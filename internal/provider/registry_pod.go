@@ -3,85 +3,32 @@ package provider
 import (
 	"context"
 	"encoding/json"
-	"fmt"
-
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/johnandersen777/deno-kcp/api/v1alpha1"
-	"github.com/publicdomainrelay/kcp-libs/common/statuspatch"
 )
 
 func (r *Registry) ReadPod(ctx context.Context, ref Ref) (*v1alpha1.DenoPod, error) {
-	c, err := r.deno(ctx, ref.LogicalCluster)
-	if err != nil {
-		return nil, err
-	}
-	var pod v1alpha1.DenoPod
-	if err := c.Get().Namespace(ref.Namespace).Resource("denopods").Name(ref.Name).Do(ctx).Into(&pod); err != nil {
-		return nil, fmt.Errorf("provider: read pod %s in %s: %w", ref.Name, ref.LogicalCluster, err)
-	}
-	return &pod, nil
+	return r.pods.Get(ctx, ref)
 }
 
 func (r *Registry) CreatePod(ctx context.Context, logicalCluster string, pod *v1alpha1.DenoPod) error {
-	c, err := r.deno(ctx, logicalCluster)
-	if err != nil {
-		return err
-	}
-	if err := c.Post().Namespace(pod.Namespace).Resource("denopods").Body(pod).Do(ctx).Into(&v1alpha1.DenoPod{}); err != nil {
-		return fmt.Errorf("provider: create pod %s in %s: %w", pod.Name, logicalCluster, err)
-	}
-	return nil
+	return r.pods.Create(ctx, logicalCluster, pod)
 }
 
 func (r *Registry) WritePodStatus(ctx context.Context, ref Ref, st v1alpha1.DenoPodStatus) error {
-	c, err := r.deno(ctx, ref.LogicalCluster)
-	if err != nil {
-		return err
-	}
 	body, err := podStatusPatch(st)
 	if err != nil {
 		return err
 	}
-	if body, err = statuspatch.WithResourceVersion(body, ref.ResourceVersion); err != nil {
-		return err
-	}
-	if err := c.Patch(types.MergePatchType).SubResource("status").Namespace(ref.Namespace).Resource("denopods").
-		Name(ref.Name).Body(body).Do(ctx).Into(&v1alpha1.DenoPod{}); err != nil {
-		return fmt.Errorf("provider: write pod status for %s in %s: %w", ref.Name, ref.LogicalCluster, err)
-	}
-	return nil
+	return r.pods.PatchStatus(ctx, ref, body)
 }
 
 func (r *Registry) DeletePod(ctx context.Context, ref Ref) error {
-	c, err := r.deno(ctx, ref.LogicalCluster)
-	if err != nil {
-		return err
-	}
-	if err := c.Delete().Namespace(ref.Namespace).Resource("denopods").Name(ref.Name).
-		Body([]byte(`{"propagationPolicy":"Background"}`)).Do(ctx).Error(); err != nil {
-		if apierrors.IsNotFound(err) {
-			return nil
-		}
-		return fmt.Errorf("provider: delete pod %s in %s: %w", ref.Name, ref.LogicalCluster, err)
-	}
-	return nil
+	return r.pods.Delete(ctx, ref)
 }
 
 func (r *Registry) RemovePodFinalizer(ctx context.Context, ref Ref) error {
-	c, err := r.deno(ctx, ref.LogicalCluster)
-	if err != nil {
-		return err
-	}
-	var obj v1alpha1.DenoPod
-	if err := c.Get().Namespace(ref.Namespace).Resource("denopods").Name(ref.Name).Do(ctx).Into(&obj); err != nil {
-		if apierrors.IsNotFound(err) {
-			return nil
-		}
-		return fmt.Errorf("provider: reading pod %s in %s to release its finalizer: %w", ref.Name, ref.LogicalCluster, err)
-	}
-	return patchFinalizers(ctx, c, "denopods", ref.Namespace, ref.Name, obj.Finalizers, v1alpha1.FinalizerDenoPod)
+	return r.pods.RemoveFinalizer(ctx, ref, v1alpha1.FinalizerDenoPod)
 }
 
 func podStatusPatch(st v1alpha1.DenoPodStatus) ([]byte, error) {

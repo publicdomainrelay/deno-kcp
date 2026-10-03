@@ -19,6 +19,7 @@ import (
 	"github.com/publicdomainrelay/kcp-libs/abc/runref"
 	"github.com/publicdomainrelay/kcp-libs/common/kcp"
 	"github.com/publicdomainrelay/kcp-libs/impl/assets"
+	"github.com/publicdomainrelay/kcp-libs/impl/kcpstore"
 	"github.com/publicdomainrelay/kcp-libs/impl/openbaoclient"
 	"github.com/publicdomainrelay/kcp-libs/impl/pkiprovisioner"
 
@@ -183,7 +184,7 @@ type Provider struct {
 
 	clusterCA []byte
 
-	paths *clusterPaths
+	paths *kcpstore.PathCache
 }
 
 // ponytail: a created run is counted active until the informer observes it, bounded by allocatedRunTTL so a run deleted before it is seen cannot pin the job forever.
@@ -271,7 +272,7 @@ func New(opts Options) (*Provider, error) {
 			opts.BundledActionsDir = abs
 		}
 	}
-	p := &Provider{opts: opts, probes: probe.NewTracker(), reader: opts.Reader, jobWriteAt: map[string]time.Time{}, jobAlloc: map[string][]allocatedRun{}, leases: newAdmissionLeases(), runRefs: runref.New(runRefTTL), paths: newClusterPaths()}
+	p := &Provider{opts: opts, probes: probe.NewTracker(), reader: opts.Reader, jobWriteAt: map[string]time.Time{}, jobAlloc: map[string][]allocatedRun{}, leases: newAdmissionLeases(), runRefs: runref.New(runRefTTL), paths: kcpstore.NewPathCache(storeOf(opts.Registry))}
 	// ponytail: a failure here degrades rather than stops the provider. The shim
 	// is how a workload resolves a peer by name; a read-only or missing runs
 	// directory should cost that feature, not the whole controller.

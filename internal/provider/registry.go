@@ -4,24 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 
-	kcpv1alpha1 "github.com/kcp-dev/sdk/apis/tenancy/v1alpha1"
-	authenticationv1 "k8s.io/api/authentication/v1"
-	corev1 "k8s.io/api/core/v1"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/runtime/serializer"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/rest"
 
 	"github.com/publicdomainrelay/kcp-libs/common/kcp"
 	"github.com/publicdomainrelay/kcp-libs/common/ref"
-	"github.com/publicdomainrelay/kcp-libs/common/statuspatch"
+	"github.com/publicdomainrelay/kcp-libs/impl/kcpstore"
 
 	"github.com/johnandersen777/deno-kcp/api/v1alpha1"
 )
@@ -41,171 +32,94 @@ type RegistryOptions struct {
 }
 
 type Registry struct {
-	cfg *rest.Config
+	store *kcpstore.Store
 
-	http *http.Client
+	workflowRuns *kcpstore.Resource[v1alpha1.PolicyWorkflowRun]
 
-	codecs runtime.NegotiatedSerializer
+	runs *kcpstore.Resource[v1alpha1.DenoRun]
+
+	pods *kcpstore.Resource[v1alpha1.DenoPod]
+
+	jobs *kcpstore.Resource[v1alpha1.DenoJob]
+
+	triggers *kcpstore.Resource[v1alpha1.RunTrigger]
+
+	engines *kcpstore.Resource[v1alpha1.PolicyEngine]
+
+	workflowPods *kcpstore.Resource[v1alpha1.PolicyWorkflowPod]
+
+	openBaos *kcpstore.Resource[v1alpha1.OpenBao]
 }
 
 func NewRegistry(opts RegistryOptions) (*Registry, error) {
 	if opts.Host == "" {
 		return nil, errors.New("provider: Host is required")
 	}
-	cfg := &rest.Config{}
-	if opts.RestConfig != nil {
-		cfg = rest.CopyConfig(opts.RestConfig)
-	}
-	cfg.Host = baseHost(opts.Host)
-	cfg.ContentType = "application/json"
-	cfg.AcceptContentTypes = "application/json"
-	if opts.Transport != nil {
-		cfg.Transport = opts.Transport
-	}
-	httpClient, err := rest.HTTPClientFor(cfg)
-	if err != nil {
-		return nil, fmt.Errorf("provider: %w", err)
-	}
-	scheme, err := newScheme()
+	store, err := kcpstore.New(kcpstore.Options{
+		Host:       opts.Host,
+		RestConfig: opts.RestConfig,
+		Transport:  opts.Transport,
+	})
 	if err != nil {
 		return nil, err
 	}
 	return &Registry{
-		cfg:    cfg,
-		http:   httpClient,
-		codecs: serializer.NewCodecFactory(scheme).WithoutConversion(),
+		store:        store,
+		workflowRuns: kcpstore.Of[v1alpha1.PolicyWorkflowRun](store, denoGVR("policyworkflowruns")),
+		runs:         kcpstore.Of[v1alpha1.DenoRun](store, denoGVR("denoruns")),
+		pods:         kcpstore.Of[v1alpha1.DenoPod](store, denoGVR("denopods")),
+		jobs:         kcpstore.Of[v1alpha1.DenoJob](store, denoGVR("denojobs")),
+		triggers:     kcpstore.Of[v1alpha1.RunTrigger](store, denoGVR("runtriggers")),
+		engines:      kcpstore.Of[v1alpha1.PolicyEngine](store, denoGVR("policyengines")),
+		workflowPods: kcpstore.Of[v1alpha1.PolicyWorkflowPod](store, denoGVR("policyworkflowpods")),
+		openBaos:     kcpstore.Of[v1alpha1.OpenBao](store, denoGVR("openbaos")),
 	}, nil
 }
 
+func denoGVR(resource string) schema.GroupVersionResource {
+	return schema.GroupVersionResource{
+		Group:    v1alpha1.GroupVersion.Group,
+		Version:  v1alpha1.GroupVersion.Version,
+		Resource: resource,
+	}
+}
+
+// storeOf is the path cache's link to the API. A registry that is not the
+// concrete *Registry (a watch cache, a fake) has no store, and a nil store
+// makes the cache answer empty rather than fail.
+func storeOf(registry Instances) *kcpstore.Store {
+	if r, ok := registry.(*Registry); ok {
+		return r.store
+	}
+	return nil
+}
+
 func (r *Registry) Read(ctx context.Context, ref Ref) (*v1alpha1.PolicyWorkflowRun, error) {
-	c, err := r.deno(ctx, ref.LogicalCluster)
-	if err != nil {
-		return nil, err
-	}
-	var run v1alpha1.PolicyWorkflowRun
-	if err := c.Get().Namespace(ref.Namespace).Resource("policyworkflowruns").Name(ref.Name).Do(ctx).Into(&run); err != nil {
-		return nil, fmt.Errorf("provider: read %s in %s: %w", ref.Name, ref.LogicalCluster, err)
-	}
-	return &run, nil
+	return r.workflowRuns.Get(ctx, ref)
 }
 
 func (r *Registry) WriteStatus(ctx context.Context, ref Ref, st v1alpha1.PolicyWorkflowRunStatus) error {
-	c, err := r.deno(ctx, ref.LogicalCluster)
-	if err != nil {
-		return err
-	}
 	body, err := statusPatch(st)
 	if err != nil {
 		return err
 	}
-	if body, err = statuspatch.WithResourceVersion(body, ref.ResourceVersion); err != nil {
-		return err
-	}
-	if err := c.Patch(types.MergePatchType).SubResource("status").Namespace(ref.Namespace).Resource("policyworkflowruns").
-		Name(ref.Name).Body(body).Do(ctx).Into(&v1alpha1.PolicyWorkflowRun{}); err != nil {
-		return fmt.Errorf("provider: write status for %s in %s: %w", ref.Name, ref.LogicalCluster, err)
-	}
-	return nil
+	return r.workflowRuns.PatchStatus(ctx, ref, body)
 }
 
 func (r *Registry) Delete(ctx context.Context, ref Ref) error {
-	c, err := r.deno(ctx, ref.LogicalCluster)
-	if err != nil {
-		return err
-	}
-	if err := c.Delete().Namespace(ref.Namespace).Resource("policyworkflowruns").Name(ref.Name).
-		Body([]byte(`{"propagationPolicy":"Background"}`)).Do(ctx).Error(); err != nil {
-		if apierrors.IsNotFound(err) {
-			return nil
-		}
-		return fmt.Errorf("provider: delete %s in %s: %w", ref.Name, ref.LogicalCluster, err)
-	}
-	return nil
+	return r.workflowRuns.Delete(ctx, ref)
 }
 
 func (r *Registry) RemoveFinalizer(ctx context.Context, ref Ref) error {
-	c, err := r.deno(ctx, ref.LogicalCluster)
-	if err != nil {
-		return err
-	}
-	var obj v1alpha1.PolicyWorkflowRun
-	if err := c.Get().Namespace(ref.Namespace).Resource("policyworkflowruns").Name(ref.Name).Do(ctx).Into(&obj); err != nil {
-		if apierrors.IsNotFound(err) {
-			return nil
-		}
-		return fmt.Errorf("provider: reading %s in %s to release its finalizer: %w",
-			ref.Name, ref.LogicalCluster, err)
-	}
-	return patchFinalizers(ctx, c, "policyworkflowruns", ref.Namespace, ref.Name, obj.Finalizers, v1alpha1.FinalizerPolicyWorkflowRun)
+	return r.workflowRuns.RemoveFinalizer(ctx, ref, v1alpha1.FinalizerPolicyWorkflowRun)
 }
 
 func (r *Registry) CreateWorkflowRun(ctx context.Context, logicalCluster string, run *v1alpha1.PolicyWorkflowRun) error {
-	c, err := r.deno(ctx, logicalCluster)
-	if err != nil {
-		return err
-	}
-	if err := c.Post().Namespace(run.Namespace).Resource("policyworkflowruns").Body(run).Do(ctx).Into(&v1alpha1.PolicyWorkflowRun{}); err != nil {
-		return fmt.Errorf("provider: create policyworkflowrun %s in %s: %w", run.Name, logicalCluster, err)
-	}
-	return nil
+	return r.workflowRuns.Create(ctx, logicalCluster, run)
 }
 
 func (r *Registry) ListWorkflowRuns(ctx context.Context, logicalCluster string) ([]v1alpha1.PolicyWorkflowRun, error) {
-	list, err := r.listWorkflowRuns(ctx, logicalCluster)
-	if err != nil {
-		return nil, err
-	}
-	return list.Items, nil
-}
-
-func (r *Registry) listWorkflowRuns(ctx context.Context, logicalCluster string) (*v1alpha1.PolicyWorkflowRunList, error) {
-	c, err := r.deno(ctx, logicalCluster)
-	if err != nil {
-		return nil, err
-	}
-	var list v1alpha1.PolicyWorkflowRunList
-	if err := c.Get().Resource("policyworkflowruns").Do(ctx).Into(&list); err != nil {
-		return nil, err
-	}
-	return &list, nil
-}
-
-func (r *Registry) deno(ctx context.Context, logicalCluster string) (rest.Interface, error) {
-	return r.resource(logicalCluster, v1alpha1.GroupVersion)
-}
-
-func (r *Registry) resource(logicalCluster string, gv schema.GroupVersion) (rest.Interface, error) {
-	cfg := rest.CopyConfig(r.cfg)
-	cfg.GroupVersion = &gv
-	apiPath := ApiPathPrefix + logicalCluster + "/apis"
-	if gv.Group == "" {
-		apiPath = ApiPathPrefix + logicalCluster + "/api"
-	}
-	cfg.APIPath = apiPath
-	cfg.NegotiatedSerializer = r.codecs
-	c, err := rest.RESTClientForConfigAndClient(cfg, r.http)
-	if err != nil {
-		return nil, fmt.Errorf("provider: %s: %w", logicalCluster, err)
-	}
-	return c, nil
-}
-
-func newScheme() (*runtime.Scheme, error) {
-	s := runtime.NewScheme()
-	if err := v1alpha1.AddToScheme(s); err != nil {
-		return nil, fmt.Errorf("provider: %w", err)
-	}
-	if err := kcpv1alpha1.AddToScheme(s); err != nil {
-		return nil, fmt.Errorf("provider: %w", err)
-	}
-	if err := corev1.AddToScheme(s); err != nil {
-		return nil, fmt.Errorf("provider: %w", err)
-	}
-	if err := authenticationv1.AddToScheme(s); err != nil {
-		return nil, fmt.Errorf("provider: %w", err)
-	}
-	metav1.AddToGroupVersion(s, schema.GroupVersion{Version: "v1"})
-	return s, nil
+	return r.workflowRuns.List(ctx, logicalCluster)
 }
 
 func baseHost(host string) string {

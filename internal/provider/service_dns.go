@@ -96,8 +96,10 @@ func (p *Provider) dnsTable() (map[string]string, []string) {
 // path rather than its ID, so the name reads pds.default.alice rather than
 // pds.default.2j35eh7jjhsc8ny9.
 func (p *Provider) serviceName(name, namespace, logicalCluster string) string {
-	registry, _ := p.opts.Registry.(*Registry)
-	path := p.paths.lookup(registry, context.Background(), logicalCluster)
+	path := ""
+	if p.paths != nil {
+		path = p.paths.Lookup(context.Background(), logicalCluster)
+	}
 	return kcp.ServiceFQDN(name, namespace, path, p.opts.ServiceDomain)
 }
 

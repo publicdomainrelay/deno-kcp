@@ -1,8 +1,11 @@
 package provider
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"io"
+	"net/http"
 	"strings"
 	"testing"
 
@@ -11,6 +14,7 @@ import (
 
 	"github.com/johnandersen777/deno-kcp/api/v1alpha1"
 	"github.com/publicdomainrelay/kcp-libs/common/kcp"
+	"github.com/publicdomainrelay/kcp-libs/impl/kcpstore"
 )
 
 func advertisedPod(t *testing.T, name, namespace, lc, args, env string) *unstructured.Unstructured {
@@ -34,14 +38,34 @@ func advertisedPod(t *testing.T, name, namespace, lc, args, env string) *unstruc
 	}}
 }
 
-// withPaths seeds the ID-to-path cache so a test does not need a live cluster to
-// resolve one. Identity mapping: the test fixtures use a path as their cluster
-// identifier, so the name that comes out is the one they assert on.
-func withPaths(p *Provider, ids ...string) *Provider {
-	p.paths = newClusterPaths()
-	for _, id := range ids {
-		p.paths.byID[id] = id
+// identityPaths answers every logical cluster ID with itself, so a test does not
+// need a live cluster to resolve a path. Identity mapping: the test fixtures use
+// a path as their cluster identifier, so the name that comes out is the one they
+// assert on.
+type identityPaths struct{}
+
+func (identityPaths) RoundTrip(req *http.Request) (*http.Response, error) {
+	id := strings.SplitN(strings.TrimPrefix(req.URL.Path, "/clusters/"), "/", 2)[0]
+	body, err := json.Marshal(map[string]any{
+		"metadata": map[string]any{"annotations": map[string]string{kcp.PathAnnotation: id}},
+	})
+	if err != nil {
+		return nil, err
 	}
+	return &http.Response{
+		StatusCode: http.StatusOK,
+		Header:     http.Header{"Content-Type": []string{"application/json"}},
+		Body:       io.NopCloser(bytes.NewReader(body)),
+		Request:    req,
+	}, nil
+}
+
+func withPaths(p *Provider, _ ...string) *Provider {
+	store, err := kcpstore.New(kcpstore.Options{Host: "https://kcp.test", Transport: identityPaths{}})
+	if err != nil {
+		panic(err)
+	}
+	p.paths = kcpstore.NewPathCache(store)
 	return p
 }
 
