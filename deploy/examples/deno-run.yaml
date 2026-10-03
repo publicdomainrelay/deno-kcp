@@ -1,0 +1,42 @@
+apiVersion: deno.computer/v1alpha1
+kind: DenoRun
+metadata:
+  name: read-policy-run
+  namespace: default
+  finalizers:
+    - denorun.deno.computer/run
+spec:
+  backoff: 1
+  ttlSecondsAfterFinished: 300
+  script: |
+    const token = Deno.env.get("KCP_TOKEN") ?? "";
+    const server = Deno.env.get("KCP_SERVER") ?? "";
+    const name = Deno.env.get("POD_WORKFLOW") ?? "open-policy";
+    const url = `${server}/apis/deno.computer/v1alpha1/namespaces/default/policyworkflowruns/${name}`;
+    const res = await fetch(url, { headers: { authorization: `Bearer ${token}` } });
+    const body = await res.json();
+    const allow = body?.status?.outputs?.allow ?? "";
+    await Deno.writeTextFile(
+      "result.json",
+      JSON.stringify({ httpStatus: String(res.status), allow }),
+    );
+  permissions:
+    read:
+      allow: true
+    write:
+      allowList:
+        - result.json
+    net:
+      allow: true
+    env:
+      allowList:
+        - KCP_TOKEN
+        - KCP_SERVER
+        - KCP_WORKSPACE
+        - POD_WORKFLOW
+    noPrompt: true
+  serviceAccount:
+    name: deno-runner
+    namespace: default
+  env:
+    POD_WORKFLOW: open-policy

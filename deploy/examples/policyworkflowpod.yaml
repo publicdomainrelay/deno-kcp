@@ -1,0 +1,31 @@
+apiVersion: deno.computer/v1alpha1
+kind: PolicyWorkflowPod
+metadata:
+  name: open-policy-pod
+  namespace: default
+spec:
+  policyEngine: policy-engine
+  concurrencyPolicy: Forbid
+  maxConcurrent: 1          # only used by Allow; Forbid is always a cap of 1
+  runTTLSecondsAfterFinished: 300
+  perspective: requester
+  selfDid: did:plc:example
+  workflow:
+    name: open policy
+    on:
+      workflow_dispatch:
+        inputs:
+          self-did:
+            required: true
+    jobs:
+      evaluate:
+        runs-on: self-hosted
+        steps:
+        - uses: tangy/policy-open@v1
+          id: policy
+          with:
+            self-did: ${{ inputs.self-did || '' }}
+        - run: echo "allow=${{ steps.policy.outputs.allow }} violations=${{ steps.policy.outputs.violations }}"
+        - run: test "${{ steps.policy.outputs.allow }}" = "true"
+  inputs:
+    self-did: did:plc:example

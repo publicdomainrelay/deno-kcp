@@ -1,0 +1,47 @@
+apiVersion: deno.computer/v1alpha1
+kind: DenoPod
+metadata:
+  name: openbao-tls-probe
+  namespace: default
+  finalizers:
+    - denopod.deno.computer/run
+spec:
+  denoJson:
+    fmt:
+      lineWidth: 100
+  denoLock: |
+    {
+      "version": "5"
+    }
+  restartPolicy: Never
+  script: |
+    const certificate = Deno.env.get("KCP_TLS_CERT") ?? "";
+    const serviceName = Deno.env.get("KCP_SERVICE_NAME") ?? "";
+    await Deno.writeTextFile(
+      "result.json",
+      JSON.stringify({
+        certificate,
+        serviceName,
+        hasKey: String((Deno.env.get("KCP_TLS_KEY") ?? "").length > 0),
+      }),
+    );
+  permissions:
+    read:
+      allow: true
+    write:
+      allowList:
+        - result.json
+    env:
+      allowList:
+        - KCP_TLS_CERT
+        - KCP_TLS_KEY
+        - KCP_SERVICE_NAME
+    noPrompt: true
+  env:
+    SERVICE_TLS: "true"
+  readinessProbe:
+    command:
+      - "true"
+    periodSeconds: 2
+    failureThreshold: 3
+    timeoutSeconds: 2

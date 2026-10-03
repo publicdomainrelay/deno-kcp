@@ -1,0 +1,63 @@
+apiVersion: deno.computer/v1alpha1
+kind: DenoPod
+metadata:
+  name: native-fire-open-policy
+  namespace: default
+  labels:
+    deno.computer/policyworkflowpod: open-policy-pod
+  finalizers:
+    - denopod.deno.computer/run
+spec:
+  restartPolicy: Never
+  script: |
+    const server = Deno.env.get("KCP_SERVER") ?? "";
+    const token = Deno.env.get("KCP_TOKEN") ?? "";
+    const auth = { authorization: `Bearer ${token}` };
+    const pod = await (
+      await fetch(`${server}/apis/deno.computer/v1alpha1/namespaces/default/policyworkflowpods/open-policy-pod`, { headers: auth })
+    ).json();
+    const run = {
+      apiVersion: "deno.computer/v1alpha1",
+      kind: "PolicyWorkflowRun",
+      metadata: {
+        generateName: "open-policy-pod-",
+        finalizers: ["policyworkflowrun.deno.computer/run"],
+        labels: { "deno.computer/policyworkflowpod": "open-policy-pod" },
+        ownerReferences: [
+          {
+            apiVersion: "deno.computer/v1alpha1",
+            kind: "PolicyWorkflowPod",
+            name: pod.metadata.name,
+            uid: pod.metadata.uid,
+            controller: true,
+            blockOwnerDeletion: true,
+          },
+        ],
+      },
+      spec: { policyWorkflowPod: "open-policy-pod" },
+    };
+    const res = await fetch(`${server}/apis/deno.computer/v1alpha1/namespaces/default/policyworkflowruns`, {
+      method: "POST",
+      headers: { ...auth, "content-type": "application/json" },
+      body: JSON.stringify(run),
+    });
+    const text = await res.text();
+    await Deno.writeTextFile(
+      "result.json",
+      JSON.stringify({ httpStatus: String(res.status), body: text }),
+    );
+  permissions:
+    write:
+      allowList:
+        - result.json
+    net:
+      allow: true
+    env:
+      allowList:
+        - KCP_TOKEN
+        - KCP_SERVER
+        - KCP_WORKSPACE
+    noPrompt: true
+  serviceAccount:
+    name: deno-runner
+    namespace: default

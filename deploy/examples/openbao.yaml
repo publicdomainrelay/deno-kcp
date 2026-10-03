@@ -1,0 +1,14 @@
+apiVersion: deno.computer/v1alpha1
+kind: OpenBao
+metadata:
+  name: openbao
+  namespace: default
+  finalizers:
+    - openbao.deno.computer/namespace
+spec:
+  # The OpenBao namespace this Kubernetes namespace is served by. Workloads in
+  # this namespace are issued from the intermediate CA it holds, and the
+  # intermediate is signed by the root CA in the OpenBao root namespace. A
+  # workload with SERVICE_TLS=true whose namespace holds no OpenBao object is
+  # not issued a certificate, and serves plain HTTP.
+  namespace: runtime.default

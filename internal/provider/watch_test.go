@@ -1,0 +1,204 @@
+package provider
+
+import (
+	"testing"
+
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/client-go/tools/cache"
+	"k8s.io/client-go/util/workqueue"
+
+	"github.com/johnandersen777/deno-kcp/api/v1alpha1"
+)
+
+func runObject(kind, name, lc, phase string, labels map[string]string) *unstructured.Unstructured {
+	meta := map[string]any{
+		"name":        name,
+		"annotations": map[string]any{clusterAnnotation: lc},
+	}
+	if labels != nil {
+		raw := map[string]any{}
+		for k, v := range labels {
+			raw[k] = v
+		}
+		meta["labels"] = raw
+	}
+	return &unstructured.Unstructured{Object: map[string]any{
+		"apiVersion": "deno.computer/v1alpha1",
+		"kind":       kind,
+		"metadata":   meta,
+		"status":     map[string]any{"phase": phase},
+	}}
+}
+
+func policyRunObject(name, lc, phase string, labels map[string]string) *unstructured.Unstructured {
+	return runObject("PolicyWorkflowRun", name, lc, phase, labels)
+}
+
+func triggerObject(name, lc, pod string) *unstructured.Unstructured {
+	return triggerObjectNS(name, lc, "", pod)
+}
+
+func triggerObjectNS(name, lc, ns, pod string) *unstructured.Unstructured {
+	meta := map[string]any{
+		"name":        name,
+		"annotations": map[string]any{clusterAnnotation: lc},
+	}
+	if ns != "" {
+		meta["namespace"] = ns
+	}
+	return &unstructured.Unstructured{Object: map[string]any{
+		"apiVersion": "deno.computer/v1alpha1",
+		"kind":       "RunTrigger",
+		"metadata":   meta,
+		"spec":       map[string]any{"policyWorkflowPod": pod},
+	}}
+}
+
+func triggerReader(t *testing.T, objects ...*unstructured.Unstructured) *cacheReader {
+	t.Helper()
+	indexer := cache.NewIndexer(cache.MetaNamespaceKeyFunc, watchIndexers)
+	reader := newCacheReader()
+	reader.add(workTrigger, indexer)
+	for _, obj := range objects {
+		if err := indexer.Add(obj); err != nil {
+			t.Fatal(err)
+		}
+	}
+	return reader
+}
+
+func newQueue(t *testing.T) workqueue.TypedRateLimitingInterface[workKey] {
+	t.Helper()
+	queue := workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[workKey]())
+	t.Cleanup(queue.ShutDown)
+	return queue
+}
+
+func drainKeys(queue workqueue.TypedRateLimitingInterface[workKey]) []workKey {
+	var out []workKey
+	for queue.Len() > 0 {
+		key, shutdown := queue.Get()
+		if shutdown {
+			break
+		}
+		out = append(out, key)
+		queue.Done(key)
+	}
+	return out
+}
+
+func TestTheTriggerPodIndexFindsTheTriggersThatNameThePod(t *testing.T) {
+	reader := triggerReader(t,
+		triggerObject("on-policy-allow", "root:runtime", "open-policy-pod"),
+		triggerObject("on-policy-deny", "root:runtime", "other-pod"),
+		triggerObject("on-policy-elsewhere", "root:other", "open-policy-pod"),
+	)
+	got := reader.triggerNamesForPod("root:runtime", "", "open-policy-pod")
+	if len(got) != 1 || got[0] != "on-policy-allow" {
+		t.Fatalf("triggerNamesForPod = %v, want [on-policy-allow]", got)
+	}
+}
+
+// ponytail: the guard for the failure mode a namespace introduces. Every index was keyed logical-cluster plus name, so two same-named objects in different namespaces shared one index key and cacheReader.get returned whichever the index held first, which reconciles the wrong object rather than failing.
+func TestTriggersOfTheSameNameInDifferentNamespacesDoNotCollide(t *testing.T) {
+	reader := triggerReader(t,
+		triggerObjectNS("on-allow", "root:runtime", "team-a", "policy-pod"),
+		triggerObjectNS("on-allow", "root:runtime", "team-b", "policy-pod"),
+	)
+	a := reader.triggerNamesForPod("root:runtime", "team-a", "policy-pod")
+	b := reader.triggerNamesForPod("root:runtime", "team-b", "policy-pod")
+	if len(a) != 1 || a[0] != "on-allow" {
+		t.Fatalf("team-a triggers = %v, want [on-allow]", a)
+	}
+	if len(b) != 1 || b[0] != "on-allow" {
+		t.Fatalf("team-b triggers = %v, want [on-allow]", b)
+	}
+	if other := reader.triggerNamesForPod("root:runtime", "team-c", "policy-pod"); len(other) != 0 {
+		t.Fatalf("a namespace with no triggers returned %v, want none", other)
+	}
+}
+
+func TestAPolicyRunReachingATerminalPhaseWakesTheTriggersOfItsPod(t *testing.T) {
+	for _, phase := range []string{"Succeeded", "Failed", "Cancelled"} {
+		phase := phase
+		t.Run(phase, func(t *testing.T) {
+			reader := triggerReader(t,
+				triggerObject("on-policy-allow", "root:runtime", "open-policy-pod"),
+				triggerObject("on-policy-other", "root:runtime", "another-pod"),
+			)
+			queue := newQueue(t)
+			labels := map[string]string{v1alpha1.PolicyWorkflowPodLabel: "open-policy-pod"}
+			enqueueWatchUpdate(workPolicyRun,
+				policyRunObject("open-policy-pod-1", "root:runtime", "Running", labels),
+				policyRunObject("open-policy-pod-1", "root:runtime", phase, labels), reader, queue)
+
+			got := drainKeys(queue)
+			want := workKey{kind: workTrigger, ref: Ref{LogicalCluster: "root:runtime", Name: "on-policy-allow"}}
+			if len(got) != 2 || got[1] != want {
+				t.Fatalf("queued keys = %v, want the run key then %v", got, want)
+			}
+		})
+	}
+}
+
+func TestAPolicyRunThatIsNotTerminalDoesNotWakeTheTriggers(t *testing.T) {
+	reader := triggerReader(t, triggerObject("on-policy-allow", "root:runtime", "open-policy-pod"))
+	queue := newQueue(t)
+	labels := map[string]string{v1alpha1.PolicyWorkflowPodLabel: "open-policy-pod"}
+	enqueueWatchUpdate(workPolicyRun,
+		policyRunObject("open-policy-pod-1", "root:runtime", "Pending", labels),
+		policyRunObject("open-policy-pod-1", "root:runtime", "Running", labels), reader, queue)
+
+	got := drainKeys(queue)
+	if len(got) != 1 || got[0].kind != workPolicyRun {
+		t.Fatalf("queued keys = %v, want only the policy run key", got)
+	}
+}
+
+func TestATerminalPolicyRunAppearingWakesTheTriggersOfItsPod(t *testing.T) {
+	reader := triggerReader(t, triggerObject("on-policy-allow", "root:runtime", "open-policy-pod"))
+	queue := newQueue(t)
+	labels := map[string]string{v1alpha1.PolicyWorkflowPodLabel: "open-policy-pod"}
+	enqueueWatchObject(workPolicyRun, policyRunObject("open-policy-pod-1", "root:runtime", "Succeeded", labels), reader, queue)
+
+	got := drainKeys(queue)
+	if len(got) != 2 || got[1].kind != workTrigger {
+		t.Fatalf("queued keys = %v, want the policy run key and the trigger key", got)
+	}
+}
+
+func TestADenoRunNeverWakesATrigger(t *testing.T) {
+	reader := triggerReader(t, triggerObject("on-policy-allow", "root:runtime", "open-policy-pod"))
+	queue := newQueue(t)
+	labels := map[string]string{v1alpha1.PolicyWorkflowPodLabel: "open-policy-pod"}
+	child := runObject("DenoRun", "on-policy-allow-open-policy-pod-1-1", "root:runtime", "Succeeded", labels)
+	enqueueWatchObject(workRun, child, reader, queue)
+	enqueueWatchUpdate(workRun, runObject("DenoRun", child.GetName(), "root:runtime", "Running", labels), child, reader, queue)
+
+	for _, key := range drainKeys(queue) {
+		if key.kind == workTrigger {
+			t.Fatalf("a DenoRun woke %v; the trigger watches PolicyWorkflowRuns", key)
+		}
+	}
+}
+
+func TestATriggerWithoutAPodIsNotWoken(t *testing.T) {
+	reader := triggerReader(t, &unstructured.Unstructured{Object: map[string]any{
+		"apiVersion": "deno.computer/v1alpha1",
+		"kind":       "RunTrigger",
+		"metadata": map[string]any{
+			"name":        "no-pod",
+			"annotations": map[string]any{clusterAnnotation: "root:runtime"},
+		},
+		"spec": map[string]any{},
+	}})
+	queue := newQueue(t)
+	labels := map[string]string{v1alpha1.PolicyWorkflowPodLabel: "open-policy-pod"}
+	enqueueWatchObject(workPolicyRun, policyRunObject("open-policy-pod-1", "root:runtime", "Succeeded", labels), reader, queue)
+
+	for _, key := range drainKeys(queue) {
+		if key.kind == workTrigger {
+			t.Fatalf("a trigger with no pod reference was woken: %v", key)
+		}
+	}
+}

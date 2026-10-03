@@ -1,0 +1,47 @@
+apiVersion: deno.computer/v1alpha1
+kind: RunTrigger
+metadata:
+  name: on-policy-allow
+  namespace: default
+spec:
+  policyWorkflowPod: open-policy-pod
+  match:
+    allow: "true"
+  jobTemplate:
+    backoffLimit: 1
+    ttlSecondsAfterFinished: 300
+    template:
+      script: |
+        const token = Deno.env.get("KCP_TOKEN") ?? "";
+        const server = Deno.env.get("KCP_SERVER") ?? "";
+        const url = `${server}/apis/deno.computer/v1alpha1/namespaces/default/policyworkflowruns?labelSelector=deno.computer%2Fpolicyworkflowpod%3Dopen-policy-pod`;
+        const res = await fetch(url, { headers: { authorization: `Bearer ${token}` } });
+        const body = await res.json();
+        const runs = (body?.items ?? []).slice().sort((a, b) =>
+          String(a.metadata?.creationTimestamp ?? "").localeCompare(
+            String(b.metadata?.creationTimestamp ?? ""),
+          )
+        );
+        const run = runs[runs.length - 1];
+        const allow = run?.status?.outputs?.allow ?? "";
+        await Deno.writeTextFile(
+          "result.json",
+          JSON.stringify({ httpStatus: String(res.status), allow }),
+        );
+      permissions:
+        read:
+          allow: true
+        write:
+          allowList:
+            - result.json
+        net:
+          allow: true
+        env:
+          allowList:
+            - KCP_TOKEN
+            - KCP_SERVER
+            - KCP_WORKSPACE
+        noPrompt: true
+      serviceAccount:
+        name: deno-runner
+        namespace: default
