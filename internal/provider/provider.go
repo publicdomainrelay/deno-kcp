@@ -19,8 +19,10 @@ import (
 	"github.com/publicdomainrelay/kcp-libs/abc/runref"
 	"github.com/publicdomainrelay/kcp-libs/common/kcp"
 	"github.com/publicdomainrelay/kcp-libs/factory/admission"
+	"github.com/publicdomainrelay/kcp-libs/factory/servicenames"
 	"github.com/publicdomainrelay/kcp-libs/impl/assets"
 	"github.com/publicdomainrelay/kcp-libs/impl/kcpstore"
+	"github.com/publicdomainrelay/kcp-libs/impl/metrics"
 	"github.com/publicdomainrelay/kcp-libs/impl/openbaoclient"
 	"github.com/publicdomainrelay/kcp-libs/impl/pkiprovisioner"
 
@@ -159,7 +161,9 @@ type Provider struct {
 
 	metrics providerMetrics
 
-	metricsSrv *metricsServer
+	metricsSrv *metrics.Server
+
+	services *servicenames.Resolver
 
 	jobWriteMu sync.Mutex
 
@@ -265,6 +269,7 @@ func New(opts Options) (*Provider, error) {
 	}
 	p := &Provider{opts: opts, probes: probe.NewTracker(), reader: opts.Reader, jobWriteAt: map[string]time.Time{}, jobAlloc: map[string][]allocatedRun{}, runRefs: runref.New(runRefTTL), paths: kcpstore.NewPathCache(storeOf(opts.Registry))}
 	p.admissions = newRunAdmitter(p)
+	p.initMetrics()
 	// ponytail: a failure here degrades rather than stops the provider. The shim
 	// is how a workload resolves a peer by name; a read-only or missing runs
 	// directory should cost that feature, not the whole controller.
@@ -274,6 +279,7 @@ func New(opts Options) (*Provider, error) {
 		p.dnsShim = paths[assets.ShimName]
 		p.dnsProbe = paths[assets.ProbeName]
 	}
+	p.services = p.buildServices()
 	if opts.RestConfig != nil {
 		p.clusterCA = opts.RestConfig.CAData
 	}
@@ -330,7 +336,7 @@ func (p *Provider) TrustBundle() []byte {
 
 func (p *Provider) Close() error {
 	if p.metricsSrv != nil {
-		_ = p.metricsSrv.close()
+		_ = p.metricsSrv.Close()
 	}
 	return nil
 }

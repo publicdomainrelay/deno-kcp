@@ -14,6 +14,7 @@ import (
 
 	"github.com/johnandersen777/deno-kcp/api/v1alpha1"
 	"github.com/publicdomainrelay/kcp-libs/common/kcp"
+	"github.com/publicdomainrelay/kcp-libs/factory/servicenames"
 	"github.com/publicdomainrelay/kcp-libs/impl/kcpstore"
 )
 
@@ -89,7 +90,7 @@ func TestTheTableNamesEveryPodThatAdvertisesAndSkipsTheRest(t *testing.T) {
 		advertisedPod(t, "quiet", "default", "root:alice", "", ""),
 	)
 	p := withPaths(&Provider{opts: Options{ServiceDomain: kcp.DefaultServiceDomain}, reader: reader}, "root:global", "root:alice")
-	table, workspaces := p.dnsTable()
+	table, workspaces := p.serviceResolver().Table(context.Background())
 
 	if got := table["plc.default.global.svc.kcp.local"]; got != "127.0.0.1:2587" {
 		t.Fatalf("plc address = %q, want 127.0.0.1:2587", got)
@@ -109,10 +110,10 @@ func TestTheTableNamesEveryPodThatAdvertisesAndSkipsTheRest(t *testing.T) {
 // has to translate it; 0.0.0.0 is what a service picks when it wants every
 // interface and would be useless to a peer on the same host.
 func TestAWildcardBindIsTranslatedToLoopback(t *testing.T) {
-	if got := advertisedAddress(`["--port","2587","--hostname","0.0.0.0"]`, ""); got != "127.0.0.1:2587" {
+	if got := servicenames.AdvertisedAddress(`["--port","2587","--hostname","0.0.0.0"]`, ""); got != "127.0.0.1:2587" {
 		t.Fatalf("advertisedAddress = %q, want 127.0.0.1:2587", got)
 	}
-	if got := advertisedAddress("", `{"PORT":"9","HOSTNAME":"::"}`); got != "127.0.0.1:9" {
+	if got := servicenames.AdvertisedAddress("", `{"PORT":"9","HOSTNAME":"::"}`); got != "127.0.0.1:9" {
 		t.Fatalf("a :: bind should also become loopback, got %q", got)
 	}
 }
