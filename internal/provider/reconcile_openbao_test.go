@@ -197,7 +197,7 @@ func TestReconcileOpenBaoProvisionsTheNamespacesAuthority(t *testing.T) {
 	}
 	var touchedNamespace bool
 	for _, call := range stub.calls() {
-		if call == "POST /v1/sys/namespaces/alice.default" {
+		if call == "PUT /v1/sys/namespaces/alice.default" {
 			touchedNamespace = true
 		}
 	}

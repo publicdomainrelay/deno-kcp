@@ -6,8 +6,9 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/publicdomainrelay/kcp-libs/common/denospec"
+
 	"github.com/johnandersen777/deno-kcp/api/v1alpha1"
-	"github.com/johnandersen777/deno-kcp/internal/denoperm"
 	"github.com/johnandersen777/deno-kcp/internal/denopod"
 	"github.com/johnandersen777/deno-kcp/internal/runner"
 )
@@ -127,7 +128,7 @@ func (p *Provider) runProbe(ctx context.Context, runID string, probe *v1alpha1.E
 }
 
 func (p *Provider) podRequest(ctx context.Context, ref Ref, tmpl *v1alpha1.DenoPodTemplate) (runner.PodRequest, error) {
-	args, err := denoperm.Args(tmpl.Permissions)
+	args, err := denospec.Args(tmpl.Permissions.DenoSpec())
 	if err != nil {
 		return runner.PodRequest{}, fmt.Errorf("provider: %s permissions: %w", ref.Name, err)
 	}

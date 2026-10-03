@@ -13,12 +13,13 @@ import (
 
 	"k8s.io/client-go/rest"
 
+	"github.com/publicdomainrelay/kcp-libs/impl/openbaoclient"
+	"github.com/publicdomainrelay/kcp-libs/impl/pkiprovisioner"
+
 	"github.com/johnandersen777/deno-kcp/api/v1alpha1"
-	"github.com/johnandersen777/deno-kcp/internal/baopki"
 	"github.com/johnandersen777/deno-kcp/internal/denojob"
 	"github.com/johnandersen777/deno-kcp/internal/denopod"
 	"github.com/johnandersen777/deno-kcp/internal/denorun"
-	"github.com/johnandersen777/deno-kcp/internal/openbao"
 	"github.com/johnandersen777/deno-kcp/internal/policyengine"
 	"github.com/johnandersen777/deno-kcp/internal/policyworkflowpod"
 	"github.com/johnandersen777/deno-kcp/internal/policyworkflowrun"
@@ -174,7 +175,7 @@ type Provider struct {
 
 	dnsProbe string
 
-	pki *baopki.Provisioner
+	pki *pkiprovisioner.Provisioner
 
 	clusterCA []byte
 
@@ -285,7 +286,7 @@ func New(opts Options) (*Provider, error) {
 	// the provider starts before the vault may, and the first workload that asks
 	// for a certificate is the first thing that needs it.
 	if opts.OpenBaoAddress != "" {
-		client, err := openbao.New(openbao.Options{
+		client, err := openbaoclient.New(openbaoclient.Options{
 			Address: opts.OpenBaoAddress,
 			Token:   opts.OpenBaoToken,
 			CACert:  opts.OpenBaoCACert,
@@ -293,7 +294,7 @@ func New(opts Options) (*Provider, error) {
 		if err != nil {
 			opts.Log.Warn("openbao: no client, workloads will not serve TLS", "err", err)
 		} else {
-			pki, err := baopki.New(baopki.Options{
+			pki, err := pkiprovisioner.New(pkiprovisioner.Options{
 				Client:          client,
 				Mount:           opts.OpenBaoMount,
 				Role:            opts.OpenBaoRole,

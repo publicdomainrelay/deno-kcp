@@ -10,8 +10,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/publicdomainrelay/kcp-libs/impl/openbaoclient"
+
 	"github.com/johnandersen777/deno-kcp/api/v1alpha1"
-	"github.com/johnandersen777/deno-kcp/internal/openbao"
 )
 
 const openBaoName = "openbao"
@@ -64,7 +65,7 @@ func assertAuthorityIssuesADenoPodItsCertificate(t *testing.T, c *liveCluster, v
 
 	// The root lives in the OpenBao root namespace and nowhere else, and the
 	// namespace's authority is a different certificate that chains to it.
-	server, err := openbao.New(openbao.Options{Address: addr, Token: token, CACert: vault.caCert()})
+	server, err := openbaoclient.New(openbaoclient.Options{Address: addr, Token: token, CACert: vault.caCert()})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -168,7 +169,7 @@ func awaitPodOutput(t *testing.T, c *liveCluster, name, key string) *v1alpha1.De
 
 func readRootCA(t *testing.T, vault baoServer) []byte {
 	t.Helper()
-	client, err := openbao.New(openbao.Options{Address: vault.address, Token: vault.token, CACert: vault.caCert()})
+	client, err := openbaoclient.New(openbaoclient.Options{Address: vault.address, Token: vault.token, CACert: vault.caCert()})
 	if err != nil {
 		t.Fatal(err)
 	}

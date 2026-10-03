@@ -5,7 +5,8 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/johnandersen777/deno-kcp/internal/openbao"
+	"github.com/publicdomainrelay/kcp-libs/abc/pki"
+	"github.com/publicdomainrelay/kcp-libs/impl/pkiprovisioner"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
@@ -189,7 +190,7 @@ func (p *Provider) podEnv(ctx context.Context, ref Ref, tmpl *v1alpha1.DenoPodTe
 		if err != nil {
 			p.opts.Log.Warn("openbao: no certificate for this workload, it will not serve TLS", "name", fqdn, "err", err)
 		} else {
-			env["KCP_TLS_CERT"] = leafChain(cert)
+			env["KCP_TLS_CERT"] = pkiprovisioner.LeafChain(cert)
 			env["KCP_TLS_KEY"] = cert.PrivateKey
 			env["KCP_SERVICE_NAME"] = fqdn
 		}
@@ -278,21 +279,10 @@ type podLister interface {
 // Kubernetes namespace, so a pod whose namespace holds none -- or holds two --
 // is one the provider cannot say an authority for, and it says so rather than
 // guessing.
-func (p *Provider) issueFor(ctx context.Context, ref Ref, fqdn string) (openbao.Cert, error) {
+func (p *Provider) issueFor(ctx context.Context, ref Ref, fqdn string) (pki.Cert, error) {
 	obj, err := p.authorityFor(ctx, ref.LogicalCluster, ref.Namespace)
 	if err != nil {
-		return openbao.Cert{}, err
+		return pki.Cert{}, err
 	}
 	return p.pki.Issue(ctx, obj.Spec.Namespace, fqdn, []string{fqdn}, nil)
-}
-
-// leafChain is the certificate a workload serves with, followed by the chain it
-// was issued through. Serving the intermediate alongside the leaf is what lets a
-// peer that holds only the root verify it.
-func leafChain(cert openbao.Cert) string {
-	out := cert.Certificate
-	for _, entry := range cert.CAChain {
-		out += "\n" + entry
-	}
-	return out
 }
