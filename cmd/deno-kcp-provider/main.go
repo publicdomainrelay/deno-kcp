@@ -17,6 +17,7 @@ import (
 	"github.com/johnandersen777/deno-kcp/internal/provider"
 	"github.com/publicdomainrelay/kcp-libs/abc/runner"
 	"github.com/publicdomainrelay/kcp-libs/impl/execrunner"
+	"github.com/publicdomainrelay/kcp-libs/impl/policyclient"
 )
 
 type config struct {
@@ -169,7 +170,7 @@ func main() {
 
 	providerImpl, err = provider.New(provider.Options{
 		Registry:               registry,
-		PolicyClient:           provider.NewHTTPPolicyClient(),
+		PolicyClient:           policyclient.New(),
 		Runtime:                registry,
 		RestConfig:             restCfg,
 		Minter:                 registry,

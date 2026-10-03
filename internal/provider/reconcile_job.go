@@ -84,7 +84,7 @@ func (p *Provider) jobWriteAllowed(ref Ref, job *v1alpha1.DenoJob, res denojob.R
 		(job.Status.StartTime == nil && res.StartTime != nil) {
 		return true
 	}
-	key := ref.key()
+	key := ref.Key()
 	p.jobWriteMu.Lock()
 	defer p.jobWriteMu.Unlock()
 	now := p.opts.Now()
@@ -151,7 +151,7 @@ func (p *Provider) jobForget(ref Ref) {
 }
 
 func jobAllocKey(ref Ref) string {
-	return ref.key()
+	return ref.Key()
 }
 
 func mergeRunNames(existing, extra []string) []string {

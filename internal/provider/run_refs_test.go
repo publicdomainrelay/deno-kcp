@@ -99,10 +99,10 @@ func TestAFailingRunRetries(t *testing.T) {
 		if _, _, err := p.process(ctx, workKey{kind: workRun, ref: ref}); err != nil {
 			t.Fatalf("pass %d: %v", i, err)
 		}
-		known, _, indexed := p.runRefs.lookupRef(ref)
+		record, indexed := p.runRefs.Lookup(ref)
 		t.Logf("pass %d: starts=%d phase=%s retries=%d runID=%q known=%q",
-			i, p.RunStarts(), rt.runs[ref].Status.Phase, rt.runs[ref].Status.Retries, rt.runs[ref].Status.RunID, known)
-		if !runTerminalPhase(rt.runs[ref].Status.Phase) && (!indexed || known == "") {
+			i, p.RunStarts(), rt.runs[ref].Status.Phase, rt.runs[ref].Status.Retries, rt.runs[ref].Status.RunID, record.RunID)
+		if !runTerminalPhase(rt.runs[ref].Status.Phase) && (!indexed || record.RunID == "") {
 			t.Fatalf("pass %d: a run whose workload this provider started is missing from the runRefs index, so the start guard cannot stand a stale cached copy down", i)
 		}
 	}

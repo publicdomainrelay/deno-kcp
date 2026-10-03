@@ -21,6 +21,8 @@ import (
 	"k8s.io/client-go/util/workqueue"
 
 	"github.com/johnandersen777/deno-kcp/api/v1alpha1"
+	"github.com/publicdomainrelay/kcp-libs/common/kcp"
+	"github.com/publicdomainrelay/kcp-libs/common/ref"
 )
 
 const defaultProviderWorkspace = "root:deno-provider"
@@ -30,8 +32,6 @@ const defaultRequeueAfter = 2 * time.Second
 
 // ponytail: a trigger no longer asks for a requeue, because the run event that completes its candidate run wakes it. This is the backstop for an event that never arrives, so it is long enough to be unmistakably not the discovery path: thirty times the 2s poll it replaced, and still far inside the default 3600s run TTL, so a run that is merely delayed rather than deleted is still picked up.
 const triggerBackstop = time.Minute
-
-const clusterAnnotation = "kcp.io/cluster"
 
 const (
 	indexByCluster           = "by-cluster"
@@ -283,7 +283,7 @@ var watchIndexers = cache.Indexers{
 		if !ok {
 			return nil, nil
 		}
-		lc := u.GetAnnotations()[clusterAnnotation]
+		lc := u.GetAnnotations()[kcp.ClusterAnnotation]
 		if lc == "" {
 			return nil, nil
 		}
@@ -294,47 +294,47 @@ var watchIndexers = cache.Indexers{
 		if !ok {
 			return nil, nil
 		}
-		lc := u.GetAnnotations()[clusterAnnotation]
+		lc := u.GetAnnotations()[kcp.ClusterAnnotation]
 		if lc == "" {
 			return nil, nil
 		}
-		return []string{refKey(lc, u.GetNamespace(), u.GetName())}, nil
+		return []string{ref.Key(lc, u.GetNamespace(), u.GetName())}, nil
 	},
 	indexByClusterPod: func(obj any) ([]string, error) {
 		u, ok := obj.(*unstructured.Unstructured)
 		if !ok {
 			return nil, nil
 		}
-		lc := u.GetAnnotations()[clusterAnnotation]
+		lc := u.GetAnnotations()[kcp.ClusterAnnotation]
 		pod := u.GetLabels()[v1alpha1.PolicyWorkflowPodLabel]
 		if lc == "" || pod == "" {
 			return nil, nil
 		}
-		return []string{refKey(lc, u.GetNamespace(), pod)}, nil
+		return []string{ref.Key(lc, u.GetNamespace(), pod)}, nil
 	},
 	indexByClusterJob: func(obj any) ([]string, error) {
 		u, ok := obj.(*unstructured.Unstructured)
 		if !ok {
 			return nil, nil
 		}
-		lc := u.GetAnnotations()[clusterAnnotation]
+		lc := u.GetAnnotations()[kcp.ClusterAnnotation]
 		job := u.GetLabels()[JobRunLabel]
 		if lc == "" || job == "" {
 			return nil, nil
 		}
-		return []string{refKey(lc, u.GetNamespace(), job)}, nil
+		return []string{ref.Key(lc, u.GetNamespace(), job)}, nil
 	},
 	indexByClusterTriggerPod: func(obj any) ([]string, error) {
 		u, ok := obj.(*unstructured.Unstructured)
 		if !ok {
 			return nil, nil
 		}
-		lc := u.GetAnnotations()[clusterAnnotation]
+		lc := u.GetAnnotations()[kcp.ClusterAnnotation]
 		pod, _, _ := unstructured.NestedString(u.Object, "spec", "policyWorkflowPod")
 		if lc == "" || pod == "" {
 			return nil, nil
 		}
-		return []string{refKey(lc, u.GetNamespace(), pod)}, nil
+		return []string{ref.Key(lc, u.GetNamespace(), pod)}, nil
 	},
 }
 
@@ -382,7 +382,7 @@ func enqueueOwn(kind workKind, obj any, queue workqueue.TypedRateLimitingInterfa
 	if !ok {
 		return
 	}
-	lc := u.GetAnnotations()[clusterAnnotation]
+	lc := u.GetAnnotations()[kcp.ClusterAnnotation]
 	if lc == "" {
 		return
 	}
@@ -395,7 +395,7 @@ func enqueueJobForRun(obj any, queue workqueue.TypedRateLimitingInterface[workKe
 	if !ok {
 		return
 	}
-	lc := u.GetAnnotations()[clusterAnnotation]
+	lc := u.GetAnnotations()[kcp.ClusterAnnotation]
 	job := u.GetLabels()[JobRunLabel]
 	if lc == "" || job == "" {
 		return
@@ -412,7 +412,7 @@ func enqueueTriggersForRun(reader *cacheReader, obj any, queue workqueue.TypedRa
 	if !terminalWorkflowPhase(v1alpha1.PolicyWorkflowPhase(runPhase(u))) {
 		return
 	}
-	lc := u.GetAnnotations()[clusterAnnotation]
+	lc := u.GetAnnotations()[kcp.ClusterAnnotation]
 	pod := u.GetLabels()[v1alpha1.PolicyWorkflowPodLabel]
 	if lc == "" || pod == "" {
 		return
@@ -481,7 +481,7 @@ func (p *Provider) process(ctx context.Context, key workKey) (time.Duration, boo
 			}
 			return 0, false, err
 		}
-		pass, err := p.Reconcile(ctx, key.ref.withResourceVersion(run.ResourceVersion))
+		pass, err := p.Reconcile(ctx, key.ref.WithResourceVersion(run.ResourceVersion))
 		if err != nil {
 			return 0, false, err
 		}
@@ -494,7 +494,7 @@ func (p *Provider) process(ctx context.Context, key workKey) (time.Duration, boo
 			}
 			return 0, false, err
 		}
-		return p.reconcileRun(ctx, key.ref.withResourceVersion(run.ResourceVersion), run)
+		return p.reconcileRun(ctx, key.ref.WithResourceVersion(run.ResourceVersion), run)
 	case workPod:
 		pod, err := p.readPod(ctx, key.ref)
 		if err != nil {
@@ -503,7 +503,7 @@ func (p *Provider) process(ctx context.Context, key workKey) (time.Duration, boo
 			}
 			return 0, false, err
 		}
-		return p.reconcilePod(ctx, key.ref.withResourceVersion(pod.ResourceVersion), pod)
+		return p.reconcilePod(ctx, key.ref.WithResourceVersion(pod.ResourceVersion), pod)
 	case workOpenBao:
 		obj, err := p.readOpenBao(ctx, key.ref)
 		if err != nil {
@@ -512,7 +512,7 @@ func (p *Provider) process(ctx context.Context, key workKey) (time.Duration, boo
 			}
 			return 0, false, err
 		}
-		return p.reconcileOpenBao(ctx, key.ref.withResourceVersion(obj.ResourceVersion), obj)
+		return p.reconcileOpenBao(ctx, key.ref.WithResourceVersion(obj.ResourceVersion), obj)
 	case workEngine:
 		engine, err := p.readEngine(ctx, key.ref)
 		if err != nil {
@@ -521,7 +521,7 @@ func (p *Provider) process(ctx context.Context, key workKey) (time.Duration, boo
 			}
 			return 0, false, err
 		}
-		return p.reconcileEngine(ctx, key.ref.withResourceVersion(engine.ResourceVersion), engine)
+		return p.reconcileEngine(ctx, key.ref.WithResourceVersion(engine.ResourceVersion), engine)
 	case workWorkflowPod:
 		pod, err := p.readWorkflowPod(ctx, key.ref)
 		if err != nil {
@@ -530,7 +530,7 @@ func (p *Provider) process(ctx context.Context, key workKey) (time.Duration, boo
 			}
 			return 0, false, err
 		}
-		return p.reconcileWorkflowPod(ctx, key.ref.withResourceVersion(pod.ResourceVersion), pod)
+		return p.reconcileWorkflowPod(ctx, key.ref.WithResourceVersion(pod.ResourceVersion), pod)
 	case workTrigger:
 		tr, err := p.readTrigger(ctx, key.ref)
 		if err != nil {
@@ -539,7 +539,7 @@ func (p *Provider) process(ctx context.Context, key workKey) (time.Duration, boo
 			}
 			return 0, false, err
 		}
-		return p.reconcileTrigger(ctx, key.ref.withResourceVersion(tr.ResourceVersion), tr)
+		return p.reconcileTrigger(ctx, key.ref.WithResourceVersion(tr.ResourceVersion), tr)
 	case workJob:
 		job, err := p.readJob(ctx, key.ref)
 		if err != nil {
@@ -552,7 +552,7 @@ func (p *Provider) process(ctx context.Context, key workKey) (time.Duration, boo
 		if err != nil {
 			return 0, false, err
 		}
-		return p.reconcileJob(ctx, key.ref.withResourceVersion(job.ResourceVersion), job, runs)
+		return p.reconcileJob(ctx, key.ref.WithResourceVersion(job.ResourceVersion), job, runs)
 	}
 	return 0, true, nil
 }

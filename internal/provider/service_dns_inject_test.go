@@ -10,6 +10,7 @@ import (
 	"k8s.io/client-go/tools/cache"
 
 	"github.com/johnandersen777/deno-kcp/api/v1alpha1"
+	"github.com/publicdomainrelay/kcp-libs/common/kcp"
 )
 
 func advertisedPod(t *testing.T, name, namespace, lc, args, env string) *unstructured.Unstructured {
@@ -27,7 +28,7 @@ func advertisedPod(t *testing.T, name, namespace, lc, args, env string) *unstruc
 		"metadata": map[string]any{
 			"name":        name,
 			"namespace":   namespace,
-			"annotations": map[string]any{clusterAnnotation: lc},
+			"annotations": map[string]any{kcp.ClusterAnnotation: lc},
 		},
 		"spec": map[string]any{"env": specEnv},
 	}}
@@ -63,7 +64,7 @@ func TestTheTableNamesEveryPodThatAdvertisesAndSkipsTheRest(t *testing.T) {
 		advertisedPod(t, "pds", "default", "root:alice", `[]`, `{"PORT":"2583","HOSTNAME":"127.0.0.1"}`),
 		advertisedPod(t, "quiet", "default", "root:alice", "", ""),
 	)
-	p := withPaths(&Provider{opts: Options{ServiceDomain: DefaultServiceDomain}, reader: reader}, "root:global", "root:alice")
+	p := withPaths(&Provider{opts: Options{ServiceDomain: kcp.DefaultServiceDomain}, reader: reader}, "root:global", "root:alice")
 	table, workspaces := p.dnsTable()
 
 	if got := table["plc.default.global.svc.kcp.local"]; got != "127.0.0.1:2587" {
@@ -93,7 +94,7 @@ func TestAWildcardBindIsTranslatedToLoopback(t *testing.T) {
 }
 
 func TestPodEnvCarriesTheDomainAndNamespace(t *testing.T) {
-	p := withPaths(&Provider{opts: Options{ServiceDomain: DefaultServiceDomain}, reader: podTableReader(t)}, "root:alice")
+	p := withPaths(&Provider{opts: Options{ServiceDomain: kcp.DefaultServiceDomain}, reader: podTableReader(t)}, "root:alice")
 	env := p.podEnv(context.Background(), Ref{LogicalCluster: "root:alice", Namespace: "team-a", Name: "pds"}, &v1alpha1.DenoPodTemplate{
 		Env: map[string]string{"MY_OWN": "kept"},
 	})
@@ -113,7 +114,7 @@ func TestPodEnvCarriesTheDomainAndNamespace(t *testing.T) {
 
 func TestPodEnvInjectsTheTableAsJSON(t *testing.T) {
 	reader := podTableReader(t, advertisedPod(t, "plc", "default", "root:global", `["--port","2587"]`, ""))
-	p := withPaths(&Provider{opts: Options{ServiceDomain: DefaultServiceDomain}, reader: reader}, "root:global", "root:alice")
+	p := withPaths(&Provider{opts: Options{ServiceDomain: kcp.DefaultServiceDomain}, reader: reader}, "root:global", "root:alice")
 	env := p.podEnv(context.Background(), Ref{LogicalCluster: "root:alice", Namespace: "default", Name: "pds"}, &v1alpha1.DenoPodTemplate{})
 
 	var table map[string]string
@@ -135,7 +136,7 @@ func TestPodEnvInjectsTheTableAsJSON(t *testing.T) {
 // cannot be in the informer cache before it has started, so its own entry has to
 // come from its own declarations. Without this every pod sits not-ready forever.
 func TestAPodAlwaysHasItsOwnNameInTheTable(t *testing.T) {
-	p := withPaths(&Provider{opts: Options{ServiceDomain: DefaultServiceDomain}, reader: podTableReader(t)}, "root:alice")
+	p := withPaths(&Provider{opts: Options{ServiceDomain: kcp.DefaultServiceDomain}, reader: podTableReader(t)}, "root:alice")
 	env := p.podEnv(context.Background(),
 		Ref{LogicalCluster: "root:alice", Namespace: "default", Name: "pds"},
 		&v1alpha1.DenoPodTemplate{Env: map[string]string{"SERVICE_ARGS": `["--port","2583","--hostname","127.0.0.1"]`}},
@@ -153,7 +154,7 @@ func TestAPodAlwaysHasItsOwnNameInTheTable(t *testing.T) {
 // the provider expands it, because a manifest cannot know where the shim was
 // materialised and a run directory is not where apply.sh runs.
 func TestTheProviderExpandsAKcpdnsProbeIntoRealPaths(t *testing.T) {
-	p := withPaths(&Provider{opts: Options{ServiceDomain: DefaultServiceDomain}, dnsShim: "/runs/.kcpdns/shim.ts", dnsProbe: "/runs/.kcpdns/probe.ts"}, "root:alice")
+	p := withPaths(&Provider{opts: Options{ServiceDomain: kcp.DefaultServiceDomain}, dnsShim: "/runs/.kcpdns/shim.ts", dnsProbe: "/runs/.kcpdns/probe.ts"}, "root:alice")
 	got := p.probeCommand([]string{"kcpdns", "plc.default.global.svc.kcp.local", "/health"})
 	if len(got) == 0 {
 		t.Fatal("a kcpdns probe expanded to nothing")
@@ -173,7 +174,7 @@ func TestTheProviderExpandsAKcpdnsProbeIntoRealPaths(t *testing.T) {
 }
 
 func TestAnOrdinaryProbeIsLeftAlone(t *testing.T) {
-	p := &Provider{opts: Options{ServiceDomain: DefaultServiceDomain}}
+	p := &Provider{opts: Options{ServiceDomain: kcp.DefaultServiceDomain}}
 	got := p.probeCommand([]string{"true"})
 	if len(got) != 1 || got[0] != "true" {
 		t.Fatalf("a probe that is not kcpdns was rewritten: %v", got)
@@ -184,7 +185,7 @@ func TestAnOrdinaryProbeIsLeftAlone(t *testing.T) {
 // unresolved name rather than guessing; and with no shim materialised the probe
 // form cannot be expanded at all, which has to degrade instead of panicking.
 func TestAKcpdnsProbeWithoutAShimDegrades(t *testing.T) {
-	p := &Provider{opts: Options{ServiceDomain: DefaultServiceDomain}}
+	p := &Provider{opts: Options{ServiceDomain: kcp.DefaultServiceDomain}}
 	if got := p.probeCommand([]string{"kcpdns", "x.default.alice.svc.kcp.local", "/"}); got != nil {
 		t.Fatalf("expected no command without a shim, got %v", got)
 	}

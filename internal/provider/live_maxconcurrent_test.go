@@ -17,6 +17,7 @@ import (
 	"github.com/johnandersen777/deno-kcp/internal/policyworkflowpod"
 	"github.com/johnandersen777/deno-kcp/internal/provider"
 	"github.com/publicdomainrelay/kcp-libs/impl/execrunner"
+	"github.com/publicdomainrelay/kcp-libs/impl/policyclient"
 )
 
 func TestMaxConcurrentRunAdmissionOnRealKCP(t *testing.T) {
@@ -137,7 +138,7 @@ spec:
 	}
 	p, err := provider.New(provider.Options{
 		Registry:          registry,
-		PolicyClient:      provider.NewHTTPPolicyClient(),
+		PolicyClient:      policyclient.New(),
 		Runtime:           registry,
 		RestConfig:        restCfg,
 		Minter:            registry,

@@ -13,6 +13,7 @@ import (
 	"k8s.io/client-go/rest"
 
 	"github.com/johnandersen777/deno-kcp/api/v1alpha1"
+	"github.com/publicdomainrelay/kcp-libs/abc/policy"
 )
 
 func TestNewResolvesBundledActionsDirAgainstTheWorkingDir(t *testing.T) {
@@ -59,13 +60,13 @@ type fakePolicyClient struct {
 
 	seq int
 
-	tasks map[string]PolicyTask
+	tasks map[string]policy.Task
 
 	fail bool
 }
 
 func newFakePolicyClient(fail bool) *fakePolicyClient {
-	return &fakePolicyClient{tasks: map[string]PolicyTask{}, fail: fail}
+	return &fakePolicyClient{tasks: map[string]policy.Task{}, fail: fail}
 }
 
 func (c *fakePolicyClient) Submit(_ context.Context, endpoint string, workflow []byte, inputs map[string]string) (string, error) {
@@ -77,14 +78,14 @@ func (c *fakePolicyClient) Submit(_ context.Context, endpoint string, workflow [
 	c.seq++
 	id := fmt.Sprintf("task-%d", c.seq)
 	if c.fail {
-		c.tasks[id] = PolicyTask{State: "failed", ExitStatus: "failure"}
+		c.tasks[id] = policy.Task{State: "failed", ExitStatus: "failure"}
 	} else {
-		c.tasks[id] = PolicyTask{State: "succeeded", ExitStatus: "success", Outputs: map[string]string{"allow": "true"}}
+		c.tasks[id] = policy.Task{State: "succeeded", ExitStatus: "success", Outputs: map[string]string{"allow": "true"}}
 	}
 	return id, nil
 }
 
-func (c *fakePolicyClient) Status(_ context.Context, endpoint, taskID string) (PolicyTask, error) {
+func (c *fakePolicyClient) Status(_ context.Context, endpoint, taskID string) (policy.Task, error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	return c.tasks[taskID], nil
@@ -120,7 +121,7 @@ func (f *fakeStore) RemoveFinalizer(context.Context, Ref) error {
 	return nil
 }
 
-func newProvider(t *testing.T, store Instances, client PolicyClient) *Provider {
+func newProvider(t *testing.T, store Instances, client policy.Client) *Provider {
 	t.Helper()
 	p, err := New(Options{Registry: store, PolicyClient: client, RestConfig: &rest.Config{Host: "https://kcp"}, WriteStatus: true})
 	if err != nil {

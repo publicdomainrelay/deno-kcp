@@ -9,6 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/johnandersen777/deno-kcp/api/v1alpha1"
+	"github.com/publicdomainrelay/kcp-libs/common/statuspatch"
 )
 
 func (r *Registry) ReadOpenBao(ctx context.Context, ref Ref) (*v1alpha1.OpenBao, error) {
@@ -49,7 +50,7 @@ func (r *Registry) WriteOpenBaoStatus(ctx context.Context, ref Ref, st v1alpha1.
 	if err != nil {
 		return err
 	}
-	if body, err = withResourceVersion(body, ref.ResourceVersion); err != nil {
+	if body, err = statuspatch.WithResourceVersion(body, ref.ResourceVersion); err != nil {
 		return err
 	}
 	if err := c.Patch(types.MergePatchType).SubResource("status").Namespace(ref.Namespace).Resource("openbaos").

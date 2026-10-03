@@ -9,6 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/johnandersen777/deno-kcp/api/v1alpha1"
+	"github.com/publicdomainrelay/kcp-libs/common/statuspatch"
 )
 
 func (r *Registry) ReadWorkflowPod(ctx context.Context, ref Ref) (*v1alpha1.PolicyWorkflowPod, error) {
@@ -32,7 +33,7 @@ func (r *Registry) WriteWorkflowPodStatus(ctx context.Context, ref Ref, st v1alp
 	if err != nil {
 		return err
 	}
-	if body, err = withResourceVersion(body, ref.ResourceVersion); err != nil {
+	if body, err = statuspatch.WithResourceVersion(body, ref.ResourceVersion); err != nil {
 		return err
 	}
 	if err := c.Patch(types.MergePatchType).SubResource("status").Namespace(ref.Namespace).Resource("policyworkflowpods").

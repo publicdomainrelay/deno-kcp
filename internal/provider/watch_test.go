@@ -8,12 +8,13 @@ import (
 	"k8s.io/client-go/util/workqueue"
 
 	"github.com/johnandersen777/deno-kcp/api/v1alpha1"
+	"github.com/publicdomainrelay/kcp-libs/common/kcp"
 )
 
 func runObject(kind, name, lc, phase string, labels map[string]string) *unstructured.Unstructured {
 	meta := map[string]any{
 		"name":        name,
-		"annotations": map[string]any{clusterAnnotation: lc},
+		"annotations": map[string]any{kcp.ClusterAnnotation: lc},
 	}
 	if labels != nil {
 		raw := map[string]any{}
@@ -41,7 +42,7 @@ func triggerObject(name, lc, pod string) *unstructured.Unstructured {
 func triggerObjectNS(name, lc, ns, pod string) *unstructured.Unstructured {
 	meta := map[string]any{
 		"name":        name,
-		"annotations": map[string]any{clusterAnnotation: lc},
+		"annotations": map[string]any{kcp.ClusterAnnotation: lc},
 	}
 	if ns != "" {
 		meta["namespace"] = ns
@@ -188,7 +189,7 @@ func TestATriggerWithoutAPodIsNotWoken(t *testing.T) {
 		"kind":       "RunTrigger",
 		"metadata": map[string]any{
 			"name":        "no-pod",
-			"annotations": map[string]any{clusterAnnotation: "root:runtime"},
+			"annotations": map[string]any{kcp.ClusterAnnotation: "root:runtime"},
 		},
 		"spec": map[string]any{},
 	}})

@@ -102,8 +102,8 @@ func (p *Provider) observeProbes(ctx context.Context, ref Ref, pod *v1alpha1.Den
 	}
 	if pod.Spec.LivenessProbe != nil && len(pod.Spec.LivenessProbe.Command) > 0 {
 		passed := p.runProbe(ctx, pod.Status.RunID, pod.Spec.LivenessProbe)
-		key := ref.key()
-		o.LivenessFailed = p.probes.livenessFailed(key, pod.Status.RunID, passed, thresholdOf(pod.Spec.LivenessProbe))
+		key := ref.Key()
+		o.LivenessFailed = p.probes.Record(key, pod.Status.RunID, passed, thresholdOf(pod.Spec.LivenessProbe))
 	}
 }
 

@@ -6,10 +6,9 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/publicdomainrelay/kcp-libs/common/kcp"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
-
-const clusterPathAnnotation = "kcp.io/path"
 
 var logicalClusterGV = schema.GroupVersion{Group: "core.kcp.io", Version: "v1alpha1"}
 
@@ -42,9 +41,9 @@ func (r *Registry) ClusterPath(ctx context.Context, id string) (string, error) {
 	if err := json.Unmarshal(raw, &obj); err != nil {
 		return "", fmt.Errorf("provider: parse logical cluster %s: %w", id, err)
 	}
-	path := obj.Metadata.Annotations[clusterPathAnnotation]
+	path := obj.Metadata.Annotations[kcp.PathAnnotation]
 	if path == "" {
-		return "", fmt.Errorf("provider: logical cluster %s carries no %s annotation", id, clusterPathAnnotation)
+		return "", fmt.Errorf("provider: logical cluster %s carries no %s annotation", id, kcp.PathAnnotation)
 	}
 	return path, nil
 }

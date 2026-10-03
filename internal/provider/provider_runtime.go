@@ -2,7 +2,6 @@ package provider
 
 import (
 	"context"
-	"sync"
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -12,8 +11,6 @@ import (
 )
 
 const JobRunLabel = "deno.computer/job"
-
-const DefaultLivenessThreshold int32 = 3
 
 const DefaultProbeTimeout = 5 * time.Second
 
@@ -78,46 +75,11 @@ var _ Runtime = (*Registry)(nil)
 
 var _ TokenMinter = (*Registry)(nil)
 
-type probeCounter struct {
-	runID string
-
-	failures int
-}
-
-type probeTracker struct {
-	mu sync.Mutex
-
-	liveness map[string]probeCounter
-}
-
-func newProbeTracker() *probeTracker {
-	return &probeTracker{liveness: map[string]probeCounter{}}
-}
-
-func (t *probeTracker) livenessFailed(key, runID string, passed bool, threshold int32) bool {
-	t.mu.Lock()
-	defer t.mu.Unlock()
-	c := t.liveness[key]
-	if c.runID != runID {
-		c = probeCounter{runID: runID}
+func thresholdOf(spec *v1alpha1.ExecProbe) int32 {
+	if spec.FailureThreshold != nil {
+		return *spec.FailureThreshold
 	}
-	if passed {
-		c.failures = 0
-	} else {
-		c.failures++
-	}
-	t.liveness[key] = c
-	if threshold <= 0 {
-		threshold = DefaultLivenessThreshold
-	}
-	return int32(c.failures) >= threshold
-}
-
-func thresholdOf(probe *v1alpha1.ExecProbe) int32 {
-	if probe.FailureThreshold != nil && *probe.FailureThreshold > 0 {
-		return *probe.FailureThreshold
-	}
-	return DefaultLivenessThreshold
+	return 0
 }
 
 func ownerRef(kind, name string, uid k8stypes.UID) metav1.OwnerReference {

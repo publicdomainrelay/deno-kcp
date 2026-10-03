@@ -13,7 +13,11 @@ import (
 
 	"k8s.io/client-go/rest"
 
+	"github.com/publicdomainrelay/kcp-libs/abc/policy"
+	"github.com/publicdomainrelay/kcp-libs/abc/probe"
 	"github.com/publicdomainrelay/kcp-libs/abc/runner"
+	"github.com/publicdomainrelay/kcp-libs/abc/runref"
+	"github.com/publicdomainrelay/kcp-libs/common/kcp"
 	"github.com/publicdomainrelay/kcp-libs/impl/assets"
 	"github.com/publicdomainrelay/kcp-libs/impl/openbaoclient"
 	"github.com/publicdomainrelay/kcp-libs/impl/pkiprovisioner"
@@ -73,7 +77,7 @@ type Options struct {
 
 	ProviderWorkspace string
 
-	PolicyClient PolicyClient
+	PolicyClient policy.Client
 
 	Decider *policyworkflowrun.Reconciler
 
@@ -141,7 +145,7 @@ type Options struct {
 type Provider struct {
 	opts Options
 
-	probes *probeTracker
+	probes *probe.Tracker
 
 	reader Reader
 
@@ -163,7 +167,7 @@ type Provider struct {
 
 	jobAlloc map[string][]allocatedRun
 
-	runRefs runRefs
+	runRefs *runref.Index
 
 	activeRuns atomic.Int64
 
@@ -248,7 +252,7 @@ func New(opts Options) (*Provider, error) {
 		opts.RunsDir = "runs"
 	}
 	if opts.ServiceDomain == "" {
-		opts.ServiceDomain = DefaultServiceDomain
+		opts.ServiceDomain = kcp.DefaultServiceDomain
 	}
 	if opts.RestConfig == nil {
 		return nil, errors.New("provider: RestConfig is required for the watch driver")
@@ -267,7 +271,7 @@ func New(opts Options) (*Provider, error) {
 			opts.BundledActionsDir = abs
 		}
 	}
-	p := &Provider{opts: opts, probes: newProbeTracker(), reader: opts.Reader, jobWriteAt: map[string]time.Time{}, jobAlloc: map[string][]allocatedRun{}, leases: newAdmissionLeases(), runRefs: newRunRefs(), paths: newClusterPaths()}
+	p := &Provider{opts: opts, probes: probe.NewTracker(), reader: opts.Reader, jobWriteAt: map[string]time.Time{}, jobAlloc: map[string][]allocatedRun{}, leases: newAdmissionLeases(), runRefs: runref.New(runRefTTL), paths: newClusterPaths()}
 	// ponytail: a failure here degrades rather than stops the provider. The shim
 	// is how a workload resolves a peer by name; a read-only or missing runs
 	// directory should cost that feature, not the whole controller.

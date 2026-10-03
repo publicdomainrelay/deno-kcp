@@ -20,6 +20,7 @@ import (
 	"github.com/johnandersen777/deno-kcp/internal/livegate"
 	"github.com/johnandersen777/deno-kcp/internal/provider"
 	"github.com/publicdomainrelay/kcp-libs/impl/execrunner"
+	"github.com/publicdomainrelay/kcp-libs/impl/policyclient"
 )
 
 func liveEnvInt(key string, fallback int) int {
@@ -319,7 +320,7 @@ spec:
 	counted := &countingRuntime{Runtime: registry}
 	p, err := provider.New(provider.Options{
 		Registry:          counted,
-		PolicyClient:      provider.NewHTTPPolicyClient(),
+		PolicyClient:      policyclient.New(),
 		Runtime:           counted,
 		RestConfig:        restCfg,
 		ProviderWorkspace: "root:deno-provider",

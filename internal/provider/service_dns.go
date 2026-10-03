@@ -3,44 +3,17 @@ package provider
 import (
 	"context"
 	"encoding/json"
-	"strings"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	"github.com/publicdomainrelay/kcp-libs/abc/pki"
 	"github.com/publicdomainrelay/kcp-libs/common/denospec"
+	"github.com/publicdomainrelay/kcp-libs/common/kcp"
 	"github.com/publicdomainrelay/kcp-libs/impl/assets"
 	"github.com/publicdomainrelay/kcp-libs/impl/pkiprovisioner"
 
 	"github.com/johnandersen777/deno-kcp/api/v1alpha1"
 )
-
-const DefaultServiceDomain = "kcp.local"
-
-// ponytail: the FQDN shape is <name>.<namespace>.<workspace labels>.svc.<service domain>, e.g. pds.default.alice.svc.kcp.local. The service domain is the cluster domain in the Kubernetes sense, defaulting to kcp.local, so svc is structural and not part of the flag. The workspace labels are the logical cluster path with root dropped and the rest reversed, because a path separator is not legal in a DNS label and the path is the only name kcp gives a workspace. The rule is mirrored in the preload shim, which runs in Deno and cannot import this: it is three lines in both places on purpose, and a test here pins the examples the README quotes.
-func serviceLabels(logicalCluster string) string {
-	parts := strings.Split(logicalCluster, ":")
-	out := make([]string, 0, len(parts))
-	for i := len(parts) - 1; i >= 0; i-- {
-		if parts[i] == "" || parts[i] == RootWorkspace {
-			continue
-		}
-		out = append(out, parts[i])
-	}
-	return strings.Join(out, ".")
-}
-
-func serviceFQDN(name, namespace, logicalCluster, domain string) string {
-	labels := serviceLabels(logicalCluster)
-	if namespace == "" {
-		namespace = "default"
-	}
-	host := name + "." + namespace
-	if labels != "" {
-		host += "." + labels
-	}
-	return host + ".svc." + domain
-}
 
 // ponytail: the address a pod advertises is read from its own env, in the shape
 // the examples already use for their service arguments. That couples the table
@@ -102,7 +75,7 @@ func (p *Provider) dnsTable() (map[string]string, []string) {
 	seen := map[string]bool{}
 	var workspaces []string
 	for _, pod := range p.allPods() {
-		lc := pod.GetAnnotations()[clusterAnnotation]
+		lc := pod.GetAnnotations()[kcp.ClusterAnnotation]
 		if lc == "" {
 			continue
 		}
@@ -125,7 +98,7 @@ func (p *Provider) dnsTable() (map[string]string, []string) {
 func (p *Provider) serviceName(name, namespace, logicalCluster string) string {
 	registry, _ := p.opts.Registry.(*Registry)
 	path := p.paths.lookup(registry, context.Background(), logicalCluster)
-	return serviceFQDN(name, namespace, path, p.opts.ServiceDomain)
+	return kcp.ServiceFQDN(name, namespace, path, p.opts.ServiceDomain)
 }
 
 // dnsTokens mints one token per workspace, so the shim's fallback can read a

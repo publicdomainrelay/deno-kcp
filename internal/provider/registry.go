@@ -19,36 +19,18 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/rest"
 
+	"github.com/publicdomainrelay/kcp-libs/common/kcp"
+	"github.com/publicdomainrelay/kcp-libs/common/ref"
+	"github.com/publicdomainrelay/kcp-libs/common/statuspatch"
+
 	"github.com/johnandersen777/deno-kcp/api/v1alpha1"
 )
 
-const RootWorkspace = "root"
+const RootWorkspace = kcp.RootWorkspace
 
-const ApiPathPrefix = "/clusters/"
+const ApiPathPrefix = ref.APIPathPrefix
 
-type Ref struct {
-	LogicalCluster string
-
-	Namespace string
-
-	Name string
-
-	ResourceVersion string
-}
-
-// ponytail: every composite key in this package goes through refKey, because the indexers build a key from an unstructured object and the cache reader builds one from a Ref, and the two must produce the same string or a lookup silently returns another object. Adding the namespace in one place is what keeps them in step.
-func refKey(logicalCluster, namespace, name string) string {
-	return logicalCluster + "/" + namespace + "/" + name
-}
-
-func (r Ref) key() string {
-	return refKey(r.LogicalCluster, r.Namespace, r.Name)
-}
-
-func (r Ref) withResourceVersion(rv string) Ref {
-	r.ResourceVersion = rv
-	return r
-}
+type Ref = ref.Ref
 
 type RegistryOptions struct {
 	Host string
@@ -116,7 +98,7 @@ func (r *Registry) WriteStatus(ctx context.Context, ref Ref, st v1alpha1.PolicyW
 	if err != nil {
 		return err
 	}
-	if body, err = withResourceVersion(body, ref.ResourceVersion); err != nil {
+	if body, err = statuspatch.WithResourceVersion(body, ref.ResourceVersion); err != nil {
 		return err
 	}
 	if err := c.Patch(types.MergePatchType).SubResource("status").Namespace(ref.Namespace).Resource("policyworkflowruns").
@@ -232,18 +214,6 @@ func baseHost(host string) string {
 		host = host[:i]
 	}
 	return host
-}
-
-func withResourceVersion(body []byte, rv string) ([]byte, error) {
-	if rv == "" {
-		return body, nil
-	}
-	var m map[string]any
-	if err := json.Unmarshal(body, &m); err != nil {
-		return nil, fmt.Errorf("provider: status patch: %w", err)
-	}
-	m["metadata"] = map[string]any{"resourceVersion": rv}
-	return json.Marshal(m)
 }
 
 func statusPatch(st v1alpha1.PolicyWorkflowRunStatus) ([]byte, error) {

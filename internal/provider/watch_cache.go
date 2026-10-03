@@ -11,6 +11,7 @@ import (
 	"k8s.io/client-go/tools/cache"
 
 	"github.com/johnandersen777/deno-kcp/api/v1alpha1"
+	"github.com/publicdomainrelay/kcp-libs/common/ref"
 )
 
 type cacheReader struct {
@@ -51,7 +52,7 @@ func (r *cacheReader) allPods() []*unstructured.Unstructured {
 }
 
 func (r *cacheReader) get(kind workKind, ref Ref) *unstructured.Unstructured {
-	key := ref.key()
+	key := ref.Key()
 	for _, indexer := range r.kindIndexers(kind) {
 		objs, err := indexer.ByIndex(indexByClusterName, key)
 		if err != nil || len(objs) == 0 {
@@ -124,7 +125,7 @@ func (r *cacheReader) ListRuns(_ context.Context, logicalCluster string) ([]v1al
 }
 
 func (r *cacheReader) ListRunsForJob(_ context.Context, logicalCluster, namespace, jobName string) ([]v1alpha1.DenoRun, error) {
-	key := refKey(logicalCluster, namespace, jobName)
+	key := ref.Key(logicalCluster, namespace, jobName)
 	var out []*unstructured.Unstructured
 	for _, indexer := range r.kindIndexers(workRun) {
 		objs, err := indexer.ByIndex(indexByClusterJob, key)
@@ -169,7 +170,7 @@ func (r *cacheReader) ListWorkflowRuns(_ context.Context, logicalCluster string)
 }
 
 func (r *cacheReader) triggerNamesForPod(logicalCluster, namespace, podName string) []string {
-	key := refKey(logicalCluster, namespace, podName)
+	key := ref.Key(logicalCluster, namespace, podName)
 	var out []string
 	for _, indexer := range r.kindIndexers(workTrigger) {
 		objs, err := indexer.ByIndex(indexByClusterTriggerPod, key)
@@ -188,7 +189,7 @@ func (r *cacheReader) triggerNamesForPod(logicalCluster, namespace, podName stri
 }
 
 func (r *cacheReader) ListWorkflowRunsForPod(_ context.Context, logicalCluster, namespace, podName string) ([]v1alpha1.PolicyWorkflowRun, error) {
-	key := refKey(logicalCluster, namespace, podName)
+	key := ref.Key(logicalCluster, namespace, podName)
 	var out []*unstructured.Unstructured
 	for _, indexer := range r.kindIndexers(workPolicyRun) {
 		objs, err := indexer.ByIndex(indexByClusterPod, key)

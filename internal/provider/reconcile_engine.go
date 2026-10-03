@@ -115,8 +115,8 @@ func (p *Provider) observeEngineProbes(ctx context.Context, ref Ref, engine *v1a
 	}
 	if engine.Spec.LivenessProbe != nil && len(engine.Spec.LivenessProbe.Command) > 0 {
 		passed := p.runEngineProbe(ctx, engine.Status.RunID, engine.Spec.LivenessProbe)
-		key := "engine/" + ref.key()
-		o.LivenessFailed = p.probes.livenessFailed(key, engine.Status.RunID, passed, thresholdOf(engine.Spec.LivenessProbe))
+		key := "engine/" + ref.Key()
+		o.LivenessFailed = p.probes.Record(key, engine.Status.RunID, passed, thresholdOf(engine.Spec.LivenessProbe))
 	}
 }
 

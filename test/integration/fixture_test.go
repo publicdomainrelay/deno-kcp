@@ -32,6 +32,7 @@ import (
 	"github.com/johnandersen777/deno-kcp/internal/livegate"
 	"github.com/johnandersen777/deno-kcp/internal/provider"
 	"github.com/publicdomainrelay/kcp-libs/impl/execrunner"
+	"github.com/publicdomainrelay/kcp-libs/impl/policyclient"
 )
 
 const tenantWorkspace = "runtime"
@@ -619,7 +620,7 @@ func (c *liveCluster) startProvider(t *testing.T, engineDir, actionsDir string) 
 	}
 	p, err := provider.New(provider.Options{
 		Registry:          registry,
-		PolicyClient:      provider.NewHTTPPolicyClient(),
+		PolicyClient:      policyclient.New(),
 		Runtime:           registry,
 		Minter:            registry,
 		PodRunner:         podRunner,
