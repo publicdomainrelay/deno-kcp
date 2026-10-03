@@ -77,6 +77,14 @@ type watchState struct {
 	queue workqueue.TypedRateLimitingInterface[workKey]
 }
 
+// RunWatch is this provider's own event loop rather than kcp-libs'
+// informerwatch plus factory/controller, which carry the same worker pool,
+// requeue policy and indexers. One thing holds it here: an APIExport's
+// endpoint slice can name more than one virtual workspace URL, and this
+// provider watches the same seven kinds against every one of them into one
+// cache, while informerwatch refuses a kind watched twice across sources. The
+// migration is worth doing once that refusal is narrowed to one kind twice from
+// one base, which is the duplicate it is actually there to catch.
 func (p *Provider) RunWatch(ctx context.Context) error {
 	endpoints, err := p.awaitWorkspaces(ctx)
 	if err != nil {
