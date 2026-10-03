@@ -212,13 +212,13 @@ func containsString(haystack []string, needle string) bool {
 	return false
 }
 
-// probeCommand expands the kcpdns probe form into the argv a probe actually
-// runs. A manifest cannot know where the shim was materialised, so it names the
-// probe as ["kcpdns", "<fqdn>", "<path>"] and this fills in the paths, keeping
-// the absolute runs directory out of every example. Anything else is passed
-// through untouched, and without a materialised shim the form cannot be expanded
-// at all, so the probe is dropped rather than run against a path that is not
-// there.
+// probeCommand expands the kcpdns probe form -- the marker the deploy examples
+// carry -- into the argv a probe actually runs, through denospec.ProbeCommand.
+// A manifest cannot know where the shim was materialised, so it names the probe
+// as ["kcpdns", "<fqdn>", "<path>"] and this fills in the paths, keeping the
+// absolute runs directory out of every example. Anything else is passed through
+// untouched, and without a materialised shim the form cannot be expanded at all,
+// so the probe is dropped rather than run against a path that is not there.
 func (p *Provider) probeCommand(command []string) []string {
 	if len(command) < 2 || command[0] != "kcpdns" {
 		return command

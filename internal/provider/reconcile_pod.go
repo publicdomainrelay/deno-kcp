@@ -113,7 +113,7 @@ func (p *Provider) runProbe(ctx context.Context, runID string, probe *v1alpha1.E
 	if probe.TimeoutSeconds != nil && *probe.TimeoutSeconds > 0 {
 		timeout = time.Duration(*probe.TimeoutSeconds) * time.Second
 	}
-	// ponytail: a kcpdns probe that cannot be expanded is skipped rather than run,
+	// ponytail: a shim probe that cannot be expanded is skipped rather than run,
 	// because PodRunner.Probe treats an empty command as a pass; passing nil
 	// through would mark the workload Ready on the strength of having no probe.
 	command := p.probeCommand(probe.Command)

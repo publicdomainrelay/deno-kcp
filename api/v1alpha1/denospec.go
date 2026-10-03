@@ -4,8 +4,10 @@ import "github.com/publicdomainrelay/kcp-libs/common/denospec"
 
 // The CRD declarations above are the wire contract and stay as written: the
 // library's copies are pinned to them by contract test. These conversions are
-// the one place the two shapes meet, so a field added to either side fails to
-// compile here rather than silently dropping out of a deno argv.
+// where the two shapes meet for the fields the provider actually hands to the
+// library, so a renamed or dropped field fails to compile here rather than
+// silently changing a deno argv. A conversion is added when a caller needs one;
+// the CRD's other declarations are read directly.
 
 func (p *DenoPermissions) DenoSpec() *denospec.Permissions {
 	if p == nil {
@@ -40,40 +42,9 @@ func (p *DenoPermission) denoSpec() *denospec.Permission {
 	}
 }
 
-func (t *DenoPodTemplate) DenoSpec() *denospec.PodTemplate {
-	if t == nil {
-		return nil
-	}
-	return &denospec.PodTemplate{
-		DenoJSON:       t.DenoJSON,
-		DenoLock:       t.DenoLock,
-		Script:         t.Script,
-		Permissions:    t.Permissions.DenoSpec(),
-		ServiceAccount: t.ServiceAccount.DenoSpec(),
-		APIServer:      t.APIServer,
-		Env:            t.Env,
-	}
-}
-
 func (s *ServiceAccountRef) DenoSpec() *denospec.ServiceAccountRef {
 	if s == nil {
 		return nil
 	}
 	return &denospec.ServiceAccountRef{Name: s.Name, Namespace: s.Namespace}
-}
-
-func (p *ExecProbe) DenoSpec() *denospec.ExecProbe {
-	if p == nil {
-		return nil
-	}
-	return &denospec.ExecProbe{
-		Command:          p.Command,
-		PeriodSeconds:    p.PeriodSeconds,
-		FailureThreshold: p.FailureThreshold,
-		TimeoutSeconds:   p.TimeoutSeconds,
-	}
-}
-
-func (r DenoRestartPolicy) DenoSpec() denospec.RestartPolicy {
-	return denospec.RestartPolicy(r)
 }

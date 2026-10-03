@@ -198,19 +198,9 @@ type allocatedRun struct {
 const allocatedRunTTL = 2 * time.Minute
 
 type Pass struct {
-	Ref Ref
-
 	Phase v1alpha1.PolicyWorkflowPhase
 
-	Wrote bool
-
-	Deleted bool
-
-	Unfinalized bool
-
 	RequeueAfter time.Duration
-
-	Err error
 }
 
 func New(opts Options) (*Provider, error) {
@@ -496,19 +486,18 @@ func (p *Provider) listWorkflowRunsForPod(ctx context.Context, logicalCluster, n
 func (p *Provider) Reconcile(ctx context.Context, ref Ref) (Pass, error) {
 	run, err := p.readPolicyRun(ctx, ref)
 	if err != nil {
-		return Pass{Ref: ref}, err
+		return Pass{}, err
 	}
 	adm, err := p.admit(ctx, ref, run)
 	if err != nil {
-		return Pass{Ref: ref}, err
+		return Pass{}, err
 	}
 	return p.reconcileWorkflowRun(ctx, ref, run, adm)
 }
 
 func (p *Provider) reconcileWorkflowRun(ctx context.Context, ref Ref, run *v1alpha1.PolicyWorkflowRun, adm runAdmission) (Pass, error) {
-	pass := Pass{Ref: ref}
+	pass := Pass{}
 	ref.ResourceVersion = run.ResourceVersion
-	pass.Ref = ref
 	endpoint := adm.endpoint
 	if endpoint == "" {
 		endpoint = run.Spec.EngineEndpoint
@@ -590,26 +579,20 @@ func (p *Provider) reconcileWorkflowRun(ctx context.Context, ref Ref, run *v1alp
 	status.Phase = res.Phase
 	if !reflect.DeepEqual(status, run.Status) {
 		if err := p.opts.Registry.WriteStatus(ctx, ref, status); err != nil {
-			pass.Err = err
 			return pass, err
 		}
-		pass.Wrote = true
 	}
 
 	for _, op := range res.Ops {
 		switch op {
 		case policyworkflowrun.OpRemoveFinalizer:
 			if err := p.opts.Registry.RemoveFinalizer(ctx, ref); err != nil {
-				pass.Err = err
 				return pass, err
 			}
-			pass.Unfinalized = true
 		case policyworkflowrun.OpDelete:
 			if err := p.opts.Registry.Delete(ctx, ref); err != nil {
-				pass.Err = err
 				return pass, err
 			}
-			pass.Deleted = true
 		}
 	}
 	if run.Status.Phase == v1alpha1.PolicyWorkflowRunning && res.Phase != v1alpha1.PolicyWorkflowRunning {
