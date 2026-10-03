@@ -13,6 +13,7 @@ import (
 
 	"k8s.io/client-go/rest"
 
+	"github.com/publicdomainrelay/kcp-libs/abc/joballoc"
 	"github.com/publicdomainrelay/kcp-libs/abc/policy"
 	"github.com/publicdomainrelay/kcp-libs/abc/probe"
 	"github.com/publicdomainrelay/kcp-libs/abc/runner"
@@ -169,9 +170,8 @@ type Provider struct {
 
 	jobWriteAt map[string]time.Time
 
-	jobAllocMu sync.Mutex
-
-	jobAlloc map[string][]allocatedRun
+	// ponytail: a created run counts active until the informer observes it, bounded by the allocator TTL so a run deleted before it is seen cannot pin the job forever.
+	jobAlloc *joballoc.Allocator
 
 	runRefs *runref.Index
 
@@ -191,15 +191,6 @@ type Provider struct {
 
 	paths *kcpstore.PathCache
 }
-
-// ponytail: a created run is counted active until the informer observes it, bounded by allocatedRunTTL so a run deleted before it is seen cannot pin the job forever.
-type allocatedRun struct {
-	name string
-
-	at time.Time
-}
-
-const allocatedRunTTL = 2 * time.Minute
 
 type Pass struct {
 	Phase v1alpha1.PolicyWorkflowPhase
@@ -267,7 +258,7 @@ func New(opts Options) (*Provider, error) {
 			opts.BundledActionsDir = abs
 		}
 	}
-	p := &Provider{opts: opts, probes: probe.NewTracker(), reader: opts.Reader, jobWriteAt: map[string]time.Time{}, jobAlloc: map[string][]allocatedRun{}, runRefs: runref.New(runRefTTL), paths: kcpstore.NewPathCache(storeOf(opts.Registry))}
+	p := &Provider{opts: opts, probes: probe.NewTracker(), reader: opts.Reader, jobWriteAt: map[string]time.Time{}, jobAlloc: joballoc.New(2 * time.Minute), runRefs: runref.New(runRefTTL), paths: kcpstore.NewPathCache(storeOf(opts.Registry))}
 	p.admissions = newRunAdmitter(p)
 	p.initMetrics()
 	// ponytail: a failure here degrades rather than stops the provider. The shim

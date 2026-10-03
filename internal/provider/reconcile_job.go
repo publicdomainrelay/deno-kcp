@@ -7,6 +7,8 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	"github.com/publicdomainrelay/kcp-libs/abc/joballoc"
+
 	"github.com/johnandersen777/deno-kcp/api/v1alpha1"
 	"github.com/johnandersen777/deno-kcp/internal/denojob"
 )
@@ -14,13 +16,17 @@ import (
 func (p *Provider) reconcileJob(ctx context.Context, ref Ref, job *v1alpha1.DenoJob, runs []v1alpha1.DenoRun) (time.Duration, bool, error) {
 	ref.ResourceVersion = job.ResourceVersion
 	observed := job.DeepCopy()
-	allocated := p.jobAllocated(ref)
-	observed.Status.Runs = mergeRunNames(observed.Status.Runs, allocatedRunNames(allocated))
+	key := jobAllocKey(ref)
+	now := p.opts.Now()
+	observed.Status.Runs = joballoc.MergeNames(observed.Status.Runs, p.jobAlloc.Names(key, now))
 	observedRuns := jobRuns(runs, job.Name)
 	if !jobTerminalPhase(observed.Status.Phase) {
-		observedRuns = mergeAllocatedActive(observedRuns, allocated, p.opts.Now())
+		pending := p.jobAlloc.Pending(key, observedRunNames(observedRuns), now)
+		for _, name := range pending {
+			observedRuns = append(observedRuns, denojob.RunObservation{Name: name})
+		}
 	}
-	o := denojob.Observed{Job: *observed, Runs: observedRuns, Now: p.opts.Now()}
+	o := denojob.Observed{Job: *observed, Runs: observedRuns, Now: now}
 	res, err := p.opts.JobDecider.Reconcile(ctx, o)
 	if err != nil {
 		return 0, false, err
@@ -36,10 +42,10 @@ func (p *Provider) reconcileJob(ctx context.Context, ref Ref, job *v1alpha1.Deno
 		p.wake(workRun, Ref{LogicalCluster: ref.LogicalCluster, Namespace: ref.Namespace, Name: name})
 	}
 	if len(res.CreateRuns) > 0 {
-		p.jobAllocate(ref, res.CreateRuns)
+		p.jobAlloc.Allocate(key, res.CreateRuns, now)
 	}
 	if terminal || res.DeleteJob {
-		p.jobForget(ref)
+		p.jobAlloc.Forget(key)
 	}
 	for _, name := range res.StopRuns {
 		if err := p.opts.Runtime.DeleteRun(ctx, Ref{LogicalCluster: ref.LogicalCluster, Namespace: ref.Namespace, Name: name}); err != nil {
@@ -95,76 +101,16 @@ func (p *Provider) jobWriteAllowed(ref Ref, job *v1alpha1.DenoJob, res denojob.R
 	return true
 }
 
-func (p *Provider) jobAllocated(ref Ref) []allocatedRun {
-	p.jobAllocMu.Lock()
-	defer p.jobAllocMu.Unlock()
-	return append([]allocatedRun(nil), p.jobAlloc[jobAllocKey(ref)]...)
+// ponytail: the allocator key is the ref identity; job.ResourceVersion changes on every status write, so it is dropped the way the old ref.Key() did.
+func jobAllocKey(ref Ref) Ref {
+	ref.ResourceVersion = ""
+	return ref
 }
 
-func (p *Provider) jobAllocate(ref Ref, names []string) {
-	if len(names) == 0 {
-		return
-	}
-	p.jobAllocMu.Lock()
-	defer p.jobAllocMu.Unlock()
-	key := jobAllocKey(ref)
-	now := p.opts.Now()
-	kept := p.jobAlloc[key][:0]
-	for _, a := range p.jobAlloc[key] {
-		if now.Sub(a.at) < allocatedRunTTL {
-			kept = append(kept, a)
-		}
-	}
-	for _, name := range names {
-		kept = append(kept, allocatedRun{name: name, at: now})
-	}
-	p.jobAlloc[key] = kept
-}
-
-func allocatedRunNames(allocated []allocatedRun) []string {
-	out := make([]string, 0, len(allocated))
-	for _, a := range allocated {
-		out = append(out, a.name)
-	}
-	return out
-}
-
-func mergeAllocatedActive(observed []denojob.RunObservation, allocated []allocatedRun, now time.Time) []denojob.RunObservation {
-	seen := make(map[string]bool, len(observed))
+func observedRunNames(observed []denojob.RunObservation) []string {
+	out := make([]string, 0, len(observed))
 	for i := range observed {
-		seen[observed[i].Name] = true
-	}
-	for _, a := range allocated {
-		if seen[a.name] || now.Sub(a.at) >= allocatedRunTTL {
-			continue
-		}
-		seen[a.name] = true
-		observed = append(observed, denojob.RunObservation{Name: a.name})
-	}
-	return observed
-}
-
-func (p *Provider) jobForget(ref Ref) {
-	p.jobAllocMu.Lock()
-	defer p.jobAllocMu.Unlock()
-	delete(p.jobAlloc, jobAllocKey(ref))
-}
-
-func jobAllocKey(ref Ref) string {
-	return ref.Key()
-}
-
-func mergeRunNames(existing, extra []string) []string {
-	seen := make(map[string]bool, len(existing)+len(extra))
-	out := make([]string, 0, len(existing)+len(extra))
-	for _, group := range [][]string{existing, extra} {
-		for _, name := range group {
-			if name == "" || seen[name] {
-				continue
-			}
-			seen[name] = true
-			out = append(out, name)
-		}
+		out = append(out, observed[i].Name)
 	}
 	return out
 }
