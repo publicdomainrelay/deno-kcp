@@ -18,6 +18,7 @@ import (
 	"github.com/publicdomainrelay/kcp-libs/abc/runner"
 	"github.com/publicdomainrelay/kcp-libs/abc/runref"
 	"github.com/publicdomainrelay/kcp-libs/common/kcp"
+	"github.com/publicdomainrelay/kcp-libs/factory/admission"
 	"github.com/publicdomainrelay/kcp-libs/impl/assets"
 	"github.com/publicdomainrelay/kcp-libs/impl/kcpstore"
 	"github.com/publicdomainrelay/kcp-libs/impl/openbaoclient"
@@ -152,7 +153,7 @@ type Provider struct {
 
 	watch *watchState
 
-	leases *admissionLeases
+	admissions *admission.Admitter
 
 	reconciles atomic.Uint64
 
@@ -272,7 +273,8 @@ func New(opts Options) (*Provider, error) {
 			opts.BundledActionsDir = abs
 		}
 	}
-	p := &Provider{opts: opts, probes: probe.NewTracker(), reader: opts.Reader, jobWriteAt: map[string]time.Time{}, jobAlloc: map[string][]allocatedRun{}, leases: newAdmissionLeases(), runRefs: runref.New(runRefTTL), paths: kcpstore.NewPathCache(storeOf(opts.Registry))}
+	p := &Provider{opts: opts, probes: probe.NewTracker(), reader: opts.Reader, jobWriteAt: map[string]time.Time{}, jobAlloc: map[string][]allocatedRun{}, runRefs: runref.New(runRefTTL), paths: kcpstore.NewPathCache(storeOf(opts.Registry))}
+	p.admissions = newRunAdmitter(p)
 	// ponytail: a failure here degrades rather than stops the provider. The shim
 	// is how a workload resolves a peer by name; a read-only or missing runs
 	// directory should cost that feature, not the whole controller.

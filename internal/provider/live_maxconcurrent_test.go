@@ -14,8 +14,8 @@ import (
 
 	"github.com/johnandersen777/deno-kcp/api/v1alpha1"
 	"github.com/johnandersen777/deno-kcp/internal/livegate"
-	"github.com/johnandersen777/deno-kcp/internal/policyworkflowpod"
 	"github.com/johnandersen777/deno-kcp/internal/provider"
+	"github.com/publicdomainrelay/kcp-libs/abc/queue"
 	"github.com/publicdomainrelay/kcp-libs/impl/execrunner"
 	"github.com/publicdomainrelay/kcp-libs/impl/policyclient"
 )
@@ -241,7 +241,7 @@ spec:
 		}
 		if pod.cap < 3 && queued == 0 {
 			t.Fatalf("%s accepted 3 creates at cap %d but never held a run Pending with a %s=False %s condition",
-				pod.name, pod.cap, v1alpha1.ConditionComplete, policyworkflowpod.QueueReasonAtCapacity)
+				pod.name, pod.cap, v1alpha1.ConditionComplete, queue.ReasonAtCapacity)
 		}
 		capDisplay := "unset"
 		if pod.maxConcurrent != nil {
@@ -295,7 +295,7 @@ func summarizePodRuns(runs []v1alpha1.PolicyWorkflowRun, podName string) (runnin
 		case v1alpha1.PolicyWorkflowSucceeded:
 			succeeded++
 		case v1alpha1.PolicyWorkflowPending:
-			if completeCondition(run.Status.Conditions) == string(metav1.ConditionFalse)+"/"+policyworkflowpod.QueueReasonAtCapacity {
+			if completeCondition(run.Status.Conditions) == string(metav1.ConditionFalse)+"/"+queue.ReasonAtCapacity {
 				atCapacity++
 			}
 		}

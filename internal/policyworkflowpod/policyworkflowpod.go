@@ -3,7 +3,6 @@ package policyworkflowpod
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -96,8 +95,6 @@ func carry(st v1alpha1.PolicyWorkflowPodStatus) Result {
 	}
 }
 
-const QueueReasonAtCapacity = "AtCapacity"
-
 func Capacity(policy v1alpha1.ConcurrencyPolicy, maxConcurrent *int32) (int32, bool) {
 	if policy == v1alpha1.ConcurrencyAllow {
 		if maxConcurrent == nil || *maxConcurrent <= 0 {
@@ -106,19 +103,6 @@ func Capacity(policy v1alpha1.ConcurrencyPolicy, maxConcurrent *int32) (int32, b
 		return *maxConcurrent, false
 	}
 	return 1, false
-}
-
-func QueueDecision(policy v1alpha1.ConcurrencyPolicy, maxConcurrent *int32, active, ahead int32) (bool, string, string) {
-	limit, unlimited := Capacity(policy, maxConcurrent)
-	if unlimited || active+ahead < limit {
-		return true, "", ""
-	}
-	display := policy
-	if display == "" {
-		display = v1alpha1.ConcurrencyForbid
-	}
-	return false, QueueReasonAtCapacity,
-		fmt.Sprintf("waiting for a free slot (concurrencyPolicy=%s, maxConcurrent=%d)", display, limit)
 }
 
 func RunTTL(pod *v1alpha1.PolicyWorkflowPod, providerDefault *int64) *int64 {

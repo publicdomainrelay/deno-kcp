@@ -44,10 +44,26 @@ func admissionPod(name string, policy v1alpha1.ConcurrencyPolicy, max *int32, en
 
 func admissionFor(t *testing.T, runs []v1alpha1.PolicyWorkflowRun, pods []v1alpha1.PolicyWorkflowPod, pod, run string) runAdmission {
 	t.Helper()
-	out := buildRunAdmissions("root:demo", runs, pods, nil, nil)
-	adm, ok := out[Ref{LogicalCluster: "root:demo", Name: run}]
+	rt := newFakeRuntime()
+	for i := range pods {
+		obj := pods[i]
+		rt.workflowPods[Ref{LogicalCluster: "root:demo", Name: obj.Name}] = &obj
+	}
+	refs := make(map[string]Ref, len(runs))
+	for i := range runs {
+		obj := runs[i]
+		key := Ref{LogicalCluster: "root:demo", Namespace: obj.Namespace, Name: obj.Name}
+		rt.pwi[key] = &obj
+		refs[obj.Name] = key
+	}
+	target, ok := refs[run]
 	if !ok {
-		t.Fatalf("no admission for %s", run)
+		t.Fatalf("no run %s", run)
+	}
+	p := runtimeProvider(t, rt, nil, nil)
+	adm, err := p.admit(context.Background(), target, rt.pwi[target])
+	if err != nil {
+		t.Fatalf("admit %s: %v", run, err)
 	}
 	return adm
 }
