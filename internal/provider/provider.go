@@ -13,6 +13,8 @@ import (
 
 	"k8s.io/client-go/rest"
 
+	"github.com/publicdomainrelay/kcp-libs/abc/runner"
+	"github.com/publicdomainrelay/kcp-libs/impl/assets"
 	"github.com/publicdomainrelay/kcp-libs/impl/openbaoclient"
 	"github.com/publicdomainrelay/kcp-libs/impl/pkiprovisioner"
 
@@ -23,9 +25,7 @@ import (
 	"github.com/johnandersen777/deno-kcp/internal/policyengine"
 	"github.com/johnandersen777/deno-kcp/internal/policyworkflowpod"
 	"github.com/johnandersen777/deno-kcp/internal/policyworkflowrun"
-	"github.com/johnandersen777/deno-kcp/internal/provider/kcpdns"
 	"github.com/johnandersen777/deno-kcp/internal/trigger"
-	"github.com/publicdomainrelay/kcp-libs/abc/runner"
 )
 
 type Instances interface {
@@ -271,11 +271,11 @@ func New(opts Options) (*Provider, error) {
 	// ponytail: a failure here degrades rather than stops the provider. The shim
 	// is how a workload resolves a peer by name; a read-only or missing runs
 	// directory should cost that feature, not the whole controller.
-	if shim, probe, err := kcpdns.Materialise(opts.RunsDir); err != nil {
+	if paths, err := assets.DNSSet(opts.RunsDir).Materialise(); err != nil {
 		opts.Log.Warn("kcpdns: the preload shim was not written, workloads will not resolve service names", "err", err)
 	} else {
-		p.dnsShim = shim
-		p.dnsProbe = probe
+		p.dnsShim = paths[assets.ShimName]
+		p.dnsProbe = paths[assets.ProbeName]
 	}
 	if opts.RestConfig != nil {
 		p.clusterCA = opts.RestConfig.CAData

@@ -5,13 +5,14 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/publicdomainrelay/kcp-libs/abc/pki"
-	"github.com/publicdomainrelay/kcp-libs/impl/pkiprovisioner"
-
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
+	"github.com/publicdomainrelay/kcp-libs/abc/pki"
+	"github.com/publicdomainrelay/kcp-libs/common/denospec"
+	"github.com/publicdomainrelay/kcp-libs/impl/assets"
+	"github.com/publicdomainrelay/kcp-libs/impl/pkiprovisioner"
+
 	"github.com/johnandersen777/deno-kcp/api/v1alpha1"
-	"github.com/johnandersen777/deno-kcp/internal/provider/kcpdns"
 )
 
 const DefaultServiceDomain = "kcp.local"
@@ -250,7 +251,7 @@ func (p *Provider) probeCommand(command []string) []string {
 	if p.dnsShim == "" || p.dnsProbe == "" {
 		return nil
 	}
-	return kcpdns.ProbeCommand(p.dnsShim, p.dnsProbe, command[1], probePath(command))
+	return denospec.ProbeCommand("", p.dnsShim, p.dnsProbe, command[1], probePath(command), assets.DNSProbeEnv)
 }
 
 func probePath(command []string) string {
