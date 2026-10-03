@@ -9,6 +9,7 @@ import (
 
 	"github.com/johnandersen777/deno-kcp/api/v1alpha1"
 	"github.com/johnandersen777/deno-kcp/internal/trigger"
+	"github.com/publicdomainrelay/kcp-libs/common/denocomputer"
 )
 
 func (p *Provider) reconcileTrigger(ctx context.Context, ref Ref, tr *v1alpha1.RunTrigger) (time.Duration, bool, error) {
@@ -91,9 +92,5 @@ func latestTerminalRun(runs []v1alpha1.PolicyWorkflowRun, podName string) (*v1al
 }
 
 func terminalWorkflowPhase(phase v1alpha1.PolicyWorkflowPhase) bool {
-	switch phase {
-	case v1alpha1.PolicyWorkflowSucceeded, v1alpha1.PolicyWorkflowFailed, v1alpha1.PolicyWorkflowCancelled:
-		return true
-	}
-	return false
+	return denocomputer.TerminalPolicyWorkflow(string(phase))
 }

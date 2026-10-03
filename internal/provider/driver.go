@@ -3,6 +3,8 @@ package provider
 import (
 	"time"
 
+	"github.com/publicdomainrelay/kcp-libs/common/denocomputer"
+
 	"github.com/johnandersen777/deno-kcp/api/v1alpha1"
 )
 
@@ -28,13 +30,13 @@ type workKey struct {
 const minTransitionPoll = 25 * time.Millisecond
 
 func runTerminalPhase(p v1alpha1.DenoRunPhase) bool {
-	return p == v1alpha1.DenoRunSucceeded || p == v1alpha1.DenoRunFailed
+	return denocomputer.TerminalDenoRun(string(p))
 }
 
 func podTerminalPhase(p v1alpha1.DenoPodPhase) bool {
-	return p == v1alpha1.DenoPodSucceeded || p == v1alpha1.DenoPodFailed
+	return denocomputer.TerminalDenoPod(string(p))
 }
 
 func jobTerminalPhase(p v1alpha1.DenoJobPhase) bool {
-	return p == v1alpha1.DenoJobSucceeded || p == v1alpha1.DenoJobFailed
+	return denocomputer.TerminalDenoJob(string(p))
 }
