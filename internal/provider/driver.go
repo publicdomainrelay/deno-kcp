@@ -8,6 +8,15 @@ import (
 	"github.com/johnandersen777/deno-kcp/api/v1alpha1"
 )
 
+// workKind and workKey are the dispatch vocabulary. kcp-libs carries the same
+// shape as abc/reconcile.Key with abc/reconcile.Handler, and the deciders under
+// internal/{denorun,denopod,denojob,policyengine,policyworkflowpod,
+// policyworkflowrun,trigger} carry their own Result and Op types where the
+// library has reconcile.Result[Status] and reconcile.Operation. Re-expressing
+// the seven deciders on that seam is a rewrite of their domains, not a
+// substitution like the packages this refactor already swapped, so it is left
+// as its own piece of work; nothing else in the provider depends on which
+// vocabulary the deciders use.
 type workKind string
 
 const (
