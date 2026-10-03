@@ -23,11 +23,6 @@ type RegistryOptions struct {
 	RestConfig *rest.Config
 
 	Transport http.RoundTripper
-
-	// QPS and Burst tune the CRD client; zero keeps the library defaults of 50 and 100.
-	QPS float32
-
-	Burst int
 }
 
 type Registry struct {
@@ -58,8 +53,6 @@ func NewRegistry(opts RegistryOptions) (*Registry, error) {
 		Host:       opts.Host,
 		RestConfig: opts.RestConfig,
 		Transport:  opts.Transport,
-		QPS:        opts.QPS,
-		Burst:      opts.Burst,
 	})
 	if err != nil {
 		return nil, err
