@@ -7,10 +7,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/johnandersen777/deno-kcp/api/v1alpha1"
-	"github.com/johnandersen777/deno-kcp/internal/runner"
+	"github.com/publicdomainrelay/kcp-libs/abc/runner"
+	"github.com/publicdomainrelay/kcp-libs/impl/memoryrunner"
 )
 
-func runGuardFixture(t *testing.T, pollsBeforeDone int) (*fakeRuntime, Ref, *Provider, *runner.MemoryPod) {
+func runGuardFixture(t *testing.T, pollsBeforeDone int) (*fakeRuntime, Ref, *Provider, *memoryrunner.Pod) {
 	t.Helper()
 	rt := newFakeRuntime()
 	ref := Ref{LogicalCluster: "root:demo", Name: "run-1"}
@@ -18,7 +19,7 @@ func runGuardFixture(t *testing.T, pollsBeforeDone int) (*fakeRuntime, Ref, *Pro
 		ObjectMeta: metav1.ObjectMeta{Name: "run-1", Generation: 1, UID: "uid-1"},
 		Spec:       v1alpha1.DenoRunSpec{DenoPodTemplate: v1alpha1.DenoPodTemplate{Script: "x"}},
 	}
-	mem := runner.NewMemoryPod(runner.MemoryPodOptions{
+	mem := memoryrunner.NewPod(memoryrunner.PodOptions{
 		Outcome:         runner.PodStatus{State: runner.StateSucceeded, Outputs: map[string]string{"allow": "true"}},
 		PollsBeforeDone: pollsBeforeDone,
 	})
@@ -87,7 +88,7 @@ func TestAFailingRunRetries(t *testing.T) {
 			Backoff:         &backoff,
 		},
 	}
-	mem := runner.NewMemoryPod(runner.MemoryPodOptions{
+	mem := memoryrunner.NewPod(memoryrunner.PodOptions{
 		Outcome:         runner.PodStatus{State: runner.StateFailed, ExitCode: 1, Message: "boom"},
 		PollsBeforeDone: 1,
 	})

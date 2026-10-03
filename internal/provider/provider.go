@@ -24,8 +24,8 @@ import (
 	"github.com/johnandersen777/deno-kcp/internal/policyworkflowpod"
 	"github.com/johnandersen777/deno-kcp/internal/policyworkflowrun"
 	"github.com/johnandersen777/deno-kcp/internal/provider/kcpdns"
-	"github.com/johnandersen777/deno-kcp/internal/runner"
 	"github.com/johnandersen777/deno-kcp/internal/trigger"
+	"github.com/publicdomainrelay/kcp-libs/abc/runner"
 )
 
 type Instances interface {

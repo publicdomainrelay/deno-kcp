@@ -15,7 +15,8 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 
 	"github.com/johnandersen777/deno-kcp/internal/provider"
-	"github.com/johnandersen777/deno-kcp/internal/runner"
+	"github.com/publicdomainrelay/kcp-libs/abc/runner"
+	"github.com/publicdomainrelay/kcp-libs/impl/execrunner"
 )
 
 type config struct {
@@ -134,7 +135,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	run, err := runner.NewExecEngine(runner.ExecEngineOptions{
+	run, err := execrunner.NewEngine(execrunner.EngineOptions{
 		DenoBin:   cfg.denoBin,
 		ServerDir: cfg.policyEngineDir,
 		RunsDir:   cfg.runsDir,
@@ -149,7 +150,7 @@ func main() {
 	// the provider that generates it is built from this runner.
 	var providerImpl *provider.Provider
 	var podRunner runner.PodRunner
-	execPod, err := runner.NewExecPod(runner.ExecPodOptions{
+	execPod, err := execrunner.NewPod(execrunner.PodOptions{
 		DenoBin: cfg.denoBin,
 		RunsDir: cfg.runsDir,
 		Timeout: cfg.podTimeout,

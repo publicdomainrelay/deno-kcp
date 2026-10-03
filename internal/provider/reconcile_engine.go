@@ -12,7 +12,7 @@ import (
 
 	"github.com/johnandersen777/deno-kcp/api/v1alpha1"
 	"github.com/johnandersen777/deno-kcp/internal/policyengine"
-	"github.com/johnandersen777/deno-kcp/internal/runner"
+	"github.com/publicdomainrelay/kcp-libs/abc/runner"
 )
 
 func (p *Provider) reconcileEngine(ctx context.Context, ref Ref, engine *v1alpha1.PolicyEngine) (time.Duration, bool, error) {

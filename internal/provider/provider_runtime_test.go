@@ -13,7 +13,8 @@ import (
 	"k8s.io/client-go/rest"
 
 	"github.com/johnandersen777/deno-kcp/api/v1alpha1"
-	"github.com/johnandersen777/deno-kcp/internal/runner"
+	"github.com/publicdomainrelay/kcp-libs/abc/runner"
+	"github.com/publicdomainrelay/kcp-libs/impl/memoryrunner"
 )
 
 func TestPodStatusPatchForcesManagedFieldsPresent(t *testing.T) {
@@ -374,7 +375,7 @@ func TestReconcilePodMintsATokenAndReportsOutputs(t *testing.T) {
 		},
 	}
 	minter := &fakeMinter{token: "tok"}
-	mem := runner.NewMemoryPod(runner.MemoryPodOptions{
+	mem := memoryrunner.NewPod(memoryrunner.PodOptions{
 		Outcome:         runner.PodStatus{State: runner.StateSucceeded, Outputs: map[string]string{"allow": "true"}},
 		PollsBeforeDone: 1,
 	})
@@ -411,7 +412,7 @@ func TestLongRunningPodRestartsWithAlways(t *testing.T) {
 			RestartPolicy:   v1alpha1.RestartAlways,
 		},
 	}
-	mem := runner.NewMemoryPod(runner.MemoryPodOptions{
+	mem := memoryrunner.NewPod(memoryrunner.PodOptions{
 		Outcome:         runner.PodStatus{State: runner.StateSucceeded},
 		PollsBeforeDone: 1,
 	})
@@ -436,7 +437,7 @@ func TestReconcileRunStartsAndSucceeds(t *testing.T) {
 		ObjectMeta: metav1.ObjectMeta{Name: "run-1", Generation: 1},
 		Spec:       v1alpha1.DenoRunSpec{DenoPodTemplate: v1alpha1.DenoPodTemplate{Script: "x"}},
 	}
-	mem := runner.NewMemoryPod(runner.MemoryPodOptions{
+	mem := memoryrunner.NewPod(memoryrunner.PodOptions{
 		Outcome:         runner.PodStatus{State: runner.StateSucceeded, Outputs: map[string]string{"allow": "true"}},
 		PollsBeforeDone: 1,
 	})
@@ -467,7 +468,7 @@ func TestReconcileJobCreatesARunThenSucceeds(t *testing.T) {
 		ObjectMeta: metav1.ObjectMeta{Name: "job-1", Generation: 1, UID: "job-uid"},
 		Spec:       v1alpha1.DenoJobSpec{Template: v1alpha1.DenoRunSpec{DenoPodTemplate: v1alpha1.DenoPodTemplate{Script: "x"}}},
 	}
-	p := runtimeProvider(t, rt, runner.NewMemoryPod(runner.MemoryPodOptions{}), nil)
+	p := runtimeProvider(t, rt, memoryrunner.NewPod(memoryrunner.PodOptions{}), nil)
 	ctx := context.Background()
 
 	if _, _, err := p.process(ctx, workKey{kind: workJob, ref: ref}); err != nil {
@@ -522,7 +523,7 @@ func TestReconcileTriggerCreatesAJobOnMatch(t *testing.T) {
 			Outputs: map[string]string{"allow": "true"},
 		},
 	}
-	p := runtimeProvider(t, rt, runner.NewMemoryPod(runner.MemoryPodOptions{}), nil)
+	p := runtimeProvider(t, rt, memoryrunner.NewPod(memoryrunner.PodOptions{}), nil)
 
 	if _, _, err := p.process(context.Background(), workKey{kind: workTrigger, ref: ref}); err != nil {
 		t.Fatal(err)
@@ -573,7 +574,7 @@ func TestReconcileTriggerPicksTheNewestTerminalRunOfThePod(t *testing.T) {
 		ObjectMeta: metav1.ObjectMeta{Name: "other-pod-1", CreationTimestamp: later, Labels: map[string]string{v1alpha1.PolicyWorkflowPodLabel: "other-pod"}},
 		Status:     v1alpha1.PolicyWorkflowRunStatus{Phase: v1alpha1.PolicyWorkflowSucceeded, Outputs: map[string]string{"allow": "true"}},
 	}
-	p := runtimeProvider(t, rt, runner.NewMemoryPod(runner.MemoryPodOptions{}), nil)
+	p := runtimeProvider(t, rt, memoryrunner.NewPod(memoryrunner.PodOptions{}), nil)
 
 	if _, _, err := p.process(context.Background(), workKey{kind: workTrigger, ref: ref}); err != nil {
 		t.Fatal(err)
@@ -608,7 +609,7 @@ func TestReconcileTriggerSkipsACancelledRun(t *testing.T) {
 			Outputs: map[string]string{"allow": "true"},
 		},
 	}
-	p := runtimeProvider(t, rt, runner.NewMemoryPod(runner.MemoryPodOptions{}), nil)
+	p := runtimeProvider(t, rt, memoryrunner.NewPod(memoryrunner.PodOptions{}), nil)
 
 	if _, _, err := p.process(context.Background(), workKey{kind: workTrigger, ref: ref}); err != nil {
 		t.Fatal(err)

@@ -10,7 +10,7 @@ import (
 
 	"github.com/johnandersen777/deno-kcp/api/v1alpha1"
 	"github.com/johnandersen777/deno-kcp/internal/denopod"
-	"github.com/johnandersen777/deno-kcp/internal/runner"
+	"github.com/publicdomainrelay/kcp-libs/abc/runner"
 )
 
 func (p *Provider) reconcilePod(ctx context.Context, ref Ref, pod *v1alpha1.DenoPod) (time.Duration, bool, error) {

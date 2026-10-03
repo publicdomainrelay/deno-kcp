@@ -17,7 +17,7 @@ import (
 	"github.com/johnandersen777/deno-kcp/api/v1alpha1"
 	"github.com/johnandersen777/deno-kcp/internal/livegate"
 	"github.com/johnandersen777/deno-kcp/internal/provider"
-	"github.com/johnandersen777/deno-kcp/internal/runner"
+	"github.com/publicdomainrelay/kcp-libs/impl/execrunner"
 )
 
 func TestNativeAdmissionAndQueueDrainOnRealKCP(t *testing.T) {
@@ -156,7 +156,7 @@ subjects:
 	if err != nil {
 		t.Fatal(err)
 	}
-	podRunner, err := runner.NewExecPod(runner.ExecPodOptions{
+	podRunner, err := execrunner.NewPod(execrunner.PodOptions{
 		DenoBin: envOr("DENO_BIN", "deno"),
 		RunsDir: filepath.Join(root, "pods"),
 		Timeout: 2 * time.Minute,
@@ -165,7 +165,7 @@ subjects:
 	if err != nil {
 		t.Fatal(err)
 	}
-	engineRunner, err := runner.NewExecEngine(runner.ExecEngineOptions{
+	engineRunner, err := execrunner.NewEngine(execrunner.EngineOptions{
 		DenoBin:   envOr("DENO_BIN", "deno"),
 		ServerDir: serverDir,
 		RunsDir:   filepath.Join(root, "engines"),

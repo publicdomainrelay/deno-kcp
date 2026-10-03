@@ -10,7 +10,7 @@ import (
 
 	"github.com/johnandersen777/deno-kcp/api/v1alpha1"
 	"github.com/johnandersen777/deno-kcp/internal/denorun"
-	"github.com/johnandersen777/deno-kcp/internal/runner"
+	"github.com/publicdomainrelay/kcp-libs/abc/runner"
 )
 
 func (p *Provider) reconcileRun(ctx context.Context, ref Ref, run *v1alpha1.DenoRun) (time.Duration, bool, error) {
