@@ -31,6 +31,8 @@ import (
 	"github.com/johnandersen777/deno-kcp/api/v1alpha1"
 	"github.com/johnandersen777/deno-kcp/internal/livegate"
 	"github.com/johnandersen777/deno-kcp/internal/provider"
+	"github.com/publicdomainrelay/kcp-libs/common/kcp"
+	"github.com/publicdomainrelay/kcp-libs/common/ref"
 	"github.com/publicdomainrelay/kcp-libs/impl/execrunner"
 	"github.com/publicdomainrelay/kcp-libs/impl/policyclient"
 )
@@ -204,7 +206,7 @@ func tail(path string, lines int) string {
 }
 
 func baseHost(host string) string {
-	if i := strings.Index(host, provider.ApiPathPrefix); i >= 0 {
+	if i := strings.Index(host, ref.APIPathPrefix); i >= 0 {
 		return host[:i]
 	}
 	return strings.TrimSuffix(host, "/")
@@ -347,7 +349,7 @@ func startCluster(t *testing.T, options ...func(*liveCluster)) *liveCluster {
 		cancel:     cancel,
 		root:       root,
 		kubeconfig: kubeconfig,
-		tenant:     provider.RootWorkspace + ":" + tenantWorkspace,
+		tenant:     kcp.RootWorkspace + ":" + tenantWorkspace,
 		clients:    map[string]dynamic.Interface{},
 	}
 	for _, option := range options {
@@ -405,7 +407,7 @@ func (c *liveCluster) client(logicalCluster string) dynamic.Interface {
 		return d
 	}
 	cfg := rest.CopyConfig(c.rest)
-	cfg.Host = c.host + provider.ApiPathPrefix + logicalCluster
+	cfg.Host = c.host + ref.APIPathPrefix + logicalCluster
 	cfg.ContentType = "application/json"
 	cfg.AcceptContentTypes = "application/json"
 	d, err := dynamic.NewForConfig(cfg)
@@ -552,9 +554,9 @@ func (c *liveCluster) conditionTrue(logicalCluster string, gvr schema.GroupVersi
 
 func (c *liveCluster) bootstrap() {
 	c.t.Helper()
-	c.createDocs(provider.RootWorkspace, workspaceDoc(providerWorkspace, "universal"))
+	c.createDocs(kcp.RootWorkspace, workspaceDoc(providerWorkspace, "universal"))
 	c.expect("provider workspace Ready", 60*time.Second, func() bool {
-		return c.workspacePhase(provider.RootWorkspace, providerWorkspace) == "Ready"
+		return c.workspacePhase(kcp.RootWorkspace, providerWorkspace) == "Ready"
 	})
 
 	for _, name := range []string{
@@ -567,21 +569,21 @@ func (c *liveCluster) bootstrap() {
 		"policyworkflowpod-apiresourceschema.yaml",
 		"openbao-apiresourceschema.yaml",
 	} {
-		c.applyDeployFile(provider.RootWorkspace+":"+providerWorkspace, name)
+		c.applyDeployFile(kcp.RootWorkspace+":"+providerWorkspace, name)
 	}
-	c.applyDeployFile(provider.RootWorkspace+":"+providerWorkspace, "policyworkflowrun-apiexport.yaml")
-	c.applyDeployFile(provider.RootWorkspace+":"+providerWorkspace, "denoruntime-apiexport.yaml")
-	c.applyDeployFile(provider.RootWorkspace, "workspacetype-workflow.yaml")
-	c.applyDeployFile(provider.RootWorkspace, "workspacetype-denoruntime.yaml")
+	c.applyDeployFile(kcp.RootWorkspace+":"+providerWorkspace, "policyworkflowrun-apiexport.yaml")
+	c.applyDeployFile(kcp.RootWorkspace+":"+providerWorkspace, "denoruntime-apiexport.yaml")
+	c.applyDeployFile(kcp.RootWorkspace, "workspacetype-workflow.yaml")
+	c.applyDeployFile(kcp.RootWorkspace, "workspacetype-denoruntime.yaml")
 
 	for _, export := range []string{"policyworkflowruns", "denoruntime"} {
 		export := export
 		c.expect("apiexport "+export+" IdentityValid", 60*time.Second, func() bool {
-			return c.conditionTrue(provider.RootWorkspace+":"+providerWorkspace, apiExportGVR, "", export, "IdentityValid")
+			return c.conditionTrue(kcp.RootWorkspace+":"+providerWorkspace, apiExportGVR, "", export, "IdentityValid")
 		})
 	}
 
-	c.createDocs(provider.RootWorkspace, workspaceDoc(tenantWorkspace, "denoruntime"))
+	c.createDocs(kcp.RootWorkspace, workspaceDoc(tenantWorkspace, "denoruntime"))
 	c.expect("tenant API bound", 60*time.Second, func() bool {
 		_, err := c.client(c.tenant).Resource(policyEngineGVR).List(c.ctx, metav1.ListOptions{})
 		return err == nil

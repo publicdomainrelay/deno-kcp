@@ -31,7 +31,7 @@ sends `start` / `status` / `stop` commands; the host maps each command to
   `../policy-engine` already uses in `action_worker.ts` and
   `../deno-worker-sandbox` uses in `persistent-worker.ts`.
 - The Go side already speaks `os/exec` + pipes and already has a `DENO_BIN`
-  flag, so a host is a small change to `internal/runner/` and
+  flag, so a host is a small change to `impl/execrunner` in `kcp-libs` and
   `cmd/deno-kcp-provider/main.go`.
 
 Not recommended now: **(A) embedding Deno inside the Go process via a Rust
@@ -48,8 +48,7 @@ binary, not a different execution model. Do not `--bundle` the host.
 
 ## 2. Current state (grounding)
 
-`internal/runner/pod_exec.go` and `engine_exec.go` spawn one `deno` OS process
-per workload:
+`impl/execrunner` in `kcp-libs` spawns one `deno` OS process per workload:
 
 - `ExecPod.Start` writes `deno.json`, `deno.lock`, `main.ts`, `ca.pem`,
   `stdout.txt`, `stderr.txt` into `runs/<id>/`, then
@@ -59,8 +58,9 @@ per workload:
 - `ExecEngine.Start` runs
   `deno run --allow-all --unstable-worker-options main.ts api --bind 127.0.0.1:<port>`
   in the policy-engine directory. `Stop` is the same SIGKILL.
-- Permission flags come from `internal/denoperm/denoperm.go` `Args()`, which
-  maps the CR `DenoPermissions` struct to `--allow-*` / `--deny-*`.
+- Permission flags come from `common/denospec` `Args()` in `kcp-libs`, reached
+  through `DenoPermissions.DenoSpec()` in `api/v1alpha1/denospec.go`; it maps the
+  CR `DenoPermissions` struct to `--allow-*` / `--deny-*`.
 - Reconcile is driven by the event-driven watch driver (informers over the
   APIExport virtual workspace). `Observe` reads `done.json` (`exitCode`) and
   `result.json` (outputs). `Probe` runs an exec command in the run dir.
@@ -426,11 +426,11 @@ compromise or a Worker sandbox escape reaches both. Run two hosts - a
 permissive engine host and a scoped pod host - or place the pod host in its own
 OS sandbox. This is a small change to the provider (two host clients).
 
-### 5.6 Replacing `pod_exec.go` / `engine_exec.go`
+### 5.6 Replacing `execrunner`
 
-- Add `internal/runner/host.go`: a `WorkerHost` client (spawn once, NDJSON
-  reader/writer, request ids, `Start/Observe/Stop/Probe`).
-- Add `internal/runner/host_exec.go`: `ExecPod`-compatible `PodRunner` that
+- Add `impl/execrunner/host.go` in `kcp-libs`: a `WorkerHost` client (spawn
+  once, NDJSON reader/writer, request ids, `Start/Observe/Stop/Probe`).
+- Add `impl/execrunner/host_exec.go`: a `Pod`-compatible `runner.PodRunner` that
   writes the run files and sends `start`/`status`/`stop`; `Stop` maps to
   `terminate`. `Probe` can stay a local `exec.Command` in the run dir (it is
   cheap and not a Deno run), or move into the host later.

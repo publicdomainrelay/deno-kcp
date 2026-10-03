@@ -26,7 +26,7 @@ type workKey struct {
 	ref  Ref
 }
 
-// ponytail: a run mid-transition is re-checked faster than its own RequeueAfter, because a running process is only noticed at the next observation. This is the default for Options.MinTransitionPoll, and it applies only to a runner that cannot report completion itself: the worker host is woken by its own terminal event, so clamping it there was measured as pure added cost. Sweep on the drain harness at 1000 runs and parallelism 20, exec runtime: 250ms 17.147s, 50ms 7.633s, 25ms 7.115s, 10ms 7.100s with 22 percent more reconciles, so the knee is here.
+// ponytail: a run mid-transition is re-checked faster than its own RequeueAfter, because a running process is only visible by asking it: the observation is a sample, not a report. Sweep on the drain harness at 1000 runs and parallelism 20 through ExecPod: 250ms 17.147s, 50ms 7.633s, 25ms 7.115s, 10ms 7.100s with 22 percent more reconciles, so the knee is here. It applies only to a runner that cannot report completion itself; the worker host is woken by its own terminal event, so clamping it there was measured as pure added cost.
 const minTransitionPoll = 25 * time.Millisecond
 
 func runTerminalPhase(p v1alpha1.DenoRunPhase) bool {

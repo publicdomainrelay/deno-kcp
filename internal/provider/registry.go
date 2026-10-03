@@ -5,21 +5,15 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"strings"
 
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/rest"
 
-	"github.com/publicdomainrelay/kcp-libs/common/kcp"
 	"github.com/publicdomainrelay/kcp-libs/common/ref"
 	"github.com/publicdomainrelay/kcp-libs/impl/kcpstore"
 
 	"github.com/johnandersen777/deno-kcp/api/v1alpha1"
 )
-
-const RootWorkspace = kcp.RootWorkspace
-
-const ApiPathPrefix = ref.APIPathPrefix
 
 type Ref = ref.Ref
 
@@ -120,14 +114,6 @@ func (r *Registry) CreateWorkflowRun(ctx context.Context, logicalCluster string,
 
 func (r *Registry) ListWorkflowRuns(ctx context.Context, logicalCluster string) ([]v1alpha1.PolicyWorkflowRun, error) {
 	return r.workflowRuns.List(ctx, logicalCluster)
-}
-
-func baseHost(host string) string {
-	host = strings.TrimSuffix(host, "/")
-	if i := strings.Index(host, "/clusters/"); i >= 0 {
-		host = host[:i]
-	}
-	return host
 }
 
 func statusPatch(st v1alpha1.PolicyWorkflowRunStatus) ([]byte, error) {

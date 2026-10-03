@@ -42,7 +42,7 @@ admission. Admission validates and mutates; the controller accepts and schedules
 
 The loopback endpoint re-implements authn/authz outside the API server. The
 client already gets `KCP_SERVER`, `KCP_TOKEN` and `KCP_WORKSPACE` when it names a
-service account (`internal/runner/pod_exec.go`), and KCP does RBAC on bound
+service account (`impl/execrunner` in `kcp-libs`), and KCP does RBAC on bound
 resources in the consumer workspace. The endpoint also only works inside one
 provider process.
 

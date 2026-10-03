@@ -137,8 +137,8 @@ when their namespace's authority goes.
 
 | File | What it holds |
 |---|---|
-| `internal/openbao/openbao.go` | the HTTP client: namespaces, mounts, and the PKI calls. The only place that knows the wire format. |
-| `internal/baopki/baopki.go` | the hierarchy: ensure the root, ensure a namespace's intermediate and role, issue a leaf. Caches, so a pod start is one round trip after the first. |
+| `impl/openbaoclient` (kcp-libs) | the HTTP client: namespaces, mounts, and the PKI calls. The only place that knows the wire format. |
+| `impl/pkiprovisioner` + `abc/pki` (kcp-libs) | the hierarchy: ensure the root, ensure a namespace's intermediate and role, issue a leaf. Caches, so a pod start is one round trip after the first. |
 | `internal/provider/reconcile_openbao.go` | the kind's reconciler: provisioning, status, the ambiguity check, deletion. |
 | `internal/provider/service_dns.go` | `issueFor`, which is where a pod's environment is given its certificate. |
 | `deploy/openbao-apiresourceschema.yaml` | the schema kcp serves the kind from. |

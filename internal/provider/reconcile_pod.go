@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/publicdomainrelay/kcp-libs/common/denospec"
+	"github.com/publicdomainrelay/kcp-libs/common/ref"
 
 	"github.com/johnandersen777/deno-kcp/api/v1alpha1"
 	"github.com/johnandersen777/deno-kcp/internal/denopod"
@@ -157,12 +158,12 @@ func (p *Provider) podRequest(ctx context.Context, ref Ref, tmpl *v1alpha1.DenoP
 	return req, nil
 }
 
-func (p *Provider) serverFor(tmpl *v1alpha1.DenoPodTemplate, ref Ref) string {
+func (p *Provider) serverFor(tmpl *v1alpha1.DenoPodTemplate, target Ref) string {
 	if tmpl.APIServer != "" {
 		return tmpl.APIServer
 	}
 	if p.opts.Host == "" {
 		return ""
 	}
-	return baseHost(p.opts.Host) + "/clusters/" + ref.LogicalCluster
+	return ref.BaseHost(p.opts.Host) + "/clusters/" + target.LogicalCluster
 }

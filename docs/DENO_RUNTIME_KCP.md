@@ -72,7 +72,7 @@ DenoPod (long-running, Ready, restartPolicy, exec probes)
 ## 3. DenoPod (long-running)
 
 `api/v1alpha1/types_denopod.go`; pure reconcile in `internal/denopod`; runner in
-`internal/runner/pod_exec.go`.
+`impl/execrunner` in the `kcp-libs` sibling.
 
 ```yaml
 apiVersion: deno.computer/v1alpha1
@@ -178,7 +178,7 @@ stays as the most recent run for single-run jobs. With `completions` and
 ## 6. PolicyEngine (warm engine server)
 
 `api/v1alpha1/types_policyengine.go`; pure reconcile in `internal/policyengine`;
-runner in `internal/runner/engine_exec.go`.
+runner in `impl/execrunner` in the `kcp-libs` sibling.
 
 ```yaml
 apiVersion: deno.computer/v1alpha1
@@ -353,7 +353,7 @@ server accepts an inline workflow directly:
 
 So `PolicyWorkflowRun` uses the engine's `run` path
 (`create` + poll), not a `policyRecord`. The client is
-`internal/provider/policy_client.go`; `parseWorkflow` in
+`impl/policyclient` in the `kcp-libs` sibling; `parseWorkflow` in
 `policy-engine/.../src/workflow.ts` accepts an object or a YAML string, so the
 CR's structured `spec.workflow` is sent verbatim. Verdicts are read from
 `detail.outputs` plus each `policy/<name>/<refs>` cache entry's `result.json`
@@ -528,21 +528,14 @@ api/v1alpha1/types_policyengine.go|policyworkflowpod.go|policyworkflowrun.go|run
 api/v1alpha1/types_openbao.go                         the certificate authority kind
 api/v1alpha1/types_shared.go                          permissions, templates, probes
 internal/denopod|denorun|denojob/                     pure phase machines
-internal/openbao/                                     the OpenBao HTTP client
-internal/baopki/                                      the CA hierarchy: root, intermediates, leaves
 internal/policyengine|policyworkflowpod|policyworkflowrun|trigger/  pure phase machines
-internal/runner/pod*.go                               PodRunner (exec + memory)
-internal/runner/engine*.go                            EngineRunner (exec + memory)
-internal/runner/state.go                              shared state/process helpers
 internal/provider/provider.go|provider_runtime.go     Provider: options, ports and the shared runtime state
 internal/provider/reconcile_*.go                      the per-kind reconcilers (engine, workflowpod, trigger, job, run, pod)
-internal/provider/registry.go|registry_runtime.go     the Registry: base REST client, TokenRequest, finalizer patch
-internal/provider/registry_*.go                       KCP REST per kind + its status patch
+internal/provider/registry.go|registry_*.go           the Registry: kcpstore Resources per kind + their status patches
 internal/provider/watch.go|watch_cache.go             the event-driven watch driver + the informer cache reader
-internal/provider/driver.go                           work identity (kind + ref) and the terminal-phase helpers
+internal/provider/driver.go                           work identity (kind + ref)
 internal/provider/admission.go                        maxConcurrent run admission leases
 internal/provider/metrics.go                          counters + the /metrics endpoint
-internal/provider/policy_client.go                    engine HTTP client + verdict parsing
 internal/provider/live_*_test.go                      gated live tests (DENO_KCP_REQUIRE_LIVE)
 deploy/*-apiresourceschema.yaml                       one schema per kind (immutable)
 deploy/denoruntime-apiexport.yaml                     the runtime export
@@ -551,8 +544,14 @@ deploy/examples/*.yaml                                example CRs
 deploy/demo-deno-runtime.sh                           one-command demo
 ```
 
-Dependency direction stays `api <- internal <- cmd`. Pure packages never touch
-the network; the provider does all I/O; the runners are interfaces.
+Dependency direction stays `api <- internal <- cmd`, plus one arrow out:
+`internal` and `api` consume `github.com/publicdomainrelay/kcp-libs` (the
+sibling checkout, wired with a `replace`). The OpenBao client, the PKI
+provisioner, the process runners, the DNS assets, the policy engine client,
+`kcpstore`, the run index, the probe tracker and the shared `ref`/`kcp`/
+`denospec`/`denocomputer` vocabulary all come from there rather than being
+copied here. Pure packages never touch the network; the provider does all I/O;
+the runners are interfaces.
 
 ## 15. Gotchas
 

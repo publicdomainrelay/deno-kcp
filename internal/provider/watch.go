@@ -232,7 +232,7 @@ func (p *Provider) endpointSliceClient() (dynamic.Interface, error) {
 		return nil, fmt.Errorf("provider: RestConfig is required for the watch driver")
 	}
 	cfg := rest.CopyConfig(p.opts.RestConfig)
-	cfg.Host = strings.TrimSuffix(baseHost(p.opts.Host), "/") + "/clusters/" + p.opts.ProviderWorkspace
+	cfg.Host = strings.TrimSuffix(ref.BaseHost(p.opts.Host), "/") + "/clusters/" + p.opts.ProviderWorkspace
 	return dynamic.NewForConfig(cfg)
 }
 
@@ -462,7 +462,7 @@ func (p *Provider) runWatchWorker(ctx context.Context, queue workqueue.TypedRate
 			if after <= 0 {
 				after = p.opts.Interval
 			}
-			// ponytail: a run mid-transition is re-checked faster than its own RequeueAfter, because the running process is only visible by asking it: the observation is a sample, not a report. Measured on the drain harness at 1000 runs and parallelism 20 through ExecPod: 250ms 17.147s, 50ms 7.633s, 25ms 7.115s, 10ms 7.100s with 22 percent more reconciles, so the default sits at the knee.
+			// minTransitionPoll carries the measurement behind this clamp.
 			if !terminal && key.kind == workRun && after > p.opts.MinTransitionPoll {
 				after = p.opts.MinTransitionPoll
 			}

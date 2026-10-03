@@ -69,7 +69,7 @@ server takes an inline workflow directly, and `parseWorkflow`
 (`src/workflow.ts`) accepts an object or a YAML string, so the CR's structured
 `spec.workflow` is sent verbatim. `PolicyWorkflowRun` therefore uses the
 engine's `run` path (create + poll), implemented in
-`internal/provider/policy_client.go`.
+`impl/policyclient` in the `kcp-libs` sibling.
 
 ---
 
