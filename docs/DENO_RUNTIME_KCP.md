@@ -533,9 +533,9 @@ internal/provider/provider.go|provider_runtime.go     Provider: options, ports a
 internal/provider/reconcile_*.go                      the per-kind reconcilers (engine, workflowpod, trigger, job, run, pod)
 internal/provider/registry.go|registry_*.go           the Registry: kcpstore Resources per kind + their status patches
 internal/provider/watch.go|watch_cache.go             the event-driven watch driver + the informer cache reader
-internal/provider/driver.go                           work identity (kind + ref)
+internal/provider/driver.go                           work identity (kind + ref) + the terminal-phase helpers
 internal/provider/admission.go                        maxConcurrent run admission leases
-internal/provider/metrics.go                          counters + the /metrics endpoint
+internal/provider/metrics.go                          provider gauges (reconciles/conflicts/errors) + the library metrics server
 internal/provider/live_*_test.go                      gated live tests (DENO_KCP_REQUIRE_LIVE)
 deploy/*-apiresourceschema.yaml                       one schema per kind (immutable)
 deploy/denoruntime-apiexport.yaml                     the runtime export

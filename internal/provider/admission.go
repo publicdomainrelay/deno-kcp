@@ -79,6 +79,9 @@ func (s admissionSource) Parent(ctx context.Context, run queue.Run) (Ref, bool, 
 	return Ref{LogicalCluster: run.Ref.LogicalCluster, Namespace: run.Ref.Namespace, Name: name}, true, nil
 }
 
+// Runs lists only the labelled runs, so a run naming the pod by
+// spec.policyWorkflowPod alone is not here; the admitter appends it and admits
+// it rather than passing it through un-gated.
 func (s admissionSource) Runs(ctx context.Context, parent Ref) ([]queue.Run, error) {
 	runs, err := s.p.listWorkflowRunsForPod(ctx, parent.LogicalCluster, parent.Namespace, parent.Name)
 	if err != nil {
