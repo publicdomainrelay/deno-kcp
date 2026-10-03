@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"sync"
 	"testing"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -194,6 +195,31 @@ func TestTheProviderExpandsAKcpdnsProbeIntoRealPaths(t *testing.T) {
 	for _, want := range []string{"deno", "run", "--allow-env=", "--allow-net", "--preload", "/runs/.kcpdns/shim.ts", "/runs/.kcpdns/probe.ts", "plc.default.global.svc.kcp.local", "/health"} {
 		if !strings.Contains(joined, want) {
 			t.Fatalf("expanded probe %q is missing %q", joined, want)
+		}
+	}
+}
+
+// A provider assembled by hand has no resolver until first use; concurrent
+// workloads must not each build one.
+func TestServiceResolverBuildsOnceUnderConcurrency(t *testing.T) {
+	p := withPaths(&Provider{opts: Options{ServiceDomain: kcp.DefaultServiceDomain}}, "root:alice")
+	const callers = 32
+	start := make(chan struct{})
+	resolvers := make([]*servicenames.Resolver, callers)
+	var wg sync.WaitGroup
+	wg.Add(callers)
+	for i := 0; i < callers; i++ {
+		go func(i int) {
+			defer wg.Done()
+			<-start
+			resolvers[i] = p.serviceResolver()
+		}(i)
+	}
+	close(start)
+	wg.Wait()
+	for i := 1; i < callers; i++ {
+		if resolvers[i] != resolvers[0] {
+			t.Fatal("concurrent callers built more than one resolver")
 		}
 	}
 }

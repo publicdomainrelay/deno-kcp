@@ -166,6 +166,8 @@ type Provider struct {
 
 	services *servicenames.Resolver
 
+	servicesOnce sync.Once
+
 	jobWriteMu sync.Mutex
 
 	jobWriteAt map[string]time.Time

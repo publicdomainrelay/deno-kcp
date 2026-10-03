@@ -211,3 +211,93 @@ func TestQueuedRunDoesNotSubmitUntilAdmitted(t *testing.T) {
 		t.Fatalf("admitted run status = %+v, want Running with a runID", store.inst.Status)
 	}
 }
+
+// versionTolerantRuntime reads a run by name, the way the REST store does: a
+// resource version on the ref is not part of the lookup. The watch hands
+// Reconcile a ref that carries one, so a fake keyed on the whole struct would
+// miss the read the provider actually makes.
+type versionTolerantRuntime struct {
+	*fakeRuntime
+}
+
+func (r versionTolerantRuntime) Read(ctx context.Context, ref Ref) (*v1alpha1.PolicyWorkflowRun, error) {
+	return r.fakeRuntime.Read(ctx, ref.WithResourceVersion(""))
+}
+
+func admissionProvider(t *testing.T, runs []v1alpha1.PolicyWorkflowRun, pods []v1alpha1.PolicyWorkflowPod) (*Provider, *fakeRuntime, map[string]Ref) {
+	t.Helper()
+	rt := newFakeRuntime()
+	for i := range pods {
+		obj := pods[i]
+		rt.workflowPods[Ref{LogicalCluster: "root:demo", Name: obj.Name}] = &obj
+	}
+	refs := make(map[string]Ref, len(runs))
+	for i := range runs {
+		obj := runs[i]
+		key := Ref{LogicalCluster: "root:demo", Namespace: obj.Namespace, Name: obj.Name}
+		rt.pwi[key] = &obj
+		refs[obj.Name] = key
+	}
+	p := runtimeProvider(t, rt, nil, nil)
+	p.opts.Registry = versionTolerantRuntime{rt}
+	return p, rt, refs
+}
+
+func TestReplaceDoesNotPreemptTheRunItAdmits(t *testing.T) {
+	pod := admissionPod("pod", v1alpha1.ConcurrencyReplace, nil, "http://127.0.0.1:1")
+	running := admissionRun("a", "pod", v1alpha1.PolicyWorkflowRunning, admissionBase)
+	b := admissionRun("b", "pod", v1alpha1.PolicyWorkflowPending, admissionBase.Add(time.Second))
+	c := admissionRun("c", "pod", v1alpha1.PolicyWorkflowPending, admissionBase.Add(2*time.Second))
+	p, rt, refs := admissionProvider(t, []v1alpha1.PolicyWorkflowRun{running, b, c}, []v1alpha1.PolicyWorkflowPod{pod})
+
+	adm, err := p.admit(context.Background(), refs["c"].WithResourceVersion("7"), rt.pwi[refs["c"]])
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !adm.allowed {
+		t.Fatalf("the newest run must start: %+v", adm)
+	}
+	if len(adm.preempt) != 2 {
+		t.Fatalf("preempt = %v, want the running run and the older pending run", adm.preempt)
+	}
+	for _, pre := range adm.preempt {
+		if pre.Name == "c" {
+			t.Fatalf("the admitted run preempts itself: %v", adm.preempt)
+		}
+	}
+}
+
+func TestOneRunningRunCountsOnce(t *testing.T) {
+	pod := admissionPod("pod", v1alpha1.ConcurrencyForbid, nil, "http://127.0.0.1:1")
+	running := admissionRun("a", "pod", v1alpha1.PolicyWorkflowRunning, admissionBase)
+	p, rt, refs := admissionProvider(t, []v1alpha1.PolicyWorkflowRun{running}, []v1alpha1.PolicyWorkflowPod{pod})
+
+	adm, err := p.admitRun(context.Background(), refs["a"].WithResourceVersion("7"), rt.pwi[refs["a"]])
+	if err != nil {
+		t.Fatal(err)
+	}
+	if adm.Active != 1 {
+		t.Fatalf("active = %d, want the one running run counted once", adm.Active)
+	}
+}
+
+func TestALeaseIsRetiredOnceTheRunIsObservedRunning(t *testing.T) {
+	pod := admissionPod("pod", v1alpha1.ConcurrencyReplace, nil, "http://127.0.0.1:1")
+	running := admissionRun("a", "pod", v1alpha1.PolicyWorkflowRunning, admissionBase)
+	b := admissionRun("b", "pod", v1alpha1.PolicyWorkflowPending, admissionBase.Add(time.Second))
+	c := admissionRun("c", "pod", v1alpha1.PolicyWorkflowPending, admissionBase.Add(2*time.Second))
+	p, rt, refs := admissionProvider(t, []v1alpha1.PolicyWorkflowRun{running, b, c}, []v1alpha1.PolicyWorkflowPod{pod})
+
+	if _, err := p.admit(context.Background(), refs["c"].WithResourceVersion("7"), rt.pwi[refs["c"]]); err != nil {
+		t.Fatal(err)
+	}
+	rt.pwi[refs["c"]].Status.Phase = v1alpha1.PolicyWorkflowRunning
+	observed := map[Ref]string{}
+	for _, key := range []Ref{refs["a"], refs["b"], refs["c"]} {
+		observed[key] = string(rt.pwi[key].Status.Phase)
+	}
+	parent := Ref{LogicalCluster: "root:demo", Name: "pod"}
+	if got := p.admissions.Leases().Count(parent, observed, p.opts.Now(), workflowRunLifecycle()); got != 0 {
+		t.Fatalf("leases held = %d, want the lease retired once the run is observed running", got)
+	}
+}

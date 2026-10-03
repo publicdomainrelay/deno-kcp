@@ -33,11 +33,14 @@ func (p *Provider) buildServices() *servicenames.Resolver {
 }
 
 // serviceResolver is the FQDN layer. New builds it once; a Provider assembled by
-// hand in a test gets one on first use.
+// hand in a test gets one on first use, under a Once so concurrent callers agree
+// on the same resolver.
 func (p *Provider) serviceResolver() *servicenames.Resolver {
-	if p.services == nil {
-		p.services = p.buildServices()
-	}
+	p.servicesOnce.Do(func() {
+		if p.services == nil {
+			p.services = p.buildServices()
+		}
+	})
 	return p.services
 }
 

@@ -139,16 +139,23 @@ func runAdmissionFrom(adm queue.Admission, pod *v1alpha1.PolicyWorkflowPod, defa
 	return out
 }
 
+// admitRun gives the admitter an identity ref: the queue keys runs, leases and
+// preempt lists on the whole Ref, and a ref read off the watch carries a
+// resource version the source never puts on the runs it lists.
+func (p *Provider) admitRun(ctx context.Context, ref Ref, run *v1alpha1.PolicyWorkflowRun) (queue.Admission, error) {
+	return p.admissions.Admit(ctx, queue.Run{
+		Ref:     ref.WithResourceVersion(""),
+		Phase:   string(run.Status.Phase),
+		Created: run.CreationTimestamp.Time,
+	})
+}
+
 func (p *Provider) admit(ctx context.Context, ref Ref, run *v1alpha1.PolicyWorkflowRun) (runAdmission, error) {
 	podName := runPodName(run)
 	if podName == "" {
 		return runAdmission{}, nil
 	}
-	adm, err := p.admissions.Admit(ctx, queue.Run{
-		Ref:     ref,
-		Phase:   string(run.Status.Phase),
-		Created: run.CreationTimestamp.Time,
-	})
+	adm, err := p.admitRun(ctx, ref, run)
 	if err != nil {
 		return runAdmission{}, err
 	}
