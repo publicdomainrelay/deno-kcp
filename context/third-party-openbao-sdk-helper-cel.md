@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so that CEL (Common Expression Language) expressions inside OpenBao policies and secret engines can be built, validated and evaluated against a consistent environment. It is the SDK-level surface that engine authors call: the helpers add reusable functions and identity variables to a CEL environment, and the program type turns stored expression text plus caller-supplied evaluation data into a single evaluated value. Keeping it at the SDK layer means every consumer of the CEL feature shares the same extension set, the same identity variable names, and the same compile-then-evaluate pipeline instead of each engine re-implementing it.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

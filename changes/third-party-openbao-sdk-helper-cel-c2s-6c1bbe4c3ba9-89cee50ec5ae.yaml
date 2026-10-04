@@ -10,5 +10,24 @@ spec:
   systemContext: third-party-openbao-sdk-helper-cel
   toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
 status:
-  message: the agent is summarizing third-party-openbao-sdk-helper-cel
+  agentLog: 'This context covers the OpenBao SDK CEL helper package at third_party/openbao/sdk/helper/cel.
+    It has two source files: helpers.go, which builds CEL environment options and
+    identity data, and program.go, which wraps a compiled CEL program with variables,
+    evaluation and validation. helpers.go exposes CheckValidEmailFunction, which registers
+    a check_valid_email(string) bool overload; CelGoExtFunctions, which returns the
+    CEL extension libraries (strings, lists, optional types, regex, math, sets, encoders);
+    IdentityDeclarations, which declares the client_token, entity_id, entity_groups
+    and entity_info variables for secret engines; AddIdentity, which fills a data
+    map from a logical request and resolves entity groups and entity info through
+    the system view; and EncodeJSONFunction/DecodeJSONFunction, which register encode_json
+    and decode_json over strings. program.go defines the Program, Variable and EvalConfig
+    types with ToOptions and ToEnv for building the CEL environment, Evaluate and
+    EvaluateVars for running the program, Validate and ValidateVars for checking it,
+    plus JSONProgramFromRequest and FrameworkFieldSchema for binding the program to
+    framework field data. helpers_test.go exercises the helper functions.'
+  message: wrote 12 requirement(s) and 19 interface(s) for third-party-openbao-sdk-helper-cel
+  phase: Succeeded
+superseded:
+- message: the agent is summarizing third-party-openbao-sdk-helper-cel
+  name: third-party-openbao-sdk-helper-cel-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2
   phase: Running

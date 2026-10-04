@@ -3016,6 +3016,22 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.populate-desired-metadata` (MUST): "Handler.PopulateDesiredMetadata returns an error when auth is nil, otherwise it initializes auth.Metadata, auth.Alias, and auth.Alias.Metadata when nil, chooses Fields.Default or the explicit authMetadata as the fields to include, and copies each available field with a non-empty value into both auth.Metadata and auth.Alias.Metadata only when that field is in the include list."
 - added `r.tests-cover-helper` (SHOULD): "Unit tests cover field schema generation, metadata read, parse, populate, and JSON round-trip behavior, and acceptance tests exercise the helper through sample config and login framework paths that decode stored config and populate login metadata."
 
+### third-party-openbao-sdk-helper-cel
+
+- intent: "" -> "This context exists so that CEL (Common Expression Language) expressions inside OpenBao policies and secret engines can be built, validated and evaluated against a consistent environment. It is the SDK-level surface that engine authors call: the helpers add reusable functions and identity variables to a CEL environment, and the program type turns stored expression text plus caller-supplied evaluation data into a single evaluated value. Keeping it at the SDK layer means every consumer of the CEL feature shares the same extension set, the same identity variable names, and the same compile-then-evaluate pipeline instead of each engine re-implementing it."
+- added `r.add-identity` (MUST): "AddIdentity must write client_token and entity_id from the logical request into the data map, and when entity_id is non-empty must resolve groups through view.GroupsForEntity and entity info through view.EntityInfo into entity_groups and entity_info, returning an error wrapping the cause as "unable to resolve groups" or "unable to resolve entity info" on failure; when entity_id is empty it must set entity_groups and entity_info to nil and return nil."
+- added `r.cel-extension-functions` (MUST): "CelGoExtFunctions must return a slice of cel.EnvOption that enables the CEL extension libraries: strings, lists, optional types, regex, math, sets and encoders, appended in that order."
+- added `r.check-valid-email` (MUST): "CheckValidEmailFunction must register a CEL function named check_valid_email with an overload check_valid_email_string that takes one string argument and returns bool, bound to the internal checkValidEmail implementation."
+- added `r.eval-config-environment` (MUST): "EvalConfig.ToOptions must assemble the environment options for the program, including the CEL extension functions, the identity declarations and the check_valid_email function; EvalConfig.ToEnv must turn the config into a compiled *cel.Env, returning an error when the environment cannot be built."
+- added `r.framework-field-schema` (MUST): "FrameworkFieldSchema must return the framework.FieldSchema that describes how a CEL program is declared as a field, so engines can accept a program through framework field data."
+- added `r.helper-test-coverage` (SHOULD): "TestCELHelpers in helpers_test.go should exercise the environment options produced by CheckValidEmailFunction and CelGoExtFunctions, so changes to the extension set or the email function are caught by the package tests."
+- added `r.identity-declarations` (MUST): "IdentityDeclarations must declare four CEL variables for the identity subsystem: client_token as dyn, entity_id as string, entity_groups as a list of dyn, and entity_info as a map from string to dyn."
+- added `r.json-functions` (MUST): "EncodeJSONFunction must register a CEL function named encode_json and DecodeJSONFunction must register one named decode_json, each with a single-string overload that returns dyn through its unary binding."
+- added `r.json-program-from-request` (MUST): "JSONProgramFromRequest must build a *Program from framework.FieldData, returning an error when the field data cannot be read into a program."
+- added `r.program-evaluate` (MUST): "Program.Evaluate must evaluate the program under the given context and EvalConfig with the supplied evaluation data and return the resulting ref.Val, first evaluating the program's variables so that computed variables are added to the evaluation data."
+- added `r.program-validate` (MUST): "Program.Validate must check the program against the environment produced from the given EvalConfig and report an error when the expressions do not compile; Program.ValidateVars and Variable.Validate must perform the same check for the program's variables, returning the environment that carries them."
+- added `r.variable-evaluate` (MUST): "Variable.Evaluate must evaluate one variable's expression against the environment and evaluation data and return the environment carrying the variable's result, so that later expressions can reference it."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -3229,5 +3245,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-sdk-database-helper-dbutil-c2s-6c1bbe4c3ba9-3749680f0640 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-framework-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-authmetadata-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-sdk-helper-cel-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-helper-cel-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-sdk-helper-cel-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-sdk-helper-certutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
