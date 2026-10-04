@@ -4283,7 +4283,178 @@ system_contexts:
   - third_party/openbao/api/auth/ldap/ldap.go
   - third_party/openbao/api/auth/ldap/ldap_test.go
   id: sc.third-party-openbao-api-auth-ldap
+  intent: 'This context documents the vendored OpenBao LDAP authentication helper
+    so its contract stays pinned to the code that ships in-tree. It exists because
+    the file is third-party code copied into the repository rather than imported:
+    the surrounding project depends on the exact behavior of NewLDAPAuth, LDAPAuth.Login,
+    Password, LoginOption, and WithMountPath, and any local patch or upgrade must
+    preserve the validation errors, the password-source precedence, the default mount
+    path, and the write path that the rest of the tree relies on. The spec records
+    those obligations, plus the compile-time api.AuthMethod assertion and the test
+    file, so drift is visible.'
+  interfaces:
+  - file: third_party/openbao/api/auth/ldap/ldap.go
+    kind: struct
+    name: LDAPAuth
+    signature: type LDAPAuth struct { mountPath string; username string; password
+      string; passwordFile string; passwordEnv string }
+  - file: third_party/openbao/api/auth/ldap/ldap.go
+    kind: method
+    name: LDAPAuth.Login
+    signature: func (a *LDAPAuth) Login(ctx context.Context, client *api.Client) (*api.Secret,
+      error)
+  - file: third_party/openbao/api/auth/ldap/ldap.go
+    kind: type_alias
+    name: LoginOption
+    signature: type LoginOption func(a *LDAPAuth) error
+  - file: third_party/openbao/api/auth/ldap/ldap.go
+    kind: function
+    name: NewLDAPAuth
+    signature: func NewLDAPAuth(username string, password *Password, opts ...LoginOption)
+      (*LDAPAuth, error)
+  - file: third_party/openbao/api/auth/ldap/ldap.go
+    kind: struct
+    name: Password
+    signature: type Password struct { FromFile string; FromEnv string; FromString
+      string }
+  - file: third_party/openbao/api/auth/ldap/ldap.go
+    kind: function
+    name: WithMountPath
+    signature: func WithMountPath(mountPath string) LoginOption
   name: third-party-openbao-api-auth-ldap
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/api/auth/ldap/ldap.go
+    - function:6b97c5af51e2fcc7c021f01f76b860fa
+    - struct:07bf6c0373565c007ccb05ed56ccb1c3
+    id: r.default-mount-path
+    level: MUST
+    text: NewLDAPAuth must initialize the LDAPAuth mount path to the defaultMountPath
+      constant, whose value is "ldap".
+  - codeRefs:
+    - file:third_party/openbao/api/auth/ldap/ldap.go
+    - method:7883bf85aa412b42f30a2fd6ccb9e0d3
+    - struct:07bf6c0373565c007ccb05ed56ccb1c3
+    id: r.implements-api-auth-method
+    level: MUST
+    text: LDAPAuth must satisfy the api.AuthMethod interface, asserted at compile
+      time by a package-level assignment from (*LDAPAuth)(nil).
+  - codeRefs:
+    - file:third_party/openbao/api/auth/ldap/ldap.go
+    - method:7883bf85aa412b42f30a2fd6ccb9e0d3
+    id: r.login-nil-context-default
+    level: MUST
+    text: LDAPAuth.Login must substitute context.Background() when ctx is nil, so
+      the login call always carries a non-nil context.
+  - codeRefs:
+    - file:third_party/openbao/api/auth/ldap/ldap.go
+    - function:6b97c5af51e2fcc7c021f01f76b860fa
+    - type_alias:17d8d2b686c300dfc2d55d97cb878aec
+    id: r.login-options-applied-in-order
+    level: MUST
+    text: 'NewLDAPAuth must apply each LoginOption to the constructed LDAPAuth in
+      the order given, and must wrap any option error as "error with login option:
+      %w" and return no LDAPAuth.'
+  - codeRefs:
+    - file:third_party/openbao/api/auth/ldap/ldap.go
+    - method:7883bf85aa412b42f30a2fd6ccb9e0d3
+    id: r.login-password-env-empty-rejected
+    level: MUST
+    text: LDAPAuth.Login must read the env-var branch with os.Getenv and must fail
+      with "password was specified with an environment variable with an empty value"
+      when that variable is unset or empty.
+  - codeRefs:
+    - file:third_party/openbao/api/auth/ldap/ldap.go
+    - method:7883bf85aa412b42f30a2fd6ccb9e0d3
+    id: r.login-password-file-wins
+    level: MUST
+    text: 'LDAPAuth.Login must read the password from the file when passwordFile is
+      set, taking precedence over passwordEnv and the plaintext password, and must
+      wrap a read failure as "error reading password: %w".'
+  - codeRefs:
+    - file:third_party/openbao/api/auth/ldap/ldap.go
+    - method:7883bf85aa412b42f30a2fd6ccb9e0d3
+    id: r.login-returns-secret
+    level: MUST
+    text: LDAPAuth.Login must return the *api.Secret returned by the write, unmodified,
+      with a nil error on success.
+  - codeRefs:
+    - file:third_party/openbao/api/auth/ldap/ldap.go
+    - method:7883bf85aa412b42f30a2fd6ccb9e0d3
+    id: r.login-write-path-and-error
+    level: MUST
+    text: 'LDAPAuth.Login must submit a map containing the key "password" using client.Logical().WriteWithContext
+      to the path formatted as "auth/%s/login/%s" from the mount path and username,
+      and must wrap a write failure as "unable to log in with LDAP auth: %w".'
+  - codeRefs:
+    - file:third_party/openbao/api/auth/ldap/ldap.go
+    - function:cfc4c249d2f4e73eba4e8982bcbf4692
+    - type_alias:17d8d2b686c300dfc2d55d97cb878aec
+    id: r.option-error-returned
+    level: SHOULD
+    text: LoginOption functions should return a nil error on success so that they
+      do not abort construction of the LDAPAuth.
+  - codeRefs:
+    - file:third_party/openbao/api/auth/ldap/ldap.go
+    id: r.password-file-read-limit-and-trim
+    level: MUST
+    text: The password file read must be capped at 1000 bytes via io.LimitReader and
+      must strip a single trailing newline from the read bytes before use.
+  - codeRefs:
+    - file:third_party/openbao/api/auth/ldap/ldap.go
+    - function:6b97c5af51e2fcc7c021f01f76b860fa
+    - struct:07bf6c0373565c007ccb05ed56ccb1c3
+    id: r.password-source-copied
+    level: MUST
+    text: NewLDAPAuth must copy only the non-empty password source fields from Password
+      onto the LDAPAuth struct, mapping FromFile to passwordFile, FromEnv to passwordEnv
+      and FromString to password.
+  - codeRefs:
+    - file:third_party/openbao/api/auth/ldap/ldap.go
+    - function:6b97c5af51e2fcc7c021f01f76b860fa
+    - struct:d967b30d769c5a955fb2372261c1950e
+    id: r.password-source-exactly-one
+    level: MUST
+    text: Password.validate must reject a Password where none of FromFile, FromEnv
+      and FromString is set, and must reject any Password where more than one of them
+      is set; the zero-source error text is "password for LDAP auth must be provided
+      with a source file, environment variable, or plaintext string" and the multi-source
+      error text is "only one source for the password should be specified".
+  - codeRefs:
+    - file:third_party/openbao/api/auth/ldap/ldap.go
+    - function:6b97c5af51e2fcc7c021f01f76b860fa
+    id: r.reject-empty-username
+    level: MUST
+    text: NewLDAPAuth must return an error with the message "no user name provided
+      for login" when username is empty, and must not return an LDAPAuth.
+  - codeRefs:
+    - file:third_party/openbao/api/auth/ldap/ldap.go
+    - function:6b97c5af51e2fcc7c021f01f76b860fa
+    id: r.reject-nil-password
+    level: MUST
+    text: NewLDAPAuth must return an error with the message "no password provided
+      for login" when password is nil, and must not return an LDAPAuth.
+  - codeRefs:
+    - file:third_party/openbao/api/auth/ldap/ldap_test.go
+    id: r.test-coverage
+    level: SHOULD
+    text: ldap_test.go should exercise the LDAPAuth constructor and Login behavior
+      so the described contract stays verifiable.
+  - codeRefs:
+    - file:third_party/openbao/api/auth/ldap/ldap.go
+    - function:6b97c5af51e2fcc7c021f01f76b860fa
+    id: r.validate-error-wrapped
+    level: MUST
+    text: 'NewLDAPAuth must wrap any failure from Password.validate in an error prefixed
+      "invalid password: ".'
+  - codeRefs:
+    - file:third_party/openbao/api/auth/ldap/ldap.go
+    - function:cfc4c249d2f4e73eba4e8982bcbf4692
+    - type_alias:17d8d2b686c300dfc2d55d97cb878aec
+    id: r.with-mount-path-overrides
+    level: MUST
+    text: WithMountPath must return a LoginOption that sets the LDAPAuth mount path
+      to the supplied value and returns a nil error.
   upstream: self
 - code:
   - third_party/openbao/api/auth/userpass/userpass.go
