@@ -13,14 +13,14 @@ spec:
   intent: 'The context exists so that calling code can tag an error as either the
     caller''s fault or the server''s fault without depending on the full OpenBao SDK.
     Certificate creation in certutil needs exactly this split: invalid Not Before
-    / Not After parameters must be reported to the requester as a UserError, while
-    a failure to compute a subject key ID must be reported as an InternalError. Keeping
-    the vendored types in third_party preserves a drop-in match with the upstream
-    OpenBao SDK helper so that adjacent vendored packages, chiefly certutil, compile
-    and type-assert against the same package path and names. The spec pins only what
-    this file must keep true for that compatibility to hold: two exported structs,
-    one exported string field each, and one Error method each that returns the field
-    unchanged.'
+    / Not After parameters must reach the requester as a UserError, while a failure
+    to compute a subject key ID must reach the caller as an InternalError. Keeping
+    the vendored type in third_party preserves a drop-in match with the upstream OpenBao
+    SDK helper, so that adjacent vendored packages, chiefly certutil, compile and
+    type-assert against the same import path and the same type names. The spec pins
+    only what this file must keep true for that compatibility to hold: two exported
+    structs, one exported string field each, and one Error method each that returns
+    the field unchanged.'
   interfaces:
   - file: third_party/openbao/sdk/helper/errutil/error.go
     kind: struct
@@ -46,15 +46,15 @@ spec:
     id: r.error-methods-use-value-receiver
     level: SHOULD
     text: Both Error methods should stay on value receivers, not pointer receivers,
-      so that a UserError or InternalError value is itself an error and callers can
-      return the struct literal directly without taking its address.
+      so that a UserError or InternalError value is itself an error and callers return
+      the struct literal directly without taking its address.
   - codeRefs:
     - file:third_party/openbao/sdk/helper/errutil/error.go
     - struct:0e0f46591e5e44fa46b17ca1d4f2b33a
     id: r.internal-error-carries-message
     level: MUST
     text: 'InternalError must be an exported struct in package errutil with a single
-      exported field Err of type string, so that callers can construct it with a composite
+      exported field Err of type string, so that callers construct it with a composite
       literal such as errutil.InternalError{Err: msg} and read the message back from
       the field.'
   - codeRefs:
@@ -64,8 +64,8 @@ spec:
     level: MUST
     text: InternalError must satisfy the standard error interface by defining Error()
       string on a value receiver that returns the Err field unchanged, with no prefix,
-      wrapping, or reformatting, so callers can return it directly as an error whose
-      text is exactly the string they set.
+      wrapping, or reformatting, so callers return it directly as an error whose text
+      is exactly the string they set.
   - codeRefs:
     - file:third_party/openbao/sdk/helper/errutil/error.go
     id: r.no-message-interpretation
@@ -82,18 +82,17 @@ spec:
     text: The package must keep UserError and InternalError as two separate types
       rather than one, because calling code branches on the concrete type to decide
       whether the fault belongs to the requester or to the server; certutil returns
-      errutil.UserError when the certificate Not Before time is later than or equal
-      to Not After, and returns errutil.InternalError when the subject key ID cannot
-      be derived.
+      errutil.InternalError when the subject key ID cannot be derived and returns
+      errutil.UserError when the computed Not Before is later than, or equal to, Not
+      After.
   - codeRefs:
     - file:third_party/openbao/sdk/helper/errutil/error.go
     - struct:58cac1ec3c195633337fd829177a9cf5
     id: r.user-error-carries-message
     level: MUST
     text: 'UserError must be an exported struct in package errutil with a single exported
-      field Err of type string, so that callers can construct it with a composite
-      literal such as errutil.UserError{Err: msg} and read the message back from the
-      field.'
+      field Err of type string, so that callers construct it with a composite literal
+      such as errutil.UserError{Err: msg} and read the message back from the field.'
   - codeRefs:
     - method:c005f97d9637c6ba6d1f4e44eab1ae4c
     - struct:58cac1ec3c195633337fd829177a9cf5
@@ -101,6 +100,6 @@ spec:
     level: MUST
     text: UserError must satisfy the standard error interface by defining Error()
       string on a value receiver that returns the Err field unchanged, with no prefix,
-      wrapping, or reformatting, so callers can return it directly as an error whose
-      text is exactly the string they set.
+      wrapping, or reformatting, so callers return it directly as an error whose text
+      is exactly the string they set.
   upstream: self
