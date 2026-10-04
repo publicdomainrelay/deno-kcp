@@ -5379,6 +5379,22 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.usage-constraint` (MUST): "The component must only be used as a child of a `Confirm` component, which is what supplies `renderedTrigger` and the `resetTrigger` action that drive visibility and dismissal."
 - added `r.visibility-binding` (MUST): "The `showConfirm` computed property must depend on both `id` and `renderedTrigger` and must evaluate to true only when `renderedTrigger` is strictly equal to `id`, so a single parent `Confirm` can bind one message to one trigger."
 
+### third-party-openbao-ui-lib-core-addon-components-list-item
+
+- intent: "" -> "These files exist as reusable building blocks for rendering a list item's content region and its popup menu inside the OpenBao UI. content.js is the tagless wrapper that keeps list item markup free of an extra element, and popup-menu.js is the tagless menu region that binds the list item it belongs to (item) and whether a menu should be shown (hasMenu), with its markup supplied by an external template. The context exists so the tagless-component contract and the popup menu's public properties and layout binding are stated explicitly for anyone consuming or modifying the list-item component family."
+- added `r.both-default-export` (MUST): "Each module must expose its component as the single anonymous default export of the file, so Ember resolves content and popup-menu by module path with no named export."
+- added `r.content-is-tagless` (MUST): "The content component must be an @ember/component Component created with Component.extend and must set tagName to the empty string, so it renders no wrapping element of its own and leaves all markup to its template."
+- added `r.popup-menu-binds-layout` (MUST): "The popup-menu component must be an @ember/component Component created with Component.extend and must assign its layout to the template imported from ../../templates/components/list-item/popup-menu, so its markup comes from that external template file rather than being inline."
+- added `r.popup-menu-declares-properties` (MUST): "The popup-menu component must declare two public properties, item and hasMenu, each defaulting to null; item carries the list item the menu belongs to and hasMenu carries whether a menu should be shown, and both are expected to be supplied by the caller."
+- added `r.popup-menu-is-tagless` (MUST): "The popup-menu component must set tagName to the empty string, so it does not introduce a wrapping DOM element around the layout it renders."
+
+### third-party-openbao-ui-lib-core-addon-components-page
+
+- intent: "" -> "The context exists to pin down the contract of the shared Breadcrumbs page component that other OpenBao UI routes build on. It records that the component is a thin Ember class whose only behavior is the constructor-time validation of its `breadcrumbs` argument, so that any page reusing or replacing it knows the required shape: an array of entries, each with a `label` key, with routing metadata passed through untouched."
+- added `r.arguments-forwarded-to-super` (MUST): "The constructor must forward its arguments to the parent Component constructor via super(...arguments) before running breadcrumb validation, and must not declare or reorder the component arguments itself."
+- added `r.breadcrumbs-arg-required` (MUST): "Breadcrumbs must read its entries from the `breadcrumbs` component argument and must iterate every entry during construction, treating the argument as non-null and enumerable."
+- added `r.label-key-asserted` (MUST): "For each breadcrumb entry, the constructor must assert that its keys include `label`; an entry without a `label` key must fail the assertion with the message 'breadcrumb has a label key'."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5840,4 +5856,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-core-addon-components-confirm-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-core-addon-components-list-item-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-core-addon-components-page-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-lib-core-addon-decorators-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-core-addon-helpers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-lib-core-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
