@@ -7,5 +7,99 @@ metadata:
   name: third-party-openbao-internal-vault-external-tests-workflows
   namespace: default
 spec:
+  intent: 'The context exists to prove end-to-end that the workflows engine behaves
+    correctly across the HTTP surface: storage and listing of workflow definitions,
+    execution of multi-flow workflows that template paths and thread responses between
+    flows, rejection of recursive workflows, authentication with MFA enforcement,
+    permission gating of unauthenticated execution, and the internal-only nature of
+    the alias-lookahead operation. It anchors those invariants to runnable acceptance
+    tests so a change in the workflows subsystem that breaks any of these observable
+    behaviours fails the suite.'
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/workflows/workflow_test.go
+    id: r.alias-lookahead-internal-only
+    level: MUST
+    text: A workflow whose authentication flow uses the alias-lookahead operation
+      must exist and be listable, but executing it through sys/workflows/execute must
+      fail with an error containing "cannot handle internal-only request operation"
+      and return no response.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/workflows/workflow_test.go
+    id: r.cluster-setup
+    level: MUST
+    text: Each top-level test builds a single-core in-process cluster with the HTTP
+      handler and DisableCache set, registers the userpass credential backend and
+      the kv-v2 and totp logical backends, starts the cluster, waits for core 0 to
+      become active, and defers cluster cleanup so the test leaves no running core
+      behind.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/workflows/workflow_test.go
+    id: r.login-mfa
+    level: MUST
+    text: Executing the login-MFA workflow provisions userpass, an admin policy, an
+      identity entity and alias, a TOTP MFA method with a login enforcement, imports
+      the generated TOTP URL into the totp mount, reads a code, and performs the login
+      with the X-Vault-MFA header; the returned token must successfully read auth/token/lookup-self.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/workflows/workflow_test.go
+    id: r.namespace-isolation
+    level: MUST
+    text: The acceptance test creates a separate child namespace for each subtest
+      (acceptance, recursion, mfa, unauthenticated, alias-lookahead) and runs that
+      subtest against a client scoped with WithNamespace, so the subtests do not share
+      workflow or auth state.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/workflows/workflow_test.go
+    id: r.namespace-provisioning
+    level: MUST
+    text: Executing the create-namespace workflow with namespace, username and password
+      inputs creates the namespace, mounts userpass auth, writes an ns-admin ACL policy,
+      creates the named user, mounts kv-v2 at secret, and returns output containing
+      the input namespace and an auth client_token.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/workflows/workflow_test.go
+    id: r.provisioned-token-works
+    level: MUST
+    text: The token returned by the create-namespace workflow must be usable in the
+      newly created child namespace to write and read a kv-v2 secret at secret/data/test.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/workflows/workflow_test.go
+    id: r.recursion-limit
+    level: MUST
+    text: A workflow whose single flow calls sys/workflows/execute of itself must
+      fail execution with an error containing "too much workflow recursion" instead
+      of looping.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/workflows/workflow_test.go
+    id: r.template-evaluation
+    level: MUST
+    text: Workflow definitions must support template-evaluated request paths built
+      from input fields and response field selectors, eval of data values from inputs,
+      and output data drawn from a named flow's named response field selector, including
+      sourcing the authentication flow's auth.client_token.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/workflows/workflow_test.go
+    id: r.unauthenticated-disabled
+    level: MUST
+    text: With AllowUnauthenticatedWorkflows false, a tokenless client must receive
+      a "permission denied" error from sys/workflows/unauthed-execute even for a workflow
+      stored with allow_unauthenticated true.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/workflows/workflow_test.go
+    id: r.unauthenticated-execute
+    level: MUST
+    text: With AllowUnauthenticatedWorkflows true, a tokenless client may execute
+      a workflow stored with allow_unauthenticated true via sys/workflows/unauthed-execute,
+      but the same tokenless client must receive a "permission denied" error for a
+      workflow stored with allow_unauthenticated false.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/workflows/workflow_test.go
+    id: r.workflow-lifecycle
+    level: MUST
+    text: Writing a workflow definition to sys/workflows/manage/<name> makes it appear
+      in the List of sys/workflows/manage and makes it executable at sys/workflows/execute/<name>;
+      deleting it removes it so the List returns nil, and a fresh namespace starts
+      with no workflows.
   upstream: self
