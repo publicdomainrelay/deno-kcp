@@ -4312,6 +4312,21 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.list-first-partial-match` (MUST): "The list controller MUST expose a firstPartialMatch computed property that returns null when the filter already matches a key or no id starts with the escaped filter, and otherwise returns the single matching record, or returns an object carrying the model's shared prefix id when several entries share that prefix, so the UI can offer the common prefix as the next completion."
 - added `r.list-is-loading-default` (MAY): "The list controller MAY carry an isLoading flag defaulting to false, used by the list template to show a loading state while the route reloads."
 
+### third-party-openbao-ui-app-controllers-vault-cluster-access-mfa
+
+- intent: "" -> "The context exists to record the interface and behavior of MfaMethodsListController, the Ember controller backing the MFA methods list route in the OpenBao UI. It is needed so that the pagination contract of the MFA methods list screen is described in the specification: the controller exposes queryParams so Ember serializes the page into the URL, and it seeds page to 1 so a fresh visit to the list starts on the first page rather than an undefined or empty page value."
+- added `r.controller-extends-ember-controller` (MUST): "MfaMethodsListController must extend Ember's Controller base class so it can act as the route's controller and participate in Ember's controller lifecycle and query-parameter binding."
+- added `r.default-export` (SHOULD): "The module should export MfaMethodsListController as its default export so Ember's resolver can look the controller up by route name."
+- added `r.page-default-one` (MUST): "The controller must initialize its page property to the numeric value 1, so the MFA methods list starts on the first page when no page query parameter is present in the URL."
+- added `r.query-params-contains-page` (MUST): "The controller must declare queryParams as an array containing exactly the string 'page', so Ember binds the page property to the 'page' URL query parameter for the MFA methods list route."
+
+### third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-enforcements
+
+- intent: "" -> "This context exists to pin down the page-state contract of the MFA enforcement list route in the OpenBao UI: which query parameter the route accepts, how it is named, and what the default page value is when the URL carries no page query parameter. It is deliberately narrow, covering only the controller and not the matching route, template, adapter, or model. Recording it makes the URL/pagination contract of that page explicit and stable, so changes to page sizing, parameter naming, or the default page number can be checked against it."
+- added `r.extends-ember-controller` (MUST): "MfaEnforcementListController must be the default export of the file and must extend Ember's Controller class, so the route resolves it as the controller for the MFA enforcement list page."
+- added `r.page-defaults-to-one` (MUST): "The page property must be initialized to the number 1, so a request with no page query parameter shows the first page of the MFA enforcement list rather than an empty or undefined page."
+- added `r.page-is-query-param` (MUST): "The controller must declare queryParams as an array containing the single element 'page', so the current page is bound to a 'page' query parameter in the browser URL and is preserved across reload and back navigation."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4651,7 +4666,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-controllers-vault-cluster-access-identity-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-leases-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-method-item-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-enforcements-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |

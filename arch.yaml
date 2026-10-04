@@ -61049,18 +61049,98 @@ system_contexts:
 - code:
   - third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods.js
   codeRefIndex:
+  - class:440062a628c6eae4794a86ba8179be4e MfaMethodsListController@third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods.js:8
   - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods.js
     methods.js@third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods.js
   id: sc.third-party-openbao-ui-app-controllers-vault-cluster-access-mfa
+  intent: 'The context exists to record the interface and behavior of MfaMethodsListController,
+    the Ember controller backing the MFA methods list route in the OpenBao UI. It
+    is needed so that the pagination contract of the MFA methods list screen is described
+    in the specification: the controller exposes queryParams so Ember serializes the
+    page into the URL, and it seeds page to 1 so a fresh visit to the list starts
+    on the first page rather than an undefined or empty page value.'
+  interfaces:
+  - file: third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods.js
+    kind: class
+    name: MfaMethodsListController
+    signature: class MfaMethodsListController extends Controller { queryParams = ['page'];
+      page = 1; }
   name: third-party-openbao-ui-app-controllers-vault-cluster-access-mfa
+  requirements:
+  - codeRefs:
+    - class:440062a628c6eae4794a86ba8179be4e
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods.js
+    id: r.controller-extends-ember-controller
+    level: MUST
+    text: MfaMethodsListController must extend Ember's Controller base class so it
+      can act as the route's controller and participate in Ember's controller lifecycle
+      and query-parameter binding.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods.js
+    id: r.default-export
+    level: SHOULD
+    text: The module should export MfaMethodsListController as its default export
+      so Ember's resolver can look the controller up by route name.
+  - codeRefs:
+    - class:440062a628c6eae4794a86ba8179be4e
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods.js
+    id: r.page-default-one
+    level: MUST
+    text: The controller must initialize its page property to the numeric value 1,
+      so the MFA methods list starts on the first page when no page query parameter
+      is present in the URL.
+  - codeRefs:
+    - class:440062a628c6eae4794a86ba8179be4e
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods.js
+    id: r.query-params-contains-page
+    level: MUST
+    text: The controller must declare queryParams as an array containing exactly the
+      string 'page', so Ember binds the page property to the 'page' URL query parameter
+      for the MFA methods list route.
   upstream: self
 - code:
   - third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/enforcements/index.js
   codeRefIndex:
+  - class:23a3872c16d0d338fabe3c587cda66e7 MfaEnforcementListController@third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/enforcements/index.js:8
   - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/enforcements/index.js
     index.js@third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/enforcements/index.js
   id: sc.third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-enforcements
+  intent: 'This context exists to pin down the page-state contract of the MFA enforcement
+    list route in the OpenBao UI: which query parameter the route accepts, how it
+    is named, and what the default page value is when the URL carries no page query
+    parameter. It is deliberately narrow, covering only the controller and not the
+    matching route, template, adapter, or model. Recording it makes the URL/pagination
+    contract of that page explicit and stable, so changes to page sizing, parameter
+    naming, or the default page number can be checked against it.'
+  interfaces:
+  - file: third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/enforcements/index.js
+    kind: class
+    name: MfaEnforcementListController
+    signature: export default class MfaEnforcementListController extends Controller
   name: third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-enforcements
+  requirements:
+  - codeRefs:
+    - class:23a3872c16d0d338fabe3c587cda66e7
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/enforcements/index.js
+    id: r.extends-ember-controller
+    level: MUST
+    text: MfaEnforcementListController must be the default export of the file and
+      must extend Ember's Controller class, so the route resolves it as the controller
+      for the MFA enforcement list page.
+  - codeRefs:
+    - class:23a3872c16d0d338fabe3c587cda66e7
+    id: r.page-defaults-to-one
+    level: MUST
+    text: The page property must be initialized to the number 1, so a request with
+      no page query parameter shows the first page of the MFA enforcement list rather
+      than an empty or undefined page.
+  - codeRefs:
+    - class:23a3872c16d0d338fabe3c587cda66e7
+    id: r.page-is-query-param
+    level: MUST
+    text: The controller must declare queryParams as an array containing the single
+      element 'page', so the current page is bound to a 'page' query parameter in
+      the browser URL and is preserved across reload and back navigation.
   upstream: self
 - code:
   - third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/enforcements/enforcement/index.js

@@ -1,5 +1,6 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
+- class:23a3872c16d0d338fabe3c587cda66e7 MfaEnforcementListController@third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/enforcements/index.js:8
 - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/enforcements/index.js
   index.js@third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/enforcements/index.js
 kind: SystemContext
@@ -7,5 +8,40 @@ metadata:
   name: third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-enforcements
   namespace: default
 spec:
+  intent: 'This context exists to pin down the page-state contract of the MFA enforcement
+    list route in the OpenBao UI: which query parameter the route accepts, how it
+    is named, and what the default page value is when the URL carries no page query
+    parameter. It is deliberately narrow, covering only the controller and not the
+    matching route, template, adapter, or model. Recording it makes the URL/pagination
+    contract of that page explicit and stable, so changes to page sizing, parameter
+    naming, or the default page number can be checked against it.'
+  interfaces:
+  - file: third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/enforcements/index.js
+    kind: class
+    name: MfaEnforcementListController
+    signature: export default class MfaEnforcementListController extends Controller
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - class:23a3872c16d0d338fabe3c587cda66e7
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/enforcements/index.js
+    id: r.extends-ember-controller
+    level: MUST
+    text: MfaEnforcementListController must be the default export of the file and
+      must extend Ember's Controller class, so the route resolves it as the controller
+      for the MFA enforcement list page.
+  - codeRefs:
+    - class:23a3872c16d0d338fabe3c587cda66e7
+    id: r.page-defaults-to-one
+    level: MUST
+    text: The page property must be initialized to the number 1, so a request with
+      no page query parameter shows the first page of the MFA enforcement list rather
+      than an empty or undefined page.
+  - codeRefs:
+    - class:23a3872c16d0d338fabe3c587cda66e7
+    id: r.page-is-query-param
+    level: MUST
+    text: The controller must declare queryParams as an array containing the single
+      element 'page', so the current page is bound to a 'page' query parameter in
+      the browser URL and is preserved across reload and back navigation.
   upstream: self
