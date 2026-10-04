@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+It exists so that every storage engine in the project (file, in-memory, raft, and the deno-kcp consumers) can be programmed against one small interface while cache, encoding, injection, notification, view scoping and listing behaviour are composed as wrappers rather than baked into each engine. Callers depend on Backend and on the optional capability interfaces; the Exercise* helpers define what a correct implementation must do, so they act as the executable specification for every backend.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
