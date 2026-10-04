@@ -1,10 +1,65 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
 - file:third_party/openbao/internal/helper/template/template.go template.go@third_party/openbao/internal/helper/template/template.go
+- function:0fbc5b16cbaec183b3fb1ca03f6c4ebc CompileTemplatePathForFiltering@third_party/openbao/internal/helper/template/template.go:12
+- function:be8659e87c09dc6b583391ba45c8042c UseTemplateForFiltering@third_party/openbao/internal/helper/template/template.go:5
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-helper-template
   namespace: default
 spec:
+  intent: The context exists to pin down the contract of the two exported helpers
+    in third_party/openbao/internal/helper/template/template.go, which is the only
+    place in the tree that fixes the variable names a path-filtering template may
+    reference. It exists because the filtering templates are authored as strings elsewhere
+    (from configuration or request input) and must be compiled and evaluated with
+    a stable, agreed-upon data shape; anyone changing that data shape, the constructor
+    used for compilation, or the error propagation would break every caller that writes
+    a filter template.
+  interfaces:
+  - file: third_party/openbao/internal/helper/template/template.go
+    kind: function
+    name: CompileTemplatePathForFiltering
+    signature: func CompileTemplatePathForFiltering(tmpl string) (template.StringTemplate,
+      error)
+  - file: third_party/openbao/internal/helper/template/template.go
+    kind: function
+    name: UseTemplateForFiltering
+    signature: func UseTemplateForFiltering(t template.StringTemplate, path string,
+      key string) (string, error)
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/template/template.go
+    - function:0fbc5b16cbaec183b3fb1ca03f6c4ebc
+    id: r.compile-path-template
+    level: MUST
+    text: CompileTemplatePathForFiltering must take a raw template string and return
+      a template.StringTemplate produced by calling template.NewTemplate(template.Template(tmpl)),
+      so callers get a compiled template rather than an unevaluated string.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/template/template.go
+    id: r.package-surface
+    level: MUST
+    text: The package must keep its exported surface to these two functions; any additional
+      behaviour, template variables, or state belongs in the SDK template package
+      rather than in this helper file.
+  - codeRefs:
+    - function:0fbc5b16cbaec183b3fb1ca03f6c4ebc
+    - function:be8659e87c09dc6b583391ba45c8042c
+    id: r.propagate-errors
+    level: MUST
+    text: Both helpers must return the error from the underlying SDK template call
+      untouched, and UseTemplateForFiltering must return the generated string alongside
+      that error, so callers can distinguish compile-time failure from evaluation
+      failure.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/template/template.go
+    - function:be8659e87c09dc6b583391ba45c8042c
+    id: r.render-with-key-and-path
+    level: MUST
+    text: UseTemplateForFiltering must evaluate the supplied template.StringTemplate
+      through Generate with a data map containing exactly the keys "key" and "path",
+      bound to the caller's key and path arguments respectively, so filter templates
+      can reference {{.key}} and {{.path}}.
   upstream: self

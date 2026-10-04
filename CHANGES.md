@@ -1791,6 +1791,14 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.notify-reports-success-and-error` (MUST): "Notify must return (true, nil) after the state string is written successfully, and must return (false, err) carrying the underlying error when either the unixgram dial or the write fails."
 - added `r.notify-writes-datagram-to-socket` (MUST): "When NOTIFY_SOCKET is set, Notify must dial it as a unixgram UnixAddr and write the given state string as the datagram body, closing the connection afterwards."
 
+### third-party-openbao-internal-helper-template
+
+- intent: "" -> "The context exists to pin down the contract of the two exported helpers in third_party/openbao/internal/helper/template/template.go, which is the only place in the tree that fixes the variable names a path-filtering template may reference. It exists because the filtering templates are authored as strings elsewhere (from configuration or request input) and must be compiled and evaluated with a stable, agreed-upon data shape; anyone changing that data shape, the constructor used for compilation, or the error propagation would break every caller that writes a filter template."
+- added `r.compile-path-template` (MUST): "CompileTemplatePathForFiltering must take a raw template string and return a template.StringTemplate produced by calling template.NewTemplate(template.Template(tmpl)), so callers get a compiled template rather than an unevaluated string."
+- added `r.package-surface` (MUST): "The package must keep its exported surface to these two functions; any additional behaviour, template variables, or state belongs in the SDK template package rather than in this helper file."
+- added `r.propagate-errors` (MUST): "Both helpers must return the error from the underlying SDK template call untouched, and UseTemplateForFiltering must return the generated string alongside that error, so callers can distinguish compile-time failure from evaluation failure."
+- added `r.render-with-key-and-path` (MUST): "UseTemplateForFiltering must evaluate the supplied template.StringTemplate through Generate with a data map containing exactly the keys "key" and "path", bound to the caller's key and path arguments respectively, so filter templates can reference {{.key}} and {{.path}}."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -1895,5 +1903,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-helper-storagepacker-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-stubbolt-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-systemd-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-helper-template-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-helper-template-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-testhelpers-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-helper-testhelpers-cassandra-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
