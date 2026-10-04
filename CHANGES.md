@@ -5076,6 +5076,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.scope-route-name-param` (MUST): "OidcScopeRoute.model must accept a destructured { name } parameter, taking the scope name from the route's dynamic segment, and use it to resolve the single scope model for the detail screen through the injected store service."
 - added `r.store-service-injection` (MUST): "Each of the three scope route classes must declare the store service as an injected service property, so the model hooks resolve records against the application's Ember Data store rather than any other data source."
 
+### third-party-openbao-ui-app-routes-vault-cluster-access-oidc-scopes-scope
+
+- intent: "" -> "These modules exist to give the OIDC scope details and edit URLs a resolvable route class in the Ember router map. The context is described here so the spec records that the two classes are intentionally empty Route subclasses: any behavior seen on those screens comes from the Route superclass and the corresponding controllers and templates, not from route-level code. The spec fixes that contract so later edits know an empty subclass is the current, deliberate state rather than an unfinished stub."
+- added `r.details-route-is-empty-route-subclass` (MUST): "details.js MUST declare OidcScopeDetailsRoute as a class extending Ember's Route with an empty body, so the OIDC scope details route inherits every hook from Route and overrides none of them."
+- added `r.edit-route-is-empty-route-subclass` (MUST): "edit.js MUST declare OidcScopeEditRoute as a class extending Ember's Route with an empty body, so the OIDC scope edit route inherits every hook from Route and overrides none of them."
+- added `r.one-route-class-per-module` (MUST): "Each route file MUST contain only its single route class and MUST NOT add model, beforeModel, afterModel, setupController, redirect or action members, so scope data loading and mutation stay in the controller and adapter layers."
+- added `r.route-paths-map-to-scope-subscreens` (SHOULD): "The two classes SHOULD remain placed under the scopes/scope directory so the router nests the details and edit screens beneath a single OIDC scope belonging to a vault cluster, matching the router map that resolves them."
+- added `r.routes-exported-as-default` (MUST): "Each route module MUST expose its class as the module's default export, because the Ember resolver locates route classes by file path and default export rather than by named import."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5500,5 +5509,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-routes-vault-cluster-access-oidc-scopes-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-oidc-scopes-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-oidc-scopes-scope-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-routes-vault-cluster-access-oidc-scopes-scope-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
