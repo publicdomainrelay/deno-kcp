@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The package exists so that a database secrets engine plugin, whether compiled into the host as a builtin or run as a separate go-plugin process, exposes one uniform Database contract to the caller. It carries that contract across the gRPC boundary in both directions (server-side gRPCServer adapter, client-side gRPCClient adapter), converts the JSON-encoded config bytes to and from map[string]any, normalizes shutdown and unimplemented-static-account failures into sentinel errors, and instruments every call so the host can report per-database-type metrics and trace logs.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

@@ -41024,8 +41024,355 @@ system_contexts:
   - file:third_party/openbao/sdk/database/dbplugin/grpc_transport.go grpc_transport.go@third_party/openbao/sdk/database/dbplugin/grpc_transport.go
   - file:third_party/openbao/sdk/database/dbplugin/plugin.go plugin.go@third_party/openbao/sdk/database/dbplugin/plugin.go
   - file:third_party/openbao/sdk/database/dbplugin/server.go server.go@third_party/openbao/sdk/database/dbplugin/server.go
+  - function:367d7c005038ee0b286efbce7c301dfc RegisterDatabaseServer@third_party/openbao/sdk/database/dbplugin/database_grpc.pb.go:228
+  - function:5538fbfef2fa7a5bee63edeef718db1e PluginFactoryVersion@third_party/openbao/sdk/database/dbplugin/plugin.go:82
+  - function:569800375c1f0c1bceac6e6d92eb01c6 Serve@third_party/openbao/sdk/database/dbplugin/server.go:17
+  - function:95ad517bf38c38608ba63dac99b36f52 PluginFactory@third_party/openbao/sdk/database/dbplugin/plugin.go:76
+  - function:aae24a7ae09470196e76e7a619b2aab7 NewPluginClient@third_party/openbao/sdk/database/dbplugin/client.go:37
+  - function:c37077d1ebc4514fc538caceceeeae09 NewDatabaseClient@third_party/openbao/sdk/database/dbplugin/database_grpc.pb.go:58
+  - function:d36ff173d0b7cb0fadfc7c44e8e5733d ServeConfig@third_party/openbao/sdk/database/dbplugin/server.go:21
+  - function:e5b4989ee62011d67318b2da9f8f5214 NewDatabaseErrorSanitizerMiddleware@third_party/openbao/sdk/database/dbplugin/databasemiddleware.go:267
+  - interface:897912d1e6d82bba93ea31d5cdbdbac9 DatabaseServer@third_party/openbao/sdk/database/dbplugin/database_grpc.pb.go:166
+  - interface:96708e350e69a92427f97ac71da1cc45 DatabaseClient@third_party/openbao/sdk/database/dbplugin/database_grpc.pb.go:40
+  - interface:b8b2e8166dbe54f74280d9310ea769af UnsafeDatabaseServer@third_party/openbao/sdk/database/dbplugin/database_grpc.pb.go:224
+  - interface:dd78a1312c43389d929171ce9fb39a7b Database@third_party/openbao/sdk/database/dbplugin/plugin.go:20
+  - method:01932b9c19362fab72d1ae7de54c94e1 SetCredentialsRequest.GetStatements@third_party/openbao/sdk/database/dbplugin/database.pb.go:839
+  - method:036e648f044bf2474721691c07bfff31 databaseMetricsMiddleware.RevokeUser@third_party/openbao/sdk/database/dbplugin/databasemiddleware.go:157
+  - method:03f83cfe3a549bce6661bf9b2396c6da databaseTracingMiddleware.Init@third_party/openbao/sdk/database/dbplugin/databasemiddleware.go:75
+  - method:049857250e11062a471066cd7e55df53 databaseMetricsMiddleware.Init@third_party/openbao/sdk/database/dbplugin/databasemiddleware.go:194
+  - method:0ab07f301b3331370941499ea6540ff6 DatabaseClient.RotateRootCredentials@third_party/openbao/sdk/database/dbplugin/database_grpc.pb.go:45
+  - method:0af6c8c9018c97cb51ad0a7fb1a04615 DatabaseErrorSanitizerMiddleware.Type@third_party/openbao/sdk/database/dbplugin/databasemiddleware.go:274
+  - method:0ddf3480f381f0121feb2c735ae59a75 StaticUserConfig.GetUsername@third_party/openbao/sdk/database/dbplugin/database.pb.go:780
+  - method:13d65244d17bba6e05a946b0f8180538 StaticUserConfig.GetPassword@third_party/openbao/sdk/database/dbplugin/database.pb.go:787
+  - method:158f5e42a62dfb8f2cbf3906c30955a9 TypeResponse.GetType@third_party/openbao/sdk/database/dbplugin/database.pb.go:610
+  - method:15a4fa5e5106d7e89d04b5ff2a16b992 DatabaseClient.RevokeUser@third_party/openbao/sdk/database/dbplugin/database_grpc.pb.go:44
+  - method:18c4a0e57515b0304053c2e451e73b80 DatabaseClient.Initialize@third_party/openbao/sdk/database/dbplugin/database_grpc.pb.go:51
+  - method:1a06f659bdb741a0f57f8a313982185e DatabaseServer.RenewUser@third_party/openbao/sdk/database/dbplugin/database_grpc.pb.go:169
+  - method:1b366e19201a4b757054f94dd59264ef DatabaseServer.GenerateCredentials@third_party/openbao/sdk/database/dbplugin/database_grpc.pb.go:175
   id: sc.third-party-openbao-sdk-database-dbplugin
+  intent: The package exists so that a database secrets engine plugin, whether compiled
+    into the host as a builtin or run as a separate go-plugin process, exposes one
+    uniform Database contract to the caller. It carries that contract across the gRPC
+    boundary in both directions (server-side gRPCServer adapter, client-side gRPCClient
+    adapter), converts the JSON-encoded config bytes to and from map[string]any, normalizes
+    shutdown and unimplemented-static-account failures into sentinel errors, and instruments
+    every call so the host can report per-database-type metrics and trace logs.
+  interfaces:
+  - file: third_party/openbao/sdk/database/dbplugin/plugin.go
+    kind: interface
+    name: Database
+    signature: type Database interface { Type() (string, error); CreateUser(ctx context.Context,
+      statements Statements, usernameConfig UsernameConfig, expiration time.Time)
+      (username string, password string, err error); RenewUser(ctx context.Context,
+      statements Statements, username string, expiration time.Time) error; RevokeUser(ctx
+      context.Context, statements Statements, username string) error; RotateRootCredentials(ctx
+      context.Context, statements []string) (config map[string]any, err error); GenerateCredentials(ctx
+      context.Context) (string, error); SetCredentials(ctx context.Context, statements
+      Statements, staticConfig StaticUserConfig) (username string, password string,
+      err error); Init(ctx context.Context, config map[string]any, verifyConnection
+      bool) (saveConfig map[string]any, err error); Close() error }
+  - file: third_party/openbao/sdk/database/dbplugin/database_grpc.pb.go
+    kind: interface
+    name: DatabaseClient
+    signature: type DatabaseClient interface { Type(ctx context.Context, in *Empty,
+      opts ...grpc.CallOption) (*TypeResponse, error); CreateUser(ctx context.Context,
+      in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error);
+      RenewUser(ctx context.Context, in *RenewUserRequest, opts ...grpc.CallOption)
+      (*Empty, error); RevokeUser(ctx context.Context, in *RevokeUserRequest, opts
+      ...grpc.CallOption) (*Empty, error); RotateRootCredentials(ctx context.Context,
+      in *RotateRootCredentialsRequest, opts ...grpc.CallOption) (*RotateRootCredentialsResponse,
+      error); Init(ctx context.Context, in *InitRequest, opts ...grpc.CallOption)
+      (*InitResponse, error); Close(ctx context.Context, in *Empty, opts ...grpc.CallOption)
+      (*Empty, error); SetCredentials(ctx context.Context, in *SetCredentialsRequest,
+      opts ...grpc.CallOption) (*SetCredentialsResponse, error); GenerateCredentials(ctx
+      context.Context, in *Empty, opts ...grpc.CallOption) (*GenerateCredentialsResponse,
+      error); Initialize(ctx context.Context, in *InitializeRequest, opts ...grpc.CallOption)
+      (*Empty, error) }
+  - file: third_party/openbao/sdk/database/dbplugin/databasemiddleware.go
+    kind: struct
+    name: DatabaseErrorSanitizerMiddleware
+    signature: type DatabaseErrorSanitizerMiddleware struct { next Database; secretsFn
+      func() map[string]any }
+  - file: third_party/openbao/sdk/database/dbplugin/databasemiddleware.go
+    kind: method
+    name: DatabaseErrorSanitizerMiddleware.Type
+    signature: func (mw *DatabaseErrorSanitizerMiddleware) Type() (string, error)
+  - file: third_party/openbao/sdk/database/dbplugin/client.go
+    kind: struct
+    name: DatabasePluginClient
+    signature: type DatabasePluginClient struct { client *plugin.Client; sync.Mutex;
+      Database }
+  - file: third_party/openbao/sdk/database/dbplugin/client.go
+    kind: method
+    name: DatabasePluginClient.Close
+    signature: func (dc *DatabasePluginClient) Close() error
+  - file: third_party/openbao/sdk/database/dbplugin/database_grpc.pb.go
+    kind: interface
+    name: DatabaseServer
+    signature: type DatabaseServer interface { Type(context.Context, *Empty) (*TypeResponse,
+      error); CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse,
+      error); RenewUser(context.Context, *RenewUserRequest) (*Empty, error); RevokeUser(context.Context,
+      *RevokeUserRequest) (*Empty, error); RotateRootCredentials(context.Context,
+      *RotateRootCredentialsRequest) (*RotateRootCredentialsResponse, error); Init(context.Context,
+      *InitRequest) (*InitResponse, error); Close(context.Context, *Empty) (*Empty,
+      error); SetCredentials(context.Context, *SetCredentialsRequest) (*SetCredentialsResponse,
+      error); GenerateCredentials(context.Context, *Empty) (*GenerateCredentialsResponse,
+      error); Initialize(context.Context, *InitializeRequest) (*Empty, error); mustEmbedUnimplementedDatabaseServer()
+      }
+  - file: third_party/openbao/sdk/database/dbplugin/database_grpc.pb.go
+    kind: method
+    name: DatabaseServer.GenerateCredentials
+    signature: func (c *databaseClient) GenerateCredentials(ctx context.Context, in
+      *Empty, opts ...grpc.CallOption) (*GenerateCredentialsResponse, error)
+  - file: third_party/openbao/sdk/database/dbplugin/database_grpc.pb.go
+    kind: method
+    name: DatabaseServer.RenewUser
+    signature: func (c *databaseClient) RenewUser(ctx context.Context, in *RenewUserRequest,
+      opts ...grpc.CallOption) (*Empty, error)
+  - file: third_party/openbao/sdk/database/dbplugin/plugin.go
+    kind: struct
+    name: GRPCDatabasePlugin
+    signature: type GRPCDatabasePlugin struct { Impl Database; plugin.NetRPCUnsupportedPlugin
+      }
+  - file: third_party/openbao/sdk/database/dbplugin/plugin.go
+    kind: method
+    name: GRPCDatabasePlugin.GRPCClient
+    signature: func (GRPCDatabasePlugin) GRPCClient(doneCtx context.Context, _ *plugin.GRPCBroker,
+      c *grpc.ClientConn) (any, error)
+  - file: third_party/openbao/sdk/database/dbplugin/plugin.go
+    kind: method
+    name: GRPCDatabasePlugin.GRPCServer
+    signature: func (d GRPCDatabasePlugin) GRPCServer(_ *plugin.GRPCBroker, s *grpc.Server)
+      error
+  - file: third_party/openbao/sdk/database/dbplugin/database_grpc.pb.go
+    kind: function
+    name: NewDatabaseClient
+    signature: func NewDatabaseClient(cc grpc.ClientConnInterface) DatabaseClient
+  - file: third_party/openbao/sdk/database/dbplugin/databasemiddleware.go
+    kind: function
+    name: NewDatabaseErrorSanitizerMiddleware
+    signature: func NewDatabaseErrorSanitizerMiddleware(next Database, secretsFn func()
+      map[string]any) *DatabaseErrorSanitizerMiddleware
+  - file: third_party/openbao/sdk/database/dbplugin/client.go
+    kind: function
+    name: NewPluginClient
+    signature: func NewPluginClient(ctx context.Context, sys pluginutil.RunnerUtil,
+      pluginRunner *pluginutil.PluginRunner, logger log.Logger, isMetadataMode bool)
+      (Database, error)
+  - file: third_party/openbao/sdk/database/dbplugin/plugin.go
+    kind: function
+    name: PluginFactory
+    signature: func PluginFactory(ctx context.Context, pluginName string, pluginVersion
+      string, sys pluginutil.LookRunnerUtil, logger log.Logger) (Database, error)
+  - file: third_party/openbao/sdk/database/dbplugin/plugin.go
+    kind: function
+    name: PluginFactoryVersion
+    signature: func PluginFactoryVersion(ctx context.Context, pluginName string, pluginVersion
+      string, sys pluginutil.LookRunnerUtil, logger log.Logger) (Database, error)
+  - file: third_party/openbao/sdk/database/dbplugin/database_grpc.pb.go
+    kind: function
+    name: RegisterDatabaseServer
+    signature: func RegisterDatabaseServer(s grpc.ServiceRegistrar, srv DatabaseServer)
+  - file: third_party/openbao/sdk/database/dbplugin/server.go
+    kind: function
+    name: Serve
+    signature: func Serve(db Database, tlsProvider func() (*tls.Config, error))
+  - file: third_party/openbao/sdk/database/dbplugin/server.go
+    kind: function
+    name: ServeConfig
+    signature: func ServeConfig(db Database, tlsProvider func() (*tls.Config, error))
+      *plugin.ServeConfig
+  - file: third_party/openbao/sdk/database/dbplugin/database_grpc.pb.go
+    kind: interface
+    name: UnsafeDatabaseServer
+    signature: type UnsafeDatabaseServer interface { mustEmbedUnimplementedDatabaseServer()
+      }
+  - file: third_party/openbao/sdk/database/dbplugin/databasemiddleware.go
+    kind: method
+    name: databaseMetricsMiddleware.Init
+    signature: func (mw *databaseMetricsMiddleware) Init(ctx context.Context, config
+      map[string]any, verifyConnection bool) (saveConfig map[string]any, err error)
+  - file: third_party/openbao/sdk/database/dbplugin/databasemiddleware.go
+    kind: method
+    name: databaseMetricsMiddleware.RevokeUser
+    signature: func (mw *databaseMetricsMiddleware) RevokeUser(ctx context.Context,
+      statements Statements, username string) (err error)
+  - file: third_party/openbao/sdk/database/dbplugin/databasemiddleware.go
+    kind: method
+    name: databaseTracingMiddleware.Init
+    signature: func (mw *databaseTracingMiddleware) Init(ctx context.Context, config
+      map[string]any, verifyConnection bool) (saveConfig map[string]any, err error)
   name: third-party-openbao-sdk-database-dbplugin
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/sdk/database/dbplugin/client.go
+    - method:01932b9c19362fab72d1ae7de54c94e1
+    id: r.client-close-kills-plugin
+    level: MUST
+    text: DatabasePluginClient embeds Database and holds the go-plugin Client; its
+      Close closes the embedded Database first and then calls Kill on the plugin client,
+      returning the Database close error.
+  - codeRefs:
+    - file:third_party/openbao/sdk/database/dbplugin/client.go
+    - function:aae24a7ae09470196e76e7a619b2aab7
+    id: r.client-dispense
+    level: MUST
+    text: NewPluginClient registers GRPCDatabasePlugin under plugin-set versions 3
+      and 4 keyed by the name database, starts the runner via RunMetadataMode when
+      isMetadataMode is set and Run otherwise, dispenses database from the RPC client,
+      and accepts only a *gRPCClient, returning unsupported client type for anything
+      else.
+  - codeRefs:
+    - file:third_party/openbao/sdk/database/dbplugin/database_grpc.pb.go
+    - method:0ab07f301b3331370941499ea6540ff6
+    - method:15a4fa5e5106d7e89d04b5ff2a16b992
+    - method:18c4a0e57515b0304053c2e451e73b80
+    id: r.client-interface-methods
+    level: MUST
+    text: DatabaseClient.RotateRootCredentials, DatabaseClient.RevokeUser and DatabaseClient.Initialize
+      are the client-side stubs the gRPCClient adapter invokes, sending the corresponding
+      proto request over the connection and surfacing the transport error to the caller.
+  - codeRefs:
+    - file:third_party/openbao/sdk/database/dbplugin/plugin.go
+    - interface:dd78a1312c43389d929171ce9fb39a7b
+    id: r.database-contract
+    level: MUST
+    text: 'Database is the contract every database plugin implementation satisfies:
+      Type reports the backend type name, CreateUser/RenewUser/RevokeUser manage dynamic
+      users against Statements and UsernameConfig, RotateRootCredentials and Init
+      return a config map that persists across restarts, GenerateCredentials and SetCredentials
+      support static accounts, and Close tears down the underlying connection.'
+  - codeRefs:
+    - file:third_party/openbao/sdk/database/dbplugin/databasemiddleware.go
+    - function:e5b4989ee62011d67318b2da9f8f5214
+    - method:0af6c8c9018c97cb51ad0a7fb1a04615
+    id: r.error-sanitizer
+    level: MUST
+    text: DatabaseErrorSanitizerMiddleware wraps a Database and passes every returned
+      error through sanitize, which replaces url.Error with unable to parse connection
+      url, unwraps and re-wraps pgconn.ParseConfigError, and when secretsFn is set
+      replaces each non-empty secret key found in the message while preserving the
+      gRPC status code.
+  - codeRefs:
+    - file:third_party/openbao/sdk/database/dbplugin/databasemiddleware.go
+    - function:5538fbfef2fa7a5bee63edeef718db1e
+    id: r.factory-wrapping
+    level: MUST
+    text: PluginFactoryVersion reads Type from the built database, then wraps it in
+      databaseMetricsMiddleware carrying that type string for every call, and additionally
+      wraps it in databaseTracingMiddleware when the plugin-named logger reports IsTrace,
+      logging the transport it detected.
+  - codeRefs:
+    - file:third_party/openbao/sdk/database/dbplugin/grpc_transport.go
+    - function:c37077d1ebc4514fc538caceceeeae09
+    id: r.grpc-client-adapter
+    level: MUST
+    text: GRPCDatabasePlugin.GRPCClient returns a gRPCClient bound to the connection,
+      the DatabaseClient and the doneCtx; every gRPCClient call derives a cancellable
+      context tied to doneCtx through pluginutil.CtxCancelIfCanceled, and when doneCtx
+      is already done the call returns ErrPluginShutdown instead of the transport
+      error.
+  - codeRefs:
+    - file:third_party/openbao/sdk/database/dbplugin/grpc_transport.go
+    - function:367d7c005038ee0b286efbce7c301dfc
+    id: r.grpc-server-adapter
+    level: MUST
+    text: GRPCDatabasePlugin.GRPCServer wraps Impl in DatabaseErrorSanitizerMiddleware
+      and registers a gRPCServer over it; the gRPCServer adapter converts proto requests
+      to Database calls, marshals Init and RotateRootCredentials results to JSON bytes
+      in Config, validates each Expiration timestamp before use, and implements the
+      deprecated Initialize as a call to Init.
+  - codeRefs:
+    - file:third_party/openbao/sdk/database/dbplugin/plugin.go
+    - function:aae24a7ae09470196e76e7a619b2aab7
+    id: r.handshake
+    level: MUST
+    text: Client and server share one handshakeConfig with ProtocolVersion 4, MagicCookieKey
+      VAULT_DATABASE_PLUGIN and MagicCookieValue 926a0820-aea2-be28-51d6-83cdf00e8edb;
+      the comment states this is a UX feature that stops bad plugins running, not
+      a security feature.
+  - codeRefs:
+    - file:third_party/openbao/sdk/database/dbplugin/databasemiddleware.go
+    - method:036e648f044bf2474721691c07bfff31
+    - method:049857250e11062a471066cd7e55df53
+    id: r.metrics-middleware
+    level: MUST
+    text: databaseMetricsMiddleware forwards each Database call and records, under
+      both database.<Op> and database.<typeStr>.<Op>, a call counter plus an error
+      counter on failure and a timer via MeasureSince, including for CreateUser, RenewUser,
+      RevokeUser, SetCredentials, GenerateCredentials and Close.
+  - codeRefs:
+    - file:third_party/openbao/sdk/database/dbplugin/database.pb.go
+    - method:0ddf3480f381f0121feb2c735ae59a75
+    - method:13d65244d17bba6e05a946b0f8180538
+    - method:158f5e42a62dfb8f2cbf3906c30955a9
+    id: r.pb-message-shape
+    level: MUST
+    text: The legacy protobuf InitializeRequest carries Config as raw bytes and VerifyConnection,
+      and the service message set exposes accessors such as TypeResponse.GetType and
+      StaticUserConfig.GetUsername/GetPassword that the adapters use to move config
+      and static-account fields across the boundary.
+  - codeRefs:
+    - file:third_party/openbao/sdk/database/dbplugin/database_grpc.pb.go
+    - interface:897912d1e6d82bba93ea31d5cdbdbac9
+    - interface:96708e350e69a92427f97ac71da1cc45
+    - interface:b8b2e8166dbe54f74280d9310ea769af
+    id: r.pb-service
+    level: MUST
+    text: The generated gRPC service exposes Type, CreateUser, RenewUser, RevokeUser,
+      RotateRootCredentials, Init, Close, SetCredentials, GenerateCredentials and
+      the deprecated Initialize on both DatabaseServer and DatabaseClient, with UnimplementedDatabaseServer
+      answering every method with codes.Unimplemented so implementations stay forward
+      compatible.
+  - codeRefs:
+    - file:third_party/openbao/sdk/database/dbplugin/plugin.go
+    - function:5538fbfef2fa7a5bee63edeef718db1e
+    - function:95ad517bf38c38608ba63dac99b36f52
+    id: r.plugin-factory
+    level: MUST
+    text: PluginFactory delegates to PluginFactoryVersion with an empty version; PluginFactoryVersion
+      looks the plugin up in the catalog as consts.PluginTypeDatabase, and when the
+      runner is Builtin it casts BuiltinFactory's result to Database (rejecting a
+      non-Database with unsupported database type), otherwise it builds a DatabasePluginClient
+      and records the transport as gRPC.
+  - codeRefs:
+    - file:third_party/openbao/sdk/database/dbplugin/server.go
+    - function:569800375c1f0c1bceac6e6d92eb01c6
+    - function:d36ff173d0b7cb0fadfc7c44e8e5733d
+    id: r.serve
+    level: MUST
+    text: Serve builds the config from ServeConfig and hands it to plugin.Serve; ServeConfig
+      first calls pluginutil.OptionallyEnableMlock and returns nil after printing
+      the error when mlock cannot be enabled, then registers GRPCDatabasePlugin for
+      versions 3 and 4 under the name database with GRPCServer set to plugin.DefaultGRPCServer
+      and the caller's TLSProvider.
+  - codeRefs:
+    - file:third_party/openbao/sdk/database/dbplugin/database_grpc.pb.go
+    - method:1a06f659bdb741a0f57f8a313982185e
+    - method:1b366e19201a4b757054f94dd59264ef
+    id: r.server-interface-method
+    level: MUST
+    text: DatabaseServer.RenewUser and DatabaseServer.GenerateCredentials are the
+      server-side entry points for lease renewal and generated-password requests,
+      mapping the proto request onto the wrapped Database and returning an Empty response
+      or the implementation error.
+  - codeRefs:
+    - file:third_party/openbao/sdk/database/dbplugin/grpc_transport.go
+    - method:15a4fa5e5106d7e89d04b5ff2a16b992
+    id: r.static-unsupported
+    level: MUST
+    text: gRPCClient.SetCredentials treats a gRPC Unimplemented status as ErrPluginStaticUnsupported
+      (database plugin does not support Static Accounts) so callers can fall back
+      for plugins predating static accounts.
+  - codeRefs:
+    - file:third_party/openbao/sdk/database/dbplugin/databasemiddleware.go
+    - function:5538fbfef2fa7a5bee63edeef718db1e
+    - method:03f83cfe3a549bce6661bf9b2396c6da
+    id: r.tracing-middleware
+    level: MUST
+    text: databaseTracingMiddleware forwards each Database call while emitting Trace-level
+      started and finished log lines with the error and elapsed duration, and is only
+      installed when the caller's logger is in trace mode.
   upstream: self
 - code:
   - third_party/openbao/sdk/database/dbplugin/v5/conversions_test.go
