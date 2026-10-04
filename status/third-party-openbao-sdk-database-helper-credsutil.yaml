@@ -1,15 +1,153 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: Case, CaseOp, CredentialsProducer, CredentialsProducer.GenerateCredentials,
+    CredentialsProducer.GenerateExpiration, CredentialsProducer.GeneratePassword,
+    CredentialsProducer.GenerateUsername, DisplayName, GenerateUsername, MaxLength,
+    RandomAlphaNumeric, RoleName, SQLCredentialsProducer, SQLCredentialsProducer.GenerateCredentials,
+    SQLCredentialsProducer.GenerateExpiration, SQLCredentialsProducer.GeneratePassword,
+    SQLCredentialsProducer.GenerateUsername, Separator, ToLower, ToUpper, UsernameOpt'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/sdk/database/helper/credsutil/credsutil.go
+  - third_party/openbao/sdk/database/helper/credsutil/credsutil_test.go
+  - third_party/openbao/sdk/database/helper/credsutil/sql.go
+  - third_party/openbao/sdk/database/helper/credsutil/usernames.go
+  - third_party/openbao/sdk/database/helper/credsutil/usernames_test.go
+  fingerprint: f3c20c15d5051e5f1d4efd52b6af38f034218f554077eb90531cc1b5c9ab6cd3
+  interfaces:
+  - codegraphId: interface:37bb204d5510a5c724b76501024a2559
+    file: third_party/openbao/sdk/database/helper/credsutil/credsutil.go
+    kind: interface
+    line: 18
+    name: CredentialsProducer
+  - codegraphId: method:cf6f63c360cd78f4e48a9a12f61e32cc
+    file: third_party/openbao/sdk/database/helper/credsutil/credsutil.go
+    kind: method
+    line: 19
+    name: CredentialsProducer.GenerateCredentials
+    signature: (context.Context) (string, error)
+  - codegraphId: method:c33d66967be03770f7d7d5ebed8af102
+    file: third_party/openbao/sdk/database/helper/credsutil/credsutil.go
+    kind: method
+    line: 20
+    name: CredentialsProducer.GenerateUsername
+    signature: (dbplugin.UsernameConfig) (string, error)
+  - codegraphId: method:5b6e07fe468135c76d6df0a7ab5c77e0
+    file: third_party/openbao/sdk/database/helper/credsutil/credsutil.go
+    kind: method
+    line: 21
+    name: CredentialsProducer.GeneratePassword
+    signature: () (string, error)
+  - codegraphId: method:1a9e0c44a270015aa8815b0ea5fa644e
+    file: third_party/openbao/sdk/database/helper/credsutil/credsutil.go
+    kind: method
+    line: 22
+    name: CredentialsProducer.GenerateExpiration
+    signature: (time.Time) (string, error)
+  - codegraphId: function:44f819624b6cba6b297d54852b1c4afb
+    file: third_party/openbao/sdk/database/helper/credsutil/credsutil.go
+    kind: function
+    line: 34
+    name: RandomAlphaNumeric
+    signature: (length int, prependA1a bool) (string, error)
+  - codegraphId: struct:0c79431f0c22f255959881d50b73764e
+    file: third_party/openbao/sdk/database/helper/credsutil/sql.go
+    kind: struct
+    line: 18
+    name: SQLCredentialsProducer
+  - codegraphId: method:b1d55f3316ba4e52d4e5725140d510c9
+    file: third_party/openbao/sdk/database/helper/credsutil/sql.go
+    kind: method
+    line: 26
+    name: SQLCredentialsProducer.GenerateCredentials
+    signature: (ctx context.Context) (string, error)
+  - codegraphId: method:a5fec403ec0e554daf31082fe9d66583
+    file: third_party/openbao/sdk/database/helper/credsutil/sql.go
+    kind: method
+    line: 34
+    name: SQLCredentialsProducer.GenerateUsername
+    signature: (config dbplugin.UsernameConfig) (string, error)
+  - codegraphId: method:be63c48b438a11b5e0bddcda445d36eb
+    file: third_party/openbao/sdk/database/helper/credsutil/sql.go
+    kind: method
+    line: 48
+    name: SQLCredentialsProducer.GeneratePassword
+    signature: () (string, error)
+  - codegraphId: method:02bd74950b1038734e7540ffbcd2f497
+    file: third_party/openbao/sdk/database/helper/credsutil/sql.go
+    kind: method
+    line: 57
+    name: SQLCredentialsProducer.GenerateExpiration
+    signature: (ttl time.Time) (string, error)
+  - codegraphId: type_alias:8f48b954f6fb6c701eb567a72a0cd8b6
+    file: third_party/openbao/sdk/database/helper/credsutil/usernames.go
+    kind: type_alias
+    line: 12
+    name: CaseOp
+  - codegraphId: type_alias:22430d0874393653e29c721d1905bded
+    file: third_party/openbao/sdk/database/helper/credsutil/usernames.go
+    kind: type_alias
+    line: 54
+    name: UsernameOpt
+  - codegraphId: function:4ba1e502f46336dbbe49c044937fd10c
+    file: third_party/openbao/sdk/database/helper/credsutil/usernames.go
+    kind: function
+    line: 56
+    name: DisplayName
+    signature: (dispName string, maxLength int) UsernameOpt
+  - codegraphId: function:183fc86f28d48a2b4b8179ea0ce24e83
+    file: third_party/openbao/sdk/database/helper/credsutil/usernames.go
+    kind: function
+    line: 62
+    name: RoleName
+    signature: (roleName string, maxLength int) UsernameOpt
+  - codegraphId: function:68f3892cc55d3d2cdc8e6ecd0ea7c2ed
+    file: third_party/openbao/sdk/database/helper/credsutil/usernames.go
+    kind: function
+    line: 68
+    name: Separator
+    signature: (sep string) UsernameOpt
+  - codegraphId: function:4c822ca1a0b0d91db03420dde87191b3
+    file: third_party/openbao/sdk/database/helper/credsutil/usernames.go
+    kind: function
+    line: 74
+    name: MaxLength
+    signature: (maxLen int) UsernameOpt
+  - codegraphId: function:b8694ac40227d568befbad15fc5d0799
+    file: third_party/openbao/sdk/database/helper/credsutil/usernames.go
+    kind: function
+    line: 80
+    name: Case
+    signature: (c CaseOp) UsernameOpt
+  - codegraphId: function:b89f3ce664ec9d2edd3e93f94af7a5df
+    file: third_party/openbao/sdk/database/helper/credsutil/usernames.go
+    kind: function
+    line: 86
+    name: ToLower
+    signature: () UsernameOpt
+  - codegraphId: function:3efb3892c2779cc91e90fd1fc70b6d70
+    file: third_party/openbao/sdk/database/helper/credsutil/usernames.go
+    kind: function
+    line: 90
+    name: ToUpper
+    signature: () UsernameOpt
+  - codegraphId: function:fd514f0c010fb6a3096ddbb2fba178ba
+    file: third_party/openbao/sdk/database/helper/credsutil/usernames.go
+    kind: function
+    line: 94
+    name: GenerateUsername
+    signature: (opts ...UsernameOpt) (string, error)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 68b6da6760b46df3380fd09381bcea51dbd4b36d082ea92d9e73382aa7e52e5b
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: f3c20c15d5051e5f1d4efd52b6af38f034218f554077eb90531cc1b5c9ab6cd3

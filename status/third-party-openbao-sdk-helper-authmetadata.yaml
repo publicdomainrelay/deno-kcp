@@ -1,15 +1,78 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: FieldSchema, Fields, Handler, Handler.AuthMetadata, Handler.MarshalJSON,
+    Handler.ParseAuthMetadata, Handler.PopulateDesiredMetadata, Handler.UnmarshalJSON,
+    NewHandler'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/sdk/helper/authmetadata/auth_metadata.go
+  - third_party/openbao/sdk/helper/authmetadata/auth_metadata_acc_test.go
+  - third_party/openbao/sdk/helper/authmetadata/auth_metadata_test.go
+  fingerprint: 797f7ad517e39416b2ae9f6ae13f9eeee754b953540a2c5ff3ca545d12e61e4a
+  interfaces:
+  - codegraphId: struct:9fcedc2c86951fa69c9add75e0d29bfa
+    file: third_party/openbao/sdk/helper/authmetadata/auth_metadata.go
+    kind: struct
+    line: 36
+    name: Fields
+  - codegraphId: function:30b0c154e218ad7c1bd02ebc48afd5c9
+    file: third_party/openbao/sdk/helper/authmetadata/auth_metadata.go
+    kind: function
+    line: 60
+    name: FieldSchema
+    signature: (fields *Fields) *framework.FieldSchema
+  - codegraphId: function:bc6902ea102d64111fba38c639b8301c
+    file: third_party/openbao/sdk/helper/authmetadata/auth_metadata.go
+    kind: function
+    line: 72
+    name: NewHandler
+    signature: (fields *Fields) *Handler
+  - codegraphId: struct:7debbf9b5d3b0882f2f62603687cb674
+    file: third_party/openbao/sdk/helper/authmetadata/auth_metadata.go
+    kind: struct
+    line: 78
+    name: Handler
+  - codegraphId: method:dfcfa3376c23b36f74b2eb2b9df67ff1
+    file: third_party/openbao/sdk/helper/authmetadata/auth_metadata.go
+    kind: method
+    line: 93
+    name: Handler.AuthMetadata
+    signature: () []string
+  - codegraphId: method:129c61fefb3740eaa68437caa931bea9
+    file: third_party/openbao/sdk/helper/authmetadata/auth_metadata.go
+    kind: method
+    line: 104
+    name: Handler.ParseAuthMetadata
+    signature: (data *framework.FieldData) error
+  - codegraphId: method:bb360504c48177a70bfc7ce835507980
+    file: third_party/openbao/sdk/helper/authmetadata/auth_metadata.go
+    kind: method
+    line: 141
+    name: Handler.PopulateDesiredMetadata
+    signature: (auth *logical.Auth, available map[string]string) error
+  - codegraphId: method:242451869589bb34c0f150484bf2a0ab
+    file: third_party/openbao/sdk/helper/authmetadata/auth_metadata.go
+    kind: method
+    line: 171
+    name: Handler.MarshalJSON
+    signature: () ([]byte, error)
+  - codegraphId: method:5c35d0a8f670260ae20b2a71225a7bb1
+    file: third_party/openbao/sdk/helper/authmetadata/auth_metadata.go
+    kind: method
+    line: 179
+    name: Handler.UnmarshalJSON
+    signature: (data []byte) error
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: d66f9e610dc79ea8d2172de9360b4c38faf452a4d08b451c942e810bdf097b20
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 797f7ad517e39416b2ae9f6ae13f9eeee754b953540a2c5ff3ca545d12e61e4a

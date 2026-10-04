@@ -1,15 +1,86 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: ConnectionProducer, ConnectionProducer.Close, ConnectionProducer.Connection,
+    ConnectionProducer.Init, SQLConnectionProducer, SQLConnectionProducer.Close, SQLConnectionProducer.Connection,
+    SQLConnectionProducer.Init, SQLConnectionProducer.SecretValues, SQLConnectionProducer.SetCredentials'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/sdk/database/helper/connutil/connutil.go
+  - third_party/openbao/sdk/database/helper/connutil/sql.go
+  - third_party/openbao/sdk/database/helper/connutil/sql_test.go
+  fingerprint: 330ec9a7ee8db2f417051cec3c06125a3654026b5d8e85342f169cd81b37e2b5
+  interfaces:
+  - codegraphId: interface:48d4b5869c65a3b882d131454d06163c
+    file: third_party/openbao/sdk/database/helper/connutil/connutil.go
+    kind: interface
+    line: 17
+    name: ConnectionProducer
+  - codegraphId: method:c99c5c903f8a077b34026b268b8c4458
+    file: third_party/openbao/sdk/database/helper/connutil/connutil.go
+    kind: method
+    line: 18
+    name: ConnectionProducer.Close
+    signature: () error
+  - codegraphId: method:04fdc8dc8f6253a32a168232526042f8
+    file: third_party/openbao/sdk/database/helper/connutil/connutil.go
+    kind: method
+    line: 19
+    name: ConnectionProducer.Init
+    signature: (context.Context, map[string]any, bool) (map[string]any, error)
+  - codegraphId: method:e6cf6b9a6696eff4668c928fb4e0056d
+    file: third_party/openbao/sdk/database/helper/connutil/connutil.go
+    kind: method
+    line: 20
+    name: ConnectionProducer.Connection
+    signature: (context.Context) (any, error)
+  - codegraphId: struct:d81f5bea6f8380adacb6db72f7f323e0
+    file: third_party/openbao/sdk/database/helper/connutil/sql.go
+    kind: struct
+    line: 25
+    name: SQLConnectionProducer
+  - codegraphId: method:dc4c94228b7447cb58b273d7e8546074
+    file: third_party/openbao/sdk/database/helper/connutil/sql.go
+    kind: method
+    line: 42
+    name: SQLConnectionProducer.Init
+    signature: (ctx context.Context, conf map[string]any, verifyConnection bool) (map[string]any,
+      error)
+  - codegraphId: method:6fcf84dfb3c68382c9e7b1bea6d77885
+    file: third_party/openbao/sdk/database/helper/connutil/sql.go
+    kind: method
+    line: 122
+    name: SQLConnectionProducer.Connection
+    signature: (ctx context.Context) (any, error)
+  - codegraphId: method:9816f53d6ac0e746c72b7357c2e3be4c
+    file: third_party/openbao/sdk/database/helper/connutil/sql.go
+    kind: method
+    line: 176
+    name: SQLConnectionProducer.SecretValues
+    signature: () map[string]any
+  - codegraphId: method:84115a9344807fbb8bc739368f64d780
+    file: third_party/openbao/sdk/database/helper/connutil/sql.go
+    kind: method
+    line: 183
+    name: SQLConnectionProducer.Close
+    signature: () error
+  - codegraphId: method:502c42c9107694a9c33a985fd2cc9b2a
+    file: third_party/openbao/sdk/database/helper/connutil/sql.go
+    kind: method
+    line: 203
+    name: SQLConnectionProducer.SetCredentials
+    signature: (ctx context.Context, statements dbplugin.Statements, staticUser dbplugin.StaticUserConfig)
+      (username, password string, err error)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: ccd881e0f972b22a0cd782e10236f148a38e16d48b01445c9a6fc77f7d963aef
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 330ec9a7ee8db2f417051cec3c06125a3654026b5d8e85342f169cd81b37e2b5
