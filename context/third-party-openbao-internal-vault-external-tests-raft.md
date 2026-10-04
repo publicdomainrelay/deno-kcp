@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so that the raft external tests have a reusable, cluster-agnostic assertion for Raft configuration state instead of each test spelling out the sys/storage/raft/configuration parse and leader checks itself. The helper parameterizes the cluster as a testcluster.VaultCluster, so any cluster implementation the test suite builds can be handed to it, and it derives the expected membership from cluster.Nodes() rather than from a literal list, which keeps the expectation correct as the node count changes. The two test files exist to invoke that helper (TestRaft_Configuration) and to exercise autopilot behavior against the same cluster shape; the context is defined by the shared assertion, not by the individual test names.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

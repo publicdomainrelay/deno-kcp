@@ -2501,6 +2501,14 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.exec-dev-cluster-for-pprof` (MUST): "TestSysPprof_Exec runs in parallel and, when the BAO_BINARY variable is non-empty, builds a dev cluster through testcluster.NewTestExecDevCluster with ClusterOptions.NumCores set to 1, BinaryPath taken from BAO_BINARY, and BaseListenAddress 127.0.0.1:8208, then calls pprof.SysPprof_Test with that cluster."
 - added `r.standby-exec-dev-cluster` (MUST): "TestSysPprof_Standby_Exec runs in parallel and, when BAO_BINARY is non-empty, builds an exec dev cluster with VaultNodeConfig.DisablePerformanceStandby set to true, BinaryPath from BAO_BINARY, and BaseListenAddress 127.0.0.1:8210, then calls pprof.SysPprof_Standby_Test with that cluster."
 
+### third-party-openbao-internal-vault-external-tests-raft
+
+- intent: "" -> "This context exists so that the raft external tests have a reusable, cluster-agnostic assertion for Raft configuration state instead of each test spelling out the sys/storage/raft/configuration parse and leader checks itself. The helper parameterizes the cluster as a testcluster.VaultCluster, so any cluster implementation the test suite builds can be handed to it, and it derives the expected membership from cluster.Nodes() rather than from a literal list, which keeps the expectation correct as the node count changes. The two test files exist to invoke that helper (TestRaft_Configuration) and to exercise autopilot behavior against the same cluster shape; the context is defined by the shared assertion, not by the individual test names."
+- added `r.helper-reused-by-suite` (SHOULD): "The assertion lives in raft.go and is driven from the package's test files: raft_test.go calls Raft_Configuration_Test from TestRaft_Configuration, so the helper stays free of test-registration side effects and remains callable by other tests in third_party/openbao/internal/vault/external_tests/raft/raft_autopilot_test.go and raft_test.go."
+- added `r.leader-is-core-0` (MUST): "For every server entry in secret.Data["config"]["servers"], the helper reads node_id and leader; the entry whose node_id is core-0 must have leader true, and every other entry must have leader false. A violation fails the test with t.Fatalf carrying the offending server value."
+- added `r.membership-matches-node-count` (MUST): "The helper builds the set of observed node_id values and an expected set of names core-0 through core-(N-1), where N is len(cluster.Nodes()), and fails the test when deep.Equal between the two sets returns a non-empty diff, reporting the diff with t.Fatalf."
+- added `r.reads-raft-configuration` (MUST): "Raft_Configuration_Test takes a *testing.T and a testcluster.VaultCluster, takes the API client of the cluster's first node via cluster.Nodes()[0].APIClient(), and reads the path sys/storage/raft/configuration with Logical().Read; a read error is reported with t.Fatal and stops the test."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -2671,4 +2679,4 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-vault-external-tests-pprof-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-pprof-pprof-binary-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-quotas-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-internal-vault-external-tests-raft-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-vault-external-tests-raft-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |

@@ -10,5 +10,15 @@ spec:
   systemContext: third-party-openbao-internal-vault-external-tests-raft
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-vault-external-tests-raft
-  phase: Running
+  agentLog: 'This context covers the raft external test package of the vendored OpenBao
+    tree under third_party/openbao/internal/vault/external_tests/raft. It holds one
+    exported helper, Raft_Configuration_Test in raft.go, plus two Go test files: raft_test.go,
+    which drives it from TestRaft_Configuration, and raft_autopilot_test.go. The helper
+    reads sys/storage/raft/configuration through the first node''s API client, asserts
+    that core-0 is the leader and every other node is not, then compares the set of
+    node ids seen in the response against the set core-0 .. core-N built from the
+    cluster''s node count, failing with a deep.Equal diff when the two sets differ.
+    Nothing else is exported; the package is a test-support surface only, consumed
+    by the surrounding test suite rather than by production code.'
+  message: wrote 4 requirement(s) and 1 interface(s) for third-party-openbao-internal-vault-external-tests-raft
+  phase: Succeeded
