@@ -1,5 +1,6 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
+- class:b6199ded53e7c771c2e355a09af4bba3 PolicyEditController@third_party/openbao/ui/app/controllers/vault/cluster/policy/edit.js:11
 - file:third_party/openbao/ui/app/controllers/vault/cluster/policy/create.js create.js@third_party/openbao/ui/app/controllers/vault/cluster/policy/create.js
 - file:third_party/openbao/ui/app/controllers/vault/cluster/policy/edit.js edit.js@third_party/openbao/ui/app/controllers/vault/cluster/policy/edit.js
 - file:third_party/openbao/ui/app/controllers/vault/cluster/policy/show.js show.js@third_party/openbao/ui/app/controllers/vault/cluster/policy/show.js
@@ -8,5 +9,59 @@ metadata:
   name: third-party-openbao-ui-app-controllers-vault-cluster-policy
   namespace: default
 spec:
+  intent: This context is the policy-editing surface of the OpenBao web UI. It exists
+    to give the edit route a working delete action with success and failure feedback,
+    and to give the create and show routes a shared cleanup contract that releases
+    the record a singleton controller would otherwise hold onto after the route is
+    left. The edit controller owns the destructive path for a policy, and the create
+    controller owns the lifecycle housekeeping that show inherits.
+  interfaces:
+  - file: third_party/openbao/ui/app/controllers/vault/cluster/policy/edit.js
+    kind: class
+    name: PolicyEditController
+    signature: class PolicyEditController extends Controller
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/policy/create.js
+    id: r.create-controller-cleanup-model
+    level: MUST
+    text: The policy create controller's cleanupModel must leave the model untouched
+      when there is no model or when the model is saving, destroyed or destroying,
+      and otherwise set this.model to null, because controllers are singletons and
+      would keep the stale model alive across route visits, then call removeRecord(this.store,
+      model) when the model exposes an unloadRecord function.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/policy/create.js
+    id: r.create-controller-store-service
+    level: MUST
+    text: The create controller must inject the Ember store service so that cleanupModel
+      can pass it to removeRecord when unloading a model.
+  - codeRefs:
+    - class:b6199ded53e7c771c2e355a09af4bba3
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/policy/edit.js
+    id: r.delete-policy-destroys-and-redirects
+    level: MUST
+    text: PolicyEditController.deletePolicy must read policyType and name from this.model,
+      destroy the record through this.model.destroyRecord(), flash a success message
+      of the form '<POLICYTYPE> policy "<name>" was successfully deleted.' with policyType
+      uppercased, and then transition safely to the vault.cluster.policies route for
+      that policyType.
+  - codeRefs:
+    - class:b6199ded53e7c771c2e355a09af4bba3
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/policy/edit.js
+    id: r.delete-policy-rolls-back-on-error
+    level: MUST
+    text: When destroyRecord rejects, deletePolicy must call this.model.rollbackAttributes()
+      and flash a danger message that names the uppercased policyType and the policy
+      name and appends the failure detail, using the error.errors entries joined with
+      '. ' when that array is present and error.message otherwise.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/policy/create.js
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/policy/show.js
+    id: r.show-controller-inherits-create
+    level: MUST
+    text: The policy show controller must extend the create controller without adding
+      or overriding any behavior, so the show route inherits the store service and
+      the cleanupModel contract from the create controller.
   upstream: self

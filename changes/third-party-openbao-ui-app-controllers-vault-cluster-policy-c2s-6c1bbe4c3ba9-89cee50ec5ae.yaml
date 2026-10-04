@@ -10,5 +10,22 @@ spec:
   systemContext: third-party-openbao-ui-app-controllers-vault-cluster-policy
   toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
 status:
-  message: the agent is summarizing third-party-openbao-ui-app-controllers-vault-cluster-policy
-  phase: Running
+  agentLog: This context holds the Ember.js controllers for the OpenBao UI policy
+    screens under third_party/openbao/ui/app/controllers/vault/cluster/policy. edit.js
+    defines PolicyEditController, an Ember Controller that injects the router and
+    flashMessages services and exposes an @action async deletePolicy() that destroys
+    the policy model, flashes a success message naming the uppercased policyType and
+    the policy name, and navigates to vault.cluster.policies for that policyType;
+    when destroyRecord rejects it rolls back the model attributes and flashes a danger
+    message built from the joined error.errors or error.message. create.js defines
+    an anonymous Controller.extend with an injected store service and a cleanupModel()
+    hook that returns early when there is no model or the model is saving, destroyed
+    or destroying, otherwise unsetting this.model to null because controllers are
+    singletons, and calling removeRecord(this.store, model) when the model has an
+    unloadRecord function. show.js defines a controller that is just CreateController.extend({}),
+    so the show route reuses the create controller's store service and cleanupModel
+    behavior unchanged.
+  message: wrote 5 requirement(s) and 1 interface(s) for third-party-openbao-ui-app-controllers-vault-cluster-policy;
+    interface PolicyEditController.deletePolicy is not in the observed facts; dropped;
+    interface cleanupModel is not in the observed facts; dropped
+  phase: Succeeded

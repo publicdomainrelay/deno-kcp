@@ -4449,6 +4449,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.loading-flag-from-route` (MUST): "The controller holds an `isLoading` flag that defaults to false and is set by the route's `loading` action, so the template reflects route transition progress."
 - added `r.query-params-bound` (MUST): "The controller binds the `page` and `pageFilter` properties to the URL query parameters of the same names, and keeps the local filter state `filter` null, `page` 1, `pageFilter` null, and `filterFocused` false until changed."
 
+### third-party-openbao-ui-app-controllers-vault-cluster-policy
+
+- intent: "" -> "This context is the policy-editing surface of the OpenBao web UI. It exists to give the edit route a working delete action with success and failure feedback, and to give the create and show routes a shared cleanup contract that releases the record a singleton controller would otherwise hold onto after the route is left. The edit controller owns the destructive path for a policy, and the create controller owns the lifecycle housekeeping that show inherits."
+- added `r.create-controller-cleanup-model` (MUST): "The policy create controller's cleanupModel must leave the model untouched when there is no model or when the model is saving, destroyed or destroying, and otherwise set this.model to null, because controllers are singletons and would keep the stale model alive across route visits, then call removeRecord(this.store, model) when the model exposes an unloadRecord function."
+- added `r.create-controller-store-service` (MUST): "The create controller must inject the Ember store service so that cleanupModel can pass it to removeRecord when unloading a model."
+- added `r.delete-policy-destroys-and-redirects` (MUST): "PolicyEditController.deletePolicy must read policyType and name from this.model, destroy the record through this.model.destroyRecord(), flash a success message of the form '<POLICYTYPE> policy "<name>" was successfully deleted.' with policyType uppercased, and then transition safely to the vault.cluster.policies route for that policyType."
+- added `r.delete-policy-rolls-back-on-error` (MUST): "When destroyRecord rejects, deletePolicy must call this.model.rollbackAttributes() and flash a danger message that names the uppercased policyType and the policy name and appends the failure detail, using the error.errors entries joined with '. ' when that array is present and error.message otherwise."
+- added `r.show-controller-inherits-create` (MUST): "The policy show controller must extend the create controller without adding or overriding any behavior, so the show route inherits the store service and the cleanupModel contract from the create controller."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4809,6 +4818,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-policies-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-controllers-vault-cluster-policy-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-policy-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-secrets-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

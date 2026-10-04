@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context is the policy-editing surface of the OpenBao web UI. It exists to give the edit route a working delete action with success and failure feedback, and to give the create and show routes a shared cleanup contract that releases the record a singleton controller would otherwise hold onto after the route is left. The edit controller owns the destructive path for a policy, and the create controller owns the lifecycle housekeeping that show inherits.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
