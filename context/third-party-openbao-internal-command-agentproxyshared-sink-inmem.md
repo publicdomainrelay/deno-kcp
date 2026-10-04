@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to describe the in-memory implementation of the agent proxy sink interface, the alternative to the file sink for deployments that must not persist a token to disk. It matters because WriteToken is the hook that both retains the token in process memory and pushes it into the lease cache so cached leases are invalidated and re-authenticated when the token rotates, while Token is the read path other agent components use to fetch the current credential.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

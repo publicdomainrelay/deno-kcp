@@ -1242,6 +1242,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.write-token-error-wrapping` (SHOULD): "fileSink.WriteToken should return wrapped errors that name the failing step and path: UUID generation, temp file opening in the target directory, writing, closing, removing during the write check, changing ownership, and renaming to the target path, and should log a trace on entry and exit plus an info line when the token is written."
 - added `r.write-token-temp-file-protocol` (MUST): "fileSink.WriteToken must generate a UUID, open a temporary file named "<basename>.tmp.<first UUID segment>" in the same directory as the configured path with the sink's mode, and write either the supplied token or, when the token is empty, the UUID itself; when writing fails it must close and remove the temporary file, ignoring those errors, and return a wrapped error."
 
+### third-party-openbao-internal-command-agentproxyshared-sink-inmem
+
+- intent: "" -> "This context exists to describe the in-memory implementation of the agent proxy sink interface, the alternative to the file sink for deployments that must not persist a token to disk. It matters because WriteToken is the hook that both retains the token in process memory and pushes it into the lease cache so cached leases are invalidated and re-authenticated when the token rotates, while Token is the read path other agent components use to fetch the current credential."
+- added `r.concurrent-access-safe` (MUST): "Token access must go through an atomic load and store pair, so that concurrent WriteToken and Token calls never race on the token field."
+- added `r.implements-sink-interface` (MUST): "The in-memory sink must satisfy the sink.Sink interface, providing both WriteToken(string) error and Token() string, so it is interchangeable with the file sink wherever a Sink is required."
+- added `r.new-constructs-inmem-sink` (MUST): "New must accept a *sink.SinkConfig and a *cache.LeaseCache and return a value satisfying sink.Sink together with a nil error, retaining the lease cache so that later token writes can register with it. A nil lease cache must still produce a usable sink."
+- added `r.token-reads-stored-or-empty` (MUST): "inmemSink.Token must return the token most recently written by WriteToken, and must return the empty string when no token has ever been stored, never panicking on the unset case."
+- added `r.write-token-stores-and-registers` (MUST): "inmemSink.WriteToken must store the given token in the sink's atomic token value, and then, when a lease cache is present, call the cache's RegisterAutoAuthToken with that token and return the resulting error. When no lease cache is present the method must return nil."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -1298,6 +1307,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-command-agentproxyshared-sink-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agentproxyshared-sink-file-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agentproxyshared-sink-file-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-command-agentproxyshared-sink-inmem-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-command-agentproxyshared-sink-inmem-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agentproxyshared-sink-mock-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-command-agentproxyshared-winsvc-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-internal-command-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |

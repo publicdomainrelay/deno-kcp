@@ -17365,8 +17365,72 @@ system_contexts:
   codeRefIndex:
   - file:third_party/openbao/internal/command/agentproxyshared/sink/inmem/inmem_sink.go
     inmem_sink.go@third_party/openbao/internal/command/agentproxyshared/sink/inmem/inmem_sink.go
+  - function:b01b1fa25047842ed99f8dda474fa46b New@third_party/openbao/internal/command/agentproxyshared/sink/inmem/inmem_sink.go:24
+  - method:53c83733cd1819b3ce234033f1bb0527 inmemSink.WriteToken@third_party/openbao/internal/command/agentproxyshared/sink/inmem/inmem_sink.go:38
+  - method:559cadf1bde829922d9e7a655c71ce22 inmemSink.Token@third_party/openbao/internal/command/agentproxyshared/sink/inmem/inmem_sink.go:48
   id: sc.third-party-openbao-internal-command-agentproxyshared-sink-inmem
+  intent: This context exists to describe the in-memory implementation of the agent
+    proxy sink interface, the alternative to the file sink for deployments that must
+    not persist a token to disk. It matters because WriteToken is the hook that both
+    retains the token in process memory and pushes it into the lease cache so cached
+    leases are invalidated and re-authenticated when the token rotates, while Token
+    is the read path other agent components use to fetch the current credential.
+  interfaces:
+  - file: third_party/openbao/internal/command/agentproxyshared/sink/inmem/inmem_sink.go
+    kind: function
+    name: New
+    signature: func New(conf *sink.SinkConfig, leaseCache *cache.LeaseCache) (sink.Sink,
+      error)
+  - file: third_party/openbao/internal/command/agentproxyshared/sink/inmem/inmem_sink.go
+    kind: method
+    name: inmemSink.Token
+    signature: func (s *inmemSink) Token() string
+  - file: third_party/openbao/internal/command/agentproxyshared/sink/inmem/inmem_sink.go
+    kind: method
+    name: inmemSink.WriteToken
+    signature: func (s *inmemSink) WriteToken(token string) error
   name: third-party-openbao-internal-command-agentproxyshared-sink-inmem
+  requirements:
+  - codeRefs:
+    - method:53c83733cd1819b3ce234033f1bb0527
+    - method:559cadf1bde829922d9e7a655c71ce22
+    id: r.concurrent-access-safe
+    level: MUST
+    text: Token access must go through an atomic load and store pair, so that concurrent
+      WriteToken and Token calls never race on the token field.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/sink/inmem/inmem_sink.go
+    id: r.implements-sink-interface
+    level: MUST
+    text: The in-memory sink must satisfy the sink.Sink interface, providing both
+      WriteToken(string) error and Token() string, so it is interchangeable with the
+      file sink wherever a Sink is required.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/sink/inmem/inmem_sink.go
+    - function:b01b1fa25047842ed99f8dda474fa46b
+    id: r.new-constructs-inmem-sink
+    level: MUST
+    text: New must accept a *sink.SinkConfig and a *cache.LeaseCache and return a
+      value satisfying sink.Sink together with a nil error, retaining the lease cache
+      so that later token writes can register with it. A nil lease cache must still
+      produce a usable sink.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/sink/inmem/inmem_sink.go
+    - method:559cadf1bde829922d9e7a655c71ce22
+    id: r.token-reads-stored-or-empty
+    level: MUST
+    text: inmemSink.Token must return the token most recently written by WriteToken,
+      and must return the empty string when no token has ever been stored, never panicking
+      on the unset case.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/sink/inmem/inmem_sink.go
+    - method:53c83733cd1819b3ce234033f1bb0527
+    id: r.write-token-stores-and-registers
+    level: MUST
+    text: inmemSink.WriteToken must store the given token in the sink's atomic token
+      value, and then, when a lease cache is present, call the cache's RegisterAutoAuthToken
+      with that token and return the resulting error. When no lease cache is present
+      the method must return nil.
   upstream: self
 - code:
   - third_party/openbao/internal/command/agentproxyshared/sink/mock/mock_sink.go
