@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to pin down the behavior of the OIDC provider route controller inside the OpenBao UI so that the edit-route detection and header-visibility contract are specified rather than inferred. It records that route state is derived from the router's routeDidChange event by substring match on the route name, and that the header is shown only outside the edit route. Anyone porting, refactoring, or testing the OIDC providers UI needs this contract: the controller holds no other state and computes no other derived value.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

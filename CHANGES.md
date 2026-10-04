@@ -4410,6 +4410,14 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.rotate-key-task-wrapper` (SHOULD): "rotateKey is wrapped as an ember-concurrency task with the waitFor decorator, so the rotation runs as a managed, non-reentrant task while the UI waits on it."
 - added `r.rotate-key-uses-adapter-and-ttl` (MUST): "rotateKey looks up the adapter for the oidc/key model through the injected store and calls its rotate method with the model's name and the model's verificationTtl, so both the key name and the verification TTL are sent for the rotation."
 
+### third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-providers
+
+- intent: "" -> "This context exists to pin down the behavior of the OIDC provider route controller inside the OpenBao UI so that the edit-route detection and header-visibility contract are specified rather than inferred. It records that route state is derived from the router's routeDidChange event by substring match on the route name, and that the header is shown only outside the edit route. Anyone porting, refactoring, or testing the OIDC providers UI needs this contract: the controller holds no other state and computes no other derived value."
+- added `r.constructor-subscribes-route-change` (MUST): "The constructor must call super with the forwarded arguments and register a handler on the router's routeDidChange event that destructures targetName and assigns isEditRoute the value true when targetName includes the substring 'edit', and false when it does not."
+- added `r.module-default-export` (MUST): "The file third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/providers/provider.js must define OidcProviderController as an Ember Controller subclass and export it as the module default."
+- added `r.router-service-injection` (MUST): "OidcProviderController must inject the Ember router service into the router property so the controller can observe route transitions, and must declare isEditRoute as a tracked property so changes to it re-render the template."
+- added `r.show-header-inverts-edit-route` (MUST): "The showHeader getter must return the negation of isEditRoute, so the header is shown only when the current route is not the edit route and is hidden while the edit form is rendered."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4762,8 +4770,9 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-clients-client-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-keys-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-keys-key-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-keys-key-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-providers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-keys-key-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-providers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-providers-provider-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
