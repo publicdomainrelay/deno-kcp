@@ -2003,6 +2003,22 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.is-builtin-version-parses-semver` (MUST): "IsBuiltinVersion must return false when the input string is not a valid semantic version, and must not panic or error on such input."
 - added `r.is-builtin-version-table-test` (SHOULD): "TestIsBuiltinVersion should keep the table of version/builtin pairs covering both accepted metadata placements, the substring-but-not-identifier negative case, a version with no metadata, and a non-semver string, asserting each expected result."
 
+### third-party-openbao-internal-http
+
+- intent: "" -> "The context exists to explain how the vendored OpenBao HTTP front end is structured so that deno-kcp can reason about, patch or call it without re-reading the whole vendored tree. It names the request/response wire types of the sys endpoints, the handler anchors and adapters used to inject a handler into the Vault core, the JSON complexity enforcement, the UI asset wrapper, and the test harness helpers. Every requirement here describes behaviour already present in the observed files, not a proposed change."
+- added `r.copy-response-writer` (MUST): "copyResponseWriter wraps an http.ResponseWriter: Header delegates to the wrapped writer, Write appends the bytes to an internal buffer while also writing them through, and WriteHeader records the status code before forwarding it, so the response body and status can be inspected after the handler runs."
+- added `r.cors-and-help` (SHOULD): "cors.go handles cross-origin request policy for the API and UI, and help.go renders the help output for mount and auth paths; both are wired into the shared route table in handler.go."
+- added `r.handler-anchor` (MUST): "HandlerAnchor is the no-argument anchor type that the Vault core mounts; its Handler method takes the listener properties and returns the package-level handler built from those properties."
+- added `r.handler-func-adapter` (MUST): "HandlerFunc is a func type over the same signature, and its Handler method lets an arbitrary function be used wherever a handler provider is required, so tests and callbacks can install their own handler."
+- added `r.json-complexity-limits` (MUST): "EnforceJSONComplexityLimits reads a JSON body from the reader under a context, validates it against the configured complexity limits, and reports the observed size values along with an error when the limits are exceeded, so oversized or deeply nested request bodies are rejected instead of decoded."
+- added `r.logical-routing` (MUST): "logical.go forwards non-sys paths to the Vault core as logical requests, and index.go serves the index route, forming the passthrough from HTTP to secret engine operations."
+- added `r.multi-reader-closer` (MAY): "multiReaderCloser combines several readers and closes them as one; its Close method releases every underlying reader so request bodies assembled from multiple sources are fully drained."
+- added `r.sys-route-files` (MUST): "Each sys concern has its own handler file registering its routes on the shared mux: audit, auth, config CORS, config state, generate-root, health, host info, in-flight requests, init, internal, leader, lease, metrics, monitor, mount, mounts, namespaces, policy, raft, rekey, rotate, seal and wrapping, and each ships a paired _test.go exercising those routes."
+- added `r.sys-wire-types` (MUST): "The sys endpoint files define the request and response structs that fix the JSON wire shape of each operation: generate-root init/status/update, health, init request, init response, init status, raft join request and response, rekey request, rekey status, rekey update request and response, rekey verification update request, verification status and verification update response, and the unseal request. The HTTP handlers decode into and encode from these types."
+- added `r.test-harness` (SHOULD): "testing.go exposes helpers that build a real listener on a free address and stand up a fully wired test server: TestListener returns the listener and address, TestServer builds a server from a core, TestServerWithListener and TestServerWithListenerAndProperties accept a caller-supplied listener and optional handler properties, TestServerWithCertForwarding enables the certificate-forwarding path, and TestServerAuth returns a server that requires the given token."
+- added `r.ui-asset-wrapper` (SHOULD): "UIAssetWrapper serves the web UI file set; its Open method returns an http.File for a requested asset name, backed by embedded assets when the embed build tag is on and by assets_stub.go otherwise."
+- added `r.wrap-http-server-handler` (MUST): "WrapHttpServerHandler takes an http.Handler plus a listener configuration and returns the handler to serve, applying the listener-derived wrapping (transport, TLS, proxy and similar concerns) that the configured listener requires."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -2126,5 +2142,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-helper-tlsdebug-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-useragent-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-versions-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-http-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-http-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-physical-crosstest-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |

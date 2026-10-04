@@ -29239,8 +29239,334 @@ system_contexts:
   - file:third_party/openbao/internal/http/testing.go testing.go@third_party/openbao/internal/http/testing.go
   - file:third_party/openbao/internal/http/unwrapping_raw_body_test.go unwrapping_raw_body_test.go@third_party/openbao/internal/http/unwrapping_raw_body_test.go
   - file:third_party/openbao/internal/http/util.go util.go@third_party/openbao/internal/http/util.go
+  - function:1a39cf4e86eccf88009e235523d16614 TestServerWithListenerAndProperties@third_party/openbao/internal/http/testing.go:32
+  - function:2e8c896a6a31adb733c76bde2edca6e5 WrapHttpServerHandler@third_party/openbao/internal/http/handler.go:478
+  - function:9721f01f2945a7644f94f41f0c466613 TestListener@third_party/openbao/internal/http/testing.go:16
+  - function:a1732bf9310d647b993a51edae99c0af TestServerWithListener@third_party/openbao/internal/http/testing.go:47
+  - function:b0d52dd8e11ccd15f45fb886f9fb5082 TestServerWithCertForwarding@third_party/openbao/internal/http/testing.go:63
+  - function:b106bcd2d6184b15afb7677cff3a396c EnforceJSONComplexityLimits@third_party/openbao/internal/http/json.go:122
+  - function:e06335d0c0882c762de0d50399455bd9 TestServer@third_party/openbao/internal/http/testing.go:87
+  - function:ee89a43f24c3e910320d9f6364f5b1e4 TestServerAuth@third_party/openbao/internal/http/testing.go:93
+  - method:00f873e3b91b9528ca4d0b27b8ec4360 multiReaderCloser.Close@third_party/openbao/internal/http/util.go:253
+  - method:4d96008ed49146f640748d9606499ead copyResponseWriter.Write@third_party/openbao/internal/http/handler.go:283
+  - method:5412779bc9a7ee61e2eff3d2b8384a63 copyResponseWriter.WriteHeader@third_party/openbao/internal/http/handler.go:288
+  - method:54a0c4654f2f6b8ed2ad71d828455b96 UIAssetWrapper.Open@third_party/openbao/internal/http/handler.go:825
+  - method:84eb5fb6f1aae6434f6d6f06dbfd80cf HandlerAnchor.Handler@third_party/openbao/internal/http/handler.go:129
+  - method:a5cca87321744db3c1ee18a1dc79bd40 HandlerFunc.Handler@third_party/openbao/internal/http/handler.go:137
+  - method:c831c4945e58cf05c1efba63b5fd62bf copyResponseWriter.Header@third_party/openbao/internal/http/handler.go:279
+  - struct:00c3694b43bc074ff8e885b14fd2742a UnsealRequest@third_party/openbao/internal/http/sys_seal.go:184
+  - struct:016c00b4b99172fccb45188271ef7f5d HandlerAnchor@third_party/openbao/internal/http/handler.go:127
+  - struct:0be9dca687b6bc4a7250ba145ece21c1 InitRequest@third_party/openbao/internal/http/sys_init.go:119
+  - struct:30a67a6afdd05f4539608e1c5b492034 RekeyVerificationStatusResponse@third_party/openbao/internal/http/sys_rekey.go:372
+  - struct:5145c7dfa28a9d4e42cf239a95151f57 HealthResponse@third_party/openbao/internal/http/sys_health.go:170
+  - struct:73bb07faf010373b79a04aac61e398ef RekeyVerificationUpdateResponse@third_party/openbao/internal/http/sys_rekey.go:380
+  - struct:878734e749075a5f33055d05e2141217 RekeyUpdateResponse@third_party/openbao/internal/http/sys_rekey.go:356
+  - struct:9516c58a3e2ce7506455850e5efe3ff7 GenerateRootUpdateRequest@third_party/openbao/internal/http/sys_generate_root.go:230
+  - struct:a100ab592585fb4f37e0b3742df1df7c JoinResponse@third_party/openbao/internal/http/sys_raft.go:101
+  - struct:b78c5904da11db12bd1bb73047f41b5f RekeyUpdateRequest@third_party/openbao/internal/http/sys_rekey.go:351
+  - struct:b9f82c89b9e865f4ae188c1228608441 InitStatusResponse@third_party/openbao/internal/http/sys_init.go:137
+  - struct:bc7f306e4d035f955d01e9846abc92cf GenerateRootStatusResponse@third_party/openbao/internal/http/sys_generate_root.go:217
+  - struct:bf0c13e2cc2e82e9088408c856ce3266 GenerateRootInitRequest@third_party/openbao/internal/http/sys_generate_root.go:212
+  - struct:c1feb31f25bc79ac7c3f575c3cf72a87 RekeyRequest@third_party/openbao/internal/http/sys_rekey.go:330
+  - struct:db8c14b6eed4f3bbb3c4adea7202dd64 RekeyVerificationUpdateRequest@third_party/openbao/internal/http/sys_rekey.go:367
+  - struct:f3f3f40f449d5956118c6e73d5851eb7 InitResponse@third_party/openbao/internal/http/sys_init.go:129
+  - struct:f4eaf8acd7e99e98cc5c232bba9d84a3 RekeyStatusResponse@third_party/openbao/internal/http/sys_rekey.go:338
+  - struct:f930638200133c35808bc2881f2f701f JoinRequest@third_party/openbao/internal/http/sys_raft.go:105
+  - struct:fefbc685630821c5a39e1c2f581b33d8 UIAssetWrapper@third_party/openbao/internal/http/handler.go:821
+  - type_alias:28a21571ba0b776aa360350f41d08ee0 HandlerFunc@third_party/openbao/internal/http/handler.go:135
   id: sc.third-party-openbao-internal-http
+  intent: The context exists to explain how the vendored OpenBao HTTP front end is
+    structured so that deno-kcp can reason about, patch or call it without re-reading
+    the whole vendored tree. It names the request/response wire types of the sys endpoints,
+    the handler anchors and adapters used to inject a handler into the Vault core,
+    the JSON complexity enforcement, the UI asset wrapper, and the test harness helpers.
+    Every requirement here describes behaviour already present in the observed files,
+    not a proposed change.
+  interfaces:
+  - file: third_party/openbao/internal/http/json.go
+    kind: function
+    name: EnforceJSONComplexityLimits
+    signature: func EnforceJSONComplexityLimits(ctx context.Context, reader io.Reader)
+      (int64, int64, error)
+  - file: third_party/openbao/internal/http/sys_generate_root.go
+    kind: struct
+    name: GenerateRootInitRequest
+    signature: type GenerateRootInitRequest struct
+  - file: third_party/openbao/internal/http/sys_generate_root.go
+    kind: struct
+    name: GenerateRootStatusResponse
+    signature: type GenerateRootStatusResponse struct
+  - file: third_party/openbao/internal/http/sys_generate_root.go
+    kind: struct
+    name: GenerateRootUpdateRequest
+    signature: type GenerateRootUpdateRequest struct
+  - file: third_party/openbao/internal/http/handler.go
+    kind: struct
+    name: HandlerAnchor
+    signature: type HandlerAnchor struct
+  - file: third_party/openbao/internal/http/handler.go
+    kind: method
+    name: HandlerAnchor.Handler
+    signature: func (h HandlerAnchor) Handler(props *vault.HandlerProperties) http.Handler
+  - file: third_party/openbao/internal/http/handler.go
+    kind: type_alias
+    name: HandlerFunc
+    signature: type HandlerFunc func(props *vault.HandlerProperties) http.Handler
+  - file: third_party/openbao/internal/http/handler.go
+    kind: method
+    name: HandlerFunc.Handler
+    signature: func (h HandlerFunc) Handler(props *vault.HandlerProperties) http.Handler
+  - file: third_party/openbao/internal/http/sys_health.go
+    kind: struct
+    name: HealthResponse
+    signature: type HealthResponse struct
+  - file: third_party/openbao/internal/http/sys_init.go
+    kind: struct
+    name: InitRequest
+    signature: type InitRequest struct
+  - file: third_party/openbao/internal/http/sys_init.go
+    kind: struct
+    name: InitResponse
+    signature: type InitResponse struct
+  - file: third_party/openbao/internal/http/sys_init.go
+    kind: struct
+    name: InitStatusResponse
+    signature: type InitStatusResponse struct
+  - file: third_party/openbao/internal/http/sys_raft.go
+    kind: struct
+    name: JoinRequest
+    signature: type JoinRequest struct
+  - file: third_party/openbao/internal/http/sys_raft.go
+    kind: struct
+    name: JoinResponse
+    signature: type JoinResponse struct
+  - file: third_party/openbao/internal/http/sys_rekey.go
+    kind: struct
+    name: RekeyRequest
+    signature: type RekeyRequest struct
+  - file: third_party/openbao/internal/http/sys_rekey.go
+    kind: struct
+    name: RekeyStatusResponse
+    signature: type RekeyStatusResponse struct
+  - file: third_party/openbao/internal/http/sys_rekey.go
+    kind: struct
+    name: RekeyUpdateRequest
+    signature: type RekeyUpdateRequest struct
+  - file: third_party/openbao/internal/http/sys_rekey.go
+    kind: struct
+    name: RekeyUpdateResponse
+    signature: type RekeyUpdateResponse struct
+  - file: third_party/openbao/internal/http/sys_rekey.go
+    kind: struct
+    name: RekeyVerificationStatusResponse
+    signature: type RekeyVerificationStatusResponse struct
+  - file: third_party/openbao/internal/http/sys_rekey.go
+    kind: struct
+    name: RekeyVerificationUpdateRequest
+    signature: type RekeyVerificationUpdateRequest struct
+  - file: third_party/openbao/internal/http/sys_rekey.go
+    kind: struct
+    name: RekeyVerificationUpdateResponse
+    signature: type RekeyVerificationUpdateResponse struct
+  - file: third_party/openbao/internal/http/testing.go
+    kind: function
+    name: TestListener
+    signature: func TestListener(tb testing.TB) (net.Listener, string)
+  - file: third_party/openbao/internal/http/testing.go
+    kind: function
+    name: TestServer
+    signature: func TestServer(tb testing.TB, core *vault.Core) (net.Listener, string)
+  - file: third_party/openbao/internal/http/testing.go
+    kind: function
+    name: TestServerAuth
+    signature: func TestServerAuth(tb testing.TB, addr string, token string)
+  - file: third_party/openbao/internal/http/testing.go
+    kind: function
+    name: TestServerWithCertForwarding
+    signature: func TestServerWithCertForwarding(tb testing.TB, core *vault.Core)
+      (net.Listener, string)
+  - file: third_party/openbao/internal/http/testing.go
+    kind: function
+    name: TestServerWithListener
+    signature: func TestServerWithListener(tb testing.TB, ln net.Listener, addr string,
+      core *vault.Core)
+  - file: third_party/openbao/internal/http/testing.go
+    kind: function
+    name: TestServerWithListenerAndProperties
+    signature: func TestServerWithListenerAndProperties(tb testing.TB, ln net.Listener,
+      addr string, core *vault.Core, props *vault.HandlerProperties)
+  - file: third_party/openbao/internal/http/handler.go
+    kind: struct
+    name: UIAssetWrapper
+    signature: type UIAssetWrapper struct
+  - file: third_party/openbao/internal/http/handler.go
+    kind: method
+    name: UIAssetWrapper.Open
+    signature: func (w *UIAssetWrapper) Open(name string) (http.File, error)
+  - file: third_party/openbao/internal/http/sys_seal.go
+    kind: struct
+    name: UnsealRequest
+    signature: type UnsealRequest struct
+  - file: third_party/openbao/internal/http/handler.go
+    kind: function
+    name: WrapHttpServerHandler
+    signature: func WrapHttpServerHandler(h http.Handler, l *configutil.Listener)
+      http.Handler
+  - file: third_party/openbao/internal/http/handler.go
+    kind: method
+    name: copyResponseWriter.Header
+    signature: func (w *copyResponseWriter) Header() http.Header
+  - file: third_party/openbao/internal/http/handler.go
+    kind: method
+    name: copyResponseWriter.Write
+    signature: func (w *copyResponseWriter) Write(buf []byte) (int, error)
+  - file: third_party/openbao/internal/http/handler.go
+    kind: method
+    name: copyResponseWriter.WriteHeader
+    signature: func (w *copyResponseWriter) WriteHeader(code int)
+  - file: third_party/openbao/internal/http/util.go
+    kind: method
+    name: multiReaderCloser.Close
+    signature: func (m *multiReaderCloser) Close() error
   name: third-party-openbao-internal-http
+  requirements:
+  - codeRefs:
+    - method:4d96008ed49146f640748d9606499ead
+    - method:5412779bc9a7ee61e2eff3d2b8384a63
+    - method:c831c4945e58cf05c1efba63b5fd62bf
+    id: r.copy-response-writer
+    level: MUST
+    text: 'copyResponseWriter wraps an http.ResponseWriter: Header delegates to the
+      wrapped writer, Write appends the bytes to an internal buffer while also writing
+      them through, and WriteHeader records the status code before forwarding it,
+      so the response body and status can be inspected after the handler runs.'
+  - codeRefs:
+    - file:third_party/openbao/internal/http/cors.go
+    - file:third_party/openbao/internal/http/handler.go
+    - file:third_party/openbao/internal/http/help.go
+    id: r.cors-and-help
+    level: SHOULD
+    text: cors.go handles cross-origin request policy for the API and UI, and help.go
+      renders the help output for mount and auth paths; both are wired into the shared
+      route table in handler.go.
+  - codeRefs:
+    - file:third_party/openbao/internal/http/handler.go
+    - method:84eb5fb6f1aae6434f6d6f06dbfd80cf
+    - struct:016c00b4b99172fccb45188271ef7f5d
+    id: r.handler-anchor
+    level: MUST
+    text: HandlerAnchor is the no-argument anchor type that the Vault core mounts;
+      its Handler method takes the listener properties and returns the package-level
+      handler built from those properties.
+  - codeRefs:
+    - method:a5cca87321744db3c1ee18a1dc79bd40
+    - type_alias:28a21571ba0b776aa360350f41d08ee0
+    id: r.handler-func-adapter
+    level: MUST
+    text: HandlerFunc is a func type over the same signature, and its Handler method
+      lets an arbitrary function be used wherever a handler provider is required,
+      so tests and callbacks can install their own handler.
+  - codeRefs:
+    - file:third_party/openbao/internal/http/json.go
+    - function:b106bcd2d6184b15afb7677cff3a396c
+    id: r.json-complexity-limits
+    level: MUST
+    text: EnforceJSONComplexityLimits reads a JSON body from the reader under a context,
+      validates it against the configured complexity limits, and reports the observed
+      size values along with an error when the limits are exceeded, so oversized or
+      deeply nested request bodies are rejected instead of decoded.
+  - codeRefs:
+    - file:third_party/openbao/internal/http/index.go
+    - file:third_party/openbao/internal/http/logical.go
+    id: r.logical-routing
+    level: MUST
+    text: logical.go forwards non-sys paths to the Vault core as logical requests,
+      and index.go serves the index route, forming the passthrough from HTTP to secret
+      engine operations.
+  - codeRefs:
+    - file:third_party/openbao/internal/http/util.go
+    - method:00f873e3b91b9528ca4d0b27b8ec4360
+    id: r.multi-reader-closer
+    level: MAY
+    text: multiReaderCloser combines several readers and closes them as one; its Close
+      method releases every underlying reader so request bodies assembled from multiple
+      sources are fully drained.
+  - codeRefs:
+    - file:third_party/openbao/internal/http/sys_generate_root.go
+    - file:third_party/openbao/internal/http/sys_health.go
+    - file:third_party/openbao/internal/http/sys_in_flight_requests.go
+    - file:third_party/openbao/internal/http/sys_init.go
+    - file:third_party/openbao/internal/http/sys_leader.go
+    - file:third_party/openbao/internal/http/sys_metrics.go
+    - file:third_party/openbao/internal/http/sys_raft.go
+    - file:third_party/openbao/internal/http/sys_rekey.go
+    - file:third_party/openbao/internal/http/sys_seal.go
+    id: r.sys-route-files
+    level: MUST
+    text: 'Each sys concern has its own handler file registering its routes on the
+      shared mux: audit, auth, config CORS, config state, generate-root, health, host
+      info, in-flight requests, init, internal, leader, lease, metrics, monitor, mount,
+      mounts, namespaces, policy, raft, rekey, rotate, seal and wrapping, and each
+      ships a paired _test.go exercising those routes.'
+  - codeRefs:
+    - struct:00c3694b43bc074ff8e885b14fd2742a
+    - struct:0be9dca687b6bc4a7250ba145ece21c1
+    - struct:30a67a6afdd05f4539608e1c5b492034
+    - struct:5145c7dfa28a9d4e42cf239a95151f57
+    - struct:73bb07faf010373b79a04aac61e398ef
+    - struct:878734e749075a5f33055d05e2141217
+    - struct:9516c58a3e2ce7506455850e5efe3ff7
+    - struct:a100ab592585fb4f37e0b3742df1df7c
+    - struct:b78c5904da11db12bd1bb73047f41b5f
+    - struct:b9f82c89b9e865f4ae188c1228608441
+    - struct:bc7f306e4d035f955d01e9846abc92cf
+    - struct:bf0c13e2cc2e82e9088408c856ce3266
+    - struct:c1feb31f25bc79ac7c3f575c3cf72a87
+    - struct:db8c14b6eed4f3bbb3c4adea7202dd64
+    - struct:f3f3f40f449d5956118c6e73d5851eb7
+    - struct:f4eaf8acd7e99e98cc5c232bba9d84a3
+    - struct:f930638200133c35808bc2881f2f701f
+    id: r.sys-wire-types
+    level: MUST
+    text: 'The sys endpoint files define the request and response structs that fix
+      the JSON wire shape of each operation: generate-root init/status/update, health,
+      init request, init response, init status, raft join request and response, rekey
+      request, rekey status, rekey update request and response, rekey verification
+      update request, verification status and verification update response, and the
+      unseal request. The HTTP handlers decode into and encode from these types.'
+  - codeRefs:
+    - file:third_party/openbao/internal/http/testing.go
+    - function:1a39cf4e86eccf88009e235523d16614
+    - function:9721f01f2945a7644f94f41f0c466613
+    - function:a1732bf9310d647b993a51edae99c0af
+    - function:b0d52dd8e11ccd15f45fb886f9fb5082
+    - function:e06335d0c0882c762de0d50399455bd9
+    - function:ee89a43f24c3e910320d9f6364f5b1e4
+    id: r.test-harness
+    level: SHOULD
+    text: 'testing.go exposes helpers that build a real listener on a free address
+      and stand up a fully wired test server: TestListener returns the listener and
+      address, TestServer builds a server from a core, TestServerWithListener and
+      TestServerWithListenerAndProperties accept a caller-supplied listener and optional
+      handler properties, TestServerWithCertForwarding enables the certificate-forwarding
+      path, and TestServerAuth returns a server that requires the given token.'
+  - codeRefs:
+    - file:third_party/openbao/internal/http/assets.go
+    - file:third_party/openbao/internal/http/assets_stub.go
+    - method:54a0c4654f2f6b8ed2ad71d828455b96
+    - struct:fefbc685630821c5a39e1c2f581b33d8
+    id: r.ui-asset-wrapper
+    level: SHOULD
+    text: UIAssetWrapper serves the web UI file set; its Open method returns an http.File
+      for a requested asset name, backed by embedded assets when the embed build tag
+      is on and by assets_stub.go otherwise.
+  - codeRefs:
+    - function:2e8c896a6a31adb733c76bde2edca6e5
+    id: r.wrap-http-server-handler
+    level: MUST
+    text: WrapHttpServerHandler takes an http.Handler plus a listener configuration
+      and returns the handler to serve, applying the listener-derived wrapping (transport,
+      TLS, proxy and similar concerns) that the configured listener requires.
   upstream: self
 - code:
   - third_party/openbao/internal/physical/crosstest/cross_test.go

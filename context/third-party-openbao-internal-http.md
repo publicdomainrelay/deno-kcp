@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists to explain how the vendored OpenBao HTTP front end is structured so that deno-kcp can reason about, patch or call it without re-reading the whole vendored tree. It names the request/response wire types of the sys endpoints, the handler anchors and adapters used to inject a handler into the Vault core, the JSON complexity enforcement, the UI asset wrapper, and the test harness helpers. Every requirement here describes behaviour already present in the observed files, not a proposed change.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

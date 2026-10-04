@@ -10,5 +10,16 @@ spec:
   systemContext: third-party-openbao-internal-http
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-http
-  phase: Running
+  agentLog: This context is the OpenBao (Vault fork) HTTP API layer vendored into
+    deno-kcp under third_party/openbao/internal/http. It contains handler.go, which
+    registers the whole HTTP route table and mounts the Vault core behind net/http,
+    plus per-endpoint files for the sys surface (generate-root, health, init, in-flight
+    requests, leader, metrics, raft join, rekey, seal), JSON request decoding with
+    complexity limits, CORS, help, logical (secret engine) routing, metrics, index/UI
+    asset serving and embedded-asset stubs. Non-test support files (testing.go, util.go)
+    provide test listeners, fully wired test servers with optional certificate forwarding
+    and auth, and a multiReaderCloser that closes a group of readers as one. The package
+    is the boundary that turns an HTTP request into a Vault logical/sys operation
+    and turns the result back into JSON or raw body.
+  message: wrote 12 requirement(s) and 35 interface(s) for third-party-openbao-internal-http
+  phase: Succeeded
