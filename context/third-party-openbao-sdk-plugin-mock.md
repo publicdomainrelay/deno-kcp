@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so that OpenBao's plugin framework can be tested without a real secrets engine. A host that mounts this backend gets deterministic answers on every path, and a transport under test gets every error shape the plugin RPC layer must round-trip. It is test scaffolding that is shipped as a plugin: the backend deliberately keeps a mutable internal value so the Invalidate callback has something observable to destroy, deliberately returns each error family from errors/type, and deliberately reports its type through FactoryType so that both logical and other backend types can be constructed from one implementation.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
