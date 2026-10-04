@@ -73162,7 +73162,41 @@ system_contexts:
   codeRefIndex:
   - file:third_party/openbao/ui/lib/kubernetes/config/environment.js environment.js@third_party/openbao/ui/lib/kubernetes/config/environment.js
   id: sc.third-party-openbao-ui-lib-kubernetes-config
+  intent: This context exists so the kubernetes UI app inside the vendored OpenBao
+    UI library has its Ember environment configuration produced at build time. It
+    is third-party code kept in-tree rather than authored here, so the specification
+    records only what the file does, not how it should evolve. Anything building or
+    replacing that UI app depends on this module to stamp the correct module prefix
+    and environment into the build configuration.
   name: third-party-openbao-ui-lib-kubernetes-config
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/kubernetes/config/environment.js
+    id: r.environment-passthrough
+    level: MUST
+    text: The returned configuration object must set environment to the caller-supplied
+      environment argument without altering it, so the build inherits the environment
+      name it was invoked with.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/kubernetes/config/environment.js
+    id: r.exports-environment-factory
+    level: MUST
+    text: The module must export a single function via module.exports that accepts
+      an Ember environment name and returns a fresh configuration object on every
+      call.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/kubernetes/config/environment.js
+    id: r.module-prefix-kubernetes
+    level: MUST
+    text: The returned configuration object must set modulePrefix to the literal string
+      'kubernetes', so the UI app resolves its modules under that prefix.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/kubernetes/config/environment.js
+    id: r.strict-node-module
+    level: SHOULD
+    text: The file should stay a CommonJS Node module in strict mode with the eslint-env
+      node directive and retain the HashiCorp copyright and MPL-2.0 SPDX header from
+      its vendored origin.
   upstream: self
 - code:
   - third_party/openbao/ui/lib/open-api-explorer/index.js

@@ -5676,6 +5676,14 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.rules-compare-by-identity` (MUST): "Each template's `rules` is a module-level rule value, not a value built fresh on every call. The consumer finds the selected template with `rulesTemplates.find((x) => x.rules === generatedRoleRules)`, so a returned rules value must be reference-equal to the constant it came from for an unedited template to be recognized."
 - added `r.six-ordered-templates` (MUST): "getRules() returns exactly six template objects in this order, each with string `id` and `label` plus a `rules` value: '1' 'No template', '2' 'Read resources in a namespace', '3' 'Edit resources in a namespace', '4' 'Update pods, secrets, configmaps, and endpoints', '5' 'Update services and secrets', '6' 'Use pod security policies'."
 
+### third-party-openbao-ui-lib-kubernetes-config
+
+- intent: "" -> "This context exists so the kubernetes UI app inside the vendored OpenBao UI library has its Ember environment configuration produced at build time. It is third-party code kept in-tree rather than authored here, so the specification records only what the file does, not how it should evolve. Anything building or replacing that UI app depends on this module to stamp the correct module prefix and environment into the build configuration."
+- added `r.environment-passthrough` (MUST): "The returned configuration object must set environment to the caller-supplied environment argument without altering it, so the build inherits the environment name it was invoked with."
+- added `r.exports-environment-factory` (MUST): "The module must export a single function via module.exports that accepts an Ember environment name and returns a fresh configuration object on every call."
+- added `r.module-prefix-kubernetes` (MUST): "The returned configuration object must set modulePrefix to the literal string 'kubernetes', so the UI app resolves its modules under that prefix."
+- added `r.strict-node-module` (SHOULD): "The file should stay a CommonJS Node module in strict mode with the eslint-env node directive and retain the HashiCorp copyright and MPL-2.0 SPDX header from its vendored origin."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -6175,5 +6183,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-kubernetes-addon-routes-roles-role-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-kubernetes-addon-utils-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-kubernetes-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-lib-kubernetes-config-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-kubernetes-config-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-lib-kubernetes-config-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-lib-open-api-explorer-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
