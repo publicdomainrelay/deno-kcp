@@ -4,5 +4,177 @@ metadata:
   name: third-party-openbao-internal-builtin-database-valkey
   namespace: default
 spec:
+  intent: This context exists so the vendored Valkey database plugin can be read,
+    reviewed and modified without opening the whole OpenBao third_party tree. It covers
+    the connection producer that owns config parsing, TLS material and the radix client
+    pool, and the ValkeyDB plugin surface that the database secrets engine drives
+    for user creation, update and deletion. Pinning the producer's validation order,
+    the connection_url versus discrete-parameter exclusivity, the valkeys scheme shortcut
+    and the lazy TLS pool construction gives a reader the exact contract the rest
+    of the plugin depends on.
+  interfaces:
+  - file: third_party/openbao/internal/builtin/database/valkey/valkey.go
+    kind: function
+    name: New
+    signature: func New() (any, error)
+  - file: third_party/openbao/internal/builtin/database/valkey/valkey.go
+    kind: struct
+    name: ValkeyDB
+    signature: type ValkeyDB struct { *valkeyDBConnectionProducer; credsutil.CredentialsProducer
+      }
+  - file: third_party/openbao/internal/builtin/database/valkey/valkey.go
+    kind: method
+    name: ValkeyDB.DeleteUser
+    signature: func (c *ValkeyDB) DeleteUser(ctx context.Context, req dbplugin.DeleteUserRequest)
+      (dbplugin.DeleteUserResponse, error)
+  - file: third_party/openbao/internal/builtin/database/valkey/valkey.go
+    kind: method
+    name: ValkeyDB.Initialize
+    signature: func (c *ValkeyDB) Initialize(ctx context.Context, req dbplugin.InitializeRequest)
+      (dbplugin.InitializeResponse, error)
+  - file: third_party/openbao/internal/builtin/database/valkey/valkey.go
+    kind: method
+    name: ValkeyDB.NewUser
+    signature: func (c *ValkeyDB) NewUser(ctx context.Context, req dbplugin.NewUserRequest)
+      (dbplugin.NewUserResponse, error)
+  - file: third_party/openbao/internal/builtin/database/valkey/valkey.go
+    kind: method
+    name: ValkeyDB.Type
+    signature: func (c *ValkeyDB) Type() (string, error)
+  - file: third_party/openbao/internal/builtin/database/valkey/valkey.go
+    kind: method
+    name: ValkeyDB.UpdateUser
+    signature: func (c *ValkeyDB) UpdateUser(ctx context.Context, req dbplugin.UpdateUserRequest)
+      (dbplugin.UpdateUserResponse, error)
+  - file: third_party/openbao/internal/builtin/database/valkey/connection_producer.go
+    kind: method
+    name: valkeyDBConnectionProducer.Close
+    signature: func (c *valkeyDBConnectionProducer) Close() error
+  - file: third_party/openbao/internal/builtin/database/valkey/connection_producer.go
+    kind: method
+    name: valkeyDBConnectionProducer.Connection
+    signature: func (c *valkeyDBConnectionProducer) Connection(ctx context.Context)
+      (any, error)
+  - file: third_party/openbao/internal/builtin/database/valkey/connection_producer.go
+    kind: method
+    name: valkeyDBConnectionProducer.Init
+    signature: func (c *valkeyDBConnectionProducer) Init(ctx context.Context, initConfig
+      map[string]any, verifyConnection bool) (saveConfig map[string]any, err error)
+  - file: third_party/openbao/internal/builtin/database/valkey/connection_producer.go
+    kind: method
+    name: valkeyDBConnectionProducer.Initialize
+    signature: func (c *valkeyDBConnectionProducer) Initialize(ctx context.Context,
+      config map[string]any, verifyConnection bool) error
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - method:9545ac34407bd7a0f454f367d91399b9
+    id: r.ca-cert-required-when-tls
+    level: MUST
+    text: When TLS is enabled, Init MUST reject an empty CACert with the error "ca_cert
+      cannot be empty".
+  - codeRefs:
+    - method:427e3712d41179406f6cfb5b02e426f1
+    id: r.connection-caches-client
+    level: MUST
+    text: Connection MUST return the cached client when one is already present, and
+      otherwise MUST build a radix.PoolConfig, create the pool over tcp at Addr with
+      the context, store it as the client, and return it.
+  - codeRefs:
+    - method:427e3712d41179406f6cfb5b02e426f1
+    id: r.connection-requires-initialization
+    level: MUST
+    text: Connection MUST return connutil.ErrNotInitialized when the producer is not
+      Initialized, and MUST NOT take the producer lock because callers such as CreateUser
+      already hold it.
+  - codeRefs:
+    - method:427e3712d41179406f6cfb5b02e426f1
+    id: r.connection-tls-dialer-and-root-ca
+    level: MUST
+    text: When TLS is set, Connection MUST build a root CA pool from CACert, return
+      the error "failed to parse root certificate" when the PEM cannot be parsed,
+      and dial through a tls.Dialer whose tls.Config carries those RootCAs and InsecureSkipVerify
+      set from InsecureTLS; otherwise it MUST dial a plain radix dialer. Both paths
+      MUST pass Username and Password as AuthUser and AuthPass.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/database/valkey/connection_producer.go
+    - method:9545ac34407bd7a0f454f367d91399b9
+    id: r.connection-url-exclusive-with-individual-parameters
+    level: MUST
+    text: Init MUST reject a config that sets connection_url together with any of
+      Host, Port, Username, Password or TLS, returning the error "cannot specify both
+      connection_url and individual connection parameters".
+  - codeRefs:
+    - method:9545ac34407bd7a0f454f367d91399b9
+    id: r.connection-url-parsed-into-address
+    level: MUST
+    text: When connection_url is set, Init MUST parse it, set TLS when the scheme
+      is "valkeys", and derive Addr from the parsed hostname and port, Username from
+      the URL user, and Password from the URL password.
+  - codeRefs:
+    - method:9545ac34407bd7a0f454f367d91399b9
+    id: r.individual-parameters-required-when-no-url
+    level: MUST
+    text: When connection_url is empty, Init MUST reject empty Host, zero Port, empty
+      Username and empty Password with the corresponding "host cannot be empty", "port
+      cannot be empty", "username cannot be empty" and "password cannot be empty"
+      errors, and MUST build Addr with net.JoinHostPort from Host and the decimal
+      Port.
+  - codeRefs:
+    - method:9545ac34407bd7a0f454f367d91399b9
+    id: r.init-records-raw-config-and-initialized-state
+    level: MUST
+    text: Init MUST store the incoming config in rawConfig, decode it into the producer
+      through a mapstructure decoder configured with WeaklyTypedInput and the json
+      tag name, set Initialized to true, and return initConfig as the saved config.
+  - codeRefs:
+    - method:427e3712d41179406f6cfb5b02e426f1
+    - method:54ff7525a3213cf993e72f4d308ba565
+    - method:9545ac34407bd7a0f454f367d91399b9
+    id: r.init-verifies-and-closes-on-failure
+    level: MUST
+    text: When verifyConnection is true, Init MUST call Connection and, on error,
+      close the producer and return an error wrapping the cause as "error verifying
+      connection".
+  - codeRefs:
+    - function:978862d8011b00bac819507253bdc40e
+    - method:9bc592af64e66b2c877634c8f9f92ba4
+    - method:a99adf5df6742a2aa726a4d611e3bafc
+    - method:b85beda9e21d4debeb77cfd2a037481c
+    - method:ecc70248f2a40b03d37b0ebdd50482cb
+    - struct:398078981736199853095f03d14fc210
+    id: r.plugin-implements-database-plugin-contract
+    level: MUST
+    text: 'ValkeyDB MUST expose the dbplugin surface used by the database secrets
+      engine: NewUser, UpdateUser, DeleteUser, Type and the constructor New, alongside
+      the embedded connection producer and credentials producer.'
+  - codeRefs:
+    - method:9313dd88c5a0f37c2175d40d2f586ee5
+    - method:d8fab9f0745ca0dd55fc2e648c2cf482
+    id: r.plugin-initialize-delegates-and-echoes-config
+    level: MUST
+    text: ValkeyDB.Initialize MUST call the embedded producer's Initialize with req.Config
+      and req.VerifyConnection, return the error unwrapped on failure, and otherwise
+      respond with Config set to req.Config.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/database/valkey/valkey.go
+    - struct:398078981736199853095f03d14fc210
+    id: r.producer-composes-plugin
+    level: MUST
+    text: ValkeyDB MUST embed the pointer to valkeyDBConnectionProducer and credsutil.CredentialsProducer
+      so the plugin inherits connection management and credential generation.
+  - codeRefs:
+    - method:9313dd88c5a0f37c2175d40d2f586ee5
+    - method:9545ac34407bd7a0f454f367d91399b9
+    id: r.producer-initialize-delegates-to-init
+    level: MUST
+    text: valkeyDBConnectionProducer.Initialize MUST delegate to Init with the same
+      context, config and verifyConnection flag and return only the resulting error.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/database/valkey/valkey_test.go
+    id: r.tests-cover-plugin
+    level: SHOULD
+    text: valkey_test.go SHOULD exercise initialization through the producer, for
+      example setupValkeyDBInitialize and testValkeyDBCreateUser, so config parsing
+      and user creation stay covered.
   upstream: self
