@@ -10,5 +10,23 @@ spec:
   systemContext: third-party-openbao-internal-builtin-logical-ssh
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-builtin-logical-ssh
+  agentLog: This context is the OpenBao SSH secrets engine, vendored under third_party/openbao/internal/builtin/logical/ssh.
+    It is a logical backend plugin that mints and signs SSH credentials. The engine
+    exposes paths for CA configuration (path_config_ca.go), named issuer configuration
+    and management (path_config_issuers.go, path_issuers.go), zero-address role configuration
+    (path_config_zeroaddress.go), role definitions (path_roles.go), certificate signing
+    and issuance (path_issue.go, path_issue_sign.go, path_sign.go), certificate verification
+    (path_verify.go), one-time-password credential generation (path_creds_create.go,
+    secret_otp.go), OTP lookup and fetch (path_lookup.go, path_fetch.go), and cleanup
+    of dynamic host keys (path_cleanup_dynamic_host_keys.go). Shared field schemas
+    live in fields.go, cryptographic helpers in util.go, and persistence in storage.go
+    plus storage_migrations.go. The backend is constructed by Backend and wrapped
+    by Factory, which the plugin catalog calls to obtain a logical.Backend. Salt and
+    salted-OTP generation support the OTP credential flow, and ImportIssuer writes
+    issuer key material into storage.
+  message: wrote 15 requirement(s) and 6 interface(s) for third-party-openbao-internal-builtin-logical-ssh
+  phase: Succeeded
+superseded:
+- message: the agent is summarizing third-party-openbao-internal-builtin-logical-ssh
+  name: third-party-openbao-internal-builtin-logical-ssh-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2
   phase: Running

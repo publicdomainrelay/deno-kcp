@@ -841,6 +841,25 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.serve-rabbitmq-backend` (MUST): "main must serve the RabbitMQ logical backend over the plugin multiplex protocol by calling plugin.ServeMultiplex with a ServeOpts whose BackendFactoryFunc is rabbitmq.Factory, so the binary can be registered as a secrets engine plugin."
 - added `r.tls-provider-for-automtls-compat` (MUST): "ServeOpts must set TLSProviderFunc to api.VaultPluginTLSProvider of the TLS config taken from apiClientMeta.GetTLSConfig(), so the plugin keeps backwards compatibility with OpenBao/Vault versions that do not support plugin AutoMTLS."
 
+### third-party-openbao-internal-builtin-logical-ssh
+
+- intent: "" -> "The context exists so the repository can carry a vendored copy of the OpenBao SSH secrets engine rather than depend on an external module. It defines the engine's factory entry point, its storage layout and migrations, and the wire-level path handlers that make up its API surface. The specification records which paths the engine must register, how CA and issuer key material is stored and imported, and how OTP credentials are salted and generated, so the vendored code can be reasoned about and modified in place."
+- added `r.backend-construction` (MUST): "Backend builds the SSH secrets engine from the config, returning the concrete *backend, and that backend registers the engine's path set and its storage helpers."
+- added `r.backend-tests` (SHOULD): "Backend construction and the CA and issuer configuration paths stay covered by backend_test.go, path_config_ca_test.go, and path_config_issuers_test.go."
+- added `r.ca-and-issuer-storage` (MUST): "CA and issuer key material is read and written through the storage layer, which owns the entry types and keys used by the config/ca, config/issuers, and issuers paths."
+- added `r.dynamic-host-key-cleanup` (MUST): "The cleanup dynamic host keys path removes stored dynamic host key entries that are no longer valid."
+- added `r.factory-entrypoint` (MUST): "Factory accepts a context and a logical.BackendConfig, constructs the SSH backend through Backend, calls Setup on it with the same config, and returns the resulting logical.Backend or the setup error."
+- added `r.import-issuer` (MUST): "storageContext.ImportIssuer takes a public key, a private key, a flag marking whether the key material was generated rather than supplied, an issuer name, and a set-default flag; it stores the issuer, reports whether the stored issuer became the default, and returns the resulting issuerEntry or an error."
+- added `r.otp-generation` (MUST): "backend.GenerateSaltedOTP returns a generated OTP together with its salted form, and backend.GenerateOTPCredential takes the logical request and the sshOTP entry and returns the OTP credential string that is handed back to the caller."
+- added `r.otp-lifecycle` (MUST): "The OTP lifecycle is split across creds/create, secret_otp, lookup, and fetch: creation issues an OTP credential and stores it, lookup reads the stored entry by IP, fetch returns stored credentials, and secret_otp is the secret type backing an issued OTP."
+- added `r.path-registration` (MUST): "The backend must register the handlers implemented across the path files: CA configuration, issuer configuration and issuer management, zero-address configuration, roles, issue, sign, verify, credentials creation, OTP secret, lookup, fetch, and dynamic host key cleanup."
+- added `r.request-fields` (MUST): "Path request and response schemas are declared centrally in fields.go and shared by the issue, sign, creds, roles, and configuration handlers instead of being declared per handler."
+- added `r.roles-and-zeroaddress` (MUST): "Roles are stored and validated by path_roles.go, and path_config_zeroaddress.go binds the role used when a request arrives from the zero address, so OTP issuance can resolve a role for that case."
+- added `r.salt-accessor` (MUST): "backend.Salt returns the salt.Salt bound to the context, and is the salting function used by the OTP credential flow."
+- added `r.shared-helpers` (SHOULD): "Cryptographic and conversion helpers shared by the path handlers live in util.go rather than being duplicated in each handler."
+- added `r.sign-issue-verify` (MUST): "The issue, sign, and verify paths sign a caller-supplied public key with the configured CA and validate a presented certificate, sharing the signing logic in path_issue_sign.go."
+- added `r.storage-migrations` (MUST): "Storage migrations upgrade data written by earlier versions of the engine into the current layout, and are covered by storage_migrations_test.go."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -861,5 +880,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-builtin-logical-pkiext-pkiext-binary-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-rabbitmq-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-rabbitmq-cmd-rabbitmq-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-builtin-logical-ssh-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-builtin-logical-ssh-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-internal-builtin-logical-ssh-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-ssh-cmd-ssh-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
