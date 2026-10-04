@@ -1584,6 +1584,21 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.sync-mutex-embed` (MUST): "`SyncMutex` embeds `sync.Mutex` and nothing else, providing the ordinary, non-instrumented `Mutex` implementation used when deadlock detection is not requested."
 - added `r.sync-rwmutex-embed` (MUST): "`SyncRWMutex` embeds `sync.RWMutex`, providing the ordinary, non-instrumented `RWMutex` implementation that supplies `RLock`, `RLocker`, `RUnlock` and the exclusive pair."
 
+### third-party-openbao-internal-helper-logging
+
+- intent: "" -> "This context exists so the deno-kcp repository keeps a describable, self-contained picture of the OpenBao logging helper it vendors under third_party. It records the observable behavior of the rotating file writer and of the log level/format parsing and logger setup helpers, so changes to that vendored code can be reviewed against a stated contract instead of re-reading the sources each time. It is a reference context, not a feature: nothing here is authored by this repository, and the requirements below describe what the vendored code already does."
+- added `r.log-format-string` (MUST): "LogFormat.String must render the format as its textual name so a parsed format can be printed back in the form ParseLogFormat accepts."
+- added `r.logfile-name-pattern` (MUST): "LogFile.fileNamePattern must split the configured file name into stem and extension, substitute .log when the file name has no extension, and return stem + "-%s" + extension so the rotation timestamp is inserted before the extension."
+- added `r.logfile-rotation-and-prune` (MUST): "LogFile must rotate its backing file when the configured duration since last creation has elapsed or when bytesWritten reaches maxBytes, and must delete the oldest archived files so that no more than maxArchivedFiles rotated files remain; when both duration and maxBytes are zero, rotation must stay disabled."
+- added `r.logfile-write-serialized` (MUST): "LogFile.Write must hold the acquire mutex for the whole write, open a new backing file when none is open, rotate the file when rotation is due, and add the number of bytes written by the underlying file to the running byte total before returning that count and any error."
+- added `r.logging-tests` (SHOULD): "Tests must cover opening a new log file, rotation by max duration, rotation by max bytes, pruning with pruning enabled and disabled, and rotation disabled, plus the logger configuration and level/format parsing helpers."
+- added `r.new-log-config` (MUST): "NewLogConfig must build a LogConfig from its default file name argument and the surrounding environment, returning the config together with an error rather than a partial config when a value fails to parse."
+- added `r.no-error-writer` (MUST): "noErrorWriter.Write must write through to its wrapped io.Writer, report the length of the input as written, and never surface the underlying writer's error to the caller."
+- added `r.parse-log-format` (MUST): "ParseLogFormat must map a format string onto a LogFormat value and must return an error naming the unsupported format when the string is not a known format."
+- added `r.parse-log-level` (MUST): "ParseLogLevel must map a level name onto an hclog.Level and must return an error naming the unsupported level when the string is not a known level."
+- added `r.setup-logger` (MUST): "Setup must build an hclog.InterceptLogger from the given LogConfig and writer, wrapping the writer in noErrorWriter so a failing writer does not disable logging, and must return an error when the config cannot be applied."
+- added `r.translate-logger-level` (MUST): "TranslateLoggerLevel must read the level of the given hclog.Logger and return it as a string, returning an error instead when the logger reports a level that has no string form."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -1671,5 +1686,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-helper-kmsplugin-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-listenerutil-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-locking-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-helper-logging-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-helper-logging-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-metricsutil-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |

@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the deno-kcp repository keeps a describable, self-contained picture of the OpenBao logging helper it vendors under third_party. It records the observable behavior of the rotating file writer and of the log level/format parsing and logger setup helpers, so changes to that vendored code can be reviewed against a stated contract instead of re-reading the sources each time. It is a reference context, not a feature: nothing here is authored by this repository, and the requirements below describe what the vendored code already does.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
