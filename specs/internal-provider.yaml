@@ -109,6 +109,34 @@ spec:
     - struct:616ab943fe3365809df93a906c1942bc
     - struct:cd6145b620673d1d890a45c3b08eaaf5
     - struct:d27a8fecd6ae256e43a6e3e8a3089705
+  - id: r.provider-initial-list-is-bounded-and-retried
+    level: MUST
+    text: Provider.RunWatch must never leave the provider reconciling nothing because
+      an informer's initial list never completes. The wait for a kind's cache to sync
+      is bounded by a deadline; when it has not synced by then the provider abandons
+      that attempt, starts the informers again, and repeats while the context lives,
+      so a list that the APIExport virtual workspace never ends is retried rather
+      than waited on forever -- the state in which the provider looks healthy, sits
+      with no cache and gives no workload a status. The provider logs at info level
+      each time a kind's cache has synced and each time it retries an attempt that
+      did not sync in time, so a stalled cache is visible from the log alone. Once
+      the caches have synced the provider reconciles the objects that were already
+      in the cluster when it started, so a first start after apply.sh reconciles what
+      apply.sh applied, with no restart.
+    codeRefs:
+    - file:internal/provider/provider.go
+    - method:83f50090d7ebe3148f7aa5e0db332b4d
+    - method:bedc23e806b40419ad4ae31c624ffdf9
+  - id: r.provider-initial-list-is-bounded-and-retried-test
+    level: MUST
+    text: An offline test covers it. A cache-sync wait against a factory that never
+      reports synced must return within its deadline, report the retry and start the
+      next attempt, rather than block on the first attempt; the same wait against
+      a factory that reports synced must return promptly and must not start another
+      attempt. The test must fail against a provider that waits on its first attempt
+      without a deadline.
+    codeRefs:
+    - file:internal/provider/watch_test.go
   - id: r.provider-runs-reconcile-loop
     level: MUST
     text: Provider.Run drives the reconcile loop until the context is done, and Provider.Reconcile
