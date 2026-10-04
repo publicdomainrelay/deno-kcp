@@ -9,5 +9,6 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/ui/app/instance-initializers/track-csp-event.js` file track-csp-event.js (third_party/openbao/ui/app/instance-initializers/track-csp-event.js)
+- `function:4b03aad49f16b64f3ea2ec56bbf50525` function initialize (third_party/openbao/ui/app/instance-initializers/track-csp-event.js)
 <!-- SPECD_MANAGED_END -->
