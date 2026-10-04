@@ -4268,6 +4268,16 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.index-toggle-disabled` (MUST): "The index controller's toggleDisabled action must pick the enable or disable verb pair from the model's current disabled flag, toggle the model's disabled property, save the model, and flash a message built from that verb and the identity type and id on both success and failure."
 - added `r.merge-reuses-create` (MUST): "The merge controller must extend the create controller without adding or overriding behavior, so the merge route inherits create's navAfterSave and cleanupModel contract."
 
+### third-party-openbao-ui-app-controllers-vault-cluster-access-identity-aliases
+
+- intent: "" -> "This context exists to specify the list, add and edit controllers for identity aliases in the OpenBao UI: the filtering, pagination and reload behavior of the alias list, and the create/edit forms' reuse of the shared identity create controller with an alias-specific show route."
+- added `r.add-controller-extends-create` (MUST): "The alias add controller extends the shared identity create controller imported from '../create' and sets showRoute to the route name 'vault.cluster.access.identity.aliases.show', so a successful creation navigates to the alias show route."
+- added `r.edit-controller-extends-add` (MUST): "The alias edit controller extends the alias add controller with no further overrides, inheriting its create form behavior and the alias show route."
+- added `r.filter-matches-key` (MUST): "The list controller computes filterMatchesKey from filter and model: it is true only when the model is non-empty and contains an item whose id equals the current filter."
+- added `r.first-partial-match` (MUST): "The list controller computes firstPartialMatch by escaping the filter with escape-string-regexp, anchoring it at the start of item ids, and returning null when the filter exactly matches a key or nothing matches; otherwise it returns the single matching item, or an object with the model's shared prefix from core/utils/common-prefix when the filter already equals that prefix."
+- added `r.list-actions` (MUST): "The list controller actions set the filter, set the filter focus flag, and reload the list: setFilter and setFilterFocus write their argument to filter and filterFocused, while refresh and onDelete both send 'reload' to the parent list route."
+- added `r.list-query-params` (MUST): "The alias list controller binds query params page to 'page' and pageFilter to 'pageFilter', defaults page to 1 and pageFilter to null, and exposes filter, filterFocused (false) and isLoading (false) as its remaining state."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4601,7 +4611,8 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-controllers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-controllers-vault-cluster-access-identity-aliases-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-access-identity-aliases-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-access-identity-aliases-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-identity-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-identity-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

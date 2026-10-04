@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to specify the list, add and edit controllers for identity aliases in the OpenBao UI: the filtering, pagination and reload behavior of the alias list, and the create/edit forms' reuse of the shared identity create controller with an alias-specific show route.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
