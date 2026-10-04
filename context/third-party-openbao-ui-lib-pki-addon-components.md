@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so the PKI UI behaviour is specified rather than re-derived from source each time. It records what each component exposes to its template and parent route, and what each action must do: which model fields a constructor expands into form fields, when a save path validates and persists, when a capability probe gates a request, and how TTL, key bits, key usage and file upload inputs are normalized before they reach the model. Anyone editing the vendored OpenBao UI, or building against it, uses this context to know the component contracts without reading all fifteen files.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
