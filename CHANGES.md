@@ -3576,7 +3576,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.creation-time-with-ttl-gives-expiry` (MUST): "CreationTime records when the wrapping token was created so that, combined with TTL, a caller can compute the expected expiration."
 - added `r.format-is-internal-only` (MUST): "Format selects the wrapping format and must not be returned to callers; it is internal state only."
 - added `r.nonzero-ttl-requests-wrapping` (MUST): "A non-zero TTL specifies that the response must be wrapped and gives the desired TTL of the wrapping token; a zero TTL means no wrapping is requested."
-- added `r.parallel-encoding-tags` (SHOULD): "Every field must carry matching json, structs, and mapstructure tags so the wrap info encodes into API responses and decodes from stored or plugin-transported data under the same key names."
+- added `r.parallel-encoding-tags` (SHOULD): "Every field must carry matching `json`, `structs`, `mapstructure`, and `sentinel` tags so the wrap info encodes into API responses and decodes from stored, audited, or plugin-transported data under the same key names."
 - added `r.seal-wrap-controls-downstream-behavior` (MUST): "SealWrap controls seal wrapping behavior downstream for specific use cases and must be carried through the response metadata rather than decided by the consumer."
 - added `r.token-carries-wrapped-response` (MUST): "The Token field holds the token that contains the wrapped response, and Accessor holds that same token's accessor so the wrapping token can be looked up without the token value."
 - added `r.wrapped-accessor-for-created-credentials` (MUST): "When the contained response is the output of a token or approle secret-id creation call, WrappedAccessor exposes the created token's or secret-id's accessor there."
@@ -3856,6 +3856,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-sdk-helper-tokenutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-useragent-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-wrapping-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-sdk-helper-wrapping-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-helper-wrapping-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-xor-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-logical-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-physical-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
