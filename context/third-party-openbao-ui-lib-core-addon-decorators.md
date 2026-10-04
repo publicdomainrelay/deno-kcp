@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so the confirm-leave decorator can be described and reimplemented from its observable behavior: a mixin-style class decorator that intercepts route transitions to protect unsaved model edits. It documents the contract for callers (the PKI route modules that apply it), the Route-subclass precondition and its silent fallback, the rollback semantics that distinguish new from persisted records, the confirmation prompt text, the test-mode bypass, and the silent cleanup paths that are discarded without confirmation.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

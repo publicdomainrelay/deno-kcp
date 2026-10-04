@@ -5395,6 +5395,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.breadcrumbs-arg-required` (MUST): "Breadcrumbs must read its entries from the `breadcrumbs` component argument and must iterate every entry during construction, treating the argument as non-null and enumerable."
 - added `r.label-key-asserted` (MUST): "For each breadcrumb entry, the constructor must assert that its keys include `label`; an entry without a `label` key must fail the assertion with the message 'breadcrumb has a label key'."
 
+### third-party-openbao-ui-lib-core-addon-decorators
+
+- intent: "" -> "The context exists so the confirm-leave decorator can be described and reimplemented from its observable behavior: a mixin-style class decorator that intercepts route transitions to protect unsaved model edits. It documents the contract for callers (the PKI route modules that apply it), the Route-subclass precondition and its silent fallback, the rollback semantics that distinguish new from persisted records, the confirmation prompt text, the test-mode bypass, and the silent cleanup paths that are discarded without confirmation."
+- added `r.model-path-default` (MUST): "The exported factory must default modelPath to the string 'model' when no argument is given, and must accept an optional silentCleanupPaths collection of controller property paths, so callers can name a different controller model property and extra models to discard quietly."
+- added `r.rollback-dirty-only` (MUST): "Rollback of a model must occur only when the model exists, reports hasDirtyAttributes, and is not isSaving; the returned subclass must call unloadRecord when the model isNew and rollbackAttributes otherwise, reading the model from the controller at the given path."
+- added `r.route-subclass-precondition` (MUST): "The decorator must check that the decorated SuperClass has Ember's Route on its prototype chain before applying; when the check fails it must log an error stating the decorator must be used on an instance of the ember Route class and return the original SuperClass unchanged, so the decorator is a no-op rather than a hard failure."
+- added `r.silent-cleanup-paths` (MUST): "After the confirmation decision, the action must iterate the optional silentCleanupPaths collection and roll back each named model without prompting, then return true so the transition proceeds."
+- added `r.will-transition-confirm` (MUST): "The overridden willTransition(transition) action must call the superclass implementation first inside a try/catch so that a missing parent hook does not throw; if the model at modelPath is dirty and not saving it must roll the model back when Ember.testing is true or when the user accepts window.confirm('You have unsaved changes. Navigating away will discard these changes. Are you sure you want to discard your changes?'), otherwise it must call transition.abort() and return false to block navigation."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5856,6 +5865,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-core-addon-components-confirm-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-core-addon-components-list-item-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-core-addon-components-page-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-lib-core-addon-decorators-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-core-addon-decorators-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-lib-core-addon-decorators-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-lib-core-addon-helpers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-lib-core-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
