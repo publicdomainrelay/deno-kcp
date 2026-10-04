@@ -5018,6 +5018,16 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.list-swallows-404-as-empty` (MUST): "A query failure whose httpStatus is 404 must be converted to an empty array, while any other error is rethrown unchanged."
 - added `r.routes-extend-ember-route` (MUST): "All three classes extend the Ember '@ember/routing/route' default export and obtain services through the '@ember/service' inject alias, and each module keeps the HashiCorp MPL-2.0 copyright header."
 
+### third-party-openbao-ui-app-routes-vault-cluster-access-oidc-clients-client
+
+- intent: "" -> "These files exist to give each OIDC client detail screen its own routable sub-state: a details view, an edit view, and a providers list view reachable at .../clients/client/providers. The empty details and edit routes are deliberate placeholders that rely on the parent route's model and on the corresponding templates; only the providers route needs its own data fetch, because the set of identity providers allowed to use a given client is not part of the client record itself and must be queried separately by allowed_client_id. The nested route structure lets the UI render client details, client edit form, and client-to-provider associations under a single client model without refetching the client for each tab."
+- added `r.default-export-route-class` (MUST): "Each file must default-export its single route class (OidcClientDetailsRoute, OidcClientEditRoute, OidcClientProvidersRoute) so Ember's route resolver can map the module path .../clients/client/<name> onto the matching route."
+- added `r.details-route-inherits-parent-model` (MUST): "OidcClientDetailsRoute must extend Ember's Route without overriding any hook or injecting services, so the details view resolves its model through the parent vault.cluster.access.oidc.clients.client route."
+- added `r.edit-route-inherits-parent-model` (MUST): "OidcClientEditRoute must extend Ember's Route without overriding any hook or injecting services, so the edit view reuses the already-loaded client model from the parent route instead of fetching its own."
+- added `r.providers-route-404-empty` (MUST): "OidcClientProvidersRoute.model() must convert an error whose httpStatus is 404 into an empty array rather than propagating it, and must rethrow every other error unchanged."
+- added `r.providers-route-queries-by-client` (MUST): "OidcClientProvidersRoute.model() must read the parent route model via modelFor('vault.cluster.access.oidc.clients.client') and query the oidc/provider record type with the filter allowed_client_id bound to that model's clientId, returning the query promise as the route model."
+- added `r.providers-route-store-injected` (MUST): "OidcClientProvidersRoute must obtain its data layer through the injected store service, queried as this.store.query, so the provider list is loaded through Ember Data rather than direct HTTP calls."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5432,6 +5442,8 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-routes-vault-cluster-access-oidc-assignments-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-oidc-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-oidc-clients-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-routes-vault-cluster-access-oidc-clients-client-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-routes-vault-cluster-access-oidc-clients-client-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-routes-vault-cluster-access-oidc-clients-client-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-routes-vault-cluster-access-oidc-keys-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
