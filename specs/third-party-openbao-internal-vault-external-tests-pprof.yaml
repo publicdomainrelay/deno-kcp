@@ -2,10 +2,75 @@ apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
 - file:third_party/openbao/internal/vault/external_tests/pprof/pprof.go pprof.go@third_party/openbao/internal/vault/external_tests/pprof/pprof.go
 - file:third_party/openbao/internal/vault/external_tests/pprof/pprof_test.go pprof_test.go@third_party/openbao/internal/vault/external_tests/pprof/pprof_test.go
+- function:72ef1ad28d2ed5526bdb4e9b55b31211 SysPprof_Test@third_party/openbao/internal/vault/external_tests/pprof/pprof.go:19
+- function:a8b945b73826f471cf2d88027c833677 SysPprof_Standby_Test@third_party/openbao/internal/vault/external_tests/pprof/pprof.go:117
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-vault-external-tests-pprof
   namespace: default
 spec:
+  intent: 'This context exists to specify the external pprof verification surface
+    of the vendored OpenBao tree, so the pprof endpoints of a running Vault-compatible
+    cluster stay covered by tests that live outside the core packages. It pins down
+    what the two exported entrypoints must do to a live cluster: which pprof paths
+    get exercised, how the requests are configured, which responses count as failures,
+    and that the standby node is probed directly alongside the active node. It is
+    written for readers who need to know the contract of these exported test helpers
+    without reading the vendored source.'
+  interfaces:
+  - file: third_party/openbao/internal/vault/external_tests/pprof/pprof.go
+    kind: function
+    name: SysPprof_Standby_Test
+    signature: func SysPprof_Standby_Test(t *testing.T, cluster testcluster.VaultCluster)
+  - file: third_party/openbao/internal/vault/external_tests/pprof/pprof.go
+    kind: function
+    name: SysPprof_Test
+    signature: func SysPprof_Test(t *testing.T, cluster testcluster.VaultCluster)
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - function:72ef1ad28d2ed5526bdb4e9b55b31211
+    id: r.http-client-tls-http2
+    level: MUST
+    text: The requests must go through an HTTP client built on cleanhttp's default
+      pooled transport carrying the first node's TLS config, configured for HTTP/2,
+      and any transport configuration error must fail the test.
+  - codeRefs:
+    - function:72ef1ad28d2ed5526bdb4e9b55b31211
+    id: r.pprof-response-validation
+    level: MUST
+    text: Each pprof response body must be read in full; an unmarshal error is ignored
+      because some endpoints return binary blobs, but a response whose decoded JSON
+      contains an errors key must fail the test with that error value, and an empty
+      body must fail the test.
+  - codeRefs:
+    - function:72ef1ad28d2ed5526bdb4e9b55b31211
+    id: r.profile-trace-seconds-param
+    level: MUST
+    text: The profile and trace cases must send a seconds parameter of 1, and cases
+      whose seconds value is empty must send no seconds parameter at all.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/pprof/pprof.go
+    - function:a8b945b73826f471cf2d88027c833677
+    id: r.standby-both-nodes-cmdline
+    level: MUST
+    text: SysPprof_Standby_Test must read sys/pprof/cmdline as a raw logical response
+      from node 0 and then node 1 of the cluster, requiring no error and a non-empty
+      command line from each and logging both values.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/pprof/pprof.go
+    - function:72ef1ad28d2ed5526bdb4e9b55b31211
+    id: r.sys-pprof-endpoint-sweep
+    level: MUST
+    text: SysPprof_Test must exercise the sys/pprof endpoints index, cmdline, goroutine,
+      heap, profile, symbol and trace, issuing one GET request per case against the
+      first node of the cluster and running each as its own subtest named after the
+      case.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/pprof/pprof_test.go
+    id: r.test-wiring
+    level: SHOULD
+    text: The Go tests in pprof_test.go should call the exported helpers with a freshly
+      created test cluster, so TestSysPprof drives SysPprof_Test and TestSysPprof_Standby
+      drives SysPprof_Standby_Test.
   upstream: self

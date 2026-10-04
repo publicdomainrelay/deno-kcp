@@ -10,5 +10,17 @@ spec:
   systemContext: third-party-openbao-internal-vault-external-tests-pprof
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-vault-external-tests-pprof
-  phase: Running
+  agentLog: This context covers the external pprof test suite for OpenBao, housed
+    in third_party/openbao/internal/vault/external_tests/pprof/. The single non-test
+    file pprof.go exports two acceptance-style test entrypoints, SysPprof_Test and
+    SysPprof_Standby_Test, both taking a *testing.T and a testcluster.VaultCluster.
+    SysPprof_Test builds a pooled HTTP/2 client with the first node's TLS config,
+    then drives a table of seven sys/pprof endpoints (index, cmdline, goroutine, heap,
+    profile, symbol, trace) as GET requests, adding a seconds parameter for the profile
+    and trace cases, and asserts each response is non-empty and free of an errors
+    field. SysPprof_Standby_Test reads sys/pprof/cmdline as a raw logical response
+    from both node 0 and node 1 of the cluster, requiring no error and a non-empty
+    body from each, and logs the command lines. The companion pprof_test.go file wires
+    these into Go tests, TestSysPprof and TestSysPprof_Standby, that supply the cluster.
+  message: wrote 6 requirement(s) and 2 interface(s) for third-party-openbao-internal-vault-external-tests-pprof
+  phase: Succeeded
