@@ -5259,6 +5259,22 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.provider-list-normalization` (MUST): "OidcProviderSerializer must override normalizeItems with the same behavior as the client serializer, flattening payload.data.keys against payload.data.key_info, so the provider list view receives issuer metadata alongside each provider name."
 - added `r.rely-on-base-normalization` (SHOULD): "OidcAssignmentSerializer, OidcKeySerializer, and OidcScopeSerializer should declare only primaryKey and leave normalizeItems to ApplicationSerializer, so their payload handling stays whatever the shared base defines."
 
+### third-party-openbao-ui-app-serializers-pki
+
+- intent: "" -> "This context exists to describe the client-side serialization layer that translates between the PKI API's request/response shapes and the UI's models: which attributes are client-only and never sent, how per-action payload parameters are filtered, how certificate strings are parsed back into structured objects, how list responses are rehydrated into full model attributes, and how the role and tidy serializers special-case empty arrays and manual tidy requests."
+- added `r.action-attrs-not-serialized` (MUST): "PkiActionSerializer declares attrs marking customTtl and type with serialize: false so those client-only fields never reach the API payload."
+- added `r.action-normalize-parses-certificate` (MUST): "When a response payload carries data.certificate, PkiActionSerializer.normalizeResponse parses it with parseCertificate and adds the parsed object as parsed_certificate plus the extracted common_name to the normalized data before delegating to the base normalizer; otherwise it delegates the arguments unchanged."
+- added `r.action-serialize-filters-by-action` (MUST): "PkiActionSerializer.serialize asks _allowedParamsByType for the request type and record type, and when a list is returned it maps subject_serial_number to the backend's serial_number key and emits only the allowed keys whose value is defined; when the allow-list is null (unmatched type) it returns the base serialized data unfiltered."
+- added `r.allowed-params-per-action` (MUST): "_allowedParamsByType derives key fields from keyParamsByType(type) by underscoring and lowercasing, and returns import to pem_bundle; generate-root and rotate-root to the common properties plus issuer_name, max_path_length, not_after, not_before_duration, permitted_dns_domains, private_key_format and ttl; generate-csr to the common properties plus add_basic_constraints; sign-intermediate to common_name, issuer_name and csr; and null for any other action type."
+- added `r.certificate-serializer-inherits` (MUST): "PkiCertificateSerializer reuses the certificate serializer behavior unchanged, declaring no fields and no method overrides."
+- added `r.issuer-normalize-items-rehydrates` (MUST): "PkiIssuerSerializer.normalizeItems turns a LIST payload's data.keys array into one object per issuer combining issuer_id with the matching data.key_info entry, so list results carry full model attributes; payloads without a keys array have data flattened onto the payload and the data key removed."
+- added `r.issuer-normalize-response-parses-cert` (MUST): "When data.certificate is present, PkiIssuerSerializer.normalizeResponse parses it with parseCertificate and adds parsed_certificate and common_name to the normalized data before delegating; otherwise it delegates the original arguments."
+- added `r.issuer-primary-key-and-attrs` (MUST): "PkiIssuerSerializer uses issuer_id as its primary key and marks caChain, certificate, commonName, isDefault, isRoot, issuerId, keyId, parsedCertificate and serialNumber as serialize: false."
+- added `r.key-normalize-items-rehydrates` (MUST): "PkiKeySerializer uses key_id as primary key, marks type as serialize: false, and normalizeItems expands data.keys into objects combining key_id with the matching data.key_info entry; payloads without a keys array are flattened from data."
+- added `r.pki-serializers-extend-application` (MUST): "Each PKI serializer is a default export extending the shared ApplicationSerializer, except PkiCertificateSerializer which extends the cert serializer and adds no overrides."
+- added `r.role-serialize-preserves-key-usage` (MUST): "PkiRoleSerializer marks name as serialize: false and, after delegating to the base serialize, coerces key_usage to an empty array when absent so the no-default-constraint case survives the stripping of empty arrays."
+- added `r.tidy-serialize-manual` (MUST): "PkiTidySerializer.serialize removes enabled and intervalDuration from the serialized payload when the tidy type is manual, and otherwise returns the base serialization unchanged."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5704,5 +5720,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-serializers-kubernetes-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-serializers-oidc-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-serializers-oidc-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-serializers-pki-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-serializers-pki-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-serializers-pki-certificate-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

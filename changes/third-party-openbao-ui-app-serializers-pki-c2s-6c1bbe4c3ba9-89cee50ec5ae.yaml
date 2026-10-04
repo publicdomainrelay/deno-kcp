@@ -10,5 +10,26 @@ spec:
   systemContext: third-party-openbao-ui-app-serializers-pki
   toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
 status:
-  message: the agent is summarizing third-party-openbao-ui-app-serializers-pki
-  phase: Running
+  agentLog: 'This context covers the six Ember Data serializers under third_party/openbao/ui/app/serializers/pki
+    — action.js, certificate.js, issuer.js, key.js, role.js and tidy.js. Together
+    they adapt OpenBao''s PKI API payloads for the UI: PkiActionSerializer shapes
+    request bodies per PKI action type through an allow-list and parses returned certificates
+    into a parsed_certificate object; PkiIssuerSerializer and PkiKeySerializer rehydrate
+    LIST responses keyed by issuer_id/key_id and parse issuer certificates; PkiRoleSerializer
+    keeps an empty key_usage array in the serialized JSON and never serializes the
+    role name; PkiTidySerializer strips enabled and intervalDuration from manual tidy
+    requests; PkiCertificateSerializer inherits the generic certificate serializer
+    unchanged. All six extend the application serializer (certificate via the cert
+    serializer) and share the convention of marking server-owned or UI-only attributes
+    with serialize: false.'
+  message: wrote 12 requirement(s) and 6 interface(s) for third-party-openbao-ui-app-serializers-pki;
+    interface PkiActionSerializer.normalizeResponse is not in the observed facts;
+    dropped; interface PkiActionSerializer.serialize is not in the observed facts;
+    dropped; interface PkiActionSerializer._allowedParamsByType is not in the observed
+    facts; dropped; interface PkiIssuerSerializer.normalizeResponse is not in the
+    observed facts; dropped; interface PkiIssuerSerializer.normalizeItems is not in
+    the observed facts; dropped; interface PkiKeySerializer.normalizeItems is not
+    in the observed facts; dropped; interface PkiRoleSerializer.serialize is not in
+    the observed facts; dropped; interface PkiTidySerializer.serialize is not in the
+    observed facts; dropped
+  phase: Succeeded

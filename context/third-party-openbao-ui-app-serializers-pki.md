@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to describe the client-side serialization layer that translates between the PKI API's request/response shapes and the UI's models: which attributes are client-only and never sent, how per-action payload parameters are filtered, how certificate strings are parsed back into structured objects, how list responses are rehydrated into full model attributes, and how the role and tidy serializers special-case empty arrays and manual tidy requests.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

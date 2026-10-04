@@ -68999,6 +68999,12 @@ system_contexts:
   - third_party/openbao/ui/app/serializers/pki/role.js
   - third_party/openbao/ui/app/serializers/pki/tidy.js
   codeRefIndex:
+  - class:17afa5a16f974f99e67ef3e6f7205fff PkiIssuerSerializer@third_party/openbao/ui/app/serializers/pki/issuer.js:9
+  - class:6abebc6c0d0a1d473794f1e8a538ae94 PkiRoleSerializer@third_party/openbao/ui/app/serializers/pki/role.js:8
+  - class:c130369168208db034158640fa9be8a1 PkiKeySerializer@third_party/openbao/ui/app/serializers/pki/key.js:8
+  - class:d596e6b4964c7c32cc019abe6e3c012d PkiCertificateSerializer@third_party/openbao/ui/app/serializers/pki/certificate.js:8
+  - class:dc330f2a39a80f717515bc5b71a9b192 PkiActionSerializer@third_party/openbao/ui/app/serializers/pki/action.js:11
+  - class:e1779c6c64f378b370bd456fcdeabae7 PkiTidySerializer@third_party/openbao/ui/app/serializers/pki/tidy.js:8
   - file:third_party/openbao/ui/app/serializers/pki/action.js action.js@third_party/openbao/ui/app/serializers/pki/action.js
   - file:third_party/openbao/ui/app/serializers/pki/certificate.js certificate.js@third_party/openbao/ui/app/serializers/pki/certificate.js
   - file:third_party/openbao/ui/app/serializers/pki/issuer.js issuer.js@third_party/openbao/ui/app/serializers/pki/issuer.js
@@ -69006,7 +69012,141 @@ system_contexts:
   - file:third_party/openbao/ui/app/serializers/pki/role.js role.js@third_party/openbao/ui/app/serializers/pki/role.js
   - file:third_party/openbao/ui/app/serializers/pki/tidy.js tidy.js@third_party/openbao/ui/app/serializers/pki/tidy.js
   id: sc.third-party-openbao-ui-app-serializers-pki
+  intent: 'This context exists to describe the client-side serialization layer that
+    translates between the PKI API''s request/response shapes and the UI''s models:
+    which attributes are client-only and never sent, how per-action payload parameters
+    are filtered, how certificate strings are parsed back into structured objects,
+    how list responses are rehydrated into full model attributes, and how the role
+    and tidy serializers special-case empty arrays and manual tidy requests.'
+  interfaces:
+  - file: third_party/openbao/ui/app/serializers/pki/action.js
+    kind: class
+    name: PkiActionSerializer
+    signature: class PkiActionSerializer extends ApplicationSerializer
+  - file: third_party/openbao/ui/app/serializers/pki/certificate.js
+    kind: class
+    name: PkiCertificateSerializer
+    signature: class PkiCertificateSerializer extends CertSerializer
+  - file: third_party/openbao/ui/app/serializers/pki/issuer.js
+    kind: class
+    name: PkiIssuerSerializer
+    signature: class PkiIssuerSerializer extends ApplicationSerializer
+  - file: third_party/openbao/ui/app/serializers/pki/key.js
+    kind: class
+    name: PkiKeySerializer
+    signature: class PkiKeySerializer extends ApplicationSerializer
+  - file: third_party/openbao/ui/app/serializers/pki/role.js
+    kind: class
+    name: PkiRoleSerializer
+    signature: class PkiRoleSerializer extends ApplicationSerializer
+  - file: third_party/openbao/ui/app/serializers/pki/tidy.js
+    kind: class
+    name: PkiTidySerializer
+    signature: class PkiTidySerializer extends ApplicationSerializer
   name: third-party-openbao-ui-app-serializers-pki
+  requirements:
+  - codeRefs:
+    - class:dc330f2a39a80f717515bc5b71a9b192
+    - file:third_party/openbao/ui/app/serializers/pki/action.js
+    id: r.action-attrs-not-serialized
+    level: MUST
+    text: 'PkiActionSerializer declares attrs marking customTtl and type with serialize:
+      false so those client-only fields never reach the API payload.'
+  - codeRefs:
+    - file:third_party/openbao/ui/app/serializers/pki/action.js
+    id: r.action-normalize-parses-certificate
+    level: MUST
+    text: When a response payload carries data.certificate, PkiActionSerializer.normalizeResponse
+      parses it with parseCertificate and adds the parsed object as parsed_certificate
+      plus the extracted common_name to the normalized data before delegating to the
+      base normalizer; otherwise it delegates the arguments unchanged.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/serializers/pki/action.js
+    id: r.action-serialize-filters-by-action
+    level: MUST
+    text: PkiActionSerializer.serialize asks _allowedParamsByType for the request
+      type and record type, and when a list is returned it maps subject_serial_number
+      to the backend's serial_number key and emits only the allowed keys whose value
+      is defined; when the allow-list is null (unmatched type) it returns the base
+      serialized data unfiltered.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/serializers/pki/action.js
+    id: r.allowed-params-per-action
+    level: MUST
+    text: _allowedParamsByType derives key fields from keyParamsByType(type) by underscoring
+      and lowercasing, and returns import to pem_bundle; generate-root and rotate-root
+      to the common properties plus issuer_name, max_path_length, not_after, not_before_duration,
+      permitted_dns_domains, private_key_format and ttl; generate-csr to the common
+      properties plus add_basic_constraints; sign-intermediate to common_name, issuer_name
+      and csr; and null for any other action type.
+  - codeRefs:
+    - class:d596e6b4964c7c32cc019abe6e3c012d
+    - file:third_party/openbao/ui/app/serializers/pki/certificate.js
+    id: r.certificate-serializer-inherits
+    level: MUST
+    text: PkiCertificateSerializer reuses the certificate serializer behavior unchanged,
+      declaring no fields and no method overrides.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/serializers/pki/issuer.js
+    id: r.issuer-normalize-items-rehydrates
+    level: MUST
+    text: PkiIssuerSerializer.normalizeItems turns a LIST payload's data.keys array
+      into one object per issuer combining issuer_id with the matching data.key_info
+      entry, so list results carry full model attributes; payloads without a keys
+      array have data flattened onto the payload and the data key removed.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/serializers/pki/issuer.js
+    id: r.issuer-normalize-response-parses-cert
+    level: MUST
+    text: When data.certificate is present, PkiIssuerSerializer.normalizeResponse
+      parses it with parseCertificate and adds parsed_certificate and common_name
+      to the normalized data before delegating; otherwise it delegates the original
+      arguments.
+  - codeRefs:
+    - class:17afa5a16f974f99e67ef3e6f7205fff
+    - file:third_party/openbao/ui/app/serializers/pki/issuer.js
+    id: r.issuer-primary-key-and-attrs
+    level: MUST
+    text: 'PkiIssuerSerializer uses issuer_id as its primary key and marks caChain,
+      certificate, commonName, isDefault, isRoot, issuerId, keyId, parsedCertificate
+      and serialNumber as serialize: false.'
+  - codeRefs:
+    - class:c130369168208db034158640fa9be8a1
+    - file:third_party/openbao/ui/app/serializers/pki/key.js
+    id: r.key-normalize-items-rehydrates
+    level: MUST
+    text: 'PkiKeySerializer uses key_id as primary key, marks type as serialize: false,
+      and normalizeItems expands data.keys into objects combining key_id with the
+      matching data.key_info entry; payloads without a keys array are flattened from
+      data.'
+  - codeRefs:
+    - class:17afa5a16f974f99e67ef3e6f7205fff
+    - class:6abebc6c0d0a1d473794f1e8a538ae94
+    - class:c130369168208db034158640fa9be8a1
+    - class:d596e6b4964c7c32cc019abe6e3c012d
+    - class:dc330f2a39a80f717515bc5b71a9b192
+    - class:e1779c6c64f378b370bd456fcdeabae7
+    id: r.pki-serializers-extend-application
+    level: MUST
+    text: Each PKI serializer is a default export extending the shared ApplicationSerializer,
+      except PkiCertificateSerializer which extends the cert serializer and adds no
+      overrides.
+  - codeRefs:
+    - class:6abebc6c0d0a1d473794f1e8a538ae94
+    - file:third_party/openbao/ui/app/serializers/pki/role.js
+    id: r.role-serialize-preserves-key-usage
+    level: MUST
+    text: 'PkiRoleSerializer marks name as serialize: false and, after delegating
+      to the base serialize, coerces key_usage to an empty array when absent so the
+      no-default-constraint case survives the stripping of empty arrays.'
+  - codeRefs:
+    - class:e1779c6c64f378b370bd456fcdeabae7
+    - file:third_party/openbao/ui/app/serializers/pki/tidy.js
+    id: r.tidy-serialize-manual
+    level: MUST
+    text: PkiTidySerializer.serialize removes enabled and intervalDuration from the
+      serialized payload when the tidy type is manual, and otherwise returns the base
+      serialization unchanged.
   upstream: self
 - code:
   - third_party/openbao/ui/app/serializers/pki/certificate/base.js
