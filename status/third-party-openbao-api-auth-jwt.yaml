@@ -1,0 +1,69 @@
+conditions:
+- message: 'undeclared: JWTAuth, JWTAuth.Login, New, Option, WithMountPath, WithToken,
+    WithTokenFromEnv, WithTokenFromPath'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/api/auth/jwt/jwt.go
+  fingerprint: 86cc28061a38be296814e5b5a278cca8a4f08a5f69e0882bec9315614316c24c
+  interfaces:
+  - codegraphId: struct:abb2bb341ee56ffb83644c314d2fc9e4
+    file: third_party/openbao/api/auth/jwt/jwt.go
+    kind: struct
+    line: 36
+    name: JWTAuth
+  - codegraphId: type_alias:a4524c14e23c21e6a0c9ec52c5c0345f
+    file: third_party/openbao/api/auth/jwt/jwt.go
+    kind: type_alias
+    line: 54
+    name: Option
+  - codegraphId: function:6cd6a31e27f327715c4ff05f356f84e5
+    file: third_party/openbao/api/auth/jwt/jwt.go
+    kind: function
+    line: 67
+    name: New
+    signature: (roleName string, opts ...Option) (*JWTAuth, error)
+  - codegraphId: method:bd156f15d59c7a024f3b42cc22eaaf42
+    file: third_party/openbao/api/auth/jwt/jwt.go
+    kind: method
+    line: 95
+    name: JWTAuth.Login
+    signature: (ctx context.Context, client *api.Client) (*api.Secret, error)
+  - codegraphId: function:eeaf585452aa898fd223655de1516ade
+    file: third_party/openbao/api/auth/jwt/jwt.go
+    kind: function
+    line: 123
+    name: WithToken
+    signature: (token string) Option
+  - codegraphId: function:1b614483408b422219bfc3d70828cf47
+    file: third_party/openbao/api/auth/jwt/jwt.go
+    kind: function
+    line: 135
+    name: WithTokenFromPath
+    signature: (path string) Option
+  - codegraphId: function:5b77232edaba34ac15adc8636b883ad9
+    file: third_party/openbao/api/auth/jwt/jwt.go
+    kind: function
+    line: 147
+    name: WithTokenFromEnv
+    signature: (env string) Option
+  - codegraphId: function:04979f4a112ef4def1b90b2d82880584
+    file: third_party/openbao/api/auth/jwt/jwt.go
+    kind: function
+    line: 160
+    name: WithMountPath
+    signature: (mountPath string) Option
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 3a4b35f11381f8c92eddf95c57f9cd7f58a7f913eac35cc42729ec083bfab125
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 86cc28061a38be296814e5b5a278cca8a4f08a5f69e0882bec9315614316c24c

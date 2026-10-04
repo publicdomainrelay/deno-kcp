@@ -1,0 +1,58 @@
+conditions:
+- message: 'undeclared: LoginOption, NewUserpassAuth, Password, UserpassAuth, UserpassAuth.Login,
+    WithMountPath'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/api/auth/userpass/userpass.go
+  - third_party/openbao/api/auth/userpass/userpass_test.go
+  fingerprint: 79f6c213ec7befa9476499544d8eead4dcf53293c6fdd6346c2f5561c4c37ccd
+  interfaces:
+  - codegraphId: struct:a59bb055a5013978de35ac677b4ec239
+    file: third_party/openbao/api/auth/userpass/userpass.go
+    kind: struct
+    line: 17
+    name: UserpassAuth
+  - codegraphId: struct:96e3f457b1325f85ffcedcb95a8bb314
+    file: third_party/openbao/api/auth/userpass/userpass.go
+    kind: struct
+    line: 25
+    name: Password
+  - codegraphId: type_alias:d9885a92c719f1e783f19725804a4044
+    file: third_party/openbao/api/auth/userpass/userpass.go
+    kind: type_alias
+    line: 38
+    name: LoginOption
+  - codegraphId: function:f736e7e6a1f4575d2650107dd15dd744
+    file: third_party/openbao/api/auth/userpass/userpass.go
+    kind: function
+    line: 48
+    name: NewUserpassAuth
+    signature: (username string, password *Password, opts ...LoginOption) (*UserpassAuth,
+      error)
+  - codegraphId: method:9afc106af9cd9785e2aa574c2189b084
+    file: third_party/openbao/api/auth/userpass/userpass.go
+    kind: method
+    line: 94
+    name: UserpassAuth.Login
+    signature: (ctx context.Context, client *api.Client) (*api.Secret, error)
+  - codegraphId: function:f5e1d9de7472feb4063d8d4b38e6638b
+    file: third_party/openbao/api/auth/userpass/userpass.go
+    kind: function
+    line: 126
+    name: WithMountPath
+    signature: (mountPath string) LoginOption
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: bde492d23d51e894c96c8d839efae70993b4d63b17d204a502c653407eae0c92
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 79f6c213ec7befa9476499544d8eead4dcf53293c6fdd6346c2f5561c4c37ccd

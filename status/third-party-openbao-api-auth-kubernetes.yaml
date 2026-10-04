@@ -1,0 +1,69 @@
+conditions:
+- message: 'undeclared: KubernetesAuth, KubernetesAuth.Login, LoginOption, NewKubernetesAuth,
+    WithMountPath, WithServiceAccountToken, WithServiceAccountTokenEnv, WithServiceAccountTokenPath'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/api/auth/kubernetes/kubernetes.go
+  fingerprint: bfafbd247162d15f3162f33f4b09151658080040066ad02d6361e40c9dc84440
+  interfaces:
+  - codegraphId: struct:aacb30786479f3c154e168149430a970
+    file: third_party/openbao/api/auth/kubernetes/kubernetes.go
+    kind: struct
+    line: 15
+    name: KubernetesAuth
+  - codegraphId: type_alias:7515089cf8eb51b5674e31d3d9fc3056
+    file: third_party/openbao/api/auth/kubernetes/kubernetes.go
+    kind: type_alias
+    line: 23
+    name: LoginOption
+  - codegraphId: function:6018cdcb1153708818262d1b8e572716
+    file: third_party/openbao/api/auth/kubernetes/kubernetes.go
+    kind: function
+    line: 42
+    name: NewKubernetesAuth
+    signature: (roleName string, opts ...LoginOption) (*KubernetesAuth, error)
+  - codegraphId: method:035d365a5053cf1f3dec72468c4cc875
+    file: third_party/openbao/api/auth/kubernetes/kubernetes.go
+    kind: method
+    line: 74
+    name: KubernetesAuth.Login
+    signature: (ctx context.Context, client *api.Client) (*api.Secret, error)
+  - codegraphId: function:1aea8c53dc4a2d69df54b170c87873cb
+    file: third_party/openbao/api/auth/kubernetes/kubernetes.go
+    kind: function
+    line: 92
+    name: WithMountPath
+    signature: (mountPath string) LoginOption
+  - codegraphId: function:65bbac571051a841d9f60bbeb8bf4d40
+    file: third_party/openbao/api/auth/kubernetes/kubernetes.go
+    kind: function
+    line: 102
+    name: WithServiceAccountTokenPath
+    signature: (pathToToken string) LoginOption
+  - codegraphId: function:49833cec3190bb2ae6a53a181dab4f79
+    file: third_party/openbao/api/auth/kubernetes/kubernetes.go
+    kind: function
+    line: 113
+    name: WithServiceAccountToken
+    signature: (jwt string) LoginOption
+  - codegraphId: function:de0f2ba1333fa8789f0bd0a7a47adf9d
+    file: third_party/openbao/api/auth/kubernetes/kubernetes.go
+    kind: function
+    line: 120
+    name: WithServiceAccountTokenEnv
+    signature: (envVar string) LoginOption
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 0aaed7112d33353f08c0adb0248266f8bf1a1474d6740636dc651d5bf66603d1
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: bfafbd247162d15f3162f33f4b09151658080040066ad02d6361e40c9dc84440
