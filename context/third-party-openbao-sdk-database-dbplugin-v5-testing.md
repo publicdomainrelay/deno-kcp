@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The package exists so that every database plugin implementation under the OpenBao SDK can be tested with one consistent set of assertions instead of each plugin test file repeating the same call, error check and response validation. It centralises the retry behaviour needed on slow CI runners, the per-request timeout policy, and the fatal-error reporting used across plugin test suites, keeping the plugin tests themselves down to request construction and probe logic.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

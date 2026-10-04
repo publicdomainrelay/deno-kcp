@@ -1,10 +1,114 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
 - file:third_party/openbao/sdk/database/dbplugin/v5/testing/test_helpers.go test_helpers.go@third_party/openbao/sdk/database/dbplugin/v5/testing/test_helpers.go
+- function:07cf3ec50df686d409d95e2a75722836 AssertDeleteUser@third_party/openbao/sdk/database/dbplugin/v5/testing/test_helpers.go:103
+- function:20e77e5d3904c33a46e120a90d9b164b AssertUpdateUser@third_party/openbao/sdk/database/dbplugin/v5/testing/test_helpers.go:91
+- function:43efeb0b2256e05b2d09adcc53efcdea AssertClose@third_party/openbao/sdk/database/dbplugin/v5/testing/test_helpers.go:115
+- function:b7cdaca22eb7cb0148a67ae9be570b8a AssertInitialize@third_party/openbao/sdk/database/dbplugin/v5/testing/test_helpers.go:58
+- function:f1eb72494032d79525938cd66f4ab59f AssertInitializeCircleCiTest@third_party/openbao/sdk/database/dbplugin/v5/testing/test_helpers.go:35
+- function:f455d988032eff37176187ea4d763a66 AssertNewUser@third_party/openbao/sdk/database/dbplugin/v5/testing/test_helpers.go:74
 kind: SystemContext
 metadata:
   name: third-party-openbao-sdk-database-dbplugin-v5-testing
   namespace: default
 spec:
+  intent: The package exists so that every database plugin implementation under the
+    OpenBao SDK can be tested with one consistent set of assertions instead of each
+    plugin test file repeating the same call, error check and response validation.
+    It centralises the retry behaviour needed on slow CI runners, the per-request
+    timeout policy, and the fatal-error reporting used across plugin test suites,
+    keeping the plugin tests themselves down to request construction and probe logic.
+  interfaces:
+  - file: third_party/openbao/sdk/database/dbplugin/v5/testing/test_helpers.go
+    kind: function
+    name: AssertClose
+    signature: (t *testing.T, db dbplugin.Database)
+  - file: third_party/openbao/sdk/database/dbplugin/v5/testing/test_helpers.go
+    kind: function
+    name: AssertDeleteUser
+    signature: (t *testing.T, db dbplugin.Database, req dbplugin.DeleteUserRequest)
+  - file: third_party/openbao/sdk/database/dbplugin/v5/testing/test_helpers.go
+    kind: function
+    name: AssertInitialize
+    signature: (t *testing.T, db dbplugin.Database, req dbplugin.InitializeRequest)
+      dbplugin.InitializeResponse
+  - file: third_party/openbao/sdk/database/dbplugin/v5/testing/test_helpers.go
+    kind: function
+    name: AssertInitializeCircleCiTest
+    signature: (t *testing.T, db dbplugin.Database, req dbplugin.InitializeRequest)
+      dbplugin.InitializeResponse
+  - file: third_party/openbao/sdk/database/dbplugin/v5/testing/test_helpers.go
+    kind: function
+    name: AssertNewUser
+    signature: (t *testing.T, db dbplugin.Database, req dbplugin.NewUserRequest) dbplugin.NewUserResponse
+  - file: third_party/openbao/sdk/database/dbplugin/v5/testing/test_helpers.go
+    kind: function
+    name: AssertUpdateUser
+    signature: (t *testing.T, db dbplugin.Database, req dbplugin.UpdateUserRequest)
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - function:f1eb72494032d79525938cd66f4ab59f
+    id: r.circleci-retry
+    level: MUST
+    text: AssertInitializeCircleCiTest calls verifyInitialize at most five times,
+      reports each failed attempt with t.Errorf, waits one second before the next
+      attempt, logs when initialization succeeded on a later attempt, and returns
+      the last response it obtained.
+  - codeRefs:
+    - function:43efeb0b2256e05b2d09adcc53efcdea
+    id: r.close-assertion
+    level: MUST
+    text: AssertClose provides the package's close assertion for a dbplugin.Database,
+      reporting any close failure through the supplied *testing.T and returning nothing.
+  - codeRefs:
+    - file:third_party/openbao/sdk/database/dbplugin/v5/testing/test_helpers.go
+    - function:07cf3ec50df686d409d95e2a75722836
+    - function:20e77e5d3904c33a46e120a90d9b164b
+    - function:b7cdaca22eb7cb0148a67ae9be570b8a
+    - function:f1eb72494032d79525938cd66f4ab59f
+    - function:f455d988032eff37176187ea4d763a66
+    id: r.helper-marking
+    level: MUST
+    text: Each assertion helper calls t.Helper before doing work, so a reported failure
+      points at the calling test rather than at the helper body.
+  - codeRefs:
+    - function:b7cdaca22eb7cb0148a67ae9be570b8a
+    id: r.initialize-fatal
+    level: MUST
+    text: AssertInitialize calls verifyInitialize once and, on error, stops the test
+      with t.Fatalf carrying the initialization error, otherwise returns the successful
+      response.
+  - codeRefs:
+    - function:f455d988032eff37176187ea4d763a66
+    id: r.new-user-username-check
+    level: MUST
+    text: AssertNewUser stops the test with t.Fatalf when Database.NewUser returns
+      an error, and separately fails when the response carries an empty Username,
+      returning the response only when a username is present.
+  - codeRefs:
+    - file:third_party/openbao/sdk/database/dbplugin/v5/testing/test_helpers.go
+    id: r.request-timeout-resolution
+    level: MUST
+    text: The request timeout helper reads BAO_TEST_DATABASE_REQUEST_TIMEOUT, returns
+      ten seconds when the variable is empty, parses a supplied value as a duration
+      in seconds, and stops the test with t.Fatalf when that value does not parse.
+  - codeRefs:
+    - function:07cf3ec50df686d409d95e2a75722836
+    - function:20e77e5d3904c33a46e120a90d9b164b
+    id: r.update-delete-fatal
+    level: MUST
+    text: AssertUpdateUser and AssertDeleteUser discard the Database response value,
+      and stop the test with t.Fatalf on error; the delete helper includes the requested
+      username in its failure message.
+  - codeRefs:
+    - function:07cf3ec50df686d409d95e2a75722836
+    - function:20e77e5d3904c33a46e120a90d9b164b
+    - function:f455d988032eff37176187ea4d763a66
+    id: r.user-request-deadline
+    level: MUST
+    text: AssertNewUser, AssertUpdateUser and AssertDeleteUser each build a context
+      with the timeout helper's duration, defer its cancel function, and pass that
+      context to the corresponding Database method, so no user operation can block
+      the test indefinitely.
   upstream: self

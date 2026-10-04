@@ -2922,6 +2922,18 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.update-user-deltas` (MUST): "UpdateUserRequest must identify the account by username and carry each change as its own optional sub-message — ChangePassword, ChangeExpiration or ChangePublicKey — alongside the credential type, so a caller can change one aspect without restating the others; UpdateUserResponse is empty."
 - added `r.username-config-parts` (MUST): "UsernameConfig must carry a DisplayName and a RoleName so a secrets engine can render a human-readable name while the plugin derives the actual account name from the role."
 
+### third-party-openbao-sdk-database-dbplugin-v5-testing
+
+- intent: "" -> "The package exists so that every database plugin implementation under the OpenBao SDK can be tested with one consistent set of assertions instead of each plugin test file repeating the same call, error check and response validation. It centralises the retry behaviour needed on slow CI runners, the per-request timeout policy, and the fatal-error reporting used across plugin test suites, keeping the plugin tests themselves down to request construction and probe logic."
+- added `r.circleci-retry` (MUST): "AssertInitializeCircleCiTest calls verifyInitialize at most five times, reports each failed attempt with t.Errorf, waits one second before the next attempt, logs when initialization succeeded on a later attempt, and returns the last response it obtained."
+- added `r.close-assertion` (MUST): "AssertClose provides the package's close assertion for a dbplugin.Database, reporting any close failure through the supplied *testing.T and returning nothing."
+- added `r.helper-marking` (MUST): "Each assertion helper calls t.Helper before doing work, so a reported failure points at the calling test rather than at the helper body."
+- added `r.initialize-fatal` (MUST): "AssertInitialize calls verifyInitialize once and, on error, stops the test with t.Fatalf carrying the initialization error, otherwise returns the successful response."
+- added `r.new-user-username-check` (MUST): "AssertNewUser stops the test with t.Fatalf when Database.NewUser returns an error, and separately fails when the response carries an empty Username, returning the response only when a username is present."
+- added `r.request-timeout-resolution` (MUST): "The request timeout helper reads BAO_TEST_DATABASE_REQUEST_TIMEOUT, returns ten seconds when the variable is empty, parses a supplied value as a duration in seconds, and stops the test with t.Fatalf when that value does not parse."
+- added `r.update-delete-fatal` (MUST): "AssertUpdateUser and AssertDeleteUser discard the Database response value, and stop the test with t.Fatalf on error; the delete helper includes the requested username in its failure message."
+- added `r.user-request-deadline` (MUST): "AssertNewUser, AssertUpdateUser and AssertDeleteUser each build a context with the timeout helper's duration, defer its cancel function, and pass that context to the corresponding Database method, so no user operation can block the test indefinitely."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -3128,5 +3140,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-sdk-database-dbplugin-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-database-dbplugin-v5-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-database-dbplugin-v5-proto-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-sdk-database-dbplugin-v5-testing-c2s-6c1bbe4c3ba9-3749680f0640 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-database-dbplugin-v5-testing-c2s-6c1bbe4c3ba9-3749680f0640 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-database-helper-connutil-c2s-6c1bbe4c3ba9-3749680f0640 | CodeToSpec | Running |  | 0 | - |
