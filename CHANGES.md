@@ -3262,6 +3262,21 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.user-dn-lookup` (MUST): "GetUserDN must derive the distinguished name of a user from the configuration, the supplied bind DN and the username, searching the directory when the configuration requires it and otherwise composing the DN, so callers get one canonical DN string."
 - added `r.user-search-filter-rendering` (MUST): "RenderUserSearchFilter must default cfg.UserFilter to "({{.UserAttr}}={{.Username}})" when it is empty, compile it as a Go text/template, and return a template compilation error wrapped as an LDAP search failure. It must escape the user attribute and the username with ldap.EscapeFilter per RFC 4515 before substitution, and when cfg.UPNDomain is set it must force the template's UserAttr to userPrincipalName and substitute the username as "<escaped username>@<UPNDomain>"."
 
+### third-party-openbao-sdk-helper-locksutil
+
+- intent: "" -> "This context exists so the deno-kcp repository carries the OpenBao SDK locksutil package as a third_party dependency rather than fetching it at build time. The package gives callers cancellable and key-sharded locking primitives: a context-aware mutex for code that must not block past a deadline, a keyed variant for serialising work per identifier without a global lock, and sharded lock arrays so many keys map onto a small fixed set of locks. It is not fork-owned code; it is described here so the vendored surface and its behaviour stay traceable."
+- added `r.behaviour-pinned-by-tests` (SHOULD): "The observable behaviour of the package stays pinned by cancel_test.go, keyed_test.go and sharded_test.go, which exercise lock/unlock cycles, panic on improper unlock, cancellation during acquisition under synctest, and the sharded key helpers."
+- added `r.cancel-lock-acquire-honours-context` (MUST): "CancelLock.Lock selects between the context's Done channel and sending on the lock channel: if the context is cancelled or expires first it returns ctx.Err() without taking the lock, otherwise it acquires the lock and returns nil."
+- added `r.cancel-lock-blocks-then-succeeds-after-release` (MUST): "A goroutine blocked in CancelLock.Lock acquires the lock once the holder calls Unlock, so the lock serialises access rather than dropping waiters; cancel_test.go covers this with the Wait subtest."
+- added `r.cancel-lock-construction` (MUST): "NewCancelLock returns a ready-to-use CancelLock backed by a buffered channel of capacity one, so callers need no further initialisation before locking."
+- added `r.cancel-lock-unlock-panics-when-not-held` (MUST): "CancelLock.Unlock releases a held lock and panics when the lock is not held, so a double unlock or an unlock of a fresh lock is a programmer error rather than a silent no-op; cancel_test.go asserts this with require.Panics for both the unlocked and the already-unlocked cases."
+- added `r.keyed-cancel-lock-per-key-serialisation` (MUST): "KeyedCancelLock[K comparable] holds a sync.Mutex and a map from key to keyedCancelLockEntry; Lock(ctx, key) takes the map mutex only long enough to obtain that key's CancelLock and then waits on it with the caller's context, and Unlock(key) releases the key's CancelLock, so unrelated keys do not block each other."
+- added `r.keyed-cancel-lock-pool-and-constructor` (MUST): "KeyedCancelLock entries are drawn from a sync.Pool whose New function is installed by resetKeyedCancelLockPool, which builds each entry from NewCancelLock, and NewKeyedCancelLock returns a *KeyedCancelLock[K] with an initialised (empty) key map."
+- added `r.lock-with-unlock-helpers` (MUST): "LockWithUnlock takes the shard lock for a key and returns a function that releases it, and RLockWithUnlock does the same through the read-lock path, so callers can defer the returned closure instead of pairing Lock and Unlock by hand."
+- added `r.locks-for-multiple-keys` (MUST): "LocksForKeys maps a slice of keys to the slice of locks that covers them, so a caller can acquire every shard touched by a batch of keys before mutating them."
+- added `r.shard-selection-from-key` (MUST): "LockIndexForKey derives a uint8 shard index from a key string, and LockForKey applies that index to a []*L to return the single lock responsible for the key, so the same key always resolves to the same shard."
+- added `r.sharded-lock-sets-construction` (MUST): "CreateLocks returns a preallocated slice of *LockEntry, and CreateGenericLocks returns the same shape generically as []*L, giving callers a fixed set of shards to spread keys across."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -3500,4 +3515,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-sdk-helper-keysutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-keysutil-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-sdk-helper-ldaputil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-sdk-helper-locksutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-helper-locksutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-sdk-helper-locksutil-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
