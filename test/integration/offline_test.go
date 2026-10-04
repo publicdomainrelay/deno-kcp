@@ -52,9 +52,20 @@ func TestEveryExampleDecodesFromDisk(t *testing.T) {
 }
 
 func TestExampleInventoryMatchesDisk(t *testing.T) {
-	disk, err := exampleFilesOnDisk()
+	raw, err := exampleFilesOnDisk()
 	if err != nil {
 		t.Fatal(err)
+	}
+	skip := map[string]bool{}
+	for _, file := range nonExamples {
+		skip[file] = true
+	}
+	var disk []string
+	for _, file := range raw {
+		if skip[file] {
+			continue
+		}
+		disk = append(disk, file)
 	}
 	var covered []string
 	for _, e := range exampleFiles() {
