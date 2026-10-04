@@ -36329,7 +36329,83 @@ system_contexts:
   - file:third_party/openbao/internal/vault/external_tests/raftha/raft_ha_test.go
     raft_ha_test.go@third_party/openbao/internal/vault/external_tests/raftha/raft_ha_test.go
   id: sc.third-party-openbao-internal-vault-external-tests-raftha
+  intent: 'This context exists to pin down the raft HA external tests of the vendored
+    OpenBao tree: they exercise cluster formation over two physical backends and two
+    TLS client-certificate modes, and they exercise growing an existing non-raft cluster
+    into a raft-HA cluster while preserving barrier keys and the root token. It records
+    what the tests set up and assert so that the join, peer-verification and peer-removal
+    behaviour they depend on stays specified.'
   name: third-party-openbao-internal-vault-external-tests-raftha
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/raftha/raft_ha_test.go
+    id: r.bootstrap-and-join-upgraded-cluster
+    level: MUST
+    text: In the upgraded cluster the leader client must set the saved root token,
+      seal the leader to install the address provider and unseal it again, write sys/storage/raft/bootstrap
+      to make the leader active, install the address provider on the other two cores'
+      raft backends, join cores 1 and 2 with the cluster CA certificate, and verify
+      all three cores are peers.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/raftha/raft_ha_test.go
+    id: r.cluster-setup-three-cores
+    level: MUST
+    text: testRaftHANewCluster must configure a vault.CoreConfig and vault.TestClusterOptions
+      through teststorage.RaftHASetup with vaulthttp.Handler, start a three-core vault
+      test cluster, and clean it up on exit.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/raftha/raft_ha_test.go
+    id: r.existing-cluster-upgrade
+    level: MUST
+    text: TestRaft_HA_ExistingCluster must create a cluster with raft absent as HA
+      backend (physBundle.HABackend set to nil) over reusable in-memory storage, capture
+      the cluster barrier keys and root token, then build a second cluster over reusable
+      raft HA storage with SkipInit true and restore those captured barrier keys and
+      root token onto it.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/raftha/raft_ha_test.go
+    id: r.join-cores
+    level: MUST
+    text: Cores 1 and 2 must join through api.RaftJoinRequest carrying the cluster
+      CA certificate as LeaderCACert, and when addClientCerts is true also carrying
+      LeaderClientCert and LeaderClientKey from the cluster CA material; a join error
+      or a response with Joined false must fail the test.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/raftha/raft_ha_test.go
+    id: r.leader-address-provider
+    level: MUST
+    text: The leader core must be sealed before a testhelpers.TestRaftServerAddressProvider
+      is installed on its raft.RaftBackend, then unsealed, and the test must wait
+      for the core to become active; this ordering exists because the address provider
+      can only be swapped while the core is sealed.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/raftha/raft_ha_test.go
+    id: r.new-cluster-matrix
+    level: MUST
+    text: 'TestRaft_HA_NewCluster must run four parallel subtests: the file backend
+      and the in-memory backend, each with and without client certificates, and each
+      must delegate to testRaftHANewCluster with the matching teststorage bundler
+      and addClientCerts flag.'
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/raftha/raft_ha_test.go
+    id: r.remove-peer
+    level: MUST
+    text: Writing sys/storage/raft/remove-peer with server_id core-1 and then core-2
+      against the leader client must succeed, and a following testhelpers.VerifyRaftPeers
+      must confirm core-0 is the only remaining peer.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/raftha/raft_ha_test.go
+    id: r.test-cluster-options-existing
+    level: SHOULD
+    text: The existing-cluster test should run with performance standby disabled,
+      standbys kept sealed, and standby reads disabled, and should name its logger
+      after the test for readable output.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/raftha/raft_ha_test.go
+    id: r.verify-peers-added
+    level: MUST
+    text: After joining, testhelpers.VerifyRaftPeers on the leader client must confirm
+      core-0, core-1 and core-2 are all present as peers.
   upstream: self
 - code:
   - third_party/openbao/internal/vault/external_tests/response/allowed_response_headers_test.go

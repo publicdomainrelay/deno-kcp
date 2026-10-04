@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to pin down the raft HA external tests of the vendored OpenBao tree: they exercise cluster formation over two physical backends and two TLS client-certificate modes, and they exercise growing an existing non-raft cluster into a raft-HA cluster while preserving barrier keys and the root token. It records what the tests set up and assert so that the join, peer-verification and peer-removal behaviour they depend on stays specified.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

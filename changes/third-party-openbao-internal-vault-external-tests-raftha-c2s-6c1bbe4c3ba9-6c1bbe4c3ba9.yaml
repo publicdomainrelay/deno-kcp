@@ -10,5 +10,26 @@ spec:
   systemContext: third-party-openbao-internal-vault-external-tests-raftha
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-vault-external-tests-raftha
-  phase: Running
+  agentLog: 'This context is the Go test package raftha under third_party/openbao/internal/vault/external_tests,
+    whose single file raft_ha_test.go holds integration tests for OpenBao raft high-availability
+    clustering. TestRaft_HA_NewCluster registers four parallel subtests formed by
+    the cross product of two storage bundlers (teststorage.MakeFileBackend, teststorage.MakeInmemBackend)
+    and two client-certificate modes (no_client_certs, with_client_certs), all delegating
+    to the helper testRaftHANewCluster. That helper builds a vault.CoreConfig and
+    vault.TestClusterOptions with vaulthttp.Handler, calls teststorage.RaftHASetup,
+    starts a three-core test cluster, seals the leader to install a testhelpers.TestRaftServerAddressProvider
+    on its raft.RaftBackend, unseals it, waits for active, then joins core-1 and core-2
+    through api.RaftJoinRequest carrying the cluster CA certificate and optionally
+    the CA client certificate and key. It asserts the join succeeded, verifies via
+    testhelpers.VerifyRaftPeers that core-0, core-1 and core-2 are peers, writes sys/storage/raft/remove-peer
+    for core-1 and core-2, and re-verifies that core-0 remains the only peer. TestRaft_HA_ExistingCluster
+    covers the upgrade path: it disables performance standby, keeps standbys sealed,
+    disables standby reads, builds a reusable in-memory storage bundle whose HABackend
+    is nil, creates a cluster without raft as HA backend while saving the barrier
+    keys and root token, then creates a second cluster with teststorage.MakeReusableRaftHAStorage
+    under SkipInit, restores the saved barrier keys and root token, installs the address
+    provider, seals and unseals the leader, bootstraps raft on the leader with the
+    root token, waits for active, joins the remaining cores and verifies the same
+    three-peer set.'
+  message: wrote 9 requirement(s) and 0 interface(s) for third-party-openbao-internal-vault-external-tests-raftha
+  phase: Succeeded

@@ -2535,6 +2535,19 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.parallel-and-cleanup` (MUST): "The test calls t.Parallel() before any other setup, and defers cluster.Cleanup() immediately after docker.NewTestDockerCluster returns, so docker clusters do not leak when the test fails or is skipped over later."
 - added `r.skip-without-binary` (MUST): "TestRaft_Configuration_Docker reads api.ReadBaoVariable("BAO_BINARY") into a binary variable and calls t.Skip with the message "only running docker test when $BAO_BINARY present" when that variable is empty, so the docker test runs only where a binary path is provided."
 
+### third-party-openbao-internal-vault-external-tests-raftha
+
+- intent: "" -> "This context exists to pin down the raft HA external tests of the vendored OpenBao tree: they exercise cluster formation over two physical backends and two TLS client-certificate modes, and they exercise growing an existing non-raft cluster into a raft-HA cluster while preserving barrier keys and the root token. It records what the tests set up and assert so that the join, peer-verification and peer-removal behaviour they depend on stays specified."
+- added `r.bootstrap-and-join-upgraded-cluster` (MUST): "In the upgraded cluster the leader client must set the saved root token, seal the leader to install the address provider and unseal it again, write sys/storage/raft/bootstrap to make the leader active, install the address provider on the other two cores' raft backends, join cores 1 and 2 with the cluster CA certificate, and verify all three cores are peers."
+- added `r.cluster-setup-three-cores` (MUST): "testRaftHANewCluster must configure a vault.CoreConfig and vault.TestClusterOptions through teststorage.RaftHASetup with vaulthttp.Handler, start a three-core vault test cluster, and clean it up on exit."
+- added `r.existing-cluster-upgrade` (MUST): "TestRaft_HA_ExistingCluster must create a cluster with raft absent as HA backend (physBundle.HABackend set to nil) over reusable in-memory storage, capture the cluster barrier keys and root token, then build a second cluster over reusable raft HA storage with SkipInit true and restore those captured barrier keys and root token onto it."
+- added `r.join-cores` (MUST): "Cores 1 and 2 must join through api.RaftJoinRequest carrying the cluster CA certificate as LeaderCACert, and when addClientCerts is true also carrying LeaderClientCert and LeaderClientKey from the cluster CA material; a join error or a response with Joined false must fail the test."
+- added `r.leader-address-provider` (MUST): "The leader core must be sealed before a testhelpers.TestRaftServerAddressProvider is installed on its raft.RaftBackend, then unsealed, and the test must wait for the core to become active; this ordering exists because the address provider can only be swapped while the core is sealed."
+- added `r.new-cluster-matrix` (MUST): "TestRaft_HA_NewCluster must run four parallel subtests: the file backend and the in-memory backend, each with and without client certificates, and each must delegate to testRaftHANewCluster with the matching teststorage bundler and addClientCerts flag."
+- added `r.remove-peer` (MUST): "Writing sys/storage/raft/remove-peer with server_id core-1 and then core-2 against the leader client must succeed, and a following testhelpers.VerifyRaftPeers must confirm core-0 is the only remaining peer."
+- added `r.test-cluster-options-existing` (SHOULD): "The existing-cluster test should run with performance standby disabled, standbys kept sealed, and standby reads disabled, and should name its logger after the test for readable output."
+- added `r.verify-peers-added` (MUST): "After joining, testhelpers.VerifyRaftPeers on the leader client must confirm core-0, core-1 and core-2 are all present as peers."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -2709,5 +2722,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-vault-external-tests-raft-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-raft-raft-binary-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-raft-raft-binary-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-vault-external-tests-raftha-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-vault-external-tests-raftha-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-response-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
