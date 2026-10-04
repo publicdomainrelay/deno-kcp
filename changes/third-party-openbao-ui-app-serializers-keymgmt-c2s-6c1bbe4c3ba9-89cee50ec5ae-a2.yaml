@@ -1,0 +1,38 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-ui-app-serializers-keymgmt-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-ui-app-serializers-keymgmt
+  toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
+status:
+  agentLog: 'This context holds the two Ember Data serializers for the OpenBao key-management
+    UI, vendored under third_party/openbao/ui/app/serializers/keymgmt. KeymgmtKeySerializer
+    in key.js overrides normalizeItems: when the payload is versioned it converts
+    the versions object, keyed by version number, into an array of version records
+    whose id is the version number parsed as a base-10 integer spread together with
+    that version''s own fields, sets created to the creation_time of the first version
+    in key order, sets last_rotated to the creation_time of the last version in key
+    order, and returns the annotated payload; when the payload is instead an array
+    it maps each entry down to id and name both taken from the entry''s id plus the
+    backend taken from the parent payload; anything else is returned unchanged. KeymgmtProviderSerializer
+    in provider.js declares primaryKey = ''name'', overrides normalizeItems to stamp
+    id = name and backend = payload.backend onto every provider of an array payload
+    and to pass non-array payloads through, and overrides serialize to call the superclass
+    serializer with the original arguments and merge the record''s unsaved credentials
+    into the resulting JSON.'
+  message: wrote 6 requirement(s) and 2 interface(s) for third-party-openbao-ui-app-serializers-keymgmt
+  phase: Succeeded
+superseded:
+- message: wrote 6 requirement(s) and 2 interface(s) for third-party-openbao-ui-app-serializers-keymgmt;
+    interface KeymgmtKeySerializer.normalizeItems is not in the observed facts; dropped;
+    interface KeymgmtProviderSerializer.primaryKey is not in the observed facts; dropped;
+    interface KeymgmtProviderSerializer.normalizeItems is not in the observed facts;
+    dropped; interface KeymgmtProviderSerializer.serialize is not in the observed
+    facts; dropped
+  name: third-party-openbao-ui-app-serializers-keymgmt-c2s-6c1bbe4c3ba9-89cee50ec5ae
+  phase: Succeeded

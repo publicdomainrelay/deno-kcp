@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-The context exists so the key-management Ember serializers can be described and reasoned about as a unit: how raw keymgmt API payloads are normalized into Ember Data records and how records are serialized back for create/update requests. It matters because the key endpoint returns versions as a number-keyed object and omits backend context, and because provider credentials live on the record rather than in the serialized attributes, so both quirks must be handled outside the default ApplicationSerializer behaviour that both classes extend.
+The context exists so the key-management serializers can be described and reasoned about as one unit: how raw keymgmt API payloads become Ember Data records and how records become create/update request bodies. It matters because the key endpoint returns versions as a number-keyed object rather than an array and omits backend context from list entries, and because provider credentials live on the record rather than in the serialized attributes, so neither quirk can be handled by the default ApplicationSerializer behaviour that both classes extend.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

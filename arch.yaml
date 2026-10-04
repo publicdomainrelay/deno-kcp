@@ -68741,13 +68741,13 @@ system_contexts:
   - file:third_party/openbao/ui/app/serializers/keymgmt/key.js key.js@third_party/openbao/ui/app/serializers/keymgmt/key.js
   - file:third_party/openbao/ui/app/serializers/keymgmt/provider.js provider.js@third_party/openbao/ui/app/serializers/keymgmt/provider.js
   id: sc.third-party-openbao-ui-app-serializers-keymgmt
-  intent: 'The context exists so the key-management Ember serializers can be described
-    and reasoned about as a unit: how raw keymgmt API payloads are normalized into
-    Ember Data records and how records are serialized back for create/update requests.
-    It matters because the key endpoint returns versions as a number-keyed object
-    and omits backend context, and because provider credentials live on the record
-    rather than in the serialized attributes, so both quirks must be handled outside
-    the default ApplicationSerializer behaviour that both classes extend.'
+  intent: 'The context exists so the key-management serializers can be described and
+    reasoned about as one unit: how raw keymgmt API payloads become Ember Data records
+    and how records become create/update request bodies. It matters because the key
+    endpoint returns versions as a number-keyed object rather than an array and omits
+    backend context from list entries, and because provider credentials live on the
+    record rather than in the serialized attributes, so neither quirk can be handled
+    by the default ApplicationSerializer behaviour that both classes extend.'
   interfaces:
   - file: third_party/openbao/ui/app/serializers/keymgmt/key.js
     kind: class
@@ -68764,10 +68764,10 @@ system_contexts:
     - file:third_party/openbao/ui/app/serializers/keymgmt/key.js
     id: r.key-list-normalization
     level: MUST
-    text: When normalizeItems produces an array, each element must be reduced to id
-      and name both taken from the element's id, plus backend taken from the parent
-      payload's backend field, and a payload that is neither versioned nor an array
-      must be returned unchanged.
+    text: When the normalized payload is not versioned but is an array, KeymgmtKeySerializer.normalizeItems
+      must map each element to an object holding only id and name, both taken from
+      the element's id, plus backend taken from the parent payload's backend field;
+      a payload that is neither versioned nor an array must be returned unchanged.
   - codeRefs:
     - class:d2f1cce48f9d3fc208c3a35c8df4e55a
     - file:third_party/openbao/ui/app/serializers/keymgmt/key.js
@@ -68775,40 +68775,44 @@ system_contexts:
     level: MUST
     text: When versions are present, the normalized key must carry created taken from
       the creation_time of the first version in key order and last_rotated taken from
-      the creation_time of the last version in key order, so the first version is
-      never also used as last_rotated.
+      the creation_time of the last version in key order, with the last version compared
+      only in the else branch so the first version is never also used as last_rotated
+      and a single-version payload leaves last_rotated unset.
   - codeRefs:
     - class:d2f1cce48f9d3fc208c3a35c8df4e55a
     - file:third_party/openbao/ui/app/serializers/keymgmt/key.js
     id: r.key-versions-object-to-array
     level: MUST
-    text: KeymgmtKeySerializer.normalizeItems must convert a payload's versions object,
-      whose keys are version numbers, into an array of version objects where each
-      entry has id set to its key parsed as a base-10 integer and spreads that version's
-      own fields alongside it.
+    text: KeymgmtKeySerializer.normalizeItems must, when the normalized payload carries
+      a versions object whose keys are version numbers, replace that object with an
+      array of version objects in key order, each entry having id set to its key parsed
+      as a base-10 integer with that version's own fields spread alongside it.
   - codeRefs:
     - class:88cba2da41a41350ecfad514d4118378
     - file:third_party/openbao/ui/app/serializers/keymgmt/provider.js
     id: r.provider-list-normalization
     level: MUST
-    text: KeymgmtProviderSerializer.normalizeItems must, for an array payload, set
-      each provider's id to its name and its backend to the parent payload's backend,
-      and return non-array payloads from the superclass unchanged.
+    text: KeymgmtProviderSerializer.normalizeItems must run the superclass normalization
+      and then, only when the result is an array, set each provider's id to that provider's
+      name and its backend to the parent payload's backend, returning the normalized
+      value unchanged otherwise.
   - codeRefs:
     - class:88cba2da41a41350ecfad514d4118378
     - file:third_party/openbao/ui/app/serializers/keymgmt/provider.js
     id: r.provider-primary-key-name
     level: MUST
-    text: KeymgmtProviderSerializer must use name as its primary key, so provider
-      records are identified by their name attribute rather than an id attribute.
+    text: KeymgmtProviderSerializer must set primaryKey to the string 'name', so provider
+      records are identified by their name attribute rather than by an id attribute.
   - codeRefs:
     - class:88cba2da41a41350ecfad514d4118378
     - file:third_party/openbao/ui/app/serializers/keymgmt/provider.js
     id: r.provider-serialize-credentials
     level: MUST
     text: KeymgmtProviderSerializer.serialize must call the superclass serialize with
-      the original arguments and merge the record's credentials attribute (snapshot.record.credentials)
-      into the resulting JSON alongside the serialized attributes.
+      the original arguments and return the resulting JSON spread together with a
+      credentials key holding snapshot.record.credentials, so provider credentials
+      reach the request body alongside the serialized attributes even though they
+      are not serialized attributes.
   upstream: self
 - code:
   - third_party/openbao/ui/app/serializers/kubernetes/config.js
