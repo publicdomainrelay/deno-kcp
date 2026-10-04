@@ -3187,3 +3187,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-sdk-database-helper-connutil-c2s-6c1bbe4c3ba9-3749680f0640 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-database-helper-credsutil-c2s-6c1bbe4c3ba9-3749680f0640 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-database-helper-dbutil-c2s-6c1bbe4c3ba9-3749680f0640 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-sdk-framework-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-helper-authmetadata-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
