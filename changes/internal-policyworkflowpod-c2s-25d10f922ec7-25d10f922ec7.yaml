@@ -10,5 +10,17 @@ spec:
   systemContext: internal-policyworkflowpod
   toCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
 status:
-  message: the agent is summarizing internal-policyworkflowpod
-  phase: Running
+  agentLog: 'internal/policyworkflowpod holds the decider for the PolicyWorkflowPod
+    resource: it reads an Observed snapshot of a PolicyWorkflowPod plus the readiness
+    of its referenced policy engine and produces a Result that names the pod''s phase,
+    its endpoint and active-run count, its Ready condition and the requeue delay.
+    The package exports a Reconciler built by New, the Reconcile method that does
+    the phase decision, a carry helper that copies the previous status forward, and
+    two pure helpers used by the admission path, Capacity and RunTTL. Phase logic
+    is small: a pod with a deletion timestamp keeps its carried status, a pod whose
+    engine is not ready goes Pending with a Ready=False EngineNotReady condition,
+    and a pod with a ready engine and a non-empty endpoint goes Running, publishes
+    that endpoint and sets Ready=True. Both live paths ask for a 2 second requeue.
+    Tests cover Pending, Running, and the RunTTL precedence rules.'
+  message: wrote 16 requirement(s) and 8 interface(s) for internal-policyworkflowpod
+  phase: Succeeded
