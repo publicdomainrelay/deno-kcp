@@ -1,10 +1,153 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
 - file:third_party/openbao/internal/serviceregistration/service_registration.go service_registration.go@third_party/openbao/internal/serviceregistration/service_registration.go
+- interface:b8412bfbee8a77db8cda0864a01fd4ff ServiceRegistration@third_party/openbao/internal/serviceregistration/service_registration.go:36
+- method:55f8ed1a2259bf597809b2c796fa6eeb ServiceRegistration.Run@third_party/openbao/internal/serviceregistration/service_registration.go:69
+- method:a44b75080ace3a03cf10f85b54c16012 ServiceRegistration.NotifySealedStateChange@third_party/openbao/internal/serviceregistration/service_registration.go:84
+- method:ae717215e4df0076c74ac2e2a181a570 ServiceRegistration.NotifyInitializedStateChange@third_party/openbao/internal/serviceregistration/service_registration.go:98
+- method:ccbff5a37fb9d810240f214a3733c3ad ServiceRegistration.NotifyPerformanceStandbyStateChange@third_party/openbao/internal/serviceregistration/service_registration.go:91
+- method:fdb03743787e1f720246219e7b5f544d ServiceRegistration.NotifyActiveStateChange@third_party/openbao/internal/serviceregistration/service_registration.go:77
+- struct:3f95d94681b666eb08dff50caf24570e State@third_party/openbao/internal/serviceregistration/service_registration.go:23
+- type_alias:beaf67b38d23b9dd08c5290bb5d1af11 Factory@third_party/openbao/internal/serviceregistration/service_registration.go:32
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-serviceregistration
   namespace: default
 spec:
+  intent: 'The context exists so the repository has a single, implementation-agnostic
+    description of how a node advertises its state to a service registry. Callers
+    in the vault and command layers depend on the interface and the Factory type rather
+    than on any specific registry backend, so a Kubernetes implementation, a test
+    double, or a future backend can be substituted at configuration time. Reading
+    this context tells you what a registry integration must provide: construct from
+    config plus logger plus initial State, start with a shutdown channel and wait
+    group, and accept per-dimension state change notifications that report errors
+    back to the core.'
+  interfaces:
+  - file: third_party/openbao/internal/serviceregistration/service_registration.go
+    kind: type_alias
+    name: Factory
+    signature: type Factory func(config map[string]string, logger log.Logger, state
+      State) (ServiceRegistration, error)
+  - file: third_party/openbao/internal/serviceregistration/service_registration.go
+    kind: interface
+    name: ServiceRegistration
+    signature: type ServiceRegistration interface { Run(shutdownCh <-chan struct{},
+      wait *sync.WaitGroup, redirectAddr string) error; NotifyActiveStateChange(isActive
+      bool) error; NotifySealedStateChange(isSealed bool) error; NotifyPerformanceStandbyStateChange(isStandby
+      bool) error; NotifyInitializedStateChange(isInitialized bool) error }
+  - file: third_party/openbao/internal/serviceregistration/service_registration.go
+    kind: method
+    name: ServiceRegistration.NotifyActiveStateChange
+    signature: NotifyActiveStateChange(isActive bool) error
+  - file: third_party/openbao/internal/serviceregistration/service_registration.go
+    kind: method
+    name: ServiceRegistration.NotifyInitializedStateChange
+    signature: NotifyInitializedStateChange(isInitialized bool) error
+  - file: third_party/openbao/internal/serviceregistration/service_registration.go
+    kind: method
+    name: ServiceRegistration.NotifyPerformanceStandbyStateChange
+    signature: NotifyPerformanceStandbyStateChange(isStandby bool) error
+  - file: third_party/openbao/internal/serviceregistration/service_registration.go
+    kind: method
+    name: ServiceRegistration.NotifySealedStateChange
+    signature: NotifySealedStateChange(isSealed bool) error
+  - file: third_party/openbao/internal/serviceregistration/service_registration.go
+    kind: method
+    name: ServiceRegistration.Run
+    signature: Run(shutdownCh <-chan struct{}, wait *sync.WaitGroup, redirectAddr
+      string) error
+  - file: third_party/openbao/internal/serviceregistration/service_registration.go
+    kind: struct
+    name: State
+    signature: type State struct { VaultVersion string; IsInitialized, IsSealed, IsActive,
+      IsPerformanceStandby bool }
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/serviceregistration/service_registration.go
+    - type_alias:beaf67b38d23b9dd08c5290bb5d1af11
+    id: r.factory-builds-registration-from-config
+    level: MUST
+    text: Factory is a function type with signature func(config map[string]string,
+      logger log.Logger, state State) (ServiceRegistration, error). A backend is selected
+      and constructed by calling a Factory with its string config map, a logger and
+      the initial State; the call returns either a usable ServiceRegistration or an
+      error, so construction failure is reported to the caller rather than panicking.
+  - codeRefs:
+    - file:third_party/openbao/internal/serviceregistration/service_registration.go
+    - interface:b8412bfbee8a77db8cda0864a01fd4ff
+    id: r.interface-defines-registry-contract
+    level: MUST
+    text: 'ServiceRegistration is the interface every service registry backend implements.
+      It declares exactly five methods, all returning error: Run, NotifyActiveStateChange,
+      NotifySealedStateChange, NotifyPerformanceStandbyStateChange and NotifyInitializedStateChange.
+      Any type offered through a Factory must satisfy all five, and callers hold only
+      this interface, never a concrete backend type.'
+  - codeRefs:
+    - file:third_party/openbao/internal/serviceregistration/service_registration.go
+    - interface:b8412bfbee8a77db8cda0864a01fd4ff
+    id: r.notifications-are-per-dimension
+    level: SHOULD
+    text: The four notification methods each address exactly one state dimension and
+      take that dimension's new boolean rather than a whole State snapshot, so implementations
+      only patch the affected registry field. Implementations may return nil after
+      handing work to an internal retry mechanism instead of waiting for the registry
+      call to complete.
+  - codeRefs:
+    - interface:b8412bfbee8a77db8cda0864a01fd4ff
+    - method:fdb03743787e1f720246219e7b5f544d
+    id: r.notify-active-state
+    level: MUST
+    text: NotifyActiveStateChange(isActive bool) error reports a change in active/standby
+      leadership for this node, carrying the new value as a boolean and returning
+      an error when the registry update fails. Callers use it instead of re-reading
+      Status, so each leadership transition produces exactly one notification.
+  - codeRefs:
+    - interface:b8412bfbee8a77db8cda0864a01fd4ff
+    - method:ae717215e4df0076c74ac2e2a181a570
+    id: r.notify-initialized-state
+    level: MUST
+    text: NotifyInitializedStateChange(isInitialized bool) error reports whether the
+      node has been initialized, carrying the new value and returning an error on
+      failure. Initialization is notified independently of seal state, so a node can
+      report initialized and sealed at the same time.
+  - codeRefs:
+    - interface:b8412bfbee8a77db8cda0864a01fd4ff
+    - method:ccbff5a37fb9d810240f214a3733c3ad
+    id: r.notify-performance-standby-state
+    level: MUST
+    text: NotifyPerformanceStandbyStateChange(isStandby bool) error reports whether
+      the node has entered or left performance standby mode, carrying the new value
+      and returning an error when the registry cannot be updated. This is a separate
+      dimension from active state and from seal state.
+  - codeRefs:
+    - interface:b8412bfbee8a77db8cda0864a01fd4ff
+    - method:a44b75080ace3a03cf10f85b54c16012
+    id: r.notify-sealed-state
+    level: MUST
+    text: NotifySealedStateChange(isSealed bool) error reports whether the node is
+      sealed, carrying the new value and returning an error on registry-update failure.
+      Seal and unseal are both expressed through this one call by flipping the boolean.
+  - codeRefs:
+    - interface:b8412bfbee8a77db8cda0864a01fd4ff
+    - method:55f8ed1a2259bf597809b2c796fa6eeb
+    id: r.run-drives-registration-lifecycle
+    level: MUST
+    text: 'ServiceRegistration.Run takes a shutdownCh <-chan struct{}, a wait *sync.WaitGroup
+      and a redirectAddr string, and returns error. It starts the registration work:
+      the shutdown channel lets the caller stop it, the wait group lets the caller
+      block until the goroutines it starts have finished, and the redirect address
+      is passed through so the registry can point clients at the node. An error return
+      reports a failure to begin or maintain registration.'
+  - codeRefs:
+    - file:third_party/openbao/internal/serviceregistration/service_registration.go
+    - struct:3f95d94681b666eb08dff50caf24570e
+    id: r.state-struct-carries-node-status
+    level: MUST
+    text: 'State is a plain struct that carries the node status handed to a registry
+      implementation: a VaultVersion string, and the four booleans IsInitialized,
+      IsSealed, IsActive and IsPerformanceStandby. Factory takes this struct as its
+      third argument, so a newly built ServiceRegistration starts from a known snapshot
+      of those five fields.'
   upstream: self

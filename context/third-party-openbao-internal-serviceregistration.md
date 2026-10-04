@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so the repository has a single, implementation-agnostic description of how a node advertises its state to a service registry. Callers in the vault and command layers depend on the interface and the Factory type rather than on any specific registry backend, so a Kubernetes implementation, a test double, or a future backend can be substituted at configuration time. Reading this context tells you what a registry integration must provide: construct from config plus logger plus initial State, start with a shutdown channel and wait group, and accept per-dimension state change notifications that report errors back to the core.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
