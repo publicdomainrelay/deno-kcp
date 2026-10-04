@@ -9,5 +9,8 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/ui/types/ember-data/types/registries/adapter.d.ts` file adapter.d.ts (third_party/openbao/ui/types/ember-data/types/registries/adapter.d.ts)
+- `file:third_party/openbao/ui/types/ember-data/types/registries/model.d.ts` file model.d.ts (third_party/openbao/ui/types/ember-data/types/registries/model.d.ts)
+- `interface:7cb47966de4cab7537b549e5e9d10016` interface AdapterRegistry (third_party/openbao/ui/types/ember-data/types/registries/adapter.d.ts)
+- `interface:ea426a02e10410048eba0d7c554b17b2` interface ModelRegistry (third_party/openbao/ui/types/ember-data/types/registries/model.d.ts)
 <!-- SPECD_MANAGED_END -->

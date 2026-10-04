@@ -1,15 +1,33 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: AdapterRegistry, ModelRegistry'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/ui/types/ember-data/types/registries/adapter.d.ts
+  - third_party/openbao/ui/types/ember-data/types/registries/model.d.ts
+  fingerprint: b9c31d26c4dafa242f6e0bf5815caf85bf6e9d3485e1a6026375133e5b6bd8c3
+  interfaces:
+  - codegraphId: interface:7cb47966de4cab7537b549e5e9d10016
+    file: third_party/openbao/ui/types/ember-data/types/registries/adapter.d.ts
+    kind: interface
+    line: 15
+    name: AdapterRegistry
+  - codegraphId: interface:ea426a02e10410048eba0d7c554b17b2
+    file: third_party/openbao/ui/types/ember-data/types/registries/model.d.ts
+    kind: interface
+    line: 10
+    name: ModelRegistry
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 8f3f54e940ac5fd27a216fdd4e349e1b4d66d79e25bae59315757ad6cc6aebfb
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: b9c31d26c4dafa242f6e0bf5815caf85bf6e9d3485e1a6026375133e5b6bd8c3
