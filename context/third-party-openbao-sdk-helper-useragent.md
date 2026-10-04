@@ -9,5 +9,8 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/sdk/helper/useragent/useragent.go` file useragent.go (third_party/openbao/sdk/helper/useragent/useragent.go)
+- `file:third_party/openbao/sdk/helper/useragent/useragent_test.go` file useragent_test.go (third_party/openbao/sdk/helper/useragent/useragent_test.go)
+- `function:c2b7b93f98bb13761bb4913658be6306` function String (third_party/openbao/sdk/helper/useragent/useragent.go)
+- `function:f2ef3a3169d630fdb4bad111f1a84fbf` function PluginString (third_party/openbao/sdk/helper/useragent/useragent.go)
 <!-- SPECD_MANAGED_END -->

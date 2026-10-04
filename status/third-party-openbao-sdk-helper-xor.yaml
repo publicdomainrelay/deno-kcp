@@ -1,15 +1,35 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: XORBase64, XORBytes'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/sdk/helper/xor/xor.go
+  - third_party/openbao/sdk/helper/xor/xor_test.go
+  fingerprint: d401b2f06d1c8cea28abe329296d493cab71448f6edead04ac99dc35c7b6ef2c
+  interfaces:
+  - codegraphId: function:9c0ecf693088b895977e7459db29c29e
+    file: third_party/openbao/sdk/helper/xor/xor.go
+    kind: function
+    line: 15
+    name: XORBytes
+    signature: (a, b []byte) ([]byte, error)
+  - codegraphId: function:3a5b1b307f6da1e8d7cfd677e6a37901
+    file: third_party/openbao/sdk/helper/xor/xor.go
+    kind: function
+    line: 32
+    name: XORBase64
+    signature: (a, b string) ([]byte, error)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 5efda777b8f74740669432cf4735dded7f9e88ccbce0ab1b93898c7ba7c8f835
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: d401b2f06d1c8cea28abe329296d493cab71448f6edead04ac99dc35c7b6ef2c

@@ -9,5 +9,6 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/sdk/helper/wrapping/wrapinfo.go` file wrapinfo.go (third_party/openbao/sdk/helper/wrapping/wrapinfo.go)
+- `struct:ccd5a601db10ca6ca18546b359ced1bd` struct ResponseWrapInfo (third_party/openbao/sdk/helper/wrapping/wrapinfo.go)
 <!-- SPECD_MANAGED_END -->
