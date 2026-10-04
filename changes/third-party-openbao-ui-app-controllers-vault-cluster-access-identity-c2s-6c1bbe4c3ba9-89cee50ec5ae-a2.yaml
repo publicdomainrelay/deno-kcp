@@ -1,0 +1,34 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-ui-app-controllers-vault-cluster-access-identity-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-ui-app-controllers-vault-cluster-access-identity
+  toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
+status:
+  agentLog: 'third_party/openbao/ui/app/controllers/vault/cluster/access/identity
+    holds the four Ember.js controllers behind the OpenBao UI identity screens of
+    a vault cluster''s access area. create.js declares the store and router services,
+    a showRoute (''vault.cluster.access.identity.show'') and showTab (''details'')
+    target, a navAfterSave ember-concurrency task that routes to the show route after
+    a normal save and to a type-specific list route after a delete, and a cleanupModel
+    method that rolls back dirty attributes, nulls the singleton controller''s model,
+    and unloads the record when the model is not saving or being destroyed. edit.js
+    and merge.js re-export that base controller unchanged, so the edit and merge routes
+    inherit create''s save-navigation and cleanup behavior. index.js is the list controller:
+    it owns page and pageFilter query params, a filter string, filterFocused and isLoading
+    state, filterMatchesKey and firstPartialMatch computed properties (the latter
+    using escape-string-regexp and core/utils/common-prefix), and the actions setFilter,
+    setFilterFocus, refresh (which bubbles reload to the list route), delete, toggleDisabled,
+    and reloadRecord, reporting outcomes through the flashMessages service.'
+  message: wrote 9 requirement(s) and 0 interface(s) for third-party-openbao-ui-app-controllers-vault-cluster-access-identity;
+    the spec already said this
+  phase: Succeeded
+superseded:
+- message: wrote 9 requirement(s) and 0 interface(s) for third-party-openbao-ui-app-controllers-vault-cluster-access-identity
+  name: third-party-openbao-ui-app-controllers-vault-cluster-access-identity-c2s-6c1bbe4c3ba9-89cee50ec5ae
+  phase: Succeeded
