@@ -10,5 +10,24 @@ spec:
   systemContext: third-party-openbao-internal-builtin-logical-pkiext-pkiext-binary
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-builtin-logical-pkiext-pkiext-binary
-  phase: Running
+  agentLog: 'This context covers the `third_party/openbao/internal/builtin/logical/pkiext/pkiext_binary`
+    package, the container-backed test harness that OpenBao''s PKI ACME tests build
+    on. Two types carry the whole surface: `VaultPkiCluster` (pki_cluster.go:20) wraps
+    a `docker.DockerCluster` plus an optional `dnstest.TestServer`, and `VaultPkiMount`
+    (pki_mount.go:15) wraps one PKI mount on the active node. `NewVaultPkiCluster`
+    (pki_cluster.go:25) reads `BAO_BINARY` from the environment and skips the test
+    when it is unset, otherwise starts a docker cluster from `quay.io/openbao/openbao:latest`
+    with the given binary, TRACE log level and 3 cores. `NewVaultPkiClusterWithDNS`
+    (pki_cluster.go:50) builds on it and attaches a test DNS resolver for `dadgarcorp.com`
+    onto the cluster network. Cluster methods read cluster topology (active node,
+    non-active nodes, container host port, network name, IP, ID, listener CA cert
+    PEM) and manipulate test DNS and host files (`AddHostname`, `AddNameToHostFiles`,
+    `AddDNSRecord`, the three `RemoveDNSRecord*` variants, `RemoveAllDNSRecords`),
+    then create mounts (`CreateMount`, `CreateAcmeMount`) that return `*VaultPkiMount`.
+    Mount methods drive the PKI engine over the API: cluster config, ACME config,
+    root and intermediate generation, CSR signing, bundle import, issuer/default-issuer/role
+    updates, EAB key retrieval and CA cert PEM retrieval. The ACME test file (acme_test.go)
+    consumes this harness across Caddy, certbot, EAB, IP/DNS, wildcard, ICA-DNS-prevention
+    and step-down-node subtests.'
+  message: wrote 13 requirement(s) and 34 interface(s) for third-party-openbao-internal-builtin-logical-pkiext-pkiext-binary
+  phase: Succeeded
