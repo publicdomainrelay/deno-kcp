@@ -1,10 +1,10 @@
 package provider
 
 import (
+	"context"
 	"testing"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
 
 	"github.com/johnandersen777/deno-kcp/api/v1alpha1"
@@ -35,6 +35,18 @@ func policyRunObject(name, lc, phase string, labels map[string]string) *unstruct
 	return runObject("PolicyWorkflowRun", name, lc, phase, labels)
 }
 
+func podObject(name, ns, lc string) *unstructured.Unstructured {
+	return &unstructured.Unstructured{Object: map[string]any{
+		"apiVersion": "deno.computer/v1alpha1",
+		"kind":       "DenoPod",
+		"metadata": map[string]any{
+			"name":        name,
+			"namespace":   ns,
+			"annotations": map[string]any{kcp.ClusterAnnotation: lc},
+		},
+	}}
+}
+
 func triggerObject(name, lc, pod string) *unstructured.Unstructured {
 	return triggerObjectNS(name, lc, "", pod)
 }
@@ -57,13 +69,9 @@ func triggerObjectNS(name, lc, ns, pod string) *unstructured.Unstructured {
 
 func triggerReader(t *testing.T, objects ...*unstructured.Unstructured) *cacheReader {
 	t.Helper()
-	indexer := cache.NewIndexer(cache.MetaNamespaceKeyFunc, watchIndexers)
 	reader := newCacheReader()
-	reader.add(workTrigger, indexer)
 	for _, obj := range objects {
-		if err := indexer.Add(obj); err != nil {
-			t.Fatal(err)
-		}
+		reader.upsert(workTrigger, obj)
 	}
 	return reader
 }
@@ -201,5 +209,49 @@ func TestATriggerWithoutAPodIsNotWoken(t *testing.T) {
 		if key.kind == workTrigger {
 			t.Fatalf("a trigger with no pod reference was woken: %v", key)
 		}
+	}
+}
+
+// ponytail: one wildcard informer serves every workspace, so root:alice and
+// root:bob each hold a DenoPod named pds in namespace default. A cache keyed by
+// namespace and name alone keeps one entry and evicts the other; this test
+// fails then.
+func TestTheWatchCacheKeepsSameNamedPodsFromDifferentWorkspaces(t *testing.T) {
+	reader := newCacheReader()
+	alice := podObject("pds", "default", "root:alice")
+	bob := podObject("pds", "default", "root:bob")
+	reader.upsert(workPod, alice)
+	reader.upsert(workPod, bob)
+
+	// A wildcard informer re-list adds every workspace's object again; neither
+	// may displace the other.
+	reader.upsert(workPod, alice)
+	reader.upsert(workPod, bob)
+
+	pods := reader.allPods()
+	if len(pods) != 2 {
+		t.Fatalf("allPods returned %d pods, want both workspaces' pds", len(pods))
+	}
+	seen := map[string]bool{}
+	for _, p := range pods {
+		seen[p.GetAnnotations()[kcp.ClusterAnnotation]] = true
+	}
+	if !seen["root:alice"] || !seen["root:bob"] {
+		t.Fatalf("allPods clusters = %v, want root:alice and root:bob", seen)
+	}
+
+	gotAlice, err := reader.ReadPod(context.Background(), Ref{LogicalCluster: "root:alice", Namespace: "default", Name: "pds"})
+	if err != nil {
+		t.Fatalf("read root:alice pds: %v", err)
+	}
+	gotBob, err := reader.ReadPod(context.Background(), Ref{LogicalCluster: "root:bob", Namespace: "default", Name: "pds"})
+	if err != nil {
+		t.Fatalf("read root:bob pds: %v", err)
+	}
+	if lc := gotAlice.GetAnnotations()[kcp.ClusterAnnotation]; lc != "root:alice" {
+		t.Fatalf("ReadPod(root:alice) returned the pod of %q", lc)
+	}
+	if lc := gotBob.GetAnnotations()[kcp.ClusterAnnotation]; lc != "root:bob" {
+		t.Fatalf("ReadPod(root:bob) returned the pod of %q", lc)
 	}
 }

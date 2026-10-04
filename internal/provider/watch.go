@@ -285,6 +285,26 @@ func (p *Provider) watchFactory(url string) (dynamicinformer.DynamicSharedInform
 	return dynamicinformer.NewFilteredDynamicSharedInformerFactory(client, 0, metav1.NamespaceAll, nil), nil
 }
 
+// watchKeyFunc keys a cached object by its logical cluster as well as its
+// namespace and name. One wildcard informer serves every workspace at once, so
+// root:alice and root:bob can each hold a DenoPod named pds in namespace
+// default; the client-go default key would collapse the two into one store
+// entry and the second would evict the first.
+func watchKeyFunc(obj any) (string, error) {
+	if tombstone, ok := obj.(cache.DeletedFinalStateUnknown); ok {
+		obj = tombstone.Obj
+	}
+	u, ok := obj.(*unstructured.Unstructured)
+	if !ok {
+		return cache.MetaNamespaceKeyFunc(obj)
+	}
+	lc := u.GetAnnotations()[kcp.ClusterAnnotation]
+	if lc == "" {
+		return cache.MetaNamespaceKeyFunc(obj)
+	}
+	return ref.Key(lc, u.GetNamespace(), u.GetName()), nil
+}
+
 var watchIndexers = cache.Indexers{
 	indexByCluster: func(obj any) ([]string, error) {
 		u, ok := obj.(*unstructured.Unstructured)
@@ -348,17 +368,23 @@ var watchIndexers = cache.Indexers{
 
 func (p *Provider) registerInformer(factory dynamicinformer.DynamicSharedInformerFactory, res watchResource, reader *cacheReader, queue workqueue.TypedRateLimitingInterface[workKey]) {
 	informer := factory.ForResource(res.gvr).Informer()
-	indexer := informer.GetIndexer()
-	_ = indexer.AddIndexers(watchIndexers)
-	reader.add(res.kind, indexer)
+	// ponytail: the cache the reader serves is the reader's own cluster-keyed
+	// store, not the informer's indexer. The informer keys its store by
+	// namespace and name, which cannot hold two workspaces' objects of the same
+	// name; the reader feeds its store from the events instead.
 	_, _ = informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj any) {
+			reader.upsert(res.kind, obj)
 			p.recordEvent()
 			enqueueWatchObject(res.kind, obj, reader, queue)
 		},
 		UpdateFunc: func(oldObj, obj any) {
+			reader.upsert(res.kind, obj)
 			p.recordEvent()
 			enqueueWatchUpdate(res.kind, oldObj, obj, reader, queue)
+		},
+		DeleteFunc: func(obj any) {
+			reader.remove(res.kind, obj)
 		},
 	})
 }
