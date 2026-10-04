@@ -10,5 +10,17 @@ spec:
   systemContext: third-party-openbao-sdk-helper-ocsp
   toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
 status:
-  message: the agent is summarizing third-party-openbao-sdk-helper-ocsp
-  phase: Running
+  agentLog: This context is the OCSP helper package vendored under third_party/openbao/sdk/helper/ocsp.
+    It contains a Client that answers certificate revocation questions over OCSP,
+    caches responses, and plugs into TLS verification. Client holds a map of CA root
+    certificates, a shared x509.CertPool, and an LRU two-queue cache of OCSP responses
+    keyed by certificate identity, guarded by an RWMutex. New builds a Client from
+    a logger factory and a cache size; Logger returns the hclog logger; NewTransport
+    derives an *http.Transport from a VerifyConfig; ClearCache purges the response
+    cache. Verification entry points are VerifyLeafCertificate, VerifyPeerCertificate,
+    GetRevocationStatus and GetAllRevocationStatus, all driven by a VerifyConfig and
+    an ocspStatus result. A FailOpenMode type and a narrow clientInterface exposing
+    only Do keep the HTTP transport replaceable, which ocsp_test.go exercises with
+    a fakeHTTPClient.
+  message: wrote 11 requirement(s) and 12 interface(s) for third-party-openbao-sdk-helper-ocsp
+  phase: Succeeded

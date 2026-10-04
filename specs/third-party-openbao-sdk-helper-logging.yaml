@@ -56,9 +56,10 @@ spec:
     id: r.log-format-enum
     level: MUST
     text: LogFormat must be an integer enum with exactly three defined values — UnspecifiedFormat,
-      StandardFormat and JSONFormat — and its String method must render them as the
-      strings "unspecified", "standard" and "json" respectively, falling back to "unknown"
-      for any value outside that set.
+      StandardFormat and JSONFormat — so callers can compare parse results by value,
+      and its String method must render those three values as the strings "unspecified",
+      "standard" and "json" respectively, falling back to "unknown" for any value
+      outside that set.
   - codeRefs:
     - file:third_party/openbao/sdk/helper/logging/logging.go
     - function:14579d465d86403647209873e941c97d
@@ -66,36 +67,37 @@ spec:
     id: r.new-vault-logger-default-output
     level: MUST
     text: NewVaultLogger must create a logger at the requested level that writes to
-      log.DefaultOutput, delegating to NewVaultLoggerWithWriter so both constructors
-      produce identically configured loggers apart from the writer.
+      log.DefaultOutput by delegating to NewVaultLoggerWithWriter with that writer,
+      so both constructors produce identically configured loggers apart from the writer.
   - codeRefs:
     - file:third_party/openbao/sdk/helper/logging/logging.go
     - function:9ba0bab216e904df7cc422f1ce26c15d
     - function:f429f14084efc1889a39feef98b72677
     id: r.new-vault-logger-with-writer
     level: MUST
-    text: NewVaultLoggerWithWriter must build a log.Logger through log.New with the
-      caller's level and writer, IndependentLevels set to true, and JSONFormat set
-      from ParseEnvLogFormat() equalling JSONFormat, so that JSON output is selected
-      by the environment variable rather than by an argument.
+    text: NewVaultLoggerWithWriter must build a log.Logger through log.New with a
+      log.LoggerOptions carrying the caller's level, the caller's writer as Output,
+      IndependentLevels set to true, and JSONFormat set from ParseEnvLogFormat() equalling
+      JSONFormat, so that JSON output is selected by the environment variable rather
+      than by an argument.
   - codeRefs:
     - file:third_party/openbao/sdk/helper/logging/logging.go
     - function:f429f14084efc1889a39feef98b72677
     id: r.parse-env-log-format
     level: MUST
-    text: ParseEnvLogFormat must read the BAO_LOG_FORMAT variable, lower-case it,
-      map "json", "vault_json", "vault-json" and "vaultjson" to JSONFormat and "standard"
-      to StandardFormat, and return UnspecifiedFormat for an unset variable or any
-      unrecognised value, without ever returning an error.
+    text: ParseEnvLogFormat must read the BAO_LOG_FORMAT variable via api.ReadBaoVariable,
+      lower-case its value, map "json", "vault_json", "vault-json" and "vaultjson"
+      to JSONFormat and "standard" to StandardFormat, and return UnspecifiedFormat
+      for an unset variable or any unrecognised value, without ever returning an error.
   - codeRefs:
     - file:third_party/openbao/sdk/helper/logging/logging.go
     - function:c93ea2090c966df5cc25488e76155619
     id: r.parse-log-format
     level: MUST
     text: 'ParseLogFormat must lower-case and trim the supplied string before matching,
-      so that "" and whitespace-only input yield UnspecifiedFormat with no error,
-      "standard" in any case yields StandardFormat, and "json" in any case (including
-      surrounding whitespace) yields JSONFormat; any other input must yield UnspecifiedFormat
+      so that "" and whitespace-only input yield UnspecifiedFormat with a nil error,
+      "standard" in any case yields StandardFormat, and "json" in any case including
+      surrounding whitespace yields JSONFormat; any other input must yield UnspecifiedFormat
       together with an error whose message is "unknown log format: <format>" carrying
       the original, untrimmed argument.'
   - codeRefs:
@@ -103,8 +105,8 @@ spec:
     - function:c93ea2090c966df5cc25488e76155619
     id: r.parse-log-format-tested
     level: SHOULD
-    text: ParseLogFormat's accepted inputs and error text must stay covered by Test_ParseLogFormat,
-      which asserts the empty string, a single space, "standard", "STANDARD", "json",
-      " json " and "bogus", and must hold the expected LogFormat and error for each
-      case.
+    text: ParseLogFormat's accepted inputs and error text must stay covered by Test_ParseLogFormat
+      in logging_test.go, which asserts the empty string, a single space, "standard",
+      "STANDARD", "json", " json " and "bogus", and must hold both the expected LogFormat
+      and the expected error for each case.
   upstream: self
