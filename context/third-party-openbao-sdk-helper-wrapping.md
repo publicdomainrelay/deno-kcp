@@ -16,4 +16,5 @@ upstream: self
 ## Resolved code references
 
 - `file:third_party/openbao/sdk/helper/wrapping/wrapinfo.go` file wrapinfo.go (third_party/openbao/sdk/helper/wrapping/wrapinfo.go)
+- `struct:ccd5a601db10ca6ca18546b359ced1bd` struct ResponseWrapInfo (third_party/openbao/sdk/helper/wrapping/wrapinfo.go)
 <!-- SPECD_MANAGED_END -->

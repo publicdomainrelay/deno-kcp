@@ -1,0 +1,99 @@
+conditions:
+- message: 'undeclared: FileBackend, FileBackend.Delete, FileBackend.DeleteInternal,
+    FileBackend.Get, FileBackend.GetInternal, FileBackend.List, FileBackend.ListInternal,
+    FileBackend.ListPage, FileBackend.ListPageInternal, FileBackend.Put, FileBackend.PutInternal,
+    NewFileBackend'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/sdk/physical/file/file.go
+  - third_party/openbao/sdk/physical/file/file_test.go
+  fingerprint: 67669ea236f7217d9343632d69d08a013c287a83866b7136f62fdde361ef8cb0
+  interfaces:
+  - codegraphId: struct:f97cbbb490e02fba40d62fc63b49a6bb
+    file: third_party/openbao/sdk/physical/file/file.go
+    kind: struct
+    line: 37
+    name: FileBackend
+  - codegraphId: function:5928099dab2401f1ce6d627c360788ab
+    file: third_party/openbao/sdk/physical/file/file.go
+    kind: function
+    line: 49
+    name: NewFileBackend
+    signature: (conf map[string]string, logger log.Logger) (physical.Backend, error)
+  - codegraphId: method:599ec27aef47db9557c6304417ab5567
+    file: third_party/openbao/sdk/physical/file/file.go
+    kind: method
+    line: 66
+    name: FileBackend.Delete
+    signature: (ctx context.Context, path string) error
+  - codegraphId: method:549203c34572c9fddea69fe42798a23e
+    file: third_party/openbao/sdk/physical/file/file.go
+    kind: method
+    line: 76
+    name: FileBackend.DeleteInternal
+    signature: (ctx context.Context, path string) error
+  - codegraphId: method:34da34a9c4bcb8ce4b40ba1ca8aabf7d
+    file: third_party/openbao/sdk/physical/file/file.go
+    kind: method
+    line: 141
+    name: FileBackend.Get
+    signature: (ctx context.Context, k string) (*physical.Entry, error)
+  - codegraphId: method:28cb36e96f79e69c49344b9e1145e48f
+    file: third_party/openbao/sdk/physical/file/file.go
+    kind: method
+    line: 151
+    name: FileBackend.GetInternal
+    signature: (ctx context.Context, k string) (*physical.Entry, error)
+  - codegraphId: method:8a4e549a0d3b349730977b89514322f9
+    file: third_party/openbao/sdk/physical/file/file.go
+    kind: method
+    line: 200
+    name: FileBackend.Put
+    signature: (ctx context.Context, entry *physical.Entry) error
+  - codegraphId: method:2ec2fa72c6f199918e53b34c2a6c9378
+    file: third_party/openbao/sdk/physical/file/file.go
+    kind: method
+    line: 210
+    name: FileBackend.PutInternal
+    signature: (ctx context.Context, entry *physical.Entry) error
+  - codegraphId: method:d9f6481e4bcc5bd49efcc51e1fd2e740
+    file: third_party/openbao/sdk/physical/file/file.go
+    kind: method
+    line: 276
+    name: FileBackend.List
+    signature: (ctx context.Context, prefix string) ([]string, error)
+  - codegraphId: method:2934e1f3503031ec5c839a5bc5a7254d
+    file: third_party/openbao/sdk/physical/file/file.go
+    kind: method
+    line: 286
+    name: FileBackend.ListPage
+    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
+      error)
+  - codegraphId: method:f2158a69453454f476c45266d23a6beb
+    file: third_party/openbao/sdk/physical/file/file.go
+    kind: method
+    line: 296
+    name: FileBackend.ListInternal
+    signature: (ctx context.Context, prefix string) ([]string, error)
+  - codegraphId: method:0e5a66a1ca3f5d50f9f2b8f5ba1fb395
+    file: third_party/openbao/sdk/physical/file/file.go
+    kind: method
+    line: 300
+    name: FileBackend.ListPageInternal
+    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
+      error)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 4bc3c38f8264964ce1fc88ddb2efecd6e373f015cd24690149f22bcfb76a29a4
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 67669ea236f7217d9343632d69d08a013c287a83866b7136f62fdde361ef8cb0
