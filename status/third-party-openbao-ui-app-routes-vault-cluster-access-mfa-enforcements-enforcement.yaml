@@ -1,15 +1,27 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: MfaLoginEnforcementEditRoute'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/ui/app/routes/vault/cluster/access/mfa/enforcements/enforcement/edit.js
+  fingerprint: 971451ea96c88b7be638056140455751b822c2a9a8b66bce45155a381465bfc6
+  interfaces:
+  - codegraphId: class:1ceca47d6f273ffa24bcc7ce879e48f2
+    file: third_party/openbao/ui/app/routes/vault/cluster/access/mfa/enforcements/enforcement/edit.js
+    kind: class
+    line: 8
+    name: MfaLoginEnforcementEditRoute
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: d8b2e1a4ae7d532eb42b6da7dd1b246f5ecdd056451833ab47c658adaa82a39c
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 971451ea96c88b7be638056140455751b822c2a9a8b66bce45155a381465bfc6

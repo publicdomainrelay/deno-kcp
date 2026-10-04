@@ -9,5 +9,6 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `class:fa1e6bf6840a2041d782e2d621e3dd2f` class OidcConfigureRoute (third_party/openbao/ui/app/routes/vault/cluster/access/oidc/index.js)
+- `file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/index.js` file index.js (third_party/openbao/ui/app/routes/vault/cluster/access/oidc/index.js)
 <!-- SPECD_MANAGED_END -->

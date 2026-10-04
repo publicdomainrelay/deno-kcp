@@ -9,5 +9,6 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `class:851d220f0101654bfd32bf841f733051` class MfaMethodEditRoute (third_party/openbao/ui/app/routes/vault/cluster/access/mfa/methods/method/edit.js)
+- `file:third_party/openbao/ui/app/routes/vault/cluster/access/mfa/methods/method/edit.js` file edit.js (third_party/openbao/ui/app/routes/vault/cluster/access/mfa/methods/method/edit.js)
 <!-- SPECD_MANAGED_END -->
