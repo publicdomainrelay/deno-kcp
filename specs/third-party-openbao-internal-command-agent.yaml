@@ -9,10 +9,83 @@ codeRefIndex:
 - file:third_party/openbao/internal/command/agent/jwt_end_to_end_test.go jwt_end_to_end_test.go@third_party/openbao/internal/command/agent/jwt_end_to_end_test.go
 - file:third_party/openbao/internal/command/agent/testing.go testing.go@third_party/openbao/internal/command/agent/testing.go
 - file:third_party/openbao/internal/command/agent/token_file_end_to_end_test.go token_file_end_to_end_test.go@third_party/openbao/internal/command/agent/token_file_end_to_end_test.go
+- function:b694f010cebc494d1fe128a22732b5e2 GetTestJWT@third_party/openbao/internal/command/agent/testing.go:22
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-command-agent
   namespace: default
 spec:
+  intent: 'This context exists so the agent command has one place where its integration-level
+    contract is demonstrated: a reusable JWT fixture for auto-auth tests, plus end-to-end
+    tests that each prove a distinct auth method or cache path works against a live
+    server. It is the evidence layer for the agent''s login and caching behaviour,
+    not the implementation itself.'
+  interfaces:
+  - file: third_party/openbao/internal/command/agent/testing.go
+    kind: function
+    name: GetTestJWT
+    signature: func GetTestJWT(t *testing.T) (string, *ecdsa.PrivateKey)
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agent/approle_end_to_end_test.go
+    id: r.approle-auto-auth
+    level: MUST
+    text: The AppRole end-to-end test must drive the agent's auto-auth with AppRole
+      credentials against a running server and assert that the resulting token is
+      obtained and used by the agent.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agent/cache_end_to_end_test.go
+    id: r.cache-e2e
+    level: MUST
+    text: The cache end-to-end test must run the agent's proxy cache against a live
+      server and assert cached responses are served and refreshed according to the
+      configured cache settings.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agent/cert_end_to_end_test.go
+    id: r.cert-auto-auth
+    level: MUST
+    text: The certificate end-to-end test must exercise the agent's cert auto-auth
+      method using client certificate material and assert that the agent obtains a
+      token through that method.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agent/jwt_end_to_end_test.go
+    - function:b694f010cebc494d1fe128a22732b5e2
+    id: r.jwt-auto-auth
+    level: MUST
+    text: The JWT end-to-end test must consume the GetTestJWT fixture, configure the
+      agent's JWT auto-auth method with the minted token and its key material, and
+      assert the agent authenticates successfully against the server.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agent/testing.go
+    - function:b694f010cebc494d1fe128a22732b5e2
+    id: r.jwt-fixture-helper
+    level: MUST
+    text: testing.go must export GetTestJWT, a helper that decodes TestECDSAPrivKey
+      from PEM into an *ecdsa.PrivateKey, fails the test if parsing errors, signs
+      a JWT with ES256 and the JWT type header, attaches the fixed public claims (subject,
+      Auth0 issuer, NotBefore five seconds in the past, and the plugin audience) plus
+      private claims carrying user and groups, and returns the serialized token together
+      with the private key so callers can also verify or reuse the key.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agent/doc.go
+    id: r.package-doc
+    level: SHOULD
+    text: doc.go must carry the package-level documentation for the agent command
+      package, describing what the command does so the exported behaviour is discoverable
+      from godoc.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agent/auto_auth_preload_token_end_to_end_test.go
+    id: r.preload-token-auto-auth
+    level: MUST
+    text: The preload token end-to-end test must exercise the agent's auto-auth preload
+      path, where a token is supplied ahead of the auth method, and assert the preloaded
+      token is the one the agent presents.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agent/token_file_end_to_end_test.go
+    id: r.token-file-auto-auth
+    level: MUST
+    text: The token file end-to-end test must exercise the agent's token-file auto-auth
+      method, reading a wrapping or plain token from a file path, and assert the agent
+      authenticates and unwraps as configured.
   upstream: self

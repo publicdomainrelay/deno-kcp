@@ -954,6 +954,18 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.command-registry` (MUST): "Command types in this package are collected by `initCommands` in commands.go, which instantiates `AgentCommand` and its siblings into the CLI command map, so every command described here is reachable as a subcommand of the `bao` binary."
 - added `r.sibling-arg-completion` (SHOULD): "Sibling commands follow the same completion contract as the agent command but may return a real predictor: `AgentGenerateConfigCommand.AutocompleteArgs` returns `complete.PredictNothing`, while `AuditDisableCommand.AutocompleteArgs` returns `c.PredictVaultAudits()`, which resolves through `BaseCommand.PredictVaultAudits` to `NewPredict().VaultAudits()`."
 
+### third-party-openbao-internal-command-agent
+
+- intent: "" -> "This context exists so the agent command has one place where its integration-level contract is demonstrated: a reusable JWT fixture for auto-auth tests, plus end-to-end tests that each prove a distinct auth method or cache path works against a live server. It is the evidence layer for the agent's login and caching behaviour, not the implementation itself."
+- added `r.approle-auto-auth` (MUST): "The AppRole end-to-end test must drive the agent's auto-auth with AppRole credentials against a running server and assert that the resulting token is obtained and used by the agent."
+- added `r.cache-e2e` (MUST): "The cache end-to-end test must run the agent's proxy cache against a live server and assert cached responses are served and refreshed according to the configured cache settings."
+- added `r.cert-auto-auth` (MUST): "The certificate end-to-end test must exercise the agent's cert auto-auth method using client certificate material and assert that the agent obtains a token through that method."
+- added `r.jwt-auto-auth` (MUST): "The JWT end-to-end test must consume the GetTestJWT fixture, configure the agent's JWT auto-auth method with the minted token and its key material, and assert the agent authenticates successfully against the server."
+- added `r.jwt-fixture-helper` (MUST): "testing.go must export GetTestJWT, a helper that decodes TestECDSAPrivKey from PEM into an *ecdsa.PrivateKey, fails the test if parsing errors, signs a JWT with ES256 and the JWT type header, attaches the fixed public claims (subject, Auth0 issuer, NotBefore five seconds in the past, and the plugin audience) plus private claims carrying user and groups, and returns the serialized token together with the private key so callers can also verify or reuse the key."
+- added `r.package-doc` (SHOULD): "doc.go must carry the package-level documentation for the agent command package, describing what the command does so the exported behaviour is discoverable from godoc."
+- added `r.preload-token-auto-auth` (MUST): "The preload token end-to-end test must exercise the agent's auto-auth preload path, where a token is supplied ahead of the auth method, and assert the preloaded token is the one the agent presents."
+- added `r.token-file-auto-auth` (MUST): "The token file end-to-end test must exercise the agent's token-file auto-auth method, reading a wrapping or plain token from a file path, and assert the agent authenticates and unwraps as configured."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -985,6 +997,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-builtin-plugin-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-plugin-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-plugin-v5-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-command-agent-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-command-agent-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agent-config-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-command-agent-exec-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-internal-command-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |

@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the agent command has one place where its integration-level contract is demonstrated: a reusable JWT fixture for auto-auth tests, plus end-to-end tests that each prove a distinct auth method or cache path works against a live server. It is the evidence layer for the agent's login and caching behaviour, not the implementation itself.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
