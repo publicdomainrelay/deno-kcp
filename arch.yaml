@@ -52471,8 +52471,89 @@ system_contexts:
   - third_party/openbao/sdk/helper/wrapping/wrapinfo.go
   codeRefIndex:
   - file:third_party/openbao/sdk/helper/wrapping/wrapinfo.go wrapinfo.go@third_party/openbao/sdk/helper/wrapping/wrapinfo.go
+  - struct:ccd5a601db10ca6ca18546b359ced1bd ResponseWrapInfo@third_party/openbao/sdk/helper/wrapping/wrapinfo.go:8
   id: sc.third-party-openbao-sdk-helper-wrapping
+  intent: 'The context exists so that the wrapped-response metadata type is specified
+    in isolation: what each field means, which fields are returned to a caller and
+    which stay internal, and how the tags make the struct round-trip through JSON,
+    `structs`, and `mapstructure`. It documents the contract other OpenBao code depends
+    on when it creates, transports, or unwraps a wrapped response.'
+  interfaces:
+  - file: third_party/openbao/sdk/helper/wrapping/wrapinfo.go
+    kind: struct
+    name: ResponseWrapInfo
+    signature: type ResponseWrapInfo struct { TTL time.Duration; Token string; Accessor
+      string; CreationTime time.Time; WrappedAccessor string; WrappedEntityID string;
+      Format string; CreationPath string; SealWrap bool }
   name: third-party-openbao-sdk-helper-wrapping
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/wrapping/wrapinfo.go
+    - struct:ccd5a601db10ca6ca18546b359ced1bd
+    id: r.creation-path-records-original-request
+    level: MUST
+    text: CreationPath records the original request path used to create the wrapped
+      response, so the wrap can be traced back to the request that produced it.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/wrapping/wrapinfo.go
+    - struct:ccd5a601db10ca6ca18546b359ced1bd
+    id: r.creation-time-with-ttl-gives-expiry
+    level: MUST
+    text: CreationTime records when the wrapping token was created so that, combined
+      with TTL, a caller can compute the expected expiration.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/wrapping/wrapinfo.go
+    - struct:ccd5a601db10ca6ca18546b359ced1bd
+    id: r.format-is-internal-only
+    level: MUST
+    text: Format selects the wrapping format and must not be returned to callers;
+      it is internal state only.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/wrapping/wrapinfo.go
+    - struct:ccd5a601db10ca6ca18546b359ced1bd
+    id: r.nonzero-ttl-requests-wrapping
+    level: MUST
+    text: A non-zero TTL specifies that the response must be wrapped and gives the
+      desired TTL of the wrapping token; a zero TTL means no wrapping is requested.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/wrapping/wrapinfo.go
+    - struct:ccd5a601db10ca6ca18546b359ced1bd
+    id: r.parallel-encoding-tags
+    level: SHOULD
+    text: Every field must carry matching json, structs, and mapstructure tags so
+      the wrap info encodes into API responses and decodes from stored or plugin-transported
+      data under the same key names.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/wrapping/wrapinfo.go
+    - struct:ccd5a601db10ca6ca18546b359ced1bd
+    id: r.seal-wrap-controls-downstream-behavior
+    level: MUST
+    text: SealWrap controls seal wrapping behavior downstream for specific use cases
+      and must be carried through the response metadata rather than decided by the
+      consumer.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/wrapping/wrapinfo.go
+    - struct:ccd5a601db10ca6ca18546b359ced1bd
+    id: r.token-carries-wrapped-response
+    level: MUST
+    text: The Token field holds the token that contains the wrapped response, and
+      Accessor holds that same token's accessor so the wrapping token can be looked
+      up without the token value.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/wrapping/wrapinfo.go
+    - struct:ccd5a601db10ca6ca18546b359ced1bd
+    id: r.wrapped-accessor-for-created-credentials
+    level: MUST
+    text: When the contained response is the output of a token or approle secret-id
+      creation call, WrappedAccessor exposes the created token's or secret-id's accessor
+      there.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/wrapping/wrapinfo.go
+    - struct:ccd5a601db10ca6ca18546b359ced1bd
+    id: r.wrapped-entity-id-is-requester
+    level: MUST
+    text: WrappedEntityID identifies the entity of the caller that initiated the wrapping
+      request.
   upstream: self
 - code:
   - third_party/openbao/sdk/helper/xor/xor.go

@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so that the wrapped-response metadata type is specified in isolation: what each field means, which fields are returned to a caller and which stay internal, and how the tags make the struct round-trip through JSON, `structs`, and `mapstructure`. It documents the contract other OpenBao code depends on when it creates, transports, or unwraps a wrapped response.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
