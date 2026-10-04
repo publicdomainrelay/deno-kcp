@@ -9,5 +9,8 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/ui/tests/acceptance/secrets/backend/kubernetes/configuration-test.js` file configuration-test.js (third_party/openbao/ui/tests/acceptance/secrets/backend/kubernetes/configuration-test.js)
+- `file:third_party/openbao/ui/tests/acceptance/secrets/backend/kubernetes/credentials-test.js` file credentials-test.js (third_party/openbao/ui/tests/acceptance/secrets/backend/kubernetes/credentials-test.js)
+- `file:third_party/openbao/ui/tests/acceptance/secrets/backend/kubernetes/overview-test.js` file overview-test.js (third_party/openbao/ui/tests/acceptance/secrets/backend/kubernetes/overview-test.js)
+- `file:third_party/openbao/ui/tests/acceptance/secrets/backend/kubernetes/roles-test.js` file roles-test.js (third_party/openbao/ui/tests/acceptance/secrets/backend/kubernetes/roles-test.js)
 <!-- SPECD_MANAGED_END -->
