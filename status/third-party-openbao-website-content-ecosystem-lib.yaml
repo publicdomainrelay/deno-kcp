@@ -1,15 +1,68 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: Member, News, NewsBlurb, Randomize, RandomizeMembers, YouTubeTalk,
+    getLogo'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/website/content/ecosystem/lib/Member.tsx
+  - third_party/openbao/website/content/ecosystem/lib/News.tsx
+  - third_party/openbao/website/content/ecosystem/lib/Randomize.tsx
+  - third_party/openbao/website/content/ecosystem/lib/RandomizeMembers.tsx
+  fingerprint: cb1ed2ad27ed1e5b9d635436d74b2f3c27da560221181a5e32f83433e3a6aba0
+  interfaces:
+  - codegraphId: function:f10ab2cc8cfad54ec9acb7018783203c
+    file: third_party/openbao/website/content/ecosystem/lib/Member.tsx
+    kind: function
+    line: 11
+    name: getLogo
+    signature: '(title: string, logoName: string)'
+  - codegraphId: function:fabfe4337e8f5f83b927737ef98a074f
+    file: third_party/openbao/website/content/ecosystem/lib/Member.tsx
+    kind: function
+    line: 36
+    name: Member
+    signature: ({ title, logoName, children })
+  - codegraphId: function:968aad2abaf14535512a265d3ce110a8
+    file: third_party/openbao/website/content/ecosystem/lib/News.tsx
+    kind: function
+    line: 8
+    name: News
+    signature: ({ title, memberName, children })
+  - codegraphId: function:8f3e97d9230aa363423beb4674ec9ddc
+    file: third_party/openbao/website/content/ecosystem/lib/News.tsx
+    kind: function
+    line: 28
+    name: NewsBlurb
+    signature: ({ title, memberName, link, children })
+  - codegraphId: function:ad2219be1c11fd49914601c7bfc96601
+    file: third_party/openbao/website/content/ecosystem/lib/News.tsx
+    kind: function
+    line: 43
+    name: YouTubeTalk
+    signature: ({ title, memberName, vid, lowres, children })
+  - codegraphId: function:250667d0b277526a7dfc60a9b557eda4
+    file: third_party/openbao/website/content/ecosystem/lib/Randomize.tsx
+    kind: function
+    line: 4
+    name: Randomize
+    signature: ({children})
+  - codegraphId: function:cfad8efa322d04da6fd911e132a992dc
+    file: third_party/openbao/website/content/ecosystem/lib/RandomizeMembers.tsx
+    kind: function
+    line: 8
+    name: RandomizeMembers
+    signature: ()
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: ca908aa4c3143cef6fbaec9e02231f768034f8b1c7e8b7e44531d4551e96dd73
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: cb1ed2ad27ed1e5b9d635436d74b2f3c27da560221181a5e32f83433e3a6aba0

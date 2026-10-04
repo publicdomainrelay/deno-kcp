@@ -9,5 +9,9 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/website/docusaurus.config.ts` file docusaurus.config.ts (third_party/openbao/website/docusaurus.config.ts)
+- `file:third_party/openbao/website/pnpm-lock.yaml` file pnpm-lock.yaml (third_party/openbao/website/pnpm-lock.yaml)
+- `file:third_party/openbao/website/pnpm-workspace.yaml` file pnpm-workspace.yaml (third_party/openbao/website/pnpm-workspace.yaml)
+- `file:third_party/openbao/website/sidebars.ts` file sidebars.ts (third_party/openbao/website/sidebars.ts)
+- `file:third_party/openbao/website/sidebarsCommunity.ts` file sidebarsCommunity.ts (third_party/openbao/website/sidebarsCommunity.ts)
 <!-- SPECD_MANAGED_END -->

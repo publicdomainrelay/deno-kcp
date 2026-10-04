@@ -9,5 +9,8 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `class:a7c0d3919a4fcd1348c985dce2d6a2cc` class PkiConfigCrlModel (third_party/openbao/ui/types/vault/models/pki/config/crl.d.ts)
+- `class:dbffa86dedc574b86d3b64e5911d46d6` class PkiConfigUrlsModel (third_party/openbao/ui/types/vault/models/pki/config/urls.d.ts)
+- `file:third_party/openbao/ui/types/vault/models/pki/config/crl.d.ts` file crl.d.ts (third_party/openbao/ui/types/vault/models/pki/config/crl.d.ts)
+- `file:third_party/openbao/ui/types/vault/models/pki/config/urls.d.ts` file urls.d.ts (third_party/openbao/ui/types/vault/models/pki/config/urls.d.ts)
 <!-- SPECD_MANAGED_END -->
