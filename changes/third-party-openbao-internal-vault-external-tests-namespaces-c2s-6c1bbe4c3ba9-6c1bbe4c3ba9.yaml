@@ -10,5 +10,21 @@ spec:
   systemContext: third-party-openbao-internal-vault-external-tests-namespaces
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-vault-external-tests-namespaces
-  phase: Running
+  agentLog: 'This context covers two Go external (integration) test files in package
+    `namespaces` under `third_party/openbao/internal/vault/external_tests/namespaces`.
+    `namespace_test.go` exercises repeated deletion of a namespace on a two-core in-process
+    OpenBao test cluster: it creates `ns1`, writes an admin policy, concurrently populates
+    ten KV-v2 mounts and ten userpass auth mounts with 25 entries each, deletes the
+    namespace, then steps down the active core so the deletion is cancelled, and asserts
+    the namespace remains listed and is marked `tainted` before a second delete removes
+    it and leaves its raw storage empty. It also carries the in-file `populateAuth`,
+    `populateMounts` helpers and the `adminPolicy` constant granting full capabilities.
+    `sealing_test.go` exercises namespace-level sealing on a three-core cluster with
+    a Shamir seal config of 3 shares and threshold 2, using the `createSealedNs`,
+    `doUnseal`, `doSeal`, `requireSealed` and `requireUnsealed` helpers to assert
+    that sealed namespaces are sealed on every node, that unseal and seal operations
+    propagate to all nodes, and that unsealed state resynchronizes after core sealing,
+    step-down and unsealing. No exported interfaces exist; every declaration is an
+    unexported test function, helper or constant.'
+  message: wrote 9 requirement(s) and 0 interface(s) for third-party-openbao-internal-vault-external-tests-namespaces
+  phase: Succeeded

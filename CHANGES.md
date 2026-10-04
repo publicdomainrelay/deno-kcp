@@ -2427,6 +2427,19 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.single-node-trace-cluster` (MUST): "The test must start a Docker cluster with NumCores 1, image repo quay.io/openbao/openbao, tag latest, VaultBinary set to the BAO_BINARY value, node LogLevel TRACE, and must defer cluster cleanup."
 - added `r.skip-without-binary` (MUST): "TestRecovery_Docker must read the BAO_BINARY variable with api.ReadBaoVariable and skip the test with the message "only running docker test when $BAO_BINARY present" when it is empty, so the Docker test never runs without an explicit binary."
 
+### third-party-openbao-internal-vault-external-tests-namespaces
+
+- intent: "" -> "This context exists to specify the black-box behavior the external namespace tests assert about OpenBao: how namespace deletion must survive an interrupted (cancelled) deletion and leave a tainted namespace that a second delete can finish, and how per-namespace seal/unseal state must propagate across all cores of a cluster, including after seal, step-down, restart and resync. It documents the acceptance rules these integration tests enforce so that changes to namespace deletion, tainting or namespace sealing can be checked against them."
+- added `r.ci-skip-for-repeated-deletion` (MUST): "TestNamespaceRepeatedDeletion skips itself when the CI environment variable is non-empty, because creating 500 KV and userpass objects causes context cancellation timeouts, and otherwise runs in parallel."
+- added `r.deletion-completes-and-clears-storage` (MUST): "Once the second delete is issued, sys/namespaces must become empty within the eventual timeout, and listing sys/raw/namespaces/<uuid> for the deleted namespace must return nil, showing namespace storage is gone."
+- added `r.deletion-interrupted-leaves-tainted-namespace` (MUST): "After the namespace is deleted and the active core is stepped down, the namespace must still appear under sys/namespaces, a read of sys/namespaces/ns1 must report tainted true, and a second delete must be accepted."
+- added `r.namespace-population-uses-v2-kv-and-userpass` (MUST): "Namespace population must enable KV-v2 mounts named kv-v2, kv-v1 and kv under the kv logical backend factory plus userpass credential backend, wait for the KV-v2 mount config to expose cas_required before writing entries, and write entries and users concurrently in the namespace of the admin policy."
+- added `r.sealed-namespace-creation-returns-shares` (MUST): "Creating a namespace with a seal configuration must return a response carrying key_shares, and the Shamir configuration with shares 3 and threshold 2 must yield 3 share strings."
+- added `r.sealed-state-on-every-node` (MUST): "A sealed namespace must reject mount listing with an error containing "is sealed" and a nil mount list on every core of the cluster, and an unsealed namespace must list non-empty mounts without error."
+- added `r.three-core-cluster-with-eventual-checks` (MUST): "TestNamespaceClusterSealing runs a three-core test cluster in parallel and uses eventual assertions with 25 second timeouts and 100 millisecond polling for namespace creation, unsealing and resealing, because standby nodes can lag behind."
+- added `r.unseal-and-seal-propagate-across-cluster` (MUST): "Unsealing a namespace from any core must unseal it immediately on the active core and eventually on all other nodes, and sealing a namespace must make it sealed again on all nodes."
+- added `r.unsealed-state-resyncs-after-restart` (MUST): "After cores are sealed, stepped down and unsealed, namespaces that were unsealed must become reachable again on all nodes, showing unsealed namespace state is synchronized when nodes rejoin."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -2587,4 +2600,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-vault-external-tests-misc-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-misc-misc-binary-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-misc-misc-binary-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-vault-external-tests-namespaces-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-vault-external-tests-namespaces-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-internal-vault-external-tests-plugin-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-vault-external-tests-policy-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Pending |  | 0 | - |
