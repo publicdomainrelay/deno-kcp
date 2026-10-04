@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to pin down the contract of the third-party OpenBao UI core addon before any local modification, so that work in deno-kcp treats this vendored component set as an interface rather than as free-form markup. It records which modules exist at which path, which class each module exports, and the few behaviours the observed code proves: how AlertBanner validates its type argument, how CheckboxGrid derives and reports checked values, how AutocompleteInput binds its dropdown API and input element, and how AlertInlineComponent and BoxRadio compute their display strings. The specification gives later changes a named surface to keep compatible, and marks the component families that must stay grouped so templates referencing them keep resolving.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
