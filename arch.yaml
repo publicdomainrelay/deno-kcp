@@ -22801,12 +22801,12 @@ system_contexts:
   - method:e1a88070e93159d6c6612cfd62d22535 remoteKMS.Close@third_party/openbao/internal/helper/kmsplugin/kms.go:167
   - struct:f505aca759e0d5ab602240d7661125bd Catalog@third_party/openbao/internal/helper/kmsplugin/catalog.go:32
   id: sc.third-party-openbao-internal-helper-kmsplugin
-  intent: This context exists because KMS plugins in OpenBao must be usable before
-    core is created and are declarative only, so they need their own catalog separate
-    from the main core plugin catalog. It gives core a stable way to obtain a sealed/unsealed
-    KMS, key or auto-unseal wrapper by name from either a builtin or an external plugin,
-    and it keeps those long-lived objects correct across plugin process restarts and
-    configuration reloads without the caller seeing ErrPluginShutdown.
+  intent: KMS plugins in OpenBao must be usable before core is created and are declarative
+    only, so they need their own catalog separate from the main core plugin catalog.
+    This context gives core a stable way to obtain a sealed or unsealed KMS, key or
+    auto-unseal wrapper by name from either a builtin or an external plugin, and keeps
+    those long-lived objects correct across plugin process restarts and configuration
+    reloads without the caller ever seeing gkwplugin.ErrPluginShutdown.
   interfaces:
   - file: third_party/openbao/internal/helper/kmsplugin/catalog.go
     kind: struct
