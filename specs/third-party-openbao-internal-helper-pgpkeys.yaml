@@ -102,9 +102,10 @@ spec:
     - function:f48c70c4217ae84284553499d7f34907
     id: r.decrypt-bytes
     level: MUST
-    text: DecryptBytes takes an encoded encrypted payload together with a private
-      key string and returns the decrypted bytes in a buffer, so callers can recover
-      a share that was encrypted by EncryptShares.
+    text: DecryptBytes takes a base64-encoded encrypted payload together with a private
+      key string and returns the decrypted bytes in a bytes.Buffer, so a caller can
+      recover a share that EncryptShares produced; a decode, key-parse or decryption
+      failure is returned as an error with a nil buffer.
   - codeRefs:
     - file:third_party/openbao/internal/helper/pgpkeys/encrypt_decrypt.go
     - function:990284d610e59ba7e3bfdeb30ad7d517
@@ -115,7 +116,8 @@ spec:
       number of PGP keys". Otherwise it parses the keys into entities, encrypts each
       input share to the entity at the same index with openpgp.Encrypt, and returns
       the primary-key fingerprints and the ciphertexts in that same order, wrapping
-      setup and write failures.'
+      setup failure as "error setting up encryption for PGP message" and write failure
+      as "error encrypting PGP message".'
   - codeRefs:
     - file:third_party/openbao/internal/helper/pgpkeys/encrypt_decrypt.go
     - function:9251717ca0a274b53792e10bc0bd6e6e
@@ -124,7 +126,8 @@ spec:
     text: GetEntities treats every element of pgpKeys as a standard-base64 string,
       decodes it, and parses the bytes with openpgp.ReadEntity, returning the entities
       in input order. A decode failure becomes "error decoding given PGP key" and
-      a parse failure becomes "error parsing given PGP key", both wrapping the cause.
+      a parse failure becomes "error parsing given PGP key", both wrapping the cause,
+      and the first failure aborts the whole call.
   - codeRefs:
     - file:third_party/openbao/internal/helper/pgpkeys/keybase.go
     - function:3e73c82528ff0863f8a29c086e3a406a
@@ -142,10 +145,10 @@ spec:
     - function:34595ac455643604c743c3764ec6cfb1
     id: r.fingerprints
     level: MUST
-    text: GetFingerprints returns one lowercase hex fingerprint per entity, taken
+    text: GetFingerprints returns one lowercase hex fingerprint per entity, formatted
       from entity.PrimaryKey.Fingerprint, in the order given. When the entities argument
-      is nil it first parses entities from the pgpKeys string slice, so callers may
-      pass either form.
+      is nil it first parses entities from the pgpKeys slice through GetEntities,
+      so callers may pass either form, and a parse failure is returned unchanged.
   - codeRefs:
     - file:third_party/openbao/internal/helper/pgpkeys/flag.go
     - function:d27b0da6cdf542960c4594e9b50a5483
@@ -154,7 +157,8 @@ spec:
     text: ParsePGPKeys expands a list of key references into base64 keys, preserving
       input order and length. It trims each entry; an entry prefixed with "keybase:"
       must resolve from the Keybase lookup map or the call fails with "keybase user
-      %q not found"; every other entry is read from disk through ReadPGPFile.
+      %q not found"; every other entry is read from disk through ReadPGPFile, and
+      a read failure aborts the call.
   - codeRefs:
     - file:third_party/openbao/internal/helper/pgpkeys/flag.go
     - method:08c76c120c58c7eb787e03ef57f37379
@@ -165,9 +169,9 @@ spec:
     level: MUST
     text: 'PubKeyFileFlag is a string-backed flag.Value and command.Example that carries
       exactly one key: String renders the stored key, Set parses a comma-separated
-      value and fails with "can only be specified once" on a second call and "can
-      only specify one pgp key" when the value expands to more than one key, and Example
-      returns "keybase:user".'
+      value through ParsePGPKeys and fails with "can only be specified once" on a
+      second call and "can only specify one pgp key" when the value expands to more
+      than one key, and Example returns "keybase:user".'
   - codeRefs:
     - file:third_party/openbao/internal/helper/pgpkeys/flag.go
     - method:4d3884509d108f2cdfb1504141580b2b
@@ -178,8 +182,9 @@ spec:
     level: MUST
     text: 'PubKeyFilesFlag is a []string-backed flag.Value and command.Example that
       carries a list of keys: String prints the slice, Set parses a comma-separated
-      value into the expanded key list and fails with "can only be specified once"
-      on a second call, and Example returns "keybase:user1, keybase:user2, ...".'
+      value into the expanded key list through ParsePGPKeys and fails with "can only
+      be specified once" on a second call, and Example returns "keybase:user1, keybase:user2,
+      ...".'
   - codeRefs:
     - file:third_party/openbao/internal/helper/pgpkeys/flag.go
     - function:68d46cf0c2a816b60fba703bf62dcda6
