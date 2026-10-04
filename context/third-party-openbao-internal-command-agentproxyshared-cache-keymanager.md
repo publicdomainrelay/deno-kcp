@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to specify the key-material boundary of the agent proxy shared cache. The cache needs a wrapper to encrypt and decrypt cached responses and a way to hand back the material that reproduces the cache key, but it should not care how that material is produced or whether it is abstracted behind an external KMS. The KeyManager interface states that boundary in two methods, and PassthroughKeyManager supplies the simplest conforming behavior: one locally held AES-GCM root key, generated if absent, returned unchanged as the retrieval token. Reading this context tells a maintainer what the contract requires, what the passthrough implementation accepts and rejects, and which error strings and constants downstream code can depend on.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

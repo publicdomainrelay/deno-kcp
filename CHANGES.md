@@ -1199,6 +1199,18 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.serialize-excludes-renew-context` (MUST): "Serialize must clear RenewCtxInfo on its receiver copy before JSON marshalling, so the renewal context, cancel func and done channel never appear in the serialized bytes, and must return the marshal error unwrapped if marshalling fails."
 - added `r.set-index` (MUST): "Set must reject a nil index with an error, insert the index into the `indexer` table in a write transaction, abort the transaction when the insert fails, and commit only on success."
 
+### third-party-openbao-internal-command-agentproxyshared-cache-keymanager
+
+- intent: "" -> "This context exists to specify the key-material boundary of the agent proxy shared cache. The cache needs a wrapper to encrypt and decrypt cached responses and a way to hand back the material that reproduces the cache key, but it should not care how that material is produced or whether it is abstracted behind an external KMS. The KeyManager interface states that boundary in two methods, and PassthroughKeyManager supplies the simplest conforming behavior: one locally held AES-GCM root key, generated if absent, returned unchanged as the retrieval token. Reading this context tells a maintainer what the contract requires, what the passthrough implementation accepts and rejects, and which error strings and constants downstream code can depend on."
+- added `r.constructor-key-size` (MUST): "NewPassthroughKeyManager must branch on the length of the supplied key: a zero-length key causes it to draw 32 fresh bytes from crypto/rand and use them as the root key, a 32-byte key is used verbatim, and any other length must return a nil manager with the error formatted as "invalid key size, should be 32, got %d" carrying the observed length."
+- added `r.constructor-wrapper-setup` (MUST): "NewPassthroughKeyManager must build an aead wrapper, set its config with key_id mapped to KeyID, install the resolved root key bytes through SetAesGcmKeyBytes, and return a PassthroughKeyManager holding that wrapper; a failure from the random read, SetConfig or SetAesGcmKeyBytes must abort with a nil manager and the underlying error."
+- added `r.interface-contract` (MUST): "The package must expose a KeyManager interface whose contract is exactly two methods: Wrapper, which returns a wrapping.Wrapper usable for key-related operations, and RetrievalToken, which takes a context and returns the byte material that lets a caller source back the encryption key, where that material may be the encryption key itself or a token or identifier exchanged for it."
+- added `r.keyid-constant` (MUST): "The package must define the constant KeyID with the value "root" and use it as the key_id config entry when configuring a wrapper."
+- added `r.passthrough-implements-keymanager` (MUST): "PassthroughKeyManager must satisfy KeyManager, enforced at compile time by the assertion var _ KeyManager = (*PassthroughKeyManager)(nil); a change that removes either method from the type must break the build."
+- added `r.retrieval-token-passthrough` (MUST): "PassthroughKeyManager.RetrievalToken must return the key bytes held by the wrapper, obtained through KeyBytes with the caller's context, and must return a nil token with the error "unable to get wrapper for token retrieval" when the wrapper is nil; because the manager is a passthrough it must not abstract, re-wrap or transform the key material before returning it."
+- added `r.test-coverage` (SHOULD): "The package should keep passthrough_test.go exercising the passthrough constructor together with both Wrapper and RetrievalToken, so the key-size branches and the nil-wrapper error path stay covered."
+- added `r.wrapper-accessor` (MUST): "PassthroughKeyManager.Wrapper must return the manager's stored *aead.Wrapper unchanged, so callers perform key operations against the same wrapper the constructor configured."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -1251,6 +1263,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-command-agentproxyshared-cache-cacheboltdb-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agentproxyshared-cache-cacheboltdb-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agentproxyshared-cache-cachememdb-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-command-agentproxyshared-cache-keymanager-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-command-agentproxyshared-cache-keymanager-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agentproxyshared-sink-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-internal-command-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
