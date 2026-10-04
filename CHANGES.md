@@ -3105,4 +3105,4 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-sdk-database-dbplugin-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Failed |  | 0 | - |
 | third-party-openbao-sdk-database-dbplugin-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-database-dbplugin-v5-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-sdk-database-dbplugin-v5-proto-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-database-dbplugin-v5-proto-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
