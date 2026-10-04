@@ -3474,6 +3474,34 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.vaultcluster-contract` (MUST): "VaultCluster exposes the node list, barrier key access and mutation, recovery key access and mutation, a barrier-or-recovery fallback, the CA certificate PEM file path, Cleanup, ClusterID, NamedLogger, and root token get and set."
 - added `r.vaultcluster-node-contract` (MUST): "VaultClusterNode is the per-node view of a cluster and exposes only an API client and a TLS config for that node."
 
+### third-party-openbao-sdk-helper-testcluster-docker
+
+- intent: "" -> "The context exists so that tests can stand up disposable, multi-node OpenBao clusters in Docker and drive failure scenarios against them without hand-managing containers. It defines the cluster and node lifecycle (create, start, stop, pause, upgrade, cleanup), the fault-injection surface (partition, unpartition, network delay), the secret accessors tests need to unseal or authenticate (barrier keys, recovery keys, root token), the transport accessors (TLS config, API client, CA PEM file), and the storage abstraction that lets a cluster run on in-memory or PostgreSQL-backed storage, including a mapper that assigns one database per node index."
+- added `r.certificate-getter` (MUST): "NewCertificateGetter records the certificate file, key file and optional passphrase, Reload re-reads the pair from disk and returns an error when loading fails, and GetCertificate satisfies tls.Config.GetCertificate by returning the last loaded certificate."
+- added `r.cluster-construction` (MUST): "NewDockerCluster builds a cluster of nodes from the supplied DockerClusterOptions and returns an error when setup fails, while NewTestDockerCluster wraps it for tests and ties cluster teardown to the testing.T lifetime."
+- added `r.cluster-membership` (MUST): "AddNode appends a further node to an existing cluster using new options, and Nodes returns the current node list as testcluster.VaultClusterNode values."
+- added `r.default-options` (MUST): "DefaultOptions derives a usable set of cluster options from the testing.T, so a caller that supplies no options still gets a runnable cluster configuration."
+- added `r.fault-injection` (MUST): "PartitionFromCluster and UnpartitionFromCluster cut and restore a node's network reachability to the rest of the cluster, and AddNetworkDelay injects latency toward a target IP for a given duration."
+- added `r.key-access` (MUST): "The cluster exposes and accepts barrier and recovery keys, with GetBarrierOrRecoveryKeys returning whichever set the cluster mode actually produced so unseal logic does not need to know the seal type."
+- added `r.log-consumer` (MUST): "LogConsumerWriter.Write forwards container log bytes to the wrapped consumer and reports the byte count written."
+- added `r.node-clients` (MUST): "A node hands out a TLS config and an authenticated API client so tests can address the node directly, and NamedLogger returns a logger scoped to a sub-name for both cluster and nodes."
+- added `r.node-lifecycle` (MUST): "DockerClusterNode.Start launches the node container from the given options, Stop halts it, Pause suspends it, Cleanup releases its container resources, and Name reports the node name used for certificates and container naming."
+- added `r.node-upgrade` (MUST): "Upgrade replaces the running node with one created from the supplied options, so a test can move a cluster member from one OpenBao image to another."
+- added `r.package-scope` (MUST): "The package is vendored third-party OpenBao SDK test helper code, split across cert.go for certificate loading, environment.go for the Docker cluster and node lifecycle, and storage.go for pluggable storage backends."
+- added `r.postgres-cluster-storage` (MUST): "NewPostgreSQLClusterStorage creates one database per cluster through a PostgreSQLClusterMapper, ForNode returns the testcluster.NodeStorage for a given node index, and Cleanup and Type report teardown and the storage type name."
+- added `r.postgres-storage` (MUST): "NewPostgreSQLStorage starts a PostgreSQL container on the given docker network for a test, NewStaticPostgreSQLStorage instead adopts existing external and internal connection URLs, and Client opens a *sql.DB against the storage instance."
+- added `r.storage-backends` (MUST): "InmemStorage and PostgreSQLStorage both implement the node storage contract: Start prepares the backend for a cluster, Cleanup releases it, Opts returns the OpenBao storage stanza options, and Type returns the storage type name."
+- added `r.token-and-endpoints` (MUST): "The cluster holds a root token through GetRootToken and SetRootToken, reports its identity through ClusterID, returns its CA certificate PEM file path through GetCACertPEMFile, and Cleanup tears down all nodes."
+
+### third-party-openbao-sdk-helper-testhelpers
+
+- intent: "" -> "Expose a small, dependency-light set of helpers so tests can render a struct or map into a stable, comparable representation without hand-writing per-type conversion code. The SHA-256 hashing of byte slices keeps binary values such as keys and tokens out of test output and gives a deterministic, fixed-width rendering, which makes golden comparisons and log lines safe to read and diff."
+- added `r.stringordie-fatal-on-error` (MUST): "StringOrDie must call t.Helper() so failures point at the caller, render its input through ToMap, call t.Fatal(err) when that fails, and otherwise return fmt.Sprintf("%v", m) of the decoded map."
+- added `r.test-coverage` (SHOULD): "The package should keep its ToMap behavior covered by a test in output_test.go so that tag selection and byte hashing stay verified."
+- added `r.tomap-byte-hashing` (MUST): "ToMap must run a second mapstructure decode over the intermediate map with a DecodeHook that detects values whose type is a slice of uint8 and replaces them with the hex encoding of sha256.Sum256 of those bytes. Non-byte values must pass through the hook unchanged. This second pass exists because mapstructure does not invoke the DecodeHook per field during struct-to-map conversion but does during map-to-map conversion. Errors from this second decode must be returned with a nil map."
+- added `r.tomap-json-tag-decoding` (MUST): "ToMap must decode its input into a map[string]any using a mapstructure decoder configured with TagName "json" and IgnoreUntaggedFields true, so field names come from json struct tags and fields without such a tag are omitted. Any error from constructing the decoder or decoding the input must be returned with a nil map."
+- added `r.tostring-error-as-text` (MUST): "ToString must render its input through ToMap; when ToMap fails it must return err.Error() as the string, and otherwise it must return fmt.Sprintf("%v", m) of the decoded map."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -3731,4 +3759,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-sdk-helper-template-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-testcluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-testcluster-docker-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-sdk-helper-testhelpers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-helper-testhelpers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-sdk-helper-testhelpers-postgresql-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Pending |  | 0 | - |
+| third-party-openbao-sdk-helper-testhelpers-schema-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec |  |  | 0 | - |

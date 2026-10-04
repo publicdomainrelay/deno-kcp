@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+Expose a small, dependency-light set of helpers so tests can render a struct or map into a stable, comparable representation without hand-writing per-type conversion code. The SHA-256 hashing of byte slices keeps binary values such as keys and tokens out of test output and gives a deterministic, fixed-width rendering, which makes golden comparisons and log lines safe to read and diff.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

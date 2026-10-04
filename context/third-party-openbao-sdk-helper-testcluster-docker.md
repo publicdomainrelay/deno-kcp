@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so that tests can stand up disposable, multi-node OpenBao clusters in Docker and drive failure scenarios against them without hand-managing containers. It defines the cluster and node lifecycle (create, start, stop, pause, upgrade, cleanup), the fault-injection surface (partition, unpartition, network delay), the secret accessors tests need to unseal or authenticate (barrier keys, recovery keys, root token), the transport accessors (TLS config, API client, CA PEM file), and the storage abstraction that lets a cluster run on in-memory or PostgreSQL-backed storage, including a mapper that assigns one database per node index.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
