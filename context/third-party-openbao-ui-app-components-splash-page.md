@@ -9,5 +9,7 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/ui/app/components/splash-page/splash-content.js` file splash-content.js (third_party/openbao/ui/app/components/splash-page/splash-content.js)
+- `file:third_party/openbao/ui/app/components/splash-page/splash-footer.js` file splash-footer.js (third_party/openbao/ui/app/components/splash-page/splash-footer.js)
+- `file:third_party/openbao/ui/app/components/splash-page/splash-header.js` file splash-header.js (third_party/openbao/ui/app/components/splash-page/splash-header.js)
 <!-- SPECD_MANAGED_END -->
