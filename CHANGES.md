@@ -3203,6 +3203,19 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.encode-rejects-nil` (MUST): "EncodeJSON must return a nil byte slice and the error "input for encoding is nil" when the input value is nil, and must not attempt encoding in that case."
 - added `r.round-trip-tested` (SHOULD): "The package tests must cover the compress/decompress round trip through EncodeJSONAndCompress and DecodeJSON, the encode path through EncodeJSON, and the decode path through DecodeJSON, so the canary and nil-check behavior stay verified."
 
+### third-party-openbao-sdk-helper-kdf
+
+- intent: "" -> "This context exists to record the contract of the vendored OpenBao kdf helper so that callers deriving key material from a key plus context can rely on its alignment rules, counter layout, overflow guard, and output length, and so that the two entry points stay byte-for-byte compatible with the upstream vectors that kdf_test.go encodes."
+- added `r.counter-mode-alignment` (MUST): "CounterMode rejects a prfLen that is not a multiple of 8 with the error "PRF must be byte aligned", and rejects a requested bits value that is not a multiple of 8 with the error "bits required must be byte aligned"."
+- added `r.counter-mode-context-overflow` (MUST): "CounterMode refuses a context longer than math.MaxInt-8 bytes with the error "too much context specified; would overflow: %d bytes", so the 4+len(context)+4 input allocation cannot overflow."
+- added `r.counter-mode-input-layout` (MUST): "Each PRF input block is 4+len(context)+4 bytes: the leading 4 bytes hold the round index as a big-endian uint32, the middle bytes hold the caller context, and the trailing 4 bytes hold the requested bit count as a big-endian uint32."
+- added `r.counter-mode-output-length` (MUST): "CounterMode concatenates the per-round PRF outputs and returns exactly bits/8 bytes, discarding the surplus from the final round when bits is not a whole multiple of prfLen."
+- added `r.counter-mode-prf-length` (MUST): "CounterMode verifies that each PRF result is exactly prfLen bits long and aborts with the error "PRF length mis-match (%d vs %d)" when it is not, propagating any PRF error unchanged."
+- added `r.counter-mode-rounds` (MUST): "CounterMode computes the round count as bits divided by prfLen, rounded up when the division is inexact, and calls the PRF once per round."
+- added `r.hmac-sha256-prf` (MUST): "HMACSHA256PRF computes HMAC-SHA256 over data keyed by key and returns the raw digest, never returning an error, which makes its output exactly 256 bits and thus usable as a PRF for CounterMode with prfLen 256."
+- added `r.key-material-vectors` (MUST): "The package tests hold CounterMode and HMACSHA256PRF to externally generated Python vectors: CounterMode with HMACSHA256PRF and prfLen 256 on key bytes 1..16 and context "the quick brown fox" must reproduce the recorded 32-byte digest at 256 bits, the returned length must equal the requested bit count for 128, 256, 384 and 1024 bits, and the output must not contain the key bytes."
+- added `r.prf-function-type` (MUST): "A PRF is any function of the form func([]byte, []byte) ([]byte, error), so CounterMode accepts an arbitrary pseudo-random function over a key and an input block."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -3436,4 +3449,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-sdk-helper-hclutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-identitytpl-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-jsonutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-sdk-helper-kdf-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-helper-kdf-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-sdk-helper-kdf-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-helper-keysutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |

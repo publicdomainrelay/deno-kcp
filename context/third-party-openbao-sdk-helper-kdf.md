@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to record the contract of the vendored OpenBao kdf helper so that callers deriving key material from a key plus context can rely on its alignment rules, counter layout, overflow guard, and output length, and so that the two entry points stay byte-for-byte compatible with the upstream vectors that kdf_test.go encodes.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
