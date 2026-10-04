@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists because KMS plugins in OpenBao must be usable before core is created and are declarative only, so they need their own catalog separate from the main core plugin catalog. It gives core a stable way to obtain a sealed/unsealed KMS, key or auto-unseal wrapper by name from either a builtin or an external plugin, and it keeps those long-lived objects correct across plugin process restarts and configuration reloads without the caller seeing ErrPluginShutdown.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

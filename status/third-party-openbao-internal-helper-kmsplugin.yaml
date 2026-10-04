@@ -1,11 +1,8 @@
 conditions:
-- message: 'undeclared: Catalog, Catalog.ConfigureWrapper, Catalog.GetMetadata, Catalog.OpenKMS,
-    Catalog.ReloadConfig, NewCatalog, remoteKMS.Close, remoteKMS.GetKey, remoteKMS.Open,
-    remoteKey.Decrypt, remoteKey.Encrypt, remoteKey.ExportPublic, remoteKey.Sign,
-    remoteKey.Verify, remoteWrapper.Decrypt, remoteWrapper.Encrypt, remoteWrapper.Finalize,
-    remoteWrapper.Init, remoteWrapper.KeyId, remoteWrapper.SetConfig, remoteWrapper.Type'
-  reason: InterfacesMissing
-  status: "False"
+- message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+  reason: InterfacesObserved
+  status: "True"
   type: CodeSynced
 - message: observed facts match the synced fingerprint
   reason: FingerprintEqual
@@ -160,5 +157,5 @@ observed:
     name: remoteWrapper.Decrypt
     signature: (ctx context.Context, blob *wrapping.BlobInfo, opts ...wrapping.Option)
       (plaintext []byte, err error)
-realizedSpecHash: f2dfc29f28a667a8e403a2a306d6f75b53c20037d5dfe1a54ca39c7f6d31ceb6
+realizedSpecHash: 799b9108bb97b26df850e6bc360cdb7195b6ec45580f60d15fd95e36da708356
 syncedFingerprint: 06fe97fb8bfa6ea2ec81782ed054b0e589ab676f0370939ec7c4ef76a5531e5b
