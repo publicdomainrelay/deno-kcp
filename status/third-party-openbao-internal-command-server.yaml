@@ -1,0 +1,240 @@
+conditions:
+- message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+  reason: InterfacesObserved
+  status: "True"
+  type: CodeSynced
+- message: no synced fingerprint has been recorded yet
+  reason: NotSyncedYet
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/command/server/config.go
+  - third_party/openbao/internal/command/server/config_custom_response_headers_test.go
+  - third_party/openbao/internal/command/server/config_plugin_test.go
+  - third_party/openbao/internal/command/server/config_telemetry_test.go
+  - third_party/openbao/internal/command/server/config_test.go
+  - third_party/openbao/internal/command/server/config_test_helpers.go
+  - third_party/openbao/internal/command/server/config_test_helpers_util.go
+  - third_party/openbao/internal/command/server/listener.go
+  - third_party/openbao/internal/command/server/listener_tcp.go
+  - third_party/openbao/internal/command/server/listener_tcp_test.go
+  - third_party/openbao/internal/command/server/listener_test.go
+  - third_party/openbao/internal/command/server/listener_unix.go
+  - third_party/openbao/internal/command/server/listener_unix_test.go
+  - third_party/openbao/internal/command/server/tls_util.go
+  fingerprint: 15260140e75444e46479fb58238eb1ad98d372fb6198ed5e83c7fff0bd4a16b0
+  interfaces:
+  - codegraphId: struct:4bdf678f74dd0912dcde5e5a84b683ed
+    file: third_party/openbao/internal/command/server/config.go
+    kind: struct
+    line: 45
+    name: Config
+  - codegraphId: method:7bdac16f01c5ea155ebcbf4784ec6468
+    file: third_party/openbao/internal/command/server/config.go
+    kind: method
+    line: 160
+    name: Config.Validate
+    signature: (sourceFilePath string) []configutil.ConfigError
+  - codegraphId: function:25d191a1c582b2afff5c117b0c98d892
+    file: third_party/openbao/internal/command/server/config.go
+    kind: function
+    line: 194
+    name: DevConfig
+    signature: (storageType string) (*Config, error)
+  - codegraphId: function:dc9cec84675661684ef50f71f836876c
+    file: third_party/openbao/internal/command/server/config.go
+    kind: function
+    line: 224
+    name: DevTLSConfig
+    signature: (storageType, certDir string) (*Config, error)
+  - codegraphId: struct:74aced83ab721c3aef75e861a8d5dc49
+    file: third_party/openbao/internal/command/server/config.go
+    kind: struct
+    line: 281
+    name: Storage
+  - codegraphId: method:9e072e25d8c94deae7afc680407f1016
+    file: third_party/openbao/internal/command/server/config.go
+    kind: method
+    line: 289
+    name: Storage.GoString
+    signature: () string
+  - codegraphId: struct:50f523b4646e342801663df8560f611a
+    file: third_party/openbao/internal/command/server/config.go
+    kind: struct
+    line: 294
+    name: ServiceRegistration
+  - codegraphId: method:d8c26748252a06f94eeb67a95ef4bde3
+    file: third_party/openbao/internal/command/server/config.go
+    kind: method
+    line: 300
+    name: ServiceRegistration.Validate
+    signature: (source string) []configutil.ConfigError
+  - codegraphId: method:2aeb95c290196a8338bee818f2f2da9d
+    file: third_party/openbao/internal/command/server/config.go
+    kind: method
+    line: 304
+    name: ServiceRegistration.GoString
+    signature: () string
+  - codegraphId: struct:3017d05b44fddeef00f6df7ce311ab72
+    file: third_party/openbao/internal/command/server/config.go
+    kind: struct
+    line: 309
+    name: PluginConfig
+  - codegraphId: method:64c3ada9252b647581c194fc64cdcdb2
+    file: third_party/openbao/internal/command/server/config.go
+    kind: method
+    line: 324
+    name: PluginConfig.Slug
+    signature: () string
+  - codegraphId: method:04a00522ec09e8828a14449e51257aca
+    file: third_party/openbao/internal/command/server/config.go
+    kind: method
+    line: 328
+    name: PluginConfig.FullName
+    signature: () string
+  - codegraphId: method:f8cf98197bc0197fa6d91b935722c904
+    file: third_party/openbao/internal/command/server/config.go
+    kind: method
+    line: 332
+    name: PluginConfig.CommandPath
+    signature: () string
+  - codegraphId: method:5237a00d60222596780babd141d0b54f
+    file: third_party/openbao/internal/command/server/config.go
+    kind: method
+    line: 341
+    name: PluginConfig.Validate
+    signature: (sourceFilePath string) []configutil.ConfigError
+  - codegraphId: function:0b87c92a006924445170e92eb9fd3ac6
+    file: third_party/openbao/internal/command/server/config.go
+    kind: function
+    line: 491
+    name: NewConfig
+    signature: () *Config
+  - codegraphId: method:1e2b78057ea3261cec98c003011000b3
+    file: third_party/openbao/internal/command/server/config.go
+    kind: method
+    line: 498
+    name: Config.Merge
+    signature: (c2 *Config) *Config
+  - codegraphId: function:ce54ba88db8a7cc2d9fb83b3c0ad91b5
+    file: third_party/openbao/internal/command/server/config.go
+    kind: function
+    line: 752
+    name: LoadConfig
+    signature: (path string, allPaths []string) (cfg *Config, err error)
+  - codegraphId: function:b56dd38ccbd2881d4021840d20796e60
+    file: third_party/openbao/internal/command/server/config.go
+    kind: function
+    line: 787
+    name: CheckConfig
+    signature: (c *Config, e error) (*Config, error)
+  - codegraphId: function:a93f3eab7b0c4eb35407fb4473459e82
+    file: third_party/openbao/internal/command/server/config.go
+    kind: function
+    line: 805
+    name: LoadConfigFile
+    signature: (path string, allPaths []string) (cfg *Config, err error)
+  - codegraphId: function:958c77c54e3d19f60e8370d4eec48511
+    file: third_party/openbao/internal/command/server/config.go
+    kind: function
+    line: 861
+    name: ParseConfig
+    signature: (d, source string) (*Config, error)
+  - codegraphId: function:ebac0163d349adaca8243e545103be78
+    file: third_party/openbao/internal/command/server/config.go
+    kind: function
+    line: 1125
+    name: LoadConfigDir
+    signature: (dir string) (cfg *Config, err error)
+  - codegraphId: function:03144b89852a78296c71206dadc98175
+    file: third_party/openbao/internal/command/server/config.go
+    kind: function
+    line: 1200
+    name: ParseStorage
+    signature: (result *Config, list *ast.ObjectList, name string) error
+  - codegraphId: method:46291d598e445725edf9c16649397f06
+    file: third_party/openbao/internal/command/server/config.go
+    kind: method
+    line: 1397
+    name: Config.Sanitized
+    signature: () map[string]any
+  - codegraphId: method:dd879843d58ee64591c50ee959a6590c
+    file: third_party/openbao/internal/command/server/config.go
+    kind: method
+    line: 1526
+    name: Config.Prune
+    signature: ()
+  - codegraphId: method:6b0b29f1cc7f42aab557545e3d264c92
+    file: third_party/openbao/internal/command/server/config.go
+    kind: method
+    line: 1546
+    name: Config.ToVaultNodeConfig
+    signature: () (*testcluster.VaultNodeConfig, error)
+  - codegraphId: struct:463f6d147378f09cf4090ac0289e86ca
+    file: third_party/openbao/internal/command/server/config.go
+    kind: struct
+    line: 1585
+    name: AuditDevice
+  - codegraphId: method:6aba0f8d267b7079b058de03a6dc991c
+    file: third_party/openbao/internal/command/server/config.go
+    kind: method
+    line: 1596
+    name: AuditDevice.Validate
+    signature: (source string) []configutil.ConfigError
+  - codegraphId: method:f0f2e32b6c83cb5abd5d5e3309e05218
+    file: third_party/openbao/internal/command/server/config.go
+    kind: method
+    line: 1600
+    name: AuditDevice.GoString
+    signature: () string
+  - codegraphId: type_alias:c4cacf93cb6abf0d30fc16f0c8c7e5c9
+    file: third_party/openbao/internal/command/server/listener.go
+    kind: type_alias
+    line: 22
+    name: ListenerFactory
+  - codegraphId: function:d449e3c77a6f2ae4ca4924a6528f57ae
+    file: third_party/openbao/internal/command/server/listener.go
+    kind: function
+    line: 32
+    name: NewListener
+    signature: (l *configutil.Listener, logger hclog.Logger, ui cli.Ui) (net.Listener,
+      map[string]string, listenerutil.ReloadableCertGetter, error)
+  - codegraphId: struct:936b3ecb8c374add186971d8a9e30073
+    file: third_party/openbao/internal/command/server/listener_tcp.go
+    kind: struct
+    line: 93
+    name: TCPKeepAliveListener
+  - codegraphId: method:b2e8befe16960a229617e8a4339cae16
+    file: third_party/openbao/internal/command/server/listener_tcp.go
+    kind: method
+    line: 97
+    name: TCPKeepAliveListener.Accept
+    signature: () (c net.Conn, err error)
+  - codegraphId: struct:a00667479a3f5bebc162cd6582de4991
+    file: third_party/openbao/internal/command/server/tls_util.go
+    kind: struct
+    line: 25
+    name: CaCert
+  - codegraphId: function:6dedc4a5dc32fe052d06d52b24fcd566
+    file: third_party/openbao/internal/command/server/tls_util.go
+    kind: function
+    line: 32
+    name: GenerateCert
+    signature: (caCertTemplate *x509.Certificate, caSigner crypto.Signer) (string,
+      string, error)
+  - codegraphId: function:336c55c9040b22b705deb645348aeae1
+    file: third_party/openbao/internal/command/server/tls_util.go
+    kind: function
+    line: 96
+    name: GenerateCA
+    signature: () (*CaCert, error)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: c1711a6b71a3601d773c97d46cc7bc8bc58dd2ae4a4dee6734e9ffa8d9b41741
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 15260140e75444e46479fb58238eb1ad98d372fb6198ed5e83c7fff0bd4a16b0

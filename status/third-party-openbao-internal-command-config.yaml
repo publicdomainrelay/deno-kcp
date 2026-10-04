@@ -1,0 +1,61 @@
+conditions:
+- message: 'undeclared: Config, DefaultConfig, DefaultTokenHelper, IsValidListener,
+    LoadConfig, ParseConfig'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/command/config/config.go
+  - third_party/openbao/internal/command/config/config_test.go
+  - third_party/openbao/internal/command/config/util.go
+  - third_party/openbao/internal/command/config/validate_listener.go
+  fingerprint: fa5a7da3898e9ab01f252b59dd264c3c22f0d2ea2ffd578596325ffd2ed1b7a8
+  interfaces:
+  - codegraphId: struct:4b1ba5d63cf8dc198cfc08f9ef33fd77
+    file: third_party/openbao/internal/command/config/config.go
+    kind: struct
+    line: 29
+    name: DefaultConfig
+  - codegraphId: function:58bf7df6c635e4699997fc3c9bce2ab2
+    file: third_party/openbao/internal/command/config/config.go
+    kind: function
+    line: 39
+    name: Config
+    signature: () (*DefaultConfig, error)
+  - codegraphId: function:00ff8c6fcaed486ef644620e39fe1d52
+    file: third_party/openbao/internal/command/config/config.go
+    kind: function
+    line: 52
+    name: LoadConfig
+    signature: (path string) (*DefaultConfig, error)
+  - codegraphId: function:0ed1d5fca0cc285791fd3b30358158e6
+    file: third_party/openbao/internal/command/config/config.go
+    kind: function
+    line: 81
+    name: ParseConfig
+    signature: (contents string) (*DefaultConfig, error)
+  - codegraphId: function:9f9dc1297fd8e44b56a0a2ed424ee9cc
+    file: third_party/openbao/internal/command/config/util.go
+    kind: function
+    line: 12
+    name: DefaultTokenHelper
+    signature: (vaultAddr string) (token.TokenHelper, error)
+  - codegraphId: function:eb7f725cdde9e369c32c10727c5ab80e
+    file: third_party/openbao/internal/command/config/validate_listener.go
+    kind: function
+    line: 8
+    name: IsValidListener
+    signature: (listener *configutil.Listener) error
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 55e39f14e342c6a64b9755efb9b83e7f84c15a02eccaae61f2fb7c8f64e87e3f
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: fa5a7da3898e9ab01f252b59dd264c3c22f0d2ea2ffd578596325ffd2ed1b7a8
