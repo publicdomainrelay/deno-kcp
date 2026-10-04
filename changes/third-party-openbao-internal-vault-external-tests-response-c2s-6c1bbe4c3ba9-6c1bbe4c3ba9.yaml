@@ -10,5 +10,18 @@ spec:
   systemContext: third-party-openbao-internal-vault-external-tests-response
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-vault-external-tests-response
-  phase: Running
+  agentLog: 'This context covers a single Go test file, third_party/openbao/internal/vault/external_tests/response/allowed_response_headers_test.go,
+    in package identity. The test TestIdentityStore_EntityDisabled stands up an in-process
+    OpenBao test cluster (vault.NewTestCluster with vaulthttp.Handler and DisableStandbyReads
+    true), registers a credential backend named headtest that exposes two paths, login
+    and loginnoerror, and both return a www-authenticate: Negotiate response header.
+    The login path returns logical.CodedError(401, "authentication required") and
+    the loginnoerror path returns a successful response with an empty Auth. The test
+    asserts that a header emitted by a mount is stripped from the HTTP response while
+    the mount''s AllowedResponseHeaders tuning excludes it, then calls Sys().TuneMount
+    with AllowedResponseHeaders []string{"WwW-AuthenTicate"} and asserts the header
+    survives on both the 200 and the 401 responses, which also shows the allowed-list
+    match is case-insensitive.'
+  message: wrote 5 requirement(s) and 0 interface(s) for third-party-openbao-internal-vault-external-tests-response;
+    interface TestIdentityStore_EntityDisabled is not in the observed facts; dropped
+  phase: Succeeded
