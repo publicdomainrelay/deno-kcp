@@ -1001,6 +1001,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.server-config-fields` (MUST): "ServerConfig carries the hclog.Logger and *config.Config agent configuration plus the Namespace, LogLevel and LogWriter settings; LogLevel and LogWriter exist so the internal consul-template runner's own logger matches the agent's log level and writes to the same io.Writer, since that logger cannot be set or copied externally."
 - added `r.server-state-guarded` (SHOULD): "Server keeps its childProcess, childProcessState, lastRenderedEnvVars, numberOfTemplates and runner fields internal to the package, and guards childProcess and childProcessState with childProcessLock so shutdown in Run and restart in restartChildProcess cannot observe a half-updated process."
 
+### third-party-openbao-internal-command-agent-exec-test-app
+
+- intent: "" -> "The context exists to pin down the observable contract of the exec test app so that the agent exec server behavior it verifies stays describable: which flags configure the process, how long it may live, how it reacts to signals, what it serves over HTTP, and what exit code it reports. It is a test fixture, so its requirements are the fixture's guarantees to the test that drives it, not production behavior."
+- added `r.flag-config-surface` (MUST): "Configuration is parsed by the standard flag package in init, with no environment variables backing any option: --port (uint, default 34000) sets the HTTP listen port; --sleep-after-stop-signal (duration, default 1s) sets the pause after a stop signal; --use-sigusr1 (bool, default false) selects SIGUSR1 instead of SIGTERM as the stop signal; --stop-after (duration, default 0) stops the process after that duration; --exit-code (int, default 0) sets the code returned at exit."
+- added `r.http-endpoint` (MUST): "run serves HTTP on the address ":" plus the port flag, with read, write and idle timeouts of 20 seconds each; the handler encodes a fresh Response of the current environment and PID as JSON with status 200 and Content-Type application/json, honoring a query parameter pretty=1 by indenting the output with two spaces."
+- added `r.response-shape` (MUST): "The Response struct carries the process environment as a map of variable name to value under the JSON key environment_variables and the current process identifier under the JSON key process_id."
+- added `r.shutdown-and-exit` (MUST): "After a stop condition the HTTP server is shut down gracefully, a failing ListenAndServe returns an error unless it is http.ErrServerClosed, and main exits with the --exit-code value, logging an error and exiting through log.Fatalf when run returns an error."
+- added `r.stop-conditions` (MUST): "The process stops on whichever comes first: a 60 second context timeout, the configured stop signal, or the --stop-after duration elapsing; on a stop signal it sleeps for --sleep-after-stop-signal when that value is positive before continuing."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -1037,6 +1046,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-command-agent-config-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agent-exec-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agent-exec-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-command-agent-exec-test-app-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-command-agent-exec-test-app-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agent-internal-ctmanager-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-internal-command-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |

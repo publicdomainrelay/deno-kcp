@@ -10,5 +10,15 @@ spec:
   systemContext: third-party-openbao-internal-command-agent-exec-test-app
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-command-agent-exec-test-app
-  phase: Running
+  agentLog: 'This context is the Go test application at third_party/openbao/internal/command/agent/exec/test-app/main.go,
+    a small standalone process used by TestExecServer_Run to exercise OpenBao agent
+    acting as a process supervisor. The program parses five command-line flags in
+    init, starts an HTTP server on the configured port whose handler JSON-encodes
+    the process environment and PID as the exported Response struct, and then blocks
+    until one of three stop conditions fires: a 60 second context timeout, a stop
+    signal (SIGTERM by default, SIGUSR1 when --use-sigusr1 is set), or the --stop-after
+    duration elapsing. After the stop condition the server is shut down and the process
+    exits with the given --exit-code, optionally sleeping for --sleep-after-stop-signal
+    first to simulate cleanup work that a supervisor must wait out.'
+  message: wrote 5 requirement(s) and 1 interface(s) for third-party-openbao-internal-command-agent-exec-test-app
+  phase: Succeeded
