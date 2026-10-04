@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+These are test-fixture manifests, not application code: they exist so the kubernetes secrets-engine integration tests have a real cluster with known ServiceAccounts, known RBAC grants, and a host-reachable Vault. The split is deliberate — hostPortPatch is applied over the Vault helm chart, testServiceAccounts creates the subjects, testRoles declares the permissions, and testBindings attaches them, so a test can assert behaviour for a privileged ServiceAccount, an under-privileged one, and a token-creating one.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

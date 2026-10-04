@@ -717,6 +717,18 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.loopback-listen-address` (MUST): "The mapping sets listenAddress to 127.0.0.1, so the published port binds the loopback interface only and is not exposed on external interfaces."
 - added `r.single-control-plane-node` (MUST): "The cluster defines exactly one node and gives it the control-plane role, so the integration test cluster has a single schedulable control plane and no separate workers."
 
+### third-party-openbao-internal-builtin-logical-kubernetes-integrationtest-vault
+
+- intent: "" -> "These are test-fixture manifests, not application code: they exist so the kubernetes secrets-engine integration tests have a real cluster with known ServiceAccounts, known RBAC grants, and a host-reachable Vault. The split is deliberate — hostPortPatch is applied over the Vault helm chart, testServiceAccounts creates the subjects, testRoles declares the permissions, and testBindings attaches them, so a test can assert behaviour for a privileged ServiceAccount, an under-privileged one, and a token-creating one."
+- added `r.broken-secrets-abilities-role` (MUST): "testRoles.yaml declares ClusterRole k8s-secrets-abilities-broken with the same grants as k8s-secrets-abilities except it omits the serviceaccounts create and delete verbs, so a creds/ call fails partway and tests can exercise WAL plus ownerRef rollback of orphaned Kubernetes objects."
+- added `r.cluster-role-bindings` (MUST): "testBindings.yaml binds the cluster roles to the ServiceAccounts in namespace test: ClusterRoleBinding k8s-secrets-abilities-binding binds k8s-secrets-abilities to test-token-create, vault and super-jwt; test-clusterrole-abilities binds test-cluster-role-list-pods to test-token-create, vault and broken-jwt; test-capabilities binds the test-capabilities ClusterRole to super-jwt; and k8s-secrets-abilities-binding-broken binds k8s-secrets-abilities-broken to broken-jwt alone."
+- added `r.hostport-patch` (MUST): "hostPortPatch.yaml is a strategic-merge patch over the Vault workload spec.template.spec that targets the container named vault and sets its port named http to hostPort 8200 and containerPort 8200, so kind can forward host traffic to the Vault container; the file header points at the Makefile setup-integration-test target as its consumer."
+- added `r.inspection-roles` (MUST): "testRoles.yaml declares ClusterRole test-capabilities granting get and list on serviceaccounts and on rolebindings, roles, clusterrolebindings and clusterroles, and declares pod-listing roles test-role-list-pods (namespaced Role in namespace test) and test-cluster-role-list-pods (ClusterRole), both granting list on pods, so tests can inspect the objects they create."
+- added `r.role-binding` (MUST): "testBindings.yaml declares namespaced RoleBinding test-role-abilities in namespace test that references Role test-role-list-pods and takes ServiceAccounts sample-app and broken-jwt as subjects."
+- added `r.role-subject-names` (MUST): "Every subject named in the bindings must match a ServiceAccount declared in testServiceAccounts.yaml, and every roleRef must match a role declared in testRoles.yaml, so the fixture set applies without dangling references on a fresh test namespace."
+- added `r.secrets-abilities-role` (MUST): "testRoles.yaml declares ClusterRole k8s-secrets-abilities granting create on serviceaccounts/token, get on namespaces, create and delete on serviceaccounts, and create and delete on rolebindings, roles, clusterrolebindings and clusterroles, so a bound ServiceAccount can stand in for what the secrets engine needs."
+- added `r.test-service-accounts` (MUST): "testServiceAccounts.yaml declares four ServiceAccounts, all in namespace test: test-token-create, sample-app, super-jwt and broken-jwt; these are the subjects the bindings attach roles to."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -727,5 +739,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-builtin-logical-kubernetes-cmd-kubernetes-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-kubernetes-integrationtest-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-kubernetes-integrationtest-kind-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-builtin-logical-kubernetes-integrationtest-vault-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-builtin-logical-kubernetes-integrationtest-vault-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-kv-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-builtin-logical-kv-cmd-kv-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
