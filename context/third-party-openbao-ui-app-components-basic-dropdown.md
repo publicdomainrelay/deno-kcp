@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-The context exists to record the local customization the application applies on top of the third-party `ember-basic-dropdown` addon. The addon's trigger component normally renders without a `type` attribute, which is a problem when the trigger element is a button, because the HTML default for a button inside a form is `type="submit"` and the trigger would submit the surrounding form. By extending the addon component and adding `attributeBindings: ['type']`, the app lets callers set the trigger element's `type` explicitly, so a dropdown trigger inside a form can be rendered as `type="button"` and behave as a plain toggle instead of submitting. It is a vendored, minimal override, kept in the third_party tree, and is expected only to widen the addon's attribute surface, not to change its dropdown behavior.
+The context records the local customization the application applies on top of the third-party `ember-basic-dropdown` addon. The addon trigger renders no `type` attribute, and a button inside a form defaults to `type="submit"`, so a dropdown trigger placed in a form would submit that form. Extending the addon trigger and declaring `attributeBindings: ['type']` lets a caller pass `type="button"` and get a plain toggle. The file stays a minimal vendored passthrough so addon upgrades remain cheap.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
