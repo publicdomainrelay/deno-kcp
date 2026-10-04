@@ -7,5 +7,90 @@ metadata:
   name: third-party-openbao-ui-lib-open-api-explorer-addon-components
   namespace: default
 spec:
+  intent: 'The context exists to describe the vendored OpenBao Swagger UI Ember component:
+    how it loads and configures the Swagger UI bundle, how it authenticates and namespaces
+    outgoing API requests, and how its client-side operation filter is wired into
+    the rendered UI. It exists so the addon component''s behaviour, headers, and filter
+    semantics are specified without reading the file.'
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/open-api-explorer/addon/components/swagger-ui.js
+    id: r.dom-id
+    level: MUST
+    text: The Swagger UI mount point is the element whose id is the component's `elementId`
+      with the suffix `-swagger`.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/open-api-explorer/addon/components/swagger-ui.js
+    id: r.dynamic-import-bundle
+    level: MUST
+    text: On `didInsertElement` the component dynamically imports `swagger-ui-dist/swagger-ui-bundle.js`
+      and invokes the default export bundle with the built configuration, then flips
+      `swaggerLoading` to false in the bundle's `onComplete` callback.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/open-api-explorer/addon/components/swagger-ui.js
+    id: r.initial-filter
+    level: MUST
+    text: The `initialFilter` value has its leading slashes trimmed and is passed
+      as the Swagger UI `filter` option, falling back to `true` when the trimmed value
+      is empty.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/open-api-explorer/addon/components/swagger-ui.js
+    id: r.load-spec-url
+    level: MUST
+    text: The component configures Swagger UI against the OpenBao internal specification
+      endpoint `/v1/sys/internal/specs/openapi`, with `deepLinking` false, `docExpansion`
+      set to `list`, `operationsSorter` set to `alpha`, `showExtensions` true so `x-vault-`
+      options render, `defaultModelsExpandDepth` -1, and `defaultModelExpandDepth`
+      1.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/open-api-explorer/addon/components/swagger-ui.js
+    id: r.operation-filter
+    level: MUST
+    text: The `SearchFilterPlugin` provides an `opsFilter` function that filters each
+      tag's operations to those whose `path` contains the typed phrase, then drops
+      any tag left with zero operations.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/open-api-explorer/addon/components/swagger-ui.js
+    id: r.plugin-and-presets
+    level: MUST
+    text: The bundle configuration enables the `apis` preset, the `DownloadUrl` plugin,
+      and the custom search filter plugin, and never enables deep linking.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/open-api-explorer/addon/components/swagger-ui.js
+    id: r.proxy-event-action
+    level: MUST
+    text: The `proxyEvent` action finds the `.operation-filter-input` element, builds
+      a bubbling `input` CustomEvent whose `target` and `currentTarget` are redefined
+      to that element and marked simulated, sets the element value to the incoming
+      value with leading slashes trimmed, and invokes the React `onChange` handler
+      found on the element's `__reactProps` key.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/open-api-explorer/addon/components/swagger-ui.js
+    id: r.request-namespace-header
+    level: MUST
+    text: The interceptor adds an `X-Vault-Namespace` header from the injected `namespace`
+      service path only when that path is present and the request URL does not match
+      any string in `APP.NAMESPACE_ROOT_URLS`.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/open-api-explorer/addon/components/swagger-ui.js
+    id: r.request-token-header
+    level: MUST
+    text: Every request issued by Swagger UI passes through a `requestInterceptor`
+      that sets the `X-Vault-Token` header to the current token held by the injected
+      `auth` service.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/open-api-explorer/addon/components/swagger-ui.js
+    id: r.rewrite-spec-paths
+    level: MUST
+    text: For requests that are not spec loads, the interceptor parses the URL and
+      rewrites it to `protocol//host/v1` followed by the original pathname and search,
+      because spec paths omit the `/v1` prefix.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/open-api-explorer/addon/components/swagger-ui.js
+    id: r.update-filter-action
+    level: MUST
+    text: The `updateFilter` action calls the `onFilterChange` callback with the event
+      target's value, or an empty string when that value is falsy, so the filter query
+      parameter stays sharable.
   upstream: self

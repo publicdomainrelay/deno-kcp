@@ -5705,6 +5705,21 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.routes-builds-empty-route-map` (MUST): "`routes.js` MUST export as default the result of calling `ember-engines/routes`' `buildRoutes` with a callback, and that callback MUST register no routes today, so the engine's route table stays empty until routes are added there."
 - added `r.vendored-upstream-license-headers` (SHOULD): "Each file SHOULD keep the `Copyright (c) HashiCorp, Inc.` header and the `SPDX-License-Identifier: MPL-2.0` line, because this directory is vendored OpenBao code and the license and attribution travel with the source."
 
+### third-party-openbao-ui-lib-open-api-explorer-addon-components
+
+- intent: "" -> "The context exists to describe the vendored OpenBao Swagger UI Ember component: how it loads and configures the Swagger UI bundle, how it authenticates and namespaces outgoing API requests, and how its client-side operation filter is wired into the rendered UI. It exists so the addon component's behaviour, headers, and filter semantics are specified without reading the file."
+- added `r.dom-id` (MUST): "The Swagger UI mount point is the element whose id is the component's `elementId` with the suffix `-swagger`."
+- added `r.dynamic-import-bundle` (MUST): "On `didInsertElement` the component dynamically imports `swagger-ui-dist/swagger-ui-bundle.js` and invokes the default export bundle with the built configuration, then flips `swaggerLoading` to false in the bundle's `onComplete` callback."
+- added `r.initial-filter` (MUST): "The `initialFilter` value has its leading slashes trimmed and is passed as the Swagger UI `filter` option, falling back to `true` when the trimmed value is empty."
+- added `r.load-spec-url` (MUST): "The component configures Swagger UI against the OpenBao internal specification endpoint `/v1/sys/internal/specs/openapi`, with `deepLinking` false, `docExpansion` set to `list`, `operationsSorter` set to `alpha`, `showExtensions` true so `x-vault-` options render, `defaultModelsExpandDepth` -1, and `defaultModelExpandDepth` 1."
+- added `r.operation-filter` (MUST): "The `SearchFilterPlugin` provides an `opsFilter` function that filters each tag's operations to those whose `path` contains the typed phrase, then drops any tag left with zero operations."
+- added `r.plugin-and-presets` (MUST): "The bundle configuration enables the `apis` preset, the `DownloadUrl` plugin, and the custom search filter plugin, and never enables deep linking."
+- added `r.proxy-event-action` (MUST): "The `proxyEvent` action finds the `.operation-filter-input` element, builds a bubbling `input` CustomEvent whose `target` and `currentTarget` are redefined to that element and marked simulated, sets the element value to the incoming value with leading slashes trimmed, and invokes the React `onChange` handler found on the element's `__reactProps` key."
+- added `r.request-namespace-header` (MUST): "The interceptor adds an `X-Vault-Namespace` header from the injected `namespace` service path only when that path is present and the request URL does not match any string in `APP.NAMESPACE_ROOT_URLS`."
+- added `r.request-token-header` (MUST): "Every request issued by Swagger UI passes through a `requestInterceptor` that sets the `X-Vault-Token` header to the current token held by the injected `auth` service."
+- added `r.rewrite-spec-paths` (MUST): "For requests that are not spec loads, the interceptor parses the URL and rewrites it to `protocol//host/v1` followed by the original pathname and search, because spec paths omit the `/v1` prefix."
+- added `r.update-filter-action` (MUST): "The `updateFilter` action calls the `onFilterChange` callback with the event target's value, or an empty string when that value is falsy, so the filter query parameter stays sharable."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -6207,7 +6222,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-kubernetes-config-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-kubernetes-config-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-open-api-explorer-addon-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-lib-open-api-explorer-addon-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-ui-lib-open-api-explorer-addon-components-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-open-api-explorer-addon-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-lib-open-api-explorer-addon-components-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-open-api-explorer-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-open-api-explorer-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
