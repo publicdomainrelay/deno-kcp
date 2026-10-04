@@ -9,5 +9,7 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/ui/tests/helpers/components/sidebar-nav.js` file sidebar-nav.js (third_party/openbao/ui/tests/helpers/components/sidebar-nav.js)
+- `file:third_party/openbao/ui/tests/helpers/components/ttl-picker.js` file ttl-picker.js (third_party/openbao/ui/tests/helpers/components/ttl-picker.js)
+- `function:dc4754280986053ae2ffa0355acf9678` function stubPermissions (third_party/openbao/ui/tests/helpers/components/sidebar-nav.js)
 <!-- SPECD_MANAGED_END -->
