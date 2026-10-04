@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so that the agent proxy can authenticate to OpenBao with a JWT read from a file on disk and kept fresh by a polling watcher, instead of a static token. NewJWTAuthMethod is the construction and configuration surface, defining which config keys are required and which are optional and what the read cadence defaults to; Authenticate is the point where a current JWT is turned into a login request; NewCreds and CredSuccess are the handshake through which the method tells the agent that new credentials were found and that a credential cycle succeeded. Together they pin down the observable contract of the JWT auth method for the tests in jwt_test.go, which drive the delete-after-reading and symlink-following paths.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

@@ -3,10 +3,116 @@ codeRefIndex:
 - file:third_party/openbao/internal/command/agentproxyshared/auth/jwt/jwt.go jwt.go@third_party/openbao/internal/command/agentproxyshared/auth/jwt/jwt.go
 - file:third_party/openbao/internal/command/agentproxyshared/auth/jwt/jwt_test.go
   jwt_test.go@third_party/openbao/internal/command/agentproxyshared/auth/jwt/jwt_test.go
+- function:5309b89ba07996090ade8f15667301c7 NewJWTAuthMethod@third_party/openbao/internal/command/agentproxyshared/auth/jwt/jwt.go:43
+- method:448def8af0745a4758db8c0228a618b1 jwtMethod.NewCreds@third_party/openbao/internal/command/agentproxyshared/auth/jwt/jwt.go:147
+- method:564d5539ce5d0b556518bc2a4bac0ead jwtMethod.CredSuccess@third_party/openbao/internal/command/agentproxyshared/auth/jwt/jwt.go:151
+- method:80be1d87e70084dc2be8fac52ffd9036 jwtMethod.Authenticate@third_party/openbao/internal/command/agentproxyshared/auth/jwt/jwt.go:131
+- method:efcbcd483e832be4936a32b3df90e691 jwtMethod.Shutdown@third_party/openbao/internal/command/agentproxyshared/auth/jwt/jwt.go:157
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-command-agentproxyshared-auth-jwt
   namespace: default
 spec:
+  intent: The context exists so that the agent proxy can authenticate to OpenBao with
+    a JWT read from a file on disk and kept fresh by a polling watcher, instead of
+    a static token. NewJWTAuthMethod is the construction and configuration surface,
+    defining which config keys are required and which are optional and what the read
+    cadence defaults to; Authenticate is the point where a current JWT is turned into
+    a login request; NewCreds and CredSuccess are the handshake through which the
+    method tells the agent that new credentials were found and that a credential cycle
+    succeeded. Together they pin down the observable contract of the JWT auth method
+    for the tests in jwt_test.go, which drive the delete-after-reading and symlink-following
+    paths.
+  interfaces:
+  - file: third_party/openbao/internal/command/agentproxyshared/auth/jwt/jwt.go
+    kind: function
+    name: NewJWTAuthMethod
+    signature: func NewJWTAuthMethod(conf *auth.AuthConfig) (auth.AuthMethod, error)
+  - file: third_party/openbao/internal/command/agentproxyshared/auth/jwt/jwt.go
+    kind: method
+    name: jwtMethod.Authenticate
+    signature: func (j *jwtMethod) Authenticate(_ context.Context, _ *api.Client)
+      (string, http.Header, map[string]any, error)
+  - file: third_party/openbao/internal/command/agentproxyshared/auth/jwt/jwt.go
+    kind: method
+    name: jwtMethod.CredSuccess
+    signature: func (j *jwtMethod) CredSuccess()
+  - file: third_party/openbao/internal/command/agentproxyshared/auth/jwt/jwt.go
+    kind: method
+    name: jwtMethod.NewCreds
+    signature: func (j *jwtMethod) NewCreds() chan struct{}
+  - file: third_party/openbao/internal/command/agentproxyshared/auth/jwt/jwt.go
+    kind: method
+    name: jwtMethod.Shutdown
+    signature: func (j *jwtMethod) Shutdown()
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/auth/jwt/jwt.go
+    - method:80be1d87e70084dc2be8fac52ffd9036
+    id: r.authenticate-login-request
+    level: MUST
+    text: jwtMethod.Authenticate must trigger an ingress of the token, load the latest
+      known JWT, fail with "latest known jwt is empty, cannot authenticate" when none
+      is loaded, and otherwise return the login path built as the mount path joined
+      with "/login", nil headers, and a request body carrying the 'role' and the current
+      'jwt'.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/auth/jwt/jwt.go
+    - function:5309b89ba07996090ade8f15667301c7
+    id: r.config-validation
+    level: MUST
+    text: NewJWTAuthMethod must reject a nil auth.AuthConfig with "empty config" and
+      a nil Config map with "empty config data"; it must require the 'path' key to
+      be present and to convert to a string, and the 'role' key likewise, and must
+      reject a config whose path or role is the empty string.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/auth/jwt/jwt.go
+    - method:564d5539ce5d0b556518bc2a4bac0ead
+    id: r.cred-success-once
+    level: MUST
+    text: jwtMethod.CredSuccess must close the credential success gate exactly once,
+      guarded by a sync.Once, so repeated success reports do not close the channel
+      twice.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/auth/jwt/jwt.go
+    - method:448def8af0745a4758db8c0228a618b1
+    id: r.new-creds-channel
+    level: MUST
+    text: jwtMethod.NewCreds must return the channel on which the method signals that
+      new credentials were found, so the agent can wait on it instead of polling.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/auth/jwt/jwt.go
+    - function:5309b89ba07996090ade8f15667301c7
+    id: r.optional-bool-options
+    level: MUST
+    text: NewJWTAuthMethod must read the optional 'remove_jwt_after_reading' and 'remove_jwt_follows_symlinks'
+      keys through parseutil.ParseBool, default remove_jwt_after_reading to true and
+      remove_jwt_follows_symlinks to false when the keys are absent, and wrap any
+      parse failure in an error naming the offending key.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/auth/jwt/jwt.go
+    - function:5309b89ba07996090ade8f15667301c7
+    id: r.read-period-default
+    level: MUST
+    text: NewJWTAuthMethod must take the read period from the optional 'jwt_read_period'
+      key parsed with parseutil.ParseDurationSecond, and when that key is absent must
+      use 500ms if remove_jwt_after_reading is true and 1 minute otherwise, then start
+      a ticker on that period.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/auth/jwt/jwt.go
+    - method:efcbcd483e832be4936a32b3df90e691
+    id: r.shutdown-surface
+    level: MUST
+    text: jwtMethod must implement Shutdown with no arguments and no return value,
+      completing the auth.AuthMethod surface the type offers to the agent.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/auth/jwt/jwt.go
+    - function:5309b89ba07996090ade8f15667301c7
+    id: r.watcher-startup
+    level: MUST
+    text: NewJWTAuthMethod must run the file watcher in its own goroutine before returning,
+      initialise the credsFound, watch, stop, done and credSuccessGate channels and
+      a sync.Once on the method, and log the path it will read the JWT from at info
+      level.
   upstream: self

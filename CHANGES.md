@@ -1095,6 +1095,18 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.secret-id-read-cache` (MUST): "When secretIDFilePath is set, Authenticate stats and reads that file, trims the value into cachedSecretID, and on read error or empty content fails with the matching "... secret ID ..." error unless a cached secret ID is already known, in which case it logs a warning and reuses the cached value."
 - added `r.wrapping-path-validation` (MUST): "When secret_id_response_wrapping_path is configured, Authenticate clones the API client, sets the file contents as its token, looks up sys/wrapping/lookup, requires the response and its data and the creation_path field to be present and a string, and rejects the login with "unable to validate wrapping token creation path" when creation_path differs from the configured path; it then unwraps the token and takes the secret_id from the response data, returning specific errors for a nil response, nil data, missing key, or non-string secret_id."
 
+### third-party-openbao-internal-command-agentproxyshared-auth-jwt
+
+- intent: "" -> "The context exists so that the agent proxy can authenticate to OpenBao with a JWT read from a file on disk and kept fresh by a polling watcher, instead of a static token. NewJWTAuthMethod is the construction and configuration surface, defining which config keys are required and which are optional and what the read cadence defaults to; Authenticate is the point where a current JWT is turned into a login request; NewCreds and CredSuccess are the handshake through which the method tells the agent that new credentials were found and that a credential cycle succeeded. Together they pin down the observable contract of the JWT auth method for the tests in jwt_test.go, which drive the delete-after-reading and symlink-following paths."
+- added `r.authenticate-login-request` (MUST): "jwtMethod.Authenticate must trigger an ingress of the token, load the latest known JWT, fail with "latest known jwt is empty, cannot authenticate" when none is loaded, and otherwise return the login path built as the mount path joined with "/login", nil headers, and a request body carrying the 'role' and the current 'jwt'."
+- added `r.config-validation` (MUST): "NewJWTAuthMethod must reject a nil auth.AuthConfig with "empty config" and a nil Config map with "empty config data"; it must require the 'path' key to be present and to convert to a string, and the 'role' key likewise, and must reject a config whose path or role is the empty string."
+- added `r.cred-success-once` (MUST): "jwtMethod.CredSuccess must close the credential success gate exactly once, guarded by a sync.Once, so repeated success reports do not close the channel twice."
+- added `r.new-creds-channel` (MUST): "jwtMethod.NewCreds must return the channel on which the method signals that new credentials were found, so the agent can wait on it instead of polling."
+- added `r.optional-bool-options` (MUST): "NewJWTAuthMethod must read the optional 'remove_jwt_after_reading' and 'remove_jwt_follows_symlinks' keys through parseutil.ParseBool, default remove_jwt_after_reading to true and remove_jwt_follows_symlinks to false when the keys are absent, and wrap any parse failure in an error naming the offending key."
+- added `r.read-period-default` (MUST): "NewJWTAuthMethod must take the read period from the optional 'jwt_read_period' key parsed with parseutil.ParseDurationSecond, and when that key is absent must use 500ms if remove_jwt_after_reading is true and 1 minute otherwise, then start a ticker on that period."
+- added `r.shutdown-surface` (MUST): "jwtMethod must implement Shutdown with no arguments and no return value, completing the auth.AuthMethod surface the type offers to the agent."
+- added `r.watcher-startup` (MUST): "NewJWTAuthMethod must run the file watcher in its own goroutine before returning, initialise the credsFound, watch, stop, done and credSuccessGate channels and a sync.Once on the method, and log the path it will read the JWT from at info level."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -1137,7 +1149,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-command-agent-template-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agentproxyshared-auth-approle-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agentproxyshared-auth-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-command-agentproxyshared-auth-cert-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-internal-command-agentproxyshared-auth-jwt-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-command-agentproxyshared-auth-cert-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-internal-command-agentproxyshared-auth-jwt-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agentproxyshared-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
