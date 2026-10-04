@@ -1,5 +1,8 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
+- class:b65aa124b79a16c12d6ec06b8623993b OidcKeysRoute@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/index.js:9
+- class:c07aeacad4bd5c619d29098d6c0a27c6 OidcKeysCreateRoute@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/create.js:9
+- class:e540d03d95c9923ba8d814aecdf1b490 OidcKeyRoute@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/key.js:9
 - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/create.js
   create.js@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/create.js
 - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/index.js index.js@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/index.js
@@ -9,5 +12,79 @@ metadata:
   name: third-party-openbao-ui-app-routes-vault-cluster-access-oidc-keys
   namespace: default
 spec:
+  intent: 'This context documents the OIDC key route handlers of the vendored OpenBao
+    web UI: the list route, the create route, and the single-key detail route. It
+    exists so that the data-loading contract of each route, which store operation
+    is invoked, with which arguments, and how the list route degrades on a missing
+    backend path, is stated explicitly rather than inferred from three near-identical
+    Ember route classes.'
+  interfaces:
+  - file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/key.js
+    kind: class
+    name: OidcKeyRoute
+    signature: class OidcKeyRoute extends Route
+  - file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/create.js
+    kind: class
+    name: OidcKeysCreateRoute
+    signature: class OidcKeysCreateRoute extends Route
+  - file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/index.js
+    kind: class
+    name: OidcKeysRoute
+    signature: class OidcKeysRoute extends Route
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/create.js
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/index.js
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/key.js
+    id: r.extend-ember-route
+    level: SHOULD
+    text: Each route class should extend the @ember/routing/route default export and
+      override only model, leaving transition, setup, and rendering behavior to the
+      Ember router.
+  - codeRefs:
+    - class:e540d03d95c9923ba8d814aecdf1b490
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/key.js
+    id: r.oidc-key-detail-find-by-name
+    level: MUST
+    text: OidcKeyRoute.model must destructure name from the route params and return
+      this.store.findRecord('oidc/key', name) so the detail route loads the key identified
+      by the name segment.
+  - codeRefs:
+    - class:c07aeacad4bd5c619d29098d6c0a27c6
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/create.js
+    id: r.oidc-keys-create-unsaved-record
+    level: MUST
+    text: OidcKeysCreateRoute.model must return this.store.createRecord('oidc/key'),
+      an unsaved oidc/key record for the create form, and must not persist it.
+  - codeRefs:
+    - class:b65aa124b79a16c12d6ec06b8623993b
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/index.js
+    id: r.oidc-keys-list-404-empty
+    level: MUST
+    text: The list query must catch a rejection whose httpStatus is 404 and resolve
+      to an empty array instead, so an unconfigured key endpoint renders as an empty
+      list.
+  - codeRefs:
+    - class:b65aa124b79a16c12d6ec06b8623993b
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/index.js
+    id: r.oidc-keys-list-query
+    level: MUST
+    text: OidcKeysRoute.model must load the key index by calling this.store.query('oidc/key',
+      {}) and must resolve to the returned collection of oidc/key records.
+  - codeRefs:
+    - class:b65aa124b79a16c12d6ec06b8623993b
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/index.js
+    id: r.oidc-keys-list-reraise
+    level: MUST
+    text: The list query must rethrow every error that is not an httpStatus 404 rejection,
+      so genuine failures are not swallowed.
+  - codeRefs:
+    - class:b65aa124b79a16c12d6ec06b8623993b
+    - class:c07aeacad4bd5c619d29098d6c0a27c6
+    - class:e540d03d95c9923ba8d814aecdf1b490
+    id: r.store-service-injection
+    level: MUST
+    text: Each of the three route classes must inject the Ember Data store as the
+      service named store, because every model hook resolves records through this.store.
   upstream: self

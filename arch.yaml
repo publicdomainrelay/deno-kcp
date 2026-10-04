@@ -66994,15 +66994,17 @@ system_contexts:
   - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/client/providers.js
     providers.js@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/client/providers.js
   id: sc.third-party-openbao-ui-app-routes-vault-cluster-access-oidc-clients-client
-  intent: 'These files exist to give each OIDC client detail screen its own routable
-    sub-state: a details view, an edit view, and a providers list view reachable at
-    .../clients/client/providers. The empty details and edit routes are deliberate
-    placeholders that rely on the parent route''s model and on the corresponding templates;
-    only the providers route needs its own data fetch, because the set of identity
-    providers allowed to use a given client is not part of the client record itself
-    and must be queried separately by allowed_client_id. The nested route structure
-    lets the UI render client details, client edit form, and client-to-provider associations
-    under a single client model without refetching the client for each tab.'
+  intent: 'This context exists so the client details view, the client edit form, and
+    the client-to-provider associations can each be addressed as their own nested
+    route under a single client model. The details and edit routes are deliberately
+    empty: they need no data of their own because the parent route already fetched
+    the client, and the corresponding templates render against that inherited model.
+    Only the providers route owns a fetch, because the set of identity providers permitted
+    to use a given client is not a field on the client record; it is discovered by
+    querying the oidc/provider type with the allowed_client_id filter, and a 404 from
+    that query means no providers are linked rather than an error worth surfacing.
+    The split keeps one client load shared across three tabs instead of refetching
+    per screen.'
   interfaces:
   - file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/client/details.js
     kind: class
@@ -67024,62 +67026,143 @@ system_contexts:
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/client/providers.js
     id: r.default-export-route-class
     level: MUST
-    text: Each file must default-export its single route class (OidcClientDetailsRoute,
-      OidcClientEditRoute, OidcClientProvidersRoute) so Ember's route resolver can
-      map the module path .../clients/client/<name> onto the matching route.
+    text: Each of the three modules default-exports its single route class, OidcClientDetailsRoute
+      from details.js, OidcClientEditRoute from edit.js and OidcClientProvidersRoute
+      from providers.js, so Ember's route resolver maps the module path .../clients/client/<name>
+      onto the matching route.
   - codeRefs:
     - class:7f1cb0f1c4fee1deecf68d6f592c15b5
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/client/details.js
     id: r.details-route-inherits-parent-model
     level: MUST
-    text: OidcClientDetailsRoute must extend Ember's Route without overriding any
-      hook or injecting services, so the details view resolves its model through the
-      parent vault.cluster.access.oidc.clients.client route.
+    text: OidcClientDetailsRoute extends Ember's Route with an empty body and no overridden
+      hook or injected service, so the details template resolves its model through
+      the parent vault.cluster.access.oidc.clients.client route instead of loading
+      the client again.
   - codeRefs:
     - class:56f63b8c4d657f5b5b97e5a1e90267fe
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/client/edit.js
     id: r.edit-route-inherits-parent-model
     level: MUST
-    text: OidcClientEditRoute must extend Ember's Route without overriding any hook
-      or injecting services, so the edit view reuses the already-loaded client model
-      from the parent route instead of fetching its own.
+    text: OidcClientEditRoute extends Ember's Route with an empty body and no overridden
+      hook or injected service, so the edit form reuses the already-loaded client
+      model from the parent route rather than fetching its own.
   - codeRefs:
     - class:d81a601a448cf767deb20b2bd5266e2e
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/client/providers.js
     id: r.providers-route-404-empty
     level: MUST
-    text: OidcClientProvidersRoute.model() must convert an error whose httpStatus
-      is 404 into an empty array rather than propagating it, and must rethrow every
-      other error unchanged.
+    text: OidcClientProvidersRoute.model() attaches a catch to the query promise that
+      returns an empty array when err.httpStatus is 404 and rethrows the error unchanged
+      in every other case, so an unlinked client renders an empty provider list while
+      real failures still reach Ember's error handling.
   - codeRefs:
     - class:d81a601a448cf767deb20b2bd5266e2e
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/client/providers.js
     id: r.providers-route-queries-by-client
     level: MUST
-    text: OidcClientProvidersRoute.model() must read the parent route model via modelFor('vault.cluster.access.oidc.clients.client')
-      and query the oidc/provider record type with the filter allowed_client_id bound
-      to that model's clientId, returning the query promise as the route model.
+    text: 'OidcClientProvidersRoute.model() reads the parent route model through this.modelFor(''vault.cluster.access.oidc.clients.client'')
+      and returns this.store.query(''oidc/provider'', { allowed_client_id: model.clientId
+      }) as the route model, so the provider list is the set of providers whose allowed_client_id
+      matches the current client''s clientId.'
   - codeRefs:
     - class:d81a601a448cf767deb20b2bd5266e2e
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/client/providers.js
     id: r.providers-route-store-injected
     level: MUST
-    text: OidcClientProvidersRoute must obtain its data layer through the injected
-      store service, queried as this.store.query, so the provider list is loaded through
-      Ember Data rather than direct HTTP calls.
+    text: OidcClientProvidersRoute declares store as a service-injected property and
+      reaches its data only through this.store.query, so the provider list loads through
+      Ember Data rather than a direct HTTP call.
   upstream: self
 - code:
   - third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/create.js
   - third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/index.js
   - third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/key.js
   codeRefIndex:
+  - class:b65aa124b79a16c12d6ec06b8623993b OidcKeysRoute@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/index.js:9
+  - class:c07aeacad4bd5c619d29098d6c0a27c6 OidcKeysCreateRoute@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/create.js:9
+  - class:e540d03d95c9923ba8d814aecdf1b490 OidcKeyRoute@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/key.js:9
   - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/create.js
     create.js@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/create.js
   - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/index.js
     index.js@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/index.js
   - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/key.js key.js@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/key.js
   id: sc.third-party-openbao-ui-app-routes-vault-cluster-access-oidc-keys
+  intent: 'This context documents the OIDC key route handlers of the vendored OpenBao
+    web UI: the list route, the create route, and the single-key detail route. It
+    exists so that the data-loading contract of each route, which store operation
+    is invoked, with which arguments, and how the list route degrades on a missing
+    backend path, is stated explicitly rather than inferred from three near-identical
+    Ember route classes.'
+  interfaces:
+  - file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/key.js
+    kind: class
+    name: OidcKeyRoute
+    signature: class OidcKeyRoute extends Route
+  - file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/create.js
+    kind: class
+    name: OidcKeysCreateRoute
+    signature: class OidcKeysCreateRoute extends Route
+  - file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/index.js
+    kind: class
+    name: OidcKeysRoute
+    signature: class OidcKeysRoute extends Route
   name: third-party-openbao-ui-app-routes-vault-cluster-access-oidc-keys
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/create.js
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/index.js
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/key.js
+    id: r.extend-ember-route
+    level: SHOULD
+    text: Each route class should extend the @ember/routing/route default export and
+      override only model, leaving transition, setup, and rendering behavior to the
+      Ember router.
+  - codeRefs:
+    - class:e540d03d95c9923ba8d814aecdf1b490
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/key.js
+    id: r.oidc-key-detail-find-by-name
+    level: MUST
+    text: OidcKeyRoute.model must destructure name from the route params and return
+      this.store.findRecord('oidc/key', name) so the detail route loads the key identified
+      by the name segment.
+  - codeRefs:
+    - class:c07aeacad4bd5c619d29098d6c0a27c6
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/create.js
+    id: r.oidc-keys-create-unsaved-record
+    level: MUST
+    text: OidcKeysCreateRoute.model must return this.store.createRecord('oidc/key'),
+      an unsaved oidc/key record for the create form, and must not persist it.
+  - codeRefs:
+    - class:b65aa124b79a16c12d6ec06b8623993b
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/index.js
+    id: r.oidc-keys-list-404-empty
+    level: MUST
+    text: The list query must catch a rejection whose httpStatus is 404 and resolve
+      to an empty array instead, so an unconfigured key endpoint renders as an empty
+      list.
+  - codeRefs:
+    - class:b65aa124b79a16c12d6ec06b8623993b
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/index.js
+    id: r.oidc-keys-list-query
+    level: MUST
+    text: OidcKeysRoute.model must load the key index by calling this.store.query('oidc/key',
+      {}) and must resolve to the returned collection of oidc/key records.
+  - codeRefs:
+    - class:b65aa124b79a16c12d6ec06b8623993b
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/index.js
+    id: r.oidc-keys-list-reraise
+    level: MUST
+    text: The list query must rethrow every error that is not an httpStatus 404 rejection,
+      so genuine failures are not swallowed.
+  - codeRefs:
+    - class:b65aa124b79a16c12d6ec06b8623993b
+    - class:c07aeacad4bd5c619d29098d6c0a27c6
+    - class:e540d03d95c9923ba8d814aecdf1b490
+    id: r.store-service-injection
+    level: MUST
+    text: Each of the three route classes must inject the Ember Data store as the
+      service named store, because every model hook resolves records through this.store.
   upstream: self
 - code:
   - third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/key/clients.js

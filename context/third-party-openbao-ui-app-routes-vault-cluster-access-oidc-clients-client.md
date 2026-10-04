@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-These files exist to give each OIDC client detail screen its own routable sub-state: a details view, an edit view, and a providers list view reachable at .../clients/client/providers. The empty details and edit routes are deliberate placeholders that rely on the parent route's model and on the corresponding templates; only the providers route needs its own data fetch, because the set of identity providers allowed to use a given client is not part of the client record itself and must be queried separately by allowed_client_id. The nested route structure lets the UI render client details, client edit form, and client-to-provider associations under a single client model without refetching the client for each tab.
+This context exists so the client details view, the client edit form, and the client-to-provider associations can each be addressed as their own nested route under a single client model. The details and edit routes are deliberately empty: they need no data of their own because the parent route already fetched the client, and the corresponding templates render against that inherited model. Only the providers route owns a fetch, because the set of identity providers permitted to use a given client is not a field on the client record; it is discovered by querying the oidc/provider type with the allowed_client_id filter, and a 404 from that query means no providers are linked rather than an error worth surfacing. The split keeps one client load shared across three tabs instead of refetching per screen.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

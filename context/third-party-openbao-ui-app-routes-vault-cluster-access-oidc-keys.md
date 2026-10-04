@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context documents the OIDC key route handlers of the vendored OpenBao web UI: the list route, the create route, and the single-key detail route. It exists so that the data-loading contract of each route, which store operation is invoked, with which arguments, and how the list route degrades on a missing backend path, is stated explicitly rather than inferred from three near-identical Ember route classes.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
