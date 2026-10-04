@@ -1,0 +1,104 @@
+conditions:
+- message: 'undeclared: CertBuilder, CertOpt, Certificate, Certificate.CombinedPEM,
+    Certificate.PrivateKeyPEM, CommonName, DNS, IP, IsCA, KeyWrapper, NewCert, NewPrivateKey,
+    Parent, SelfSign'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
+  fingerprint: ed3a1f39e6668c64feb2c611cd5d3d76556122389adeeecd34322ddefaca7a41
+  interfaces:
+  - codegraphId: struct:576e3ddf52962507a08e20c949294f33
+    file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
+    kind: struct
+    line: 23
+    name: CertBuilder
+  - codegraphId: type_alias:58ce3dbc3f3f3df27d047a4a912f1cc3
+    file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
+    kind: type_alias
+    line: 33
+    name: CertOpt
+  - codegraphId: function:da8e2a9ace006853fdc96ae3cd8b0522
+    file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
+    kind: function
+    line: 35
+    name: CommonName
+    signature: (cn string) CertOpt
+  - codegraphId: function:2d3e71f42de5bb606c06078e564f8379
+    file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
+    kind: function
+    line: 42
+    name: Parent
+    signature: (parent Certificate) CertOpt
+  - codegraphId: function:e7d25a125028fef3c7ce142e78914556
+    file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
+    kind: function
+    line: 50
+    name: IsCA
+    signature: (isCA bool) CertOpt
+  - codegraphId: function:790cd7f7c5568c8259fc5eae54c9b02d
+    file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
+    kind: function
+    line: 57
+    name: SelfSign
+    signature: () CertOpt
+  - codegraphId: function:c6b33833eae21a3f06ab755ecbe53241
+    file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
+    kind: function
+    line: 64
+    name: IP
+    signature: (ip ...string) CertOpt
+  - codegraphId: function:a4f577e331cf0b11e3543d87d3db2d15
+    file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
+    kind: function
+    line: 75
+    name: DNS
+    signature: (dns ...string) CertOpt
+  - codegraphId: function:ba14bfcf89be60541e660e91618adde5
+    file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
+    kind: function
+    line: 82
+    name: NewCert
+    signature: (t *testing.T, opts ...CertOpt) (cert Certificate)
+  - codegraphId: struct:4db8c96e0691cdb162f1ff6ace58b44b
+    file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
+    kind: struct
+    line: 161
+    name: KeyWrapper
+  - codegraphId: function:f6820c0de554a96474cd1033517b2aa3
+    file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
+    kind: function
+    line: 166
+    name: NewPrivateKey
+    signature: (t *testing.T) (key KeyWrapper)
+  - codegraphId: struct:50fe4797bed2b9be3b54634e6bc67ca0
+    file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
+    kind: struct
+    line: 192
+    name: Certificate
+  - codegraphId: method:43ebb92b6c0a8befd331a9e064f87241
+    file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
+    kind: method
+    line: 201
+    name: Certificate.CombinedPEM
+    signature: () []byte
+  - codegraphId: method:d2ffb05b814d24a1181c39c645216b13
+    file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
+    kind: method
+    line: 208
+    name: Certificate.PrivateKeyPEM
+    signature: () []byte
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 422237d279049d86f2e7997582e918b11de0955ef2be9e7bd097661be9152533
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: ed3a1f39e6668c64feb2c611cd5d3d76556122389adeeecd34322ddefaca7a41

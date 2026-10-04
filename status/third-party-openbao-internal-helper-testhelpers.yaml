@@ -1,0 +1,335 @@
+conditions:
+- message: 'undeclared: AttemptUnsealCore, AttemptUnsealCores, AwaitLeader, CreateEntityAndAlias,
+    DeriveActiveCore, DeriveStableActiveCore, DeriveStandbyCores, EnsureCoreSealed,
+    EnsureCoreUnsealed, EnsureCoresSealed, EnsureCoresUnsealed, EnsureStableActiveNode,
+    GenerateDebugLogs, GenerateRoot, GenerateRootKind, GenerateRootWithError, GetTOTPCodeFromEngine,
+    HardcodedServerAddressProvider, HardcodedServerAddressProvider.ServerAddr, IsLocalOrRegressionTests,
+    NewHardcodedServerAddressProvider, RaftAppliedIndex, RaftClusterJoinNodes, RandomWithPrefix,
+    RegisterEntityInTOTPEngine, RetryUntil, RetryUntilAtCadence, RotateClusterKeys,
+    SealCores, SetNonRootToken, SetupLoginMFATOTP, SetupMFALoginEnforcement, SetupTOTPMethod,
+    SetupTOTPMount, SetupUserpassMountAccessor, SkipUnlessEnvVarsSet, SysMetricsJSON,
+    SysMetricsReq, TestMetricSinkProvider, TestRaftServerAddressProvider, TestRaftServerAddressProvider.ServerAddr,
+    VerifyRaftConfiguration, VerifyRaftPeers, WaitForActiveNode, WaitForActiveNodeAndStandbys,
+    WaitForNCoresSealed, WaitForNCoresUnsealed, WaitForNodesExcludingSelectedStandbys,
+    WaitForRaftApply, WaitForStandbyNode'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/helper/testhelpers/testhelpers.go
+  fingerprint: 0f5c17bb69b31a80effb0414c23a7f8dfdb80c2089ee35b5f04c5776ba57da1c
+  interfaces:
+  - codegraphId: type_alias:06e4e821cea607cd83b10c678e2d292a
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: type_alias
+    line: 33
+    name: GenerateRootKind
+  - codegraphId: function:d3d9594a475c6663bf76f86cc8806955
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 42
+    name: GenerateRoot
+    signature: (t testing.T, cluster *vault.TestCluster, kind GenerateRootKind) string
+  - codegraphId: function:703af259939ff65da6c347d01f1e7d37
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 51
+    name: GenerateRootWithError
+    signature: (t testing.T, cluster *vault.TestCluster, kind GenerateRootKind) (string,
+      error)
+  - codegraphId: function:bf37a5e57742bce9377b7cdcb34c3ff5
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 127
+    name: RandomWithPrefix
+    signature: (name string) string
+  - codegraphId: function:7880d499797fb5694927bf18bfc817e5
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 131
+    name: EnsureCoresSealed
+    signature: (t testing.T, c *vault.TestCluster)
+  - codegraphId: function:ab43d3579c9e5e476b9217a89a3e4e38
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 138
+    name: EnsureCoreSealed
+    signature: (t testing.T, core *vault.TestClusterCore)
+  - codegraphId: function:606391be36c093942c10d1d46278023a
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 153
+    name: EnsureCoresUnsealed
+    signature: (t testing.T, c *vault.TestCluster)
+  - codegraphId: function:a51d6542e6e80e13d7c89c57223fecb5
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 163
+    name: EnsureCoreUnsealed
+    signature: (t testing.T, c *vault.TestCluster, core *vault.TestClusterCore)
+  - codegraphId: function:1bf262f53639f879880380b7009fee08
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 171
+    name: AttemptUnsealCores
+    signature: (c *vault.TestCluster) error
+  - codegraphId: function:436f64f1678732bb106ab188189b598b
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 181
+    name: AttemptUnsealCore
+    signature: (c *vault.TestCluster, core *vault.TestClusterCore) error
+  - codegraphId: function:8ed3fa31f5d52ab149fa4eb6b7c6ea62
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 221
+    name: EnsureStableActiveNode
+    signature: (t testing.T, cluster *vault.TestCluster)
+  - codegraphId: function:f376e294816572fec48c1ec97a942d33
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 226
+    name: DeriveStableActiveCore
+    signature: (t testing.T, cluster *vault.TestCluster) *vault.TestClusterCore
+  - codegraphId: function:21743d8240cf38ae3cd19bac795ee3b3
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 260
+    name: DeriveActiveCore
+    signature: (t testing.T, cluster *vault.TestCluster) *vault.TestClusterCore
+  - codegraphId: function:8b3b190b83e6e05f1ea50e98e6412633
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 281
+    name: DeriveStandbyCores
+    signature: (t testing.T, cluster *vault.TestCluster) []*vault.TestClusterCore
+  - codegraphId: function:b20cfe56018941079e9bb4b1e7f6f52e
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 300
+    name: WaitForNCoresUnsealed
+    signature: (t testing.T, cluster *vault.TestCluster, n int)
+  - codegraphId: function:59e09f932f21088e386327849ca9ed08
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 319
+    name: SealCores
+    signature: (t testing.T, cluster *vault.TestCluster)
+  - codegraphId: function:4d861313f82326fd7947a103450a7074
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 338
+    name: WaitForNCoresSealed
+    signature: (t testing.T, cluster *vault.TestCluster, n int)
+  - codegraphId: function:61673ce1b352f97bb54a78df456daee3
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 357
+    name: WaitForActiveNode
+    signature: (t testing.T, cluster *vault.TestCluster) *vault.TestClusterCore
+  - codegraphId: function:9bdce641e42530d70e0b2c5ebe9766ff
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 373
+    name: WaitForStandbyNode
+    signature: (t testing.T, core *vault.TestClusterCore)
+  - codegraphId: function:fdd708143b528687cfbf48522c28b089
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 389
+    name: RotateClusterKeys
+    signature: (t testing.T, cluster *vault.TestCluster, recovery bool) [][]byte
+  - codegraphId: struct:20e4118e5266add4726d4aa98dfe6fdd
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: struct
+    line: 446
+    name: TestRaftServerAddressProvider
+  - codegraphId: method:a49201ce012d0f8203c20b3d2a9440ae
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: method
+    line: 450
+    name: TestRaftServerAddressProvider.ServerAddr
+    signature: (id raftlib.ServerID) (raftlib.ServerAddress, error)
+  - codegraphId: function:87448f4f0ba0db35247dff3872cb59b0
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 465
+    name: RaftClusterJoinNodes
+    signature: (t testing.T, cluster *vault.TestCluster)
+  - codegraphId: struct:68b3f8695f83f0e80c632049ae3c1e50
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: struct
+    line: 506
+    name: HardcodedServerAddressProvider
+  - codegraphId: method:6095ad68e04632546b4650a1a541f298
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: method
+    line: 510
+    name: HardcodedServerAddressProvider.ServerAddr
+    signature: (id raftlib.ServerID) (raftlib.ServerAddress, error)
+  - codegraphId: function:ae9e53d72d0ae633ad773b2f12948ec7
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 519
+    name: NewHardcodedServerAddressProvider
+    signature: (numCores, baseClusterPort int) raftlib.ServerAddressProvider
+  - codegraphId: function:350eafd6e6856bc9d221420336605e91
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 536
+    name: VerifyRaftConfiguration
+    signature: (core *vault.TestClusterCore, numCores int) error
+  - codegraphId: function:ec7fdc011e697b2f32c7888e4e813dd3
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 566
+    name: RaftAppliedIndex
+    signature: (core *vault.TestClusterCore) uint64
+  - codegraphId: function:8f23d03f0b747d2140f9d13391fbfe66
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 570
+    name: WaitForRaftApply
+    signature: (t testing.T, core *vault.TestClusterCore, index uint64)
+  - codegraphId: function:ef29ceb1f08e98afb25e211fd44b8bb0
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 586
+    name: AwaitLeader
+    signature: (t testing.T, cluster *vault.TestCluster) (int, error)
+  - codegraphId: function:37236339a25c57350e293ef4d2f722d6
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 606
+    name: GenerateDebugLogs
+    signature: (t testing.T, client *api.Client) chan struct{}
+  - codegraphId: function:f639aebaaa92880411a2fc7928c996e8
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 655
+    name: VerifyRaftPeers
+    signature: (t testing.T, client *api.Client, expected map[string]bool) error
+  - codegraphId: function:32db13d5818b5c9b29ab24d7c5f06bbf
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 685
+    name: TestMetricSinkProvider
+    signature: (gaugeInterval time.Duration) func(string) (*metricsutil.ClusterMetricSink,
+      *metricsutil.MetricsHelper)
+  - codegraphId: function:77cc70cdab53f20062738496d9836b36
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 694
+    name: SysMetricsReq
+    signature: (client *api.Client, cluster *vault.TestCluster, unauth bool) (*SysMetricsJSON,
+      error)
+  - codegraphId: struct:e1235dc4562f38361be34e00c8f8d4a7
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: struct
+    line: 715
+    name: SysMetricsJSON
+  - codegraphId: function:e87641998499d197dc1aa67c96a2d4e7
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 759
+    name: SetNonRootToken
+    signature: (client *api.Client) error
+  - codegraphId: function:83bb56c06e94990379ecf08da6210633
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 783
+    name: RetryUntilAtCadence
+    signature: (t testing.T, timeout, sleepTime time.Duration, f func() error)
+  - codegraphId: function:8cbb65d829bcf17da27aaf0c62ee4727
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 798
+    name: RetryUntil
+    signature: (t testing.T, timeout time.Duration, f func() error)
+  - codegraphId: function:302c449890b0c3b9d0b09f24ba9f684b
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 813
+    name: CreateEntityAndAlias
+    signature: (t testing.T, client *api.Client, mountAccessor, entityName, aliasName
+      string) (*api.Client, string, string)
+  - codegraphId: function:eeb4e671874f9c2eeafad251d4f029d3
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 843
+    name: SetupTOTPMount
+    signature: (t testing.T, client *api.Client)
+  - codegraphId: function:7f0c11f062929b8c4968d5fadb169848
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 854
+    name: SetupTOTPMethod
+    signature: (t testing.T, client *api.Client, config map[string]any) string
+  - codegraphId: function:e3a15668d2382d67f14badae384f4a4a
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 870
+    name: SetupMFALoginEnforcement
+    signature: (t testing.T, client *api.Client, config map[string]any)
+  - codegraphId: function:a17a7881f8bd84728587efb4503e3951
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 881
+    name: SetupUserpassMountAccessor
+    signature: (t testing.T, client *api.Client) string
+  - codegraphId: function:78a42a5948fc8f761ec7a8c367cc4a63
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 899
+    name: RegisterEntityInTOTPEngine
+    signature: (t testing.T, client *api.Client, entityID, methodID string) string
+  - codegraphId: function:3d5461c9a630812f4a426fc83e64be1d
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 925
+    name: GetTOTPCodeFromEngine
+    signature: (t testing.T, client *api.Client, enginePath string) string
+  - codegraphId: function:5a0df139bcdf9762186ccf0b06a366d0
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 937
+    name: SetupLoginMFATOTP
+    signature: (t testing.T, client *api.Client, methodName string, waitPeriod int)
+      (*api.Client, string, string)
+  - codegraphId: function:05864e22ac19e6534f7e220b6886d355
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 973
+    name: SkipUnlessEnvVarsSet
+    signature: (t testing.T, envVars []string)
+  - codegraphId: function:adb76c6fb2245412c67f7d20cd62636a
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 984
+    name: WaitForActiveNodeAndStandbys
+    signature: (t testing.T, cluster *vault.TestCluster)
+  - codegraphId: function:de12107bf9f24730724a8095cf46ebc8
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 1001
+    name: WaitForNodesExcludingSelectedStandbys
+    signature: (t testing.T, cluster *vault.TestCluster, indexesToSkip ...int)
+  - codegraphId: function:1fd6b768199dbc80afb802f7532c2edf
+    file: third_party/openbao/internal/helper/testhelpers/testhelpers.go
+    kind: function
+    line: 1017
+    name: IsLocalOrRegressionTests
+    signature: () bool
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: cd870696764d985caaa840a2d311b83b972ab913aafffbcdf5f678f19afdc6a0
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 0f5c17bb69b31a80effb0414c23a7f8dfdb80c2089ee35b5f04c5776ba57da1c
