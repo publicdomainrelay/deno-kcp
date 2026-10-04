@@ -7,5 +7,79 @@ metadata:
   name: third-party-openbao-internal-vault-external-tests-postgresql-binary
   namespace: default
 spec:
+  intent: 'The context exists to exercise the PostgreSQL storage backend of OpenBao
+    against real containerised server binaries rather than in-memory storage, so that
+    lock fencing, concurrent initialization, initialization failure, rolling upgrades
+    and primary/replica failover are all covered end to end. It is an external, opt-in
+    test suite: it needs Docker plus a compiled binary supplied through BAO_BINARY,
+    and it deliberately skips otherwise so the ordinary unit test run stays fast and
+    dependency-free.'
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/postgresql_binary/postgresql_test.go
+    id: r.fatal-init
+    level: MUST
+    text: TestPostgreSQL_FatalInit must build the cluster directly through docker.NewDockerCluster
+      with a single core, SkipInit true, an explicit cluster name derived from the
+      test name and SkipStorageCleanup true, supply the failing self-init-failure.hcl
+      fixture alongside the good ones, and require an error from the call; it must
+      then swap the fixture set back to the working self-init.hcl and static-seal.hcl
+      and require that startup is still refused with an error.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/postgresql_binary/postgresql_test.go
+    id: r.fenced-writes
+    level: MUST
+    text: TestPostgreSQL_FencedWrites must start a PostgreSQL-backed Docker cluster
+      from the supplied binary, spam ten goroutines that each write sys/policies/acl/custom
+      up to five hundred times with a 5ms pause, then delete every row from the openbao_ha_locks
+      table through the storage client and require that at least one goroutine observed
+      an error containing physical.ErrFencedWriteFailed; after a six second pause
+      it must require testcluster.WaitForActiveNode to find a new active node and
+      require that a repeat write on that node succeeds with a nil response.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/postgresql_binary/postgresql_test.go
+    id: r.package-and-binary-gate
+    level: MUST
+    text: The file must declare package raft_binary, and every test must read the
+      BAO_BINARY environment variable via api.ReadBaoVariable and call t.Skip when
+      the value is empty, so no test reaches Docker unless a server binary path is
+      supplied.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/postgresql_binary/postgresql_test.go
+    id: r.parallel-init
+    level: MUST
+    text: TestPostgreSQL_ParallelInit must copy the self-init.hcl and static-seal.hcl
+      fixtures into the cluster config path, start with SkipInit set, require that
+      the first node reports Initialized true and Sealed false, log in as admin through
+      auth/userpass to adopt the returned auth token as the cluster root token, and
+      then require that every node answers ListPoliciesWithContext within ten seconds
+      so the count of active nodes equals the node count.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/postgresql_binary/postgresql_test.go
+    id: r.rolling-upgrade
+    level: MUST
+    text: TestPostgreSQL_Upgrade must first start a three node cluster on the published
+      latest image with no binary override, mount a version 2 kv secrets engine, write
+      the value known-value at a/key and wait for the write to succeed, then set VaultBinary
+      on the options and call node.Upgrade on every node under a sixty second timeout;
+      afterwards it must wait for an active node and require that reading a/key returns
+      known-value again.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/postgresql_binary/postgresql_test.go
+    id: r.scalability-failover
+    level: MUST
+    text: TestPostgreSQL_Scalability must build a PostgreSQL cluster storage with
+      a node mapper that places the first two nodes on the primary, adds a replica
+      for the third index and points later indices at the first replica, then start
+      a three core OpenBao cluster with audit logging to stdout and trace level; it
+      must verify a kv version 2 value is read identically from every node with client
+      redirects disabled, and then in order require that sealing the primary lets
+      a secondary accept writes, that the value propagates to the third node, that
+      sealing the secondary makes the read-only third node fail with 'local node not
+      active but active cluster node not found', that UnsealAllNodes restores identical
+      reads everywhere, that removing the PostgreSQL primary makes writes and reads
+      on the first node fail within thirty seconds, that the third node eventually
+      reads the last written value, and that PromoteNode on the replica lets the remaining
+      nodes write and read post-failover-known-value.
   upstream: self
