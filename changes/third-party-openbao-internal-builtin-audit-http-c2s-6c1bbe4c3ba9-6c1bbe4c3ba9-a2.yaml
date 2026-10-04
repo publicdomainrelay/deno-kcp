@@ -10,5 +10,26 @@ spec:
   systemContext: third-party-openbao-internal-builtin-audit-http
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-builtin-audit-http
-  phase: Running
+  agentLog: 'The vendored OpenBao HTTP audit device lives at third_party/openbao/internal/builtin/audit/http.
+    backend.go defines Backend, which satisfies the audit.Backend contract: Salt and
+    GetHash hash audit data through a salt view, LogRequest, LogResponse and LogTestMessage
+    encode a logical.LogInput through a configured formatter and POST the buffered
+    entry to a configured URI with configured headers, and Reload and Invalidate complete
+    the interface. Factory builds a Backend from an audit.BackendConfig: it rejects
+    a nil SaltConfig or nil SaltView, requires the uri config key, resolves that uri
+    with parseutil.ParsePath under WithNoTrimSpaces and WithErrorOnMissingEnv and
+    validates it with url.Parse, decodes the optional headers JSON map of string to
+    string slices and expands every header value through parseutil.ParsePath, accepts
+    only the json format (jsonx is rejected as removed), defaults hmac_accessor to
+    true, log_raw to false and elide_list_responses to false, parsing each as a bool
+    when present, stores saltConfig and saltView, wires an audit.JSONFormatWriter
+    with the configured prefix and Backend.Salt as its SaltFunc, and calls the unexported
+    getClient helper once so a broken HTTP client configuration fails at construction
+    rather than at first log. testing.go supplies GetTestAuditHandler, a test-only
+    http.HandlerFunc that stands in for a remote audit endpoint: it appends each decoded
+    audit entry to a caller-supplied logs slice under a caller-supplied mutex, verifies
+    the required headers, and increments a caller-supplied bad request counter for
+    malformed input.'
+  message: wrote 15 requirement(s) and 10 interface(s) for third-party-openbao-internal-builtin-audit-http;
+    the spec already said this
+  phase: Succeeded
