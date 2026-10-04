@@ -9,5 +9,6 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/ui/mirage/scenarios/default.js` file default.js (third_party/openbao/ui/mirage/scenarios/default.js)
+- `file:third_party/openbao/ui/mirage/scenarios/kubernetes.js` file kubernetes.js (third_party/openbao/ui/mirage/scenarios/kubernetes.js)
 <!-- SPECD_MANAGED_END -->
