@@ -4,5 +4,45 @@ metadata:
   name: third-party-openbao-internal-builtin-database-mysql-mysql-legacy-database-plugin
   namespace: default
 spec:
+  intent: This context exists to pin down the behaviour of the legacy MySQL database
+    plugin binary inside the vendored third-party OpenBao code, so that the plugin's
+    construction path, username template choice, and RPC serving contract are described
+    rather than inferred. It anchors one file and one function, and it records that
+    the legacy plugin deliberately uses DefaultLegacyUserNameTemplate and dbplugin.Serve,
+    which distinguishes it from the non-legacy MySQL plugin that uses DefaultUserNameTemplate
+    and dbplugin.ServeMultiplex. It is a description of third-party code that is depended
+    on, not code owned by this repository.
+  interfaces:
+  - file: third_party/openbao/internal/builtin/database/mysql/mysql-legacy-database-plugin/main.go
+    kind: function
+    name: Run
+    signature: func Run() error
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - function:351b9cf78c3672814bcb525f1d453382
+    id: r.constructor-error-propagates
+    level: MUST
+    text: Run returns the error from the MySQL constructor immediately when construction
+      fails, and does not call dbplugin.Serve in that case.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/database/mysql/mysql-legacy-database-plugin/main.go
+    - function:351b9cf78c3672814bcb525f1d453382
+    id: r.legacy-mysql-plugin-serves-rpc
+    level: MUST
+    text: Run constructs a MySQL database object from mysql.New(mysql.DefaultLegacyUserNameTemplate)
+      and serves it as a dbplugin.Database through dbplugin.Serve, so the legacy username
+      template is the one the plugin runs with.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/database/mysql/mysql-legacy-database-plugin/main.go
+    id: r.main-invokes-run
+    level: MUST
+    text: The main function in this file is the caller of Run; the plugin binary has
+      no other entrypoint into the database logic.
+  - codeRefs:
+    - function:351b9cf78c3672814bcb525f1d453382
+    id: r.run-returns-nil-on-success
+    level: MUST
+    text: Run returns nil after the plugin server has been served, so a successful
+      invocation reports no error to its caller.
   upstream: self
