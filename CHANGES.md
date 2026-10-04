@@ -4927,6 +4927,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.services-injected` (MUST): "`MfaConfigureRoute` must obtain its dependencies through Ember service injection: `store` for the model query and `router` for the redirect, with no direct module imports of the store or router instances."
 - added `r.stay-when-query-fails` (MUST): "When the `mfa-method` query rejects, `beforeModel` must swallow the rejection and leave the operator on the configure landing page; no transition happens and no error propagates from the hook."
 
+### third-party-openbao-ui-app-routes-vault-cluster-access-mfa-enforcements-enforcement
+
+- intent: "" -> "This context exists to record the edit route of the cluster access MFA login enforcement resource in the OpenBao UI, so that the route hierarchy and the extensions of Ember's Route class in that part of the app are documented as they are, not as they might be refactored. It matters because a route with an empty class body is a deliberate statement: the edit screen relies entirely on the framework's default route behavior and on the route's position in the router map, so any future change to the model loading or controller setup for that screen has to be introduced here rather than assumed to already exist."
+- added `r.default-export-route-class` (MUST): "The module third_party/openbao/ui/app/routes/vault/cluster/access/mfa/enforcements/enforcement/edit.js must default-export a class named MfaLoginEnforcementEditRoute, because the Ember router resolves the edit route for the cluster access MFA login enforcement resource by module path and expects the default export to be the route class."
+- added `r.extends-ember-route` (MUST): "MfaLoginEnforcementEditRoute must extend Ember's Route base class, so that the route participates in the standard Ember routing lifecycle for the edit URL of an MFA login enforcement."
+- added `r.no-controller-setup-override` (MUST): "MfaLoginEnforcementEditRoute must not override setupController, resetController, beforeModel or afterModel, so the edit screen keeps the inherited controller wiring and no route-specific side effects run on enter or exit."
+- added `r.no-injected-dependencies` (MAY): "MfaLoginEnforcementEditRoute may remain free of injected services and of any own properties or methods; if services are ever needed for the edit screen, they must be added to this class rather than assumed to be present."
+- added `r.no-model-hook` (MUST): "MfaLoginEnforcementEditRoute must declare an empty class body: it must not define a model hook, so loading of the enforcement record for the edit screen is left to the framework's default model resolution (the route's dynamic segment plus the default store lookup) rather than to code in this route."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5331,6 +5340,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-routes-vault-cluster-access-mfa-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-mfa-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-mfa-enforcements-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-ui-app-routes-vault-cluster-access-mfa-enforcements-enforcement-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-routes-vault-cluster-access-mfa-enforcements-enforcement-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-routes-vault-cluster-access-mfa-methods-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
