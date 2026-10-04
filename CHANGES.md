@@ -4959,6 +4959,13 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.methods-list-query` (MUST): "MfaMethodsRoute.model must query the 'mfa-method' store with an empty filter object and return the resulting collection, and must return an empty array when the query fails with httpStatus 404, rethrowing any other error so non-404 failures still surface."
 - added `r.routes-extend-ember-route` (SHOULD): "Each of the three route classes should remain an ES module default export extending '@ember/routing/route' Route, with store (and router where used) injected through the '@ember/service' decorator, matching the surrounding OpenBao UI route conventions."
 
+### third-party-openbao-ui-app-routes-vault-cluster-access-mfa-methods-method
+
+- intent: "" -> "The context exists so the MFA method edit screen has a resolvable route class at the path vault/cluster/access/mfa/methods/method/edit. Ember's router requires a module at that location; this file supplies the default-exported route class that lets the route tree build without customising data loading or controller setup, leaving the edit flow entirely to the inherited Route behaviour and the corresponding template and controller."
+- added `r.default-export-route-class` (MUST): "The module must export MfaMethodEditRoute as its default export so Ember's resolver can bind the class to the vault/cluster/access/mfa/methods/method/edit route path."
+- added `r.extend-ember-route` (MUST): "MfaMethodEditRoute must extend Ember's Route base class, so the route inherits the framework's default model resolution, transition hooks and controller setup."
+- added `r.no-hook-overrides` (MUST): "The class body must stay empty, overriding no Route hook and declaring no actions, so the MFA method edit route uses only inherited behaviour and adds no custom data loading or teardown."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5366,7 +5373,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-routes-vault-cluster-access-mfa-enforcements-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-mfa-enforcements-enforcement-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-mfa-methods-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-routes-vault-cluster-access-mfa-methods-method-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-routes-vault-cluster-access-mfa-methods-method-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-namespaces-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

@@ -1,5 +1,6 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
+- class:851d220f0101654bfd32bf841f733051 MfaMethodEditRoute@third_party/openbao/ui/app/routes/vault/cluster/access/mfa/methods/method/edit.js:8
 - file:third_party/openbao/ui/app/routes/vault/cluster/access/mfa/methods/method/edit.js
   edit.js@third_party/openbao/ui/app/routes/vault/cluster/access/mfa/methods/method/edit.js
 kind: SystemContext
@@ -7,5 +8,39 @@ metadata:
   name: third-party-openbao-ui-app-routes-vault-cluster-access-mfa-methods-method
   namespace: default
 spec:
+  intent: The context exists so the MFA method edit screen has a resolvable route
+    class at the path vault/cluster/access/mfa/methods/method/edit. Ember's router
+    requires a module at that location; this file supplies the default-exported route
+    class that lets the route tree build without customising data loading or controller
+    setup, leaving the edit flow entirely to the inherited Route behaviour and the
+    corresponding template and controller.
+  interfaces:
+  - file: third_party/openbao/ui/app/routes/vault/cluster/access/mfa/methods/method/edit.js
+    kind: class
+    name: MfaMethodEditRoute
+    signature: class MfaMethodEditRoute extends Route
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - class:851d220f0101654bfd32bf841f733051
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/mfa/methods/method/edit.js
+    id: r.default-export-route-class
+    level: MUST
+    text: The module must export MfaMethodEditRoute as its default export so Ember's
+      resolver can bind the class to the vault/cluster/access/mfa/methods/method/edit
+      route path.
+  - codeRefs:
+    - class:851d220f0101654bfd32bf841f733051
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/mfa/methods/method/edit.js
+    id: r.extend-ember-route
+    level: MUST
+    text: MfaMethodEditRoute must extend Ember's Route base class, so the route inherits
+      the framework's default model resolution, transition hooks and controller setup.
+  - codeRefs:
+    - class:851d220f0101654bfd32bf841f733051
+    id: r.no-hook-overrides
+    level: MUST
+    text: The class body must stay empty, overriding no Route hook and declaring no
+      actions, so the MFA method edit route uses only inherited behaviour and adds
+      no custom data loading or teardown.
   upstream: self

@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so the MFA method edit screen has a resolvable route class at the path vault/cluster/access/mfa/methods/method/edit. Ember's router requires a module at that location; this file supplies the default-exported route class that lets the route tree build without customising data loading or controller setup, leaving the edit flow entirely to the inherited Route behaviour and the corresponding template and controller.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
