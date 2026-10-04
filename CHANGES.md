@@ -626,4 +626,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 
 ## Realization
 
-_None: no SpecChange landed on this branch yet._
+| change | direction | phase | commit | verify | acceptance |
+| --- | --- | --- | --- | --- | --- |
+| third-party-openbao-internal-builtin-logical-database-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-builtin-logical-database-dbplugin-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
