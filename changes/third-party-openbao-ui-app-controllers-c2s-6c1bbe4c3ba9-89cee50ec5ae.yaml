@@ -10,5 +10,15 @@ spec:
   systemContext: third-party-openbao-ui-app-controllers
   toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
 status:
-  message: the agent is summarizing third-party-openbao-ui-app-controllers
-  phase: Running
+  agentLog: 'This context covers the two root Ember.js controllers of the OpenBao
+    web UI, which lives under third_party/openbao/ui. application.js defines the base
+    ApplicationController: it extends Ember''s Controller, exposes the build-time
+    environment object from config/environment as `env`, and injects the `auth`, `store`,
+    and `currentCluster` services. vault.js defines the VaultController for the cluster
+    route: it maps the `wrapped_token` and `redirect_to` query parameters onto the
+    `wrappedToken` and `redirectTo` properties, initializes both to empty strings,
+    exposes the same `env` value, and injects the `auth` and `store` services but
+    not `currentCluster`. Both are default exports built with `Controller.extend`,
+    so they carry no explicit class declaration and no methods of their own.'
+  message: wrote 6 requirement(s) and 0 interface(s) for third-party-openbao-ui-app-controllers
+  phase: Succeeded

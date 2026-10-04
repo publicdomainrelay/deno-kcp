@@ -7,5 +7,55 @@ metadata:
   name: third-party-openbao-ui-app-controllers
   namespace: default
 spec:
+  intent: 'This context exists to fix the contract of the UI''s base and cluster controllers:
+    which query parameters the cluster route accepts and under what names, which properties
+    default to empty, and which services each controller may rely on being injected.
+    It is the anchor for anything that reads or mutates controller state from templates
+    and routes, and it records the deliberate asymmetry that `currentCluster` is available
+    on the application controller but not on the vault controller.'
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/app/controllers/application.js
+    id: r.application-exposes-env
+    level: MUST
+    text: The application controller must expose the build-time environment object
+      imported from ../config/environment as the `env` property, so templates and
+      routes read the environment without importing the config module themselves.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/controllers/application.js
+    id: r.application-injects-services
+    level: MUST
+    text: The application controller must inject the `auth`, `store`, and `currentCluster`
+      services, making them available to every controller and template that inherits
+      from it.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/controllers/application.js
+    - file:third_party/openbao/ui/app/controllers/vault.js
+    id: r.controller-extends-ember
+    level: MUST
+    text: Both controllers must be default exports created by extending Ember's Controller
+      via `Controller.extend`, so Ember's own base behaviour and lifecycle remain
+      in force.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault.js
+    id: r.vault-query-defaults
+    level: MUST
+    text: The vault controller must default the `wrappedToken` and `redirectTo` properties
+      to the empty string, so a cluster route visited without those query parameters
+      still has a defined value for both.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault.js
+    id: r.vault-query-params
+    level: MUST
+    text: The vault controller must declare the query parameters `wrappedToken` and
+      `redirectTo`, bound to the URL names `wrapped_token` and `redirect_to` respectively,
+      so a login redirect can carry a wrapping token and a return destination through
+      the URL.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault.js
+    id: r.vault-services
+    level: MUST
+    text: The vault controller must inject the `auth` and `store` services and must
+      not inject `currentCluster`, unlike the application controller it extends.
   upstream: self

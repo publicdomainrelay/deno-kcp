@@ -4200,6 +4200,16 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.declares-env-config-shape` (MUST): "The module must declare a constant named `config` whose type holds exactly the keys `environment`, `modulePrefix`, `podModulePrefix`, `locationType`, `rootURL` and `APP`; `environment`, `modulePrefix`, `podModulePrefix` and `rootURL` must be strings, `locationType` must be limited to the literals 'history', 'hash', 'none' or 'auto', and `APP` must be a record of string keys to unknown values."
 - added `r.default-export` (MUST): "The declared `config` constant must be the module's default export, so importers using `import config from 'my-app/config/environment'` receive that typed object."
 
+### third-party-openbao-ui-app-controllers
+
+- intent: "" -> "This context exists to fix the contract of the UI's base and cluster controllers: which query parameters the cluster route accepts and under what names, which properties default to empty, and which services each controller may rely on being injected. It is the anchor for anything that reads or mutates controller state from templates and routes, and it records the deliberate asymmetry that `currentCluster` is available on the application controller but not on the vault controller."
+- added `r.application-exposes-env` (MUST): "The application controller must expose the build-time environment object imported from ../config/environment as the `env` property, so templates and routes read the environment without importing the config module themselves."
+- added `r.application-injects-services` (MUST): "The application controller must inject the `auth`, `store`, and `currentCluster` services, making them available to every controller and template that inherits from it."
+- added `r.controller-extends-ember` (MUST): "Both controllers must be default exports created by extending Ember's Controller via `Controller.extend`, so Ember's own base behaviour and lifecycle remain in force."
+- added `r.vault-query-defaults` (MUST): "The vault controller must default the `wrappedToken` and `redirectTo` properties to the empty string, so a cluster route visited without those query parameters still has a defined value for both."
+- added `r.vault-query-params` (MUST): "The vault controller must declare the query parameters `wrappedToken` and `redirectTo`, bound to the URL names `wrapped_token` and `redirect_to` respectively, so a login redirect can carry a wrapping token and a return destination through the URL."
+- added `r.vault-services` (MUST): "The vault controller must inject the `auth` and `store` services and must not inject `currentCluster`, unlike the application controller it extends."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4530,6 +4540,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-components-transit-key-action-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-components-wizard-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-config-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-controllers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-controllers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
