@@ -9,5 +9,6 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/ui/app/transforms/array.js` file array.js (third_party/openbao/ui/app/transforms/array.js)
+- `file:third_party/openbao/ui/app/transforms/object.js` file object.js (third_party/openbao/ui/app/transforms/object.js)
 <!-- SPECD_MANAGED_END -->
