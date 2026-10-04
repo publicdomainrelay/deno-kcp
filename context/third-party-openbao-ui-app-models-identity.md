@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the OpenBao UI can present and edit Vault identity data — entities, their aliases, entity merges, groups and group aliases — on top of Ember Data. The models exist to give the identity screens typed attributes with the right form editor metadata (`editType`, labels, `readOnly`, section headers), the relationships that join aliases to their parent entity or group, and capability-derived permission flags so the UI only offers actions (delete, edit, read, add alias, create policies) that the current token is allowed to perform.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

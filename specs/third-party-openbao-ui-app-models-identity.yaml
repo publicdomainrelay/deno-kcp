@@ -1,5 +1,6 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
+- class:71e521bb7cde0980024910cb7866c4f8 Model@third_party/openbao/ui/app/models/identity/entity.js:12
 - file:third_party/openbao/ui/app/models/identity/_base.js _base.js@third_party/openbao/ui/app/models/identity/_base.js
 - file:third_party/openbao/ui/app/models/identity/entity-alias.js entity-alias.js@third_party/openbao/ui/app/models/identity/entity-alias.js
 - file:third_party/openbao/ui/app/models/identity/entity-merge.js entity-merge.js@third_party/openbao/ui/app/models/identity/entity-merge.js
@@ -11,5 +12,127 @@ metadata:
   name: third-party-openbao-ui-app-models-identity
   namespace: default
 spec:
+  intent: This context exists so the OpenBao UI can present and edit Vault identity
+    data — entities, their aliases, entity merges, groups and group aliases — on top
+    of Ember Data. The models exist to give the identity screens typed attributes
+    with the right form editor metadata (`editType`, labels, `readOnly`, section headers),
+    the relationships that join aliases to their parent entity or group, and capability-derived
+    permission flags so the UI only offers actions (delete, edit, read, add alias,
+    create policies) that the current token is allowed to perform.
+  interfaces:
+  - file: third_party/openbao/ui/app/models/identity/entity.js
+    kind: class
+    name: Model
+    signature: class Model extends IdentityModel
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/app/models/identity/entity-alias.js
+    id: r.entity-alias-shape
+    level: MUST
+    text: The entity alias model declares `name`, `canonicalId`, `mountAccessor` (label
+      `Auth Backend`, mountAccessor editor), `metadata` (kv editor), `mergedFromCanonicalIds`,
+      read-only `mountPath`, `mountType`, `creationTime` and `lastUpdateTime`, and
+      derives `canDelete` and `canEdit` as aliases of `updatePath.canDelete` and `updatePath.canUpdate`
+      over an identity-capabilities `updatePath`.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/models/identity/entity-alias.js
+    - file:third_party/openbao/ui/app/models/identity/entity.js
+    id: r.entity-aliases-relationship
+    level: MUST
+    text: 'The entity Model holds a non-async, read-only `hasMany` of `identity/entity-alias`
+      named `aliases` with `inverse: ''entity''`, and the entity alias model holds
+      the matching non-async, read-only `belongsTo` of `identity/entity` named `entity`
+      with `inverse: ''aliases''`; the alias sets `parentType` to `entity` and its
+      form fields to `[''name'', ''mountAccessor'']`.'
+  - codeRefs:
+    - class:71e521bb7cde0980024910cb7866c4f8
+    - file:third_party/openbao/ui/app/models/identity/entity.js
+    id: r.entity-attributes-and-form
+    level: MUST
+    text: The entity Model declares `formFields` as `['name', 'disabled', 'policies',
+      'metadata']` and carries attributes `name`, `disabled` (boolean, default false,
+      label `Disable entity`, help text that associated tokens cannot be used but
+      are not revoked), `mergedEntityIds`, `metadata` (kv editor), `policies` (yield
+      editor, section header) and read-only `creationTime`, `lastUpdateTime`, `groupIds`,
+      `directGroupIds`, `inheritedGroupIds`.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/models/identity/entity-merge.js
+    id: r.entity-merge-form
+    level: MUST
+    text: 'The entity merge model has no relationships and takes its form fields from
+      `[''toEntityId'', ''fromEntityIds'', ''force'']`: `toEntityId` is a string labelled
+      `Entity to merge to`, `fromEntityIds` uses the `stringArray` editor and is labelled
+      `Entities to merge from`, and `force` is a boolean defaulting to false that
+      keeps MFA secrets from the to-entity on merge conflicts.'
+  - codeRefs:
+    - class:71e521bb7cde0980024910cb7866c4f8
+    id: r.entity-permission-flags
+    level: MUST
+    text: 'Entity permission flags read the capability proxies defensively with optional
+      chaining: `canDelete` from `updatePath` `canDelete`, `canEdit` from `updatePath`
+      `canUpdate`, `canRead` from `updatePath` `canRead`, `canAddAlias` from `aliasPath`
+      `canCreate` and `canCreatePolicies` from `policyPath` `canCreate`; `updatePath`
+      is a capability on `identity/entity/id/${''id''}`, `aliasPath` on `identity/entity-alias`
+      and `policyPath` is a lazy capability on `sys/policies`, so all of them yield
+      undefined while the paths are still loading.'
+  - codeRefs:
+    - file:third_party/openbao/ui/app/models/identity/group-alias.js
+    id: r.group-alias-shape
+    level: MUST
+    text: 'The group alias model sets `parentType` to `group`, takes form fields `[''name'',
+      ''mountAccessor'']`, and declares `name`, `canonicalId`, `mountAccessor` (label
+      `Auth Backend`, mountAccessor editor), read-only `mountPath`, `mountType`, `creationTime`
+      and `lastUpdateTime`, plus a non-async read-only `belongsTo` of `identity/group`
+      named `group` with `inverse: ''alias''` and identity-capabilities-derived `canDelete`/`canEdit`
+      aliases.'
+  - codeRefs:
+    - file:third_party/openbao/ui/app/models/identity/group.js
+    id: r.group-form-fields
+    level: MUST
+    text: Group form fields start as `['name', 'type', 'policies', 'metadata']` and
+      append `memberGroupIds` and `memberEntityIds` only when `type` is `internal`;
+      `type` is a string defaulting to `internal` with possible values `internal`
+      and `external`, and the member, parent group and member entity ID attributes
+      use the searchSelect editor with `string-list` as fallback component, labelled
+      Member Group IDs, Parent Group IDs and Member Entity IDs.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/models/identity/group.js
+    id: r.group-membership-and-alias-rules
+    level: MUST
+    text: 'The group model computes `hasMembers` from the lengths of `memberEntityIds`
+      and `memberGroupIds`, returning true only when their sum exceeds zero, and computes
+      `canAddAlias` to false when `type` is `internal` or the group already has an
+      alias, otherwise returning `aliasPath.canCreate`; it also aliases `canDelete`/`canEdit`
+      from `updatePath` and `canCreatePolicies` from a lazy `sys/policies` `policyPath`,
+      and relates to a single non-async read-only `identity/group-alias` named `alias`
+      with `inverse: ''group''`.'
+  - codeRefs:
+    - file:third_party/openbao/ui/app/models/identity/_base.js
+    id: r.identity-base-contract
+    level: MUST
+    text: Every identity model extends the shared IdentityModel base in `_base.js`,
+      which asserts with `formFields should be overridden` when a subclass leaves
+      `formFields` unset, exposes `fields` by expanding this model's `formFields`
+      through `expandAttributeMeta`, and derives `identityType` from the second path
+      segment of `constructor.modelName`.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/models/identity/entity-merge.js
+    id: r.merge-is-transient
+    level: MAY
+    text: The entity merge model may be used purely as a transient form object, since
+      it defines only the three merge inputs and no relationships, timestamps or capability
+      flags.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/models/identity/entity-alias.js
+    - file:third_party/openbao/ui/app/models/identity/entity.js
+    - file:third_party/openbao/ui/app/models/identity/group-alias.js
+    - file:third_party/openbao/ui/app/models/identity/group.js
+    id: r.timestamps-readonly
+    level: SHOULD
+    text: Across the identity models the server-owned fields — `creationTime`, `lastUpdateTime`,
+      `mountPath`, `mountType`, and the entity's `groupIds`, `directGroupIds` and
+      `inheritedGroupIds` — are marked `readOnly` so the UI never submits them, and
+      `metadata` consistently uses the kv editor while `policies` uses the yield editor
+      as a section header.
   upstream: self

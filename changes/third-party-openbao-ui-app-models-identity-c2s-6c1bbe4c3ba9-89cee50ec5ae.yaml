@@ -10,5 +10,29 @@ spec:
   systemContext: third-party-openbao-ui-app-models-identity
   toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
 status:
-  message: the agent is summarizing third-party-openbao-ui-app-models-identity
-  phase: Running
+  agentLog: 'This context is the Ember Data model layer that the OpenBao (Vault) UI
+    uses for Vault identity objects: entities, entity aliases, entity merges, groups,
+    and group aliases. All five concrete models extend a shared base in `_base.js`,
+    which asserts that each subclass overrides `formFields`, expands those field names
+    into full attribute metadata through `expandAttributeMeta`, and derives `identityType`
+    from the second segment of `constructor.modelName`. `entity.js` declares an ES-class
+    `Model` with `name`, `disabled` (default `false`), `mergedEntityIds`, `metadata`
+    (kv editor), `policies` (yield/section header) and read-only `creationTime`, `lastUpdateTime`,
+    `groupIds`, `directGroupIds`, `inheritedGroupIds`, plus a non-async read-only
+    `aliases` hasMany to `identity/entity-alias`. Its permissions are computed from
+    capability proxies: `updatePath` on `identity/entity/id/${''id''}` feeds `canDelete`,
+    `canEdit` and `canRead` via `.get`, `aliasPath` on `identity/entity-alias` feeds
+    `canAddAlias`, and a lazy `sys/policies` `policyPath` feeds `canCreatePolicies`.
+    `entity-alias.js` and `group-alias.js` pair with their parents through `belongsTo`/`inverse`
+    links, carry `name`, `canonicalId`, `mountAccessor` (labelled Auth Backend, `mountAccessor`
+    editor), read-only `mountPath`, `mountType`, timestamps and capability-derived
+    `canDelete`/`canEdit`, differing in `parentType` and in that the entity alias
+    also has kv `metadata` and `mergedFromCanonicalIds`. `group.js` branches its `formFields`
+    on `type` (default `internal`, possible `internal`/`external`), appending `memberGroupIds`
+    and `memberEntityIds` only for internal groups, and it computes `hasMembers` from
+    member entity and group ID lists and forbids `canAddAlias` for internal groups
+    or when a group already has an alias. `entity-merge.js` is the only model with
+    no relationships: its form fields are `toEntityId`, `fromEntityIds` (string array
+    editor) and `force` (default `false`).'
+  message: wrote 11 requirement(s) and 1 interface(s) for third-party-openbao-ui-app-models-identity
+  phase: Succeeded
