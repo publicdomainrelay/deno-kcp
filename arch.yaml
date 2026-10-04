@@ -1,0 +1,170 @@
+apiVersion: open-architecture.dffml.github.io/v0alpha1
+kind: OpenArchitecture
+metadata:
+  branch: open-architecture/deno-kcp
+  name: deno-kcp
+system_contexts:
+- code:
+  - api/v1alpha1/deno_types_test.go
+  - api/v1alpha1/denospec.go
+  - api/v1alpha1/groupversion_info.go
+  - api/v1alpha1/types_denojob.go
+  - api/v1alpha1/types_denopod.go
+  - api/v1alpha1/types_denorun.go
+  - api/v1alpha1/types_openbao.go
+  - api/v1alpha1/types_policyengine.go
+  - api/v1alpha1/types_policyworkflowpod.go
+  - api/v1alpha1/types_policyworkflowrun.go
+  - api/v1alpha1/types_runtrigger.go
+  - api/v1alpha1/types_shared.go
+  - api/v1alpha1/types_test.go
+  - api/v1alpha1/zz_generated.deepcopy.go
+  id: sc.api-v1alpha1
+  name: api-v1alpha1
+  upstream: self
+- code:
+  - cmd/deno-kcp-provider/main.go
+  id: sc.cmd-deno-kcp-provider
+  name: cmd-deno-kcp-provider
+  upstream: self
+- code:
+  - deploy/denojob-apiresourceschema.yaml
+  - deploy/denopod-apiresourceschema.yaml
+  - deploy/denorun-apiresourceschema.yaml
+  - deploy/denoruntime-apiexport.yaml
+  - deploy/openbao-apiresourceschema.yaml
+  - deploy/policyengine-apiresourceschema.yaml
+  - deploy/policyworkflowpod-apiresourceschema.yaml
+  - deploy/policyworkflowrun-apiexport.yaml
+  - deploy/policyworkflowrun-apiresourceschema.yaml
+  - deploy/runtrigger-apiresourceschema.yaml
+  - deploy/workspacetype-denoruntime.yaml
+  - deploy/workspacetype-workflow.yaml
+  id: sc.deploy
+  name: deploy
+  upstream: self
+- code:
+  - deploy/examples/deno-job.yaml
+  - deploy/examples/deno-pod.yaml
+  - deploy/examples/deno-run.yaml
+  - deploy/examples/native-fire-pod.yaml
+  - deploy/examples/openbao-tls-pod.yaml
+  - deploy/examples/openbao.yaml
+  - deploy/examples/policy-workflow-run.yaml
+  - deploy/examples/policyengine.yaml
+  - deploy/examples/policyworkflowpod.yaml
+  - deploy/examples/runtrigger.yaml
+  id: sc.deploy-examples
+  name: deploy-examples
+  upstream: self
+- code:
+  - deploy/examples/atproto/market/00-workspaces.yaml
+  - deploy/examples/atproto/market/10-rbac.yaml
+  - deploy/examples/atproto/market/15-openbao-alice.yaml
+  - deploy/examples/atproto/market/15-openbao-global.yaml
+  - deploy/examples/atproto/market/15-openbao-relay.yaml
+  - deploy/examples/atproto/market/20-global-plc.yaml
+  - deploy/examples/atproto/market/30-relay-relay.yaml
+  - deploy/examples/atproto/market/40-alice-pds.yaml
+  - deploy/examples/atproto/market/50-verifier.yaml
+  id: sc.deploy-examples-atproto-market
+  name: deploy-examples-atproto-market
+  upstream: self
+- code:
+  - internal/baoembed/cmd/baoembed/main.go
+  id: sc.internal-baoembed-cmd-baoembed
+  name: internal-baoembed-cmd-baoembed
+  upstream: self
+- code:
+  - internal/denojob/denojob.go
+  - internal/denojob/denojob_test.go
+  id: sc.internal-denojob
+  name: internal-denojob
+  upstream: self
+- code:
+  - internal/denopod/denopod.go
+  - internal/denopod/denopod_test.go
+  id: sc.internal-denopod
+  name: internal-denopod
+  upstream: self
+- code:
+  - internal/denorun/denorun.go
+  - internal/denorun/denorun_test.go
+  id: sc.internal-denorun
+  name: internal-denorun
+  upstream: self
+- code:
+  - internal/livegate/livegate.go
+  id: sc.internal-livegate
+  name: internal-livegate
+  upstream: self
+- code:
+  - internal/policyengine/policyengine.go
+  - internal/policyengine/policyengine_test.go
+  id: sc.internal-policyengine
+  name: internal-policyengine
+  upstream: self
+- code:
+  - internal/policyworkflowpod/policyworkflowpod.go
+  - internal/policyworkflowpod/policyworkflowpod_test.go
+  id: sc.internal-policyworkflowpod
+  name: internal-policyworkflowpod
+  upstream: self
+- code:
+  - internal/policyworkflowrun/policyworkflowrun.go
+  - internal/policyworkflowrun/policyworkflowrun_test.go
+  id: sc.internal-policyworkflowrun
+  name: internal-policyworkflowrun
+  upstream: self
+- code:
+  - internal/provider/admission.go
+  - internal/provider/admission_test.go
+  - internal/provider/cluster_path.go
+  - internal/provider/driver.go
+  - internal/provider/live_denojob_drain_test.go
+  - internal/provider/live_denoruntime_test.go
+  - internal/provider/live_helpers_test.go
+  - internal/provider/live_maxconcurrent_test.go
+  - internal/provider/live_native_admission_test.go
+  - internal/provider/live_ttl_test.go
+  - internal/provider/main_test.go
+  - internal/provider/metrics.go
+  - internal/provider/metrics_test.go
+  - internal/provider/provider.go
+  - internal/provider/provider_runtime.go
+  - internal/provider/provider_runtime_test.go
+  - internal/provider/provider_test.go
+  - internal/provider/reconcile_engine.go
+  - internal/provider/reconcile_job.go
+  - internal/provider/reconcile_openbao.go
+  - internal/provider/reconcile_openbao_test.go
+  - internal/provider/reconcile_pod.go
+  - internal/provider/reconcile_run.go
+  - internal/provider/reconcile_trigger.go
+  - internal/provider/reconcile_workflowpod.go
+  - internal/provider/registry.go
+  - internal/provider/registry_engine.go
+  - internal/provider/registry_job.go
+  - internal/provider/registry_openbao.go
+  - internal/provider/registry_pod.go
+  - internal/provider/registry_run.go
+  - internal/provider/registry_runtime.go
+  - internal/provider/registry_test.go
+  - internal/provider/registry_trigger.go
+  - internal/provider/registry_workflowpod.go
+  - internal/provider/run_refs.go
+  - internal/provider/run_refs_test.go
+  - internal/provider/service_dns.go
+  - internal/provider/service_dns_inject_test.go
+  - internal/provider/watch.go
+  - internal/provider/watch_cache.go
+  - internal/provider/watch_test.go
+  id: sc.internal-provider
+  name: internal-provider
+  upstream: self
+- code:
+  - .tools/open-architecture/arch.yaml
+  - .tools/open-architecture/validate.py
+  id: sc.tools-open-architecture
+  name: tools-open-architecture
+  upstream: self

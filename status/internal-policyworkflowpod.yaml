@@ -1,0 +1,68 @@
+conditions:
+- message: 'undeclared: Capacity, New, Observed, Options, Reconciler, Reconciler.Reconcile,
+    Result, RunTTL'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - internal/policyworkflowpod/policyworkflowpod.go
+  - internal/policyworkflowpod/policyworkflowpod_test.go
+  fingerprint: b718e634e81c9e90a82319184bd668a8ee239ab6f402704b3011dc38643bcd87
+  interfaces:
+  - codegraphId: struct:842e356a5ebdd4a78ce7849f4fada513
+    file: internal/policyworkflowpod/policyworkflowpod.go
+    kind: struct
+    line: 16
+    name: Observed
+  - codegraphId: struct:8ded0e2d592b1dadd943f5bc7a97eb7f
+    file: internal/policyworkflowpod/policyworkflowpod.go
+    kind: struct
+    line: 28
+    name: Result
+  - codegraphId: struct:8099607c30978aaddc31c1f6fe9b615e
+    file: internal/policyworkflowpod/policyworkflowpod.go
+    kind: struct
+    line: 40
+    name: Options
+  - codegraphId: struct:5aa211d3d5b215af5fa46eca88c2f0c0
+    file: internal/policyworkflowpod/policyworkflowpod.go
+    kind: struct
+    line: 44
+    name: Reconciler
+  - codegraphId: function:02acf20c6ae76f4247f2782b39f9905d
+    file: internal/policyworkflowpod/policyworkflowpod.go
+    kind: function
+    line: 48
+    name: New
+    signature: (opts Options) *Reconciler
+  - codegraphId: method:84d4636db1ea631ee61b88e98f741d27
+    file: internal/policyworkflowpod/policyworkflowpod.go
+    kind: method
+    line: 55
+    name: Reconciler.Reconcile
+    signature: (ctx context.Context, o Observed) (Result, error)
+  - codegraphId: function:bbc6e4753713c4d1d1079ae7e84ed8fa
+    file: internal/policyworkflowpod/policyworkflowpod.go
+    kind: function
+    line: 98
+    name: Capacity
+    signature: (policy v1alpha1.ConcurrencyPolicy, maxConcurrent *int32) (int32, bool)
+  - codegraphId: function:d4ae60590520385e8ca42957d1cb728f
+    file: internal/policyworkflowpod/policyworkflowpod.go
+    kind: function
+    line: 108
+    name: RunTTL
+    signature: (pod *v1alpha1.PolicyWorkflowPod, providerDefault *int64) *int64
+observedCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
+realizedSpecHash: c231f4f33784492f5eeb6ecaf18a10757656a1a51fdb4e5a9d50a65305615a90
+syncedCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
+syncedFingerprint: b718e634e81c9e90a82319184bd668a8ee239ab6f402704b3011dc38643bcd87

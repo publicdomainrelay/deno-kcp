@@ -1,0 +1,71 @@
+conditions:
+- message: 'undeclared: ExecutionObservation, ExecutionState, New, Observed, Op, Options,
+    Reconciler, Reconciler.Reconcile, Result'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - internal/policyengine/policyengine.go
+  - internal/policyengine/policyengine_test.go
+  fingerprint: 42ce5aae7aa756e0ff42fadfd956e8327dd77b2711487f1e0c24c37c62a6b053
+  interfaces:
+  - codegraphId: type_alias:c2475e9a59e50fceb012111299966c7a
+    file: internal/policyengine/policyengine.go
+    kind: type_alias
+    line: 16
+    name: ExecutionState
+  - codegraphId: struct:51a6de2d483d5be40201c7de454f6cd7
+    file: internal/policyengine/policyengine.go
+    kind: struct
+    line: 24
+    name: ExecutionObservation
+  - codegraphId: struct:7b1226e6c85673295723299601dd8674
+    file: internal/policyengine/policyengine.go
+    kind: struct
+    line: 32
+    name: Observed
+  - codegraphId: type_alias:43971b7fe73a576e55a3463fe8f33daf
+    file: internal/policyengine/policyengine.go
+    kind: type_alias
+    line: 46
+    name: Op
+  - codegraphId: struct:bea3d6cd026242f0ba9701845a99d9ef
+    file: internal/policyengine/policyengine.go
+    kind: struct
+    line: 58
+    name: Result
+  - codegraphId: struct:c5868ebca402d6036b8a7d908bf1a8ba
+    file: internal/policyengine/policyengine.go
+    kind: struct
+    line: 86
+    name: Options
+  - codegraphId: struct:2c2a9e18bb5ac0b6ffbbc8977980dbed
+    file: internal/policyengine/policyengine.go
+    kind: struct
+    line: 90
+    name: Reconciler
+  - codegraphId: function:26e6969406488bfc97e9ed77febe4974
+    file: internal/policyengine/policyengine.go
+    kind: function
+    line: 94
+    name: New
+    signature: (opts Options) *Reconciler
+  - codegraphId: method:cf15bd5457ef89fffc8abf3947dbb830
+    file: internal/policyengine/policyengine.go
+    kind: method
+    line: 101
+    name: Reconciler.Reconcile
+    signature: (ctx context.Context, o Observed) (Result, error)
+observedCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
+realizedSpecHash: d98f6d0b6f6cb4e229f9dab68b9ede3b8c5e412bf8c9b577387f0c452ab5fbab
+syncedCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
+syncedFingerprint: 42ce5aae7aa756e0ff42fadfd956e8327dd77b2711487f1e0c24c37c62a6b053
