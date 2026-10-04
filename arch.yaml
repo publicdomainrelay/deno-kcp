@@ -76590,7 +76590,48 @@ system_contexts:
   - file:third_party/openbao/ui/lib/service-worker-authenticated-download/service-worker/index.js
     index.js@third_party/openbao/ui/lib/service-worker-authenticated-download/service-worker/index.js
   id: sc.third-party-openbao-ui-lib-service-worker-authenticated-download-service-worker
+  intent: This context exists so the OpenBao web UI can download protected server-generated
+    files, notably Raft snapshots, without exposing the Vault token to plain anchor
+    or window downloads. The service worker sits between the page and the API, injects
+    the token fetched from an open window client at request time, and leaves all other
+    traffic untouched, keeping the interception surface limited to the snapshot endpoint.
   name: third-party-openbao-ui-lib-service-worker-authenticated-download-service-worker
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/service-worker-authenticated-download/service-worker/index.js
+    id: r.match-snapshot-get-only
+    level: MUST
+    text: A request is treated as authenticated only when its URL matches one of the
+      compiled patterns, which currently holds just '/v1/sys/storage/raft/snapshot',
+      and its method is exactly 'GET'.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/service-worker-authenticated-download/service-worker/index.js
+    id: r.passthrough-other-requests
+    level: MUST
+    text: Any request that does not satisfy both the URL pattern and the GET method
+      test is forwarded unchanged with fetch(request).
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/service-worker-authenticated-download/service-worker/index.js
+    id: r.register-fetch-listener
+    level: MUST
+    text: The service worker registers a 'fetch' event listener on self and answers
+      each event with fetchEvent.respondWith.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/service-worker-authenticated-download/service-worker/index.js
+    id: r.set-x-vault-token-and-refetch
+    level: MUST
+    text: The matched request is re-issued as a new Request built from the original
+      URL and method with a copy of the original headers, and the resolved token is
+      written into the 'X-Vault-Token' header before the fetch is performed.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/service-worker-authenticated-download/service-worker/index.js
+    id: r.token-via-client-message-channel
+    level: MUST
+    text: 'Authentication asks the controlled window clients for the Vault token by
+      matching all clients with includeUncontrolled true and type ''window'', taking
+      the first result, and posting the message {action: ''getToken''} with a MessagePort;
+      the port resolves the promise with event.data.token and rejects it with event.data.error
+      when an error field is present.'
   upstream: self
 - code:
   - third_party/openbao/ui/lib/service-worker-authenticated-download/service-worker-registration/index.js

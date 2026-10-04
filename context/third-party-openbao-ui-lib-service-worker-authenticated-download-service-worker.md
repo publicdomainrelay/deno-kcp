@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the OpenBao web UI can download protected server-generated files, notably Raft snapshots, without exposing the Vault token to plain anchor or window downloads. The service worker sits between the page and the API, injects the token fetched from an open window client at request time, and leaves all other traffic untouched, keeping the interception surface limited to the snapshot endpoint.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

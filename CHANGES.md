@@ -6048,6 +6048,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.no-request-condition` (SHOULD): "The header is applied unconditionally to all requests rather than filtered by path or method, so the behavior does not depend on which route the dev server is serving."
 - added `r.service-worker-allowed-header` (MUST): "`serverMiddleware({ app })` registers a middleware on the Ember dev server that sets the `Service-Worker-Allowed` response header to `/` on every request, widening the service worker's maximum scope to the site root so a root-scoped service worker can serve authenticated downloads."
 
+### third-party-openbao-ui-lib-service-worker-authenticated-download-service-worker
+
+- intent: "" -> "This context exists so the OpenBao web UI can download protected server-generated files, notably Raft snapshots, without exposing the Vault token to plain anchor or window downloads. The service worker sits between the page and the API, injects the token fetched from an open window client at request time, and leaves all other traffic untouched, keeping the interception surface limited to the snapshot endpoint."
+- added `r.match-snapshot-get-only` (MUST): "A request is treated as authenticated only when its URL matches one of the compiled patterns, which currently holds just '/v1/sys/storage/raft/snapshot', and its method is exactly 'GET'."
+- added `r.passthrough-other-requests` (MUST): "Any request that does not satisfy both the URL pattern and the GET method test is forwarded unchanged with fetch(request)."
+- added `r.register-fetch-listener` (MUST): "The service worker registers a 'fetch' event listener on self and answers each event with fetchEvent.respondWith."
+- added `r.set-x-vault-token-and-refetch` (MUST): "The matched request is re-issued as a new Request built from the original URL and method with a copy of the original headers, and the resolved token is written into the 'X-Vault-Token' header before the fetch is performed."
+- added `r.token-via-client-message-channel` (MUST): "Authentication asks the controlled window clients for the Vault token by matching all clients with includeUncontrolled true and type 'window', taking the first result, and posting the message {action: 'getToken'} with a MessagePort; the port resolves the promise with event.data.token and rejects it with event.data.error when an error field is present."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -6601,3 +6610,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-service-worker-authenticated-download-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-service-worker-authenticated-download-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-service-worker-authenticated-download-service-worker-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-lib-service-worker-authenticated-download-service-worker-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-service-worker-authenticated-download-service-worker-registration-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
