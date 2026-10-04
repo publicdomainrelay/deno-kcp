@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-The context exists so that the TOTP logical backend can be described and reasoned about independently of the rest of OpenBao. It pins down the plugin boundary (Factory and Backend), the storage contract for key entries (backend.Key), and the path surface split between key management and code generation. It is a spec slice of vendored third-party code, so it records the code as written rather than proposing changes.
+The context exists so the TOTP logical backend can be described and reasoned about on its own, apart from the rest of OpenBao. It fixes the plugin boundary (Factory and Backend), the storage contract for key entries (backend.Key), and the split of the path surface between key administration and code generation and validation. Because this is a spec slice of vendored third-party code, it records the code as written rather than proposing changes.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

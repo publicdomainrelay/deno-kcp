@@ -870,11 +870,21 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 
 ### third-party-openbao-internal-builtin-logical-totp
 
-- intent: "" -> "The context exists so that the TOTP logical backend can be described and reasoned about independently of the rest of OpenBao. It pins down the plugin boundary (Factory and Backend), the storage contract for key entries (backend.Key), and the path surface split between key management and code generation. It is a spec slice of vendored third-party code, so it records the code as written rather than proposing changes."
+- intent: "" -> "The context exists so the TOTP logical backend can be described and reasoned about on its own, apart from the rest of OpenBao. It fixes the plugin boundary (Factory and Backend), the storage contract for key entries (backend.Key), and the split of the path surface between key administration and code generation and validation. Because this is a spec slice of vendored third-party code, it records the code as written rather than proposing changes."
 - added `r.backend-behaviour-covered-by-tests` (SHOULD): "backend_test.go should exercise the Factory and Backend entry points so that the mounted path set and the key storage contract stay covered by the package's own tests."
 - added `r.backend-registers-key-and-code-paths` (MUST): "Backend must return a *backend whose embedded framework.Backend registers the TOTP path handlers, so that key administration paths from path_keys.go and code generation and validation paths from path_code.go are reachable through the mounted secrets engine."
 - added `r.factory-builds-and-initialises-backend` (MUST): "Factory must construct a TOTP logical backend from the supplied logical.BackendConfig, call Setup on it with the same context and config, return the configured logical.Backend on success, and return the setup error with a nil backend on failure."
 - added `r.key-lookup-uses-key-prefix-and-nil-on-absent` (MUST): "backend.Key must read the named entry from logical storage at the path "key/" concatenated with the caller-supplied name n, return nil with a nil error when no entry exists at that path, propagate a storage read error, and decode the stored JSON into a keyEntry before returning it, so callers can distinguish a missing key from a malformed one."
+
+### third-party-openbao-internal-builtin-logical-totp-cmd-totp
+
+- intent: "" -> "This context exists so the TOTP logical backend can be built and run as an out-of-process OpenBao plugin binary. The main function adapts the TOTP secrets engine (totp.Factory) to the OpenBao plugin host protocol, and wires the standard plugin TLS handshake so the backend works both with host-driven AutoMTLS and with older hosts that require the plugin to fetch its own wrapped TLS certificate."
+- added `r.env-variables-read-by-tls-provider` (MUST): "The TLS provider returned for ServeOpts must read three environment variables: BAO_PLUGIN_AUTOMTLS_ENABLED and BAO_PLUGIN_METADATA_MODE, either of which when equal to "true" makes the provider return nil so the plugin library handles TLS itself, and BAO_UNWRAP_TOKEN, which supplies the wrapping token used to unwrap the host-issued server certificate and private key. When the unwrap token is absent or unparsable the provider returns an error instead of a TLS config."
+- added `r.failure-exits-nonzero` (MUST): "When plugin.ServeMultiplex returns an error, main must log the message "plugin shutting down" with the error attached at Error level through an hclog logger and terminate the process with exit status 1."
+- added `r.flag-configuration-surface` (MUST): "main's configuration surface is the flag set returned by api.PluginAPIClientMeta.FlagSet, parsed from os.Args[1:]: string flag -ca-cert (default empty), -ca-path (default empty), -client-cert (default empty), -client-key (default empty), -tls-server-name (default empty), and boolean flag -tls-skip-verify (default false). No environment variable backs any of these flags; they are supplied on the command line by the plugin host."
+- added `r.serve-totp-backend-as-plugin` (MUST): "main must serve the TOTP logical backend as an OpenBao plugin by calling plugin.ServeMultiplex with BackendFactoryFunc set to totp.Factory, so the plugin host can instantiate the TOTP secrets engine over the plugin RPC channel."
+- added `r.tls-config-only-when-set` (SHOULD): "The api.TLSConfig handed to the TLS provider should be nil unless at least one of -ca-cert, -ca-path, -client-cert, -client-key, -tls-server-name, or -tls-skip-verify was set, so an unconfigured plugin uses default transport settings."
+- added `r.tls-provider-from-plugin-metadata` (MUST): "main must pass TLSProviderFunc derived from api.VaultPluginTLSProvider(tlsConfig) into ServeOpts, so the plugin keeps backwards compatibility with hosts that do not support plugin AutoMTLS."
 
 ## Realization
 
@@ -900,5 +910,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-builtin-logical-ssh-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-ssh-cmd-ssh-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-totp-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-builtin-logical-totp-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-internal-builtin-logical-totp-cmd-totp-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-builtin-logical-totp-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-internal-builtin-logical-totp-cmd-totp-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
