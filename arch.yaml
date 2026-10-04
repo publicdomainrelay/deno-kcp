@@ -65889,7 +65889,113 @@ system_contexts:
   - file:third_party/openbao/ui/app/routes/vault/cluster/access/leases/list.js list.js@third_party/openbao/ui/app/routes/vault/cluster/access/leases/list.js
   - file:third_party/openbao/ui/app/routes/vault/cluster/access/leases/show.js show.js@third_party/openbao/ui/app/routes/vault/cluster/access/leases/show.js
   id: sc.third-party-openbao-ui-app-routes-vault-cluster-access-leases
+  intent: 'This context exists so the leases routing behavior of the OpenBao UI is
+    specified from the code that is present: which transitions happen, which store
+    queries and capability lookups back each route''s model, what the controllers
+    receive, and how 404s and route exits are handled. It anchors the route-level
+    contract for the vault cluster access leases sub-tree.'
   name: third-party-openbao-ui-app-routes-vault-cluster-access-leases
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/leases/index.js
+    id: r.index-redirects-to-list-root
+    level: MUST
+    text: The index route's beforeModel reads the parent modelFor('vault.cluster.access.leases');
+      when that model canList and the transition's targetName equals the index route's
+      own routeName, the route replaces itself with vault.cluster.access.leases.list-root
+      and returns that transition, otherwise it returns without redirecting.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/leases/list.js
+    id: r.list-404-swallow
+    level: MUST
+    text: The list route marks has404 false on a successful lease query; a rejected
+      query with httpStatus 404 and an empty prefix resolves to an empty array instead
+      of raising, while any other rejection is rethrown.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/leases/list.js
+    id: r.list-cannot-list-yields-nothing
+    level: MUST
+    text: The list route's model hook returns nothing when the parent vault.cluster.access.leases
+      model has canList false; the guard runs before any store query, so no lease
+      request is issued in that case.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/leases/list.js
+    id: r.list-error-and-transition-actions
+    level: MUST
+    text: The list route's error action tags the error with keyId set to the current
+      prefix and, only when a previous model exists and the error's httpStatus is
+      404, sets has404 true and aborts the transition, returning true otherwise; its
+      willTransition action scrolls the window to the top and calls store.clearAllDatasets
+      when the target route name differs from this route's name.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/leases/list.js
+    id: r.list-exit-resets-filter
+    level: MUST
+    text: resetController calls super and, when the route is exiting, clears the controller's
+      filter to an empty string.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/leases/list.js
+    id: r.list-model-queries
+    level: MUST
+    text: When canList is true the list model is an rsvp hash of a lazyPaginatedQuery
+      on the lease type with prefix (defaulting to empty string when params.prefix
+      is absent), responsePath 'data.keys', and the page and pageFilter params, plus
+      a capabilities hash of findRecord on the capabilities type for sys/leases/revoke-prefix/<prefix>
+      and sys/leases/revoke-force/<prefix>.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/leases/list.js
+    id: r.list-query-params-refresh
+    level: MUST
+    text: The list route declares page and pageFilter as query params with refreshModel
+      true, so changing either re-runs the model hook.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/leases/list-root.js
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/leases/list.js
+    id: r.list-root-aliases-list
+    level: MUST
+    text: The list-root module exports no route of its own; its default export is
+      the default export of the sibling list module, so list-root and list share one
+      route class and one behavior.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/leases/list.js
+    id: r.list-setup-controller
+    level: MUST
+    text: 'setupController sets hasModel true and assigns the controller''s model
+      to the lease query result, capabilities, baseKey {id: prefix} and the route''s
+      has404 flag; when has404 is false it also sets filter to prefix concatenated
+      with pageFilter (or pageFilter alone when there is no prefix, or empty) and
+      page to the lease collection''s meta.currentPage.'
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/leases/show.js
+    id: r.show-actions
+    level: MUST
+    text: The show route's error action tags the error with keyId set to the lease_id
+      param and returns true; its refreshModel action calls this.refresh() to re-run
+      the route.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/leases/show.js
+    id: r.show-folder-redirect
+    level: MUST
+    text: The show route's beforeModel reads lease_id from its own params, computes
+      the parent key with key-utils; when the lease id is a folder it transitions
+      to vault.cluster.access.leases.list with the parent key if one exists, otherwise
+      to vault.cluster.access.leases.list-root.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/leases/show.js
+    id: r.show-model-queries
+    level: MUST
+    text: The show route's model hook returns an rsvp hash of queryRecord on the lease
+      type with lease_id, and a capabilities hash holding findRecord on the capabilities
+      type for sys/leases/renew and sys/leases/revoke plus the parent vault.cluster.access.leases
+      model.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/leases/show.js
+    id: r.show-setup-and-reset
+    level: MUST
+    text: 'setupController calls super then assigns the controller''s model to the
+      lease record, its capabilities, and baseKey {id: lease_id}; resetController
+      calls super and, when exiting, invokes the controller''s cleanupModel if that
+      optional method exists.'
   upstream: self
 - code:
   - third_party/openbao/ui/app/routes/vault/cluster/access/method/index.js

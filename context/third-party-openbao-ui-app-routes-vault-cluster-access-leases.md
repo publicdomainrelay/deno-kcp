@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the leases routing behavior of the OpenBao UI is specified from the code that is present: which transitions happen, which store queries and capability lookups back each route's model, what the controllers receive, and how 404s and route exits are handled. It anchors the route-level contract for the vault cluster access leases sub-tree.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

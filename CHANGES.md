@@ -4871,6 +4871,23 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.show-model-and-controller` (MUST): "The show route's model hook must resolve a hash of the alias record found by item_alias_id together with the section param, and its setupController must set both model and section on the controller from that resolved hash."
 - added `r.show-validates-section` (MUST): "The show route must take the tabs registered in TABS for the '<itemType>-alias' identity type and, when the requested section param is not one of them, throw an AdapterError with httpStatus set to 404."
 
+### third-party-openbao-ui-app-routes-vault-cluster-access-leases
+
+- intent: "" -> "This context exists so the leases routing behavior of the OpenBao UI is specified from the code that is present: which transitions happen, which store queries and capability lookups back each route's model, what the controllers receive, and how 404s and route exits are handled. It anchors the route-level contract for the vault cluster access leases sub-tree."
+- added `r.index-redirects-to-list-root` (MUST): "The index route's beforeModel reads the parent modelFor('vault.cluster.access.leases'); when that model canList and the transition's targetName equals the index route's own routeName, the route replaces itself with vault.cluster.access.leases.list-root and returns that transition, otherwise it returns without redirecting."
+- added `r.list-404-swallow` (MUST): "The list route marks has404 false on a successful lease query; a rejected query with httpStatus 404 and an empty prefix resolves to an empty array instead of raising, while any other rejection is rethrown."
+- added `r.list-cannot-list-yields-nothing` (MUST): "The list route's model hook returns nothing when the parent vault.cluster.access.leases model has canList false; the guard runs before any store query, so no lease request is issued in that case."
+- added `r.list-error-and-transition-actions` (MUST): "The list route's error action tags the error with keyId set to the current prefix and, only when a previous model exists and the error's httpStatus is 404, sets has404 true and aborts the transition, returning true otherwise; its willTransition action scrolls the window to the top and calls store.clearAllDatasets when the target route name differs from this route's name."
+- added `r.list-exit-resets-filter` (MUST): "resetController calls super and, when the route is exiting, clears the controller's filter to an empty string."
+- added `r.list-model-queries` (MUST): "When canList is true the list model is an rsvp hash of a lazyPaginatedQuery on the lease type with prefix (defaulting to empty string when params.prefix is absent), responsePath 'data.keys', and the page and pageFilter params, plus a capabilities hash of findRecord on the capabilities type for sys/leases/revoke-prefix/<prefix> and sys/leases/revoke-force/<prefix>."
+- added `r.list-query-params-refresh` (MUST): "The list route declares page and pageFilter as query params with refreshModel true, so changing either re-runs the model hook."
+- added `r.list-root-aliases-list` (MUST): "The list-root module exports no route of its own; its default export is the default export of the sibling list module, so list-root and list share one route class and one behavior."
+- added `r.list-setup-controller` (MUST): "setupController sets hasModel true and assigns the controller's model to the lease query result, capabilities, baseKey {id: prefix} and the route's has404 flag; when has404 is false it also sets filter to prefix concatenated with pageFilter (or pageFilter alone when there is no prefix, or empty) and page to the lease collection's meta.currentPage."
+- added `r.show-actions` (MUST): "The show route's error action tags the error with keyId set to the lease_id param and returns true; its refreshModel action calls this.refresh() to re-run the route."
+- added `r.show-folder-redirect` (MUST): "The show route's beforeModel reads lease_id from its own params, computes the parent key with key-utils; when the lease id is a folder it transitions to vault.cluster.access.leases.list with the parent key if one exists, otherwise to vault.cluster.access.leases.list-root."
+- added `r.show-model-queries` (MUST): "The show route's model hook returns an rsvp hash of queryRecord on the lease type with lease_id, and a capabilities hash holding findRecord on the capabilities type for sys/leases/renew and sys/leases/revoke plus the parent vault.cluster.access.leases model."
+- added `r.show-setup-and-reset` (MUST): "setupController calls super then assigns the controller's model to the lease record, its capabilities, and baseKey {id: lease_id}; resetController calls super and, when exiting, invokes the controller's cleanupModel if that optional method exists."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5268,7 +5285,8 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-routes-vault-cluster-access-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-identity-aliases-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-identity-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-routes-vault-cluster-access-leases-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-routes-vault-cluster-access-leases-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-method-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-routes-vault-cluster-access-method-item-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
