@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context documents the diagnostic subsystem vendored from OpenBao so that its behaviour can be reasoned about without reading the Go sources. It exists to pin down what the package guarantees: the span-and-session protocol every check goes through, the file-permission and TLS rules the checks enforce, the shape of the rendered result, and the platform-specific split between unix and windows file ownership logic. Anyone changing or re-vendoring the diagnostic tooling needs these invariants stated.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
