@@ -4351,6 +4351,16 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.type-select-reset` (MUST): "onTypeSelect(type) clears method, enforcement, methodErrors and enforcementErrors to null, resets enforcementPreference to 'new', then assigns the new type."
 - added `r.validity-state` (MUST): "checkValidityState validates the method and stores methodErrors when invalid; when enforcementPreference is 'new' it also validates the enforcement, requires the name and targets validations to pass, and stores enforcementErrors; it returns the combined result of the method validation and the enforcement validity."
 
+### third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-methods-method
+
+- intent: "" -> "This context exists to specify the page-level behavior of the MFA method detail controller: which services it depends on, how it exposes the active tab as a URL query parameter, and what the delete-method action must do on success and on failure. It captures the controller as an independently describable unit of the OpenBao UI so its query-parameter contract, service dependencies, and delete/redirect/notification flow can be verified against the code as written."
+- added `r.default-export-controller` (MUST): "The module default-exports one class, MfaMethodController, that extends Ember's Controller, so the route resolves it as the controller for the MFA method page."
+- added `r.delete-method-action` (MUST): "deleteMethod is exposed as an Ember @action so templates can invoke it as the destructive delete control for the displayed MFA method."
+- added `r.delete-method-failure` (MUST): "When the record destruction rejects, deleteMethod catches the error, reports a danger flash message with the text 'There was an error deleting this MFA method.', and performs no route transition."
+- added `r.delete-method-success` (MUST): "deleteMethod awaits destruction of the route model's method record, then reports a success flash message with the text 'MFA method deleted successfully.' and transitions to the vault.cluster.access.mfa.methods route through transitionToSafe using the injected router service."
+- added `r.injected-services` (MUST): "The controller declares router and flashMessages as injected Ember services before use, providing the routing and user-notification dependencies that deleteMethod consumes."
+- added `r.tab-query-param` (MUST): "The controller declares the query parameter list ['tab'] and initializes the tab property to 'config', so the selected tab is reflected in the URL and the page opens on the config tab when no tab parameter is given."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4694,7 +4704,8 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-enforcements-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-enforcements-enforcement-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-methods-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-methods-method-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-methods-method-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-methods-method-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-namespaces-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |

@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to specify the page-level behavior of the MFA method detail controller: which services it depends on, how it exposes the active tab as a URL query parameter, and what the delete-method action must do on success and on failure. It captures the controller as an independently describable unit of the OpenBao UI so its query-parameter contract, service dependencies, and delete/redirect/notification flow can be verified against the code as written.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

@@ -61315,10 +61315,71 @@ system_contexts:
 - code:
   - third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/method/index.js
   codeRefIndex:
+  - class:344497ad2abb8c229aa7cbc42719c21f MfaMethodController@third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/method/index.js:11
   - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/method/index.js
     index.js@third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/method/index.js
   id: sc.third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-methods-method
+  intent: 'This context exists to specify the page-level behavior of the MFA method
+    detail controller: which services it depends on, how it exposes the active tab
+    as a URL query parameter, and what the delete-method action must do on success
+    and on failure. It captures the controller as an independently describable unit
+    of the OpenBao UI so its query-parameter contract, service dependencies, and delete/redirect/notification
+    flow can be verified against the code as written.'
+  interfaces:
+  - file: third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/method/index.js
+    kind: class
+    name: MfaMethodController
+    signature: export default class MfaMethodController extends Controller
   name: third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-methods-method
+  requirements:
+  - codeRefs:
+    - class:344497ad2abb8c229aa7cbc42719c21f
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/method/index.js
+    id: r.default-export-controller
+    level: MUST
+    text: The module default-exports one class, MfaMethodController, that extends
+      Ember's Controller, so the route resolves it as the controller for the MFA method
+      page.
+  - codeRefs:
+    - class:344497ad2abb8c229aa7cbc42719c21f
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/method/index.js
+    id: r.delete-method-action
+    level: MUST
+    text: deleteMethod is exposed as an Ember @action so templates can invoke it as
+      the destructive delete control for the displayed MFA method.
+  - codeRefs:
+    - class:344497ad2abb8c229aa7cbc42719c21f
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/method/index.js
+    id: r.delete-method-failure
+    level: MUST
+    text: When the record destruction rejects, deleteMethod catches the error, reports
+      a danger flash message with the text 'There was an error deleting this MFA method.',
+      and performs no route transition.
+  - codeRefs:
+    - class:344497ad2abb8c229aa7cbc42719c21f
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/method/index.js
+    id: r.delete-method-success
+    level: MUST
+    text: deleteMethod awaits destruction of the route model's method record, then
+      reports a success flash message with the text 'MFA method deleted successfully.'
+      and transitions to the vault.cluster.access.mfa.methods route through transitionToSafe
+      using the injected router service.
+  - codeRefs:
+    - class:344497ad2abb8c229aa7cbc42719c21f
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/method/index.js
+    id: r.injected-services
+    level: MUST
+    text: The controller declares router and flashMessages as injected Ember services
+      before use, providing the routing and user-notification dependencies that deleteMethod
+      consumes.
+  - codeRefs:
+    - class:344497ad2abb8c229aa7cbc42719c21f
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/method/index.js
+    id: r.tab-query-param
+    level: MUST
+    text: The controller declares the query parameter list ['tab'] and initializes
+      the tab property to 'config', so the selected tab is reflected in the URL and
+      the page opens on the config tab when no tab parameter is given.
   upstream: self
 - code:
   - third_party/openbao/ui/app/controllers/vault/cluster/access/namespaces/create.js
