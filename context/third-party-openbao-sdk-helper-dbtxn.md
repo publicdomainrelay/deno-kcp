@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so backend database plugins and storage code in OpenBao can run small parameterised SQL statements without repeating prepare, execute, and resource-release boilerplate. Callers pick a prepared variant when a statement benefits from reuse within the driver, and a direct variant when the statement runs once. The package isolates the template substitution of {{name}} tokens behind an unexported parseQuery helper, so no caller must do string replacement on SQL by hand. Only the four Execute* entry points are exported; parseQuery and execute stay internal to the file.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

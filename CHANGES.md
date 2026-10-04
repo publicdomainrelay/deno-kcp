@@ -3104,6 +3104,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.deterministic-output` (MUST): "Hashing is deterministic and pure: the function keeps no state between calls, so the same `key` always yields the same digest bytes, and the package exports no other symbols beyond this function."
 - added `r.digest-transforms-input` (MUST): "The result is never empty and never equals the input text as a string: a passing `TestBlake2b256Hash` calls `Blake2b256Hash("sampletext")` and calls `t.Fatal("failed to hash the text")` when the returned value is the empty string or is `"sampletext"`."
 
+### third-party-openbao-sdk-helper-dbtxn
+
+- intent: "" -> "This context exists so backend database plugins and storage code in OpenBao can run small parameterised SQL statements without repeating prepare, execute, and resource-release boilerplate. Callers pick a prepared variant when a statement benefits from reuse within the driver, and a direct variant when the statement runs once. The package isolates the template substitution of {{name}} tokens behind an unexported parseQuery helper, so no caller must do string replacement on SQL by hand. Only the four Execute* entry points are exported; parseQuery and execute stay internal to the file."
+- added `r.context-required` (MUST): "All four helpers must accept the caller's context and use it for the prepare or exec call, so statement lifetime and cancellation follow the caller, and they must return the resulting error rather than panicking or logging it."
+- added `r.direct-execution-single-call` (MUST): "ExecuteDBQueryDirect and ExecuteTxQueryDirect must run the parsed query with one ExecContext call on the database or transaction and return that error directly, without preparing or closing a statement."
+- added `r.params-placeholder-substitution` (MUST): "Every exported helper must pass the params map and query through parseQuery first: when the map is empty the query is returned unchanged, and otherwise each {{key}} occurrence is replaced with its map value, so callers can build statement text from named tokens."
+- added `r.prepared-execution-releases-resources` (MUST): "ExecuteDBQuery and ExecuteTxQuery must prepare the parsed query with the caller's context, defer the close of the returned statement, and then run the statement through the shared execute helper, so the statement is always released after one execution."
+- added `r.single-statement-only` (SHOULD): "Each helper should carry exactly one statement: the package exposes no multi-statement or transaction-lifecycle API, so callers manage Begin and Commit themselves and use these helpers only for the individual statements inside a transaction."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -3328,4 +3337,4 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-sdk-helper-cryptoutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-cryptoutil-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-custommetadata-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-sdk-helper-dbtxn-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-helper-dbtxn-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
