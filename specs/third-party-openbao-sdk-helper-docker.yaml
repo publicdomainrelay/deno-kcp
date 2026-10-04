@@ -70,9 +70,9 @@ spec:
   intent: This context exists so that OpenBao integration tests can stand up external
     services (databases, plugins, LDAP, and similar) in Docker and talk to them over
     the network without hand-rolling Docker client plumbing in each test package.
-    The file centralizes container lifecycle, port/address discovery, in-container
+    The file centralizes container lifecycle, port and address discovery, in-container
     command execution, file provisioning, and image building behind one small runner
-    API, so a caller supplies a `RunOptions` describing the image, command, environment,
+    API, so a caller supplies a RunOptions describing image, command, environment,
     ports and files, and gets back a started service plus the addresses needed to
     connect to it.
   interfaces:
@@ -335,11 +335,11 @@ spec:
   - file: third_party/openbao/sdk/helper/docker/testhelpers.go
     kind: method
     name: ServiceConfig.Address
-    signature: func () Address() string
+    signature: func () string
   - file: third_party/openbao/sdk/helper/docker/testhelpers.go
     kind: method
     name: ServiceConfig.URL
-    signature: func () URL() *url.URL
+    signature: func () *url.URL
   - file: third_party/openbao/sdk/helper/docker/testhelpers.go
     kind: struct
     name: ServiceHostPort
@@ -379,7 +379,7 @@ spec:
     level: MUST
     text: NewBuildContext must return an empty BuildContext, BuildContextFromTarball
       must reconstruct one from a tar stream, and BuildContext.ToTarball must serialize
-      it back to an `io.Reader`, so a build context can be written into a container
+      it back to an io.Reader, so a build context can be written into a container
       and read back out.
   - codeRefs:
     - interface:ccd9724f792dae681d04f0ba3b7268dc
@@ -391,7 +391,7 @@ spec:
     - method:ff41f0796a62b67640f3523c0b820a2c
     id: r.build-options
     level: MUST
-    text: BuildOpt must be an option interface whose Apply mutates a `client.ImageBuildOptions`,
+    text: BuildOpt must be an option interface whose Apply mutates a client.ImageBuildOptions,
       and BuildRemove, BuildForceRemove, BuildPullParent, BuildArgs and BuildTags
       must each implement it to set their respective image build settings.
   - codeRefs:
@@ -415,17 +415,17 @@ spec:
     - struct:a7bcbc35e907c919502f88df93032e8f
     id: r.default-container-name
     level: MUST
-    text: NewServiceRunner must default the container name to `ImageRepo` when it
+    text: NewServiceRunner must default the container name to ImageRepo when ImageRepo
       contains no slash, and must reject a non-library image repo (one containing
-      a slash) that has no explicit `ContainerName`.
+      a slash) that has no explicit ContainerName.
   - codeRefs:
     - file:third_party/openbao/sdk/helper/docker/testhelpers.go
     - function:8bd6cb0ad6ef23b212cfda763eb0d5f3
     id: r.docker-api-from-env
     level: MUST
-    text: NewDockerAPI must build a Docker client from the process environment (`client.FromEnv`)
-      and pin the API version to `client.MinAPIVersion`, so tests talk to a daemon
-      configured the same way as the docker CLI.
+    text: NewDockerAPI must build a Docker client from the process environment (client.FromEnv)
+      and pin the API version to client.MinAPIVersion, so tests talk to a daemon configured
+      the same way as the docker CLI.
   - codeRefs:
     - function:027659abee07bbb1f22f66b64670f7ca
     - function:dfefbe8ad9f3777864b0abfc546ef5fb
@@ -446,7 +446,7 @@ spec:
     level: MUST
     text: Runner.CopyTo must copy a BuildContext into a destination path inside a
       container, and Runner.CopyFrom must extract a source path from a container as
-      a BuildContext together with its `container.PathStat`.
+      a BuildContext together with its container.PathStat.
   - codeRefs:
     - function:ed64d8f3ff7b12c0710a6552de82c78d
     - method:dd456d0b9822d3c7464c69c79bc76e68
@@ -462,8 +462,8 @@ spec:
     - struct:a7bcbc35e907c919502f88df93032e8f
     id: r.log-writing
     level: MUST
-    text: LogConsumerWriter must implement `io.Writer` so container log streams can
-      be redirected into a `RunOptions.LogConsumer` callback.
+    text: LogConsumerWriter must implement io.Writer so container log streams can
+      be redirected into a RunOptions.LogConsumer callback.
   - codeRefs:
     - method:db190a05f468cec2d3266a767c9d59cf
     id: r.network-addresses
@@ -483,10 +483,10 @@ spec:
     - struct:a7bcbc35e907c919502f88df93032e8f
     id: r.network-name-resolution
     level: MUST
-    text: NewServiceRunner must use `opts.NetworkName` when set, otherwise fall back
-      to the `TEST_DOCKER_NETWORK_NAME` environment variable, look the network up
-      by name, and store its ID on the options; when no network ID is known it must
-      fall back to `TEST_DOCKER_NETWORK_ID`.
+    text: NewServiceRunner must use opts.NetworkName when set, otherwise fall back
+      to the TEST_DOCKER_NETWORK_NAME environment variable, look the network up by
+      name, and store its ID on the options; when no network ID is known it must fall
+      back to TEST_DOCKER_NETWORK_ID.
   - codeRefs:
     - function:04f29607fa5c365f79559e4847b59eda
     - function:a5a4c18c5bdd490405845f402a8c566f
@@ -520,7 +520,7 @@ spec:
     - type_alias:ccb13f26d6b290434c6aab1692a4fa8a
     id: r.run-cmd-options
     level: MUST
-    text: RunCmdOpt must be an option interface whose Apply mutates a `client.ExecCreateOptions`,
+    text: RunCmdOpt must be an option interface whose Apply mutates a client.ExecCreateOptions,
       and RunCmdUser must implement it to set the user the command runs as, so callers
       can decorate an exec without touching the Docker types directly.
   - codeRefs:
@@ -545,7 +545,7 @@ spec:
     id: r.service-address-construction
     level: MUST
     text: NewServiceHostPort must build a ServiceHostPort from an explicit host and
-      port, and NewServiceURL must build a ServiceURL from a `url.URL` value without
+      port, and NewServiceURL must build a ServiceURL from a url.URL value without
       re-parsing a string.
   - codeRefs:
     - function:f61be835e23d55870bda470c202ea330
@@ -567,7 +567,7 @@ spec:
     id: r.service-addressing
     level: MUST
     text: ServiceHostPort and ServiceURL must both satisfy ServiceConfig, each returning
-      a host:port string from Address() and a `*url.URL` from URL(), so callers can
+      a host:port string from Address() and a *url.URL from URL(), so callers can
       treat either representation uniformly.
   - codeRefs:
     - function:372e27fd642fdd81548db64a253746eb
