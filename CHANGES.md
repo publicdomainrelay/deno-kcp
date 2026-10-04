@@ -3302,6 +3302,23 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.verify-leaf` (MUST): "VerifyLeafCertificate must check the revocation state of a single subject certificate against its issuer under the supplied VerifyConfig and report failure as an error."
 - added `r.verify-peer` (MUST): "VerifyPeerCertificate must accept the context, the verified chains produced during the TLS handshake and a VerifyConfig, and must judge revocation across those chains so it can be used directly as a TLS peer-verification callback."
 
+### third-party-openbao-sdk-helper-pathmanager
+
+- intent: "" -> "The context exists to pin down the vendored pathmanager helper that deno-kcp inherits from the OpenBao SDK, so the prefix-set semantics (exception markers, trailing-star trimming, trailing-slash preservation, tree transactions) are stated as testable requirements rather than left implicit in a git sub-tree. It describes the code as it stands so later changes to the vendored copy can be checked against the behaviour the rest of the tree relies on."
+- added `r.add-paths` (MUST): "AddPaths inserts each supplied path into the radix tree inside a single transaction and commits it, and it skips entries whose length is zero."
+- added `r.concurrent-access` (MUST): "Every exported method of PathManager guards the shared radix tree with the embedded RWMutex, taking a write lock for mutations and a read lock for queries, so concurrent callers do not race."
+- added `r.constructor` (MUST): "New returns a *PathManager with an empty path set, ready for concurrent use."
+- added `r.exception-marker` (MUST): "A path passed to AddPaths with a leading "!" is stored as an exception: the marker is cut off before insert and the remaining prefix is recorded against the exception flag."
+- added `r.has-exact-path` (SHOULD): "HasExactPath reports whether the given path is stored exactly, without prefix expansion."
+- added `r.has-path` (SHOULD): "HasPath reports whether a path is covered by the stored set, matching on prefix so a stored directory covers paths beneath it."
+- added `r.has-path-segments` (SHOULD): "HasPathSegments reports whether a path matches the stored set on whole segment boundaries rather than on a raw byte prefix."
+- added `r.len` (MUST): "Len reports the number of paths currently held, and it is the capacity source for Paths."
+- added `r.paths` (MUST): "Paths returns every stored path as a string slice, pre-sized with the value from Len and filled by walking the radix tree from its root."
+- added `r.remove-path-prefix` (MUST): "RemovePathPrefix deletes every stored path that lies under the given prefix, using the same locking and transactional path as the other mutators."
+- added `r.remove-paths` (MUST): "RemovePaths strips a leading "!" and a trailing "*" from each supplied path, deletes the matching tree entry inside one transaction, and skips entries whose length is zero."
+- added `r.test-coverage` (MUST): "The package tests must keep covering construction and empty state, adding and listing paths, removing them again, prefix removal, and the HasExactPath, HasPath and HasPathSegments match modes."
+- added `r.trailing-star` (MUST): "AddPaths and RemovePaths both trim a trailing "*" from every path, and neither touches a trailing slash, so a stored path that fully names a file stays distinct from a directory prefix."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -3545,5 +3562,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-sdk-helper-logging-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-logging-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-ocsp-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-sdk-helper-pathmanager-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-helper-pathmanager-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-sdk-helper-pathmanager-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-sdk-helper-pluginutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |

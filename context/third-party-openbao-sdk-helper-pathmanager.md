@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists to pin down the vendored pathmanager helper that deno-kcp inherits from the OpenBao SDK, so the prefix-set semantics (exception markers, trailing-star trimming, trailing-slash preservation, tree transactions) are stated as testable requirements rather than left implicit in a git sub-tree. It describes the code as it stands so later changes to the vendored copy can be checked against the behaviour the rest of the tree relies on.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

@@ -48836,8 +48836,154 @@ system_contexts:
   codeRefIndex:
   - file:third_party/openbao/sdk/helper/pathmanager/pathmanager.go pathmanager.go@third_party/openbao/sdk/helper/pathmanager/pathmanager.go
   - file:third_party/openbao/sdk/helper/pathmanager/pathmanager_test.go pathmanager_test.go@third_party/openbao/sdk/helper/pathmanager/pathmanager_test.go
+  - function:bb4b12e4d3e2911eee29db3c3c829185 New@third_party/openbao/sdk/helper/pathmanager/pathmanager.go:20
+  - method:006f3d8b478c3c041905a76f7f1c23f6 PathManager.Len@third_party/openbao/sdk/helper/pathmanager/pathmanager.go:85
+  - method:01de81b22d3091316959db92908a490b PathManager.HasPath@third_party/openbao/sdk/helper/pathmanager/pathmanager.go:105
+  - method:24b62e201eaa469b519cc090681b150d PathManager.RemovePathPrefix@third_party/openbao/sdk/helper/pathmanager/pathmanager.go:74
+  - method:2b8f9fe6f4ca40a55bdf750e790af9cb PathManager.Paths@third_party/openbao/sdk/helper/pathmanager/pathmanager.go:90
+  - method:710fff05c83c4dc5f779e84165610d81 PathManager.HasPathSegments@third_party/openbao/sdk/helper/pathmanager/pathmanager.go:141
+  - method:9bd5291e12236e85703daf063c32b4b1 PathManager.HasExactPath@third_party/openbao/sdk/helper/pathmanager/pathmanager.go:121
+  - method:c195b095041ba7f36698d9317f118f94 PathManager.RemovePaths@third_party/openbao/sdk/helper/pathmanager/pathmanager.go:52
+  - method:d2684f578b8fac5756f29fe2bc4c6bfd PathManager.AddPaths@third_party/openbao/sdk/helper/pathmanager/pathmanager.go:27
+  - struct:bb16fff8e7fb7187acea6600aa0f635d PathManager@third_party/openbao/sdk/helper/pathmanager/pathmanager.go:14
   id: sc.third-party-openbao-sdk-helper-pathmanager
+  intent: The context exists to pin down the vendored pathmanager helper that deno-kcp
+    inherits from the OpenBao SDK, so the prefix-set semantics (exception markers,
+    trailing-star trimming, trailing-slash preservation, tree transactions) are stated
+    as testable requirements rather than left implicit in a git sub-tree. It describes
+    the code as it stands so later changes to the vendored copy can be checked against
+    the behaviour the rest of the tree relies on.
+  interfaces:
+  - file: third_party/openbao/sdk/helper/pathmanager/pathmanager.go
+    kind: function
+    name: New
+    signature: func New() *PathManager
+  - file: third_party/openbao/sdk/helper/pathmanager/pathmanager.go
+    kind: struct
+    name: PathManager
+    signature: type PathManager struct
+  - file: third_party/openbao/sdk/helper/pathmanager/pathmanager.go
+    kind: method
+    name: PathManager.AddPaths
+    signature: func (p *PathManager) AddPaths(paths []string)
+  - file: third_party/openbao/sdk/helper/pathmanager/pathmanager.go
+    kind: method
+    name: PathManager.HasExactPath
+    signature: func (p *PathManager) HasExactPath(path string) bool
+  - file: third_party/openbao/sdk/helper/pathmanager/pathmanager.go
+    kind: method
+    name: PathManager.HasPath
+    signature: func (p *PathManager) HasPath(path string) bool
+  - file: third_party/openbao/sdk/helper/pathmanager/pathmanager.go
+    kind: method
+    name: PathManager.HasPathSegments
+    signature: func (p *PathManager) HasPathSegments(path string) bool
+  - file: third_party/openbao/sdk/helper/pathmanager/pathmanager.go
+    kind: method
+    name: PathManager.Len
+    signature: func (p *PathManager) Len() int
+  - file: third_party/openbao/sdk/helper/pathmanager/pathmanager.go
+    kind: method
+    name: PathManager.Paths
+    signature: func (p *PathManager) Paths() []string
+  - file: third_party/openbao/sdk/helper/pathmanager/pathmanager.go
+    kind: method
+    name: PathManager.RemovePathPrefix
+    signature: func (p *PathManager) RemovePathPrefix(prefix string)
+  - file: third_party/openbao/sdk/helper/pathmanager/pathmanager.go
+    kind: method
+    name: PathManager.RemovePaths
+    signature: func (p *PathManager) RemovePaths(paths []string)
   name: third-party-openbao-sdk-helper-pathmanager
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/pathmanager/pathmanager.go
+    - method:d2684f578b8fac5756f29fe2bc4c6bfd
+    id: r.add-paths
+    level: MUST
+    text: AddPaths inserts each supplied path into the radix tree inside a single
+      transaction and commits it, and it skips entries whose length is zero.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/pathmanager/pathmanager.go
+    - struct:bb16fff8e7fb7187acea6600aa0f635d
+    id: r.concurrent-access
+    level: MUST
+    text: Every exported method of PathManager guards the shared radix tree with the
+      embedded RWMutex, taking a write lock for mutations and a read lock for queries,
+      so concurrent callers do not race.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/pathmanager/pathmanager.go
+    - function:bb4b12e4d3e2911eee29db3c3c829185
+    id: r.constructor
+    level: MUST
+    text: New returns a *PathManager with an empty path set, ready for concurrent
+      use.
+  - codeRefs:
+    - method:d2684f578b8fac5756f29fe2bc4c6bfd
+    id: r.exception-marker
+    level: MUST
+    text: 'A path passed to AddPaths with a leading "!" is stored as an exception:
+      the marker is cut off before insert and the remaining prefix is recorded against
+      the exception flag.'
+  - codeRefs:
+    - method:9bd5291e12236e85703daf063c32b4b1
+    id: r.has-exact-path
+    level: SHOULD
+    text: HasExactPath reports whether the given path is stored exactly, without prefix
+      expansion.
+  - codeRefs:
+    - method:01de81b22d3091316959db92908a490b
+    id: r.has-path
+    level: SHOULD
+    text: HasPath reports whether a path is covered by the stored set, matching on
+      prefix so a stored directory covers paths beneath it.
+  - codeRefs:
+    - method:710fff05c83c4dc5f779e84165610d81
+    id: r.has-path-segments
+    level: SHOULD
+    text: HasPathSegments reports whether a path matches the stored set on whole segment
+      boundaries rather than on a raw byte prefix.
+  - codeRefs:
+    - method:006f3d8b478c3c041905a76f7f1c23f6
+    id: r.len
+    level: MUST
+    text: Len reports the number of paths currently held, and it is the capacity source
+      for Paths.
+  - codeRefs:
+    - method:006f3d8b478c3c041905a76f7f1c23f6
+    - method:2b8f9fe6f4ca40a55bdf750e790af9cb
+    id: r.paths
+    level: MUST
+    text: Paths returns every stored path as a string slice, pre-sized with the value
+      from Len and filled by walking the radix tree from its root.
+  - codeRefs:
+    - method:24b62e201eaa469b519cc090681b150d
+    id: r.remove-path-prefix
+    level: MUST
+    text: RemovePathPrefix deletes every stored path that lies under the given prefix,
+      using the same locking and transactional path as the other mutators.
+  - codeRefs:
+    - method:c195b095041ba7f36698d9317f118f94
+    id: r.remove-paths
+    level: MUST
+    text: RemovePaths strips a leading "!" and a trailing "*" from each supplied path,
+      deletes the matching tree entry inside one transaction, and skips entries whose
+      length is zero.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/pathmanager/pathmanager_test.go
+    id: r.test-coverage
+    level: MUST
+    text: The package tests must keep covering construction and empty state, adding
+      and listing paths, removing them again, prefix removal, and the HasExactPath,
+      HasPath and HasPathSegments match modes.
+  - codeRefs:
+    - method:c195b095041ba7f36698d9317f118f94
+    - method:d2684f578b8fac5756f29fe2bc4c6bfd
+    id: r.trailing-star
+    level: MUST
+    text: AddPaths and RemovePaths both trim a trailing "*" from every path, and neither
+      touches a trailing slash, so a stored path that fully names a file stays distinct
+      from a directory prefix.
   upstream: self
 - code:
   - third_party/openbao/sdk/helper/pluginutil/env.go
