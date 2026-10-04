@@ -5,10 +5,255 @@ codeRefIndex:
 - file:third_party/openbao/sdk/database/helper/credsutil/sql.go sql.go@third_party/openbao/sdk/database/helper/credsutil/sql.go
 - file:third_party/openbao/sdk/database/helper/credsutil/usernames.go usernames.go@third_party/openbao/sdk/database/helper/credsutil/usernames.go
 - file:third_party/openbao/sdk/database/helper/credsutil/usernames_test.go usernames_test.go@third_party/openbao/sdk/database/helper/credsutil/usernames_test.go
+- function:183fc86f28d48a2b4b8179ea0ce24e83 RoleName@third_party/openbao/sdk/database/helper/credsutil/usernames.go:62
+- function:3efb3892c2779cc91e90fd1fc70b6d70 ToUpper@third_party/openbao/sdk/database/helper/credsutil/usernames.go:90
+- function:44f819624b6cba6b297d54852b1c4afb RandomAlphaNumeric@third_party/openbao/sdk/database/helper/credsutil/credsutil.go:34
+- function:4ba1e502f46336dbbe49c044937fd10c DisplayName@third_party/openbao/sdk/database/helper/credsutil/usernames.go:56
+- function:4c822ca1a0b0d91db03420dde87191b3 MaxLength@third_party/openbao/sdk/database/helper/credsutil/usernames.go:74
+- function:68f3892cc55d3d2cdc8e6ecd0ea7c2ed Separator@third_party/openbao/sdk/database/helper/credsutil/usernames.go:68
+- function:b8694ac40227d568befbad15fc5d0799 Case@third_party/openbao/sdk/database/helper/credsutil/usernames.go:80
+- function:b89f3ce664ec9d2edd3e93f94af7a5df ToLower@third_party/openbao/sdk/database/helper/credsutil/usernames.go:86
+- function:fd514f0c010fb6a3096ddbb2fba178ba GenerateUsername@third_party/openbao/sdk/database/helper/credsutil/usernames.go:94
+- interface:37bb204d5510a5c724b76501024a2559 CredentialsProducer@third_party/openbao/sdk/database/helper/credsutil/credsutil.go:18
+- method:02bd74950b1038734e7540ffbcd2f497 SQLCredentialsProducer.GenerateExpiration@third_party/openbao/sdk/database/helper/credsutil/sql.go:57
+- method:1a9e0c44a270015aa8815b0ea5fa644e CredentialsProducer.GenerateExpiration@third_party/openbao/sdk/database/helper/credsutil/credsutil.go:22
+- method:5b6e07fe468135c76d6df0a7ab5c77e0 CredentialsProducer.GeneratePassword@third_party/openbao/sdk/database/helper/credsutil/credsutil.go:21
+- method:a5fec403ec0e554daf31082fe9d66583 SQLCredentialsProducer.GenerateUsername@third_party/openbao/sdk/database/helper/credsutil/sql.go:34
+- method:b1d55f3316ba4e52d4e5725140d510c9 SQLCredentialsProducer.GenerateCredentials@third_party/openbao/sdk/database/helper/credsutil/sql.go:26
+- method:be63c48b438a11b5e0bddcda445d36eb SQLCredentialsProducer.GeneratePassword@third_party/openbao/sdk/database/helper/credsutil/sql.go:48
+- method:c33d66967be03770f7d7d5ebed8af102 CredentialsProducer.GenerateUsername@third_party/openbao/sdk/database/helper/credsutil/credsutil.go:20
+- method:cf6f63c360cd78f4e48a9a12f61e32cc CredentialsProducer.GenerateCredentials@third_party/openbao/sdk/database/helper/credsutil/credsutil.go:19
+- struct:0c79431f0c22f255959881d50b73764e SQLCredentialsProducer@third_party/openbao/sdk/database/helper/credsutil/sql.go:18
+- type_alias:22430d0874393653e29c721d1905bded UsernameOpt@third_party/openbao/sdk/database/helper/credsutil/usernames.go:54
+- type_alias:8f48b954f6fb6c701eb567a72a0cd8b6 CaseOp@third_party/openbao/sdk/database/helper/credsutil/usernames.go:12
 kind: SystemContext
 metadata:
   name: third-party-openbao-sdk-database-helper-credsutil
   namespace: default
 spec:
+  intent: 'This context documents the third_party/openbao vendored copy of the SDK
+    credsutil package inside deno-kcp. It exists so the vendored helper is described
+    as it actually is: the producer interface and its SQL implementation that database
+    plugins embed, the password generator with its length floor and required-character
+    prefix, and the option-driven username builder. The package is a third-party subtree,
+    so the spec records the observable contract callers depend on rather than a design
+    this repository is free to change.'
+  interfaces:
+  - file: third_party/openbao/sdk/database/helper/credsutil/usernames.go
+    kind: function
+    name: Case
+    signature: func Case(c CaseOp) UsernameOpt
+  - file: third_party/openbao/sdk/database/helper/credsutil/usernames.go
+    kind: type_alias
+    name: CaseOp
+    signature: type CaseOp int
+  - file: third_party/openbao/sdk/database/helper/credsutil/credsutil.go
+    kind: interface
+    name: CredentialsProducer
+    signature: type CredentialsProducer interface
+  - file: third_party/openbao/sdk/database/helper/credsutil/credsutil.go
+    kind: method
+    name: CredentialsProducer.GenerateCredentials
+    signature: GenerateCredentials(context.Context) (string, error)
+  - file: third_party/openbao/sdk/database/helper/credsutil/credsutil.go
+    kind: method
+    name: CredentialsProducer.GenerateExpiration
+    signature: GenerateExpiration(time.Time) (string, error)
+  - file: third_party/openbao/sdk/database/helper/credsutil/credsutil.go
+    kind: method
+    name: CredentialsProducer.GeneratePassword
+    signature: GeneratePassword() (string, error)
+  - file: third_party/openbao/sdk/database/helper/credsutil/credsutil.go
+    kind: method
+    name: CredentialsProducer.GenerateUsername
+    signature: GenerateUsername(dbplugin.UsernameConfig) (string, error)
+  - file: third_party/openbao/sdk/database/helper/credsutil/usernames.go
+    kind: function
+    name: DisplayName
+    signature: func DisplayName(dispName string, maxLength int) UsernameOpt
+  - file: third_party/openbao/sdk/database/helper/credsutil/usernames.go
+    kind: function
+    name: GenerateUsername
+    signature: func GenerateUsername(opts ...UsernameOpt) (string, error)
+  - file: third_party/openbao/sdk/database/helper/credsutil/usernames.go
+    kind: function
+    name: MaxLength
+    signature: func MaxLength(maxLen int) UsernameOpt
+  - file: third_party/openbao/sdk/database/helper/credsutil/credsutil.go
+    kind: function
+    name: RandomAlphaNumeric
+    signature: func RandomAlphaNumeric(length int, prependA1a bool) (string, error)
+  - file: third_party/openbao/sdk/database/helper/credsutil/usernames.go
+    kind: function
+    name: RoleName
+    signature: func RoleName(roleName string, maxLength int) UsernameOpt
+  - file: third_party/openbao/sdk/database/helper/credsutil/sql.go
+    kind: struct
+    name: SQLCredentialsProducer
+    signature: type SQLCredentialsProducer struct { DisplayNameLen int; RoleNameLen
+      int; UsernameLen int; Separator string; LowercaseUsername bool }
+  - file: third_party/openbao/sdk/database/helper/credsutil/sql.go
+    kind: method
+    name: SQLCredentialsProducer.GenerateCredentials
+    signature: func (scp *SQLCredentialsProducer) GenerateCredentials(ctx context.Context)
+      (string, error)
+  - file: third_party/openbao/sdk/database/helper/credsutil/sql.go
+    kind: method
+    name: SQLCredentialsProducer.GenerateExpiration
+    signature: func (scp *SQLCredentialsProducer) GenerateExpiration(ttl time.Time)
+      (string, error)
+  - file: third_party/openbao/sdk/database/helper/credsutil/sql.go
+    kind: method
+    name: SQLCredentialsProducer.GeneratePassword
+    signature: func (scp *SQLCredentialsProducer) GeneratePassword() (string, error)
+  - file: third_party/openbao/sdk/database/helper/credsutil/sql.go
+    kind: method
+    name: SQLCredentialsProducer.GenerateUsername
+    signature: func (scp *SQLCredentialsProducer) GenerateUsername(config dbplugin.UsernameConfig)
+      (string, error)
+  - file: third_party/openbao/sdk/database/helper/credsutil/usernames.go
+    kind: function
+    name: Separator
+    signature: func Separator(sep string) UsernameOpt
+  - file: third_party/openbao/sdk/database/helper/credsutil/usernames.go
+    kind: function
+    name: ToLower
+    signature: func ToLower() UsernameOpt
+  - file: third_party/openbao/sdk/database/helper/credsutil/usernames.go
+    kind: function
+    name: ToUpper
+    signature: func ToUpper() UsernameOpt
+  - file: third_party/openbao/sdk/database/helper/credsutil/usernames.go
+    kind: type_alias
+    name: UsernameOpt
+    signature: type UsernameOpt func(*usernameBuilder)
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - function:b8694ac40227d568befbad15fc5d0799
+    - type_alias:8f48b954f6fb6c701eb567a72a0cd8b6
+    id: r.case-operation-values
+    level: MUST
+    text: CaseOp must be an integer type whose zero value KeepCase leaves casing untouched,
+      with Uppercase and Lowercase as the two alternate values that force the whole
+      generated username up or down.
+  - codeRefs:
+    - interface:37bb204d5510a5c724b76501024a2559
+    - method:1a9e0c44a270015aa8815b0ea5fa644e
+    - method:5b6e07fe468135c76d6df0a7ab5c77e0
+    - method:c33d66967be03770f7d7d5ebed8af102
+    - method:cf6f63c360cd78f4e48a9a12f61e32cc
+    id: r.credentials-producer-contract
+    level: MUST
+    text: 'CredentialsProducer must be an interface that database plugin definitions
+      can embed, declaring exactly four methods: GenerateCredentials taking a context.Context,
+      GenerateUsername taking a dbplugin.UsernameConfig, GeneratePassword taking no
+      arguments, and GenerateExpiration taking a time.Time; each returns a string
+      and an error.'
+  - codeRefs:
+    - file:third_party/openbao/sdk/database/helper/credsutil/credsutil.go
+    - function:44f819624b6cba6b297d54852b1c4afb
+    id: r.random-alpha-numeric-min-length
+    level: MUST
+    text: RandomAlphaNumeric must reject a requested length below the minimum of 10
+      with an error reading `minimum length of 10 is required`, and otherwise return
+      a string of exactly the requested length drawn from base62 randomness over the
+      alphabet [A-Za-z0-9].
+  - codeRefs:
+    - function:44f819624b6cba6b297d54852b1c4afb
+    id: r.random-alpha-numeric-required-prefix
+    level: MUST
+    text: When prependA1a is true RandomAlphaNumeric must prepend the four-character
+      literal `A1a-` and draw only length minus four random characters, so the total
+      length is unchanged and the password always contains an uppercase letter, a
+      lowercase letter, a digit and a symbol; when prependA1a is false the whole length
+      is random.
+  - codeRefs:
+    - method:b1d55f3316ba4e52d4e5725140d510c9
+    id: r.sql-credentials-delegates-to-password
+    level: MUST
+    text: SQLCredentialsProducer.GenerateCredentials must delegate to GeneratePassword
+      and return that value, propagating the error and returning the empty string
+      when password generation fails.
+  - codeRefs:
+    - method:02bd74950b1038734e7540ffbcd2f497
+    id: r.sql-expiration-format
+    level: MUST
+    text: SQLCredentialsProducer.GenerateExpiration must format the supplied time
+      using the layout `2006-01-02 15:04:05-0700` and return it with a nil error.
+  - codeRefs:
+    - function:44f819624b6cba6b297d54852b1c4afb
+    - method:be63c48b438a11b5e0bddcda445d36eb
+    id: r.sql-password-shape
+    level: MUST
+    text: SQLCredentialsProducer.GeneratePassword must return a 20-character RandomAlphaNumeric
+      value generated with prependA1a enabled, so the result always begins with the
+      required-character prefix.
+  - codeRefs:
+    - method:02bd74950b1038734e7540ffbcd2f497
+    - method:a5fec403ec0e554daf31082fe9d66583
+    - method:b1d55f3316ba4e52d4e5725140d510c9
+    - method:be63c48b438a11b5e0bddcda445d36eb
+    - struct:0c79431f0c22f255959881d50b73764e
+    id: r.sql-producer-configurable-fields
+    level: MUST
+    text: SQLCredentialsProducer must expose exported configuration fields DisplayNameLen,
+      RoleNameLen, UsernameLen (all int), Separator (string) and LowercaseUsername
+      (bool), and must satisfy CredentialsProducer so it can be used directly as the
+      generic producer for most SQL database types.
+  - codeRefs:
+    - method:a5fec403ec0e554daf31082fe9d66583
+    - struct:0c79431f0c22f255959881d50b73764e
+    id: r.sql-username-from-config
+    level: MUST
+    text: 'SQLCredentialsProducer.GenerateUsername must map its dbplugin.UsernameConfig
+      onto username options — DisplayName and RoleName truncated to DisplayNameLen
+      and RoleNameLen, the configured Separator, and MaxLength of UsernameLen — and
+      must select the case operation from LowercaseUsername: Lowercase when that field
+      is true, KeepCase otherwise.'
+  - codeRefs:
+    - file:third_party/openbao/sdk/database/helper/credsutil/sql.go
+    - function:183fc86f28d48a2b4b8179ea0ce24e83
+    - function:4ba1e502f46336dbbe49c044937fd10c
+    id: r.truncation-semantics
+    level: MUST
+    text: 'Truncation used by DisplayName, RoleName and the assembled username must
+      follow the length sign: a positive length shorter than the string cuts to that
+      many bytes, a length greater than or equal to the string length or exactly zero
+      leaves the string whole, and a negative length — the exported NoneLength value
+      of -1 — yields the empty string.'
+  - codeRefs:
+    - function:fd514f0c010fb6a3096ddbb2fba178ba
+    id: r.username-builder-defaults
+    level: MUST
+    text: GenerateUsername must start from a builder whose separator is `_`, maximum
+      length is 100 and case operation is KeepCase, then apply every supplied UsernameOpt
+      in order before building the name.
+  - codeRefs:
+    - function:fd514f0c010fb6a3096ddbb2fba178ba
+    - type_alias:22430d0874393653e29c721d1905bded
+    - type_alias:8f48b954f6fb6c701eb567a72a0cd8b6
+    id: r.username-composition
+    level: MUST
+    text: The built username must join, with the configured separator and skipping
+      empty parts, the literal `v`, the display name, the role name, a 20-character
+      RandomAlphaNumeric value generated without the required-character prefix, and
+      the current Unix timestamp rendered as a decimal string; the result must then
+      be truncated to the maximum length and the case operation applied, with Uppercase
+      and Lowercase forcing the whole name and KeepCase leaving it unchanged.
+  - codeRefs:
+    - function:183fc86f28d48a2b4b8179ea0ce24e83
+    - function:3efb3892c2779cc91e90fd1fc70b6d70
+    - function:4ba1e502f46336dbbe49c044937fd10c
+    - function:4c822ca1a0b0d91db03420dde87191b3
+    - function:68f3892cc55d3d2cdc8e6ecd0ea7c2ed
+    - function:b8694ac40227d568befbad15fc5d0799
+    - function:b89f3ce664ec9d2edd3e93f94af7a5df
+    id: r.username-option-functions
+    level: MUST
+    text: 'Each exported username option must be a UsernameOpt that mutates one builder
+      field: DisplayName stores the display name truncated to its maxLength, RoleName
+      stores the role name truncated to its maxLength, Separator sets the separator
+      verbatim, MaxLength sets the overall maximum, and Case sets the case operation;
+      ToLower and ToUpper must be shorthand for Case(Lowercase) and Case(Uppercase).'
   upstream: self

@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context documents the third_party/openbao vendored copy of the SDK credsutil package inside deno-kcp. It exists so the vendored helper is described as it actually is: the producer interface and its SQL implementation that database plugins embed, the password generator with its length floor and required-character prefix, and the option-driven username builder. The package is a third-party subtree, so the spec records the observable contract callers depend on rather than a design this repository is free to change.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
