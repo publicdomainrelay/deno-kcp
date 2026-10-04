@@ -1,0 +1,116 @@
+conditions:
+- message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+  reason: InterfacesObserved
+  status: "True"
+  type: CodeSynced
+- message: no synced fingerprint has been recorded yet
+  reason: NotSyncedYet
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/helper/pgpkeys/encrypt_decrypt.go
+  - third_party/openbao/internal/helper/pgpkeys/flag.go
+  - third_party/openbao/internal/helper/pgpkeys/flag_test.go
+  - third_party/openbao/internal/helper/pgpkeys/keybase.go
+  - third_party/openbao/internal/helper/pgpkeys/keybase_test.go
+  - third_party/openbao/internal/helper/pgpkeys/test_keys.go
+  fingerprint: a8b76f46ac19b9bd8db0eb871a2004ce97321351771d0a2b13cdfef876703503
+  interfaces:
+  - codegraphId: function:990284d610e59ba7e3bfdeb30ad7d517
+    file: third_party/openbao/internal/helper/pgpkeys/encrypt_decrypt.go
+    kind: function
+    line: 22
+    name: EncryptShares
+    signature: (input [][]byte, pgpKeys []string) ([]string, [][]byte, error)
+  - codegraphId: function:34595ac455643604c743c3764ec6cfb1
+    file: third_party/openbao/internal/helper/pgpkeys/encrypt_decrypt.go
+    kind: function
+    line: 56
+    name: GetFingerprints
+    signature: (pgpKeys []string, entities []*openpgp.Entity) ([]string, error)
+  - codegraphId: function:9251717ca0a274b53792e10bc0bd6e6e
+    file: third_party/openbao/internal/helper/pgpkeys/encrypt_decrypt.go
+    kind: function
+    line: 73
+    name: GetEntities
+    signature: (pgpKeys []string) ([]*openpgp.Entity, error)
+  - codegraphId: function:f48c70c4217ae84284553499d7f34907
+    file: third_party/openbao/internal/helper/pgpkeys/encrypt_decrypt.go
+    kind: function
+    line: 94
+    name: DecryptBytes
+    signature: (encodedCrypt, privKey string) (*bytes.Buffer, error)
+  - codegraphId: type_alias:30b6166a5fb8ea106748955a45630621
+    file: third_party/openbao/internal/helper/pgpkeys/flag.go
+    kind: type_alias
+    line: 19
+    name: PubKeyFileFlag
+  - codegraphId: method:aedcb111f667a567bf807a55bc910570
+    file: third_party/openbao/internal/helper/pgpkeys/flag.go
+    kind: method
+    line: 21
+    name: PubKeyFileFlag.String
+    signature: () string
+  - codegraphId: method:cf79122451d638b029a5158bbdaaf08e
+    file: third_party/openbao/internal/helper/pgpkeys/flag.go
+    kind: method
+    line: 23
+    name: PubKeyFileFlag.Set
+    signature: (val string) error
+  - codegraphId: method:08c76c120c58c7eb787e03ef57f37379
+    file: third_party/openbao/internal/helper/pgpkeys/flag.go
+    kind: method
+    line: 41
+    name: PubKeyFileFlag.Example
+    signature: () string
+  - codegraphId: type_alias:03a52d3c14409c44de009c7e4d33ff30
+    file: third_party/openbao/internal/helper/pgpkeys/flag.go
+    kind: type_alias
+    line: 45
+    name: PubKeyFilesFlag
+  - codegraphId: method:e1793840397cb98083d78687d508b0ed
+    file: third_party/openbao/internal/helper/pgpkeys/flag.go
+    kind: method
+    line: 47
+    name: PubKeyFilesFlag.String
+    signature: () string
+  - codegraphId: method:cfd8a0839893dfddccdc9c3924c904f8
+    file: third_party/openbao/internal/helper/pgpkeys/flag.go
+    kind: method
+    line: 51
+    name: PubKeyFilesFlag.Set
+    signature: (val string) error
+  - codegraphId: method:4d3884509d108f2cdfb1504141580b2b
+    file: third_party/openbao/internal/helper/pgpkeys/flag.go
+    kind: method
+    line: 65
+    name: PubKeyFilesFlag.Example
+    signature: () string
+  - codegraphId: function:d27b0da6cdf542960c4594e9b50a5483
+    file: third_party/openbao/internal/helper/pgpkeys/flag.go
+    kind: function
+    line: 70
+    name: ParsePGPKeys
+    signature: (keyfiles []string) ([]string, error)
+  - codegraphId: function:68d46cf0c2a816b60fba703bf62dcda6
+    file: third_party/openbao/internal/helper/pgpkeys/flag.go
+    kind: function
+    line: 101
+    name: ReadPGPFile
+    signature: (path string) (string, error)
+  - codegraphId: function:3e73c82528ff0863f8a29c086e3a406a
+    file: third_party/openbao/internal/helper/pgpkeys/keybase.go
+    kind: function
+    line: 27
+    name: FetchKeybasePubkeys
+    signature: (input []string) (map[string]string, error)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 04545c5c2be8e12dee5ebe81c951eb85c08c0908a0009590cec5672c0473780c
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: a8b76f46ac19b9bd8db0eb871a2004ce97321351771d0a2b13cdfef876703503

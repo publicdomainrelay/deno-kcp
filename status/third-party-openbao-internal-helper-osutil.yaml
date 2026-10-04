@@ -1,0 +1,88 @@
+conditions:
+- message: 'undeclared: FileGIDEqual, FilePermissionsMatch, FileSha256Sum, FileUIDEqual,
+    FileUidMatch, IsWriteGroup, IsWriteOther, OwnerPermissionsMatch, OwnerPermissionsMatchFile,
+    Umask'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/helper/osutil/fileinfo.go
+  - third_party/openbao/internal/helper/osutil/fileinfo_test.go
+  - third_party/openbao/internal/helper/osutil/fileinfo_unix.go
+  - third_party/openbao/internal/helper/osutil/fileinfo_unix_test.go
+  - third_party/openbao/internal/helper/osutil/fileinfo_windows.go
+  fingerprint: 9317bd23988fb18835b9cfd85cc49f216c9ed3c121b6d12f3a5807abae1c12be
+  interfaces:
+  - codegraphId: function:5230917cbf1f74829a48e450c17f4c02
+    file: third_party/openbao/internal/helper/osutil/fileinfo.go
+    kind: function
+    line: 16
+    name: IsWriteGroup
+    signature: (mode os.FileMode) bool
+  - codegraphId: function:d8871c7888dc2d4bed6db09ddc5955ac
+    file: third_party/openbao/internal/helper/osutil/fileinfo.go
+    kind: function
+    line: 20
+    name: IsWriteOther
+    signature: (mode os.FileMode) bool
+  - codegraphId: function:58ca6e3f55b39d24aa29a0b8244f6ee5
+    file: third_party/openbao/internal/helper/osutil/fileinfo.go
+    kind: function
+    line: 36
+    name: FilePermissionsMatch
+    signature: (info fs.FileInfo, path string, permissions int) error
+  - codegraphId: function:f6f7b35960500a40f8def96ad643c344
+    file: third_party/openbao/internal/helper/osutil/fileinfo.go
+    kind: function
+    line: 48
+    name: OwnerPermissionsMatch
+    signature: (path string, uid int, permissions int) error
+  - codegraphId: function:326475f15a2124fab7a15d850ad9d1cb
+    file: third_party/openbao/internal/helper/osutil/fileinfo.go
+    kind: function
+    line: 76
+    name: OwnerPermissionsMatchFile
+    signature: (file *os.File, uid int, permissions int) error
+  - codegraphId: function:8f224eea6f12efae1e65a6e97cb53e96
+    file: third_party/openbao/internal/helper/osutil/fileinfo.go
+    kind: function
+    line: 90
+    name: FileSha256Sum
+    signature: (path string) (result string, err error)
+  - codegraphId: function:52c64b528a752fb717f7078d441e4fcc
+    file: third_party/openbao/internal/helper/osutil/fileinfo_unix.go
+    kind: function
+    line: 16
+    name: FileUIDEqual
+    signature: (info fs.FileInfo, uid int) bool
+  - codegraphId: function:8b40f313720b4a1000c81f4f8809823d
+    file: third_party/openbao/internal/helper/osutil/fileinfo_unix.go
+    kind: function
+    line: 26
+    name: FileGIDEqual
+    signature: (info fs.FileInfo, gid int) bool
+  - codegraphId: function:b5834146fd9a9b6aa4b8fd13f3cc3c6e
+    file: third_party/openbao/internal/helper/osutil/fileinfo_unix.go
+    kind: function
+    line: 36
+    name: FileUidMatch
+    signature: (info fs.FileInfo, path string, uid int) (err error)
+  - codegraphId: function:c36bb0a2244e95f9eb9f055f6003c362
+    file: third_party/openbao/internal/helper/osutil/fileinfo_unix.go
+    kind: function
+    line: 59
+    name: Umask
+    signature: (newmask int) int
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 2cdcd8d7d7cc8725f7e2af6193c4cfc92612e52e69f070bb15b02f312b8113fb
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 9317bd23988fb18835b9cfd85cc49f216c9ed3c121b6d12f3a5807abae1c12be

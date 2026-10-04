@@ -1,0 +1,158 @@
+conditions:
+- message: 'undeclared: Canonicalize, ContextWithNamespace, ContextWithNamespaceHeader,
+    FromContext, HeaderFromContext, MountPathDetails, MountPathDetails.GetFullPath,
+    MountPathDetails.GetRelativePath, Namespace, Namespace.Clone, Namespace.GenerateUUID,
+    Namespace.HasParent, Namespace.MatchesID, Namespace.ParentPath, Namespace.String,
+    Namespace.TrimmedPath, Namespace.Validate, Namespace.ValidateUUID, ParentOf, ParseName,
+    RootContext, SplitIDFromString'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/helper/namespace/namespace.go
+  - third_party/openbao/internal/helper/namespace/namespace_test.go
+  fingerprint: 2cf4218681a2d47528f27c6397312ff850edc3f6e932707ee013deba69c71e6c
+  interfaces:
+  - codegraphId: struct:d3c23ea7a231b1acbc9f0f948631ab62
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+    kind: struct
+    line: 40
+    name: Namespace
+  - codegraphId: method:c31343f9e2d8cc12cc00b27de67c3208
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+    kind: method
+    line: 51
+    name: Namespace.String
+    signature: () string
+  - codegraphId: method:8ca58b10cc371c770997b919b7a0cbc2
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+    kind: method
+    line: 55
+    name: Namespace.Validate
+    signature: () error
+  - codegraphId: method:018bda0ff5679dab6d4588f8c112dfd3
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+    kind: method
+    line: 113
+    name: Namespace.HasParent
+    signature: (possibleParent *Namespace) bool
+  - codegraphId: method:34da7c84f15950207de1df72a3977848
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+    kind: method
+    line: 126
+    name: Namespace.ParentPath
+    signature: () (string, bool)
+  - codegraphId: function:5b24d4437d76109559ece4ad62ded2a0
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+    kind: function
+    line: 132
+    name: ParentOf
+    signature: (path string) (string, bool)
+  - codegraphId: method:7743f46beeb671e2c090422bf5323b7a
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+    kind: method
+    line: 144
+    name: Namespace.TrimmedPath
+    signature: (path string) string
+  - codegraphId: method:072b9dcb5fd5c8b4c062f5eaa8290865
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+    kind: method
+    line: 148
+    name: Namespace.Clone
+    signature: (withUnlock bool) *Namespace
+  - codegraphId: method:acf5ea946939aef3a6fc81a4a347ec29
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+    kind: method
+    line: 177
+    name: Namespace.GenerateUUID
+    signature: () (string, error)
+  - codegraphId: method:69ba4d2b355c5146e73ff755121320b1
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+    kind: method
+    line: 193
+    name: Namespace.ValidateUUID
+    signature: (candidate string) error
+  - codegraphId: method:ff66d44ddb6b00f086d5fba13c922284
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+    kind: method
+    line: 209
+    name: Namespace.MatchesID
+    signature: (id string) bool
+  - codegraphId: function:67742cbfe52aa8334c8c5414fe9d85c6
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+    kind: function
+    line: 215
+    name: ContextWithNamespace
+    signature: (ctx context.Context, ns *Namespace) context.Context
+  - codegraphId: function:edd57972743df40c6b5c50c87217fb89
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+    kind: function
+    line: 221
+    name: RootContext
+    signature: (ctx context.Context) context.Context
+  - codegraphId: function:cc7c3290d413fe4428108bdd2e9e1eca
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+    kind: function
+    line: 230
+    name: FromContext
+    signature: (ctx context.Context) (*Namespace, error)
+  - codegraphId: function:96be3d9a2d4656461d79fd78efbc6a6b
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+    kind: function
+    line: 249
+    name: ContextWithNamespaceHeader
+    signature: (ctx context.Context, nsHeader string) context.Context
+  - codegraphId: function:119638c93fe5943f4b7964b6c0507e08
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+    kind: function
+    line: 254
+    name: HeaderFromContext
+    signature: (ctx context.Context) string
+  - codegraphId: function:8708e9b0e42010489ce6fcf8e67536ed
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+    kind: function
+    line: 269
+    name: Canonicalize
+    signature: (nsPath string) string
+  - codegraphId: function:5d2ed01f69324281a03074046a28b94e
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+    kind: function
+    line: 290
+    name: ParseName
+    signature: (input string) (string, error)
+  - codegraphId: function:bf96e286d504864fa16eb6eb04202d5a
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+    kind: function
+    line: 308
+    name: SplitIDFromString
+    signature: (input string) (string, string)
+  - codegraphId: struct:5443bf7b3c772804f5855248919895d9
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+    kind: struct
+    line: 350
+    name: MountPathDetails
+  - codegraphId: method:e6655428f8e9ced8d271c326cedb3fce
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+    kind: method
+    line: 355
+    name: MountPathDetails.GetRelativePath
+    signature: (currNs *Namespace) string
+  - codegraphId: method:8e8f8737dfdc7280435a700d2bb2f70b
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+    kind: method
+    line: 360
+    name: MountPathDetails.GetFullPath
+    signature: () string
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 101b4e2e0164a40c3f757b68521a62d579603b3bb208af2ccf31a3cc14293a1c
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 2cf4218681a2d47528f27c6397312ff850edc3f6e932707ee013deba69c71e6c
