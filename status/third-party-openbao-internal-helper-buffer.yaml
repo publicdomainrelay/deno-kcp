@@ -1,0 +1,34 @@
+conditions:
+- message: 'undeclared: NewSeekableReader, nopSeekableReader.Close'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/helper/buffer/buffer.go
+  fingerprint: fbf3d61d6081cbb247a75d2b527235aeae7281dea54bd6c0fc3168fe935b4054
+  interfaces:
+  - codegraphId: method:a95c6c9f0e48d067e588a3810e481dbd
+    file: third_party/openbao/internal/helper/buffer/buffer.go
+    kind: method
+    line: 16
+    name: nopSeekableReader.Close
+    signature: () error
+  - codegraphId: function:d9f2047357fc09c009595c28886fbb98
+    file: third_party/openbao/internal/helper/buffer/buffer.go
+    kind: function
+    line: 18
+    name: NewSeekableReader
+    signature: (orig io.Reader) (io.ReadSeekCloser, error)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 496850408fd1ad7488d69b694ca6703e7d0b701a02a8dc40429be8ffa2d24e55
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: fbf3d61d6081cbb247a75d2b527235aeae7281dea54bd6c0fc3168fe935b4054
