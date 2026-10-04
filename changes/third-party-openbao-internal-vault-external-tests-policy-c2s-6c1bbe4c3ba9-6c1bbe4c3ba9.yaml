@@ -10,5 +10,21 @@ spec:
   systemContext: third-party-openbao-internal-vault-external-tests-policy
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-vault-external-tests-policy
+  agentLog: This context is the OpenBao external policy test package at third_party/openbao/internal/vault/external_tests/policy.
+    It holds two black-box acceptance test files that drive a real in-memory Vault
+    core over the HTTP API rather than calling internal policy functions directly.
+    policy_test.go covers token policy composition across login and renewal, pagination
+    limits applied by ACL policy paths over a versioned KV mount, and policy-store
+    cache invalidation across an active/standby pair with the cache disabled. acl_templating_test.go
+    covers identity-templated ACL policy paths, including entity name, entity metadata,
+    group name, group id, and alias-name templates, plus the effect of bad group membership,
+    invalid metadata values, and the allow_wildcards_in_identity_templates and allow_slashes_in_identity_templates
+    policy flags. Both files build a cluster with vault.NewTestCluster, wait for active,
+    exercise the system through the api.Client, and assert with require, strutil.EquivalentSlices,
+    and vault.TestWaitActive-style helpers.
+  message: wrote 9 requirement(s) and 0 interface(s) for third-party-openbao-internal-vault-external-tests-policy
+  phase: Succeeded
+superseded:
+- message: the agent is summarizing third-party-openbao-internal-vault-external-tests-policy
+  name: third-party-openbao-internal-vault-external-tests-policy-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2
   phase: Running

@@ -35642,7 +35642,107 @@ system_contexts:
     acl_templating_test.go@third_party/openbao/internal/vault/external_tests/policy/acl_templating_test.go
   - file:third_party/openbao/internal/vault/external_tests/policy/policy_test.go policy_test.go@third_party/openbao/internal/vault/external_tests/policy/policy_test.go
   id: sc.third-party-openbao-internal-vault-external-tests-policy
+  intent: 'The context exists so the templated-policy and policy-pagination behaviour
+    of the Vault core can be described and verified end to end from outside the vault
+    package. The tests encode the observable contract of the HTTP policy surface:
+    what a login or renewal response must report for token, identity, and combined
+    policy sets; how pagination_limit and required_parameters on an ACL path constrain
+    list and scan operations; when identity template values resolve versus deny; and
+    how policy data propagates to a standby core when the cache is disabled. A block
+    of LDAP-auth tests is commented out because it depends on an LDAP plugin and container,
+    so the remaining tests use userpass and the built-in KV backend only.'
   name: third-party-openbao-internal-vault-external-tests-policy
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/policy/acl_templating_test.go
+    id: r.bad-group-template-isolated
+    level: MUST
+    text: A policy that references a non-existent group through a name template MUST
+      NOT prevent the other paths in the token's policy set from working. Installing
+      badPolicy1 (which templates identity.groups.names.foobar.name) MUST leave every
+      other templated path behaving exactly as it did before, so only the unresolvable-template
+      path is affected.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/policy/policy_test.go
+    id: r.disabled-cache-policy-invalidation
+    level: MUST
+    text: TestPolicyStore_DisabledCacheInvalidation MUST start a two-core cluster
+      with DisableCache true, create a namespace, and write a read-only policy through
+      the active core. It MUST then retry for up to 10 seconds against the standby
+      core's GetPolicy until the returned policy text is byte-identical to the text
+      that was written, so that policy writes invalidate on a standby when no cache
+      is present.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/policy/acl_templating_test.go
+    id: r.group-membership-flips-template
+    level: MUST
+    text: 'Adding the entity to the previously empty foobar group MUST make the path
+      templated on that group name resolve: a write to secret/foobar/foo that was
+      denied before the membership change MUST succeed afterwards.'
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/policy/acl_templating_test.go
+    id: r.identity-template-resolution
+    level: MUST
+    text: TestPolicyTemplating MUST accept identity-templated paths over entity name,
+      entity metadata keys, group names, group ids, and alias names. Given an entity
+      named entity_name with metadata key=metadata, a group named group_name containing
+      that entity, a group named foobar, and a userpass alias named testuser, writes
+      to secret/entity_name/foo, secret/group_name/foo, secret/<groupID>/foo, secret/testuser/foo
+      and secret/metadata/test/foo MUST succeed, while a write to secret/entityname/foo
+      MUST be denied.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/policy/acl_templating_test.go
+    id: r.invalid-metadata-rejected
+    level: MUST
+    text: Entity metadata whose value contains template-breaking characters (a wildcard)
+      MUST make every templated path in the policy fail, and rewriting the same policy
+      with allow_wildcards_in_identity_templates and allow_slashes_in_identity_templates
+      both true MUST restore access without changing the metadata.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/policy/policy_test.go
+    id: r.ldap-backed-tests-disabled
+    level: SHOULD
+    text: The LDAP-backed no-default-policy and no-configured-policy tests SHOULD
+      remain commented out with their rationale recorded, so the package compiles
+      and runs without an LDAP plugin or container while the intended coverage stays
+      visible.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/policy/policy_test.go
+    id: r.pagination-assertion-helper
+    level: MUST
+    text: The testPagination helper MUST assert, for a given metadata sub-path, that
+      a raw list returns 100 keys when the path is unpaginated or at most 10 when
+      paginated and errors when the path is not raw-listable, that a list page of
+      75 errors when the path is paginated and otherwise returns exactly 75 keys,
+      and that a list page of 10 always succeeds with at most 10 keys.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/policy/policy_test.go
+    id: r.policy-pagination-limits
+    level: MUST
+    text: TestPolicy_PaginationLimit MUST mount a versioned KV backend and write 100
+      keys under each of the a, b, c and d prefixes, then write a policy where kv/metadata/a
+      allows list with no pagination limit, kv/metadata/b allows list with pagination_limit
+      10, kv/metadata/c allows list with required_parameters ["limit"] but no pagination
+      limit, kv/metadata/d allows list with both pagination_limit 10 and required_parameters
+      ["limit"], and kv/metadata/ allows scan and list with both settings. A raw list
+      MUST return all 100 keys on a, c and the no-suffix path, and at most 10 keys
+      on b; raw list on d MUST fail. A list with limit=max or limit=0 MUST return
+      10 keys where a pagination limit applies and 100 keys where none applies, and
+      limit=-1 MUST fail with "permission denied". Scan without limits MUST error,
+      scan with a page size of 10 MUST succeed and return 400 keys because KV metadata
+      scanning does not paginate.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/policy/policy_test.go
+    id: r.token-policy-renewal-composition
+    level: MUST
+    text: TestPolicy_TokenRenewal MUST run four table cases (no policies, token policies
+      only, identity policies only, both) by enabling the userpass auth backend, optionally
+      setting token_policies on the user, optionally creating an identity entity with
+      policies plus an entity-alias bound through the userpass mount accessor, and
+      logging in. The login response MUST report Auth.TokenPolicies equal to the token
+      policies with "default" prepended, Auth.IdentityPolicies equal to the configured
+      identity policies, and Auth.Policies equal to the concatenation of both. After
+      a renew through auth/token/renew MUST report the same three sets unchanged.
   upstream: self
 - code:
   - third_party/openbao/internal/vault/external_tests/postgresql_binary/postgresql_test.go
