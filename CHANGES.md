@@ -5885,6 +5885,22 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.routes-share-mount-path-service` (SHOULD): "Routes that need the engine identity should read it from the secretMountPath service rather than from route params, so breadcrumb and model URLs stay consistent with the host application's current mount."
 - added `r.tidy-route-model-hash` (MUST): "PkiTidyRoute must inject the store service and, in its model hook, resolve the parent 'application' model as the engine and return a hash of hasConfig (from the check-config shouldPromptConfig flag), the engine, and the engine's 'pki/tidy' auto-tidy record."
 
+### third-party-openbao-ui-lib-pki-addon-routes-certificates
+
+- intent: "" -> "The context exists to describe the data-loading and controller-setup behaviour of the PKI certificates index route. It captures which services the route depends on, how the model is assembled, how a missing mount or unconfigured engine (HTTP 404) is tolerated rather than thrown, and how the not-configured message shown to the user is chosen. Anyone changing the certificates index page needs this context to know the exact backend path, the query shape, and the fallback semantics that the template and controller rely on."
+- added `r.fetch-certificates-from-mount` (MUST): "PkiCertificatesIndexRoute.fetchCertificates queries the store for records of type 'pki/certificate/base' passing the current PKI mount path taken from the secretMountPath service as the backend option, so the listed certificates always belong to the mount the user is currently browsing."
+- added `r.injected-services` (MUST): "The route declares store and secretMountPath as injected Ember services, and secretMountPath.currentPath is the only source of the backend mount path used for certificate lookups; the route must not read the mount path from any other source."
+- added `r.model-hash-shape` (MUST): "PkiCertificatesIndexRoute.model returns a hash resolving three keys concurrently: hasConfig taken from the route's shouldPromptConfig flag, certificates taken from the pending fetchCertificates call, and parentModel taken from modelFor('certificates'), so the template receives both the certificate list and the parent certificates model."
+- added `r.setup-controller-message` (MUST): "PkiCertificatesIndexRoute.setupController calls the superclass implementation with the same controller and resolved model, then sets controller.notConfiguredMessage to getCliMessage('certificates') when the resolved certificates collection has any entries, and to getCliMessage() with no argument when it is empty or absent."
+- added `r.tolerate-404-missing-config` (MUST): "When the certificate query fails with an HTTP status of 404, fetchCertificates must not propagate the error: it returns an object carrying parentModel from modelFor('certificates') so an unconfigured or absent PKI engine still renders. Any failure whose httpStatus is not 404 must be rethrown unchanged."
+
+### third-party-openbao-ui-lib-pki-addon-routes-certificates-certificate
+
+- intent: "" -> "This context exists to describe the detail route that renders a single PKI certificate under a given secrets mount. It is the read side of the certificate detail view: it turns URL params (mount path plus serial) into an Ember Data request, and it supplies the navigation breadcrumb trail so the user can walk back up from one certificate to the certificates index and out to the mount. The context is one leaf of the OpenBao PKI addon's route tree, vendored into the deno-kcp repository under `third_party/openbao/ui`."
+- added `r.breadcrumbs-setup` (MUST): "`PkiCertificateDetailsRoute.setupController(controller, model)` must call `super.setupController(controller, model)` first, then set `controller.breadcrumbs` to the ordered trail: `secrets` (external link), the current `secretMountPath.currentPath` on the `overview` route, `certificates.index` scoped to that mount, and the terminal crumb labelled `model.id`."
+- added `r.injected-services` (MUST): "The route must declare the `store` and `secretMountPath` services as injected Ember services, since both `model()` and `setupController()` read `this.store` and `this.secretMountPath.currentPath` when building the request and the breadcrumbs."
+- added `r.route-fetch-single-certificate` (MUST): "`PkiCertificateDetailsRoute.model()` must resolve the parent route's `serial` param via `this.paramsFor('certificates/certificate')` and issue `this.store.queryRecord('pki/certificate/base', ...)`, passing `{ backend: this.secretMountPath.currentPath, id }` so the fetched certificate is scoped to the currently selected secrets mount."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -6414,5 +6430,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-pki-addon-routes-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-routes-certificates-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-routes-certificates-certificate-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-lib-pki-addon-routes-configuration-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-pki-addon-routes-issuers-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |

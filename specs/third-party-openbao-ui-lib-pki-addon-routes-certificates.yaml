@@ -1,10 +1,70 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
+- class:2ef4d0c984520a9dd1e0f461e7e5617c PkiCertificatesIndexRoute@third_party/openbao/ui/lib/pki/addon/routes/certificates/index.js:13
 - file:third_party/openbao/ui/lib/pki/addon/routes/certificates/index.js index.js@third_party/openbao/ui/lib/pki/addon/routes/certificates/index.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-lib-pki-addon-routes-certificates
   namespace: default
 spec:
+  intent: The context exists to describe the data-loading and controller-setup behaviour
+    of the PKI certificates index route. It captures which services the route depends
+    on, how the model is assembled, how a missing mount or unconfigured engine (HTTP
+    404) is tolerated rather than thrown, and how the not-configured message shown
+    to the user is chosen. Anyone changing the certificates index page needs this
+    context to know the exact backend path, the query shape, and the fallback semantics
+    that the template and controller rely on.
+  interfaces:
+  - file: third_party/openbao/ui/lib/pki/addon/routes/certificates/index.js
+    kind: class
+    name: PkiCertificatesIndexRoute
+    signature: class PkiCertificatesIndexRoute extends Route
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - class:2ef4d0c984520a9dd1e0f461e7e5617c
+    - file:third_party/openbao/ui/lib/pki/addon/routes/certificates/index.js
+    id: r.fetch-certificates-from-mount
+    level: MUST
+    text: PkiCertificatesIndexRoute.fetchCertificates queries the store for records
+      of type 'pki/certificate/base' passing the current PKI mount path taken from
+      the secretMountPath service as the backend option, so the listed certificates
+      always belong to the mount the user is currently browsing.
+  - codeRefs:
+    - class:2ef4d0c984520a9dd1e0f461e7e5617c
+    - file:third_party/openbao/ui/lib/pki/addon/routes/certificates/index.js
+    id: r.injected-services
+    level: MUST
+    text: The route declares store and secretMountPath as injected Ember services,
+      and secretMountPath.currentPath is the only source of the backend mount path
+      used for certificate lookups; the route must not read the mount path from any
+      other source.
+  - codeRefs:
+    - class:2ef4d0c984520a9dd1e0f461e7e5617c
+    - file:third_party/openbao/ui/lib/pki/addon/routes/certificates/index.js
+    id: r.model-hash-shape
+    level: MUST
+    text: 'PkiCertificatesIndexRoute.model returns a hash resolving three keys concurrently:
+      hasConfig taken from the route''s shouldPromptConfig flag, certificates taken
+      from the pending fetchCertificates call, and parentModel taken from modelFor(''certificates''),
+      so the template receives both the certificate list and the parent certificates
+      model.'
+  - codeRefs:
+    - class:2ef4d0c984520a9dd1e0f461e7e5617c
+    - file:third_party/openbao/ui/lib/pki/addon/routes/certificates/index.js
+    id: r.setup-controller-message
+    level: MUST
+    text: PkiCertificatesIndexRoute.setupController calls the superclass implementation
+      with the same controller and resolved model, then sets controller.notConfiguredMessage
+      to getCliMessage('certificates') when the resolved certificates collection has
+      any entries, and to getCliMessage() with no argument when it is empty or absent.
+  - codeRefs:
+    - class:2ef4d0c984520a9dd1e0f461e7e5617c
+    - file:third_party/openbao/ui/lib/pki/addon/routes/certificates/index.js
+    id: r.tolerate-404-missing-config
+    level: MUST
+    text: 'When the certificate query fails with an HTTP status of 404, fetchCertificates
+      must not propagate the error: it returns an object carrying parentModel from
+      modelFor(''certificates'') so an unconfigured or absent PKI engine still renders.
+      Any failure whose httpStatus is not 404 must be rethrown unchanged.'
   upstream: self

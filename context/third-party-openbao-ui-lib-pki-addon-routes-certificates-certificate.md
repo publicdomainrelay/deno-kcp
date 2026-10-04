@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to describe the detail route that renders a single PKI certificate under a given secrets mount. It is the read side of the certificate detail view: it turns URL params (mount path plus serial) into an Ember Data request, and it supplies the navigation breadcrumb trail so the user can walk back up from one certificate to the certificates index and out to the mount. The context is one leaf of the OpenBao PKI addon's route tree, vendored into the deno-kcp repository under `third_party/openbao/ui`.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
