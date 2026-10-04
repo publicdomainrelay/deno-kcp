@@ -10,5 +10,18 @@ spec:
   systemContext: internal-livegate
   toCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
 status:
-  message: the agent is summarizing internal-livegate
-  phase: Running
+  agentLog: 'internal/livegate is a tiny test-only gate package in deno-kcp. It reads
+    the DENO_KCP_REQUIRE_LIVE environment variable through RequiresLive, which reports
+    true only when that variable equals "1". Require(t, format, args) uses that flag
+    to decide the fate of a live test: with the flag set it calls t.Fatalf, otherwise
+    it calls t.Skipf, so live tests hard-fail in live-required CI runs and silently
+    skip everywhere else. Short(t, format, args) extends the gate to short mode: when
+    testing.Short() is true it delegates to Require, which skips the test unless live
+    is required. The package is consumed by provider live tests (live_denoruntime_test.go,
+    live_maxconcurrent_test.go, live_native_admission_test.go, live_ttl_test.go, live_denojob_drain_test.go)
+    and by test/integration fixtures (fixture_test.go''s requireLive, requireBinary,
+    policyEngineDir, requireDir) to gate tests on a real kcp, kine, kubectl and deno
+    toolchain. All three functions call t.Helper() so failure and skip reports point
+    at the caller rather than the gate.'
+  message: wrote 5 requirement(s) and 3 interface(s) for internal-livegate
+  phase: Succeeded
