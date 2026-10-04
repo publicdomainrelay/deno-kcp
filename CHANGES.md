@@ -4471,6 +4471,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.sorted-backends-order` (MUST): "The sortedDisplayableBackends getter sorts displayable backends so supported backends come first, then orders by descending isSupportedBackend difference and ascending id, before any filtering is applied."
 - added `r.type-and-name-filter-combination` (MUST): "When selectedEngineType is set, sortedDisplayableBackends matches backend.engineType, or matches backend.id when selectedEngineName is also set; when only selectedEngineName is set it matches backend.id; when neither is set it returns the full sorted list."
 
+### third-party-openbao-ui-app-controllers-vault-cluster-secrets-backend
+
+- intent: "" -> "This context exists so the secrets-backend controller layer can be specified and tracked as one unit. These controllers bind the backend name into breadcrumbs and toolbar state, and they translate user actions on secrets engines into route-level messages and model refreshes. The diff and metadata controllers are the two whose members are fully resolved, so they anchor the requirements; the remaining files are the siblings that complete the same directory and follow the same controller pattern."
+- added `r.backend-controller-set` (MUST): "The directory must provide one controller module per secrets-backend screen: actions-root, actions, configuration, create-root, create, credentials-root, credentials, diff, edit-root, edit, list-root, list, metadata, show-root, show, sign-root, sign, and versions, so every backend route resolves a controller."
+- added `r.diff-controller-breadcrumb` (MUST): "DiffController extends Ember Controller, tracks the current backend name in a tracked backend property, and its backendCrumb getter must return a breadcrumb object whose label, text, and model are the backend name and whose path is vault.cluster.secrets.backend.list-root, so the diff screen links back to the backend root."
+- added `r.metadata-controller-breadcrumb` (MUST): "MetadataController extends Ember Controller, tracks the current backend name in a tracked backend property, and its backendCrumb getter must return a breadcrumb object whose label, text, and model are the backend name and whose path is vault.cluster.secrets.backend.list-root."
+- added `r.metadata-refresh-action` (MUST): "MetadataController.refreshModel is an Ember @action that sends the refreshModel message to its route, so the metadata view can reload its model without a full transition."
+- added `r.root-variant-pairing` (SHOULD): "Each -root controller must pair with its non-root sibling of the same screen name (actions, create, credentials, edit, list, show, sign), with the root variant carrying the backend-level breadcrumb and the non-root variant carrying the item-level screen state."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4832,7 +4841,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-policies-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-policy-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-controllers-vault-cluster-secrets-backend-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-secrets-backend-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-secrets-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-settings-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

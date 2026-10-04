@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the secrets-backend controller layer can be specified and tracked as one unit. These controllers bind the backend name into breadcrumbs and toolbar state, and they translate user actions on secrets engines into route-level messages and model refreshes. The diff and metadata controllers are the two whose members are fully resolved, so they anchor the requirements; the remaining files are the siblings that complete the same directory and follow the same controller pattern.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

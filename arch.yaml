@@ -62148,6 +62148,8 @@ system_contexts:
   - third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend/sign.js
   - third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend/versions.js
   codeRefIndex:
+  - class:303a8df6e2e1b1f99e088b8d9891c288 MetadataController@third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend/metadata.js:10
+  - class:a8c93823983cd358bb964edeea1ddcaf DiffController@third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend/diff.js:9
   - file:third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend/actions-root.js
     actions-root.js@third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend/actions-root.js
   - file:third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend/actions.js
@@ -62185,7 +62187,87 @@ system_contexts:
   - file:third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend/versions.js
     versions.js@third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend/versions.js
   id: sc.third-party-openbao-ui-app-controllers-vault-cluster-secrets-backend
+  intent: This context exists so the secrets-backend controller layer can be specified
+    and tracked as one unit. These controllers bind the backend name into breadcrumbs
+    and toolbar state, and they translate user actions on secrets engines into route-level
+    messages and model refreshes. The diff and metadata controllers are the two whose
+    members are fully resolved, so they anchor the requirements; the remaining files
+    are the siblings that complete the same directory and follow the same controller
+    pattern.
+  interfaces:
+  - file: third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend/diff.js
+    kind: class
+    name: DiffController
+    signature: class DiffController extends Controller
+  - file: third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend/metadata.js
+    kind: class
+    name: MetadataController
+    signature: class MetadataController extends Controller
   name: third-party-openbao-ui-app-controllers-vault-cluster-secrets-backend
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend/actions-root.js
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend/actions.js
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend/configuration.js
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend/create-root.js
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend/create.js
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend/credentials-root.js
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend/credentials.js
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend/edit-root.js
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend/edit.js
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend/list-root.js
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend/list.js
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend/show-root.js
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend/show.js
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend/sign-root.js
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend/sign.js
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend/versions.js
+    id: r.backend-controller-set
+    level: MUST
+    text: 'The directory must provide one controller module per secrets-backend screen:
+      actions-root, actions, configuration, create-root, create, credentials-root,
+      credentials, diff, edit-root, edit, list-root, list, metadata, show-root, show,
+      sign-root, sign, and versions, so every backend route resolves a controller.'
+  - codeRefs:
+    - class:a8c93823983cd358bb964edeea1ddcaf
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend/diff.js
+    id: r.diff-controller-breadcrumb
+    level: MUST
+    text: DiffController extends Ember Controller, tracks the current backend name
+      in a tracked backend property, and its backendCrumb getter must return a breadcrumb
+      object whose label, text, and model are the backend name and whose path is vault.cluster.secrets.backend.list-root,
+      so the diff screen links back to the backend root.
+  - codeRefs:
+    - class:303a8df6e2e1b1f99e088b8d9891c288
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend/metadata.js
+    id: r.metadata-controller-breadcrumb
+    level: MUST
+    text: MetadataController extends Ember Controller, tracks the current backend
+      name in a tracked backend property, and its backendCrumb getter must return
+      a breadcrumb object whose label, text, and model are the backend name and whose
+      path is vault.cluster.secrets.backend.list-root.
+  - codeRefs:
+    - class:303a8df6e2e1b1f99e088b8d9891c288
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend/metadata.js
+    id: r.metadata-refresh-action
+    level: MUST
+    text: MetadataController.refreshModel is an Ember @action that sends the refreshModel
+      message to its route, so the metadata view can reload its model without a full
+      transition.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend/actions-root.js
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend/create-root.js
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend/credentials-root.js
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend/edit-root.js
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend/list-root.js
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend/show-root.js
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend/sign-root.js
+    id: r.root-variant-pairing
+    level: SHOULD
+    text: Each -root controller must pair with its non-root sibling of the same screen
+      name (actions, create, credentials, edit, list, show, sign), with the root variant
+      carrying the backend-level breadcrumb and the non-root variant carrying the
+      item-level screen state.
   upstream: self
 - code:
   - third_party/openbao/ui/app/controllers/vault/cluster/settings/configure-secret-backend.js
