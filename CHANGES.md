@@ -4549,6 +4549,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.wildcard-string-predicate` (MUST): "isWildcardString reports whether the supplied string contains wildcard syntax, letting callers branch before applying wildcard matching."
 - added `r.wizard-constants` (SHOULD): "wizard-constants exposes the fixed values the wizard flow reads, keeping those values in one module instead of repeating them across wizard templates and components."
 
+### third-party-openbao-ui-app-initializers
+
+- intent: "" -> "This context exists to pin down the boot-time behaviour that the vendored OpenBao UI contributes through Ember application initializers, separately from the rest of the Go code base in this repository. It records that the UI depends on Ember's initializer convention (an exported initialize function per file in app/initializers) and on the specific side effects those initializers apply to the application config, Ember Data, and the inspector. It matters because this code is third-party and copied rather than authored here, so the specification is needed to detect drift from upstream and to know which behaviour is intentional when the UI is upgraded."
+- added `r.deprecation-filter` (MUST): "The deprecation-filter initializer must install a deprecation message filter at boot so that filtered deprecation output is suppressed for the running application."
+- added `r.disable-ember-inspector` (SHOULD): "The application must ship a disable-ember-inspector initializer under app/initializers so the Ember Inspector is disabled for the running application."
+- added `r.identifier-generation-method` (MUST): "The ember-data-identifiers initializer must call setIdentifierGenerationMethod with a function that returns data.lid when present, otherwise a string of the form @lid:<dasherized type>-<id> when data.id is present, and otherwise a uuidv4 value, so record identifiers no longer depend on the crypto API and keep working in non-secure contexts."
+- added `r.initializer-export-convention` (MUST): "Each file under app/initializers must export a function named initialize, which Ember calls during application boot to apply that initializer's side effect."
+- added `r.root-mount-hook` (MUST): "The enable-engines initializer must attach a no-op addRootMounts function to the environment config, giving the router DSL a mount hook that root-level engine mounts are added through."
+
 ### third-party-openbao-ui-app-instance-initializers
 
 - intent: "" -> "The context exists so the CSP event tracking service starts exactly once when the Ember application instance boots. Instance-initializers run after the application instance and its services are available, which is why the lookup of 'service:csp-event' and the attach() call live here rather than in a plain initializer. Separating this file keeps the CSP reporting concern out of the service itself and out of application boot code."
@@ -4927,6 +4936,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-helpers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-initializers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Failed |  | 0 | - |
 | third-party-openbao-ui-app-initializers-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-initializers-c2s-6c1bbe4c3ba9-89cee50ec5ae-a3 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-instance-initializers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-instance-initializers-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-lib-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |

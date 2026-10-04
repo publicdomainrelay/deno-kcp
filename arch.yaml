@@ -63026,8 +63026,62 @@ system_contexts:
   - file:third_party/openbao/ui/app/initializers/disable-ember-inspector.js disable-ember-inspector.js@third_party/openbao/ui/app/initializers/disable-ember-inspector.js
   - file:third_party/openbao/ui/app/initializers/ember-data-identifiers.js ember-data-identifiers.js@third_party/openbao/ui/app/initializers/ember-data-identifiers.js
   - file:third_party/openbao/ui/app/initializers/enable-engines.js enable-engines.js@third_party/openbao/ui/app/initializers/enable-engines.js
+  - function:87b40e749cff021538fa7e2b0998ba88 initialize@third_party/openbao/ui/app/initializers/deprecation-filter.js:9
   id: sc.third-party-openbao-ui-app-initializers
+  intent: This context exists to pin down the boot-time behaviour that the vendored
+    OpenBao UI contributes through Ember application initializers, separately from
+    the rest of the Go code base in this repository. It records that the UI depends
+    on Ember's initializer convention (an exported initialize function per file in
+    app/initializers) and on the specific side effects those initializers apply to
+    the application config, Ember Data, and the inspector. It matters because this
+    code is third-party and copied rather than authored here, so the specification
+    is needed to detect drift from upstream and to know which behaviour is intentional
+    when the UI is upgraded.
+  interfaces:
+  - file: third_party/openbao/ui/app/initializers/deprecation-filter.js
+    kind: function
+    name: initialize
+    signature: export function initialize()
   name: third-party-openbao-ui-app-initializers
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/app/initializers/deprecation-filter.js
+    - function:87b40e749cff021538fa7e2b0998ba88
+    id: r.deprecation-filter
+    level: MUST
+    text: The deprecation-filter initializer must install a deprecation message filter
+      at boot so that filtered deprecation output is suppressed for the running application.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/initializers/disable-ember-inspector.js
+    id: r.disable-ember-inspector
+    level: SHOULD
+    text: The application must ship a disable-ember-inspector initializer under app/initializers
+      so the Ember Inspector is disabled for the running application.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/initializers/ember-data-identifiers.js
+    id: r.identifier-generation-method
+    level: MUST
+    text: The ember-data-identifiers initializer must call setIdentifierGenerationMethod
+      with a function that returns data.lid when present, otherwise a string of the
+      form @lid:<dasherized type>-<id> when data.id is present, and otherwise a uuidv4
+      value, so record identifiers no longer depend on the crypto API and keep working
+      in non-secure contexts.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/initializers/deprecation-filter.js
+    - file:third_party/openbao/ui/app/initializers/ember-data-identifiers.js
+    - file:third_party/openbao/ui/app/initializers/enable-engines.js
+    - function:87b40e749cff021538fa7e2b0998ba88
+    id: r.initializer-export-convention
+    level: MUST
+    text: Each file under app/initializers must export a function named initialize,
+      which Ember calls during application boot to apply that initializer's side effect.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/initializers/enable-engines.js
+    id: r.root-mount-hook
+    level: MUST
+    text: The enable-engines initializer must attach a no-op addRootMounts function
+      to the environment config, giving the router DSL a mount hook that root-level
+      engine mounts are added through.
   upstream: self
 - code:
   - third_party/openbao/ui/app/instance-initializers/track-csp-event.js

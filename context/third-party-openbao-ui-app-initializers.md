@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to pin down the boot-time behaviour that the vendored OpenBao UI contributes through Ember application initializers, separately from the rest of the Go code base in this repository. It records that the UI depends on Ember's initializer convention (an exported initialize function per file in app/initializers) and on the specific side effects those initializers apply to the application config, Ember Data, and the inspector. It matters because this code is third-party and copied rather than authored here, so the specification is needed to detect drift from upstream and to know which behaviour is intentional when the UI is upgraded.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
