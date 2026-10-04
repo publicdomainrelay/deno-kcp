@@ -3,10 +3,78 @@ codeRefIndex:
 - file:third_party/openbao/ui/app/macros/identity-capabilities.js identity-capabilities.js@third_party/openbao/ui/app/macros/identity-capabilities.js
 - file:third_party/openbao/ui/app/macros/lazy-capabilities.js lazy-capabilities.js@third_party/openbao/ui/app/macros/lazy-capabilities.js
 - file:third_party/openbao/ui/app/macros/maybe-query-record.js maybe-query-record.js@third_party/openbao/ui/app/macros/maybe-query-record.js
+- function:4a20b2d73189d0f97c759bc82588b607 maybeQueryRecord@third_party/openbao/ui/app/macros/maybe-query-record.js:11
+- function:b2de2dd4797e6ac7df2a41ae6cb405c4 apiPath@third_party/openbao/ui/app/macros/lazy-capabilities.js:21
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-app-macros
   namespace: default
 spec:
+  intent: These macros exist so models and components can declare a capability lookup
+    as a computed property and let the framework re-query it whenever the interpolated
+    path inputs or the store change, without each caller hand-writing the query, the
+    PromiseProxy wrapper, or the guard against firing a request while path parameters
+    are still missing. apiPath exists as a local, assertion-free variant of the shared
+    utils/api-path helper so the macro can build paths from a plain data object. identity-capabilities
+    exists to give the identity model one canonical capabilities macro over its two-parameter
+    path.
+  interfaces:
+  - file: third_party/openbao/ui/app/macros/lazy-capabilities.js
+    kind: function
+    name: apiPath
+    signature: apiPath(strings, ...keys) -> (data) => string
+  - file: third_party/openbao/ui/app/macros/maybe-query-record.js
+    kind: function
+    name: maybeQueryRecord
+    signature: maybeQueryRecord(modelName, options = {}, ...keys) -> ComputedProperty
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/app/macros/lazy-capabilities.js
+    - function:b2de2dd4797e6ac7df2a41ae6cb405c4
+    id: r.api-path-template
+    level: MUST
+    text: apiPath takes a tagged template's literal segments and key names and returns
+      a function that rebuilds the string by interleaving the literal segments with
+      the value of each named key read from the data argument; a null or undefined
+      data argument is treated as an empty object so every key interpolates as undefined
+      rather than throwing, and the segments are joined into a single string.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/macros/identity-capabilities.js
+    id: r.identity-capabilities-path
+    level: MUST
+    text: The default export of identity-capabilities returns a lazy capability computed
+      property built from the apiPath template identity/${identityType}/id/${id},
+      declaring 'id' and 'identityType' as the interpolated keys so the capability
+      id is `identity/<identityType>/id/<id>`.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/macros/lazy-capabilities.js
+    - function:b2de2dd4797e6ac7df2a41ae6cb405c4
+    id: r.lazy-capabilities-macro
+    level: MUST
+    text: The default export of lazy-capabilities takes a path template function followed
+      by the key names it interpolates and returns a maybeQueryRecord computed property
+      for the 'capabilities' model whose options function reads exactly those key
+      names off the context; it drops null and undefined values from that read, and
+      when the number of remaining non-empty values is less than the number of keys
+      it returns undefined so no request is issued, otherwise it returns an object
+      whose id is the template function evaluated against the non-empty context object.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/macros/maybe-query-record.js
+    - function:4a20b2d73189d0f97c759bc82588b607
+    id: r.maybe-query-record-computed
+    level: MUST
+    text: maybeQueryRecord returns an Ember computed property that depends on the
+      supplied key names plus 'store', and its getter builds a PromiseProxy object
+      whose promise is the result of store.queryRecord for the given model name and
+      query, so consumers observe a pending/settled proxy rather than the raw promise.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/macros/maybe-query-record.js
+    - function:4a20b2d73189d0f97c759bc82588b607
+    id: r.maybe-query-record-optional-query
+    level: MUST
+    text: maybeQueryRecord accepts either an options object or a function as its second
+      argument; a function is invoked with the computed property's context to produce
+      the query, and when the resulting query is falsy the proxy resolves to an empty
+      object instead of calling store.queryRecord.
   upstream: self

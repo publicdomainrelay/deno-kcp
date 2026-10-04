@@ -4599,6 +4599,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.tools-sequence` (MUST): "tools-machine.js models the wrap, wrapped, lookup, info, rewrap, rewrapped, unwrap and unwrapped sequence, advancing on LOOKUP, CONTINUE, REWRAP and UNWRAP events before reaching complete."
 - added `r.tutorial-lifecycle` (MUST): "tutorial-machine.js models a nested init/active flow with DISMISS, DONE and PAUSE transitions and dismissed, paused and complete states whose entries clear the feature, step and detail render levels and run handleDismissed, handlePaused and handleResume actions."
 
+### third-party-openbao-ui-app-macros
+
+- intent: "" -> "These macros exist so models and components can declare a capability lookup as a computed property and let the framework re-query it whenever the interpolated path inputs or the store change, without each caller hand-writing the query, the PromiseProxy wrapper, or the guard against firing a request while path parameters are still missing. apiPath exists as a local, assertion-free variant of the shared utils/api-path helper so the macro can build paths from a plain data object. identity-capabilities exists to give the identity model one canonical capabilities macro over its two-parameter path."
+- added `r.api-path-template` (MUST): "apiPath takes a tagged template's literal segments and key names and returns a function that rebuilds the string by interleaving the literal segments with the value of each named key read from the data argument; a null or undefined data argument is treated as an empty object so every key interpolates as undefined rather than throwing, and the segments are joined into a single string."
+- added `r.identity-capabilities-path` (MUST): "The default export of identity-capabilities returns a lazy capability computed property built from the apiPath template identity/${identityType}/id/${id}, declaring 'id' and 'identityType' as the interpolated keys so the capability id is `identity/<identityType>/id/<id>`."
+- added `r.lazy-capabilities-macro` (MUST): "The default export of lazy-capabilities takes a path template function followed by the key names it interpolates and returns a maybeQueryRecord computed property for the 'capabilities' model whose options function reads exactly those key names off the context; it drops null and undefined values from that read, and when the number of remaining non-empty values is less than the number of keys it returns undefined so no request is issued, otherwise it returns an object whose id is the template function evaluated against the non-empty context object."
+- added `r.maybe-query-record-computed` (MUST): "maybeQueryRecord returns an Ember computed property that depends on the supplied key names plus 'store', and its getter builds a PromiseProxy object whose promise is the result of store.queryRecord for the given model name and query, so consumers observe a pending/settled proxy rather than the raw promise."
+- added `r.maybe-query-record-optional-query` (MUST): "maybeQueryRecord accepts either an options object or a function as its second argument; a function is invoked with the computed property's context to produce the query, and when the resulting query is falsy the proxy resolves to an empty object instead of calling store.queryRecord."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4976,5 +4985,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-lib-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-machines-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-macros-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-macros-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-models-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

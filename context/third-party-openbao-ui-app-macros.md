@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+These macros exist so models and components can declare a capability lookup as a computed property and let the framework re-query it whenever the interpolated path inputs or the store change, without each caller hand-writing the query, the PromiseProxy wrapper, or the guard against firing a request while path parameters are still missing. apiPath exists as a local, assertion-free variant of the shared utils/api-path helper so the macro can build paths from a plain data object. identity-capabilities exists to give the identity model one canonical capabilities macro over its two-parameter path.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
