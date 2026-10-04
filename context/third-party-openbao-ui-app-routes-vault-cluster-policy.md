@@ -9,5 +9,7 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/ui/app/routes/vault/cluster/policy/edit.js` file edit.js (third_party/openbao/ui/app/routes/vault/cluster/policy/edit.js)
+- `file:third_party/openbao/ui/app/routes/vault/cluster/policy/index.js` file index.js (third_party/openbao/ui/app/routes/vault/cluster/policy/index.js)
+- `file:third_party/openbao/ui/app/routes/vault/cluster/policy/show.js` file show.js (third_party/openbao/ui/app/routes/vault/cluster/policy/show.js)
 <!-- SPECD_MANAGED_END -->
