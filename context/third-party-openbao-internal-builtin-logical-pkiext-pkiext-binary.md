@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the OpenBao PKI extension can exercise real ACME issuance against a real multi-node Vault/OpenBao cluster inside docker rather than against a mock. It provides the fixture layer: cluster bootstrap and topology inspection, DNS and host-file plumbing so ACME clients can resolve challenge domains, mount creation for PKI and ACME, and API-level operations for building certificate hierarchies and ACME configuration. The acme_test.go subtests are the consumers; everything here is test-support code guarded by the `BAO_BINARY` environment variable.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

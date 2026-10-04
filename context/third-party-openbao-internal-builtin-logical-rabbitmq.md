@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+It exists so an OpenBao mount can broker short lived RabbitMQ credentials instead of long lived static users: an operator stores a broker URI and credentials and a role's vhost/permissions, and each read of the creds path mints a new RabbitMQ user, hands the username and password to the caller, and removes that user when the lease ends. The context documents that contract: the factory wiring, the client cache, the lease and role lookups, and the metadata that makes revocation possible.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
