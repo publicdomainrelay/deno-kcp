@@ -10513,7 +10513,46 @@ system_contexts:
   - file:third_party/openbao/internal/builtin/logical/kubernetes/cmd/kubernetes/main.go
     main.go@third_party/openbao/internal/builtin/logical/kubernetes/cmd/kubernetes/main.go
   id: sc.third-party-openbao-internal-builtin-logical-kubernetes-cmd-kubernetes
+  intent: 'This context exists so the Kubernetes secrets engine can run as an external
+    OpenBao plugin process: a host launches the binary, passes TLS material and the
+    unwrap token through the plugin handshake, and the binary serves the kubernetes
+    logical backend over the plugin multiplex protocol. The context pins down the
+    entrypoint''s flag surface and its shutdown behavior, which are the only things
+    this file decides; all backend behavior lives in the imported kubernetes package.'
   name: third-party-openbao-internal-builtin-logical-kubernetes-cmd-kubernetes
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/cmd/kubernetes/main.go
+    id: r.config-surface
+    level: MUST
+    text: 'The entrypoint''s only configuration surface is the flag set returned by
+      api.PluginAPIClientMeta.FlagSet, parsed from os.Args[1:]; no environment variable
+      backs any of these flags, and each takes the Go zero value when absent: -ca-cert
+      (string, default ""), -ca-path (string, default ""), -client-cert (string, default
+      ""), -client-key (string, default ""), -tls-server-name (string, default ""),
+      and -tls-skip-verify (bool, default false). Values are read only through GetTLSConfig
+      after parsing.'
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/cmd/kubernetes/main.go
+    id: r.exit-nonzero-on-serve-failure
+    level: MUST
+    text: When plugin.ServeMultiplex returns a non-nil error, main must log it with
+      an hclog logger under the message "plugin shutting down" with the error attached,
+      and must exit with status 1.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/cmd/kubernetes/main.go
+    id: r.serve-kubernetes-backend-as-plugin
+    level: MUST
+    text: main must serve the kubernetes logical backend as a plugin by calling plugin.ServeMultiplex
+      with ServeOpts whose BackendFactoryFunc is kubesecrets.Factory, so the process
+      exposes the kubernetes secrets engine rather than any other backend.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/cmd/kubernetes/main.go
+    id: r.tls-provider-for-automtls-backcompat
+    level: MUST
+    text: main must set ServeOpts.TLSProviderFunc to api.VaultPluginTLSProvider(tlsConfig)
+      derived from api.PluginAPIClientMeta.GetTLSConfig, so the plugin keeps backwards
+      compatibility with host versions that do not support plugin AutoMTLS.
   upstream: self
 - code:
   - third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/creds_integration_test.go

@@ -679,6 +679,14 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.single-namespace-detection` (MUST): "roleEntry.HasSingleK8sNamespace reports true only when the role's namespace label selector is empty and exactly one namespace is configured, and that namespace is neither empty nor the wildcard "*"."
 - added `r.wal-rollback` (MUST): "Credential creation records a write-ahead log entry that carries the information needed to roll the created Kubernetes objects back, so interrupted issuance can be cleaned up on recovery."
 
+### third-party-openbao-internal-builtin-logical-kubernetes-cmd-kubernetes
+
+- intent: "" -> "This context exists so the Kubernetes secrets engine can run as an external OpenBao plugin process: a host launches the binary, passes TLS material and the unwrap token through the plugin handshake, and the binary serves the kubernetes logical backend over the plugin multiplex protocol. The context pins down the entrypoint's flag surface and its shutdown behavior, which are the only things this file decides; all backend behavior lives in the imported kubernetes package."
+- added `r.config-surface` (MUST): "The entrypoint's only configuration surface is the flag set returned by api.PluginAPIClientMeta.FlagSet, parsed from os.Args[1:]; no environment variable backs any of these flags, and each takes the Go zero value when absent: -ca-cert (string, default ""), -ca-path (string, default ""), -client-cert (string, default ""), -client-key (string, default ""), -tls-server-name (string, default ""), and -tls-skip-verify (bool, default false). Values are read only through GetTLSConfig after parsing."
+- added `r.exit-nonzero-on-serve-failure` (MUST): "When plugin.ServeMultiplex returns a non-nil error, main must log it with an hclog logger under the message "plugin shutting down" with the error attached, and must exit with status 1."
+- added `r.serve-kubernetes-backend-as-plugin` (MUST): "main must serve the kubernetes logical backend as a plugin by calling plugin.ServeMultiplex with ServeOpts whose BackendFactoryFunc is kubesecrets.Factory, so the process exposes the kubernetes secrets engine rather than any other backend."
+- added `r.tls-provider-for-automtls-backcompat` (MUST): "main must set ServeOpts.TLSProviderFunc to api.VaultPluginTLSProvider(tlsConfig) derived from api.PluginAPIClientMeta.GetTLSConfig, so the plugin keeps backwards compatibility with host versions that do not support plugin AutoMTLS."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -686,5 +694,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-builtin-logical-database-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-database-dbplugin-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-kubernetes-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-builtin-logical-kubernetes-cmd-kubernetes-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-builtin-logical-kubernetes-cmd-kubernetes-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-kubernetes-integrationtest-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |

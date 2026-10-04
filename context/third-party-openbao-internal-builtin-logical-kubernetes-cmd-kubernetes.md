@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the Kubernetes secrets engine can run as an external OpenBao plugin process: a host launches the binary, passes TLS material and the unwrap token through the plugin handshake, and the binary serves the kubernetes logical backend over the plugin multiplex protocol. The context pins down the entrypoint's flag surface and its shutdown behavior, which are the only things this file decides; all backend behavior lives in the imported kubernetes package.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
