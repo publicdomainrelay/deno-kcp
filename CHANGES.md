@@ -5646,6 +5646,17 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.export-default-helper-class` (MUST): "The module must default-export a class named CurrentMountPathHelper that extends Ember's Helper base class, so the Kubernetes addon's template resolver can look it up as the current-mount-path helper."
 - added `r.inject-secret-mount-path-service` (MUST): "The class must declare a secretMountPath property injected via the @service decorator, so the helper reads mount state from the shared service instead of holding its own copy."
 
+### third-party-openbao-ui-lib-kubernetes-addon-routes-roles
+
+- intent: "" -> "This context exists to specify the routing and data-loading behaviour of the Kubernetes roles section of the OpenBao UI addon: how the roles index route discovers and filters roles for a mounted secrets backend, how the create route prepares a new empty role record, and how each route sets up the controller with the right breadcrumbs. It gives a downstream reader or generator the contract each route must satisfy without needing to read the whole UI addon."
+- added `r.roles-create-breadcrumbs` (MUST): "KubernetesRolesCreateRoute.setupController must call super.setupController and then set controller.breadcrumbs to three entries: the backend as an 'overview' route link with models [resolvedModel.backend], 'roles' as a 'roles' route link with models [resolvedModel.backend], and a final unlinked 'create' entry."
+- added `r.roles-create-model-new-record` (MUST): "KubernetesRolesCreateRoute.model must read the backend path from the secretMountPath service and return a newly created, unsaved 'kubernetes/role' record whose backend attribute is that path, so the create form edits an unpersisted role."
+- added `r.roles-index-404-becomes-empty` (MUST): "When the roles query rejects with an error whose httpStatus is 404, KubernetesRolesRoute.model must resolve to an empty array instead of failing; any other error must be rethrown so the route still fails for genuine errors."
+- added `r.roles-index-breadcrumbs` (MUST): "KubernetesRolesRoute.setupController must call super.setupController and then set controller.breadcrumbs to a secrets entry (label 'secrets', route 'secrets', linkExternal true) followed by an entry labelled with resolvedModel.backend.id."
+- added `r.roles-index-model-queries-store` (MUST): "KubernetesRolesRoute.model must read the pageFilter value from transition.to.queryParams and query the store for 'kubernetes/role' records with backend set to the value returned by the secretMountPath service; when pageFilter is present it must filter the resolved models to those whose name lowercased contains the pageFilter lowercased, otherwise it must return all models unchanged."
+- added `r.roles-index-model-returns-hash` (MUST): "KubernetesRolesRoute.model must return a hash containing backend (the result of modelFor('application')), promptConfig, and the roles promise, so the controller receives the application model, the prompt configuration, and the role list together."
+- added `r.roles-routes-inject-services` (MUST): "Both KubernetesRolesRoute and KubernetesRolesCreateRoute must inject the store and secretMountPath services, and both must extend the shared Route base class so the default route hooks remain available."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
