@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the login MFA enforcement routes are described as they are written: which record type each route reads or builds, what route parameter the detail route consumes, and how the list route treats a missing enforcement collection. It anchors downstream work on the enforcement list, create, and detail screens to the route classes that supply their models, and records the one non-obvious behavior in the group, the 404-to-empty-array fallback in the index query.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

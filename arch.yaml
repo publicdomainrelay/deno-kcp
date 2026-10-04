@@ -66279,6 +66279,9 @@ system_contexts:
   - third_party/openbao/ui/app/routes/vault/cluster/access/mfa/enforcements/enforcement.js
   - third_party/openbao/ui/app/routes/vault/cluster/access/mfa/enforcements/index.js
   codeRefIndex:
+  - class:75cf9590dfb1bbc040d1b61410ea6455 MfaLoginEnforcementRoute@third_party/openbao/ui/app/routes/vault/cluster/access/mfa/enforcements/enforcement.js:9
+  - class:bfba4f6e717fca795d4881a93d8b0436 MfaEnforcementsRoute@third_party/openbao/ui/app/routes/vault/cluster/access/mfa/enforcements/index.js:9
+  - class:d1209001e9ce4a6fa69925e696609aef MfaLoginEnforcementCreateRoute@third_party/openbao/ui/app/routes/vault/cluster/access/mfa/enforcements/create.js:9
   - file:third_party/openbao/ui/app/routes/vault/cluster/access/mfa/enforcements/create.js
     create.js@third_party/openbao/ui/app/routes/vault/cluster/access/mfa/enforcements/create.js
   - file:third_party/openbao/ui/app/routes/vault/cluster/access/mfa/enforcements/enforcement.js
@@ -66286,7 +66289,73 @@ system_contexts:
   - file:third_party/openbao/ui/app/routes/vault/cluster/access/mfa/enforcements/index.js
     index.js@third_party/openbao/ui/app/routes/vault/cluster/access/mfa/enforcements/index.js
   id: sc.third-party-openbao-ui-app-routes-vault-cluster-access-mfa-enforcements
+  intent: 'This context exists so the login MFA enforcement routes are described as
+    they are written: which record type each route reads or builds, what route parameter
+    the detail route consumes, and how the list route treats a missing enforcement
+    collection. It anchors downstream work on the enforcement list, create, and detail
+    screens to the route classes that supply their models, and records the one non-obvious
+    behavior in the group, the 404-to-empty-array fallback in the index query.'
+  interfaces:
+  - file: third_party/openbao/ui/app/routes/vault/cluster/access/mfa/enforcements/index.js
+    kind: class
+    name: MfaEnforcementsRoute
+    signature: class MfaEnforcementsRoute extends Route
+  - file: third_party/openbao/ui/app/routes/vault/cluster/access/mfa/enforcements/create.js
+    kind: class
+    name: MfaLoginEnforcementCreateRoute
+    signature: class MfaLoginEnforcementCreateRoute extends Route
+  - file: third_party/openbao/ui/app/routes/vault/cluster/access/mfa/enforcements/enforcement.js
+    kind: class
+    name: MfaLoginEnforcementRoute
+    signature: class MfaLoginEnforcementRoute extends Route
   name: third-party-openbao-ui-app-routes-vault-cluster-access-mfa-enforcements
+  requirements:
+  - codeRefs:
+    - class:d1209001e9ce4a6fa69925e696609aef
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/mfa/enforcements/create.js
+    id: r.create-builds-new-record
+    level: MUST
+    text: MfaLoginEnforcementCreateRoute.model creates and returns a new unsaved `mfa-login-enforcement`
+      record, with no store lookup performed.
+  - codeRefs:
+    - class:75cf9590dfb1bbc040d1b61410ea6455
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/mfa/enforcements/enforcement.js
+    id: r.enforcement-finds-by-name
+    level: MUST
+    text: MfaLoginEnforcementRoute.model destructures the `name` route parameter and
+      returns the result of `findRecord('mfa-login-enforcement', name)`, so the detail
+      screen is keyed by the enforcement name in the URL.
+  - codeRefs:
+    - class:bfba4f6e717fca795d4881a93d8b0436
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/mfa/enforcements/index.js
+    id: r.index-404-falls-back-to-empty
+    level: MUST
+    text: When the enforcement query rejects with `err.httpStatus === 404`, the index
+      model hook returns an empty array instead of rethrowing; any other rejection
+      is rethrown unchanged.
+  - codeRefs:
+    - class:bfba4f6e717fca795d4881a93d8b0436
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/mfa/enforcements/index.js
+    id: r.index-model-queries-enforcements
+    level: MUST
+    text: MfaEnforcementsRoute.model queries the `mfa-login-enforcement` record type
+      with an empty query object and returns the resulting collection as the route
+      model.
+  - codeRefs:
+    - class:bfba4f6e717fca795d4881a93d8b0436
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/mfa/enforcements/index.js
+    id: r.index-sets-controller-model
+    level: MUST
+    text: MfaEnforcementsRoute.setupController sets the resolved `model` on the controller
+      so the enforcement list template reads it from the controller.
+  - codeRefs:
+    - class:75cf9590dfb1bbc040d1b61410ea6455
+    - class:bfba4f6e717fca795d4881a93d8b0436
+    - class:d1209001e9ce4a6fa69925e696609aef
+    id: r.routes-inject-store
+    level: MUST
+    text: All three route classes inject the Ember Data `store` service and reach
+      the backend only through that injected store.
   upstream: self
 - code:
   - third_party/openbao/ui/app/routes/vault/cluster/access/mfa/enforcements/enforcement/edit.js

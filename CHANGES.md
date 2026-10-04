@@ -4927,6 +4927,16 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.services-injected` (MUST): "`MfaConfigureRoute` must obtain its dependencies through Ember service injection: `store` for the model query and `router` for the redirect, with no direct module imports of the store or router instances."
 - added `r.stay-when-query-fails` (MUST): "When the `mfa-method` query rejects, `beforeModel` must swallow the rejection and leave the operator on the configure landing page; no transition happens and no error propagates from the hook."
 
+### third-party-openbao-ui-app-routes-vault-cluster-access-mfa-enforcements
+
+- intent: "" -> "This context exists so the login MFA enforcement routes are described as they are written: which record type each route reads or builds, what route parameter the detail route consumes, and how the list route treats a missing enforcement collection. It anchors downstream work on the enforcement list, create, and detail screens to the route classes that supply their models, and records the one non-obvious behavior in the group, the 404-to-empty-array fallback in the index query."
+- added `r.create-builds-new-record` (MUST): "MfaLoginEnforcementCreateRoute.model creates and returns a new unsaved `mfa-login-enforcement` record, with no store lookup performed."
+- added `r.enforcement-finds-by-name` (MUST): "MfaLoginEnforcementRoute.model destructures the `name` route parameter and returns the result of `findRecord('mfa-login-enforcement', name)`, so the detail screen is keyed by the enforcement name in the URL."
+- added `r.index-404-falls-back-to-empty` (MUST): "When the enforcement query rejects with `err.httpStatus === 404`, the index model hook returns an empty array instead of rethrowing; any other rejection is rethrown unchanged."
+- added `r.index-model-queries-enforcements` (MUST): "MfaEnforcementsRoute.model queries the `mfa-login-enforcement` record type with an empty query object and returns the resulting collection as the route model."
+- added `r.index-sets-controller-model` (MUST): "MfaEnforcementsRoute.setupController sets the resolved `model` on the controller so the enforcement list template reads it from the controller."
+- added `r.routes-inject-store` (MUST): "All three route classes inject the Ember Data `store` service and reach the backend only through that injected store."
+
 ### third-party-openbao-ui-app-routes-vault-cluster-access-mfa-enforcements-enforcement
 
 - intent: "" -> "This context exists to record the edit route of the cluster access MFA login enforcement resource in the OpenBao UI, so that the route hierarchy and the extensions of Ember's Route class in that part of the app are documented as they are, not as they might be refactored. It matters because a route with an empty class body is a deliberate statement: the edit screen relies entirely on the framework's default route behavior and on the route's position in the router map, so any future change to the model loading or controller setup for that screen has to be introduced here rather than assumed to already exist."
@@ -5340,6 +5350,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-routes-vault-cluster-access-mfa-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-mfa-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-mfa-enforcements-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-routes-vault-cluster-access-mfa-enforcements-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-mfa-enforcements-enforcement-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-mfa-methods-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
