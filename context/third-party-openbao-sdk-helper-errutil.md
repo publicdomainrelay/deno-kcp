@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so that calling code can tag an error as either the caller's fault or the server's fault without depending on the full OpenBao SDK. Certificate creation in certutil needs exactly this split: invalid Not Before / Not After parameters must be reported to the requester as a UserError, while a failure to compute a subject key ID must be reported as an InternalError. Keeping the vendored types in third_party preserves a drop-in match with the upstream OpenBao SDK helper so that adjacent vendored packages, chiefly certutil, compile and type-assert against the same package path and names. The spec pins only what this file must keep true for that compatibility to hold: two exported structs, one exported string field each, and one Error method each that returns the field unchanged.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

@@ -46040,8 +46040,104 @@ system_contexts:
   - third_party/openbao/sdk/helper/errutil/error.go
   codeRefIndex:
   - file:third_party/openbao/sdk/helper/errutil/error.go error.go@third_party/openbao/sdk/helper/errutil/error.go
+  - method:9dc058a0b93a096517b7cf7d99b84bf9 InternalError.Error@third_party/openbao/sdk/helper/errutil/error.go:21
+  - method:c005f97d9637c6ba6d1f4e44eab1ae4c UserError.Error@third_party/openbao/sdk/helper/errutil/error.go:11
+  - struct:0e0f46591e5e44fa46b17ca1d4f2b33a InternalError@third_party/openbao/sdk/helper/errutil/error.go:17
+  - struct:58cac1ec3c195633337fd829177a9cf5 UserError@third_party/openbao/sdk/helper/errutil/error.go:7
   id: sc.third-party-openbao-sdk-helper-errutil
+  intent: 'The context exists so that calling code can tag an error as either the
+    caller''s fault or the server''s fault without depending on the full OpenBao SDK.
+    Certificate creation in certutil needs exactly this split: invalid Not Before
+    / Not After parameters must be reported to the requester as a UserError, while
+    a failure to compute a subject key ID must be reported as an InternalError. Keeping
+    the vendored types in third_party preserves a drop-in match with the upstream
+    OpenBao SDK helper so that adjacent vendored packages, chiefly certutil, compile
+    and type-assert against the same package path and names. The spec pins only what
+    this file must keep true for that compatibility to hold: two exported structs,
+    one exported string field each, and one Error method each that returns the field
+    unchanged.'
+  interfaces:
+  - file: third_party/openbao/sdk/helper/errutil/error.go
+    kind: struct
+    name: InternalError
+    signature: type InternalError struct { Err string }
+  - file: third_party/openbao/sdk/helper/errutil/error.go
+    kind: method
+    name: InternalError.Error
+    signature: func (e InternalError) Error() string
+  - file: third_party/openbao/sdk/helper/errutil/error.go
+    kind: struct
+    name: UserError
+    signature: type UserError struct { Err string }
+  - file: third_party/openbao/sdk/helper/errutil/error.go
+    kind: method
+    name: UserError.Error
+    signature: func (e UserError) Error() string
   name: third-party-openbao-sdk-helper-errutil
+  requirements:
+  - codeRefs:
+    - method:9dc058a0b93a096517b7cf7d99b84bf9
+    - method:c005f97d9637c6ba6d1f4e44eab1ae4c
+    id: r.error-methods-use-value-receiver
+    level: SHOULD
+    text: Both Error methods should stay on value receivers, not pointer receivers,
+      so that a UserError or InternalError value is itself an error and callers can
+      return the struct literal directly without taking its address.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/errutil/error.go
+    - struct:0e0f46591e5e44fa46b17ca1d4f2b33a
+    id: r.internal-error-carries-message
+    level: MUST
+    text: 'InternalError must be an exported struct in package errutil with a single
+      exported field Err of type string, so that callers can construct it with a composite
+      literal such as errutil.InternalError{Err: msg} and read the message back from
+      the field.'
+  - codeRefs:
+    - method:9dc058a0b93a096517b7cf7d99b84bf9
+    - struct:0e0f46591e5e44fa46b17ca1d4f2b33a
+    id: r.internal-error-implements-error
+    level: MUST
+    text: InternalError must satisfy the standard error interface by defining Error()
+      string on a value receiver that returns the Err field unchanged, with no prefix,
+      wrapping, or reformatting, so callers can return it directly as an error whose
+      text is exactly the string they set.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/errutil/error.go
+    id: r.no-message-interpretation
+    level: MAY
+    text: The package may stay free of constructors, Unwrap methods, error chaining,
+      and message formatting; building the message text with fmt.Sprintf before assigning
+      it to Err remains the caller's job, as certutil does.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/errutil/error.go
+    - struct:0e0f46591e5e44fa46b17ca1d4f2b33a
+    - struct:58cac1ec3c195633337fd829177a9cf5
+    id: r.two-distinct-fault-types
+    level: MUST
+    text: The package must keep UserError and InternalError as two separate types
+      rather than one, because calling code branches on the concrete type to decide
+      whether the fault belongs to the requester or to the server; certutil returns
+      errutil.UserError when the certificate Not Before time is later than or equal
+      to Not After, and returns errutil.InternalError when the subject key ID cannot
+      be derived.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/errutil/error.go
+    - struct:58cac1ec3c195633337fd829177a9cf5
+    id: r.user-error-carries-message
+    level: MUST
+    text: 'UserError must be an exported struct in package errutil with a single exported
+      field Err of type string, so that callers can construct it with a composite
+      literal such as errutil.UserError{Err: msg} and read the message back from the
+      field.'
+  - codeRefs:
+    - method:c005f97d9637c6ba6d1f4e44eab1ae4c
+    - struct:58cac1ec3c195633337fd829177a9cf5
+    id: r.user-error-implements-error
+    level: MUST
+    text: UserError must satisfy the standard error interface by defining Error()
+      string on a value receiver that returns the Err field unchanged, with no prefix,
+      wrapping, or reformatting, so callers can return it directly as an error whose
+      text is exactly the string they set.
   upstream: self
 - code:
   - third_party/openbao/sdk/helper/hclutil/hcl.go

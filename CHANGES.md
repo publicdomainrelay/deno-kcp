@@ -3127,6 +3127,17 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.prepared-execution-releases-resources` (MUST): "ExecuteDBQuery and ExecuteTxQuery must prepare the parsed query with the caller's context, defer the close of the returned statement, and then run the statement through the shared execute helper, so the statement is always released after one execution."
 - added `r.single-statement-only` (SHOULD): "Each helper should carry exactly one statement: the package exposes no multi-statement or transaction-lifecycle API, so callers manage Begin and Commit themselves and use these helpers only for the individual statements inside a transaction."
 
+### third-party-openbao-sdk-helper-errutil
+
+- intent: "" -> "The context exists so that calling code can tag an error as either the caller's fault or the server's fault without depending on the full OpenBao SDK. Certificate creation in certutil needs exactly this split: invalid Not Before / Not After parameters must be reported to the requester as a UserError, while a failure to compute a subject key ID must be reported as an InternalError. Keeping the vendored types in third_party preserves a drop-in match with the upstream OpenBao SDK helper so that adjacent vendored packages, chiefly certutil, compile and type-assert against the same package path and names. The spec pins only what this file must keep true for that compatibility to hold: two exported structs, one exported string field each, and one Error method each that returns the field unchanged."
+- added `r.error-methods-use-value-receiver` (SHOULD): "Both Error methods should stay on value receivers, not pointer receivers, so that a UserError or InternalError value is itself an error and callers can return the struct literal directly without taking its address."
+- added `r.internal-error-carries-message` (MUST): "InternalError must be an exported struct in package errutil with a single exported field Err of type string, so that callers can construct it with a composite literal such as errutil.InternalError{Err: msg} and read the message back from the field."
+- added `r.internal-error-implements-error` (MUST): "InternalError must satisfy the standard error interface by defining Error() string on a value receiver that returns the Err field unchanged, with no prefix, wrapping, or reformatting, so callers can return it directly as an error whose text is exactly the string they set."
+- added `r.no-message-interpretation` (MAY): "The package may stay free of constructors, Unwrap methods, error chaining, and message formatting; building the message text with fmt.Sprintf before assigning it to Err remains the caller's job, as certutil does."
+- added `r.two-distinct-fault-types` (MUST): "The package must keep UserError and InternalError as two separate types rather than one, because calling code branches on the concrete type to decide whether the fault belongs to the requester or to the server; certutil returns errutil.UserError when the certificate Not Before time is later than or equal to Not After, and returns errutil.InternalError when the subject key ID cannot be derived."
+- added `r.user-error-carries-message` (MUST): "UserError must be an exported struct in package errutil with a single exported field Err of type string, so that callers can construct it with a composite literal such as errutil.UserError{Err: msg} and read the message back from the field."
+- added `r.user-error-implements-error` (MUST): "UserError must satisfy the standard error interface by defining Error() string on a value receiver that returns the Err field unchanged, with no prefix, wrapping, or reformatting, so callers can return it directly as an error whose text is exactly the string they set."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -3354,4 +3365,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-sdk-helper-custommetadata-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-dbtxn-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-docker-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-sdk-helper-errutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-helper-errutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-sdk-helper-errutil-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
