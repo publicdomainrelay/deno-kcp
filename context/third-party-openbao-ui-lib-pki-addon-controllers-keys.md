@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the PKI keys index page has a controller that exposes the engine mount point to its route's templates. Rather than threading the mount path down from the route or recomputing it at each use site, the controller resolves it once from the Ember owner and publishes it as a property, keeping the keys index UI decoupled from how the PKI engine was mounted.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

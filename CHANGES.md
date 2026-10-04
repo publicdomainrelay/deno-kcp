@@ -5827,6 +5827,12 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.extend-ember-controller` (MUST): "PkiIssuerIndexController must extend Ember's Controller base class and be exported as the default export of the issuers index controller module, so Ember's resolver can bind it to the issuers/index route."
 - added `r.mount-point-from-owner` (MUST): "The mountPoint getter must return the Ember owner's mountPoint obtained via getOwner(this), so the controller exposes the engine mount path of the surrounding addon."
 
+### third-party-openbao-ui-lib-pki-addon-controllers-keys
+
+- intent: "" -> "This context exists so the PKI keys index page has a controller that exposes the engine mount point to its route's templates. Rather than threading the mount path down from the route or recomputing it at each use site, the controller resolves it once from the Ember owner and publishes it as a property, keeping the keys index UI decoupled from how the PKI engine was mounted."
+- added `r.controller-default-export` (MUST): "The file default-exports PkiKeysIndexController, a subclass of Ember's Controller, so the PKI keys index route resolves it as its controller."
+- added `r.mount-point-from-owner` (MUST): "PkiKeysIndexController exposes a mountPoint getter that resolves the mount point by calling getOwner(this).mountPoint, so consumers read the PKI engine mount path from the controller instead of passing it in."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -6344,7 +6350,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-pki-addon-components-page-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-controllers-certificates-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-controllers-issuers-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-lib-pki-addon-controllers-keys-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-pki-addon-controllers-keys-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-controllers-roles-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
