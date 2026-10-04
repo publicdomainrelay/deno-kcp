@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-This file exists as an external (black-box, HTTP-level) acceptance test of the response-header allow-list feature: it verifies that a plugin mount cannot leak arbitrary HTTP response headers to clients, and that an operator can opt a specific header back in through the mount's allowed_response_headers tuning, including with different letter casing. It is an upstream OpenBao test vendored under third_party/ in this repository, so it documents the observed behaviour of the vendored vault HTTP handler, not behaviour authored in this repo.
+This context exists to pin down the observable contract of the response-header allow-list in the vendored third_party/openbao vault HTTP handler, independent of this repository's own code: a plugin mount must not be able to leak arbitrary HTTP response headers to clients, and an operator must be able to opt a specific header back in per mount through the allowed_response_headers tuning, including when the configured casing differs from the emitted casing. Because the file is an external black-box test that speaks only over the HTTP API (client.Logical().ReadRaw, client.Sys().TuneMount) and not over internal Go packages, it documents the behaviour the vendored handler is expected to preserve across upstream updates rather than behaviour authored in this repo.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

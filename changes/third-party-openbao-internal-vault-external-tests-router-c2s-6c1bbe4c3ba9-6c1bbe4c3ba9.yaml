@@ -10,5 +10,15 @@ spec:
   systemContext: third-party-openbao-internal-vault-external-tests-router
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-vault-external-tests-router
-  phase: Running
+  agentLog: This context is the external router test package at third_party/openbao/internal/vault/external_tests/router/router_ext_test.go,
+    the only file in its directory. It holds two black-box tests that drive a real
+    in-process Vault/OpenBao test cluster through the HTTP API rather than calling
+    the router directly, so the routing layer is exercised through its public surface.
+    TestRouter_MountSubpath_Checks runs testRouter_MountSubpath with three orderings
+    of nested mount points under the "a/" subpath, mounting a userpass auth backend
+    and a pki secrets backend at each path and then sealing and unsealing every core.
+    TestRouter_UnmountRollbackIsntFatal mounts the noop backend built from backend.NoopBackendRollbackErrFactory,
+    whose periodic rollback fails on purpose, then reloads and remounts it to prove
+    that a broken rollback function does not make those operations fatal.
+  message: wrote 6 requirement(s) and 0 interface(s) for third-party-openbao-internal-vault-external-tests-router
+  phase: Succeeded
