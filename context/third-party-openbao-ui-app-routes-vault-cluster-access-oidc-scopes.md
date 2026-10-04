@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-The context exists to pin down the routing surface for OIDC scope management in the OpenBao web UI: which route classes exist for the list, create, and detail screens, how each obtains its Ember Data model from the injected store, and what parameters the detail route receives. It gives a specification of the observed router hooks so that changes to the OIDC scope screens keep the same store-backed model contract, and so anyone porting or reimplementing these screens knows that the create route hands out a client-side new `oidc/scope` record rather than a fetched one.
+This context pins down the routing and model-resolution contract for the OIDC scope list, create, and detail screens in the OpenBao UI so that changes to those screens, or a port of them, keep the same store-backed model contract. It records that the create route hands out a client-side `oidc/scope` record rather than a fetched one, that the index route resolves its model with no parameters, and that the detail route is keyed on a `{ name }` parameter taken from the URL. It exists to make the three route classes, their injected `store` service, and their `model` hook shapes explicitly specified rather than implicit in the source.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

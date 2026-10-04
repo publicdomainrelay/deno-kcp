@@ -67418,23 +67418,36 @@ system_contexts:
   - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope.js
     scope.js@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope.js
   id: sc.third-party-openbao-ui-app-routes-vault-cluster-access-oidc-scopes
-  intent: 'The context exists to pin down the routing surface for OIDC scope management
-    in the OpenBao web UI: which route classes exist for the list, create, and detail
-    screens, how each obtains its Ember Data model from the injected store, and what
-    parameters the detail route receives. It gives a specification of the observed
-    router hooks so that changes to the OIDC scope screens keep the same store-backed
-    model contract, and so anyone porting or reimplementing these screens knows that
-    the create route hands out a client-side new `oidc/scope` record rather than a
-    fetched one.'
+  intent: This context pins down the routing and model-resolution contract for the
+    OIDC scope list, create, and detail screens in the OpenBao UI so that changes
+    to those screens, or a port of them, keep the same store-backed model contract.
+    It records that the create route hands out a client-side `oidc/scope` record rather
+    than a fetched one, that the index route resolves its model with no parameters,
+    and that the detail route is keyed on a `{ name }` parameter taken from the URL.
+    It exists to make the three route classes, their injected `store` service, and
+    their `model` hook shapes explicitly specified rather than implicit in the source.
+  interfaces:
+  - file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope.js
+    kind: class
+    name: OidcScopeRoute
+    signature: class OidcScopeRoute extends Route
+  - file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/create.js
+    kind: class
+    name: OidcScopesCreateRoute
+    signature: class OidcScopesCreateRoute extends Route
+  - file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/index.js
+    kind: class
+    name: OidcScopesRoute
+    signature: class OidcScopesRoute extends Route
   name: third-party-openbao-ui-app-routes-vault-cluster-access-oidc-scopes
   requirements:
   - codeRefs:
     - class:71b1fd9421b5a5c4c1980994eef2a999
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/create.js
-    id: r.create-route-new-record
+    id: r.create-route-unsaved-record
     level: MUST
-    text: OidcScopesCreateRoute.model must return a new, unsaved oidc/scope record
-      created through the injected store service (store.createRecord('oidc/scope')),
+    text: OidcScopesCreateRoute.model must take no parameters and return a new, unsaved
+      oidc/scope record obtained from the injected store service via store.createRecord('oidc/scope'),
       so the create screen edits a client-side record instead of a server-fetched
       one.
   - codeRefs:
@@ -67443,25 +67456,26 @@ system_contexts:
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope.js
     id: r.default-export-route-class
     level: MUST
-    text: Each of the three files must default-export a single class extending the
-      Ember Route base class (OidcScopesCreateRoute, OidcScopesRoute, OidcScopeRoute
-      respectively) so the router can resolve them as the create, index, and detail
-      routes of the OIDC scopes resource.
+    text: Each of the three files must default-export exactly one class extending
+      the Ember Route base class — OidcScopesCreateRoute from create.js, OidcScopesRoute
+      from index.js, and OidcScopeRoute from scope.js — and export nothing else, so
+      the router can resolve them as the create, index, and detail routes of the OIDC
+      scopes resource.
   - codeRefs:
     - class:de9f6d7acd51217b2ef9cb3fa176a5b0
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/index.js
     id: r.index-route-model-hook
     level: MUST
     text: OidcScopesRoute must override the model hook with no parameters and supply
-      the model for the OIDC scopes index screen from the injected store service.
+      the model for the OIDC scopes index (list) screen from the injected store service.
   - codeRefs:
     - class:271c3c6841cd1868b8eab40c1a455c38
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope.js
     id: r.scope-route-name-param
     level: MUST
     text: OidcScopeRoute.model must accept a destructured { name } parameter, taking
-      the scope name from the route's dynamic segment, and use it to resolve the single
-      scope model for the detail screen through the injected store service.
+      the scope name from the route's dynamic segment, and use that name to resolve
+      the single scope model for the detail screen through the injected store service.
   - codeRefs:
     - class:271c3c6841cd1868b8eab40c1a455c38
     - class:71b1fd9421b5a5c4c1980994eef2a999
@@ -67469,8 +67483,9 @@ system_contexts:
     id: r.store-service-injection
     level: MUST
     text: Each of the three scope route classes must declare the store service as
-      an injected service property, so the model hooks resolve records against the
-      application's Ember Data store rather than any other data source.
+      an injected service property named store, so that every model hook resolves
+      records against the application's Ember Data store rather than any other data
+      source.
   upstream: self
 - code:
   - third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope/details.js
@@ -67484,12 +67499,11 @@ system_contexts:
     edit.js@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope/edit.js
   id: sc.third-party-openbao-ui-app-routes-vault-cluster-access-oidc-scopes-scope
   intent: 'These modules exist to give the OIDC scope details and edit URLs a resolvable
-    route class in the Ember router map. The context is described here so the spec
-    records that the two classes are intentionally empty Route subclasses: any behavior
-    seen on those screens comes from the Route superclass and the corresponding controllers
-    and templates, not from route-level code. The spec fixes that contract so later
-    edits know an empty subclass is the current, deliberate state rather than an unfinished
-    stub.'
+    route class in the Ember router map. The context documents that the two classes
+    are intentionally empty Route subclasses: any behavior seen on those screens comes
+    from the Route superclass and the corresponding controllers and templates, not
+    from route-level code. The spec fixes that contract so later edits know an empty
+    subclass is the current, deliberate state rather than an unfinished stub.'
   interfaces:
   - file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope/details.js
     kind: class
@@ -67508,23 +67522,24 @@ system_contexts:
     level: MUST
     text: details.js MUST declare OidcScopeDetailsRoute as a class extending Ember's
       Route with an empty body, so the OIDC scope details route inherits every hook
-      from Route and overrides none of them.
+      and lifecycle method from Route and overrides none of them.
   - codeRefs:
     - class:f84eedeee8c419f5ccb0c11400b1b8f8
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope/edit.js
     id: r.edit-route-is-empty-route-subclass
     level: MUST
     text: edit.js MUST declare OidcScopeEditRoute as a class extending Ember's Route
-      with an empty body, so the OIDC scope edit route inherits every hook from Route
-      and overrides none of them.
+      with an empty body, so the OIDC scope edit route inherits every hook and lifecycle
+      method from Route and overrides none of them.
   - codeRefs:
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope/details.js
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope/edit.js
     id: r.one-route-class-per-module
     level: MUST
-    text: Each route file MUST contain only its single route class and MUST NOT add
+    text: Each route file MUST contain only its single route class and MUST NOT declare
       model, beforeModel, afterModel, setupController, redirect or action members,
-      so scope data loading and mutation stay in the controller and adapter layers.
+      so scope data loading and mutation stay in the controller and adapter layers
+      instead of route-level code.
   - codeRefs:
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope/details.js
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope/edit.js
@@ -67540,7 +67555,8 @@ system_contexts:
     level: MUST
     text: Each route module MUST expose its class as the module's default export,
       because the Ember resolver locates route classes by file path and default export
-      rather than by named import.
+      rather than by named import; OidcScopeDetailsRoute is the default export of
+      details.js and OidcScopeEditRoute is the default export of edit.js.
   upstream: self
 - code:
   - third_party/openbao/ui/app/routes/vault/cluster/policies/create.js

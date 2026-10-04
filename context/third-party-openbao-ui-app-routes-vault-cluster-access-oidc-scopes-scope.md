@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-These modules exist to give the OIDC scope details and edit URLs a resolvable route class in the Ember router map. The context is described here so the spec records that the two classes are intentionally empty Route subclasses: any behavior seen on those screens comes from the Route superclass and the corresponding controllers and templates, not from route-level code. The spec fixes that contract so later edits know an empty subclass is the current, deliberate state rather than an unfinished stub.
+These modules exist to give the OIDC scope details and edit URLs a resolvable route class in the Ember router map. The context documents that the two classes are intentionally empty Route subclasses: any behavior seen on those screens comes from the Route superclass and the corresponding controllers and templates, not from route-level code. The spec fixes that contract so later edits know an empty subclass is the current, deliberate state rather than an unfinished stub.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
