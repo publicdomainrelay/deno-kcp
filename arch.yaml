@@ -45600,8 +45600,183 @@ system_contexts:
   - file:third_party/openbao/sdk/helper/consts/proxy.go proxy.go@third_party/openbao/sdk/helper/consts/proxy.go
   - file:third_party/openbao/sdk/helper/consts/replication.go replication.go@third_party/openbao/sdk/helper/consts/replication.go
   - file:third_party/openbao/sdk/helper/consts/token_consts.go token_consts.go@third_party/openbao/sdk/helper/consts/token_consts.go
+  - function:b06db33048aa54f8f98977535f4e91b1 ParsePluginType@third_party/openbao/sdk/helper/consts/plugin_types.go:57
+  - method:64d67f41e41a0df76d54cb869a8d6f08 ReplicationState.GetDRString@third_party/openbao/sdk/helper/consts/replication.go:115
+  - method:6d7379614118cf626e8ea41acda37ac8 ReplicationState.StateStrings@third_party/openbao/sdk/helper/consts/replication.go:82
+  - method:84a38dabdcb15fe92172b46fa5303d31 ReplicationState.ToggleState@third_party/openbao/sdk/helper/consts/replication.go:152
+  - method:8a41ac131e1d78566490e6813163511d PluginType.String@third_party/openbao/sdk/helper/consts/plugin_types.go:40
+  - method:a619c1dae8d260b20d3bfc690a5f4d1a DeprecationStatus.String@third_party/openbao/sdk/helper/consts/deprecation_status.go:24
+  - method:bd6b6832c68eea69e8ca3c8e11a23711 ReplicationState.ClearState@third_party/openbao/sdk/helper/consts/replication.go:151
+  - method:c4f7f56dd4854bebce85c3a9cfc5033c ReplicationState.HasState@third_party/openbao/sdk/helper/consts/replication.go:149
+  - method:d8e8f30059e7b9314b375cac0374a509 ReplicationState.IsPrimaryState@third_party/openbao/sdk/helper/consts/replication.go:145
+  - method:efd0ce8b64d6ef103fd3c3e3887b8e5a ReplicationState.AddState@third_party/openbao/sdk/helper/consts/replication.go:150
+  - method:f85fbafd94459c1127eb2f2118c4cb58 ReplicationState.GetPerformanceString@third_party/openbao/sdk/helper/consts/replication.go:130
+  - type_alias:1cfcc74ba481d7da441d964a55a65319 PluginType@third_party/openbao/sdk/helper/consts/plugin_types.go:20
+  - type_alias:6b40d65118dc01cf1f2320ee33c4aaf4 ReplicationState@third_party/openbao/sdk/helper/consts/replication.go:24
+  - type_alias:b23bf938996d535c99277465d06f6b3d HAState@third_party/openbao/sdk/helper/consts/replication.go:154
+  - type_alias:c76b2b23f452aceb28be226af48e3a11 DeprecationStatus@third_party/openbao/sdk/helper/consts/deprecation_status.go:12
   id: sc.third-party-openbao-sdk-helper-consts
+  intent: This context exists to give the rest of the repository one canonical place
+    to name plugin kinds, deprecation levels and replication roles, so callers never
+    spell those strings or bit values themselves. PluginType and ParsePluginType round-trip
+    between a wire/manifest string and an enum, and DeprecationStatus and ReplicationState
+    expose the human-readable forms that the CLI, API responses and mount reporting
+    need. Keeping the values as untyped numeric constants with String methods lets
+    the internal server, the API layer and the SDK plugin machinery agree on encodings
+    without importing each other.
+  interfaces:
+  - file: third_party/openbao/sdk/helper/consts/deprecation_status.go
+    kind: type
+    name: DeprecationStatus
+    signature: type DeprecationStatus uint32
+  - file: third_party/openbao/sdk/helper/consts/deprecation_status.go
+    kind: method
+    name: DeprecationStatus.String
+    signature: func (s DeprecationStatus) String() string
+  - file: third_party/openbao/sdk/helper/consts/replication.go
+    kind: type
+    name: HAState
+    signature: type HAState uint32
+  - file: third_party/openbao/sdk/helper/consts/plugin_types.go
+    kind: function
+    name: ParsePluginType
+    signature: func ParsePluginType(pluginType string) (PluginType, error)
+  - file: third_party/openbao/sdk/helper/consts/plugin_types.go
+    kind: type
+    name: PluginType
+    signature: type PluginType uint32
+  - file: third_party/openbao/sdk/helper/consts/plugin_types.go
+    kind: method
+    name: PluginType.String
+    signature: func (p PluginType) String() string
+  - file: third_party/openbao/sdk/helper/consts/replication.go
+    kind: type
+    name: ReplicationState
+    signature: type ReplicationState uint32
+  - file: third_party/openbao/sdk/helper/consts/replication.go
+    kind: method
+    name: ReplicationState.AddState
+    signature: func (r *ReplicationState) AddState(flag ReplicationState)
+  - file: third_party/openbao/sdk/helper/consts/replication.go
+    kind: method
+    name: ReplicationState.ClearState
+    signature: func (r *ReplicationState) ClearState(flag ReplicationState)
+  - file: third_party/openbao/sdk/helper/consts/replication.go
+    kind: method
+    name: ReplicationState.GetDRString
+    signature: func (r ReplicationState) GetDRString() string
+  - file: third_party/openbao/sdk/helper/consts/replication.go
+    kind: method
+    name: ReplicationState.GetPerformanceString
+    signature: func (r ReplicationState) GetPerformanceString() string
+  - file: third_party/openbao/sdk/helper/consts/replication.go
+    kind: method
+    name: ReplicationState.HasState
+    signature: func (r ReplicationState) HasState(flag ReplicationState) bool
+  - file: third_party/openbao/sdk/helper/consts/replication.go
+    kind: method
+    name: ReplicationState.IsPrimaryState
+    signature: func (r ReplicationState) IsPrimaryState() bool
+  - file: third_party/openbao/sdk/helper/consts/replication.go
+    kind: method
+    name: ReplicationState.StateStrings
+    signature: func (r ReplicationState) StateStrings() []string
+  - file: third_party/openbao/sdk/helper/consts/replication.go
+    kind: method
+    name: ReplicationState.ToggleState
+    signature: func (r *ReplicationState) ToggleState(flag ReplicationState)
   name: third-party-openbao-sdk-helper-consts
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/consts/deprecation_status.go
+    - method:a619c1dae8d260b20d3bfc690a5f4d1a
+    - type_alias:c76b2b23f452aceb28be226af48e3a11
+    id: r.deprecation-status-enum-and-string
+    level: MUST
+    text: DeprecationStatus must be a uint32 enum whose String method maps the known
+      statuses to exactly the lowercase names "supported", "deprecated", "pending
+      removal" and "removed", and returns the empty string for any unrecognized value.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/consts/replication.go
+    - type_alias:b23bf938996d535c99277465d06f6b3d
+    id: r.ha-state-enum
+    level: MUST
+    text: HAState must remain a distinct enumerated type describing high-availability
+      roles, separate from ReplicationState so the two role spaces cannot be mixed
+      in one value.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/consts/plugin_types.go
+    - function:b06db33048aa54f8f98977535f4e91b1
+    - method:8a41ac131e1d78566490e6813163511d
+    id: r.parse-plugin-type-round-trip
+    level: MUST
+    text: ParsePluginType must convert a plugin type string into a PluginType, accepting
+      the same spellings that PluginType.String emits, and must return an error rather
+      than a silent zero value when the string names no known plugin kind.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/consts/plugin_types.go
+    - method:8a41ac131e1d78566490e6813163511d
+    - type_alias:1cfcc74ba481d7da441d964a55a65319
+    id: r.plugin-type-enum-and-string
+    level: MUST
+    text: PluginType must be a uint32 enum, and PluginType.String must return the
+      lowercase name for each known plugin kind so callers can print a plugin kind
+      without a lookup table.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/consts/agent.go
+    - file:third_party/openbao/sdk/helper/consts/consts.go
+    - file:third_party/openbao/sdk/helper/consts/error.go
+    - file:third_party/openbao/sdk/helper/consts/jwt.go
+    - file:third_party/openbao/sdk/helper/consts/proxy.go
+    - file:third_party/openbao/sdk/helper/consts/token_consts.go
+    id: r.remaining-const-files
+    level: SHOULD
+    text: The package must keep agent, general, error, JWT, proxy and token constants
+      in their own files (agent.go, consts.go, error.go, jwt.go, proxy.go, token_consts.go)
+      so that importers get the constant group they name without the enumerated type
+      files coming along.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/consts/replication.go
+    - method:c4f7f56dd4854bebce85c3a9cfc5033c
+    - method:d8e8f30059e7b9314b375cac0374a509
+    id: r.replication-primary-state-predicate
+    level: MUST
+    text: IsPrimaryState must report true only when the state carries a primary-role
+      replication flag, so callers can gate primary-only behavior on a single predicate
+      instead of testing individual flags.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/consts/replication.go
+    - method:84a38dabdcb15fe92172b46fa5303d31
+    - method:bd6b6832c68eea69e8ca3c8e11a23711
+    - method:c4f7f56dd4854bebce85c3a9cfc5033c
+    - method:efd0ce8b64d6ef103fd3c3e3887b8e5a
+    - type_alias:6b40d65118dc01cf1f2320ee33c4aaf4
+    id: r.replication-state-bitmask
+    level: MUST
+    text: 'ReplicationState must be an integer bitmask: HasState reports whether a
+      flag is set, AddState sets it, ClearState removes it, and ToggleState flips
+      it, with each mutation applied to the receiver so the caller''s state value
+      is updated.'
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/consts/replication.go
+    - method:64d67f41e41a0df76d54cb869a8d6f08
+    - method:f85fbafd94459c1127eb2f2118c4cb58
+    id: r.replication-state-dr-and-performance-strings
+    level: MUST
+    text: GetDRString must collapse the DR flags to a single mode name, preferring
+      bootstrapping over primary over secondary over disabled, and must return "unknown"
+      when none of those DR flags is set; GetPerformanceString must do the same for
+      the performance flags and must return an empty string when no performance flag
+      is set.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/consts/replication.go
+    - method:6d7379614118cf626e8ea41acda37ac8
+    id: r.replication-state-strings
+    level: MUST
+    text: ReplicationState.StateStrings must return one short tag per set flag, in
+      the fixed order perf-secondary, perf-primary, perf-bootstrapping, perf-disabled,
+      dr-primary, dr-secondary, dr-bootstrapping, dr-disabled, perfstandby, and must
+      return no elements when no flag is set.
   upstream: self
 - code:
   - third_party/openbao/sdk/helper/cryptoutil/cryptoutil.go

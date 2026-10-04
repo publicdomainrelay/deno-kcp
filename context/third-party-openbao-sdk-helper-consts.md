@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to give the rest of the repository one canonical place to name plugin kinds, deprecation levels and replication roles, so callers never spell those strings or bit values themselves. PluginType and ParsePluginType round-trip between a wire/manifest string and an enum, and DeprecationStatus and ReplicationState expose the human-readable forms that the CLI, API responses and mount reporting need. Keeping the values as untyped numeric constants with String methods lets the internal server, the API layer and the SDK plugin machinery agree on encodings without importing each other.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

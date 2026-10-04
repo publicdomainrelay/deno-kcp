@@ -3084,6 +3084,19 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.supported-algorithms` (MUST): "Compress must support exactly gzip and snappy, selected by the Type field of the CompressionConfig; any other type value must be rejected with an error instead of falling back to an uncompressed write."
 - added `r.uncompressed-passthrough-reported` (MUST): "When the first byte matches no known canary, DecompressWithCanary must report that the data was not compressed by returning the true flag with nil data and no error, leaving the caller to use the original bytes."
 
+### third-party-openbao-sdk-helper-consts
+
+- intent: "" -> "This context exists to give the rest of the repository one canonical place to name plugin kinds, deprecation levels and replication roles, so callers never spell those strings or bit values themselves. PluginType and ParsePluginType round-trip between a wire/manifest string and an enum, and DeprecationStatus and ReplicationState expose the human-readable forms that the CLI, API responses and mount reporting need. Keeping the values as untyped numeric constants with String methods lets the internal server, the API layer and the SDK plugin machinery agree on encodings without importing each other."
+- added `r.deprecation-status-enum-and-string` (MUST): "DeprecationStatus must be a uint32 enum whose String method maps the known statuses to exactly the lowercase names "supported", "deprecated", "pending removal" and "removed", and returns the empty string for any unrecognized value."
+- added `r.ha-state-enum` (MUST): "HAState must remain a distinct enumerated type describing high-availability roles, separate from ReplicationState so the two role spaces cannot be mixed in one value."
+- added `r.parse-plugin-type-round-trip` (MUST): "ParsePluginType must convert a plugin type string into a PluginType, accepting the same spellings that PluginType.String emits, and must return an error rather than a silent zero value when the string names no known plugin kind."
+- added `r.plugin-type-enum-and-string` (MUST): "PluginType must be a uint32 enum, and PluginType.String must return the lowercase name for each known plugin kind so callers can print a plugin kind without a lookup table."
+- added `r.remaining-const-files` (SHOULD): "The package must keep agent, general, error, JWT, proxy and token constants in their own files (agent.go, consts.go, error.go, jwt.go, proxy.go, token_consts.go) so that importers get the constant group they name without the enumerated type files coming along."
+- added `r.replication-primary-state-predicate` (MUST): "IsPrimaryState must report true only when the state carries a primary-role replication flag, so callers can gate primary-only behavior on a single predicate instead of testing individual flags."
+- added `r.replication-state-bitmask` (MUST): "ReplicationState must be an integer bitmask: HasState reports whether a flag is set, AddState sets it, ClearState removes it, and ToggleState flips it, with each mutation applied to the receiver so the caller's state value is updated."
+- added `r.replication-state-dr-and-performance-strings` (MUST): "GetDRString must collapse the DR flags to a single mode name, preferring bootstrapping over primary over secondary over disabled, and must return "unknown" when none of those DR flags is set; GetPerformanceString must do the same for the performance flags and must return an empty string when no performance flag is set."
+- added `r.replication-state-strings` (MUST): "ReplicationState.StateStrings must return one short tag per set flag, in the fixed order perf-secondary, perf-primary, perf-bootstrapping, perf-disabled, dr-primary, dr-secondary, dr-bootstrapping, dr-disabled, perfstandby, and must return no elements when no flag is set."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -3304,3 +3317,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-sdk-helper-cidrutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-compressutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-consts-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-sdk-helper-consts-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-helper-cryptoutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
