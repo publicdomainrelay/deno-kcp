@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to describe the identity MFA configuration types and the small amount of behavior layered on top of them: the deep-copy helper used when MFA configs are read from and written to storage, and the sentinel field exposure that lets policy code read MFA method fields by name. It documents the shape of the protobuf-generated messages so that callers know which provider block a Config carries, which fields each provider block holds, and how a Secret wraps a TOTP secret.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
