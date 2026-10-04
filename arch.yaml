@@ -45455,8 +45455,130 @@ system_contexts:
   codeRefIndex:
   - file:third_party/openbao/sdk/helper/compressutil/compress.go compress.go@third_party/openbao/sdk/helper/compressutil/compress.go
   - file:third_party/openbao/sdk/helper/compressutil/compress_test.go compress_test.go@third_party/openbao/sdk/helper/compressutil/compress_test.go
+  - function:0d7a37d172b1410b62e949783beded54 DecompressWithCanary@third_party/openbao/sdk/helper/compressutil/compress.go:143
+  - function:0e252cba289fbd093df390706a8f173c Compress@third_party/openbao/sdk/helper/compressutil/compress.go:72
+  - function:e0525818b7f5434aa5538c1d4f0769c6 Decompress@third_party/openbao/sdk/helper/compressutil/compress.go:133
+  - method:97cb9a317f637f0243de2cc5c16045eb CompressUtilReadCloser.Close@third_party/openbao/sdk/helper/compressutil/compress.go:45
+  - struct:95185603a0dbf488e78b75d03b1ca85e CompressionConfig@third_party/openbao/sdk/helper/compressutil/compress.go:59
+  - struct:beb86a077c23327275ee046c8bd99a71 CompressUtilReadCloser@third_party/openbao/sdk/helper/compressutil/compress.go:40
   id: sc.third-party-openbao-sdk-helper-compressutil
+  intent: This context exists so the rest of the repository can persist and read back
+    compressed values without knowing which codec wrote them. The canary byte makes
+    the format self-identifying, which lets a reader accept old data after the writer
+    switches codecs. Support for lz4 and lzw was removed, and the decompressor now
+    rejects their canaries explicitly instead of silently misreading the payload.
+    The context is a verbatim third-party copy from the OpenBao SDK, kept under third_party
+    so the repository can depend on a fixed version of the helper.
+  interfaces:
+  - file: third_party/openbao/sdk/helper/compressutil/compress.go
+    kind: function
+    name: Compress
+    signature: func Compress(data []byte, config *CompressionConfig) ([]byte, error)
+  - file: third_party/openbao/sdk/helper/compressutil/compress.go
+    kind: struct
+    name: CompressUtilReadCloser
+    signature: type CompressUtilReadCloser struct
+  - file: third_party/openbao/sdk/helper/compressutil/compress.go
+    kind: method
+    name: CompressUtilReadCloser.Close
+    signature: func (c *CompressUtilReadCloser) Close() error
+  - file: third_party/openbao/sdk/helper/compressutil/compress.go
+    kind: struct
+    name: CompressionConfig
+    signature: type CompressionConfig struct { Type string; GzipCompressionLevel int
+      }
+  - file: third_party/openbao/sdk/helper/compressutil/compress.go
+    kind: function
+    name: Decompress
+    signature: func Decompress(data []byte) ([]byte, bool, error)
+  - file: third_party/openbao/sdk/helper/compressutil/compress.go
+    kind: function
+    name: DecompressWithCanary
+    signature: func DecompressWithCanary(data []byte) ([]byte, string, bool, error)
   name: third-party-openbao-sdk-helper-compressutil
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/compressutil/compress.go
+    - function:0e252cba289fbd093df390706a8f173c
+    id: r.compress-prepends-canary
+    level: MUST
+    text: Compress must prepend a one-byte canary that names the algorithm used, so
+      that a later read can tell gzip from snappy without out-of-band metadata, and
+      must return the compressed payload after that byte rather than the payload alone.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/compressutil/compress.go
+    - function:0d7a37d172b1410b62e949783beded54
+    id: r.decompress-canary-dispatch
+    level: MUST
+    text: DecompressWithCanary must read the first byte as a canary, strip it, and
+      build the matching reader for gzip or snappy; it must return the plaintext,
+      the compression type name, and false for the not-compressed flag on success.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/compressutil/compress.go
+    - function:0d7a37d172b1410b62e949783beded54
+    - function:e0525818b7f5434aa5538c1d4f0769c6
+    id: r.decompress-wrapper
+    level: MUST
+    text: Decompress must delegate to DecompressWithCanary and return only the plaintext,
+      the not-compressed flag, and the error, discarding the compression type name.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/compressutil/compress.go
+    - function:0d7a37d172b1410b62e949783beded54
+    id: r.empty-input-error
+    level: MUST
+    text: DecompressWithCanary must return an error when the input is empty, and must
+      also error when a gzip or snappy canary is present but no payload bytes follow
+      it.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/compressutil/compress.go
+    - function:0e252cba289fbd093df390706a8f173c
+    - struct:95185603a0dbf488e78b75d03b1ca85e
+    id: r.gzip-level-honored
+    level: MUST
+    text: When the type is gzip, Compress must pass GzipCompressionLevel to the gzip
+      writer, with a zero value meaning the gzip default level, so callers can trade
+      speed against ratio.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/compressutil/compress.go
+    - method:97cb9a317f637f0243de2cc5c16045eb
+    - struct:beb86a077c23327275ee046c8bd99a71
+    id: r.read-closer-satisfies-io-closer
+    level: MUST
+    text: CompressUtilReadCloser must wrap the snappy reader and provide a Close method
+      that returns nil, so the snappy path yields an io.ReadCloser even though the
+      underlying snappy reader has no Close.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/compressutil/compress.go
+    - function:0d7a37d172b1410b62e949783beded54
+    id: r.removed-codecs-rejected
+    level: MUST
+    text: DecompressWithCanary must return an explicit error for the lz4 and lzw canaries,
+      stating that support for those codecs has been removed, rather than attempting
+      to decode them.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/compressutil/compress_test.go
+    id: r.round-trip-tested
+    level: SHOULD
+    text: The package tests should cover gzip at default, best speed and best compression
+      levels and snappy, asserting that the canary byte on the compressed output matches
+      the configured codec and that decompression returns the original bytes.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/compressutil/compress.go
+    - function:0e252cba289fbd093df390706a8f173c
+    - struct:95185603a0dbf488e78b75d03b1ca85e
+    id: r.supported-algorithms
+    level: MUST
+    text: Compress must support exactly gzip and snappy, selected by the Type field
+      of the CompressionConfig; any other type value must be rejected with an error
+      instead of falling back to an uncompressed write.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/compressutil/compress.go
+    - function:0d7a37d172b1410b62e949783beded54
+    id: r.uncompressed-passthrough-reported
+    level: MUST
+    text: When the first byte matches no known canary, DecompressWithCanary must report
+      that the data was not compressed by returning the true flag with nil data and
+      no error, leaving the caller to use the original bytes.
   upstream: self
 - code:
   - third_party/openbao/sdk/helper/consts/agent.go

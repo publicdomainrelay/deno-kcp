@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the rest of the repository can persist and read back compressed values without knowing which codec wrote them. The canary byte makes the format self-identifying, which lets a reader accept old data after the writer switches codecs. Support for lz4 and lzw was removed, and the decompressor now rejects their canaries explicitly instead of silently misreading the payload. The context is a verbatim third-party copy from the OpenBao SDK, kept under third_party so the repository can depend on a fixed version of the helper.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

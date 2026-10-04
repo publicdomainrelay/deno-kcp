@@ -3070,6 +3070,20 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.validate-cidr-list-slice` (MUST): "ValidateCIDRListSlice must return "missing CIDR blocks that needs validation" for an empty slice, and must otherwise run net.ParseCIDR on every element after strings.TrimSpace, returning false with the parse error for the first invalid block and true with a nil error when all blocks parse."
 - added `r.validate-cidr-list-string` (MUST): "ValidateCIDRListString must return "missing CIDR list that needs validation" for an empty cidrList and "missing separator" for an empty separator, then must split the string with strutil.ParseDedupLowercaseAndSortStrings and pass the resulting slice to ValidateCIDRListSlice, returning that function's result unchanged."
 
+### third-party-openbao-sdk-helper-compressutil
+
+- intent: "" -> "This context exists so the rest of the repository can persist and read back compressed values without knowing which codec wrote them. The canary byte makes the format self-identifying, which lets a reader accept old data after the writer switches codecs. Support for lz4 and lzw was removed, and the decompressor now rejects their canaries explicitly instead of silently misreading the payload. The context is a verbatim third-party copy from the OpenBao SDK, kept under third_party so the repository can depend on a fixed version of the helper."
+- added `r.compress-prepends-canary` (MUST): "Compress must prepend a one-byte canary that names the algorithm used, so that a later read can tell gzip from snappy without out-of-band metadata, and must return the compressed payload after that byte rather than the payload alone."
+- added `r.decompress-canary-dispatch` (MUST): "DecompressWithCanary must read the first byte as a canary, strip it, and build the matching reader for gzip or snappy; it must return the plaintext, the compression type name, and false for the not-compressed flag on success."
+- added `r.decompress-wrapper` (MUST): "Decompress must delegate to DecompressWithCanary and return only the plaintext, the not-compressed flag, and the error, discarding the compression type name."
+- added `r.empty-input-error` (MUST): "DecompressWithCanary must return an error when the input is empty, and must also error when a gzip or snappy canary is present but no payload bytes follow it."
+- added `r.gzip-level-honored` (MUST): "When the type is gzip, Compress must pass GzipCompressionLevel to the gzip writer, with a zero value meaning the gzip default level, so callers can trade speed against ratio."
+- added `r.read-closer-satisfies-io-closer` (MUST): "CompressUtilReadCloser must wrap the snappy reader and provide a Close method that returns nil, so the snappy path yields an io.ReadCloser even though the underlying snappy reader has no Close."
+- added `r.removed-codecs-rejected` (MUST): "DecompressWithCanary must return an explicit error for the lz4 and lzw canaries, stating that support for those codecs has been removed, rather than attempting to decode them."
+- added `r.round-trip-tested` (SHOULD): "The package tests should cover gzip at default, best speed and best compression levels and snappy, asserting that the canary byte on the compressed output matches the configured codec and that decompression returns the original bytes."
+- added `r.supported-algorithms` (MUST): "Compress must support exactly gzip and snappy, selected by the Type field of the CompressionConfig; any other type value must be rejected with an error instead of falling back to an uncompressed write."
+- added `r.uncompressed-passthrough-reported` (MUST): "When the first byte matches no known canary, DecompressWithCanary must report that the data was not compressed by returning the true flag with nil data and no error, leaving the caller to use the original bytes."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -3288,4 +3302,4 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-sdk-helper-certutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-certutil-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-sdk-helper-cidrutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-sdk-helper-compressutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-helper-compressutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
