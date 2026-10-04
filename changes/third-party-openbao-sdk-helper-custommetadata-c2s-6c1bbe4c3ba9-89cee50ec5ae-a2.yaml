@@ -1,0 +1,32 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-sdk-helper-custommetadata-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-sdk-helper-custommetadata
+  toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
+status:
+  agentLog: The custommetadata package under third_party/openbao/sdk/helper/custommetadata
+    holds one source file and one test file. custom_metadata.go defines the two exported
+    entry points Parse and Validate together with four package constants (maxKeys
+    = 64, maxKeyLength = 128, maxValueLength = 512, and validationErrorPrefix = "custom_metadata
+    validation failed"). Parse converts an arbitrary map[string]any payload into the
+    map[string]string storage form, running mapstructure.WeakDecode on each value
+    and optionally dropping nil entries so a PATCH can signal field removal; it aborts
+    with a nil map and the decode error if any value fails to convert. Validate enforces
+    the size and printability limits on the stored map, short-circuiting with a single
+    error when the entry count exceeds maxKeys and otherwise collecting every per-key
+    and per-value failure into a multierror. custom_metadata_test.go drives Validate
+    through a table of six cases (valid, too_many_keys, key_too_long, value_too_long,
+    unprintable_key, unprintable_value), each run in parallel in its own subtest.
+  message: wrote 10 requirement(s) and 2 interface(s) for third-party-openbao-sdk-helper-custommetadata;
+    the spec already said this
+  phase: Succeeded
+superseded:
+- message: wrote 10 requirement(s) and 2 interface(s) for third-party-openbao-sdk-helper-custommetadata
+  name: third-party-openbao-sdk-helper-custommetadata-c2s-6c1bbe4c3ba9-89cee50ec5ae
+  phase: Succeeded
