@@ -2169,6 +2169,22 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.shutdown-handling` (MUST): "The work runs in a goroutine that closes its completion channel with `defer` when done, and `main` blocks in a select over that channel and a shutdown channel; the shutdown channel is produced by `makeShutdownCh`, which registers `os.Interrupt` and `syscall.SIGTERM` on a buffered signal channel and closes the result channel on the first signal, at which point `main` prints `Interrupt received, exiting...` and returns."
 - added `r.unsupported-call` (MUST): "Any `-call` value other than `get-pod` or `patch-pod`, including the empty default, panics with `unsupported call provided: %q`."
 
+### third-party-openbao-internal-serviceregistration-kubernetes-testing
+
+- intent: "" -> "This context exists so the Kubernetes service-registration client and retry handler can be tested without a real cluster. Server gives tests a live HTTP endpoint that mimics the Kubernetes pod API, State lets tests assert which patches arrived, and Conf supplies the client configuration pointing at that endpoint. It is a test-support package, so its contract is what the OpenBao kubernetes client tests depend on."
+- added `r.close-cleans-up` (MUST): "closeFunc runs every registered closer: it closes the httptest server and removes the temporary token and CA certificate files created by Server, so a test leaves no files or listeners behind."
+- added `r.conf-fields` (MUST): "Conf carries ClientScheme, PathToTokenFile, PathToRootCAFile, ServiceHost and ServicePort. Server sets ClientScheme to "http://", writes the expected token and CA certificate into temp files and points PathToTokenFile and PathToRootCAFile at them, and points ServiceHost and ServicePort at the running test server."
+- added `r.forced-gateway-timeout` (MAY): "When the ReturnGatewayTimeouts flag is set, the handler answers 504 immediately and ignores the request path and method, letting tests exercise client retry behaviour on gateway timeouts."
+- added `r.get-pod-response` (MUST): "A GET against the expected namespace and pod answers 200 with the canned pod response body."
+- added `r.patch-records-state` (MUST): "A PATCH against the expected namespace and pod decodes the JSON body into a list of patches, stores each patch in the State under its "path" value, and answers 200 with the canned update response body. A body that fails to decode gets 400 with the path and decode error."
+- added `r.path-parse-error` (MUST): "If the request path cannot be parsed into namespace and pod name, the handler answers 400 and writes the unparseable path and the parse error into the body."
+- added `r.server-returns-harness` (MUST): "Server takes a *testing.T and returns a State recorder, a Conf populated with connection settings, and a closeFunc. It starts an httptest server, derives ServiceHost and ServicePort by splitting the server URL on "://" and then on ":", and fails the test via t.Fatal if the URL does not have exactly those two fields."
+- added `r.state-get` (MUST): "State.Get returns the recorded patch stored under the given key, and nil when no patch was recorded for that key, letting tests assert on the contents of a specific label or annotation patch."
+- added `r.state-num-patches` (MUST): "State.NumPatches returns how many patches the server has recorded, counted from the concurrent map that store writes into, so tests can wait for an expected number of client updates."
+- added `r.temp-file-errors-fatal` (MUST): "Any failure to create, write or close the temporary token or CA certificate file must call closeFunc to release already-acquired resources and then fail the test with t.Fatal."
+- added `r.unexpected-method` (MUST): "Any method other than GET or PATCH against the expected pod gets 400 with a message naming the unexpected method."
+- added `r.unknown-pod-not-found` (MUST): "A request whose namespace or pod name does not match ExpectedNamespace and ExpectedPodName gets 404 with the canned not-found response body, regardless of method."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -2307,4 +2323,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-serviceregistration-kubernetes-client-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-serviceregistration-kubernetes-client-cmd-kubeclient-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-serviceregistration-kubernetes-testing-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-internal-vault-backend-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-internal-vault-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |

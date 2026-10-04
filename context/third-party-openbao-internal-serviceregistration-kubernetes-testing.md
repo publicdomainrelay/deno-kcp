@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the Kubernetes service-registration client and retry handler can be tested without a real cluster. Server gives tests a live HTTP endpoint that mimics the Kubernetes pod API, State lets tests assert which patches arrived, and Conf supplies the client configuration pointing at that endpoint. It is a test-support package, so its contract is what the OpenBao kubernetes client tests depend on.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
