@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to describe the vendored OpenBao identity helper package that deno-kcp carries under third_party. It is the boundary between the generated protobuf identity records and the rest of the system: the storage layer clones and mutates these messages, policy evaluation reads them through sentinel, and the logical layer consumes them only after the ToSDK projection functions run. The spec records that projection, the deep-copy semantics, the alias upsert rule and the sentinel key surface, because callers outside this package depend on those behaviors and on the exact set of message fields the generated types carry.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
