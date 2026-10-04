@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the proxy command's configuration contract is described independently of the rest of the proxy implementation: which blocks and fields exist, what each loader does with a path, how multiple files combine, which defaults and environment variables are applied, and which combinations of blocks are rejected. It gives the reader the rules the proxy binary relies on when it starts, without needing to read the OpenBao agent config package it was forked from.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

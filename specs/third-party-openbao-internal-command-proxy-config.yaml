@@ -2,10 +2,240 @@ apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
 - file:third_party/openbao/internal/command/proxy/config/config.go config.go@third_party/openbao/internal/command/proxy/config/config.go
 - file:third_party/openbao/internal/command/proxy/config/config_test.go config_test.go@third_party/openbao/internal/command/proxy/config/config_test.go
+- function:58233c8751bc532ee0bd7ceb2b0a1669 LoadConfigDir@third_party/openbao/internal/command/proxy/config/config.go:272
+- function:6f3aa78b4a2366bf4da19d9d96a99e6e NewConfig@third_party/openbao/internal/command/proxy/config/config.go:146
+- function:81223ed17bf84bacce9a2a42cece863f LoadConfigFile@third_party/openbao/internal/command/proxy/config/config.go:348
+- function:9f3f0cbf037e405e6dd671b66222c8b2 LoadConfig@third_party/openbao/internal/command/proxy/config/config.go:259
+- method:26952baea9d476449508d9297101a9c1 Config.Merge@third_party/openbao/internal/command/proxy/config/config.go:153
+- method:786f3040dae784eff8500a5a7f0161ba transportDialer.DialContext@third_party/openbao/internal/command/proxy/config/config.go:92
+- method:adad1d15d5506eee2f708e2337dbf6bf Config.ValidateConfig@third_party/openbao/internal/command/proxy/config/config.go:221
+- method:db5214262f0a15764a3f5a52b34903ec transportDialer.Dial@third_party/openbao/internal/command/proxy/config/config.go:89
+- method:dee50bdca0490db920677c670a150440 Config.Prune@third_party/openbao/internal/command/proxy/config/config.go:51
+- struct:07ed422d82f6e9bfb21e6a107e72731f Method@third_party/openbao/internal/command/proxy/config/config.go:119
+- struct:171cca82ce1530d98edda3d9f3b9ce25 APIProxy@third_party/openbao/internal/command/proxy/config/config.go:96
+- struct:46ba8a4512b4471214d9f680f3788717 Vault@third_party/openbao/internal/command/proxy/config/config.go:73
+- struct:5164d9eec48b0d48fcc9ca7430690c69 AutoAuth@third_party/openbao/internal/command/proxy/config/config.go:109
+- struct:69b9869445749914751ff5e9ba95b3c1 Config@third_party/openbao/internal/command/proxy/config/config.go:30
+- struct:bb3dd2f39815037df9a5a07ac65f9598 Cache@third_party/openbao/internal/command/proxy/config/config.go:103
+- struct:dba8ff9e6100707a39a3327d53449ae9 Sink@third_party/openbao/internal/command/proxy/config/config.go:134
+- struct:e1a43e95f6d8e49289fb0ab7d02bca13 Retry@third_party/openbao/internal/command/proxy/config/config.go:68
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-command-proxy-config
   namespace: default
 spec:
+  intent: 'This context exists so the proxy command''s configuration contract is described
+    independently of the rest of the proxy implementation: which blocks and fields
+    exist, what each loader does with a path, how multiple files combine, which defaults
+    and environment variables are applied, and which combinations of blocks are rejected.
+    It gives the reader the rules the proxy binary relies on when it starts, without
+    needing to read the OpenBao agent config package it was forked from.'
+  interfaces:
+  - file: third_party/openbao/internal/command/proxy/config/config.go
+    kind: struct
+    name: APIProxy
+    signature: ()
+  - file: third_party/openbao/internal/command/proxy/config/config.go
+    kind: struct
+    name: AutoAuth
+    signature: ()
+  - file: third_party/openbao/internal/command/proxy/config/config.go
+    kind: struct
+    name: Cache
+    signature: ()
+  - file: third_party/openbao/internal/command/proxy/config/config.go
+    kind: struct
+    name: Config
+    signature: ()
+  - file: third_party/openbao/internal/command/proxy/config/config.go
+    kind: method
+    name: Config.Merge
+    signature: (c2 *Config) *Config
+  - file: third_party/openbao/internal/command/proxy/config/config.go
+    kind: method
+    name: Config.Prune
+    signature: ()
+  - file: third_party/openbao/internal/command/proxy/config/config.go
+    kind: method
+    name: Config.ValidateConfig
+    signature: () error
+  - file: third_party/openbao/internal/command/proxy/config/config.go
+    kind: function
+    name: LoadConfig
+    signature: (path string) (*Config, error)
+  - file: third_party/openbao/internal/command/proxy/config/config.go
+    kind: function
+    name: LoadConfigDir
+    signature: (dir string) (cfg *Config, err error)
+  - file: third_party/openbao/internal/command/proxy/config/config.go
+    kind: function
+    name: LoadConfigFile
+    signature: (path string) (*Config, error)
+  - file: third_party/openbao/internal/command/proxy/config/config.go
+    kind: struct
+    name: Method
+    signature: ()
+  - file: third_party/openbao/internal/command/proxy/config/config.go
+    kind: function
+    name: NewConfig
+    signature: () *Config
+  - file: third_party/openbao/internal/command/proxy/config/config.go
+    kind: struct
+    name: Retry
+    signature: ()
+  - file: third_party/openbao/internal/command/proxy/config/config.go
+    kind: struct
+    name: Sink
+    signature: ()
+  - file: third_party/openbao/internal/command/proxy/config/config.go
+    kind: struct
+    name: Vault
+    signature: ()
+  - file: third_party/openbao/internal/command/proxy/config/config.go
+    kind: method
+    name: transportDialer.Dial
+    signature: (network, address string) (net.Conn, error)
+  - file: third_party/openbao/internal/command/proxy/config/config.go
+    kind: method
+    name: transportDialer.DialContext
+    signature: (ctx context.Context, network, address string) (net.Conn, error)
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/command/proxy/config/config.go
+    - struct:171cca82ce1530d98edda3d9f3b9ce25
+    id: r.api-proxy-token-mode
+    level: MUST
+    text: Parsing api_proxy must allow at most one block and must accept use_auto_auth_token
+      as true, false or the string 'force', where 'force' sets both UseAutoAuthToken
+      and ForceAutoAuthToken and any other string is rejected with the true/false/force
+      message.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/proxy/config/config.go
+    - struct:07ed422d82f6e9bfb21e6a107e72731f
+    - struct:5164d9eec48b0d48fcc9ca7430690c69
+    id: r.auto-auth-method-sinks
+    level: MUST
+    text: Parsing an auto_auth block must allow at most one such block, require exactly
+      one method block, accept zero or more sink blocks, and, when the auth method
+      has a positive wrap TTL, require exactly one sink and reject a sink that also
+      sets a wrap TTL.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/proxy/config/config.go
+    - function:81223ed17bf84bacce9a2a42cece863f
+    id: r.disable-env-vars
+    level: MUST
+    text: File loading must read BAO_PROXY_DISABLE_IDLE_CONNECTIONS and BAO_PROXY_DISABLE_KEEP_ALIVES
+      as comma-separated lowercased lists, map the values 'auto-auth' to the auto-auth
+      flag and 'caching' or 'proxying' to the API proxy flag, skip empty entries,
+      and reject any other value naming the offending subsystem.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/proxy/config/config.go
+    - function:58233c8751bc532ee0bd7ceb2b0a1669
+    - method:26952baea9d476449508d9297101a9c1
+    id: r.load-config-dir
+    level: MUST
+    text: LoadConfigDir must open the directory, reject a non-directory path with
+      'configuration path must be a directory', read entries in batches of 128, keep
+      only files ending in .hcl or .json that are not editor temporary files, load
+      each kept file with LoadConfigFile, merge every later config into the accumulator
+      with Config.Merge, and join any close error into the returned error.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/proxy/config/config.go
+    - function:9f3f0cbf037e405e6dd671b66222c8b2
+    id: r.load-config-dispatch
+    level: MUST
+    text: LoadConfig must stat the given path and return the stat error unchanged
+      when the path does not exist; when the path is a directory it must delegate
+      to LoadConfigDir, otherwise to LoadConfigFile.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/proxy/config/config.go
+    - function:81223ed17bf84bacce9a2a42cece863f
+    id: r.load-config-file
+    level: MUST
+    text: LoadConfigFile must reject a directory path with 'location is a directory,
+      not a file', parse the file bytes as HCL, walk the AST to set every object key's
+      filename to the loaded path, decode the root object into a Config, parse the
+      shared config, require the file to contain a root object, and then parse the
+      auto_auth, cache, api_proxy and vault blocks in that order, wrapping each failure
+      with the block name.
+  - codeRefs:
+    - method:26952baea9d476449508d9297101a9c1
+    - struct:69b9869445749914751ff5e9ba95b3c1
+    id: r.merge-precedence
+    level: MUST
+    text: Config.Merge must return the receiver unchanged when the argument is nil,
+      otherwise start from a fresh config, merge the two shared configs when the argument
+      has one, and for each of auto_auth, cache, api_proxy and vault let the argument's
+      non-nil value replace the receiver's; scalar flags such as disable_idle_connections,
+      disable_keep_alives and exit_after_auth turn on when either side sets them.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/proxy/config/config.go
+    - struct:07ed422d82f6e9bfb21e6a107e72731f
+    id: r.method-defaults
+    level: MUST
+    text: Parsing a method block must derive the type from the single block key when
+      type is empty and error when still empty, default the mount path to 'auth/<type>',
+      strip a trailing slash from the mount path, convert wrap_ttl, min_backoff and
+      max_backoff from raw values to durations, and canonicalize the namespace path.
+  - codeRefs:
+    - function:6f3aa78b4a2366bf4da19d9d96a99e6e
+    - struct:69b9869445749914751ff5e9ba95b3c1
+    id: r.new-config
+    level: MUST
+    text: NewConfig must return a Config whose embedded SharedConfig is a freshly
+      allocated, non-nil value so callers can merge into it without a nil dereference.
+  - codeRefs:
+    - method:dee50bdca0490db920677c670a150440
+    id: r.prune
+    level: MUST
+    text: 'Config.Prune must clear the raw and unused-key bookkeeping so a loaded
+      config can be safely exposed: each listener''s RawConfig and CustomResponseHeaders
+      set to nil, listener profiling and telemetry UnusedKeys cleared, the shared
+      FoundKeys and UnusedKeys cleared, and the telemetry FoundKeys and UnusedKeys
+      cleared when telemetry is present.'
+  - codeRefs:
+    - function:81223ed17bf84bacce9a2a42cece863f
+    - struct:46ba8a4512b4471214d9f680f3788717
+    - struct:e1a43e95f6d8e49289fb0ab7d02bca13
+    id: r.retry-defaults
+    level: MUST
+    text: When a vault block is present, loading must allocate a Retry block if none
+      was given, map a num_retries of 0 to the template config's default retry attempts
+      and a num_retries of -1 to 0, and parsing must reject more than one retry block.
+  - codeRefs:
+    - struct:dba8ff9e6100707a39a3327d53449ae9
+    id: r.sink-validation
+    level: MUST
+    text: Parsing each sink must derive the type from the block key when empty and
+      error when still empty, convert wrap_ttl to a duration, accept only an empty
+      or 'curve25519' dh_type, resolve aad_env_var into aad and clear the variable
+      name, and reject AAD or derive_key without dh_type and a dh_type or dh_path
+      given without the other.
+  - codeRefs:
+    - function:58233c8751bc532ee0bd7ceb2b0a1669
+    id: r.temporary-file-skip
+    level: MUST
+    text: 'The directory scan must skip editor temporary files: names ending in ''~''
+      (vim), names starting with ''.#'' (emacs), and names that both start and end
+      with ''#'' (emacs).'
+  - codeRefs:
+    - method:786f3040dae784eff8500a5a7f0161ba
+    - method:db5214262f0a15764a3f5a52b34903ec
+    - struct:bb3dd2f39815037df9a5a07ac65f9598
+    id: r.transport-dialer
+    level: MUST
+    text: The transportDialer interface must expose Dial(network, address string)
+      (net.Conn, error) and DialContext(ctx context.Context, network, address string)
+      (net.Conn, error) so a custom dialer can be handed to the cache's HTTP transport
+      config; the cache holds one as InProcDialer.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/proxy/config/config.go
+    - method:adad1d15d5506eee2f708e2337dbf6bf
+    id: r.validate-config
+    level: MUST
+    text: 'ValidateConfig must reject, on a fully merged config: a cache or api_proxy
+      without at least one listener; api_proxy.use_auto_auth_token=true with no auto_auth
+      or with a wrapping auth method; auto_auth with no sinks unless use_auto_auth_token
+      is true; and a config with no auto_auth, no cache and no listener.'
   upstream: self

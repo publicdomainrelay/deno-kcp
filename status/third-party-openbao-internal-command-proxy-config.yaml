@@ -1,9 +1,8 @@
 conditions:
-- message: 'undeclared: APIProxy, AutoAuth, Cache, Config, Config.Merge, Config.Prune,
-    Config.ValidateConfig, LoadConfig, LoadConfigDir, LoadConfigFile, Method, NewConfig,
-    Retry, Sink, Vault, transportDialer.Dial, transportDialer.DialContext'
-  reason: InterfacesMissing
-  status: "False"
+- message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+  reason: InterfacesObserved
+  status: "True"
   type: CodeSynced
 - message: observed facts match the synced fingerprint
   reason: FingerprintEqual
@@ -113,5 +112,5 @@ observed:
     line: 348
     name: LoadConfigFile
     signature: (path string) (*Config, error)
-realizedSpecHash: 084c8c0bfa28e4d1b2ba6b2103255ba4c7e0c858dd8c3cdcdd423eb587626f16
+realizedSpecHash: 8d9714ad314b5d034d60b56f2e2835fbad9ba684ee13d0b56a4f34630867551c
 syncedFingerprint: d71c5da18955e7a9869ebf0996bf533f378bc73ffd681853318f84ae70c9942d
