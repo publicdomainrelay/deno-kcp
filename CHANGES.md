@@ -1845,6 +1845,19 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.ssl-opts-option` (MUST): "SslOpts returns a ContainerOpt that stores a *gocql.SslOptions into the config's sslOpts field, carrying the TLS settings the client uses when connecting to the container."
 - added `r.version-option` (MUST): "Version returns a ContainerOpt that stores the given version string into the config's version field, selecting which Cassandra build the container runs."
 
+### third-party-openbao-internal-helper-testhelpers-certhelpers
+
+- intent: "" -> "This context exists so tests across the OpenBao tree can mint certificates without hand-rolling crypto: a builder plus functional options gives one call site per test, with sensible expiry, key usage and CA/leaf defaults, and fatal test errors instead of returned errors. The spec records that option-modelled construction surface and the defaults NewCert applies so the helper can be reimplemented or consumed without guessing."
+- added `r.ca-key-usage` (MUST): "The IsCA option selects CA mode at signing time: when isCA is true the template gets IsCA true, KeyUsage KeyUsageCertSign|KeyUsageCRLSign and nil ExtKeyUsage; when false it gets KeyUsageDigitalSignature|KeyUsageKeyEncipherment|KeyUsageKeyAgreement and ExtKeyUsage of ExtKeyUsageServerAuth and ExtKeyUsageClientAuth."
+- added `r.common-name-option` (MUST): "The CommonName option writes its argument into the template subject: builder.tmpl.Subject.CommonName = cn, and returns nil."
+- added `r.functional-option-type` (MUST): "CertOpt is a functional option: a function taking *CertBuilder and returning error. NewCert applies every supplied option in order against the builder and calls t.Fatalf("Failed to set up certificate builder: %s", err) when an option returns an error, so a bad option aborts the test rather than yielding a partial certificate."
+- added `r.parent-option` (MUST): "The Parent option takes an already-built Certificate, copies that certificate's private key into builder.parentKey and its template into builder.parentTmpl, so the new certificate is signed by the given parent."
+- added `r.pem-accessors` (MUST): "The returned Certificate exposes its material as PEM byte slices: CombinedPEM returns certificate and private key combined, PrivateKeyPEM returns the private key alone."
+- added `r.private-key-generation` (MUST): "NewPrivateKey generates a fresh private key for the test, returns it wrapped in a KeyWrapper, and calls t.Fatal on generation failure; NewCert always generates its key through it."
+- added `r.self-sign-option` (MUST): "The SelfSign option sets the builder's selfSign flag; when set, NewCert overrides both parent and signing key so the certificate's own template is the parent and the newly generated private key is the signing key."
+- added `r.subject-alternative-names` (SHOULD): "The IP and DNS options are variadic string options that record additional subject alternative names for the certificate being built."
+- added `r.template-defaults` (MUST): "NewCert starts from an x509.Certificate template with a generated serial number, a generated common name, NotBefore one hour in the past and NotAfter one hour in the future, IsCA false, BasicConstraintsValid true, and it sets SubjectKeyId from the public key of the freshly generated private key before signing."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -1952,5 +1965,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-helper-template-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-testhelpers-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-testhelpers-cassandra-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-helper-testhelpers-certhelpers-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-helper-testhelpers-certhelpers-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-testhelpers-corehelpers-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-helper-testhelpers-ldap-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |

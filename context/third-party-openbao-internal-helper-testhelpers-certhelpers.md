@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so tests across the OpenBao tree can mint certificates without hand-rolling crypto: a builder plus functional options gives one call site per test, with sensible expiry, key usage and CA/leaf defaults, and fatal test errors instead of returned errors. The spec records that option-modelled construction surface and the defaults NewCert applies so the helper can be reimplemented or consumed without guessing.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
