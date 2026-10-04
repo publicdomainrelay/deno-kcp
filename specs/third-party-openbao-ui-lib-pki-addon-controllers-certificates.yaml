@@ -1,10 +1,55 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
+- class:a0a47a7a63c178fa46676e5a09be7401 PkiCertificatesIndexController@third_party/openbao/ui/lib/pki/addon/controllers/certificates/index.js:10
 - file:third_party/openbao/ui/lib/pki/addon/controllers/certificates/index.js index.js@third_party/openbao/ui/lib/pki/addon/controllers/certificates/index.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-lib-pki-addon-controllers-certificates
   namespace: default
 spec:
+  intent: 'The context exists so that the certificates index controller has a describable
+    specification. Downstream tooling needs to know that the controller is the state
+    holder for the certificates list view: the template binds its filter input to
+    the controller''s filter property and its focus state to filterFocused, and it
+    renders the PKI mount path from mountPoint. Capturing these three members as requirements
+    lets a consumer reimplement or stub the controller without reading the vendored
+    file.'
+  interfaces:
+  - file: third_party/openbao/ui/lib/pki/addon/controllers/certificates/index.js
+    kind: class
+    name: PkiCertificatesIndexController
+    signature: ()
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - class:a0a47a7a63c178fa46676e5a09be7401
+    - file:third_party/openbao/ui/lib/pki/addon/controllers/certificates/index.js
+    id: r.default-export-controller
+    level: MUST
+    text: The module default-exports PkiCertificatesIndexController, an Ember Controller
+      subclass, so the certificates index route resolves it as the route's controller.
+  - codeRefs:
+    - class:a0a47a7a63c178fa46676e5a09be7401
+    - file:third_party/openbao/ui/lib/pki/addon/controllers/certificates/index.js
+    id: r.mount-point-getter
+    level: MUST
+    text: The mountPoint getter returns the mountPoint of the object that owns the
+      controller, obtained with getOwner(this).mountPoint, so the certificates view
+      can display the PKI engine path without the controller storing it.
+  - codeRefs:
+    - class:a0a47a7a63c178fa46676e5a09be7401
+    - file:third_party/openbao/ui/lib/pki/addon/controllers/certificates/index.js
+    id: r.set-filter-action
+    level: MUST
+    text: The setFilter action takes a value and assigns it to the controller's filter
+      property, letting the list template filter certificates by the string the user
+      types.
+  - codeRefs:
+    - class:a0a47a7a63c178fa46676e5a09be7401
+    - file:third_party/openbao/ui/lib/pki/addon/controllers/certificates/index.js
+    id: r.set-filter-focus-action
+    level: MUST
+    text: The setFilterFocus action takes a boolean and assigns it to the controller's
+      filterFocused property, letting the list template track whether the filter input
+      holds focus.
   upstream: self

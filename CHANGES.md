@@ -5811,6 +5811,14 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.role-details-page` (MUST): "The role details page class DetailsPage MUST expose a breadcrumbs getter for the role route trail, an arrayAttrs getter that marks which role attributes are rendered as arrays, and a deleteRole action that deletes the role from the details screen."
 - added `r.tidy-status-reporting` (MUST): "PkiTidyStatusComponent MUST expose a tidyState getter reporting the current tidy run state, a hasTidyConfig getter reporting whether a tidy configuration exists, a tidyStateAlertBanner getter that maps the tidy state to the alert banner shown to the user, and a cancelTidy action that cancels a running tidy operation."
 
+### third-party-openbao-ui-lib-pki-addon-controllers-certificates
+
+- intent: "" -> "The context exists so that the certificates index controller has a describable specification. Downstream tooling needs to know that the controller is the state holder for the certificates list view: the template binds its filter input to the controller's filter property and its focus state to filterFocused, and it renders the PKI mount path from mountPoint. Capturing these three members as requirements lets a consumer reimplement or stub the controller without reading the vendored file."
+- added `r.default-export-controller` (MUST): "The module default-exports PkiCertificatesIndexController, an Ember Controller subclass, so the certificates index route resolves it as the route's controller."
+- added `r.mount-point-getter` (MUST): "The mountPoint getter returns the mountPoint of the object that owns the controller, obtained with getOwner(this).mountPoint, so the certificates view can display the PKI engine path without the controller storing it."
+- added `r.set-filter-action` (MUST): "The setFilter action takes a value and assigns it to the controller's filter property, letting the list template filter certificates by the string the user types."
+- added `r.set-filter-focus-action` (MUST): "The setFilterFocus action takes a boolean and assigns it to the controller's filterFocused property, letting the list template track whether the filter input holds focus."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -6327,5 +6335,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-pki-addon-components-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-components-page-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-controllers-certificates-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-lib-pki-addon-controllers-issuers-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
