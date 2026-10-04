@@ -1,13 +1,15 @@
-syncedCommit: 3749680f064033dbfd6d5f458b665486a0779efc
-syncedFingerprint: 6199c3cfaf7872064b2519374d6a9c456fa6d496583ee43c7a5856fecd485b7e
-realizedSpecHash: 5c4b091d79b5f25241dbed814199a53274a9f2b7d0337b1340744dbe8de32ed8
+observedCommit: dc4c717e1b925e0c074237ed32dc7f093880d843
+syncedCommit: dc4c717e1b925e0c074237ed32dc7f093880d843
+syncedFingerprint: 97d7646c0662c6cb1656d37bafc96fefaf7a4bde25d3896b7b443d4650962f59
+realizedSpecHash: 788a4510d9b80b013eca0ac70713ec075d38cdb2ef5c7452af8ebaeb0900ba61
 conditions:
 - type: CodeSynced
   status: "False"
   reason: InterfacesMissing
-  message: 'missing: admissionSource, summaryObserver; unresolved: r.watch-cache-serves-reader:
-    method:0c338b727be3207f28cbf878427e832a, r.watch-cache-serves-reader: method:233229f09be3f2275ac69f207bb6268b,
-    r.watch-cache-serves-reader: method:fec4d29b214cd73931b1d89410112759'
+  message: 'missing: admissionSource, summaryObserver; undeclared: tokenMemo.MintServiceAccountToken;
+    unresolved: r.watch-cache-serves-reader: method:0c338b727be3207f28cbf878427e832a,
+    r.watch-cache-serves-reader: method:233229f09be3f2275ac69f207bb6268b, r.watch-cache-serves-reader:
+    method:fec4d29b214cd73931b1d89410112759'
 - type: Drifted
   status: "False"
   reason: FingerprintEqual
@@ -57,6 +59,7 @@ observed:
   - internal/provider/run_refs_test.go
   - internal/provider/service_dns.go
   - internal/provider/service_dns_inject_test.go
+  - internal/provider/token_memo.go
   - internal/provider/watch.go
   - internal/provider/watch_cache.go
   - internal/provider/watch_test.go
@@ -213,46 +216,46 @@ observed:
     kind: method
     signature: () []byte
     file: internal/provider/provider.go
-    line: 322
-    codegraphId: method:f57c1668b886e5485cb302198237df3c
+    line: 327
+    codegraphId: method:a4b805744392c79f5902d7bdde427aa0
   - name: Provider.Close
     kind: method
     signature: () error
     file: internal/provider/provider.go
-    line: 330
-    codegraphId: method:bedc23e806b40419ad4ae31c624ffdf9
+    line: 335
+    codegraphId: method:a0f377d2f76db99e8afe9c2586e0960b
   - name: Provider.Run
     kind: method
     signature: (ctx context.Context) error
     file: internal/provider/provider.go
-    line: 337
-    codegraphId: method:e77a20a79e63ff4ddd7d130f60aff357
+    line: 342
+    codegraphId: method:aa9340530ea8054cd047c65b12564466
   - name: Provider.Reconciles
     kind: method
     signature: () uint64
     file: internal/provider/provider.go
-    line: 341
-    codegraphId: method:83f50090d7ebe3148f7aa5e0db332b4d
+    line: 346
+    codegraphId: method:251698aa6b54c663f304bad1abcde4c7
   - name: jobRunLister.ListRunsForJob
     kind: method
     signature: (ctx context.Context, logicalCluster, namespace, jobName string) ([]v1alpha1.DenoRun,
       error)
     file: internal/provider/provider.go
-    line: 386
-    codegraphId: method:2493a2c710828f8b4fe3808ad1408907
+    line: 391
+    codegraphId: method:4d3dd76098e544e2ecdf40aa64843ecc
   - name: podWorkflowRunLister.ListWorkflowRunsForPod
     kind: method
     signature: (ctx context.Context, logicalCluster, namespace, podName string) ([]v1alpha1.PolicyWorkflowRun,
       error)
     file: internal/provider/provider.go
-    line: 464
-    codegraphId: method:40c76b6ba2cb4f1a4bf8529657373b18
+    line: 469
+    codegraphId: method:295e5ecdd213eb504b5bd7c4cba4d61b
   - name: Provider.Reconcile
     kind: method
     signature: (ctx context.Context, ref Ref) (Pass, error)
     file: internal/provider/provider.go
-    line: 485
-    codegraphId: method:8bfddbaa8080d45fcb240bd22d4cd5eb
+    line: 490
+    codegraphId: method:74b4eda2262d1a41f9f0286fe1d0cc61
   - name: Runtime
     kind: interface
     file: internal/provider/provider_runtime.go
@@ -691,6 +694,13 @@ observed:
     file: internal/provider/run_refs.go
     line: 59
     codegraphId: method:a6a75598b35908e08153f182c3febf00
+  - name: tokenMemo.MintServiceAccountToken
+    kind: method
+    signature: (ctx context.Context, logicalCluster, namespace, name string, ttl time.Duration)
+      (string, error)
+    file: internal/provider/token_memo.go
+    line: 40
+    codegraphId: method:691db8d0c6dfcd045edafac30e2842f2
   - name: Provider.RunWatch
     kind: method
     signature: (ctx context.Context) error
@@ -772,4 +782,4 @@ observed:
     file: internal/provider/watch_cache.go
     line: 191
     codegraphId: method:3fdfde3c1a480d83c360edc8c048bc7b
-  fingerprint: 6199c3cfaf7872064b2519374d6a9c456fa6d496583ee43c7a5856fecd485b7e
+  fingerprint: 97d7646c0662c6cb1656d37bafc96fefaf7a4bde25d3896b7b443d4650962f59

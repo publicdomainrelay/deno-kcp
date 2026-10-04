@@ -48,6 +48,7 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 - `file:internal/provider/run_refs_test.go` file run_refs_test.go (internal/provider/run_refs_test.go)
 - `file:internal/provider/service_dns.go` file service_dns.go (internal/provider/service_dns.go)
 - `file:internal/provider/service_dns_inject_test.go` file service_dns_inject_test.go (internal/provider/service_dns_inject_test.go)
+- `file:internal/provider/token_memo.go` file token_memo.go (internal/provider/token_memo.go)
 - `file:internal/provider/watch.go` file watch.go (internal/provider/watch.go)
 - `file:internal/provider/watch_cache.go` file watch_cache.go (internal/provider/watch_cache.go)
 - `file:internal/provider/watch_test.go` file watch_test.go (internal/provider/watch_test.go)
@@ -63,7 +64,6 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 - `method:08cbdd1a97d2aeb9d9187918def0a3ff` method TokenMinter.MintServiceAccountToken (internal/provider/provider_runtime.go)
 - `method:0a1baf118dfd1184e6e20c9bc6c2149d` method Runtime.WriteEngineStatus (internal/provider/provider_runtime.go)
 - `method:0cb5c9e3b143e0c4ed9b5147fe59f6b3` method Registry.WriteJobStatus (internal/provider/registry_job.go)
-- `method:0f7acc2d0feaf48c63fed92350649ba4` method Runtime.WriteTriggerStatus (internal/provider/provider_runtime.go)
 
-_103 more reference(s) indexed but not listed here to stay inside the 1500-token budget._
+_105 more reference(s) indexed but not listed here to stay inside the 1500-token budget._
 <!-- SPECD_MANAGED_END -->
