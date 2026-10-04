@@ -16473,8 +16473,219 @@ system_contexts:
     bolt.go@third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go
   - file:third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt_test.go
     bolt_test.go@third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt_test.go
+  - function:0266aa1f36c231df4b1fb43aaa4eb2e5 DBFileExists@third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go:429
+  - function:f1a739369259036a49786b0739e2ff97 NewBoltStorage@third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go:85
+  - method:0f35ddf93e43b0bdfb238d1f6f0e7f83 BoltStorage.Delete@third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go:277
+  - method:49d950bd579d14b5a6e9fb769a9091cd BoltStorage.StoreRetrievalToken@third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go:398
+  - method:7b6ed657ebf53eac2ef6e7393b801636 BoltStorage.GetByType@third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go:314
+  - method:9136c2f5f9f6d5aa65801a67a68f316c BoltStorage.Clear@third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go:416
+  - method:9cd57cb838cde16a6d4ed7a3a3211f0a BoltStorage.GetAutoAuthToken@third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go:343
+  - method:bdae86ad3c7c5ad08788564510e300cd BoltStorage.Set@third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go:236
+  - method:d623a3438a0ab3059ee0cf5018bd3bf3 BoltStorage.GetRetrievalToken@third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go:375
+  - method:f371a40adf2f9c7903dc678db1f1ebce BoltStorage.Close@third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go:409
+  - struct:744ae4605d56de77f6afc07d6c8f6aee BoltStorage@third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go:66
+  - struct:87114aebead1ea17d513ad633a32b309 BoltStorageConfig@third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go:75
   id: sc.third-party-openbao-internal-command-agentproxyshared-cache-cacheboltdb
+  intent: 'This context exists so the agent proxy cache can survive restarts: it gives
+    the lease cache a disk-backed persistent storage layer whose contents are encrypted
+    at rest and whose schema can be upgraded in place. It is the bolt-backed implementation
+    of the persistent cache contract, keeping leases ordered so parents are restored
+    before children and keeping the latest auto-auth and retrieval tokens available
+    for restore.'
+  interfaces:
+  - file: third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go
+    kind: struct
+    name: BoltStorage
+    signature: type BoltStorage struct { db *bolt.DB; logger hclog.Logger; wrapper
+      wrapping.Wrapper; aad string }
+  - file: third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go
+    kind: method
+    name: BoltStorage.Clear
+    signature: func (b *BoltStorage) Clear() error
+  - file: third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go
+    kind: method
+    name: BoltStorage.Close
+    signature: func (b *BoltStorage) Close() error
+  - file: third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go
+    kind: method
+    name: BoltStorage.Delete
+    signature: func (b *BoltStorage) Delete(id string, indexType string) error
+  - file: third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go
+    kind: method
+    name: BoltStorage.GetAutoAuthToken
+    signature: func (b *BoltStorage) GetAutoAuthToken(ctx context.Context) ([]byte,
+      error)
+  - file: third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go
+    kind: method
+    name: BoltStorage.GetByType
+    signature: func (b *BoltStorage) GetByType(ctx context.Context, indexType string)
+      ([][]byte, error)
+  - file: third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go
+    kind: method
+    name: BoltStorage.GetRetrievalToken
+    signature: func (b *BoltStorage) GetRetrievalToken() ([]byte, error)
+  - file: third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go
+    kind: method
+    name: BoltStorage.Set
+    signature: func (b *BoltStorage) Set(ctx context.Context, id string, plaintext
+      []byte, indexType string) error
+  - file: third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go
+    kind: method
+    name: BoltStorage.StoreRetrievalToken
+    signature: func (b *BoltStorage) StoreRetrievalToken(token []byte) error
+  - file: third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go
+    kind: struct
+    name: BoltStorageConfig
+    signature: type BoltStorageConfig struct { Path string; Logger hclog.Logger; Wrapper
+      wrapping.Wrapper; AAD string }
+  - file: third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go
+    kind: function
+    name: DBFileExists
+    signature: func DBFileExists(path string) (bool, error)
+  - file: third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go
+    kind: function
+    name: NewBoltStorage
+    signature: func NewBoltStorage(config *BoltStorageConfig) (*BoltStorage, error)
   name: third-party-openbao-internal-command-agentproxyshared-cache-cacheboltdb
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go
+    - method:9cd57cb838cde16a6d4ed7a3a3211f0a
+    id: r.auto-auth-token
+    level: MUST
+    text: 'GetAutoAuthToken reads the AutoAuthToken key from the meta bucket, copies
+      the ciphertext out of the transaction, returns nil, nil when the value is absent,
+      and otherwise decrypts it, returning "failed to decrypt auto-auth token: %w"
+      on decryption failure; a missing meta bucket fails with "bucket %q not found".'
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go
+    - method:9136c2f5f9f6d5aa65801a67a68f316c
+    id: r.clear
+    level: MUST
+    text: Clear wipes the store by deleting the token, lease and lookup buckets inside
+      one Update transaction, emitting a trace log "deleting bolt bucket" per bucket,
+      and then re-runs createBoltSchema at the current storage version so the empty
+      schema is restored.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go
+    - method:f371a40adf2f9c7903dc678db1f1ebce
+    id: r.close
+    level: MUST
+    text: Close emits a trace log "closing bolt db" carrying the database path and
+      then closes the underlying bolt.DB.
+  - codeRefs:
+    - function:f1a739369259036a49786b0739e2ff97
+    - struct:744ae4605d56de77f6afc07d6c8f6aee
+    - struct:87114aebead1ea17d513ad633a32b309
+    id: r.config-surface
+    level: MUST
+    text: BoltStorageConfig supplies the cache directory Path, an hclog.Logger, a
+      wrapping.Wrapper used to encrypt and decrypt entries, and an AAD string passed
+      as associated data on every encrypt and decrypt call; NewBoltStorage copies
+      Logger, Wrapper and AAD onto the returned BoltStorage and uses only Path to
+      locate the database file.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go
+    - function:f1a739369259036a49786b0739e2ff97
+    id: r.database-file
+    level: MUST
+    text: The database lives at filepath.Join(config.Path, DatabaseFileName) where
+      DatabaseFileName is the constant "vault-agent-cache.db"; NewBoltStorage opens
+      it with mode 0600 and a 1 second bolt open timeout, and the joined path is the
+      only file the storage touches.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go
+    - function:0266aa1f36c231df4b1fb43aaa4eb2e5
+    id: r.db-file-exists
+    level: MUST
+    text: 'DBFileExists reports whether the cache file exists by attempting os.OpenFile
+      on filepath.Join(path, DatabaseFileName) with the O_RDWR flag and mode 0600;
+      a successful open closes the file and returns true with the close error, os.IsNotExist
+      returns false, nil, and any other error is wrapped as "failed to check if bolt
+      file exists at path %s: %w".'
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go
+    - method:0f35ddf93e43b0bdfb238d1f6f0e7f83
+    id: r.delete
+    level: MUST
+    text: 'Delete removes an entry by id: for the lease type it first resolves the
+      id through the lookup bucket, failing with "failed to lookup bolt DB key for
+      id %q" when absent, deletes the lookup entry, then deletes the resolved key
+      from the target bucket; for other types the id is used directly as the key;
+      a missing bucket fails with "bucket %q not found during delete" and a successful
+      delete emits a trace log "deleted index from bolt db".'
+  - codeRefs:
+    - method:49d950bd579d14b5a6e9fb769a9091cd
+    - method:7b6ed657ebf53eac2ef6e7393b801636
+    - method:bdae86ad3c7c5ad08788564510e300cd
+    id: r.encryption-at-rest
+    level: MUST
+    text: Every cached payload is stored as an encrypted wrapping.BlobInfo protobuf,
+      encrypted and decrypted through the configured wrapping.Wrapper with the configured
+      AAD; the only values kept in cleartext are the schema version key and the retrieval-token
+      material.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go
+    - method:7b6ed657ebf53eac2ef6e7393b801636
+    id: r.get-by-type
+    level: MUST
+    text: GetByType reads the named bucket in a View transaction, decrypts every stored
+      blob with the wrapper and AAD, and returns the plaintext values in iteration
+      order; decryption failures do not abort the scan but are collected into a multierror
+      returned alongside whatever decrypted successfully, and a missing bucket fails
+      with "bucket %q not found".
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go
+    - method:bdae86ad3c7c5ad08788564510e300cd
+    id: r.lease-key-order
+    level: MUST
+    text: Lease keys are produced by autoIncrementedLeaseKey from the lease bucket's
+      NextSequence, encoded as uint64 big endian into an 8 byte key and paired with
+      an entry in the lookup bucket mapping the caller's id to that key, so that byte-slice
+      ordering of keys preserves creation order and parents are restored before children.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go
+    - method:49d950bd579d14b5a6e9fb769a9091cd
+    - method:d623a3438a0ab3059ee0cf5018bd3bf3
+    id: r.retrieval-token
+    level: MUST
+    text: 'Retrieval-token material is stored unencrypted in the meta bucket under
+      the RetrievalTokenMaterial key: StoreRetrievalToken puts the raw bytes there
+      in an Update transaction, and GetRetrievalToken copies them out of a View transaction
+      and returns nil when the key is unset; both fail with "bucket %q not found"
+      when the meta bucket is missing.'
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go
+    - function:f1a739369259036a49786b0739e2ff97
+    id: r.schema-create
+    level: MUST
+    text: NewBoltStorage runs createBoltSchema inside a single Update transaction
+      at storage version "2"; createBoltSchema rejects any other version with "schema
+      version %s not supported", creates the version-2 buckets token, lease and lookup,
+      ensures the meta bucket exists, writes the version key into meta when absent,
+      and is a no-op when the stored version already equals the requested version.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go
+    id: r.schema-migration
+    level: MUST
+    text: 'When the stored version is "1" and the requested version is "2", createBoltSchema
+      migrates in place: it creates the v2 schema, moves every entry of the deprecated
+      auth-lease and secret-lease buckets into the lease bucket under a freshly generated
+      auto-increment key, records the id-to-key mapping in the lookup bucket, deletes
+      the deprecated buckets, and rewrites the meta version key to "2"; any other
+      stored-to-requested version pair fails with "storage migration from %s to %s
+      not implemented".'
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go
+    - method:bdae86ad3c7c5ad08788564510e300cd
+    id: r.set-encrypt
+    level: MUST
+    text: Set encrypts the plaintext with b.wrapper.Encrypt(ctx, plaintext, wrapping.WithAad([]byte(b.aad)))
+      and stores the protobuf-marshalled wrapping.BlobInfo; it accepts only indexType
+      lease, which stores under a new auto-increment key, or indexType token, which
+      stores under the id key and also writes the same blob into the meta bucket under
+      the AutoAuthToken key; any other type fails with "called Set for unsupported
+      type %q" and a missing bucket fails with "bucket %q not found".
   upstream: self
 - code:
   - third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
