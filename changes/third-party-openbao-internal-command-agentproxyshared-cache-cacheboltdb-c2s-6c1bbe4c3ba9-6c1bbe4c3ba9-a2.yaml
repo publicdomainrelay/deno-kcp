@@ -1,0 +1,35 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-internal-command-agentproxyshared-cache-cacheboltdb-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-internal-command-agentproxyshared-cache-cacheboltdb
+  toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+status:
+  agentLog: The cacheboltdb package, in third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go,
+    wraps a bbolt database as the persistent storage backend for the OpenBao agent
+    proxy cache. BoltStorageConfig carries a directory Path, an hclog.Logger, a wrapping.Wrapper
+    and an AAD string; NewBoltStorage joins Path with the constant file name vault-agent-cache.db,
+    opens it with mode 0600 and a one second timeout, then runs createBoltSchema in
+    a single Update transaction at storage version "2". The schema holds auto-auth
+    tokens in the token bucket, auth and secret leases merged into one lease bucket
+    whose keys are big-endian auto-increment sequence numbers paired with an id-to-key
+    mapping in the lookup bucket, and a meta bucket holding the schema version, the
+    latest auto-auth token ciphertext and the retrieval-token material. Payloads are
+    encrypted through the wrapper with the configured AAD and stored as protobuf-marshalled
+    wrapping.BlobInfo values; only the version key and the retrieval-token bytes stay
+    in cleartext. The exported surface is Set, Delete, GetByType, GetAutoAuthToken,
+    GetRetrievalToken, StoreRetrievalToken, Close and Clear on BoltStorage, plus the
+    DBFileExists helper, and bolt_test.go covers set/get, delete, clear, auto-auth
+    token storage, retrieval-token round trips and the v1-to-v2 and invalid-version
+    migration paths.
+  message: wrote 14 requirement(s) and 12 interface(s) for third-party-openbao-internal-command-agentproxyshared-cache-cacheboltdb
+  phase: Succeeded
+superseded:
+- message: wrote 14 requirement(s) and 12 interface(s) for third-party-openbao-internal-command-agentproxyshared-cache-cacheboltdb
+  name: third-party-openbao-internal-command-agentproxyshared-cache-cacheboltdb-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9
+  phase: Succeeded

@@ -1165,7 +1165,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 
 ### third-party-openbao-internal-command-agentproxyshared-cache-cacheboltdb
 
-- intent: "" -> "This context exists so the agent proxy cache can survive restarts: it gives the lease cache a disk-backed persistent storage layer whose contents are encrypted at rest and whose schema can be upgraded in place. It is the bolt-backed implementation of the persistent cache contract, keeping leases ordered so parents are restored before children and keeping the latest auto-auth and retrieval tokens available for restore."
+- intent: "" -> "This context exists so the agent proxy cache can survive restarts. It gives the lease cache a disk-backed persistent storage layer whose contents are encrypted at rest and whose schema can be upgraded in place. It is the bolt-backed implementation of the persistent cache contract, keeping leases ordered so parents are restored before children and keeping the latest auto-auth and retrieval tokens available for restore."
 - added `r.auto-auth-token` (MUST): "GetAutoAuthToken reads the AutoAuthToken key from the meta bucket, copies the ciphertext out of the transaction, returns nil, nil when the value is absent, and otherwise decrypts it, returning "failed to decrypt auto-auth token: %w" on decryption failure; a missing meta bucket fails with "bucket %q not found"."
 - added `r.clear` (MUST): "Clear wipes the store by deleting the token, lease and lookup buckets inside one Update transaction, emitting a trace log "deleting bolt bucket" per bucket, and then re-runs createBoltSchema at the current storage version so the empty schema is restored."
 - added `r.close` (MUST): "Close emits a trace log "closing bolt db" carrying the database path and then closes the underlying bolt.DB."
@@ -1249,7 +1249,8 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-command-agentproxyshared-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agentproxyshared-cache-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agentproxyshared-cache-cacheboltdb-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-command-agentproxyshared-cache-cacheboltdb-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-command-agentproxyshared-cache-cacheboltdb-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agentproxyshared-cache-cachememdb-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agentproxyshared-cache-keymanager-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-command-agentproxyshared-sink-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-internal-command-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |

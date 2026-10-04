@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-This context exists so the agent proxy cache can survive restarts: it gives the lease cache a disk-backed persistent storage layer whose contents are encrypted at rest and whose schema can be upgraded in place. It is the bolt-backed implementation of the persistent cache contract, keeping leases ordered so parents are restored before children and keeping the latest auto-auth and retrieval tokens available for restore.
+This context exists so the agent proxy cache can survive restarts. It gives the lease cache a disk-backed persistent storage layer whose contents are encrypted at rest and whose schema can be upgraded in place. It is the bolt-backed implementation of the persistent cache contract, keeping leases ordered so parents are restored before children and keeping the latest auto-auth and retrieval tokens available for restore.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
