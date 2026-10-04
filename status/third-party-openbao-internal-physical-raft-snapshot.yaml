@@ -1,0 +1,154 @@
+conditions:
+- message: 'undeclared: New, NewWithSealer, Parse, Restore, RestoreWithSealer, Sealer,
+    Sealer.Open, Sealer.Seal, Snapshot, Snapshot.Checksum, Snapshot.Close, Snapshot.Index,
+    Snapshot.Read, Snapshot.Size, Verify, Write, WriteToTempFile, WriteToTempFileWithSealer,
+    hashList.Add, hashList.DecodeAndVerify, hashList.Encode'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/physical/raft/snapshot/archive.go
+  - third_party/openbao/internal/physical/raft/snapshot/archive_test.go
+  - third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+  - third_party/openbao/internal/physical/raft/snapshot/snapshot_test.go
+  fingerprint: 5570a8cbf116bf1d7aecd7fde8421177139c42b4076ff5bc7abdabd99afbe482
+  interfaces:
+  - codegraphId: method:751a69b736f1be1b6ce920fe9366485e
+    file: third_party/openbao/internal/physical/raft/snapshot/archive.go
+    kind: method
+    line: 43
+    name: hashList.Add
+    signature: (file string) hash.Hash
+  - codegraphId: method:6b160675a56228edbec5b8d6a4058dfc
+    file: third_party/openbao/internal/physical/raft/snapshot/archive.go
+    kind: method
+    line: 55
+    name: hashList.Encode
+    signature: (w io.Writer) error
+  - codegraphId: method:0feb369c884ff6d26baa1e1efdca36b5
+    file: third_party/openbao/internal/physical/raft/snapshot/archive.go
+    kind: method
+    line: 66
+    name: hashList.DecodeAndVerify
+    signature: (r io.Reader) error
+  - codegraphId: struct:8936e1d8eb04c8e5a54ce32b99043682
+    file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+    kind: struct
+    line: 26
+    name: Snapshot
+  - codegraphId: method:df9d4347382c2f75927e1a36358dc272
+    file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+    kind: method
+    line: 33
+    name: Snapshot.Size
+    signature: () (int64, error)
+  - codegraphId: interface:45cf3a26619838a3576fcab008fb8d25
+    file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+    kind: interface
+    line: 43
+    name: Sealer
+  - codegraphId: method:349839e307a2f9be4e7839e04fe580d3
+    file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+    kind: method
+    line: 44
+    name: Sealer.Seal
+    signature: (context.Context, []byte) ([]byte, error)
+  - codegraphId: method:d60e48d1d32c11c9fa7b515706bc4693
+    file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+    kind: method
+    line: 45
+    name: Sealer.Open
+    signature: (context.Context, []byte) ([]byte, error)
+  - codegraphId: function:66291c3d10223057bd5fac0fe9da1b50
+    file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+    kind: function
+    line: 52
+    name: New
+    signature: (logger hclog.Logger, r *raft.Raft) (*Snapshot, error)
+  - codegraphId: function:3f8d163f009271786a61fad71a6c561b
+    file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+    kind: function
+    line: 56
+    name: NewWithSealer
+    signature: (logger hclog.Logger, r *raft.Raft, sealer Sealer) (*Snapshot, error)
+  - codegraphId: function:5706ef797e2020c0a57d334bea9d4833
+    file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+    kind: function
+    line: 122
+    name: Write
+    signature: (logger hclog.Logger, r *raft.Raft, sealer Sealer, w io.Writer) error
+  - codegraphId: method:77893886163706489a890546af7b7b4e
+    file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+    kind: method
+    line: 169
+    name: Snapshot.Index
+    signature: () uint64
+  - codegraphId: method:dc2ffbee086dd70666ba54b7394d02ad
+    file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+    kind: method
+    line: 178
+    name: Snapshot.Checksum
+    signature: () string
+  - codegraphId: method:fe4f9e6b579b6edde6ac0a7ec2f0d860
+    file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+    kind: method
+    line: 187
+    name: Snapshot.Read
+    signature: (p []byte) (n int, err error)
+  - codegraphId: method:f2e06ed5967318980f47c863ce72a9b4
+    file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+    kind: method
+    line: 197
+    name: Snapshot.Close
+    signature: () error
+  - codegraphId: function:b9fb8d800bb64112f19499a757d2bbb1
+    file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+    kind: function
+    line: 212
+    name: Verify
+    signature: (in io.Reader) (*raft.SnapshotMeta, error)
+  - codegraphId: function:5043b8d14037f37d7661ebd7ad531395
+    file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+    kind: function
+    line: 254
+    name: Parse
+    signature: (in io.Reader, out io.Writer) (*raft.SnapshotMeta, error)
+  - codegraphId: function:97decc56fc001c81ab81680efbdf428d
+    file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+    kind: function
+    line: 276
+    name: Restore
+    signature: (logger hclog.Logger, in io.Reader, r *raft.Raft) error
+  - codegraphId: function:b204c537f36efbab2b5696924a5987a8
+    file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+    kind: function
+    line: 280
+    name: RestoreWithSealer
+    signature: (logger hclog.Logger, in io.Reader, r *raft.Raft, sealer Sealer) error
+  - codegraphId: function:2b0eaf0837ec837652fff8466604f74a
+    file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+    kind: function
+    line: 296
+    name: WriteToTempFile
+    signature: (logger hclog.Logger, in io.Reader, metadata *raft.SnapshotMeta) (*os.File,
+      func(), error)
+  - codegraphId: function:f65e8dbee67eaa15167498204fa05073
+    file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+    kind: function
+    line: 300
+    name: WriteToTempFileWithSealer
+    signature: (logger hclog.Logger, in io.Reader, metadata *raft.SnapshotMeta, sealer
+      Sealer) (*os.File, func(), error)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 0d5bff442bc2b897176ddc919e7add98ab6cc3fdba98afe136d307e5661ae2b1
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 5570a8cbf116bf1d7aecd7fde8421177139c42b4076ff5bc7abdabd99afbe482
