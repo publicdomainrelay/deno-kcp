@@ -1,0 +1,31 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-internal-command-agentproxyshared-auth-kubernetes-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-internal-command-agentproxyshared-auth-kubernetes
+  toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+status:
+  agentLog: This context is the Kubernetes implementation of the agentproxyshared
+    auth.AuthMethod interface, vendored under third_party/openbao. kubernetes.go defines
+    the kubernetesMethod struct (a logger, a mount path, a required role, an optional
+    tokenPath, and an injectable jwtData ReadCloser used by tests) plus the NewKubernetesAuthMethod
+    constructor, and kubernetes_test.go covers that constructor. NewKubernetesAuthMethod
+    rejects a nil config and a nil Config map, requires a non-empty string "role",
+    accepts an optional string "token_path", copies the logger and mount path from
+    the AuthConfig, and returns the method as an auth.AuthMethod. Authenticate traces
+    "beginning authentication", reads the pod JWT, and returns the "<mountPath>/login"
+    path with a nil header and a body map carrying "role" and "jwt"; a failed JWT
+    read returns empty values with a wrapped error instead. NewCreds returns a nil
+    channel, and CredSuccess and Shutdown are empty bodies, so the method never signals
+    credential renewal and does no teardown.
+  message: wrote 11 requirement(s) and 5 interface(s) for third-party-openbao-internal-command-agentproxyshared-auth-kubernetes
+  phase: Succeeded
+superseded:
+- message: wrote 11 requirement(s) and 5 interface(s) for third-party-openbao-internal-command-agentproxyshared-auth-kubernetes
+  name: third-party-openbao-internal-command-agentproxyshared-auth-kubernetes-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9
+  phase: Succeeded
