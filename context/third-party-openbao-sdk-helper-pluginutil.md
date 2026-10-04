@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the rest of deno-kcp can host and drive OpenBao plugins without depending on an out-of-tree copy of the SDK. It fixes the plugin-side contract: how the host learns whether a plugin supports multiplexing, how a plugin reads the mlock and metadata-mode environment flags, how run options are assembled into a go-plugin client, and which interfaces a caller must supply (Looker, RunnerUtil, PluginClient) or consume (PluginRunner). The context is a vendored third-party package, so it should be read as a frozen compatibility surface — the requirements below record what the code does today rather than what it ought to do, and the generated protobuf files pin the wire form of the MultiplexingSupport RPC.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
