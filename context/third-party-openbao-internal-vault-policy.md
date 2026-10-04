@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists to describe the vendored ACL and policy store package so that other parts of deno-kcp that depend on policy evaluation can be read and changed without re-deriving this package's behaviour. It documents how rules are parsed, how an ACL is assembled from named and templated policies, how requests are checked, and how the store caches, lists and invalidates policies. It anchors every statement to the actual functions and methods in the copied files.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
