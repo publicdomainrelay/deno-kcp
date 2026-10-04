@@ -1,7 +1,7 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 kind: SpecChange
 metadata:
-  name: third-party-openbao-ui-app-serializers-kubernetes-c2s-6c1bbe4c3ba9-89cee50ec5ae
+  name: third-party-openbao-ui-app-serializers-kubernetes-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2
   namespace: default
 spec:
   delta: {}
@@ -10,7 +10,10 @@ spec:
   systemContext: third-party-openbao-ui-app-serializers-kubernetes
   toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
 status:
-  agentLog: |-
+  message: the agent is summarizing third-party-openbao-ui-app-serializers-kubernetes
+  phase: Running
+superseded:
+- message: |-
     ...e, the config serializer sets kubernetes_ca_cert, kubernetes_host and service_account_jwt to null, unsetting values left over from a previous manual configuration.",
           "codeRefs": [
             "file:third_party/openbao/ui/app/serializers/kubernetes/config.js",
@@ -65,59 +68,5 @@ status:
         }
       ]
     }
-  message: |-
-    ...e, the config serializer sets kubernetes_ca_cert, kubernetes_host and service_account_jwt to null, unsetting values left over from a previous manual configuration.",
-          "codeRefs": [
-            "file:third_party/openbao/ui/app/serializers/kubernetes/config.js",
-            "class:8676fa2c6e4d5a795d361476a4483ad5"
-          ]
-        },
-        {
-          "id": "r.role-serializer-untouched-fields",
-          "level": "SHOULD",
-          "text": "The role serializer limits itself to removing backend; it must not null or otherwise rewrite any other attribute of the role payload.",
-          "codeRefs": [
-            "file:third_party/openbao/ui/app/serializers/kubernetes/role.js"
-          ]
-        }
-      ],
-      "interfaces": [
-        {
-          "name": "KubernetesConfigSerializer",
-          "kind": "class",
-          "signature": "class KubernetesConfigSerializer extends ApplicationSerializer",
-          "file": "third_party/openbao/ui/app/serializers/kubernetes/config.js"
-        },
-        {
-          "name": "KubernetesConfigSerializer.primaryKey",
-          "kind": "property",
-          "signature": "primaryKey = 'backend'",
-          "file": "third_party/openbao/ui/app/serializers/kubernetes/config.js"
-        },
-        {
-          "name": "KubernetesConfigSerializer.serialize",
-          "kind": "method",
-          "signature": "serialize()",
-          "file": "third_party/openbao/ui/app/serializers/kubernetes/config.js"
-        },
-        {
-          "name": "KubernetesConfigSerializer",
-          "kind": "class",
-          "signature": "class KubernetesConfigSerializer extends ApplicationSerializer",
-          "file": "third_party/openbao/ui/app/serializers/kubernetes/role.js"
-        },
-        {
-          "name": "KubernetesConfigSerializer.primaryKey",
-          "kind": "property",
-          "signature": "primaryKey = 'backend'",
-          "file": "third_party/openbao/ui/app/serializers/kubernetes/role.js"
-        },
-        {
-          "name": "KubernetesConfigSerializer.serialize",
-          "kind": "method",
-          "signature": "serialize()",
-          "file": "third_party/openbao/ui/app/serializers/kubernetes/role.js"
-        }
-      ]
-    }
+  name: third-party-openbao-ui-app-serializers-kubernetes-c2s-6c1bbe4c3ba9-89cee50ec5ae
   phase: Failed
