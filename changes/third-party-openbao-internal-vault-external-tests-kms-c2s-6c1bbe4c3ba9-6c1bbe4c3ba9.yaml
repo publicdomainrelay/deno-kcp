@@ -10,5 +10,21 @@ spec:
   systemContext: third-party-openbao-internal-vault-external-tests-kms
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-vault-external-tests-kms
-  phase: Running
+  agentLog: 'This context is the KMS external test harness for OpenBao, held in two
+    files under third_party/openbao/internal/vault/external_tests/kms/. testing.go
+    exports a set of reusable exercise functions that drive a live OpenBao server
+    through its Go API client: ExerciseTransitKMS is the top-level entry that runs
+    the "transit" and "pki" subtests by calling ExerciseTransitWithTransitKMS and
+    ExercisePKIWithTransitKMS. Those two set up their respective mounts with SetupTransit
+    and SetupPKI, iterate the transit key types returned by knownTransitKeyTypes,
+    create a backing key and an external key config for each type, and hand off to
+    ExerciseTransitForKey or ExercisePKIForKey. ExerciseTransitForKey writes an external-key
+    transit key, asserts the write fails before a grant exists, creates the grant
+    at sys/external-keys/configs/kms/keys/<base>/grants/transit, retries the write
+    expecting success, then runs ExerciseTransitEncryptDecrypt and ExerciseTransitSignVerify
+    in parallel against both the "keys" and "transit" mounts when the key type supports
+    them. The PKI side follows the same pattern through ExercisePKIRootCA, ExercisePKIIntermediateCA
+    and ExercisePKICA. kms_test.go supplies the concrete TestKMS_BuiltinTransit and
+    TestKMS_ExternalTransit tests that call ExerciseTransitKMS.'
+  message: wrote 15 requirement(s) and 12 interface(s) for third-party-openbao-internal-vault-external-tests-kms
+  phase: Succeeded
