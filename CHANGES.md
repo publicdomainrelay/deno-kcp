@@ -1799,6 +1799,39 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.propagate-errors` (MUST): "Both helpers must return the error from the underlying SDK template call untouched, and UseTemplateForFiltering must return the generated string alongside that error, so callers can distinguish compile-time failure from evaluation failure."
 - added `r.render-with-key-and-path` (MUST): "UseTemplateForFiltering must evaluate the supplied template.StringTemplate through Generate with a data map containing exactly the keys "key" and "path", bound to the caller's key and path arguments respectively, so filter templates can reference {{.key}} and {{.path}}."
 
+### third-party-openbao-internal-helper-testhelpers
+
+- intent: "" -> "Keep cluster-lifecycle boilerplate out of individual tests so every OpenBao test can seal, unseal, join and await nodes through one reviewed implementation. The file exists because these operations are timing sensitive and duplicated across many packages; centralizing them (with polling loop and timeouts) makes tests deterministic and gives the tree one place to fix cluster-readiness bugs."
+- added `r.active-standby-derivation` (MUST): "DeriveActiveCore MUST return the cluster core that is currently active, and DeriveStandbyCores MUST return the list of cores that are currently standby."
+- added `r.attempt-unseal-error-variants` (MUST): "AttemptUnsealCores MUST attempt to unseal all cores and return an error rather than failing the test, and AttemptUnsealCore MUST do the same for a single core, so callers inside retry loops can observe failure."
+- added `r.await-leader` (MUST): "AwaitLeader MUST wait for a leader to be elected and MUST return the index of the leader core along with an error if no leader appears."
+- added `r.debug-logs` (MUST): "GenerateDebugLogs MUST start background collection of debug logs from the client's server and return a channel the caller closes to stop the collection."
+- added `r.entity-and-alias` (MUST): "CreateEntityAndAlias MUST create an entity and an alias tied to the given mount accessor, returning a client logged in through the alias together with the entity ID and alias ID."
+- added `r.local-or-regression-tests` (MUST): "IsLocalOrRegressionTests MUST report whether the current run is a local or regression test run, derived from the environment, so callers can gate expensive tests."
+- added `r.metric-sink-provider` (MUST): "TestMetricSinkProvider MUST return a constructor that yields a ClusterMetricSink and MetricsHelper pair for a named cluster, using the supplied gauge interval."
+- added `r.mfa-login-fixtures` (MUST): "SetupMFALoginEnforcement MUST enable MFA login enforcement from the supplied config, SetupUserpassMountAccessor MUST mount userpass and return its accessor, GetTOTPCodeFromEngine MUST read a current TOTP code from the engine path, and SetupLoginMFATOTP MUST return a client logged in with the named MFA method after waiting the given period."
+- added `r.non-root-token` (MUST): "SetNonRootToken MUST replace the client's token with a newly created non-root token so tests can exercise unprivileged request paths."
+- added `r.raft-address-providers` (MUST): "TestRaftServerAddressProvider and HardcodedServerAddressProvider MUST each implement ServerAddr, mapping a raftlib.ServerID to a raftlib.ServerAddress with an error; NewHardcodedServerAddressProvider MUST build a provider that derives each core's address from the core count and base cluster port."
+- added `r.raft-applied-index-track` (MUST): "RaftAppliedIndex MUST read the core's current Raft applied index, and WaitForRaftApply MUST block until the given core's applied index reaches the index supplied by the caller."
+- added `r.raft-join-nodes` (MUST): "RaftClusterJoinNodes MUST join every non-leader core of the cluster into the Raft configuration of the leader so the cluster reaches a full peer set."
+- added `r.random-prefix` (MUST): "RandomWithPrefix MUST return the given name with a random suffix appended, giving tests collision-free identifiers."
+- added `r.retry-until` (MUST): "RetryUntil MUST re-run the supplied function until it returns nil or the timeout elapses, failing the test on timeout; RetryUntilAtCadence MUST do the same while sleeping for the given interval between attempts."
+- added `r.root-token-generation` (MUST): "GenerateRoot MUST produce a root token for the target cluster by delegating to GenerateRootWithError and calling t.Fatal when it returns an error, so a failed generation aborts the test instead of returning an empty token."
+- added `r.root-token-key-selection` (MUST): "GenerateRootWithError MUST select cluster.RecoveryKeys when the first core's seal reports RecoveryKeySupported, otherwise cluster.BarrierKeys; it MUST clear and later restore the client namespace, submit keys until status.Required is reached, fail when the cluster holds fewer keys than required, fail when the operation ends with Complete false, and decode the encoded token with the OTP and OTP length from a follow-up status call."
+- added `r.rotate-cluster-keys` (MUST): "RotateClusterKeys MUST rotate the cluster's keys, taking a recovery flag that selects recovery or barrier key rotation, and MUST return the new key material."
+- added `r.seal-cores-and-wait` (MUST): "SealCores MUST seal every core of the cluster, and WaitForNCoresSealed MUST block until at least n cores report sealed."
+- added `r.seal-whole-cluster` (MUST): "EnsureCoresSealed MUST seal every core in the cluster by calling EnsureCoreSealed on each; EnsureCoreSealed MUST call core.Seal, then poll core.Sealed every 250 milliseconds until it reports true, and fail the test after 60 seconds."
+- added `r.skip-unless-env-vars` (MUST): "SkipUnlessEnvVarsSet MUST skip the calling test when any of the named environment variables is unset, so environment-gated tests do not run by accident."
+- added `r.stable-active-core` (MUST): "EnsureStableActiveNode MUST wait until the cluster has a stable active node, and DeriveStableActiveCore MUST return that core; both tolerate leadership changes during startup."
+- added `r.sys-metrics-request` (MUST): "SysMetricsReq MUST query the cluster's sys/metrics endpoint through the client and decode the response into SysMetricsJSON, taking an unauth flag that selects an unauthenticated request."
+- added `r.totp-fixtures` (MUST): "SetupTOTPMount MUST mount a TOTP secrets engine, SetupTOTPMethod MUST create a TOTP MFA method from the supplied config and return its method ID, and RegisterEntityInTOTPEngine MUST create a TOTP key in the engine for the given entity and method, returning the engine path."
+- added `r.unseal-whole-cluster` (MUST): "EnsureCoresUnsealed MUST unseal every core in the cluster by calling EnsureCoreUnsealed; EnsureCoreUnsealed MUST bring the given core back to unsealed state before returning."
+- added `r.verify-raft-configuration` (MUST): "VerifyRaftConfiguration MUST inspect the Raft configuration of the given core and return an error unless the configuration contains the expected number of cores."
+- added `r.verify-raft-peers` (MUST): "VerifyRaftPeers MUST compare the client's observed Raft peers against the expected peer set and return an error describing any mismatch."
+- added `r.wait-active-and-standby-node` (MUST): "WaitForActiveNode MUST return the core of the cluster that becomes active, while WaitForStandbyNode MUST block until the given core is serving as standby."
+- added `r.wait-active-with-standbys` (MUST): "WaitForActiveNodeAndStandbys MUST wait until the cluster has an active node together with its standby nodes, and WaitForNodesExcludingSelectedStandbys MUST do the same while skipping the core indexes passed as variadic arguments."
+- added `r.wait-unsealed-count` (MUST): "WaitForNCoresUnsealed MUST block until at least n cores of the cluster report unsealed."
+
 ### third-party-openbao-internal-helper-testhelpers-cassandra
 
 - intent: "" -> "Test code elsewhere in the OpenBao tree needs a real Cassandra instance to run against, without hand-writing container plumbing at each call site. This package exists to make that a two-line affair: call PrepareTestContainer with a handful of ContainerOpt values, get back a Host for dialing and a function to tear the container down. The option type keeps the container configuration extensible, so a test can override the container name, image, version, environment, copied-in files or TLS settings without the helper growing a wide parameter list."
@@ -1917,6 +1950,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-helper-stubbolt-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-systemd-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-template-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-helper-testhelpers-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-helper-testhelpers-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-testhelpers-cassandra-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-testhelpers-certhelpers-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-helper-testhelpers-corehelpers-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |

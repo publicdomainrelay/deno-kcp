@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+Keep cluster-lifecycle boilerplate out of individual tests so every OpenBao test can seal, unseal, join and await nodes through one reviewed implementation. The file exists because these operations are timing sensitive and duplicated across many packages; centralizing them (with polling loop and timeouts) makes tests deterministic and gives the tree one place to fix cluster-readiness bugs.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
