@@ -25171,8 +25171,667 @@ system_contexts:
   - file:third_party/openbao/internal/helper/profiles/response_source_test.go response_source_test.go@third_party/openbao/internal/helper/profiles/response_source_test.go
   - file:third_party/openbao/internal/helper/profiles/template_source.go template_source.go@third_party/openbao/internal/helper/profiles/template_source.go
   - file:third_party/openbao/internal/helper/profiles/template_source_test.go template_source_test.go@third_party/openbao/internal/helper/profiles/template_source_test.go
+  - function:155d2435b3754382c8642401ed9d149a NewEngine@third_party/openbao/internal/helper/profiles/profiles.go:60
+  - function:1a0c90b0e69fbddeb3383ea2b3a276ef WithSourceBuilder@third_party/openbao/internal/helper/profiles/profiles.go:78
+  - function:202569d4c2113ce28fb68010ce7a9d84 HasResponseSource@third_party/openbao/internal/helper/profiles/response_source.go:26
+  - function:22db8d00156e8649ca124a8b6a112694 WithCELSource@third_party/openbao/internal/helper/profiles/cel_source.go:53
+  - function:2b5ce51dd66011a62fca2a66cb5e4674 ParseOuterConfig@third_party/openbao/internal/helper/profiles/config.go:85
+  - function:359ea69acfc44b6fc044a6256a377f19 WithInputSource@third_party/openbao/internal/helper/profiles/input_source.go:24
+  - function:39f3d1626f87193fde2cb76639343afa ParseRequestConfig@third_party/openbao/internal/helper/profiles/config.go:151
+  - function:3b585a3d10a6f512523323a39ddcb11f WithTemplateSource@third_party/openbao/internal/helper/profiles/template_source.go:36
+  - function:3f9fe99fb6d8427b2e3fe9bdfecd48ed WithOuterBlockName@third_party/openbao/internal/helper/profiles/profiles.go:100
+  - function:449b6e660ac993d089ec2f52cea30801 ResponseSourceBuilder@third_party/openbao/internal/helper/profiles/response_source.go:11
+  - function:49a7a08966690cc4a81a852f5a5e8c15 RequestSourceBuilder@third_party/openbao/internal/helper/profiles/request_source.go:11
+  - function:543faf615015d36261bf8d0eda0b0e4c CreateOuterConfig@third_party/openbao/internal/helper/profiles/config.go:133
+  - function:58c56653fc17a408d5bdbef4fdecea3b CELSourceBuilder@third_party/openbao/internal/helper/profiles/cel_source.go:28
+  - function:6268fe8d5d14693c2294fb531b923dbe WithRequestHandler@third_party/openbao/internal/helper/profiles/profiles.go:107
+  - function:7440863d3b705c5c7b02d3c7b773d01d HasRequestSource@third_party/openbao/internal/helper/profiles/request_source.go:26
+  - function:7dfb6c1d2bdf0f29fe730a5dc3eca6f0 WithFileSource@third_party/openbao/internal/helper/profiles/file_source.go:20
+  - function:87be9e15c14e4388c9147a4c9fd1b95b WithResponseSource@third_party/openbao/internal/helper/profiles/response_source.go:20
+  - function:8f91cf64a50ef678a372b4b3141f3144 WithProfile@third_party/openbao/internal/helper/profiles/profiles.go:92
+  - function:9d316051199ccc5ff72bd1b16f009389 ParseFieldSchemaConfig@third_party/openbao/internal/helper/profiles/config.go:240
+  - function:a4edad98ad1fbf739964c91ed23e4867 WithOutput@third_party/openbao/internal/helper/profiles/profiles.go:122
+  - function:a729a90be183ca380faf1cfa1ee10468 WithRequestSource@third_party/openbao/internal/helper/profiles/request_source.go:20
+  - function:bc10320ce81be88e0ad986fdbb06a30b WithRequestIdentifierPrefix@third_party/openbao/internal/helper/profiles/profiles.go:130
+  - function:cdbb9695d2eaa3b214f1af0aaf6298df HasInputSource@third_party/openbao/internal/helper/profiles/input_source.go:46
+  - function:db601ac1cfd1d383939a33a98ca0a788 ParseInputConfig@third_party/openbao/internal/helper/profiles/config.go:185
+  - function:e36f098ae160e2f79398e7b87cc36cd5 WithLogger@third_party/openbao/internal/helper/profiles/profiles.go:114
+  - function:e81776a949f43073d6248bcb022b06fd ParseOutputConfig@third_party/openbao/internal/helper/profiles/config.go:298
+  - function:eaaaead63a5f93196c1303b471fc1764 WithDefaultToken@third_party/openbao/internal/helper/profiles/profiles.go:85
+  - function:fbf8a60e633396798ffd2c0797c4a5fe WithEnvSource@third_party/openbao/internal/helper/profiles/env_source.go:19
+  - interface:60595c584e4aa69f24c5d82c63983159 Source@third_party/openbao/internal/helper/profiles/profiles.go:145
+  - method:15f86f5c1b4b8b6c229169dff63be267 RequestSource.Close@third_party/openbao/internal/helper/profiles/request_source.go:105
+  - method:1c70ab6cce21359494fc05457b665b25 TemplateSource.Evaluate@third_party/openbao/internal/helper/profiles/template_source.go:88
+  - method:2026bd9d6124b25a0bc1647c7a559aa9 Source.Close@third_party/openbao/internal/helper/profiles/profiles.go:148
+  - method:235d32510a4a853ef6d8f5c00ec33af9 TemplateSource.Close@third_party/openbao/internal/helper/profiles/template_source.go:118
+  - method:2cc50e89ac0dd5fe1ee663cb7db5d327 EvaluationHistory.AddResponseData@third_party/openbao/internal/helper/profiles/history.go:64
+  - method:2d44bebf34957ec9a296259dca154b63 ProfileEngine.EvaluateResponse@third_party/openbao/internal/helper/profiles/profiles.go:310
+  - method:331aa1d241f627156569bc74b121ad5c EvaluationHistory.AddResponse@third_party/openbao/internal/helper/profiles/history.go:50
+  - method:369a652fcfe948c5a75410ba9dcc3f90 InputSource.Validate@third_party/openbao/internal/helper/profiles/input_source.go:62
+  - method:40be7f9be0a95531e1d621b331ddf001 EnvSource.Close@third_party/openbao/internal/helper/profiles/env_source.go:66
+  - method:4d0a3169e02d24e4605ee0ffdefdbb5e FieldSchemaConfig.ToSchema@third_party/openbao/internal/helper/profiles/config.go:279
+  - method:5796a9c7f5bc2d6c7089d0fe1e21eaa3 CELSource.Validate@third_party/openbao/internal/helper/profiles/cel_source.go:78
+  - method:58e91ee2bfcb2a743ceb4b1c85e25626 CELSource.Close@third_party/openbao/internal/helper/profiles/cel_source.go:181
+  - method:5ab8b2184a331f98bc67933f3f98bb8d FileSource.Evaluate@third_party/openbao/internal/helper/profiles/file_source.go:54
+  - method:5f2e0cb3eeb47941ff720ffe8ab1d989 EvaluationHistory.GetRequest@third_party/openbao/internal/helper/profiles/history.go:90
+  - method:6064f552e1cd175b7f6b41e3e7f85331 ResponseSource.Close@third_party/openbao/internal/helper/profiles/response_source.go:105
+  - method:77d1e0bee40987e54c50e14884728262 EnvSource.Evaluate@third_party/openbao/internal/helper/profiles/env_source.go:62
+  - method:7bb3e7df2c0cda77b4af343478036ffe InputSource.Evaluate@third_party/openbao/internal/helper/profiles/input_source.go:82
+  - method:7d662016928418f81f7fef4cb677f2fb Source.Validate@third_party/openbao/internal/helper/profiles/profiles.go:146
+  - method:806c7a4822b7810693d3a192e9659f47 EvaluationHistory.AddRequestData@third_party/openbao/internal/helper/profiles/history.go:42
+  - method:8aef40d0037c066b58cbf6229ca2a07b ProfileEngine.Debug@third_party/openbao/internal/helper/profiles/profiles.go:323
+  - method:92167f01c76019391397338b9fad330b InputConfig.ValidateUnused@third_party/openbao/internal/helper/profiles/config.go:229
+  - method:93ba3188b169e946727981f39d888ace EvaluationHistory.AddRequest@third_party/openbao/internal/helper/profiles/history.go:28
+  - method:9753974bddaa559e0268a95fb3693a8e EvaluationHistory.GetResponseField@third_party/openbao/internal/helper/profiles/history.go:112
+  - method:9777bb1614ab1257bad5214c0e1bdfcb RequestConfig.ValidateUnused@third_party/openbao/internal/helper/profiles/config.go:179
+  - method:9c6331c1c669948bcc7a9a59bcd2c01d Source.Evaluate@third_party/openbao/internal/helper/profiles/profiles.go:147
+  - method:ac1a875ee094af1b513ddd3414cc8569 ResponseSource.Evaluate@third_party/openbao/internal/helper/profiles/response_source.go:97
+  - method:afb2f3ad4d4725c3cc0e399141730f63 FieldSchemaConfig.ValidateUnused@third_party/openbao/internal/helper/profiles/config.go:291
+  - method:b66c002243e2a09d77510306b0ef7bd2 OutputConfig.ValidateUnused@third_party/openbao/internal/helper/profiles/config.go:324
+  - method:d567f11e618ea695527c8d4ba809d57a CELSource.Evaluate@third_party/openbao/internal/helper/profiles/cel_source.go:152
+  - method:df271b3a7f7ccd3ba8392be5c155c37a RequestSource.Evaluate@third_party/openbao/internal/helper/profiles/request_source.go:97
+  - method:e19aeda13f48e9d609519161c9d14960 EvaluationHistory.GetResponse@third_party/openbao/internal/helper/profiles/history.go:94
+  - method:ecb95cbfe00ccb6a3eb1b0a7a4dd2600 ProfileEngine.Evaluate@third_party/openbao/internal/helper/profiles/profiles.go:299
+  - method:ef80a98d503316c6d0e367e93b53609b InputSource.Close@third_party/openbao/internal/helper/profiles/input_source.go:86
+  - method:f0c8ca777a97c3e187690e1c463238d5 EvaluationHistory.GetRequestField@third_party/openbao/internal/helper/profiles/history.go:98
+  - method:f7424d95015b30a99100eb3f61d6c6af OuterConfig.ValidateUnused@third_party/openbao/internal/helper/profiles/config.go:141
+  - method:faae5160e965467d292a3e407f940fbb FileSource.Close@third_party/openbao/internal/helper/profiles/file_source.go:73
+  - struct:03bfea6fb1f372aabed584dd4478af8d RequestConfig@third_party/openbao/internal/helper/profiles/config.go:26
+  - struct:1f6ed880a611960bfd876db94e3ffd50 EvaluationHistory@third_party/openbao/internal/helper/profiles/history.go:17
+  - struct:40e139a8c1e23879be4183fbe96911c2 OuterConfig@third_party/openbao/internal/helper/profiles/config.go:15
+  - struct:4c1e04c79ed4b6912c79840be3ea9cc3 InputSource@third_party/openbao/internal/helper/profiles/input_source.go:51
+  - struct:71b3d9ae9c979326d66c78de0fa770d0 ProfileEngine@third_party/openbao/internal/helper/profiles/profiles.go:41
+  - struct:72fce4c115bf43ae2d07e64886a920b5 TemplateSource@third_party/openbao/internal/helper/profiles/template_source.go:42
+  - struct:811804c8b46c320e3a2afd0ade984b10 FileSource@third_party/openbao/internal/helper/profiles/file_source.go:26
+  - struct:a15daa6fb68a51426d73a1e79276e136 EnvSource@third_party/openbao/internal/helper/profiles/env_source.go:25
+  - struct:e18ee562bfd6799920b3c28e964d9b6e FieldSchemaConfig@third_party/openbao/internal/helper/profiles/config.go:55
+  - type_alias:352639b417bf65bd1a4b476947b6e9e1 SourceBuilder@third_party/openbao/internal/helper/profiles/profiles.go:138
+  - type_alias:669d78e644c095dd23c347c0f24611cb RequestHandlerFunc@third_party/openbao/internal/helper/profiles/profiles.go:141
   id: sc.third-party-openbao-internal-helper-profiles
+  intent: The package exists so OpenBao can describe a request/response profile in
+    HCL and evaluate it with pluggable data sources. The CEL source exposes `requests`,
+    `responses` and `input` variables only when the matching source is present, so
+    a profile can reference request and response data without failing at compile time
+    when that data is unavailable. The engine evaluates the profile against a recorded
+    `EvaluationHistory`, produces a `logical.Response`, and can dump a debug map.
+    Sources are decoupled behind the `Source` interface, so each backend (CEL expression,
+    template, environment variable, file, request, response, plugin input) is registered
+    by name and built lazily.
+  interfaces:
+  - file: third_party/openbao/internal/helper/profiles/cel_source.go
+    kind: struct
+    name: CELSource
+    signature: type CELSource struct
+  - file: third_party/openbao/internal/helper/profiles/cel_source.go
+    kind: method
+    name: CELSource.Close
+    signature: func (CELSource) Close(_ context.Context) error
+  - file: third_party/openbao/internal/helper/profiles/cel_source.go
+    kind: method
+    name: CELSource.Evaluate
+    signature: func (CELSource) Evaluate(ctx context.Context, eh *EvaluationHistory)
+      (any, error)
+  - file: third_party/openbao/internal/helper/profiles/cel_source.go
+    kind: method
+    name: CELSource.Validate
+    signature: func (CELSource) Validate() ([]string, []string, error)
+  - file: third_party/openbao/internal/helper/profiles/cel_source.go
+    kind: function
+    name: CELSourceBuilder
+    signature: func CELSourceBuilder(engine *ProfileEngine, field map[string]any)
+      Source
+  - file: third_party/openbao/internal/helper/profiles/config.go
+    kind: function
+    name: CreateOuterConfig
+    signature: func CreateOuterConfig(requests []*RequestConfig) []*OuterConfig
+  - file: third_party/openbao/internal/helper/profiles/env_source.go
+    kind: struct
+    name: EnvSource
+    signature: type EnvSource struct
+  - file: third_party/openbao/internal/helper/profiles/env_source.go
+    kind: method
+    name: EnvSource.Close
+    signature: func (EnvSource) Close(_ context.Context) error
+  - file: third_party/openbao/internal/helper/profiles/env_source.go
+    kind: method
+    name: EnvSource.Evaluate
+    signature: func (EnvSource) Evaluate(_ context.Context, _ *EvaluationHistory)
+      (any, error)
+  - file: third_party/openbao/internal/helper/profiles/env_source.go
+    kind: method
+    name: EnvSource.Validate
+    signature: func (EnvSource) Validate() ([]string, []string, error)
+  - file: third_party/openbao/internal/helper/profiles/env_source.go
+    kind: function
+    name: EnvSourceBuilder
+    signature: func EnvSourceBuilder(engine *ProfileEngine, field map[string]any)
+      Source
+  - file: third_party/openbao/internal/helper/profiles/history.go
+    kind: struct
+    name: EvaluationHistory
+    signature: type EvaluationHistory struct
+  - file: third_party/openbao/internal/helper/profiles/history.go
+    kind: method
+    name: EvaluationHistory.AddRequest
+    signature: func (EvaluationHistory) AddRequest(outerBlock string, requestBlock
+      string, request *logical.Request) error
+  - file: third_party/openbao/internal/helper/profiles/history.go
+    kind: method
+    name: EvaluationHistory.AddRequestData
+    signature: func (EvaluationHistory) AddRequestData(outerBlock string, requestBlock
+      string, request map[string]any) error
+  - file: third_party/openbao/internal/helper/profiles/history.go
+    kind: method
+    name: EvaluationHistory.AddResponse
+    signature: func (EvaluationHistory) AddResponse(outerBlock string, requestBlock
+      string, response *logical.Response) error
+  - file: third_party/openbao/internal/helper/profiles/history.go
+    kind: method
+    name: EvaluationHistory.AddResponseData
+    signature: func (EvaluationHistory) AddResponseData(outerBlock string, requestBlock
+      string, request map[string]any) error
+  - file: third_party/openbao/internal/helper/profiles/history.go
+    kind: method
+    name: EvaluationHistory.GetRequest
+    signature: func (EvaluationHistory) GetRequest(outerBlock string, requestBlock
+      string) (map[string]any, error)
+  - file: third_party/openbao/internal/helper/profiles/history.go
+    kind: method
+    name: EvaluationHistory.GetRequestField
+    signature: func (EvaluationHistory) GetRequestField(outerBlock string, requestBlock
+      string, fieldSelector []any) (any, error)
+  - file: third_party/openbao/internal/helper/profiles/history.go
+    kind: method
+    name: EvaluationHistory.GetResponse
+    signature: func (EvaluationHistory) GetResponse(outerBlock string, requestBlock
+      string) (map[string]any, error)
+  - file: third_party/openbao/internal/helper/profiles/history.go
+    kind: method
+    name: EvaluationHistory.GetResponseField
+    signature: func (EvaluationHistory) GetResponseField(outerBlock string, requestBlock
+      string, fieldSelector []any) (any, error)
+  - file: third_party/openbao/internal/helper/profiles/config.go
+    kind: struct
+    name: FieldSchemaConfig
+    signature: type FieldSchemaConfig struct
+  - file: third_party/openbao/internal/helper/profiles/config.go
+    kind: method
+    name: FieldSchemaConfig.ToSchema
+    signature: func (FieldSchemaConfig) ToSchema() *framework.FieldSchema
+  - file: third_party/openbao/internal/helper/profiles/config.go
+    kind: method
+    name: FieldSchemaConfig.ValidateUnused
+    signature: func (FieldSchemaConfig) ValidateUnused(path string) []configutil.ConfigError
+  - file: third_party/openbao/internal/helper/profiles/file_source.go
+    kind: struct
+    name: FileSource
+    signature: type FileSource struct
+  - file: third_party/openbao/internal/helper/profiles/file_source.go
+    kind: method
+    name: FileSource.Close
+    signature: func (FileSource) Close(_ context.Context) error
+  - file: third_party/openbao/internal/helper/profiles/file_source.go
+    kind: method
+    name: FileSource.Evaluate
+    signature: func (FileSource) Evaluate(ctx context.Context, _ *EvaluationHistory)
+      (any, error)
+  - file: third_party/openbao/internal/helper/profiles/file_source.go
+    kind: method
+    name: FileSource.Validate
+    signature: func (FileSource) Validate() ([]string, []string, error)
+  - file: third_party/openbao/internal/helper/profiles/file_source.go
+    kind: function
+    name: FileSourceBuilder
+    signature: func FileSourceBuilder(engine *ProfileEngine, field map[string]any)
+      Source
+  - file: third_party/openbao/internal/helper/profiles/input_source.go
+    kind: function
+    name: HasInputSource
+    signature: func HasInputSource(engine *ProfileEngine) bool
+  - file: third_party/openbao/internal/helper/profiles/request_source.go
+    kind: function
+    name: HasRequestSource
+    signature: func HasRequestSource(engine *ProfileEngine) bool
+  - file: third_party/openbao/internal/helper/profiles/response_source.go
+    kind: function
+    name: HasResponseSource
+    signature: func HasResponseSource(engine *ProfileEngine) bool
+  - file: third_party/openbao/internal/helper/profiles/config.go
+    kind: struct
+    name: InputConfig
+    signature: type InputConfig struct
+  - file: third_party/openbao/internal/helper/profiles/config.go
+    kind: method
+    name: InputConfig.ValidateUnused
+    signature: func (InputConfig) ValidateUnused(path string) []configutil.ConfigError
+  - file: third_party/openbao/internal/helper/profiles/input_source.go
+    kind: struct
+    name: InputSource
+    signature: type InputSource struct
+  - file: third_party/openbao/internal/helper/profiles/input_source.go
+    kind: method
+    name: InputSource.Close
+    signature: func (InputSource) Close(_ context.Context) error
+  - file: third_party/openbao/internal/helper/profiles/input_source.go
+    kind: method
+    name: InputSource.Evaluate
+    signature: func (InputSource) Evaluate(_ context.Context, eh *EvaluationHistory)
+      (any, error)
+  - file: third_party/openbao/internal/helper/profiles/input_source.go
+    kind: method
+    name: InputSource.Validate
+    signature: func (InputSource) Validate() ([]string, []string, error)
+  - file: third_party/openbao/internal/helper/profiles/profiles.go
+    kind: function
+    name: NewEngine
+    signature: func NewEngine(opts ...func(*ProfileEngine)) (*ProfileEngine, error)
+  - file: third_party/openbao/internal/helper/profiles/config.go
+    kind: struct
+    name: OuterConfig
+    signature: type OuterConfig struct
+  - file: third_party/openbao/internal/helper/profiles/config.go
+    kind: method
+    name: OuterConfig.ValidateUnused
+    signature: func (OuterConfig) ValidateUnused(path string) []configutil.ConfigError
+  - file: third_party/openbao/internal/helper/profiles/config.go
+    kind: struct
+    name: OutputConfig
+    signature: type OutputConfig struct
+  - file: third_party/openbao/internal/helper/profiles/config.go
+    kind: method
+    name: OutputConfig.ValidateUnused
+    signature: func (OutputConfig) ValidateUnused(path string) []configutil.ConfigError
+  - file: third_party/openbao/internal/helper/profiles/config.go
+    kind: function
+    name: ParseFieldSchemaConfig
+    signature: func ParseFieldSchemaConfig(list *ast.ObjectList) ([]*FieldSchemaConfig,
+      error)
+  - file: third_party/openbao/internal/helper/profiles/config.go
+    kind: function
+    name: ParseInputConfig
+    signature: func ParseInputConfig(list *ast.ObjectList) (*InputConfig, error)
+  - file: third_party/openbao/internal/helper/profiles/config.go
+    kind: function
+    name: ParseOuterConfig
+    signature: func ParseOuterConfig(outerBlockType string, list *ast.ObjectList)
+      ([]*OuterConfig, error)
+  - file: third_party/openbao/internal/helper/profiles/config.go
+    kind: function
+    name: ParseOutputConfig
+    signature: func ParseOutputConfig(list *ast.ObjectList) (*OutputConfig, error)
+  - file: third_party/openbao/internal/helper/profiles/config.go
+    kind: function
+    name: ParseRequestConfig
+    signature: func ParseRequestConfig(list *ast.ObjectList) ([]*RequestConfig, error)
+  - file: third_party/openbao/internal/helper/profiles/profiles.go
+    kind: struct
+    name: ProfileEngine
+    signature: type ProfileEngine struct
+  - file: third_party/openbao/internal/helper/profiles/profiles.go
+    kind: method
+    name: ProfileEngine.Debug
+    signature: func (ProfileEngine) Debug(ctx context.Context) map[string]any
+  - file: third_party/openbao/internal/helper/profiles/profiles.go
+    kind: method
+    name: ProfileEngine.Evaluate
+    signature: func (ProfileEngine) Evaluate(ctx context.Context) error
+  - file: third_party/openbao/internal/helper/profiles/profiles.go
+    kind: method
+    name: ProfileEngine.EvaluateResponse
+    signature: func (ProfileEngine) EvaluateResponse(ctx context.Context) (*logical.Response,
+      error)
+  - file: third_party/openbao/internal/helper/profiles/config.go
+    kind: struct
+    name: RequestConfig
+    signature: type RequestConfig struct
+  - file: third_party/openbao/internal/helper/profiles/config.go
+    kind: method
+    name: RequestConfig.ValidateUnused
+    signature: func (RequestConfig) ValidateUnused(path string) []configutil.ConfigError
+  - file: third_party/openbao/internal/helper/profiles/profiles.go
+    kind: type_alias
+    name: RequestHandlerFunc
+    signature: type RequestHandlerFunc func(context.Context, *logical.Request) (*logical.Response,
+      error)
+  - file: third_party/openbao/internal/helper/profiles/request_source.go
+    kind: struct
+    name: RequestSource
+    signature: type RequestSource struct
+  - file: third_party/openbao/internal/helper/profiles/request_source.go
+    kind: method
+    name: RequestSource.Close
+    signature: func (RequestSource) Close(_ context.Context) error
+  - file: third_party/openbao/internal/helper/profiles/request_source.go
+    kind: method
+    name: RequestSource.Evaluate
+    signature: func (RequestSource) Evaluate(_ context.Context, eh *EvaluationHistory)
+      (any, error)
+  - file: third_party/openbao/internal/helper/profiles/request_source.go
+    kind: method
+    name: RequestSource.Validate
+    signature: func (RequestSource) Validate() ([]string, []string, error)
+  - file: third_party/openbao/internal/helper/profiles/request_source.go
+    kind: function
+    name: RequestSourceBuilder
+    signature: func RequestSourceBuilder(engine *ProfileEngine, field map[string]any)
+      Source
+  - file: third_party/openbao/internal/helper/profiles/response_source.go
+    kind: struct
+    name: ResponseSource
+    signature: type ResponseSource struct
+  - file: third_party/openbao/internal/helper/profiles/response_source.go
+    kind: method
+    name: ResponseSource.Close
+    signature: func (ResponseSource) Close(_ context.Context) error
+  - file: third_party/openbao/internal/helper/profiles/response_source.go
+    kind: method
+    name: ResponseSource.Evaluate
+    signature: func (ResponseSource) Evaluate(_ context.Context, eh *EvaluationHistory)
+      (any, error)
+  - file: third_party/openbao/internal/helper/profiles/response_source.go
+    kind: method
+    name: ResponseSource.Validate
+    signature: func (ResponseSource) Validate() ([]string, []string, error)
+  - file: third_party/openbao/internal/helper/profiles/response_source.go
+    kind: function
+    name: ResponseSourceBuilder
+    signature: func ResponseSourceBuilder(engine *ProfileEngine, field map[string]any)
+      Source
+  - file: third_party/openbao/internal/helper/profiles/profiles.go
+    kind: interface
+    name: Source
+    signature: type Source interface
+  - file: third_party/openbao/internal/helper/profiles/profiles.go
+    kind: method
+    name: Source.Close
+    signature: func (Source) Close(ctx context.Context) error
+  - file: third_party/openbao/internal/helper/profiles/profiles.go
+    kind: method
+    name: Source.Evaluate
+    signature: func (Source) Evaluate(ctx context.Context, history *EvaluationHistory)
+      (value any, err error)
+  - file: third_party/openbao/internal/helper/profiles/profiles.go
+    kind: method
+    name: Source.Validate
+    signature: func (Source) Validate() (requestDeps, responseDeps []string, err error)
+  - file: third_party/openbao/internal/helper/profiles/profiles.go
+    kind: type_alias
+    name: SourceBuilder
+    signature: type SourceBuilder func(*ProfileEngine, map[string]any) Source
+  - file: third_party/openbao/internal/helper/profiles/template_source.go
+    kind: struct
+    name: TemplateSource
+    signature: type TemplateSource struct
+  - file: third_party/openbao/internal/helper/profiles/template_source.go
+    kind: method
+    name: TemplateSource.Close
+    signature: func (TemplateSource) Close(_ context.Context) error
+  - file: third_party/openbao/internal/helper/profiles/template_source.go
+    kind: method
+    name: TemplateSource.Evaluate
+    signature: func (TemplateSource) Evaluate(_ context.Context, eh *EvaluationHistory)
+      (any, error)
+  - file: third_party/openbao/internal/helper/profiles/template_source.go
+    kind: method
+    name: TemplateSource.Validate
+    signature: func (TemplateSource) Validate() ([]string, []string, error)
+  - file: third_party/openbao/internal/helper/profiles/template_source.go
+    kind: function
+    name: TemplateSourceBuilder
+    signature: func TemplateSourceBuilder(engine *ProfileEngine, field map[string]any)
+      Source
+  - file: third_party/openbao/internal/helper/profiles/cel_source.go
+    kind: function
+    name: WithCELSource
+    signature: func WithCELSource() func(*ProfileEngine)
+  - file: third_party/openbao/internal/helper/profiles/profiles.go
+    kind: function
+    name: WithDefaultToken
+    signature: func WithDefaultToken(token string) func(*ProfileEngine)
+  - file: third_party/openbao/internal/helper/profiles/env_source.go
+    kind: function
+    name: WithEnvSource
+    signature: func WithEnvSource() func(*ProfileEngine)
+  - file: third_party/openbao/internal/helper/profiles/file_source.go
+    kind: function
+    name: WithFileSource
+    signature: func WithFileSource() func(*ProfileEngine)
+  - file: third_party/openbao/internal/helper/profiles/input_source.go
+    kind: function
+    name: WithInputSource
+    signature: func WithInputSource(config *InputConfig, request *logical.Request,
+      data *framework.FieldData) func(*ProfileEngine)
+  - file: third_party/openbao/internal/helper/profiles/profiles.go
+    kind: function
+    name: WithLogger
+    signature: func WithLogger(logger hclog.Logger) func(*ProfileEngine)
+  - file: third_party/openbao/internal/helper/profiles/profiles.go
+    kind: function
+    name: WithOuterBlockName
+    signature: func WithOuterBlockName(name string) func(*ProfileEngine)
+  - file: third_party/openbao/internal/helper/profiles/profiles.go
+    kind: function
+    name: WithOutput
+    signature: func WithOutput(config *OutputConfig) func(*ProfileEngine)
+  - file: third_party/openbao/internal/helper/profiles/profiles.go
+    kind: function
+    name: WithProfile
+    signature: func WithProfile(profile []*OuterConfig) func(*ProfileEngine)
+  - file: third_party/openbao/internal/helper/profiles/profiles.go
+    kind: function
+    name: WithRequestHandler
+    signature: func WithRequestHandler(helper RequestHandlerFunc) func(*ProfileEngine)
+  - file: third_party/openbao/internal/helper/profiles/profiles.go
+    kind: function
+    name: WithRequestIdentifierPrefix
+    signature: func WithRequestIdentifierPrefix(prefix string) func(*ProfileEngine)
+  - file: third_party/openbao/internal/helper/profiles/request_source.go
+    kind: function
+    name: WithRequestSource
+    signature: func WithRequestSource() func(*ProfileEngine)
+  - file: third_party/openbao/internal/helper/profiles/response_source.go
+    kind: function
+    name: WithResponseSource
+    signature: func WithResponseSource() func(*ProfileEngine)
+  - file: third_party/openbao/internal/helper/profiles/profiles.go
+    kind: function
+    name: WithSourceBuilder
+    signature: func WithSourceBuilder(name string, builder SourceBuilder) func(*ProfileEngine)
+  - file: third_party/openbao/internal/helper/profiles/template_source.go
+    kind: function
+    name: WithTemplateSource
+    signature: func WithTemplateSource() func(*ProfileEngine)
   name: third-party-openbao-internal-helper-profiles
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/profiles/cel_source.go
+    - method:5796a9c7f5bc2d6c7089d0fe1e21eaa3
+    - method:58e91ee2bfcb2a743ceb4b1c85e25626
+    - method:d567f11e618ea695527c8d4ba809d57a
+    id: r.cel-evaluate
+    level: MUST
+    text: CELSource validates its expression against the environment options, evaluates
+      the compiled program on Evaluate and returns the resulting value, and Close
+      is a no-op that returns nil.
+  - codeRefs:
+    - function:202569d4c2113ce28fb68010ce7a9d84
+    - function:58c56653fc17a408d5bdbef4fdecea3b
+    - function:7440863d3b705c5c7b02d3c7b773d01d
+    - function:cdbb9695d2eaa3b214f1af0aaf6298df
+    id: r.cel-variable-gating
+    level: MUST
+    text: CELSourceBuilder adds the CEL variable `requests` only when HasRequestSource
+      is true, `responses` only when HasResponseSource is true, and `input` only when
+      HasInputSource is true, so a CEL profile cannot reference a source the engine
+      does not carry.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/profiles/config.go
+    - function:2b5ce51dd66011a62fca2a66cb5e4674
+    - function:39f3d1626f87193fde2cb76639343afa
+    - function:9d316051199ccc5ff72bd1b16f009389
+    - function:db601ac1cfd1d383939a33a98ca0a788
+    - function:e81776a949f43073d6248bcb022b06fd
+    id: r.config-parsing
+    level: MUST
+    text: 'The config parsers turn an HCL ast.ObjectList into typed configs: ParseOuterConfig
+      returns OuterConfig values for a named outer block type, ParseRequestConfig
+      returns RequestConfig values carrying operation, path, token, data, headers,
+      when and allow_failure, ParseInputConfig returns one InputConfig, ParseFieldSchemaConfig
+      returns FieldSchemaConfig values, and ParseOutputConfig returns one OutputConfig.'
+  - codeRefs:
+    - function:543faf615015d36261bf8d0eda0b0e4c
+    - struct:03bfea6fb1f372aabed584dd4478af8d
+    - struct:40e139a8c1e23879be4183fbe96911c2
+    id: r.create-outer-config
+    level: MUST
+    text: CreateOuterConfig builds a slice of OuterConfig from a slice of RequestConfig,
+      assigning the requests to the outer blocks the engine will evaluate.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/profiles/profiles.go
+    - function:155d2435b3754382c8642401ed9d149a
+    - struct:71b3d9ae9c979326d66c78de0fa770d0
+    id: r.engine-construction
+    level: MUST
+    text: NewEngine builds a ProfileEngine by applying each option function in order
+      and returns an error when construction fails; the resulting engine carries the
+      profile, source-builder registry and configuration set by the options.
+  - codeRefs:
+    - method:2d44bebf34957ec9a296259dca154b63
+    - method:8aef40d0037c066b58cbf6229ca2a07b
+    - method:ecb95cbfe00ccb6a3eb1b0a7a4dd2600
+    - struct:71b3d9ae9c979326d66c78de0fa770d0
+    id: r.engine-evaluate
+    level: MUST
+    text: ProfileEngine.Evaluate walks the configured profile and evaluates each outer
+      block's requests, EvaluateResponse returns the resulting logical.Response or
+      an error, and Debug returns a map of internal evaluation state for inspection.
+  - codeRefs:
+    - function:3f9fe99fb6d8427b2e3fe9bdfecd48ed
+    - function:6268fe8d5d14693c2294fb531b923dbe
+    - function:8f91cf64a50ef678a372b4b3141f3144
+    - function:a4edad98ad1fbf739964c91ed23e4867
+    - function:bc10320ce81be88e0ad986fdbb06a30b
+    - function:e36f098ae160e2f79398e7b87cc36cd5
+    - function:eaaaead63a5f93196c1303b471fc1764
+    - type_alias:669d78e644c095dd23c347c0f24611cb
+    id: r.engine-options
+    level: MUST
+    text: 'The remaining option functions configure the engine before evaluation:
+      WithProfile sets the outer configs, WithOuterBlockName sets the block name used
+      in error paths, WithDefaultToken sets the token for generated requests, WithRequestHandler
+      installs the RequestHandlerFunc used to dispatch requests, WithLogger attaches
+      an hclog.Logger, WithOutput attaches the OutputConfig, and WithRequestIdentifierPrefix
+      sets the prefix for request identifiers.'
+  - codeRefs:
+    - method:1c70ab6cce21359494fc05457b665b25
+    - method:5ab8b2184a331f98bc67933f3f98bb8d
+    - method:77d1e0bee40987e54c50e14884728262
+    - struct:72fce4c115bf43ae2d07e64886a920b5
+    - struct:811804c8b46c320e3a2afd0ade984b10
+    - struct:a15daa6fb68a51426d73a1e79276e136
+    id: r.env-file-template-sources
+    level: MUST
+    text: EnvSource resolves its value from the environment, FileSource reads its
+      value from a file path, and TemplateSource renders a template against the evaluation
+      history; each validates its inputs first and Close returns nil for all three.
+  - codeRefs:
+    - method:4d0a3169e02d24e4605ee0ffdefdbb5e
+    - struct:e18ee562bfd6799920b3c28e964d9b6e
+    id: r.field-schema
+    level: MUST
+    text: FieldSchemaConfig.ToSchema converts a parsed field schema config into a
+      framework.FieldSchema used by the plugin input surface.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/profiles/history.go
+    - method:2cc50e89ac0dd5fe1ee663cb7db5d327
+    - method:331aa1d241f627156569bc74b121ad5c
+    - method:5f2e0cb3eeb47941ff720ffe8ab1d989
+    - method:806c7a4822b7810693d3a192e9659f47
+    - method:93ba3188b169e946727981f39d888ace
+    - method:9753974bddaa559e0268a95fb3693a8e
+    - method:e19aeda13f48e9d609519161c9d14960
+    - method:f0c8ca777a97c3e187690e1c463238d5
+    - struct:1f6ed880a611960bfd876db94e3ffd50
+    id: r.history
+    level: MUST
+    text: EvaluationHistory records a request or response under an outer block name
+      and request block name, accepting either a logical.Request/logical.Response
+      or a raw map, and the getters return the stored map or resolve a field selector
+      path against it, erroring when the entry is absent.
+  - codeRefs:
+    - function:359ea69acfc44b6fc044a6256a377f19
+    - function:cdbb9695d2eaa3b214f1af0aaf6298df
+    - method:369a652fcfe948c5a75410ba9dcc3f90
+    - method:7bb3e7df2c0cda77b4af343478036ffe
+    - struct:4c1e04c79ed4b6912c79840be3ea9cc3
+    id: r.input-source
+    level: MUST
+    text: WithInputSource binds an InputConfig together with the live logical.Request
+      and framework.FieldData into an engine option, HasInputSource reports whether
+      an input source is registered, and InputSource.Evaluate reads the input values
+      from the evaluation history.
+  - codeRefs:
+    - function:202569d4c2113ce28fb68010ce7a9d84
+    - function:449b6e660ac993d089ec2f52cea30801
+    - function:49a7a08966690cc4a81a852f5a5e8c15
+    - function:7440863d3b705c5c7b02d3c7b773d01d
+    - method:ac1a875ee094af1b513ddd3414cc8569
+    - method:df271b3a7f7ccd3ba8392be5c155c37a
+    id: r.request-response-sources
+    level: MUST
+    text: RequestSource and ResponseSource read the recorded request or response for
+      the current outer and request block out of the EvaluationHistory, and HasRequestSource
+      and HasResponseSource report whether the engine carries each source so CEL variables
+      and validation can be gated on them.
+  - codeRefs:
+    - function:1a0c90b0e69fbddeb3383ea2b3a276ef
+    - function:22db8d00156e8649ca124a8b6a112694
+    - function:3b585a3d10a6f512523323a39ddcb11f
+    - function:7dfb6c1d2bdf0f29fe730a5dc3eca6f0
+    - function:87be9e15c14e4388c9147a4c9fd1b95b
+    - function:a729a90be183ca380faf1cfa1ee10468
+    - function:fbf8a60e633396798ffd2c0797c4a5fe
+    id: r.source-builder-registry
+    level: MUST
+    text: 'WithSourceBuilder registers a SourceBuilder under a name in the engine''s
+      sourceBuilders map, and each dedicated option registers its builder under a
+      fixed key: "cel", "env", "file", "request", "response" and "template".'
+  - codeRefs:
+    - method:15f86f5c1b4b8b6c229169dff63be267
+    - method:235d32510a4a853ef6d8f5c00ec33af9
+    - method:40be7f9be0a95531e1d621b331ddf001
+    - method:58e91ee2bfcb2a743ceb4b1c85e25626
+    - method:6064f552e1cd175b7f6b41e3e7f85331
+    - method:ef80a98d503316c6d0e367e93b53609b
+    - method:faae5160e965467d292a3e407f940fbb
+    id: r.source-close
+    level: MUST
+    text: Closing a source releases anything it opened and returns an error on failure;
+      the stateless sources (CEL, environment, file, request, response, template)
+      return nil, so an engine can always tear its sources down after evaluation.
+  - codeRefs:
+    - interface:60595c584e4aa69f24c5d82c63983159
+    - method:2026bd9d6124b25a0bc1647c7a559aa9
+    - method:7d662016928418f81f7fef4cb677f2fb
+    - method:9c6331c1c669948bcc7a9a59bcd2c01d
+    - type_alias:352639b417bf65bd1a4b476947b6e9e1
+    id: r.source-interface
+    level: MUST
+    text: Every source implements the Source interface with Validate returning request
+      and response dependency names, Evaluate returning a value from the evaluation
+      history, and Close releasing resources; every SourceBuilder returns a Source
+      built from the engine and the block's field map.
+  - codeRefs:
+    - method:92167f01c76019391397338b9fad330b
+    - method:9777bb1614ab1257bad5214c0e1bdfcb
+    - method:afb2f3ad4d4725c3cc0e399141730f63
+    - method:b66c002243e2a09d77510306b0ef7bd2
+    - method:f7424d95015b30a99100eb3f61d6c6af
+    id: r.validate-unused
+    level: MUST
+    text: Each config type reports unrecognised HCL keys at a given path through ValidateUnused,
+      and OuterConfig.ValidateUnused additionally recurses into each of its requests
+      so unused keys in a nested request block are reported.
   upstream: self
 - code:
   - third_party/openbao/internal/helper/proxyutil/proxyutil.go

@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The package exists so OpenBao can describe a request/response profile in HCL and evaluate it with pluggable data sources. The CEL source exposes `requests`, `responses` and `input` variables only when the matching source is present, so a profile can reference request and response data without failing at compile time when that data is unavailable. The engine evaluates the profile against a recorded `EvaluationHistory`, produces a `logical.Response`, and can dump a debug map. Sources are decoupled behind the `Source` interface, so each backend (CEL expression, template, environment variable, file, request, response, plugin input) is registered by name and built lazily.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
