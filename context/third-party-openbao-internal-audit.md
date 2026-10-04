@@ -2,13 +2,363 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to fix the contract of the audit package as a stable boundary between audit device backends and the rest of the server: a device supplies a Backend and a Formatter, the formatter serialises requests and responses into an AuditFormatWriter, and the hashing layer guarantees that secrets, tokens and potentially sensitive values are salted or HMAC'd before they leave the process. It is written so that the formatting and hashing behaviour cannot drift silently, because audit output is the forensic record and a leak or an unverifiable field is unrecoverable. The exported names, signatures and the required test files below are the parts that other packages and downstream devices depend on.
 
 _Write the prose above and the fields in the spec block. `codeRefs` and the resolved references below are maintained by the tool; an edit there is lost._
 
 ## spec
 
 ```yaml spec
+interfaces:
+- file: third_party/openbao/internal/audit/format.go
+  kind: struct
+  name: AuditAuth
+  signature: type AuditAuth struct
+- file: third_party/openbao/internal/audit/format.go
+  kind: interface
+  name: AuditFormatWriter
+  signature: interface AuditFormatWriter
+- file: third_party/openbao/internal/audit/format.go
+  kind: method
+  name: AuditFormatWriter.Salt
+  signature: func (context.Context) (*salt.Salt, error)
+- file: third_party/openbao/internal/audit/format.go
+  kind: method
+  name: AuditFormatWriter.WriteRequest
+  signature: func (io.Writer, *AuditRequestEntry) error
+- file: third_party/openbao/internal/audit/format.go
+  kind: method
+  name: AuditFormatWriter.WriteResponse
+  signature: func (io.Writer, *AuditResponseEntry) error
+- file: third_party/openbao/internal/audit/format.go
+  kind: struct
+  name: AuditFormatter
+  signature: type AuditFormatter struct
+- file: third_party/openbao/internal/audit/format.go
+  kind: method
+  name: AuditFormatter.FormatRequest
+  signature: func (ctx context.Context, w io.Writer, config FormatterConfig, in *logical.LogInput)
+    error
+- file: third_party/openbao/internal/audit/format.go
+  kind: method
+  name: AuditFormatter.FormatResponse
+  signature: func (ctx context.Context, w io.Writer, config FormatterConfig, in *logical.LogInput)
+    error
+- file: third_party/openbao/internal/audit/format.go
+  kind: struct
+  name: AuditNamespace
+  signature: type AuditNamespace struct
+- file: third_party/openbao/internal/audit/format.go
+  kind: struct
+  name: AuditPolicyResults
+  signature: type AuditPolicyResults struct
+- file: third_party/openbao/internal/audit/format.go
+  kind: struct
+  name: AuditRequest
+  signature: type AuditRequest struct
+- file: third_party/openbao/internal/audit/format.go
+  kind: struct
+  name: AuditRequestEntry
+  signature: type AuditRequestEntry struct
+- file: third_party/openbao/internal/audit/format.go
+  kind: struct
+  name: AuditResponse
+  signature: type AuditResponse struct
+- file: third_party/openbao/internal/audit/format.go
+  kind: struct
+  name: AuditResponseEntry
+  signature: type AuditResponseEntry struct
+- file: third_party/openbao/internal/audit/format.go
+  kind: struct
+  name: AuditResponseWrapInfo
+  signature: type AuditResponseWrapInfo struct
+- file: third_party/openbao/internal/audit/format.go
+  kind: struct
+  name: AuditSecret
+  signature: type AuditSecret struct
+- file: third_party/openbao/internal/audit/audit.go
+  kind: interface
+  name: Backend
+  signature: interface Backend
+- file: third_party/openbao/internal/audit/audit.go
+  kind: method
+  name: Backend.GetHash
+  signature: func (context.Context, string) (string, error)
+- file: third_party/openbao/internal/audit/audit.go
+  kind: method
+  name: Backend.Invalidate
+  signature: func (context.Context)
+- file: third_party/openbao/internal/audit/audit.go
+  kind: method
+  name: Backend.LogRequest
+  signature: func (context.Context, *logical.LogInput) error
+- file: third_party/openbao/internal/audit/audit.go
+  kind: method
+  name: Backend.LogResponse
+  signature: func (context.Context, *logical.LogInput) error
+- file: third_party/openbao/internal/audit/audit.go
+  kind: method
+  name: Backend.LogTestMessage
+  signature: func (context.Context, *logical.LogInput, map[string]string) error
+- file: third_party/openbao/internal/audit/audit.go
+  kind: method
+  name: Backend.Reload
+  signature: func (context.Context) error
+- file: third_party/openbao/internal/audit/audit.go
+  kind: struct
+  name: BackendConfig
+  signature: type BackendConfig struct
+- file: third_party/openbao/internal/audit/audit.go
+  kind: type_alias
+  name: Factory
+  signature: type Factory
+- file: third_party/openbao/internal/audit/formatter.go
+  kind: interface
+  name: Formatter
+  signature: interface Formatter
+- file: third_party/openbao/internal/audit/formatter.go
+  kind: method
+  name: Formatter.FormatRequest
+  signature: func (context.Context, io.Writer, FormatterConfig, *logical.LogInput)
+    error
+- file: third_party/openbao/internal/audit/formatter.go
+  kind: method
+  name: Formatter.FormatResponse
+  signature: func (context.Context, io.Writer, FormatterConfig, *logical.LogInput)
+    error
+- file: third_party/openbao/internal/audit/formatter.go
+  kind: struct
+  name: FormatterConfig
+  signature: type FormatterConfig struct
+- file: third_party/openbao/internal/audit/hashstructure.go
+  kind: function
+  name: HashAuth
+  signature: func HashAuth(salter *salt.Salt, in *logical.Auth, HMACAccessor bool)
+    (*logical.Auth, error)
+- file: third_party/openbao/internal/audit/hashstructure.go
+  kind: type_alias
+  name: HashCallback
+  signature: type HashCallback
+- file: third_party/openbao/internal/audit/hashstructure.go
+  kind: function
+  name: HashRequest
+  signature: func HashRequest(salter *salt.Salt, in *logical.Request, HMACAccessor
+    bool, nonHMACDataKeys []string) (*logical.Request, error)
+- file: third_party/openbao/internal/audit/hashstructure.go
+  kind: function
+  name: HashResponse
+  signature: func HashResponse(salter *salt.Salt, in *logical.Response, HMACAccessor
+    bool, nonHMACDataKeys []string, elideListResponseData bool) (*logical.Response,
+    error)
+- file: third_party/openbao/internal/audit/hashstructure.go
+  kind: function
+  name: HashString
+  signature: func HashString(salter *salt.Salt, data string) string
+- file: third_party/openbao/internal/audit/hashstructure.go
+  kind: function
+  name: HashStructure
+  signature: func HashStructure(data any, cb HashCallback, ignoredKeys []string, elideListResponseData
+    bool) error
+- file: third_party/openbao/internal/audit/hashstructure.go
+  kind: function
+  name: HashWrapInfo
+  signature: func HashWrapInfo(salter *salt.Salt, in *wrapping.ResponseWrapInfo, HMACAccessor
+    bool) (*wrapping.ResponseWrapInfo, error)
+- file: third_party/openbao/internal/audit/format_json.go
+  kind: struct
+  name: JSONFormatWriter
+  signature: type JSONFormatWriter struct
+- file: third_party/openbao/internal/audit/format_json.go
+  kind: method
+  name: JSONFormatWriter.Salt
+  signature: func (ctx context.Context) (*salt.Salt, error)
+- file: third_party/openbao/internal/audit/format_json.go
+  kind: method
+  name: JSONFormatWriter.WriteRequest
+  signature: func (w io.Writer, req *AuditRequestEntry) error
+- file: third_party/openbao/internal/audit/format_json.go
+  kind: method
+  name: JSONFormatWriter.WriteResponse
+  signature: func (w io.Writer, resp *AuditResponseEntry) error
+- file: third_party/openbao/internal/audit/format.go
+  kind: function
+  name: NewTemporaryFormatter
+  signature: func NewTemporaryFormatter(format, prefix string) *AuditFormatter
+- file: third_party/openbao/internal/audit/format.go
+  kind: struct
+  name: PolicyInfo
+  signature: type PolicyInfo struct
+- file: third_party/openbao/internal/audit/hashstructure.go
+  kind: method
+  name: hashWalker.Enter
+  signature: func (loc reflectwalk.Location) error
+- file: third_party/openbao/internal/audit/hashstructure.go
+  kind: method
+  name: hashWalker.Exit
+  signature: func (loc reflectwalk.Location) error
+- file: third_party/openbao/internal/audit/hashstructure.go
+  kind: method
+  name: hashWalker.Map
+  signature: func (m reflect.Value) error
+- file: third_party/openbao/internal/audit/hashstructure.go
+  kind: method
+  name: hashWalker.MapElem
+  signature: func (m, k, v reflect.Value) error
+- file: third_party/openbao/internal/audit/hashstructure.go
+  kind: method
+  name: hashWalker.Primitive
+  signature: func (v reflect.Value) error
+- file: third_party/openbao/internal/audit/hashstructure.go
+  kind: method
+  name: hashWalker.Slice
+  signature: func (s reflect.Value) error
+- file: third_party/openbao/internal/audit/hashstructure.go
+  kind: method
+  name: hashWalker.SliceElem
+  signature: func (i int, elem reflect.Value) error
+requirements:
+- codeRefs:
+  - file:third_party/openbao/internal/audit/format.go
+  - struct:1aea965b64c60bd43a12ccb264151fb3
+  - struct:741695d429d289a7aa4dcccfc349269d
+  - struct:78233e32820c7bb1b4062d3295a7a923
+  - struct:7a2a5f7c2bb3f70828ef9dc2c367fec7
+  - struct:8182c0f1d05df2008bcee20ad198315e
+  - struct:97e85b8e7a5d32eee71944cd29cb1ba3
+  - struct:ade4e2ad7999b79355b5f4f059901285
+  - struct:bdba964b80c03078d5ba8476cf29a72b
+  - struct:c8a410a78426ad89eebfd1caeeb5ad89
+  - struct:d2ee418aaa49678f28a459d8a2544a05
+  id: r.audit-entry-structs
+  level: MUST
+  text: The formatted payload must be described by AuditRequestEntry and AuditResponseEntry
+    wrapping AuditRequest and AuditResponse, with AuditAuth, AuditSecret, AuditResponseWrapInfo,
+    AuditPolicyResults, PolicyInfo and AuditNamespace carrying the hashed auth, secret,
+    wrap, policy and namespace fields.
+- codeRefs:
+  - file:third_party/openbao/internal/audit/format.go
+  - interface:e63f743f08baad296a54e41616c836bb
+  - method:37cbf8689e8eb68c8c3115d5dae9742d
+  - method:785bdb8bbf0a7bb1a7ae47b60cb9e494
+  - method:ef509901b843a16f09883ee11736ad03
+  id: r.audit-format-writer
+  level: MUST
+  text: 'A serialisation format must implement AuditFormatWriter: WriteRequest(io.Writer,
+    *AuditRequestEntry) error, WriteResponse(io.Writer, *AuditResponseEntry) error,
+    and Salt(context.Context) (*salt.Salt, error).'
+- codeRefs:
+  - file:third_party/openbao/internal/audit/format.go
+  - function:60d1929ca7075c2de1f0b57733c0abcc
+  - method:c4cba218c2b876bee3e4432e07448e32
+  - method:dc5c23a8d5b62c4427df8d3a4bc4019b
+  - struct:82ece37eb53f7398ea9f5ca74cb7d0c1
+  id: r.audit-formatter
+  level: MUST
+  text: AuditFormatter must implement Formatter by formatting requests and responses
+    from a logical.LogInput into the writer, and NewTemporaryFormatter(format, prefix
+    string) *AuditFormatter must return an AuditFormatter for an ad-hoc format and
+    prefix.
+- codeRefs:
+  - file:third_party/openbao/internal/audit/audit.go
+  - struct:16c537701052343971118579ab743897
+  id: r.backend-config-fields
+  level: MUST
+  text: BackendConfig must carry the audit device's salt view, salt configuration
+    and opaque user configuration so a backend can be constructed without reaching
+    back into the server.
+- codeRefs:
+  - file:third_party/openbao/internal/audit/audit.go
+  - interface:23c825ce647c9812d840833aa38a0658
+  - method:32dd1ae3ae6fd8f479c03186d25c7919
+  - method:5a403e47e6e79c05be32ee9bbf861a5d
+  - method:8118533452ddf75b7d46a9f9103c7e94
+  - method:8e5ddb8540b43e121955facc7a6913fd
+  - method:b718fbf8320836492f2a4f6cb31f7c8c
+  - method:ee41c765c3eb45cc649b844606c7defe
+  id: r.backend-interface
+  level: MUST
+  text: An audit backend must be the Backend interface, exposing LogRequest(context.Context,
+    *logical.LogInput) error, LogResponse(context.Context, *logical.LogInput) error,
+    LogTestMessage(context.Context, *logical.LogInput, map[string]string) error, GetHash(context.Context,
+    string) (string, error), Reload(context.Context) error and Invalidate(context.Context).
+- codeRefs:
+  - file:third_party/openbao/internal/audit/audit.go
+  - type_alias:0f34199f8fcc6c5aa90e45d5708386ae
+  id: r.factory-type
+  level: SHOULD
+  text: Audit backends must be constructed through the Factory type alias rather than
+    a concrete constructor, so each device package supplies its own factory value.
+- codeRefs:
+  - file:third_party/openbao/internal/audit/format_json_test.go
+  - file:third_party/openbao/internal/audit/format_test.go
+  - file:third_party/openbao/internal/audit/hashstructure_test.go
+  id: r.format-tests
+  level: SHOULD
+  text: The formatting and hashing behaviour must stay covered by tests in format_test.go,
+    format_json_test.go and hashstructure_test.go.
+- codeRefs:
+  - file:third_party/openbao/internal/audit/formatter.go
+  - interface:6a5eec8047829c0c5bc34eb14f08bfb9
+  - method:a7dbd6949fcb390c2f1f31eb5abdda07
+  - method:ba986a0a56bca6e430b0b9238ea5332d
+  - struct:e023e8c8a23899a4280df6dc4c02ea13
+  id: r.formatter-interface
+  level: MUST
+  text: A formatter must implement Formatter by offering FormatRequest(context.Context,
+    io.Writer, FormatterConfig, *logical.LogInput) error and FormatResponse(context.Context,
+    io.Writer, FormatterConfig, *logical.LogInput) error, taking a FormatterConfig
+    to carry per-mount formatting options.
+- codeRefs:
+  - file:third_party/openbao/internal/audit/hashstructure.go
+  - function:376b505131db62fa9bbb477cf7acd5c1
+  - function:42ef4700f6e217b28c6d1edd344ae593
+  - function:65f63968a54e3a6a036c304235793f90
+  - function:d6efa5e0eac024519ba054edb053d5aa
+  - function:ee7174e5166f767948eada2027879352
+  id: r.hash-helpers
+  level: MUST
+  text: HashString must HMAC a single string with the salt, and HashAuth, HashRequest,
+    HashResponse and HashWrapInfo must return salted copies of *logical.Auth, *logical.Request,
+    *logical.Response and *wrapping.ResponseWrapInfo with an error, honouring the
+    HMACAccessor flag and, for requests and responses, the nonHMACDataKeys and elideListResponseData
+    options.
+- codeRefs:
+  - file:third_party/openbao/internal/audit/hashstructure.go
+  - function:4ccd60a576f8ea73994d61927166709d
+  - type_alias:62ff219e7aec2fa896d05b5d6b22cabd
+  id: r.hash-structure-walk
+  level: MUST
+  text: HashStructure(data any, cb HashCallback, ignoredKeys []string, elideListResponseData
+    bool) error must walk an arbitrary value with reflectwalk and invoke the HashCallback
+    on each qualifying primitive, skipping the ignored keys, so nested maps, slices
+    and structs are hashed in place.
+- codeRefs:
+  - file:third_party/openbao/internal/audit/hashstructure.go
+  - method:0d02854465c1cb0437d918f06da7a813
+  - method:442a99c51a0c6063a23f51a22761ead5
+  - method:58e85ff15e1cefa152f5d6a6be9ae0bc
+  - method:61705e5d4da223dc06bff50079bece16
+  - method:75bc2961eee3ea15ed6f5f7df9e8b494
+  - method:9de2b6bd047b7f0dbf282e413f5e955f
+  - method:f06df9356da06ee81af806f2c3c58309
+  id: r.hash-walker-callbacks
+  level: MUST
+  text: The reflectwalk visitor used by HashStructure must be a hashWalker implementing
+    Enter(reflectwalk.Location) error, Exit(reflectwalk.Location) error, Map(reflect.Value)
+    error, MapElem(m, k, v reflect.Value) error, Slice(reflect.Value) error, SliceElem(i
+    int, elem reflect.Value) error and Primitive(reflect.Value) error, so the callback
+    sees map keys as well as values and can elide list response data.
+- codeRefs:
+  - file:third_party/openbao/internal/audit/format_json.go
+  - method:0822276a47ec0f91db5c37e2d09a9f9a
+  - method:6143d753818759479d079b783f08f044
+  - method:c056772154a009aadf08b07400cd96a0
+  - struct:5134606d51df693c8140708e7e4cedc1
+  id: r.json-format-writer
+  level: MUST
+  text: JSONFormatWriter must implement AuditFormatWriter, with WriteRequest and WriteResponse
+    emitting the entry as JSON to the writer and Salt returning the active salt from
+    the context.
 upstream: self
 ```
 
