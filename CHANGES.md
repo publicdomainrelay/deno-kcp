@@ -1871,6 +1871,16 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.retry-until-polls-until-success` (MUST): "RetryUntil calls the supplied function repeatedly with 100 millisecond sleeps between attempts, returns as soon as the function returns a nil error, and calls t.Fatalf with the last error when the deadline computed from the timeout passes without success."
 - added `r.test-logger-capture-and-stop` (MUST): "NewTestLogger returns a TestLogger that routes log output into an in-memory buffer for the duration of the test, and StopLogging tears that capture down and restores the previous logger."
 
+### third-party-openbao-internal-helper-testhelpers-ldap
+
+- intent: "" -> "This context exists so test suites that exercise OpenBao's LDAP authentication and secrets-engine paths have a real directory server to talk to without an external fixture. The helper hides container lifecycle, port mapping, and readiness polling behind one call, and hands back a ready-to-use ldaputil.ConfigEntry plus a cleanup func so each test can bind, search, and tear down deterministically. It is a third-party (openbao) internal helper vendored into this repository, not application code."
+- added `r.close-probe-connection` (SHOULD): "The readiness callback should defer Close on the dialed LDAP connection so the probe connection does not leak into the test's lifetime."
+- added `r.default-config-entry` (MUST): "PrepareTestContainer must populate the returned ldaputil.ConfigEntry with the planetexpress defaults: UserDN and GroupDN ou=people,dc=planetexpress,dc=com, UserAttr cn, UserFilter ({{.UserAttr}}={{.Username}}), BindDN cn=admin,dc=planetexpress,dc=com, BindPassword GoodNewsEveryone, GroupAttr cn, RequestTimeout 60, MaximumPageSize 1000."
+- added `r.fatal-on-failure` (MUST): "PrepareTestContainer must call t.Fatalf with the message "could not start local LDAP docker container: %s" when the service runner cannot be created or the service fails to start."
+- added `r.readiness-probe` (MUST): "Before returning, the service callback must set cfg.Url to ldap://<host>:<port>, construct an ldaputil.Client with ldaputil.NewLDAP() and an hclog logger, dial the server with DialLDAP, and resolve the bind DN for the user "Philip J. Fry" via GetUserBindDN, returning an error if any step fails."
+- added `r.return-cleanup-and-config` (MUST): "PrepareTestContainer must return the container service's Cleanup function together with the populated ConfigEntry so callers can release the container after the test."
+- added `r.start-ldap-container` (MUST): "PrepareTestContainer must start a Docker service from image repository docker.mirror.hashicorp.services/michelvocks/docker-test-openldap, using the caller-supplied version argument as ImageTag, container name "ldap", and an exposed 389/tcp port."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -1980,5 +1990,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-helper-testhelpers-cassandra-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-testhelpers-certhelpers-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-testhelpers-corehelpers-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-helper-testhelpers-ldap-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-helper-testhelpers-ldap-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-internal-helper-testhelpers-ldap-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-internal-helper-testhelpers-logical-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
