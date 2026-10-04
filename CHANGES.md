@@ -3754,6 +3754,36 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.self-equals-flagging` (MUST): "self-equals.yml must define Go rule self-equals at severity ERROR, matching a value compared with itself through either == or !=, and report "Comparing with self"."
 - added `r.upstream-identity-preserved` (SHOULD): "Because these files are a vendored copy of the OpenBao tooling, rule ids, severities, messages and the MPL-2.0 copyright and SPDX headers must stay as upstream defines them, so findings from this repository remain comparable with upstream and the license notice stays attached."
 
+### third-party-openbao-tools-semgrep-ci
+
+- intent: "" -> "The directory exists so CI can statically reject Go patterns that the OpenBao project treats as defects but that a compiler or vet does not catch, for example an unchecked nil after a storage read, a MAC compared with bytes.Equal, or an auth response returned together with an error. Each file is a standalone Semgrep ruleset that the CI job loads and runs over the Go source; the rule ids double as the failure identifiers a developer sees. The rules are vendored from OpenBao into third_party, so this context documents the inherited policy as-is rather than a policy this repository authored."
+- added `r.bad-multierror-append` (MUST): "Rule bad-multierror-append reports go code that assigns multierror.Append back onto either operand, covering $ERR = multierror.Append($ERRORS, $ERR), $ERR = multierror.Append($ERR, $ERR), $ERRORS = multierror.Append($ERR, $ERR) and $ERRORS = multierror.Append($ERR, $ERRORS), at severity ERROR."
+- added `r.bad-nil-guard` (MUST): "Rule bad-nil-guard reports go boolean expressions that compare a variable against nil and also dereference or call a field on that same variable, in all six orderings of && and || with == nil and != nil, at severity ERROR."
+- added `r.ed25519-pointer` (MUST): "Rule use-non-pointer-ed25519-public-key is a generic-language rule scoped with paths.include *.go that reports the type expression *ed25519.PublicKey, at severity ERROR."
+- added `r.error-shadowing` (MUST): "Rules error-shadow-check-types and error-shadow-check-regex report reassignment of an error variable before it is checked, exempting paths where the code tests == nil, tests != nil, passes the error to a checking call, or enters a switch, both at severity ERROR."
+- added `r.fmt-printf` (MUST): "Rule fmt.Printf reports fmt.Printf and fmt.Println anywhere except test files, cmd trees, tools trees and the two sdk database plugin server files, using paths.exclude globs **/*_test.go, **/cmd/**/*.go, **/tools/**/*.go, sdk/database/dbplugin/server.go and sdk/database/dbplugin/v5/plugin_server.go, at severity ERROR."
+- added `r.hashsum` (MUST): "Rule hash-sum-without-write reports a hash Sum call on a freshly constructed hasher or on a hasher whose value never reaches a Write call or another function, at severity ERROR."
+- added `r.hmac-bytes` (MUST): "Rule use-hmac-equal reports a bytes.Equal comparison against the output of $MAC.Sum where $MAC came from hmac.New, in either argument order, at severity ERROR."
+- added `r.hmac-hash` (MUST): "Rule hmac-needs-new reports hmac.New when handed a closure that returns a hash instance already allocated before the call, in the named-function, inline-literal and cast forms, at severity ERROR."
+- added `r.logger-format-string` (MUST): "Rule logger-used-with-format-string reports hclog Trace, Debug, Info, Warn and Error calls whose literal message contains a printf-style verb, restricted to files importing github.com/hashicorp/go-hclog, at severity ERROR."
+- added `r.logger-level-check` (MUST): "Rule logger-level-check reports an if statement that guards a log call with the matching level predicate on the same logger, matching $LOGGER against a name containing logger and $CHECK and $LOG against IsDebug/IsInfo/IsWarn/IsError/IsTrace/IsFatal and Debug/Info/Warn/Error/Trace/Fatal, at severity ERROR."
+- added `r.loop-time-after` (MUST): "Rule loop-time-after reports a receive from time.After inside a for loop as a hint to use a ticker or timer, at severity WARNING."
+- added `r.loopclosure` (MUST): "Rule loopclosure reports use of a range loop's value variable inside a goroutine, exempting goroutines that pass the variable as a parameter and goroutines that declare their own inner loop, at severity WARNING."
+- added `r.mpl-license-header` (MUST): "Every rule file under third_party/openbao/tools/semgrep/ci carries an SPDX-License-Identifier: MPL-2.0 comment and a HashiCorp or OpenBao copyright line before the rules block."
+- added `r.no-nil-check` (MUST): "no-nil-check.yml defines four ERROR rules for a value taken from a storage read and then dereferenced or passed on without a nil test: nil-check-logical-storage for ($S : logical.Storage).Get, nil-check-physical-storage for ($S : physical.Storage).Get, nil-check-physical-storage-by-nsid for NamespaceByID, and nil-check-logical-storage-regex for receivers matching the storage, s, barrier, view, barrierView, physical and underlying name regex, which excludes /internal/vault/ui.go from its scope."
+- added `r.non-nil-err-auth-response` (MUST): "Rule non-nil-err-auth-response reports returning a logical.Response that carries an Auth value together with err, logical.CodedError, fmt.Errorf or errors.New, including the form where the response is first bound to a variable and returned later, at severity ERROR."
+- added `r.oddifsequence` (MUST): "Rule odd-sequence-ifs reports a second conditional whose test contradicts, repeats or loops on the test of an early-returning if, covering nested and sequential forms over both boolean and equality tests, at severity ERROR."
+- added `r.paths-with-callbacks` (MUST): "Rule uses-path-callbacks reports a framework.Path literal that sets Callbacks, in slice-element and address-of forms, at severity WARNING."
+- added `r.paths-with-callbacks-and-operations` (MUST): "Rule path-has-both-callbacks-and-operations reports a framework.Path literal that sets both Callbacks and Operations, in slice-element and address-of forms and in either field order, at severity ERROR."
+- added `r.return-nil` (MUST): "Rule hc-return-nil in return-nil.yml reports returning a variable from inside its own nil test, and returning that variable after an if that returns early when it is non-nil, at severity ERROR."
+- added `r.return-nil-error` (MUST): "Rule return-nil in return-nil-error.yml reports an if err == nil branch that returns err itself as a value, with or without additional return operands, at severity ERROR."
+- added `r.rule-anatomy` (MUST): "Each file has a top-level rules list whose entries each declare id, message, languages and severity, so Semgrep can load the file and report a named finding."
+- added `r.splitn-1` (MUST): "Rule splitn-1 reports strings.SplitN called with a limit of 1 as a no-op split, at severity ERROR."
+- added `r.tests-context` (MUST): "Rule use-test-context is scoped with paths.include *_test.go and reports context.Background and context.TODO in test files, telling the author to use (t/b).Context() instead, at severity ERROR."
+- added `r.time-parse-duration` (MUST): "Rule time-parse-duration reports any call to time.ParseDuration and directs the author to parseutil.ParseDurationSeconds, at severity ERROR."
+- added `r.wrongerrcall` (MUST): "Rule maybe-wrong-err reports returning err from inside a branch guarded by a different error's Err() method, at severity WARNING."
+- added `r.wronglock` (MUST): "Rule wrong-lock-unlock reports a mutex lock followed by a deferred mismatched unlock, covering Lock with deferred RUnlock, RLock with deferred Unlock, Lock with deferred Lock, and RLock with deferred RLock, at severity ERROR."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4032,4 +4062,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-sdk-plugin-pb-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-queue-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-tools-semgrep-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-tools-semgrep-ci-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-tools-semgrep-ci-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-tools-semgrep-ci-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |

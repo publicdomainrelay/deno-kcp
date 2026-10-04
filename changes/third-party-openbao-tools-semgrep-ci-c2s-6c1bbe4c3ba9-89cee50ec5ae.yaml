@@ -10,5 +10,26 @@ spec:
   systemContext: third-party-openbao-tools-semgrep-ci
   toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
 status:
-  message: the agent is summarizing third-party-openbao-tools-semgrep-ci
+  agentLog: 'This context holds the Semgrep rule set that the vendored OpenBao tree
+    runs from third_party/openbao/tools/semgrep/ci. It is 24 YAML files, 847 lines
+    total, each carrying an MPL-2.0 SPDX header and a top-level `rules:` list. Every
+    rule declares an `id`, a `message`, a `languages` list (Go for most, `[generic]`
+    for the Ed25519 pointer check) and a `severity`. The rules encode Go-specific
+    review conventions for the OpenBao codebase: multierror misuse, inverted nil guards,
+    error shadowing, forbidden fmt.Printf/Println outside command and test files,
+    hash and HMAC misuse (Sum without Write, bytes.Equal on a MAC, hmac.New over a
+    reused hash instance), hclog format strings and redundant level checks, time.After
+    inside loops, loop-variable capture in goroutines, missed nil checks after logical/physical
+    storage Get and after NamespaceByID, returning a logical.Response with an Auth
+    field alongside a non-nil error, contradictory if sequences, framework.Path entries
+    that mix Callbacks with Operations, two return-nil shapes, strings.SplitN with
+    a limit of 1, context.Background/TODO in tests, time.ParseDuration, mismatched
+    lock/unlock defer pairs, and a heuristic wrong-error return. Severities split
+    between ERROR and WARNING; a handful of rules narrow their scope with `paths.include`
+    or `paths.exclude` globs.'
+  message: wrote 26 requirement(s) and 0 interface(s) for third-party-openbao-tools-semgrep-ci
+  phase: Succeeded
+superseded:
+- message: the agent is summarizing third-party-openbao-tools-semgrep-ci
+  name: third-party-openbao-tools-semgrep-ci-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2
   phase: Running

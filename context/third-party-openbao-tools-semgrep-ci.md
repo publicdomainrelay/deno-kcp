@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The directory exists so CI can statically reject Go patterns that the OpenBao project treats as defects but that a compiler or vet does not catch, for example an unchecked nil after a storage read, a MAC compared with bytes.Equal, or an auth response returned together with an error. Each file is a standalone Semgrep ruleset that the CI job loads and runs over the Go source; the rule ids double as the failure identifiers a developer sees. The rules are vendored from OpenBao into third_party, so this context documents the inherited policy as-is rather than a policy this repository authored.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
