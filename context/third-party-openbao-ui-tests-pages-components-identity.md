@@ -9,5 +9,6 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/ui/tests/pages/components/identity/edit-form.js` file edit-form.js (third_party/openbao/ui/tests/pages/components/identity/edit-form.js)
+- `file:third_party/openbao/ui/tests/pages/components/identity/item-details.js` file item-details.js (third_party/openbao/ui/tests/pages/components/identity/item-details.js)
 <!-- SPECD_MANAGED_END -->
