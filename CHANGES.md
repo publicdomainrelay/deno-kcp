@@ -1703,6 +1703,16 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.reconcile-skips-manual-plugins` (MUST): "Reconcile skips any plugin whose Image field is nil, so declaratively listed plugins that are downloaded by other means are left alone."
 - added `r.reconcile-validates-and-honors-behavior` (MUST): "For each plugin with an image, Reconcile logs every PluginConfig validation error, and when validation fails it returns an error if shouldFailOnError reports true and otherwise warns and continues with the next plugin; download failures are handled the same fail-or-warn way."
 
+### third-party-openbao-internal-helper-policies
+
+- intent: "" -> "The context exists so the internal policy helper has its own pinned, described equivalence rule separate from the sdk copy, which has drifted. It records exactly what the internal implementation guarantees (nil handling, default filtering, duplicate collapsing, order independence) so a later change to either copy can be checked against a stated contract rather than against the other file. The test in policies_test.go is the executable form of that contract and is the only caller recorded for this function."
+- added `r.default-filtered` (MUST): "While building the per-side name sets, EquivalentPolicies skips every element equal to the string "default", so that name never contributes to the comparison on either side."
+- added `r.duplicates-collapsed` (MUST): "EquivalentPolicies inserts each non-default name into a map[string]bool per side, so repeated names collapse to one entry and both duplicate counts and input ordering are irrelevant to the result."
+- added `r.nil-lists-equivalent` (MUST): "EquivalentPolicies returns true when both a and b are nil, before any set construction takes place."
+- added `r.one-nil-not-equivalent` (MUST): "EquivalentPolicies returns false when exactly one of a and b is nil, with no exception for a non-nil side that holds only the name "default"; the internal implementation keeps only the both-nil and either-nil checks, unlike the sdk copy of the same function."
+- added `r.sorted-set-comparison` (MUST): "After collecting the unique names into slices, EquivalentPolicies sorts both with sort.Strings and returns false if the lengths differ or any index pair differs, otherwise true; the comparison is therefore over the sorted unique non-default name sets."
+- added `r.test-covers-contract` (SHOULD): "TestEquivalentPolicies in policies_test.go exercises the contract by asserting that [foo bar] is not equivalent to nil, not equivalent to [foo], equivalent to [bar foo] (order independence), and equivalent to [foo default bar] (default filtering)."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -1799,5 +1809,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-helper-pgpkeys-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-pgpkeys-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-pluginutil-oci-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-helper-policies-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-helper-policies-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-profiles-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-helper-proxyutil-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |

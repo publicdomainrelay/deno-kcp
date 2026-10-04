@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so the internal policy helper has its own pinned, described equivalence rule separate from the sdk copy, which has drifted. It records exactly what the internal implementation guarantees (nil handling, default filtering, duplicate collapsing, order independence) so a later change to either copy can be checked against a stated contract rather than against the other file. The test in policies_test.go is the executable form of that contract and is the only caller recorded for this function.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

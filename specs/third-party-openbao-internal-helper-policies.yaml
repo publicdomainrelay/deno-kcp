@@ -2,10 +2,70 @@ apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
 - file:third_party/openbao/internal/helper/policies/policies.go policies.go@third_party/openbao/internal/helper/policies/policies.go
 - file:third_party/openbao/internal/helper/policies/policies_test.go policies_test.go@third_party/openbao/internal/helper/policies/policies_test.go
+- function:379ad7dcf8d0a770034c5155490d07a1 EquivalentPolicies@third_party/openbao/internal/helper/policies/policies.go:12
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-helper-policies
   namespace: default
 spec:
+  intent: The context exists so the internal policy helper has its own pinned, described
+    equivalence rule separate from the sdk copy, which has drifted. It records exactly
+    what the internal implementation guarantees (nil handling, default filtering,
+    duplicate collapsing, order independence) so a later change to either copy can
+    be checked against a stated contract rather than against the other file. The test
+    in policies_test.go is the executable form of that contract and is the only caller
+    recorded for this function.
+  interfaces:
+  - file: third_party/openbao/internal/helper/policies/policies.go
+    kind: function
+    name: EquivalentPolicies
+    signature: func EquivalentPolicies(a, b []string) bool
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - function:379ad7dcf8d0a770034c5155490d07a1
+    id: r.default-filtered
+    level: MUST
+    text: While building the per-side name sets, EquivalentPolicies skips every element
+      equal to the string "default", so that name never contributes to the comparison
+      on either side.
+  - codeRefs:
+    - function:379ad7dcf8d0a770034c5155490d07a1
+    id: r.duplicates-collapsed
+    level: MUST
+    text: EquivalentPolicies inserts each non-default name into a map[string]bool
+      per side, so repeated names collapse to one entry and both duplicate counts
+      and input ordering are irrelevant to the result.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/policies/policies.go
+    - function:379ad7dcf8d0a770034c5155490d07a1
+    id: r.nil-lists-equivalent
+    level: MUST
+    text: EquivalentPolicies returns true when both a and b are nil, before any set
+      construction takes place.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/policies/policies.go
+    - function:379ad7dcf8d0a770034c5155490d07a1
+    id: r.one-nil-not-equivalent
+    level: MUST
+    text: EquivalentPolicies returns false when exactly one of a and b is nil, with
+      no exception for a non-nil side that holds only the name "default"; the internal
+      implementation keeps only the both-nil and either-nil checks, unlike the sdk
+      copy of the same function.
+  - codeRefs:
+    - function:379ad7dcf8d0a770034c5155490d07a1
+    id: r.sorted-set-comparison
+    level: MUST
+    text: After collecting the unique names into slices, EquivalentPolicies sorts
+      both with sort.Strings and returns false if the lengths differ or any index
+      pair differs, otherwise true; the comparison is therefore over the sorted unique
+      non-default name sets.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/policies/policies_test.go
+    id: r.test-covers-contract
+    level: SHOULD
+    text: TestEquivalentPolicies in policies_test.go exercises the contract by asserting
+      that [foo bar] is not equivalent to nil, not equivalent to [foo], equivalent
+      to [bar foo] (order independence), and equivalent to [foo default bar] (default
+      filtering).
   upstream: self
