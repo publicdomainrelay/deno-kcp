@@ -1,0 +1,57 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-ui-app-serializers-pki-certificate-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-ui-app-serializers-pki-certificate
+  toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
+status:
+  message: the agent is summarizing third-party-openbao-ui-app-serializers-pki-certificate
+  phase: Running
+superseded:
+- message: |-
+    ...",
+          "level": "MUST",
+          "text": "The generate serializer module must default-export a class named PkiCertificateGenerateSerializer that extends PkiCertificateBaseSerializer with an empty body, so certificate generation reuses the base primaryKey, attrs and normalizeResponse behavior without adding overrides.",
+          "codeRefs": ["class:6768f8a77ef44e47f4b276581b9678a2", "file:third_party/openbao/ui/app/serializers/pki/certificate/generate.js"]
+        },
+        {
+          "id": "r.sign-serializer-subclass",
+          "level": "MUST",
+          "text": "The sign serializer module must default-export a class named PkiCertificateGenerateSerializer that extends PkiCertificateBaseSerializer with an empty body, so certificate signing reuses the base primaryKey, attrs and normalizeResponse behavior without adding overrides.",
+          "codeRefs": ["file:third_party/openbao/ui/app/serializers/pki/certificate/sign.js"]
+        }
+      ],
+      "interfaces": [
+        {
+          "name": "PkiCertificateBaseSerializer",
+          "kind": "class",
+          "signature": "class PkiCertificateBaseSerializer extends ApplicationSerializer",
+          "file": "third_party/openbao/ui/app/serializers/pki/certificate/base.js"
+        },
+        {
+          "name": "PkiCertificateBaseSerializer.normalizeResponse",
+          "kind": "method",
+          "signature": "normalizeResponse(store, primaryModelClass, payload, id, requestType)",
+          "file": "third_party/openbao/ui/app/serializers/pki/certificate/base.js"
+        },
+        {
+          "name": "PkiCertificateGenerateSerializer",
+          "kind": "class",
+          "signature": "class PkiCertificateGenerateSerializer extends PkiCertificateBaseSerializer {}",
+          "file": "third_party/openbao/ui/app/serializers/pki/certificate/generate.js"
+        },
+        {
+          "name": "PkiCertificateGenerateSerializer",
+          "kind": "class",
+          "signature": "class PkiCertificateGenerateSerializer extends PkiCertificateBaseSerializer {}",
+          "file": "third_party/openbao/ui/app/serializers/pki/certificate/sign.js"
+        }
+      ]
+    }
+  name: third-party-openbao-ui-app-serializers-pki-certificate-c2s-6c1bbe4c3ba9-89cee50ec5ae
+  phase: Failed
