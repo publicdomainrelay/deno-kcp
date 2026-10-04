@@ -5217,6 +5217,19 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.role-primary-key` (MUST): "The role serializer MUST use 'name' as the primary key, so a role record is identified by the role name returned by the API."
 - added `r.role-serialize-transpose` (MUST): "Serializing a role MUST convert the UI-side shape back to the API shape: a database array becomes db_name holding its first element, creation_statement becomes the one-element creation_statements array, and revocation_statement becomes the one-element revocation_statements array, with each singular key deleted after transposition."
 
+### third-party-openbao-ui-app-serializers-identity
+
+- intent: "" -> "This context exists so the identity serializer layer of the bundled OpenBao UI can be described and reasoned about as one unit: how list, lazy-paginated and single-record responses for identity entities, entity aliases, groups and group aliases are normalized into Ember Data records, and how embedded alias relationships are declared, serialized and stripped. It captures the shared base behavior that the concrete serializers inherit or override, so changes to identity payload handling can be checked against the contract those four serializers depend on."
+- added `r.base-normalize-items-list-flattening` (MUST): "The base identity serializer extends the application serializer and overrides normalizeItems so that when payload.data.keys is an array whose first element is a string, each key becomes a model taken from payload.data.key_info[key] with model.id set to the key, and the array of those models is returned; when the first element is not a string the keys array is returned unchanged because it was already normalized into objects by extractLazyPaginatedData."
+- added `r.base-normalize-items-single-record` (MUST): "When payload.data.keys is absent or not an array, the base identity serializer assigns payload.data onto payload, deletes payload.data, and returns the payload unchanged otherwise, so single-record responses are unwrapped rather than treated as collections."
+- added `r.entity-alias-lazy-pagination` (MUST): "The entity alias serializer extends the base identity serializer and overrides extractLazyPaginatedData to map each entry of payload.data.keys to payload.data.key_info[key], set model.id to the key, and set model.backend to payload.backend when payload.backend is present, returning the mapped models."
+- added `r.entity-embedded-aliases` (MUST): "The entity serializer extends the base identity serializer with EmbeddedRecordsMixin, declares the aliases relationship as embedded always so aliases travel inside the entity payload, and overrides serializeHasMany as a no-op because entity relationships are not serialized."
+- added `r.entity-lazy-pagination` (MUST): "The entity serializer overrides extractLazyPaginatedData with the same key_info mapping used by the entity alias serializer: each payload.data.keys entry becomes payload.data.key_info[key] with id set to the key and backend set from payload.backend when present."
+- added `r.group-alias-inherits-base` (MUST): "The group alias serializer extends the base identity serializer and adds no overrides, so group alias records use the base normalization behavior for lists and single records without an embedded relationship."
+- added `r.group-embedded-alias` (MUST): "The group serializer extends the base identity serializer with EmbeddedRecordsMixin, declares the alias relationship as embedded always so the alias travels inside the group payload, and removes an alias object that is present but empty from find-record responses before delegating to the parent normalization."
+- added `r.group-serialize-external-fields` (MUST): "The group serializer overrides serialize so that the alias key is always deleted from the outgoing JSON, and when the serialized type is external the member_entity_ids and member_group_ids keys are deleted as well, because an external group carries neither."
+- added `r.serializer-inheritance-chain` (MUST): "Each concrete identity serializer must derive from the base identity serializer rather than the application serializer directly, so the list and single-record normalization rules of the base apply to entities, entity aliases, groups and group aliases alike."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5655,6 +5668,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-routes-vault-cluster-tools-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-serializers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-serializers-database-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-serializers-identity-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-serializers-identity-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-serializers-keymgmt-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

@@ -68645,7 +68645,92 @@ system_contexts:
   - file:third_party/openbao/ui/app/serializers/identity/group-alias.js group-alias.js@third_party/openbao/ui/app/serializers/identity/group-alias.js
   - file:third_party/openbao/ui/app/serializers/identity/group.js group.js@third_party/openbao/ui/app/serializers/identity/group.js
   id: sc.third-party-openbao-ui-app-serializers-identity
+  intent: 'This context exists so the identity serializer layer of the bundled OpenBao
+    UI can be described and reasoned about as one unit: how list, lazy-paginated and
+    single-record responses for identity entities, entity aliases, groups and group
+    aliases are normalized into Ember Data records, and how embedded alias relationships
+    are declared, serialized and stripped. It captures the shared base behavior that
+    the concrete serializers inherit or override, so changes to identity payload handling
+    can be checked against the contract those four serializers depend on.'
   name: third-party-openbao-ui-app-serializers-identity
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/app/serializers/identity/_base.js
+    id: r.base-normalize-items-list-flattening
+    level: MUST
+    text: The base identity serializer extends the application serializer and overrides
+      normalizeItems so that when payload.data.keys is an array whose first element
+      is a string, each key becomes a model taken from payload.data.key_info[key]
+      with model.id set to the key, and the array of those models is returned; when
+      the first element is not a string the keys array is returned unchanged because
+      it was already normalized into objects by extractLazyPaginatedData.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/serializers/identity/_base.js
+    id: r.base-normalize-items-single-record
+    level: MUST
+    text: When payload.data.keys is absent or not an array, the base identity serializer
+      assigns payload.data onto payload, deletes payload.data, and returns the payload
+      unchanged otherwise, so single-record responses are unwrapped rather than treated
+      as collections.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/serializers/identity/entity-alias.js
+    id: r.entity-alias-lazy-pagination
+    level: MUST
+    text: The entity alias serializer extends the base identity serializer and overrides
+      extractLazyPaginatedData to map each entry of payload.data.keys to payload.data.key_info[key],
+      set model.id to the key, and set model.backend to payload.backend when payload.backend
+      is present, returning the mapped models.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/serializers/identity/entity.js
+    id: r.entity-embedded-aliases
+    level: MUST
+    text: The entity serializer extends the base identity serializer with EmbeddedRecordsMixin,
+      declares the aliases relationship as embedded always so aliases travel inside
+      the entity payload, and overrides serializeHasMany as a no-op because entity
+      relationships are not serialized.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/serializers/identity/entity.js
+    id: r.entity-lazy-pagination
+    level: MUST
+    text: 'The entity serializer overrides extractLazyPaginatedData with the same
+      key_info mapping used by the entity alias serializer: each payload.data.keys
+      entry becomes payload.data.key_info[key] with id set to the key and backend
+      set from payload.backend when present.'
+  - codeRefs:
+    - file:third_party/openbao/ui/app/serializers/identity/group-alias.js
+    id: r.group-alias-inherits-base
+    level: MUST
+    text: The group alias serializer extends the base identity serializer and adds
+      no overrides, so group alias records use the base normalization behavior for
+      lists and single records without an embedded relationship.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/serializers/identity/group.js
+    id: r.group-embedded-alias
+    level: MUST
+    text: The group serializer extends the base identity serializer with EmbeddedRecordsMixin,
+      declares the alias relationship as embedded always so the alias travels inside
+      the group payload, and removes an alias object that is present but empty from
+      find-record responses before delegating to the parent normalization.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/serializers/identity/group.js
+    id: r.group-serialize-external-fields
+    level: MUST
+    text: The group serializer overrides serialize so that the alias key is always
+      deleted from the outgoing JSON, and when the serialized type is external the
+      member_entity_ids and member_group_ids keys are deleted as well, because an
+      external group carries neither.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/serializers/identity/_base.js
+    - file:third_party/openbao/ui/app/serializers/identity/entity-alias.js
+    - file:third_party/openbao/ui/app/serializers/identity/entity.js
+    - file:third_party/openbao/ui/app/serializers/identity/group-alias.js
+    - file:third_party/openbao/ui/app/serializers/identity/group.js
+    id: r.serializer-inheritance-chain
+    level: MUST
+    text: Each concrete identity serializer must derive from the base identity serializer
+      rather than the application serializer directly, so the list and single-record
+      normalization rules of the base apply to entities, entity aliases, groups and
+      group aliases alike.
   upstream: self
 - code:
   - third_party/openbao/ui/app/serializers/keymgmt/key.js
