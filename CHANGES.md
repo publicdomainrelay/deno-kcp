@@ -4400,6 +4400,16 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.showheader-inverts-edit-route` (MUST): "The showHeader getter must return the boolean negation of isEditRoute, so the header is shown on all routes except the edit route and is hidden while the edit form renders."
 - added `r.tracks-edit-route-from-router-event` (MUST): "The constructor must call super with the passed arguments and subscribe to the router service's 'routeDidChange' event; on each event it must set the tracked isEditRoute property to true when the event's targetName contains the substring 'edit' and to false otherwise, so the controller follows every later navigation rather than only the initial route."
 
+### third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-keys-key
+
+- intent: "" -> "This context exists to describe the behaviour of the OIDC key detail controller in the vendored OpenBao UI, so that the rotate and delete flows for a single OIDC key are specified in one place. It matters because these two actions mutate key material and delete it: rotation must pass both the key name and the verification TTL to the adapter, and deletion must leave the record consistent (rollback on failure) and navigate away only after a successful destroy. The context gives the controller's service dependencies and its success/error reporting contract, which is what any change to the OIDC key detail screen has to preserve."
+- added `r.controller-default-export` (MUST): "The module exports as its default a class OidcKeyDetailsController that extends the Ember Controller base class, and it injects the store, router, and flashMessages services into the class."
+- added `r.delete-destroys-and-navigates` (MUST): "delete is an action that destroys the model record, flashes a success message on completion, and only then transitions through transitionToSafe on the injected router to the vault.cluster.access.oidc.keys route."
+- added `r.delete-rollback-on-error` (MUST): "When the destroy in delete throws, the controller rolls back the model attributes, does not navigate away, and flashes a danger message built from the error's errors joined with '. ' when that list is present, otherwise from error.message."
+- added `r.rotate-key-feedback` (MUST): "rotateKey reports the outcome through flashMessages: a success message naming the rotated key when the adapter call resolves, and a danger message carrying the caught error's errors when it rejects."
+- added `r.rotate-key-task-wrapper` (SHOULD): "rotateKey is wrapped as an ember-concurrency task with the waitFor decorator, so the rotation runs as a managed, non-reentrant task while the UI waits on it."
+- added `r.rotate-key-uses-adapter-and-ttl` (MUST): "rotateKey looks up the adapter for the oidc/key model through the injected store and calls its rotate method with the model's name and the model's verificationTtl, so both the key name and the verification TTL are sent for the rotation."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4752,6 +4762,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-clients-client-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-keys-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-keys-key-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-keys-key-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-providers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |

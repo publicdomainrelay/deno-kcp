@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to describe the behaviour of the OIDC key detail controller in the vendored OpenBao UI, so that the rotate and delete flows for a single OIDC key are specified in one place. It matters because these two actions mutate key material and delete it: rotation must pass both the key name and the verification TTL to the adapter, and deletion must leave the record consistent (rollback on failure) and navigate away only after a successful destroy. The context gives the controller's service dependencies and its success/error reporting contract, which is what any change to the OIDC key detail screen has to preserve.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
