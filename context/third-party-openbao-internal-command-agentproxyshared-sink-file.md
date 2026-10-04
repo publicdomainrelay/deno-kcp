@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so the file sink's construction contract and write behaviour are described in one place: what configuration keys NewFileSink accepts, what validation it performs, how WriteToken writes through a temporary file and renames it atomically, and how the tests drive both. It also records that the sink is reached through the sink.Sink interface, so a change to either the config keys or the temporary-file protocol must keep the interface contract intact.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

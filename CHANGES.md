@@ -1230,6 +1230,18 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.wrap-ttl` (MUST): "When a SinkConfig has a non-zero WrapTTL, the token is first wrapped: the client is cloned with headers, its token set to the token being wrapped, a wrapping lookup function returning the TTL string is installed, and sys/wrapping/wrap is called; any clone, write, nil-secret or nil-wrap-info failure aborts the write with a descriptive error rather than writing the raw token, and the encoded WrapInfo becomes the new token."
 - added `r.write-sink-transform-order` (MUST): "The per-sink write path checks that the token being written is still the latest token, then applies wrapping first and encryption second, and passes the resulting token to Sink.WriteToken; a token that has been superseded is skipped without error."
 
+### third-party-openbao-internal-command-agentproxyshared-sink-file
+
+- intent: "" -> "The context exists so the file sink's construction contract and write behaviour are described in one place: what configuration keys NewFileSink accepts, what validation it performs, how WriteToken writes through a temporary file and renames it atomically, and how the tests drive both. It also records that the sink is reached through the sink.Sink interface, so a change to either the config keys or the temporary-file protocol must keep the interface contract intact."
+- added `r.construction-write-check` (MUST): "NewFileSink must call WriteToken with the empty string before returning the sink, so construction verifies the target directory is writable, and must wrap any failure as "error during write check"; a successful check must leave no file behind."
+- added `r.constructor-validates-logger-and-path` (MUST): "NewFileSink must reject a nil logger with the error "nil logger provided", reject a config map with no "path" key with "'path' not specified for file sink", and reject a non-string path value with "could not parse 'path' as string"; on success it returns a fileSink implementing sink.Sink."
+- added `r.default-mode-and-ownership` (MUST): "NewFileSink must default the file mode to 0o640 and set uid and gid to -1, meaning ownership is left unchanged, when the corresponding Config keys are absent."
+- added `r.mode-uid-gid-validation` (MUST): "NewFileSink must accept optional "mode", "uid" and "gid" integer overrides, erroring with "could not parse 'mode' as integer", "could not parse 'uid' as integer" or "could not parse 'gid' as integer" on a type mismatch, and erroring with "file mode does not represent a regular file" when the mode is not a regular file mode; the accepted values override the sink's stored mode, uid and gid."
+- added `r.tests-cover-construction-mode-ownership` (MUST): "The package tests must cover sink construction against a real temporary path, the mode override on the written file, and the uid/gid chown override, and must also contain a sink test file for the surrounding sink behaviour."
+- added `r.write-token-empty-token-and-rename` (MUST): "On an empty token fileSink.WriteToken must treat the call as a write check, removing the temporary file and returning nil; on a non-empty token it must apply the configured uid and gid through os.Chown only when either differs from -1, then rename the temporary file over the configured path so the token lands atomically."
+- added `r.write-token-error-wrapping` (SHOULD): "fileSink.WriteToken should return wrapped errors that name the failing step and path: UUID generation, temp file opening in the target directory, writing, closing, removing during the write check, changing ownership, and renaming to the target path, and should log a trace on entry and exit plus an info line when the token is written."
+- added `r.write-token-temp-file-protocol` (MUST): "fileSink.WriteToken must generate a UUID, open a temporary file named "<basename>.tmp.<first UUID segment>" in the same directory as the configured path with the sink's mode, and write either the supplied token or, when the token is empty, the UUID itself; when writing fails it must close and remove the temporary file, ignoring those errors, and return a wrapped error."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -1285,5 +1297,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-command-agentproxyshared-cache-keymanager-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agentproxyshared-sink-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agentproxyshared-sink-file-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-internal-command-agentproxyshared-sink-file-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-internal-command-agentproxyshared-sink-inmem-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-internal-command-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |

@@ -17264,8 +17264,101 @@ system_contexts:
     file_sink_test.go@third_party/openbao/internal/command/agentproxyshared/sink/file/file_sink_test.go
   - file:third_party/openbao/internal/command/agentproxyshared/sink/file/sink_test.go
     sink_test.go@third_party/openbao/internal/command/agentproxyshared/sink/file/sink_test.go
+  - function:1980f527e25c15d42d5fd3f44e98ead1 NewFileSink@third_party/openbao/internal/command/agentproxyshared/sink/file/file_sink.go:28
+  - method:ad5cef131aceee3b60dbe1ec0fbcda62 fileSink.WriteToken@third_party/openbao/internal/command/agentproxyshared/sink/file/file_sink.go:104
   id: sc.third-party-openbao-internal-command-agentproxyshared-sink-file
+  intent: 'The context exists so the file sink''s construction contract and write
+    behaviour are described in one place: what configuration keys NewFileSink accepts,
+    what validation it performs, how WriteToken writes through a temporary file and
+    renames it atomically, and how the tests drive both. It also records that the
+    sink is reached through the sink.Sink interface, so a change to either the config
+    keys or the temporary-file protocol must keep the interface contract intact.'
+  interfaces:
+  - file: third_party/openbao/internal/command/agentproxyshared/sink/file/file_sink.go
+    kind: function
+    name: NewFileSink
+    signature: func NewFileSink(conf *sink.SinkConfig) (sink.Sink, error)
+  - file: third_party/openbao/internal/command/agentproxyshared/sink/file/file_sink.go
+    kind: method
+    name: fileSink.WriteToken
+    signature: func (f *fileSink) WriteToken(token string) error
   name: third-party-openbao-internal-command-agentproxyshared-sink-file
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/sink/file/file_sink.go
+    - function:1980f527e25c15d42d5fd3f44e98ead1
+    - method:ad5cef131aceee3b60dbe1ec0fbcda62
+    id: r.construction-write-check
+    level: MUST
+    text: NewFileSink must call WriteToken with the empty string before returning
+      the sink, so construction verifies the target directory is writable, and must
+      wrap any failure as "error during write check"; a successful check must leave
+      no file behind.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/sink/file/file_sink.go
+    - function:1980f527e25c15d42d5fd3f44e98ead1
+    id: r.constructor-validates-logger-and-path
+    level: MUST
+    text: NewFileSink must reject a nil logger with the error "nil logger provided",
+      reject a config map with no "path" key with "'path' not specified for file sink",
+      and reject a non-string path value with "could not parse 'path' as string";
+      on success it returns a fileSink implementing sink.Sink.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/sink/file/file_sink.go
+    - function:1980f527e25c15d42d5fd3f44e98ead1
+    id: r.default-mode-and-ownership
+    level: MUST
+    text: NewFileSink must default the file mode to 0o640 and set uid and gid to -1,
+      meaning ownership is left unchanged, when the corresponding Config keys are
+      absent.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/sink/file/file_sink.go
+    - function:1980f527e25c15d42d5fd3f44e98ead1
+    id: r.mode-uid-gid-validation
+    level: MUST
+    text: NewFileSink must accept optional "mode", "uid" and "gid" integer overrides,
+      erroring with "could not parse 'mode' as integer", "could not parse 'uid' as
+      integer" or "could not parse 'gid' as integer" on a type mismatch, and erroring
+      with "file mode does not represent a regular file" when the mode is not a regular
+      file mode; the accepted values override the sink's stored mode, uid and gid.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/sink/file/file_sink_test.go
+    - file:third_party/openbao/internal/command/agentproxyshared/sink/file/sink_test.go
+    id: r.tests-cover-construction-mode-ownership
+    level: MUST
+    text: The package tests must cover sink construction against a real temporary
+      path, the mode override on the written file, and the uid/gid chown override,
+      and must also contain a sink test file for the surrounding sink behaviour.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/sink/file/file_sink.go
+    - method:ad5cef131aceee3b60dbe1ec0fbcda62
+    id: r.write-token-empty-token-and-rename
+    level: MUST
+    text: On an empty token fileSink.WriteToken must treat the call as a write check,
+      removing the temporary file and returning nil; on a non-empty token it must
+      apply the configured uid and gid through os.Chown only when either differs from
+      -1, then rename the temporary file over the configured path so the token lands
+      atomically.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/sink/file/file_sink.go
+    - method:ad5cef131aceee3b60dbe1ec0fbcda62
+    id: r.write-token-error-wrapping
+    level: SHOULD
+    text: 'fileSink.WriteToken should return wrapped errors that name the failing
+      step and path: UUID generation, temp file opening in the target directory, writing,
+      closing, removing during the write check, changing ownership, and renaming to
+      the target path, and should log a trace on entry and exit plus an info line
+      when the token is written.'
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/sink/file/file_sink.go
+    - method:ad5cef131aceee3b60dbe1ec0fbcda62
+    id: r.write-token-temp-file-protocol
+    level: MUST
+    text: fileSink.WriteToken must generate a UUID, open a temporary file named "<basename>.tmp.<first
+      UUID segment>" in the same directory as the configured path with the sink's
+      mode, and write either the supplied token or, when the token is empty, the UUID
+      itself; when writing fails it must close and remove the temporary file, ignoring
+      those errors, and return a wrapped error.
   upstream: self
 - code:
   - third_party/openbao/internal/command/agentproxyshared/sink/inmem/inmem_sink.go
