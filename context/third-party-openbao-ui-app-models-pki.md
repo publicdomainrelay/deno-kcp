@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context marks out the vendored PKI model layer of the OpenBao web UI so that the specifications around it have a stable, exact description of what these six models are and do. It exists because the surrounding deno-kcp work depends on knowing the field names, capability predicates, and help/path routing these models expose, without having to re-read the vendored JavaScript each time. The spec is descriptive: it records the attributes, the OpenAPI/help hooks, the capability gates, and the mount scoping that the code already implements, and it names the models the type declarations and PKI components bind to.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

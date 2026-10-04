@@ -1,5 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
+- class:2bc734ca8db65c0e3725743bd1a43272 PkiSignIntermediateModel@third_party/openbao/ui/app/models/pki/sign-intermediate.js:26
+- class:94060da0bdffa022432d3ad39befd9fd PkiRoleModel@third_party/openbao/ui/app/models/pki/role.js:76
+- class:c41f2189781777365f01d63f6f5ce5e1 PkiActionModel@third_party/openbao/ui/app/models/pki/action.js:49
+- class:dcf1fb5555c3db5ee172a816792e9ea1 PkiKeyModel@third_party/openbao/ui/app/models/pki/key.js:29
+- class:ed97b0eda21ce3413f482a312ce2b03a PkiIssuerModel@third_party/openbao/ui/app/models/pki/issuer.js:28
+- class:f3b616b5f2ee31a0617e1c0429a929e0 PkiTidyModel@third_party/openbao/ui/app/models/pki/tidy.js:11
 - file:third_party/openbao/ui/app/models/pki/action.js action.js@third_party/openbao/ui/app/models/pki/action.js
 - file:third_party/openbao/ui/app/models/pki/issuer.js issuer.js@third_party/openbao/ui/app/models/pki/issuer.js
 - file:third_party/openbao/ui/app/models/pki/key.js key.js@third_party/openbao/ui/app/models/pki/key.js
@@ -11,5 +17,147 @@ metadata:
   name: third-party-openbao-ui-app-models-pki
   namespace: default
 spec:
+  intent: 'The context marks out the vendored PKI model layer of the OpenBao web UI
+    so that the specifications around it have a stable, exact description of what
+    these six models are and do. It exists because the surrounding deno-kcp work depends
+    on knowing the field names, capability predicates, and help/path routing these
+    models expose, without having to re-read the vendored JavaScript each time. The
+    spec is descriptive: it records the attributes, the OpenAPI/help hooks, the capability
+    gates, and the mount scoping that the code already implements, and it names the
+    models the type declarations and PKI components bind to.'
+  interfaces:
+  - file: third_party/openbao/ui/app/models/pki/action.js
+    kind: class
+    name: PkiActionModel
+    signature: class PkiActionModel extends Model
+  - file: third_party/openbao/ui/app/models/pki/issuer.js
+    kind: class
+    name: PkiIssuerModel
+    signature: class PkiIssuerModel extends Model
+  - file: third_party/openbao/ui/app/models/pki/key.js
+    kind: class
+    name: PkiKeyModel
+    signature: class PkiKeyModel extends Model
+  - file: third_party/openbao/ui/app/models/pki/role.js
+    kind: class
+    name: PkiRoleModel
+    signature: class PkiRoleModel extends Model
+  - file: third_party/openbao/ui/app/models/pki/sign-intermediate.js
+    kind: class
+    name: PkiSignIntermediateModel
+    signature: class PkiSignIntermediateModel extends PkiCertificateBaseModel
+  - file: third_party/openbao/ui/app/models/pki/tidy.js
+    kind: class
+    name: PkiTidyModel
+    signature: class PkiTidyModel extends Model
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - class:c41f2189781777365f01d63f6f5ce5e1
+    - file:third_party/openbao/ui/app/models/pki/action.js
+    id: r.action-capability-gates
+    level: MUST
+    text: PkiActionModel exposes boolean capability methods canImportBundle, canGenerateIssuerRoot,
+      canGenerateIssuerIntermediate, and canCrossSign, each backed by the matching
+      capability path property (importBundlePath, generateIssuerRootPath, generateIssuerCsrPath,
+      crossSignPath) so the UI enables an action only when the mount permits it.
+  - codeRefs:
+    - class:c41f2189781777365f01d63f6f5ce5e1
+    - file:third_party/openbao/ui/app/models/pki/action.js
+    id: r.action-field-surface
+    level: MUST
+    text: 'PkiActionModel declares the full field surface for issuer and certificate
+      actions: action type and secret mount path; PEM bundle with parsed certificate,
+      imported issuers, imported keys, and mapping; certificate, serial number, issuers,
+      type, issuer name, key name, and key reference; subject fields (common name,
+      alt names, IP/URI/other SANs, OU, organization, country, locality, province,
+      street address, postal code, subject serial number); key parameters (format,
+      private key format, key type, key bits); CA parameters (max path length, exclude
+      CN from SANs, permitted DNS domains, basic constraints, not-before duration,
+      managed key name and id, custom TTL, TTL, not-after); and CSR material (issuer
+      id, CSR, CA chain, key id, private key, private key type).'
+  - codeRefs:
+    - class:ed97b0eda21ce3413f482a312ce2b03a
+    - file:third_party/openbao/ui/app/models/pki/issuer.js
+    id: r.issuer-capability-gates
+    level: MUST
+    text: PkiIssuerModel exposes boolean capability methods canRotateIssuer, canCrossSign,
+      canSignIntermediate, canConfigure, and canDeleteAllIssuers, backed by its issuerPath,
+      rotateExported, rotateInternal, rotateExisting, deletePath, crossSignPath, and
+      signIntermediate path properties, and resolves its own identity through backend()
+      and issuerRef().
+  - codeRefs:
+    - class:ed97b0eda21ce3413f482a312ce2b03a
+    - file:third_party/openbao/ui/app/models/pki/issuer.js
+    id: r.issuer-field-surface
+    level: SHOULD
+    text: PkiIssuerModel declares issuer identity and configuration fields — isDefault,
+      issuerId, keyId, CA chain, certificate, serial number, parsed certificate, common
+      name, isRoot, subject serial number, alt names, IP/URI/other SANs, issuer name,
+      leaf not-after behavior, usage, manual chain, revocation signature algorithm,
+      issuing certificates, CRL distribution points, OCSP servers, PEM bundle with
+      imported issuers, imported keys, and mapping — plus rotateExported, rotateInternal,
+      and rotateExisting flags describing how a rotation exports the issuer.
+  - codeRefs:
+    - class:dcf1fb5555c3db5ee172a816792e9ea1
+    - file:third_party/openbao/ui/app/models/pki/key.js
+    id: r.key-capability-gates
+    level: MUST
+    text: PkiKeyModel exposes boolean capability methods canRead, canEdit, canDelete,
+      canGenerateKey, and canImportKey, backed by its keyPath, generatePath, and importPath
+      properties and a backend() method, so key read, edit, delete, generate, and
+      import affordances are permission-gated.
+  - codeRefs:
+    - class:c41f2189781777365f01d63f6f5ce5e1
+    - class:dcf1fb5555c3db5ee172a816792e9ea1
+    - class:ed97b0eda21ce3413f482a312ce2b03a
+    - class:f3b616b5f2ee31a0617e1c0429a929e0
+    - file:third_party/openbao/ui/app/models/pki/tidy.js
+    id: r.mount-scoping
+    level: MUST
+    text: Each PKI model carries a secretMountPath property naming the secrets-engine
+      mount it belongs to; for PkiTidyModel the mount is the model id, since only
+      one pki/tidy record (the auto-tidy config) ever persists per mount.
+  - codeRefs:
+    - class:2bc734ca8db65c0e3725743bd1a43272
+    - class:94060da0bdffa022432d3ad39befd9fd
+    - class:f3b616b5f2ee31a0617e1c0429a929e0
+    - file:third_party/openbao/ui/app/models/pki/role.js
+    - file:third_party/openbao/ui/app/models/pki/sign-intermediate.js
+    id: r.openapi-help-urls
+    level: MUST
+    text: 'PkiRoleModel and PkiTidyModel declare a useOpenAPI getter returning true
+      so the path-help serializer resolves their help endpoints, and each supplies
+      getHelpUrl(backend) building the help URL for its own route: `/v1/${backend}/roles/example?help=1`
+      for roles, `/v1/${backend}/config/auto-tidy?help=1` for tidy, and `/v1/${backend}/issuer/example/sign-intermediate?help=1`
+      for sign-intermediate.'
+  - codeRefs:
+    - class:94060da0bdffa022432d3ad39befd9fd
+    - file:third_party/openbao/ui/app/models/pki/role.js
+    id: r.role-attribute-defaults
+    level: SHOULD
+    text: PkiRoleModel describes an issuance role with a read-only backend, a name
+      field that is edit-disabled, an issuer reference defaulting to 'default', and
+      TTL/backdating fields (custom TTL, not-before duration) carrying label, details
+      label, sub-text, and TTL edit type so the role form renders and validates them.
+  - codeRefs:
+    - class:2bc734ca8db65c0e3725743bd1a43272
+    - file:third_party/openbao/ui/app/models/pki/sign-intermediate.js
+    id: r.sign-intermediate-inherits-certificate-base
+    level: MUST
+    text: 'PkiSignIntermediateModel extends PkiCertificateBaseModel rather than a
+      plain Model, and adds the CSR-signing fields on top: issuer reference, PEM-encoded
+      CSR, use-CSR-values toggle, not-before duration defaulting to 30s, permitted
+      DNS domains defaulting to empty, and max path length defaulting to -1.'
+  - codeRefs:
+    - class:f3b616b5f2ee31a0617e1c0429a929e0
+    - file:third_party/openbao/ui/app/models/pki/tidy.js
+    id: r.tidy-config-attributes
+    level: MUST
+    text: 'PkiTidyModel models the single auto-tidy configuration record, pairing
+      each boolean toggle (tidyAcme, enabled) with a mapped detail attribute that
+      carries the label, disabled label, helper text for both states, details label,
+      and TTL formatting: acmeAccountSafetyBuffer maps to tidyAcme, and intervalDuration
+      maps to enabled. The ''enabled'' and ''intervalDuration'' attributes apply to
+      automatic tidy only.'
   upstream: self

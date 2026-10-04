@@ -10,5 +10,52 @@ spec:
   systemContext: third-party-openbao-ui-app-models-pki
   toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
 status:
-  message: the agent is summarizing third-party-openbao-ui-app-models-pki
-  phase: Running
+  agentLog: '...rty/openbao/ui/app/models/pki/. Six model classes describe the request
+    and response shapes the UI uses when it talks to a PKI secrets engine mount: PkiActionModel
+    (one-shot actions such as importing a PEM bundle, generating a root or an intermediate
+    CSR, and cross-signing), PkiIssuerModel (an issuer in a mount: its certificate,
+    chain, SANs, CRL/OCSP config, and rotation), PkiKeyModel (a key pair: key id,
+    name, type, bits, imported PEM or private key), PkiRoleModel (an issuance role:
+    issuer reference, TTLs, key usage, allowed domains), PkiSignIntermediateModel
+    (the form for signing a CSR into an intermediate, extending PkiCertificateBaseModel),
+    and PkiTidyModel (the single auto-tidy configuration record for a mount). Each
+    model declares its fields with Ember Data @attr decorators that also carry UI
+    metadata (label, detailsLabel, helper text, editType, defaultValue, formatTtl),
+    holds a secretMountPath property naming the mount it belongs to, and offers a
+    useOpenAPI getter plus a getHelpUrl(backend) method that builds the `?help=1`
+    path-help URL for its endpoint. The issuer, key, and action models additionally
+    expose boolean capability methods (canRead, canEdit, canDelete, canRotateIssuer,
+    canCrossSign, canSignIntermediate, canConfigure, canImportKey, canGenerateKey,
+    canImportBundle, canGenerateIssuerRoot, canGenerateIssuerIntermediate, canDeleteAllIssuers)
+    that gate the corresponding UI affordances, and path properties (keyPath, generatePath,
+    importPath, issuerPath, deletePath, crossSignPath, signIntermediate, importBundlePath,
+    generateIssuerRootPath, generateIssuerCsrPath) that name the API routes behind
+    those actions. TypeScript declaration counterparts for the same models live under
+    third_party/openbao/ui/types/vault/models/pki/ and are consumed by the page and
+    form components in third_party/openbao/ui/lib/pki/addon/components/. This is vendored
+    third-party code; the context exists to pin down its interface surface and behavior
+    as-is rather than to propose changes.'
+  message: wrote 10 requirement(s) and 6 interface(s) for third-party-openbao-ui-app-models-pki;
+    interface PkiActionModel.backend is not in the observed facts; dropped; interface
+    PkiActionModel.canImportBundle is not in the observed facts; dropped; interface
+    PkiActionModel.canGenerateIssuerRoot is not in the observed facts; dropped; interface
+    PkiActionModel.canGenerateIssuerIntermediate is not in the observed facts; dropped;
+    interface PkiActionModel.canCrossSign is not in the observed facts; dropped; interface
+    PkiIssuerModel.useOpenAPI is not in the observed facts; dropped; interface PkiIssuerModel.backend
+    is not in the observed facts; dropped; interface PkiIssuerModel.issuerRef is not
+    in the observed facts; dropped; interface PkiIssuerModel.canRotateIssuer is not
+    in the observed facts; dropped; interface PkiIssuerModel.canCrossSign is not in
+    the observed facts; dropped; interface PkiIssuerModel.canSignIntermediate is not
+    in the observed facts; dropped; interface PkiIssuerModel.canConfigure is not in
+    the observed facts; dropped; interface PkiIssuerModel.canDeleteAllIssuers is not
+    in the observed facts; dropped; interface PkiKeyModel.backend is not in the observed
+    facts; dropped; interface PkiKeyModel.canRead is not in the observed facts; dropped;
+    interface PkiKeyModel.canEdit is not in the observed facts; dropped; interface
+    PkiKeyModel.canDelete is not in the observed facts; dropped; interface PkiKeyModel.canGenerateKey
+    is not in the observed facts; dropped; interface PkiKeyModel.canImportKey is not
+    in the observed facts; dropped; interface PkiRoleModel.useOpenAPI is not in the
+    observed facts; dropped; interface PkiRoleModel.getHelpUrl is not in the observed
+    facts; dropped; interface PkiSignIntermediateModel.getHelpUrl is not in the observed
+    facts; dropped; interface PkiTidyModel.useOpenAPI is not in the observed facts;
+    dropped; interface PkiTidyModel.getHelpUrl is not in the observed facts; dropped
+  phase: Succeeded
