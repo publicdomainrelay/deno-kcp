@@ -36474,7 +36474,57 @@ system_contexts:
   - file:third_party/openbao/internal/vault/external_tests/router/router_ext_test.go
     router_ext_test.go@third_party/openbao/internal/vault/external_tests/router/router_ext_test.go
   id: sc.third-party-openbao-internal-vault-external-tests-router
+  intent: 'The context exists to pin down router behavior that only shows up end to
+    end: how mounts at nested subpaths resolve regardless of the order they are created,
+    how they survive a seal/unseal cycle, and that a mount whose rollback function
+    returns an error can still be reloaded and remounted. It is an external test package,
+    so it is written against the api/v2 client and the HTTP handler, which keeps it
+    decoupled from internal router types and guards the wiring between HTTP routing,
+    core mount bookkeeping, and backend lifecycle.'
   name: third-party-openbao-internal-vault-external-tests-router
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/router/router_ext_test.go
+    id: r.mount-subpath-order-independence
+    level: MUST
+    text: Mounting an auth backend and a secrets backend at nested subpath mount points
+      must succeed whether the longer mounted path is created before or after the
+      shorter one; the test runs the pair {"a/abcd/123", "abcd/123"} in both orders
+      against a fresh cluster.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/router/router_ext_test.go
+    id: r.mount-subpath-seal-unseal
+    level: MUST
+    text: After the auth and secrets backends are mounted at their subpaths, all cores
+      in the cluster must seal and then unseal successfully, with a failure reported
+      through the test rather than ignored.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/router/router_ext_test.go
+    id: r.noop-backend-factory-source
+    level: MUST
+    text: The failing-rollback test must mount the noop backend built from backend.NoopBackendRollbackErrFactory
+      so the periodic rollback error is produced by the mounted backend itself.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/router/router_ext_test.go
+    id: r.reload-backend-with-failing-rollback
+    level: MUST
+    text: 'Reloading a mounted backend whose periodic rollback function returns an
+      error must succeed: a write to sys/plugins/reload/backend for that mount must
+      not return an error.'
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/router/router_ext_test.go
+    id: r.remount-backend-with-failing-rollback
+    level: MUST
+    text: 'Remounting a backend whose periodic rollback function returns an error
+      must succeed: a write to sys/remount moving that mount to a new path must not
+      return an error, and the cores must then seal and unseal.'
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/router/router_ext_test.go
+    id: r.router-tests-use-http-handler-and-real-cluster
+    level: MUST
+    text: Both tests must build the cluster with vault.NewTestCluster using vaulthttp.Handler
+      as the handler func, wait for the first core to become active, drive it through
+      cluster.Cores[0].Client, and clean the cluster up on exit.
   upstream: self
 - code:
   - third_party/openbao/internal/vault/external_tests/sealmigration/seal_migration_pre14_test.go

@@ -2557,6 +2557,16 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.raw-response-inspection` (SHOULD): "Header assertions must inspect the raw HTTP response through client.Logical().ReadRaw, which returns the status code and the header collection directly rather than the decoded logical response."
 - added `r.test-cluster-lifecycle` (MUST): "The test must run against a vault.NewTestCluster configured with HandlerFunc vaulthttp.Handler and DisableStandbyReads true, start it with cluster.Start(), wait for the active core with vault.TestWaitActive, and defer cluster.Cleanup() so the cluster is always torn down."
 
+### third-party-openbao-internal-vault-external-tests-router
+
+- intent: "" -> "The context exists to pin down router behavior that only shows up end to end: how mounts at nested subpaths resolve regardless of the order they are created, how they survive a seal/unseal cycle, and that a mount whose rollback function returns an error can still be reloaded and remounted. It is an external test package, so it is written against the api/v2 client and the HTTP handler, which keeps it decoupled from internal router types and guards the wiring between HTTP routing, core mount bookkeeping, and backend lifecycle."
+- added `r.mount-subpath-order-independence` (MUST): "Mounting an auth backend and a secrets backend at nested subpath mount points must succeed whether the longer mounted path is created before or after the shorter one; the test runs the pair {"a/abcd/123", "abcd/123"} in both orders against a fresh cluster."
+- added `r.mount-subpath-seal-unseal` (MUST): "After the auth and secrets backends are mounted at their subpaths, all cores in the cluster must seal and then unseal successfully, with a failure reported through the test rather than ignored."
+- added `r.noop-backend-factory-source` (MUST): "The failing-rollback test must mount the noop backend built from backend.NoopBackendRollbackErrFactory so the periodic rollback error is produced by the mounted backend itself."
+- added `r.reload-backend-with-failing-rollback` (MUST): "Reloading a mounted backend whose periodic rollback function returns an error must succeed: a write to sys/plugins/reload/backend for that mount must not return an error."
+- added `r.remount-backend-with-failing-rollback` (MUST): "Remounting a backend whose periodic rollback function returns an error must succeed: a write to sys/remount moving that mount to a new path must not return an error, and the cores must then seal and unseal."
+- added `r.router-tests-use-http-handler-and-real-cluster` (MUST): "Both tests must build the cluster with vault.NewTestCluster using vaulthttp.Handler as the handler func, wait for the first core to become active, drive it through cluster.Cores[0].Client, and clean the cluster up on exit."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
