@@ -1223,17 +1223,24 @@ system_contexts:
       pds.default.bob.svc.kcp.local /xrpc/_health) and the host proves by fetching
       the same path from outside with curl https://127.0.0.1:2585/xrpc/_health; the
       bidder answers on bidder.default.bob.svc.kcp.local /oauth-client-metadata.json
-      and on https://127.0.0.1:2586/oauth-client-metadata.json. Both host checks use
-      https, because every service pod sets SERVICE_TLS true and the provider issues
-      it a leaf, so the listener the host reaches is the TLS one; an http:// fetch
-      of a TLS listener is not a check of anything and must not be written. http_code
-      reports the status curl printed, and prints 000 exactly once when the fetch
-      failed rather than appending a second fallback. And the five long-running pods
-      are still Running with ready true when they are read a second time at least
-      ten seconds later, so a pod that dies after startup fails the run. It prints
-      a final table naming every check and its result, prints the tail of the provider
-      log and the status of the failing pod when a check fails, and exits 0 only when
-      every check passed.'
+      and on http://127.0.0.1:2586/oauth-client-metadata.json. The host check names
+      the scheme the listener actually speaks, and the two are not the same. The PDS
+      in root:bob serves TLS -- its supervisor script writes the injected leaf and
+      appends --tls-cert-file and --tls-key-file -- so its host check is https, because
+      an http:// fetch of a TLS listener is not a check of anything and must not be
+      written. The bidder serves plain HTTP on its port: SERVICE_TLS is true for it
+      too, but its supervisor script must not append the TLS flags, because hono-bidder
+      declares no such options and its parser rejects unknown ones, so the bidder
+      consumes only the trust bundle and its listener is not the TLS one; its host
+      check is therefore http://, and an https:// fetch of a plain listener fails
+      the same way round. The readiness probe of the provider is the one that does
+      not care, because it tries https and then http. http_code reports the status
+      curl printed, and prints 000 exactly once when the fetch failed rather than
+      appending a second fallback. And the five long-running pods are still Running
+      with ready true when they are read a second time at least ten seconds later,
+      so a pod that dies after startup fails the run. It prints a final table naming
+      every check and its result, prints the tail of the provider log and the status
+      of the failing pod when a check fails, and exits 0 only when every check passed.'
   - codeRefs:
     - file:deploy/examples/atproto/market/15-openbao-alice.yaml
     - file:deploy/examples/atproto/market/15-openbao-bob.yaml
