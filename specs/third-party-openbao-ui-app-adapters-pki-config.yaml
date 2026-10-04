@@ -1,5 +1,10 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
+- class:0ae4baeedbb44b011a1bb8b77ebcd63d PkiConfigCrlAdapter@third_party/openbao/ui/app/adapters/pki/config/crl.js:9
+- class:7013746357be30dc3099a721f1e46d65 PkiConfigBaseAdapter@third_party/openbao/ui/app/adapters/pki/config/base.js:8
+- class:b07ea4beb4f13b0976ed4043f7e6deca PkiConfigClusterAdapter@third_party/openbao/ui/app/adapters/pki/config/cluster.js:9
+- class:e7161dbfd2de9d32ca59cd636e4daa5f PkiConfigUrlsAdapter@third_party/openbao/ui/app/adapters/pki/config/urls.js:9
+- class:f085aea2fe7d8234f29b97c5b51d4929 PkiConfigAcmeAdapter@third_party/openbao/ui/app/adapters/pki/config/acme.js:9
 - file:third_party/openbao/ui/app/adapters/pki/config/acme.js acme.js@third_party/openbao/ui/app/adapters/pki/config/acme.js
 - file:third_party/openbao/ui/app/adapters/pki/config/base.js base.js@third_party/openbao/ui/app/adapters/pki/config/base.js
 - file:third_party/openbao/ui/app/adapters/pki/config/cluster.js cluster.js@third_party/openbao/ui/app/adapters/pki/config/cluster.js
@@ -10,5 +15,89 @@ metadata:
   name: third-party-openbao-ui-app-adapters-pki-config
   namespace: default
 spec:
+  intent: 'This context exists so that the PKI configuration read/write HTTP surface
+    of the OpenBao UI stays described in one place: a single generic adapter holds
+    the request logic (GET for findRecord, POST for updateRecord) while thin subclasses
+    supply only the URL for each of the four PKI config endpoints. It documents that
+    contract so refactors of the adapters preserve the mount-path encoding, the v1
+    namespace, and the data unwrapping of resp.data on find.'
+  interfaces:
+  - file: third_party/openbao/ui/app/adapters/pki/config/acme.js
+    kind: class
+    name: PkiConfigAcmeAdapter
+    signature: class PkiConfigAcmeAdapter extends PkiConfigBaseAdapter
+  - file: third_party/openbao/ui/app/adapters/pki/config/base.js
+    kind: class
+    name: PkiConfigBaseAdapter
+    signature: class PkiConfigBaseAdapter extends ApplicationAdapter
+  - file: third_party/openbao/ui/app/adapters/pki/config/cluster.js
+    kind: class
+    name: PkiConfigClusterAdapter
+    signature: class PkiConfigClusterAdapter extends PkiConfigBaseAdapter
+  - file: third_party/openbao/ui/app/adapters/pki/config/crl.js
+    kind: class
+    name: PkiConfigCrlAdapter
+    signature: class PkiConfigCrlAdapter extends PkiConfigBaseAdapter
+  - file: third_party/openbao/ui/app/adapters/pki/config/urls.js
+    kind: class
+    name: PkiConfigUrlsAdapter
+    signature: class PkiConfigUrlsAdapter extends PkiConfigBaseAdapter
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - class:7013746357be30dc3099a721f1e46d65
+    - file:third_party/openbao/ui/app/adapters/pki/config/base.js
+    id: r.base-extends-application-adapter
+    level: MUST
+    text: PkiConfigBaseAdapter must extend the UI application adapter and declare
+      namespace 'v1', so every PKI config request is issued under that API namespace.
+  - codeRefs:
+    - class:7013746357be30dc3099a721f1e46d65
+    - file:third_party/openbao/ui/app/adapters/pki/config/base.js
+    id: r.find-record-gets-and-unwraps
+    level: MUST
+    text: findRecord must issue an HTTP GET to the URL produced by _url(backend) and
+      must resolve with the response body's data property, not the raw response, so
+      callers receive the record payload directly.
+  - codeRefs:
+    - class:0ae4baeedbb44b011a1bb8b77ebcd63d
+    - class:b07ea4beb4f13b0976ed4043f7e6deca
+    - class:e7161dbfd2de9d32ca59cd636e4daa5f
+    - class:f085aea2fe7d8234f29b97c5b51d4929
+    id: r.subclasses-supply-only-url
+    level: MUST
+    text: PkiConfigAcmeAdapter, PkiConfigClusterAdapter, PkiConfigCrlAdapter and PkiConfigUrlsAdapter
+      must extend PkiConfigBaseAdapter, keep namespace 'v1', and override only _url(backend),
+      so find and update behavior stays inherited and identical across the four config
+      endpoints.
+  - codeRefs:
+    - class:7013746357be30dc3099a721f1e46d65
+    - file:third_party/openbao/ui/app/adapters/pki/config/base.js
+    id: r.update-record-posts-serialized-snapshot
+    level: MUST
+    text: updateRecord must serialize the snapshot and issue an HTTP POST with that
+      serialized payload as data to _url(snapshot.record.id), so the record's id supplies
+      the backend mount path.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/adapters/pki/config/acme.js
+    - file:third_party/openbao/ui/app/adapters/pki/config/cluster.js
+    - file:third_party/openbao/ui/app/adapters/pki/config/crl.js
+    - file:third_party/openbao/ui/app/adapters/pki/config/urls.js
+    id: r.url-helpers-import-path-encoding
+    level: SHOULD
+    text: The four subclasses should import encodePath from vault/utils/path-encoding-helpers
+      rather than hand-rolling path escaping, keeping encoding behavior consistent
+      with the rest of the UI.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/adapters/pki/config/acme.js
+    - file:third_party/openbao/ui/app/adapters/pki/config/cluster.js
+    - file:third_party/openbao/ui/app/adapters/pki/config/crl.js
+    - file:third_party/openbao/ui/app/adapters/pki/config/urls.js
+    id: r.url-shape-encoded-backend-plus-config-path
+    level: MUST
+    text: 'Each _url(backend) must return this.buildURL() joined with the URL-encoded
+      backend mount path and then the adapter''s own fixed segment: /config/acme for
+      ACME, /config/cluster for cluster, /config/crl for CRL, and /config/urls for
+      URLs; the backend must be passed through encodePath so mounts containing reserved
+      characters stay addressable.'
   upstream: self

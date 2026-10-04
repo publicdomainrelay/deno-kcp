@@ -3968,6 +3968,16 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.subclasses-extend-base` (MUST): "`PkiCertificateGenerateAdapter` and `PkiCertificateSignAdapter` each extend `PkiCertificateBaseAdapter` and override only `urlForCreateRecord`, inheriting the v1 namespace, the query/queryRecord read path and the revoke-based `updateRecord` from the base."
 - added `r.update-record-revokes` (MUST): "`updateRecord(store, type, snapshot)` POSTs to `${buildURL()}/${encodePath(backend)}/revoke` with data `{ serial_number: serialNumber }` when the record has a serial number, else `{ certificate }`; revocation is the only way a certificate record is updated because revoking sets the revocationTime property. The resolved value is `{ data: { ...serialize(snapshot), ...response.data } }`."
 
+### third-party-openbao-ui-app-adapters-pki-config
+
+- intent: "" -> "This context exists so that the PKI configuration read/write HTTP surface of the OpenBao UI stays described in one place: a single generic adapter holds the request logic (GET for findRecord, POST for updateRecord) while thin subclasses supply only the URL for each of the four PKI config endpoints. It documents that contract so refactors of the adapters preserve the mount-path encoding, the v1 namespace, and the data unwrapping of resp.data on find."
+- added `r.base-extends-application-adapter` (MUST): "PkiConfigBaseAdapter must extend the UI application adapter and declare namespace 'v1', so every PKI config request is issued under that API namespace."
+- added `r.find-record-gets-and-unwraps` (MUST): "findRecord must issue an HTTP GET to the URL produced by _url(backend) and must resolve with the response body's data property, not the raw response, so callers receive the record payload directly."
+- added `r.subclasses-supply-only-url` (MUST): "PkiConfigAcmeAdapter, PkiConfigClusterAdapter, PkiConfigCrlAdapter and PkiConfigUrlsAdapter must extend PkiConfigBaseAdapter, keep namespace 'v1', and override only _url(backend), so find and update behavior stays inherited and identical across the four config endpoints."
+- added `r.update-record-posts-serialized-snapshot` (MUST): "updateRecord must serialize the snapshot and issue an HTTP POST with that serialized payload as data to _url(snapshot.record.id), so the record's id supplies the backend mount path."
+- added `r.url-helpers-import-path-encoding` (SHOULD): "The four subclasses should import encodePath from vault/utils/path-encoding-helpers rather than hand-rolling path escaping, keeping encoding behavior consistent with the rest of the UI."
+- added `r.url-shape-encoded-backend-plus-config-path` (MUST): "Each _url(backend) must return this.buildURL() joined with the URL-encoded backend mount path and then the adapter's own fixed segment: /config/acme for ACME, /config/cluster for cluster, /config/crl for CRL, and /config/urls for URLs; the backend must be passed through encodePath so mounts containing reserved characters stay addressable."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4267,6 +4277,8 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-adapters-pki-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-adapters-pki-certificate-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-adapters-pki-certificate-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-adapters-pki-config-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-adapters-pki-config-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-adapters-pki-config-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-adapters-policy-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
