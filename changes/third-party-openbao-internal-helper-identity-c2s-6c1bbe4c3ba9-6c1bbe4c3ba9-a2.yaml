@@ -1,0 +1,29 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-internal-helper-identity-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-internal-helper-identity
+  toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+status:
+  agentLog: The vendored OpenBao identity helper package under third_party/openbao/internal/helper/identity
+    holds the protobuf identity records (Group, Entity, Alias, EntityStorageEntry,
+    PersonaIndexEntry, LocalAliases) in types.pb.go, the deep-copy and SDK-projection
+    helpers in identity.go, and the Sentinel read surface in sentinel.go. Clone deep-copies
+    a record by proto.Marshal and proto.Unmarshal into a fresh value and refuses a
+    nil receiver with an error, so the storage layer can mutate copies without touching
+    originals. Entity.UpsertAlias replaces an alias by ID in place or appends it.
+    ToSDKAlias, ToSDKEntity, ToSDKGroup and ToSDKGroups project the internal records
+    onto logical.Alias, logical.Entity and logical.Group, copying Metadata into a
+    new map so the SDK value never aliases the internal map. Each record's SentinelGet
+    and SentinelKeys expose the policy-readable field surface.
+  message: wrote 14 requirement(s) and 110 interface(s) for third-party-openbao-internal-helper-identity
+  phase: Succeeded
+superseded:
+- message: wrote 14 requirement(s) and 110 interface(s) for third-party-openbao-internal-helper-identity
+  name: third-party-openbao-internal-helper-identity-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9
+  phase: Succeeded
