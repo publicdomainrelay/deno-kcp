@@ -9,6 +9,8 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
+- `class:4ccde46e2def7df4b8568c996f3e847f` class KubernetesRoleAdapter (third_party/openbao/ui/app/adapters/kubernetes/role.js)
+- `class:79c09b75c4ee536ddd9bf3addc6df266` class KubernetesConfigAdapter (third_party/openbao/ui/app/adapters/kubernetes/config.js)
 - `file:third_party/openbao/ui/app/adapters/kubernetes/config.js` file config.js (third_party/openbao/ui/app/adapters/kubernetes/config.js)
 - `file:third_party/openbao/ui/app/adapters/kubernetes/role.js` file role.js (third_party/openbao/ui/app/adapters/kubernetes/role.js)
 <!-- SPECD_MANAGED_END -->
