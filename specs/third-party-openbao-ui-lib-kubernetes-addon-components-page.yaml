@@ -1,5 +1,9 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
+- class:61f6a2f3ad14fda31c4eb1e5bd7bae33 CredentialsPageComponent@third_party/openbao/ui/lib/kubernetes/addon/components/page/credentials.js:24
+- class:851a065b8af5cecabbcc0e56093fc543 OverviewPageComponent@third_party/openbao/ui/lib/kubernetes/addon/components/page/overview.js:21
+- class:8b28e62b9791dd1a906daa148db95bf7 ConfigurePageComponent@third_party/openbao/ui/lib/kubernetes/addon/components/page/configure.js:20
+- class:c4799dd3cc2410e0a290734729f06041 RolesPageComponent@third_party/openbao/ui/lib/kubernetes/addon/components/page/roles.js:21
 - file:third_party/openbao/ui/lib/kubernetes/addon/components/page/configure.js configure.js@third_party/openbao/ui/lib/kubernetes/addon/components/page/configure.js
 - file:third_party/openbao/ui/lib/kubernetes/addon/components/page/credentials.js
   credentials.js@third_party/openbao/ui/lib/kubernetes/addon/components/page/credentials.js
@@ -10,5 +14,147 @@ metadata:
   name: third-party-openbao-ui-lib-kubernetes-addon-components-page
   namespace: default
 spec:
+  intent: 'This context exists to specify the behaviour of the Kubernetes secrets-engine
+    page layer of the OpenBao UI: the four components that render and act on the configure,
+    overview, credentials and roles screens. It defines what each component must do
+    with its arguments, injected services and tracked state so the pages can be reimplemented,
+    tested or ported without losing the routing, validation, inference and deletion
+    semantics that the current Ember implementation encodes.'
+  interfaces:
+  - file: third_party/openbao/ui/lib/kubernetes/addon/components/page/configure.js
+    kind: class
+    name: ConfigurePageComponent
+    signature: ConfigurePageComponent()
+  - file: third_party/openbao/ui/lib/kubernetes/addon/components/page/credentials.js
+    kind: class
+    name: CredentialsPageComponent
+    signature: CredentialsPageComponent()
+  - file: third_party/openbao/ui/lib/kubernetes/addon/components/page/overview.js
+    kind: class
+    name: OverviewPageComponent
+    signature: OverviewPageComponent()
+  - file: third_party/openbao/ui/lib/kubernetes/addon/components/page/roles.js
+    kind: class
+    name: RolesPageComponent
+    signature: RolesPageComponent()
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - class:8b28e62b9791dd1a906daa148db95bf7
+    - file:third_party/openbao/ui/lib/kubernetes/addon/components/page/configure.js
+    id: r.configure-disable-save-until-valid
+    level: MUST
+    text: The isDisabled getter must return true when disableLocalCaJwt is falsy and
+      inferredState is not 'success', and must also return true while the save or
+      fetchInferred task is running, so the save button is unavailable until inference
+      succeeds and no task is in flight.
+  - codeRefs:
+    - class:8b28e62b9791dd1a906daa148db95bf7
+    - file:third_party/openbao/ui/lib/kubernetes/addon/components/page/configure.js
+    id: r.configure-fetch-inferred-calls-adapter
+    level: MUST
+    text: The fetchInferred task must call store.adapterFor('kubernetes/config').checkConfigVars
+      with the model's backend and set inferredState to 'success' when the call resolves
+      and to 'error' when it rejects, so the UI reflects whether the local CA/JWT
+      configuration can be detected.
+  - codeRefs:
+    - class:8b28e62b9791dd1a906daa148db95bf7
+    - file:third_party/openbao/ui/lib/kubernetes/addon/components/page/configure.js
+    id: r.configure-infer-state-on-construction
+    level: MUST
+    text: ConfigurePageComponent must seed its tracked inferredState to 'success'
+      in the constructor only when the config model is not new and disableLocalCaJwt
+      is falsy; otherwise inferredState stays unset so the page shows the inference
+      step as not yet run.
+  - codeRefs:
+    - class:8b28e62b9791dd1a906daa148db95bf7
+    - file:third_party/openbao/ui/lib/kubernetes/addon/components/page/configure.js
+    id: r.configure-leave-route-name
+    level: SHOULD
+    text: The leave method must transition the 'host-router' service to the route
+      built from the fixed prefix 'vault.cluster.secrets.backend.kubernetes.' plus
+      the given route argument, keeping all configure-page navigation under the kubernetes
+      secrets backend namespace.
+  - codeRefs:
+    - class:8b28e62b9791dd1a906daa148db95bf7
+    - file:third_party/openbao/ui/lib/kubernetes/addon/components/page/configure.js
+    id: r.configure-radio-select-clears-inference
+    level: MUST
+    text: The onRadioSelect action must write the selected value onto model.disableLocalCaJwt
+      and reset inferredState to null, so changing the local CA/JWT choice invalidates
+      any previous inference result.
+  - codeRefs:
+    - class:8b28e62b9791dd1a906daa148db95bf7
+    - file:third_party/openbao/ui/lib/kubernetes/addon/components/page/configure.js
+    id: r.configure-save-confirm-and-validate
+    level: MUST
+    text: The save task must, for an existing model on its first invocation, set showConfirm
+      instead of saving; on the confirmed invocation it must clear showConfirm, run
+      model.validate(), and on an invalid result store the validation state in modelValidations
+      and the invalid form message in alert and return without saving.
+  - codeRefs:
+    - class:8b28e62b9791dd1a906daa148db95bf7
+    - file:third_party/openbao/ui/lib/kubernetes/addon/components/page/configure.js
+    id: r.configure-save-then-leave
+    level: MUST
+    text: When model.validate() reports a valid model, the save task must persist
+      the model and then call leave to transition the host router, so a successful
+      configuration save navigates away from the configure page.
+  - codeRefs:
+    - class:61f6a2f3ad14fda31c4eb1e5bd7bae33
+    - file:third_party/openbao/ui/lib/kubernetes/addon/components/page/credentials.js
+    id: r.credentials-fetch-and-lease-expiry
+    level: MUST
+    text: CredentialsPageComponent must expose a fetchCredentials action that requests
+      credentials for the current form state, an updateTtl action that stores the
+      goSafeTimeString as the ttl, a setKubernetesNamespace action that stores the
+      event target value as kubernetesNamespace, a cancel action that abandons the
+      request, and a leaseExpiry getter that derives the lease expiry from the fetched
+      credentials, with any failure recorded in the tracked error property.
+  - codeRefs:
+    - class:851a065b8af5cecabbcc0e56093fc543
+    - file:third_party/openbao/ui/lib/kubernetes/addon/components/page/overview.js
+    id: r.overview-generate-credential-transition
+    level: MUST
+    text: The generateCredential action must transition the 'host-router' service
+      to 'vault.cluster.secrets.backend.kubernetes.roles.role.credentials' passing
+      the tracked selectedRole, and selectRole must store the first element of the
+      passed array as selectedRole, so credential generation targets the role chosen
+      in the role selector.
+  - codeRefs:
+    - class:851a065b8af5cecabbcc0e56093fc543
+    - file:third_party/openbao/ui/lib/kubernetes/addon/components/page/overview.js
+    id: r.overview-role-options-from-args
+    level: MUST
+    text: OverviewPageComponent's constructor must build its tracked roleOptions array
+      from args.roles, mapping each role to an object carrying the role name as both
+      the name and the id, so the page offers exactly the roles it was given.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/kubernetes/addon/components/page/configure.js
+    - file:third_party/openbao/ui/lib/kubernetes/addon/components/page/credentials.js
+    - file:third_party/openbao/ui/lib/kubernetes/addon/components/page/overview.js
+    - file:third_party/openbao/ui/lib/kubernetes/addon/components/page/roles.js
+    id: r.pages-inject-host-router
+    level: MUST
+    text: Every one of the four page components must inject the 'host-router' service
+      as the navigation mechanism, so route changes stay under the host application's
+      router rather than the addon's own routing.
+  - codeRefs:
+    - class:c4799dd3cc2410e0a290734729f06041
+    - file:third_party/openbao/ui/lib/kubernetes/addon/components/page/roles.js
+    id: r.roles-delete-removes-record-and-option
+    level: MUST
+    text: The onDelete action must call model.destroyRecord(), then remove the model
+      from args.roles by index when it is present, and report a success flash message
+      naming the deleted role; on any thrown error it must report a danger flash message
+      built from the error and the fallback text 'Error deleting role. Please try
+      again or contact support'.
+  - codeRefs:
+    - class:c4799dd3cc2410e0a290734729f06041
+    - file:third_party/openbao/ui/lib/kubernetes/addon/components/page/roles.js
+    id: r.roles-mount-point-from-owner
+    level: MUST
+    text: The mountPoint getter must return the mountPoint of the owner obtained through
+      getOwner(this), so role links and routes resolve against the engine's actual
+      mount path rather than a hardcoded prefix.
   upstream: self

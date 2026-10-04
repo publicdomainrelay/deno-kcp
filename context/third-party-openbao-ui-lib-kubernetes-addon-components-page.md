@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to specify the behaviour of the Kubernetes secrets-engine page layer of the OpenBao UI: the four components that render and act on the configure, overview, credentials and roles screens. It defines what each component must do with its arguments, injected services and tracked state so the pages can be reimplemented, tested or ported without losing the routing, validation, inference and deletion semantics that the current Ember implementation encodes.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
