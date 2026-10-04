@@ -4112,6 +4112,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.selection-tracked` (MUST): "The selection field must be a Glimmer tracked property, so a change to the selected mount type re-renders the type form."
 - added `r.set-mount-type-callback` (MUST): "The component must accept a setMountType callback argument and invoke it with the chosen mount type string, so the caller can write that value onto its model."
 
+### third-party-openbao-ui-app-components-secret-list
+
+- intent: "" -> "This context exists so the database secret list can render per-row type information and offer per-row connection and credential operations without owning backend logic. The component delegates all mutation to Ember Data adapters and reports outcomes through the flash message service, keeping the template thin. The specification records which path values map to which key type and which adapter each action must talk to, so the list item's contract with the adapters and the user-visible flash strings stay stable."
+- added `r.component-state-and-services` (MUST): "The component must declare roleType as a tracked property initialized to the empty string, and must inject the store and flashMessages services, because the action methods depend on those services to resolve adapters and report results."
+- added `r.key-type-from-path` (MUST): "The keyTypeValue getter must derive the key type from the current item's path, not from the item's type field: a path of 'roles' must return 'dynamic', a path of 'static-roles' must return 'static', and any other path must return an empty string."
+- added `r.reset-connection` (MUST): "resetConnection(id) must read the backend from the current item, obtain the 'database/connection' adapter from the store, call resetConnection with the backend and id, flash the success message `Success: ${id} connection was reset` when the promise resolves, and flash the rejection's errors as a danger message when it fails."
+- added `r.rotate-role-cred` (MUST): "rotateRoleCred(id) must read the backend from the current item, obtain the 'database/credential' adapter from the store, call rotateRoleCredentials with the backend and id, flash the success message `Success: Credentials for ${id} role were rotated` when the promise resolves, and flash the rejection's errors as a danger message when it fails."
+- added `r.rotate-root-cred` (MUST): "rotateRootCred(id) must read the backend from the current item, obtain the 'database/connection' adapter from the store, call rotateRootCredentials with the backend and id, flash the success message `Success: ${id} connection was rotated` when the promise resolves, and flash the rejection's errors as a danger message when it fails."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4430,5 +4439,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-components-modal-form-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-components-mount-backend-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-components-oidc-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-ui-app-components-secret-list-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-components-secret-list-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

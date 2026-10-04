@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the database secret list can render per-row type information and offer per-row connection and credential operations without owning backend logic. The component delegates all mutation to Ember Data adapters and reports outcomes through the flash message service, keeping the template thin. The specification records which path values map to which key type and which adapter each action must talk to, so the list item's contract with the adapters and the user-visible flash strings stay stable.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
