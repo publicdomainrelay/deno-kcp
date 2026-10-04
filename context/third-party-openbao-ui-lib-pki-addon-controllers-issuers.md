@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists to specify the small Ember controller that backs the PKI issuers index page in OpenBao's web UI, so that the mountPoint lookup and the deferred link-click close behavior are captured as explicit obligations rather than implied by a two-method class.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

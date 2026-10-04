@@ -5819,6 +5819,14 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.set-filter-action` (MUST): "The setFilter action takes a value and assigns it to the controller's filter property, letting the list template filter certificates by the string the user types."
 - added `r.set-filter-focus-action` (MUST): "The setFilterFocus action takes a boolean and assigns it to the controller's filterFocused property, letting the list template track whether the filter input holds focus."
 
+### third-party-openbao-ui-lib-pki-addon-controllers-issuers
+
+- intent: "" -> "The context exists to specify the small Ember controller that backs the PKI issuers index page in OpenBao's web UI, so that the mountPoint lookup and the deferred link-click close behavior are captured as explicit obligations rather than implied by a two-method class."
+- added `r.action-decorated-handler` (MUST): "onLinkClick must be decorated with @action so Ember binds it correctly when referenced from a template click handler."
+- added `r.defer-link-click-close` (MUST): "onLinkClick must accept the passed object D and close the UI element by invoking D.actions.close() inside Ember's next() scheduler rather than synchronously, so that passing D.actions through a click handler does not break production builds."
+- added `r.extend-ember-controller` (MUST): "PkiIssuerIndexController must extend Ember's Controller base class and be exported as the default export of the issuers index controller module, so Ember's resolver can bind it to the issuers/index route."
+- added `r.mount-point-from-owner` (MUST): "The mountPoint getter must return the Ember owner's mountPoint obtained via getOwner(this), so the controller exposes the engine mount path of the surrounding addon."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
