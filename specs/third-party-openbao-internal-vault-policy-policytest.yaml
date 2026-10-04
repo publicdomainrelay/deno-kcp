@@ -26,8 +26,9 @@ spec:
     id: r.baseline-not-root
     level: MUST
     text: Before the case table runs, a read request for path sys/mount/foo must be
-      evaluated through acl.AllowOperation with a namespace-scoped context, and the
-      result must not report RootPrivs; a root result fails with "unexpected root".
+      evaluated through acl.AllowOperation with a namespace-scoped context and the
+      root-privilege argument false, and the result must not report RootPrivs; a root
+      result fails the test with "unexpected root".
   - codeRefs:
     - file:third_party/openbao/internal/vault/policy/policytest/acl.go
     - function:c661ac0e792f811fac9344e9db3e2bbf
@@ -49,10 +50,10 @@ spec:
     level: MUST
     text: 'The table must cover the layered-policy semantics it documents: the root
       path denied read but allowed help without root privileges, wildcard grants under
-      dev/ and stage/aws/ that do carry root privileges, a denied sys/seal-adjacent
-      read next to an allowed sys/seal update with root privileges, hidden path segments
-      denied, a stage subpath denied for update, and read/list/update/create/patch
-      all denied on paths no policy names.'
+      dev/ and stage/aws/ that do carry root privileges, a denied sys/status read
+      next to an allowed sys/seal update with root privileges, hidden dev/hide/ segments
+      denied, stage/aws/policy/foo denied for update, and read/list/update/create/patch
+      all denied on paths no policy names (foo/bar and baz/quux).'
   - codeRefs:
     - function:c661ac0e792f811fac9344e9db3e2bbf
     id: r.fresh-request-per-case
