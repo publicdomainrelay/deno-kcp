@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to pin down the behaviour of the file physical backend that deno-kcp vendors from the OpenBao SDK, so that the storage contract it offers to the rest of the system is explicit rather than inferred from the Go source. It matters because the backend is deprecated but still reachable through the physical.Backend interface, so its construction rules, path safety checks and not-found semantics must stay fixed while the surrounding tree changes.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

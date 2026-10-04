@@ -3609,6 +3609,23 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.storage-view-construction` (MUST): "NewStorageView builds a storage view that scopes a backend to its own prefix of the underlying storage, so paths the backend writes are namespaced and it cannot reach outside its mount without an explicit barrier view."
 - added `r.version-grpc-service` (MUST): "The generated version service registers a plugin version server against a gRPC server through RegisterPluginVersionServer, with the message types and service descriptor defined in the generated protobuf files, so the host can query the version a plugin backend reports."
 
+### third-party-openbao-sdk-physical-file
+
+- intent: "" -> "This context exists to pin down the behaviour of the file physical backend that deno-kcp vendors from the OpenBao SDK, so that the storage contract it offers to the rest of the system is explicit rather than inferred from the Go source. It matters because the backend is deprecated but still reachable through the physical.Backend interface, so its construction rules, path safety checks and not-found semantics must stay fixed while the surrounding tree changes."
+- added `r.backend-implements-physical-backend` (MUST): "FileBackend must satisfy the physical.Backend interface and NewFileBackend must be usable as a factory that returns a physical.Backend, so callers select the file backend through the SDK storage interface rather than a concrete type."
+- added `r.construct-requires-path` (MUST): "NewFileBackend must read the "path" key from the configuration map and return a nil backend together with the error "'path' must be set" when that key is absent; otherwise it constructs a FileBackend rooted at that path."
+- added `r.delete-delegates-internal` (MUST): "Delete must return whatever DeleteInternal returns for the same context and path, adding no behaviour of its own beyond the semaphore and lock bracketing."
+- added `r.deprecation-warning` (MUST): "When the logger passed to NewFileBackend is not nil, construction must emit a warning that the file physical backend is deprecated and that operators should run bao operator migrate to move to a supported storage backend by v2.7.0."
+- added `r.get-decodes-entry` (MUST): "When the file exists and is non-empty, GetInternal must open it, JSON-decode its contents into a fileEntry, and return a physical.Entry whose Key is the original logical key and whose Value is the decoded value, closing the file handle on the way out."
+- added `r.get-honours-context` (MUST): "After a successful decode GetInternal must select on ctx.Done() and return ctx.Err() when the context has been cancelled, taking the default branch otherwise."
+- added `r.get-missing-and-empty-file` (MUST): "GetInternal must expand the logical key into a directory and file name, join them, and return a nil entry with a nil error both when the file does not exist and when it exists with size zero; in the zero-size case it must make a best-effort removal of the file and ignore the removal error."
+- added `r.list-pagination-surface` (MUST): "List must delegate to ListInternal and ListPage must delegate to ListPageInternal, forwarding the prefix, the after cursor and the limit so that paginated and unpaginated listings stay consistent with one another."
+- added `r.path-validation-rejects-parent-refs` (MUST): "validatePath must reject any path whose text contains ".." by returning consts.ErrPathContainsParentReferences, and GetInternal must call that validation before touching the filesystem and propagate its error unchanged to the caller."
+- added `r.permit-pool-sizing` (MUST): "The constructed backend must carry a permit pool created by physical.NewPermitPool with physical.DefaultParallelOperations, so that concurrency is bounded by the SDK default rather than by the caller."
+- added `r.public-methods-serialize` (MUST): "Each public entry point (Delete, Get, Put, List, ListPage) must acquire a permit from the pool, defer its release, take the backend write lock, defer the unlock, and then delegate the work to the matching Internal method, so that no two public operations touch the filesystem concurrently."
+- added `r.read-write-symmetric-entry-type` (MUST): "Put must persist entries through PutInternal using the same JSON file entry representation that GetInternal decodes, so that a value written by Put is returned unchanged by Get for the same key."
+- added `r.test-coverage` (SHOULD): "file_test.go should continue to cover base64 URL encoding of keys, path validation and general backend behaviour through TestFileBackend_Base64URLEncoding, TestFileBackend_ValidatePath and TestFileBackend, each constructing its backend with NewFileBackend."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -3877,4 +3894,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-sdk-helper-xor-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-logical-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-physical-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-sdk-physical-file-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-physical-file-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-sdk-physical-inmem-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
