@@ -5657,6 +5657,16 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.roles-index-model-returns-hash` (MUST): "KubernetesRolesRoute.model must return a hash containing backend (the result of modelFor('application')), promptConfig, and the roles promise, so the controller receives the application model, the prompt configuration, and the role list together."
 - added `r.roles-routes-inject-services` (MUST): "Both KubernetesRolesRoute and KubernetesRolesCreateRoute must inject the store and secretMountPath services, and both must extend the shared Route base class so the default route hooks remain available."
 
+### third-party-openbao-ui-lib-kubernetes-addon-routes-roles-role
+
+- intent: "" -> "The context exists to describe the routing behavior for an individual Kubernetes secrets-backend role: how the role URL resolves to a sub-page, how the backend mount path and role name are turned into a model, and what breadcrumb trail each sub-page presents. It is a specification of the existing Ember route classes so the nested route contract (params, services, model payload, breadcrumbs) is recorded rather than re-derived from the source."
+- added `r.breadcrumb-model-wiring` (SHOULD): "Breadcrumb entries for the backend and roles list must carry models: [resolvedModel.backend] so the links can rebuild the overview and roles routes, and the role-level entry must carry models: [resolvedModel.backend, resolvedModel.name]; credentials uses resolvedModel.roleName for the role label and model pair because its model has no name field."
+- added `r.breadcrumbs-chain` (MUST): "setupController must assign controller.breadcrumbs as an array of label/route/models entries that leads from the backend overview, to the roles list, to the role itself, and then to the sub-page label: details ends at the role name with no trailing route, edit labels the role via route 'roles.role' and appends 'edit', and credentials labels the role via route 'roles.role.details' and appends 'credentials'."
+- added `r.credentials-model-is-plain-object` (MUST): "The credentials route must not query the store; its model returns a plain object with roleName taken from paramsFor('roles.role').name and backend taken from the secretMountPath service, because the generated-credentials page needs only the role identity and mount path."
+- added `r.details-and-edit-load-role-record` (MUST): "The details and edit routes must build their model by reading the backend mount path from the secretMountPath service via get(), destructuring name out of paramsFor('roles.role'), and returning store.queryRecord('kubernetes/role', { backend, name }) so both sub-pages show the same persisted role record."
+- added `r.index-redirects-to-details` (MUST): "The bare role route must not render anything itself: its redirect hook calls transitionTo('vault.cluster.secrets.backend.kubernetes.roles.role.details') on the injected 'host-router' service, so visiting a role lands on the details sub-route."
+- added `r.setupController-calls-super` (MUST): "Each of the details, edit and credentials routes must call super.setupController(controller, resolvedModel) before touching the controller, so base Route behavior is preserved."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -6152,5 +6162,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-kubernetes-addon-routes-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Failed |  | 0 | - |
 | third-party-openbao-ui-lib-kubernetes-addon-routes-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Failed |  | 0 | - |
 | third-party-openbao-ui-lib-kubernetes-addon-routes-roles-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-lib-kubernetes-addon-routes-roles-role-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-kubernetes-addon-routes-roles-role-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-kubernetes-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

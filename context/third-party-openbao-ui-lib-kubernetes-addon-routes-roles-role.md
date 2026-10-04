@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists to describe the routing behavior for an individual Kubernetes secrets-backend role: how the role URL resolves to a sub-page, how the backend mount path and role name are turned into a model, and what breadcrumb trail each sub-page presents. It is a specification of the existing Ember route classes so the nested route contract (params, services, model payload, breadcrumbs) is recorded rather than re-derived from the source.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
