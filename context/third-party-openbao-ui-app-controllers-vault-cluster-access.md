@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to record the observable contract of the two vendored OpenBao UI controllers in the vault/cluster/access folder, so that the auth-methods list filtering behavior and the OIDC header state machine can be referenced, tested or modified without re-reading the Ember source. It names the state each controller owns, the derived values it computes from the route model, and the route-name conditions that drive the OIDC header.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

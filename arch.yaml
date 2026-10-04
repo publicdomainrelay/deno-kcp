@@ -60522,10 +60522,126 @@ system_contexts:
   - third_party/openbao/ui/app/controllers/vault/cluster/access/methods.js
   - third_party/openbao/ui/app/controllers/vault/cluster/access/oidc.js
   codeRefIndex:
+  - class:808950ebb775d7e1cc279bd796289cf6 VaultClusterAccessMethodsController@third_party/openbao/ui/app/controllers/vault/cluster/access/methods.js:12
+  - class:d01e2b33e4201cbf01aa4907d05d3f85 OidcConfigureController@third_party/openbao/ui/app/controllers/vault/cluster/access/oidc.js:10
   - file:third_party/openbao/ui/app/controllers/vault/cluster/access/methods.js methods.js@third_party/openbao/ui/app/controllers/vault/cluster/access/methods.js
   - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc.js oidc.js@third_party/openbao/ui/app/controllers/vault/cluster/access/oidc.js
   id: sc.third-party-openbao-ui-app-controllers-vault-cluster-access
+  intent: This context exists to record the observable contract of the two vendored
+    OpenBao UI controllers in the vault/cluster/access folder, so that the auth-methods
+    list filtering behavior and the OIDC header state machine can be referenced, tested
+    or modified without re-reading the Ember source. It names the state each controller
+    owns, the derived values it computes from the route model, and the route-name
+    conditions that drive the OIDC header.
+  interfaces:
+  - file: third_party/openbao/ui/app/controllers/vault/cluster/access/oidc.js
+    kind: class
+    name: OidcConfigureController
+    signature: class OidcConfigureController extends Controller
+  - file: third_party/openbao/ui/app/controllers/vault/cluster/access/methods.js
+    kind: class
+    name: VaultClusterAccessMethodsController
+    signature: class VaultClusterAccessMethodsController extends Controller
   name: third-party-openbao-ui-app-controllers-vault-cluster-access
+  requirements:
+  - codeRefs:
+    - class:808950ebb775d7e1cc279bd796289cf6
+    id: r.auth-method-array-by-name
+    level: MUST
+    text: The authMethodArrayByName getter returns the sorted, de-duplicated set of
+      method names derived from authMethodList, so the name filter offers each auth
+      method name once.
+  - codeRefs:
+    - class:808950ebb775d7e1cc279bd796289cf6
+    id: r.auth-method-array-by-type
+    level: MUST
+    text: The authMethodArrayByType getter maps authMethodList entries to their type
+      and returns the de-duplicated, sorted set of those types, so the type filter
+      offers each auth engine type once.
+  - codeRefs:
+    - class:808950ebb775d7e1cc279bd796289cf6
+    id: r.auth-method-filter-state
+    level: MUST
+    text: The controller keeps tracked state for the auth method options list, the
+      selected auth type and the selected auth name, so that selecting a type or a
+      name re-derives the displayed list instead of mutating the route model.
+  - codeRefs:
+    - class:808950ebb775d7e1cc279bd796289cf6
+    id: r.auth-method-list
+    level: MUST
+    text: The authMethodList getter returns a copy of the route model filtered by
+      selectedAuthType when a type is set, filtered by selectedAuthName against each
+      method's id when a name is set, filtered by both when both are set (name check
+      applied first inside the type filter), and the unfiltered copy when neither
+      is set.
+  - codeRefs:
+    - class:808950ebb775d7e1cc279bd796289cf6
+    id: r.disable-method
+    level: MUST
+    text: The disableMethod action takes an auth method model and disables that method,
+      using the injected flashMessages service to report the result.
+  - codeRefs:
+    - class:808950ebb775d7e1cc279bd796289cf6
+    id: r.filter-auth-name
+    level: MUST
+    text: The filterAuthName action takes a name argument and applies it as the controller's
+      selected auth name, which authMethodList matches against each method's id.
+  - codeRefs:
+    - class:808950ebb775d7e1cc279bd796289cf6
+    id: r.filter-auth-type
+    level: MUST
+    text: The filterAuthType action takes a type argument and applies it as the controller's
+      selected auth type, which authMethodList uses to narrow the displayed methods.
+  - codeRefs:
+    - class:808950ebb775d7e1cc279bd796289cf6
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/methods.js
+    id: r.flash-messages-service
+    level: MUST
+    text: VaultClusterAccessMethodsController injects the flashMessages service so
+      that the filter and disable actions can report outcomes to the user.
+  - codeRefs:
+    - class:d01e2b33e4201cbf01aa4907d05d3f85
+    id: r.oidc-header-cta
+    level: MUST
+    text: setHeader reads the destination route name from the transition and sets
+      the tracked header to 'cta' when that name contains 'oidc.index', because the
+      OIDC landing view shows a create button as a call to action.
+  - codeRefs:
+    - class:d01e2b33e4201cbf01aa4907d05d3f85
+    id: r.oidc-header-list
+    level: MUST
+    text: When the destination route name is not the OIDC index, setHeader sets header
+      to 'list' if the name contains '<resource>.index' for one of clients, assignments,
+      keys, scopes or providers, because those list views share one tabbed header.
+  - codeRefs:
+    - class:d01e2b33e4201cbf01aa4907d05d3f85
+    id: r.oidc-header-null
+    level: MUST
+    text: For any destination route that is neither the OIDC index nor one of the
+      resource index routes, setHeader sets header to null, leaving those routes responsible
+      for their own header.
+  - codeRefs:
+    - class:d01e2b33e4201cbf01aa4907d05d3f85
+    id: r.oidc-is-cta
+    level: MUST
+    text: The isCta getter returns true only when the tracked header equals 'cta',
+      giving templates a boolean call-to-action flag rather than repeating the string
+      comparison.
+  - codeRefs:
+    - class:d01e2b33e4201cbf01aa4907d05d3f85
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc.js
+    id: r.oidc-router-subscription
+    level: MUST
+    text: OidcConfigureController's constructor calls super with the passed arguments
+      and registers a routeDidChange listener on the injected router that forwards
+      each transition to setHeader, so the header state follows routing without a
+      per-route hook.
+  - codeRefs:
+    - class:808950ebb775d7e1cc279bd796289cf6
+    id: r.page-query-params
+    level: MUST
+    text: The controller declares page, pageFilter and filter state and lists them
+      as query parameters, so paging and the name filter survive in the URL.
   upstream: self
 - code:
   - third_party/openbao/ui/app/controllers/vault/cluster/access/identity/create.js

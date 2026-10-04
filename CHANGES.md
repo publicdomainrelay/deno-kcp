@@ -4237,6 +4237,24 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.settings-namespace-service` (MUST): "The cluster settings controller injects the namespace service so the settings route can read and change the active namespace."
 - added `r.unseal-transition` (MUST): "The unseal controller's transitionToCluster action reloads the model and then transitions safely to vault.cluster with the model name, and isUnsealed(data) reports unsealed as data.sealed being exactly false."
 
+### third-party-openbao-ui-app-controllers-vault-cluster-access
+
+- intent: "" -> "This context exists to record the observable contract of the two vendored OpenBao UI controllers in the vault/cluster/access folder, so that the auth-methods list filtering behavior and the OIDC header state machine can be referenced, tested or modified without re-reading the Ember source. It names the state each controller owns, the derived values it computes from the route model, and the route-name conditions that drive the OIDC header."
+- added `r.auth-method-array-by-name` (MUST): "The authMethodArrayByName getter returns the sorted, de-duplicated set of method names derived from authMethodList, so the name filter offers each auth method name once."
+- added `r.auth-method-array-by-type` (MUST): "The authMethodArrayByType getter maps authMethodList entries to their type and returns the de-duplicated, sorted set of those types, so the type filter offers each auth engine type once."
+- added `r.auth-method-filter-state` (MUST): "The controller keeps tracked state for the auth method options list, the selected auth type and the selected auth name, so that selecting a type or a name re-derives the displayed list instead of mutating the route model."
+- added `r.auth-method-list` (MUST): "The authMethodList getter returns a copy of the route model filtered by selectedAuthType when a type is set, filtered by selectedAuthName against each method's id when a name is set, filtered by both when both are set (name check applied first inside the type filter), and the unfiltered copy when neither is set."
+- added `r.disable-method` (MUST): "The disableMethod action takes an auth method model and disables that method, using the injected flashMessages service to report the result."
+- added `r.filter-auth-name` (MUST): "The filterAuthName action takes a name argument and applies it as the controller's selected auth name, which authMethodList matches against each method's id."
+- added `r.filter-auth-type` (MUST): "The filterAuthType action takes a type argument and applies it as the controller's selected auth type, which authMethodList uses to narrow the displayed methods."
+- added `r.flash-messages-service` (MUST): "VaultClusterAccessMethodsController injects the flashMessages service so that the filter and disable actions can report outcomes to the user."
+- added `r.oidc-header-cta` (MUST): "setHeader reads the destination route name from the transition and sets the tracked header to 'cta' when that name contains 'oidc.index', because the OIDC landing view shows a create button as a call to action."
+- added `r.oidc-header-list` (MUST): "When the destination route name is not the OIDC index, setHeader sets header to 'list' if the name contains '<resource>.index' for one of clients, assignments, keys, scopes or providers, because those list views share one tabbed header."
+- added `r.oidc-header-null` (MUST): "For any destination route that is neither the OIDC index nor one of the resource index routes, setHeader sets header to null, leaving those routes responsible for their own header."
+- added `r.oidc-is-cta` (MUST): "The isCta getter returns true only when the tracked header equals 'cta', giving templates a boolean call-to-action flag rather than repeating the string comparison."
+- added `r.oidc-router-subscription` (MUST): "OidcConfigureController's constructor calls super with the passed arguments and registers a routeDidChange listener on the injected router that forwards each transition to setHeader, so the header state follows routing without a per-route hook."
+- added `r.page-query-params` (MUST): "The controller declares page, pageFilter and filter state and lists them as query parameters, so paging and the name filter survive in the URL."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4569,7 +4587,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-config-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-controllers-vault-cluster-access-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-access-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

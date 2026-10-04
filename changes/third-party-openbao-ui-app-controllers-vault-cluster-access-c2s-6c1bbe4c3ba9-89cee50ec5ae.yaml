@@ -10,5 +10,31 @@ spec:
   systemContext: third-party-openbao-ui-app-controllers-vault-cluster-access
   toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
 status:
-  message: the agent is summarizing third-party-openbao-ui-app-controllers-vault-cluster-access
-  phase: Running
+  agentLog: 'This context is two Ember.js route controllers in the OpenBao web UI,
+    under third_party/openbao/ui/app/controllers/vault/cluster/access/. VaultClusterAccessMethodsController
+    (methods.js) backs the auth-methods list screen: it holds a tracked options list
+    plus a selected auth type and selected auth name, keeps `page` and `pageFilter`
+    as query-string state, and derives filtered views of the route model through the
+    getters authMethodList, authMethodArrayByType and authMethodArrayByName. It also
+    exposes the filter and disable actions filterAuthType, filterAuthName and disableMethod,
+    and injects the flashMessages service for user feedback. OidcConfigureController
+    (oidc.js) backs the OIDC configuration area: its constructor subscribes to the
+    router''s routeDidChange event and calls setHeader on every transition, which
+    sets the tracked `header` property to the string ''cta'' for the oidc index route,
+    to ''list'' when the new route name contains one of the resource index routes
+    (clients, assignments, keys, scopes, providers), and to null otherwise; the isCta
+    getter exposes whether the controller is currently in the call-to-action state.
+    Both files are vendored third-party UI code, described here as it exists rather
+    than as it should be.'
+  message: wrote 14 requirement(s) and 2 interface(s) for third-party-openbao-ui-app-controllers-vault-cluster-access;
+    interface VaultClusterAccessMethodsController.authMethodList is not in the observed
+    facts; dropped; interface VaultClusterAccessMethodsController.authMethodArrayByType
+    is not in the observed facts; dropped; interface VaultClusterAccessMethodsController.authMethodArrayByName
+    is not in the observed facts; dropped; interface VaultClusterAccessMethodsController.filterAuthType
+    is not in the observed facts; dropped; interface VaultClusterAccessMethodsController.filterAuthName
+    is not in the observed facts; dropped; interface VaultClusterAccessMethodsController.disableMethod
+    is not in the observed facts; dropped; interface OidcConfigureController.constructor
+    is not in the observed facts; dropped; interface OidcConfigureController.setHeader
+    is not in the observed facts; dropped; interface OidcConfigureController.isCta
+    is not in the observed facts; dropped
+  phase: Succeeded
