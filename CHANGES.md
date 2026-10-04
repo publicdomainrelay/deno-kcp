@@ -1713,6 +1713,18 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.sorted-set-comparison` (MUST): "After collecting the unique names into slices, EquivalentPolicies sorts both with sort.Strings and returns false if the lengths differ or any index pair differs, otherwise true; the comparison is therefore over the sorted unique non-default name sets."
 - added `r.test-covers-contract` (SHOULD): "TestEquivalentPolicies in policies_test.go exercises the contract by asserting that [foo bar] is not equivalent to nil, not equivalent to [foo], equivalent to [bar foo] (order independence), and equivalent to [foo default bar] (default filtering)."
 
+### third-party-openbao-internal-helper-proxyutil
+
+- intent: "" -> "This context exists to describe the vendored OpenBao PROXY protocol listener helper that this repository carries under third_party. It is the seam between a raw listener and a listener that understands the PROXY protocol line sent by a load balancer, and it decides trust for that line from a configurable behavior mode plus an authorized address list. The spec pins the parsing contract, the three accepted behavior values, the trust decision made per connection, and the failure modes, so downstream wiring that configures proxy_protocol_behavior and authorized_addrs can be reasoned about without reading the vendored file."
+- added `r.authorized-addrs-json` (SHOULD): "AuthorizedAddrs should stay serializable as the json field "authorized_addrs" holding sockaddr.SockAddrMarshaler pointers, so the authorized address list survives a config round trip."
+- added `r.authorized-match-uses` (MUST): "Within that Policy, if any entry of ProxyProtoConfig.AuthorizedAddrs Contains the parsed remote address, the Policy must return proxyproto.USE, so the PROXY header is trusted."
+- added `r.authorized-policy-parse` (MUST): "For Behavior allow_authorized or deny_unauthorized, WrapInProxyProto must set a Policy that parses the remote address with sockaddr.NewSockAddr; when that parse fails the Policy returns proxyproto.REJECT and an error wrapping the failure as "error parsing remote address"."
+- added `r.behavior-dispatch` (MUST): "WrapInProxyProto must dispatch on ProxyProtoConfig.Behavior. The accepted values are use_always, allow_authorized and deny_unauthorized; any other value must return the original listener unchanged together with an error whose text is "unknown behavior type for proxy proto config"."
+- added `r.config-locking` (MUST): "WrapInProxyProto must hold the config write lock for the duration of the call, and the installed Policy must take the config read lock around its reads of Behavior and AuthorizedAddrs, so that SetAuthorizedAddrs can update the list while the listener is serving."
+- added `r.parse-authorized-addrs` (MUST): "ProxyProtoConfig.SetAuthorizedAddrs must parse its argument with parseutil.ParseAddrs and assign the result to the AuthorizedAddrs field. When parsing fails it must return that error and leave the existing AuthorizedAddrs value unchanged; on success it returns nil."
+- added `r.unmatched-fallback` (MUST): "Within that Policy, an address not covered by AuthorizedAddrs must return proxyproto.IGNORE when Behavior is allow_authorized, and proxyproto.REJECT with an error when Behavior is deny_unauthorized."
+- added `r.use-always` (MUST): "For Behavior use_always, WrapInProxyProto must return a proxyproto.Listener over the given listener with ReadHeaderTimeout set to 10 seconds and no Policy, so PROXY headers are accepted unconditionally."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -1812,3 +1824,4 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-helper-policies-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-profiles-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-internal-helper-proxyutil-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-internal-helper-random-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
