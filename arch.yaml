@@ -58830,8 +58830,76 @@ system_contexts:
   - file:third_party/openbao/ui/app/components/console/log-text.js log-text.js@third_party/openbao/ui/app/components/console/log-text.js
   - file:third_party/openbao/ui/app/components/console/output-log.js output-log.js@third_party/openbao/ui/app/components/console/output-log.js
   - file:third_party/openbao/ui/app/components/console/ui-panel.js ui-panel.js@third_party/openbao/ui/app/components/console/ui-panel.js
+  - function:1773dcc409cb53c5ac648ea78b8777b8 stringifyObjectValues@third_party/openbao/ui/app/components/console/log-object.js:11
   id: sc.third-party-openbao-ui-app-components-console
+  intent: The context exists to pin down the behaviour of the OpenBao UI console component
+    layer so that the vendored third-party UI is described by the code that is actually
+    present rather than by assumption. It records which modules make up the console,
+    what the one observed export does to its input, and which integration test covers
+    it, so later work on the vendored tree can tell deliberate behaviour from accidental
+    behaviour before changing anything.
+  interfaces:
+  - file: third_party/openbao/ui/app/components/console/log-object.js
+    kind: function
+    name: stringifyObjectValues
+    signature: stringifyObjectValues(data)
   name: third-party-openbao-ui-app-components-console
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/app/components/console/command-input.js
+    - file:third_party/openbao/ui/app/components/console/log-json.js
+    - file:third_party/openbao/ui/app/components/console/log-list.js
+    - file:third_party/openbao/ui/app/components/console/log-object.js
+    - file:third_party/openbao/ui/app/components/console/log-text.js
+    - file:third_party/openbao/ui/app/components/console/output-log.js
+    - file:third_party/openbao/ui/app/components/console/ui-panel.js
+    id: r.console-module-set
+    level: MUST
+    text: The console component directory MUST contain the seven modules command-input.js,
+      log-json.js, log-list.js, log-object.js, log-text.js, output-log.js and ui-panel.js,
+      each responsible for its named part of rendering the console and its log output.
+  - codeRefs:
+    - function:1773dcc409cb53c5ac648ea78b8777b8
+    id: r.in-place-mutation
+    level: MUST
+    text: stringifyObjectValues MUST mutate the caller's data object in place and
+      MUST NOT return a new object; the stringified values are assigned back onto
+      the same keys.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/components/console/log-object.js
+    - function:1773dcc409cb53c5ac648ea78b8777b8
+    id: r.log-object-calls-helper
+    level: SHOULD
+    text: log-object.js SHOULD use stringifyObjectValues on the log data it renders,
+      so that non-string values reaching the object log view are shown as JSON text
+      instead of raw objects.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/components/console/log-json.js
+    - file:third_party/openbao/ui/app/components/console/log-list.js
+    - file:third_party/openbao/ui/app/components/console/log-object.js
+    - file:third_party/openbao/ui/app/components/console/log-text.js
+    - file:third_party/openbao/ui/app/components/console/output-log.js
+    id: r.output-log-appends
+    level: MAY
+    text: output-log.js MAY render the accumulated console output, with the per-type
+      log components (log-json, log-list, log-object, log-text) handling the individual
+      entries that the output log collects.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/components/console/log-object.js
+    - function:1773dcc409cb53c5ac648ea78b8777b8
+    id: r.stringify-object-values
+    level: MUST
+    text: log-object.js MUST export stringifyObjectValues(data). It iterates the own
+      enumerable keys of data, and for each key replaces the value with JSON.stringify(value)
+      when typeof value is not 'string', leaving string values untouched.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/components/console/command-input.js
+    - file:third_party/openbao/ui/app/components/console/output-log.js
+    - file:third_party/openbao/ui/app/components/console/ui-panel.js
+    id: r.ui-panel-contains
+    level: MAY
+    text: ui-panel.js MAY act as the container that holds command-input.js and output-log.js
+      together in the console panel.
   upstream: self
 - code:
   - third_party/openbao/ui/app/components/identity/_popup-base.js
