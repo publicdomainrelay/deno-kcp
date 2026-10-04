@@ -2630,6 +2630,12 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.skip-without-binary` (MUST): "Every test function other than the helpers reads the BAO_BINARY variable through api.ReadBaoVariable and calls t.Skip with the message "only running docker test when $BAO_BINARY present" when that variable is empty, so the suite is a no-op unless a built binary path is supplied."
 - added `r.tls-verification-container` (MUST): "validateTLS builds and runs an Alpine image containing curl with the expected root certificate written to /root.pem, joins it to the cluster's container network, optionally rewrites /etc/resolv.conf with a search domain of dadgarcorp.com and the supplied nameserver, then runs curl --verbose --cacert /root.pem against https://<address>/v1/sys/health and fails the test when the command's non-zero return code disagrees with the expectFail argument."
 
+### third-party-openbao-internal-vault-external-tests-userpass-binary
+
+- intent: "" -> "This context exists to name and delimit the IP-token-binding external test of the userpass auth method, so that the spec records the file as part of the repository without inventing an API. It is a documentation anchor: the file is a test, it exports no interface, and everything it exercises is reached through helpers defined elsewhere. Keeping it as its own context stops the exported-interface description from being padded with symbols that the observed facts do not support."
+- added `r.ip-token-binding-external-test-present` (MUST): "The repository must carry third_party/openbao/internal/vault/external_tests/userpass_binary/ip_token_binding_test.go as part of the userpass_binary external test set, so that the IP-token-binding behavior of the userpass auth method has a dedicated test file inside the vendored tree."
+- added `r.no-exported-interface` (MUST): "The context must expose no exported interface: the observed facts list the file alone and no function, type, method, constant or variable, so other packages may depend on this path only as a test target and never import a symbol from it."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -2816,3 +2822,4 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-vault-external-tests-tlslistener-binary-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-token-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-userpass-binary-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-internal-vault-external-tests-workflows-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Pending |  | 0 | - |
