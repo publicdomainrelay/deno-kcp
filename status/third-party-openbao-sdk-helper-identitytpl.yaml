@@ -1,15 +1,34 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: PopulateString, PopulateStringInput'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/sdk/helper/identitytpl/templating.go
+  - third_party/openbao/sdk/helper/identitytpl/templating_test.go
+  fingerprint: 0b04a38f2ff134d8a299b3f4af18887943762f5b7f321f3e5fdc90abb4deb71f
+  interfaces:
+  - codegraphId: struct:dd4409fc828faf633e005ced43289975
+    file: third_party/openbao/sdk/helper/identitytpl/templating.go
+    kind: struct
+    line: 32
+    name: PopulateStringInput
+  - codegraphId: function:8a7ad43cd54daad745ecbf63b34f1b0b
+    file: third_party/openbao/sdk/helper/identitytpl/templating.go
+    kind: function
+    line: 107
+    name: PopulateString
+    signature: (p PopulateStringInput) (bool, string, error)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: d643b0dd9fe8307454d3d2eebe07f7682a612b6335466649f867988cbe54b40d
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 0b04a38f2ff134d8a299b3f4af18887943762f5b7f321f3e5fdc90abb4deb71f

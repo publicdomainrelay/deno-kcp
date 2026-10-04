@@ -9,5 +9,6 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/sdk/helper/jsonutil/json.go` file json.go (third_party/openbao/sdk/helper/jsonutil/json.go)
+- `file:third_party/openbao/sdk/helper/jsonutil/json_test.go` file json_test.go (third_party/openbao/sdk/helper/jsonutil/json_test.go)
 <!-- SPECD_MANAGED_END -->
