@@ -72125,14 +72125,95 @@ system_contexts:
   codeRefIndex:
   - file:third_party/openbao/ui/lib/css/index.js index.js@third_party/openbao/ui/lib/css/index.js
   id: sc.third-party-openbao-ui-lib-css
+  intent: This context exists to pin down the behavior of the vendored OpenBao UI
+    stylesheet addon inside deno-kcp, so the copied third-party file is documented
+    as it actually is and any change to it can be compared against a stated contract.
+    It is reference material for the vendored tree, not code that deno-kcp's Go side
+    calls.
   name: third-party-openbao-ui-lib-css
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/css/index.js
+    id: r.developing-addon-always-true
+    level: SHOULD
+    text: isDevelopingAddon returns true unconditionally, so the addon is always rebuilt
+      as developing code rather than being treated as a stable dependency.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/css/index.js
+    id: r.exports-sass-svg-uri-addon
+    level: MUST
+    text: The module exports a single addon object whose name is sassSvgUri, and it
+      requires broccoli-funnel, broccoli-merge-trees and path at load time under 'use
+      strict'.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/css/index.js
+    id: r.included-resolves-sass-svg-uri-package
+    level: MUST
+    text: The included hook first calls the superclass included hook with the addon's
+      arguments, then walks app = app.app while app.import is not a function, and
+      stores path.dirname(require.resolve('sass-svg-uri')) in this.sassSVGURIPath,
+      so later tree building knows the package location.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/css/index.js
+    id: r.tree-for-styles-funnels-package-into-app-styles
+    level: MUST
+    text: 'treeForStyles builds a Funnel over this.sassSVGURIPath with srcDir ''/''
+      and destDir ''app/styles/sass-svg-uri'', then returns mergeTrees of that single
+      tree with overwrite: true, so the resolved package''s styles land under app/styles/sass-svg-uri
+      in the addon''s style tree.'
   upstream: self
 - code:
   - third_party/openbao/ui/lib/keep-gitkeep/index.js
   codeRefIndex:
   - file:third_party/openbao/ui/lib/keep-gitkeep/index.js index.js@third_party/openbao/ui/lib/keep-gitkeep/index.js
   id: sc.third-party-openbao-ui-lib-keep-gitkeep
+  intent: Provide a durable placeholder mechanism so that the gitignored OpenBao/Vault
+    web UI output directory is still tracked in git as a directory. The addon hooks
+    into the Ember build pipeline and recreates an empty .gitkeep in the build output
+    directory on every build, which matters because git cannot track empty directories
+    and the downstream Go build expects that folder structure to exist.
   name: third-party-openbao-ui-lib-keep-gitkeep
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/keep-gitkeep/index.js
+    id: r.addon-name-from-package
+    level: MUST
+    text: The exported addon's name must be read from the addon's own package.json
+      rather than hard-coded, so the addon registers under the name declared by its
+      package metadata.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/keep-gitkeep/index.js
+    id: r.developing-addon-true
+    level: MUST
+    text: isDevelopingAddon must return true, which keeps this vendored placeholder
+      addon treated as an in-development addon during the build.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/keep-gitkeep/index.js
+    id: r.no-other-side-effects
+    level: SHOULD
+    text: The addon must not perform any file write or other side effect outside postBuild,
+      so the only effect of including it in the UI build is the .gitkeep placeholder.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/keep-gitkeep/index.js
+    id: r.strict-mode-commonjs
+    level: SHOULD
+    text: The module must remain a strict-mode CommonJS module that exports a single
+      addon object via module.exports, matching the Ember CLI addon contract used
+      by the rest of the vendored OpenBao UI libraries.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/keep-gitkeep/index.js
+    id: r.vendored-license-header
+    level: MUST
+    text: The file must retain the HashiCorp copyright notice and the SPDX-License-Identifier
+      MPL-2.0 header, because this is vendored third-party code and the license attribution
+      must not be stripped.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/keep-gitkeep/index.js
+    id: r.write-gitkeep-after-build
+    level: MUST
+    text: After the UI build completes, the addon must synchronously write an empty
+      .gitkeep file into the build result directory, so that the gitignored output
+      folder structure survives into a published or packaged build.
   upstream: self
 - code:
   - third_party/openbao/ui/lib/kubernetes/index.js

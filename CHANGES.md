@@ -5540,6 +5540,24 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.reexport-b64-helpers` (MUST): "The b64 module must re-export the named bindings encodeString and decodeString from core/utils/b64 without adding wrappers or modification, so callers importing from app/utils get the core base64 encode and decode functions."
 - added `r.reexport-timestamp-default` (MUST): "The timestamp module must re-export the default export of core/utils/timestamp as its own default export, so importers of app/utils/timestamp receive the core timestamp implementation unchanged."
 
+### third-party-openbao-ui-lib-css
+
+- intent: "" -> "This context exists to pin down the behavior of the vendored OpenBao UI stylesheet addon inside deno-kcp, so the copied third-party file is documented as it actually is and any change to it can be compared against a stated contract. It is reference material for the vendored tree, not code that deno-kcp's Go side calls."
+- added `r.developing-addon-always-true` (SHOULD): "isDevelopingAddon returns true unconditionally, so the addon is always rebuilt as developing code rather than being treated as a stable dependency."
+- added `r.exports-sass-svg-uri-addon` (MUST): "The module exports a single addon object whose name is sassSvgUri, and it requires broccoli-funnel, broccoli-merge-trees and path at load time under 'use strict'."
+- added `r.included-resolves-sass-svg-uri-package` (MUST): "The included hook first calls the superclass included hook with the addon's arguments, then walks app = app.app while app.import is not a function, and stores path.dirname(require.resolve('sass-svg-uri')) in this.sassSVGURIPath, so later tree building knows the package location."
+- added `r.tree-for-styles-funnels-package-into-app-styles` (MUST): "treeForStyles builds a Funnel over this.sassSVGURIPath with srcDir '/' and destDir 'app/styles/sass-svg-uri', then returns mergeTrees of that single tree with overwrite: true, so the resolved package's styles land under app/styles/sass-svg-uri in the addon's style tree."
+
+### third-party-openbao-ui-lib-keep-gitkeep
+
+- intent: "" -> "Provide a durable placeholder mechanism so that the gitignored OpenBao/Vault web UI output directory is still tracked in git as a directory. The addon hooks into the Ember build pipeline and recreates an empty .gitkeep in the build output directory on every build, which matters because git cannot track empty directories and the downstream Go build expects that folder structure to exist."
+- added `r.addon-name-from-package` (MUST): "The exported addon's name must be read from the addon's own package.json rather than hard-coded, so the addon registers under the name declared by its package metadata."
+- added `r.developing-addon-true` (MUST): "isDevelopingAddon must return true, which keeps this vendored placeholder addon treated as an in-development addon during the build."
+- added `r.no-other-side-effects` (SHOULD): "The addon must not perform any file write or other side effect outside postBuild, so the only effect of including it in the UI build is the .gitkeep placeholder."
+- added `r.strict-mode-commonjs` (SHOULD): "The module must remain a strict-mode CommonJS module that exports a single addon object via module.exports, matching the Ember CLI addon contract used by the rest of the vendored OpenBao UI libraries."
+- added `r.vendored-license-header` (MUST): "The file must retain the HashiCorp copyright notice and the SPDX-License-Identifier MPL-2.0 header, because this is vendored third-party code and the license attribution must not be stripped."
+- added `r.write-gitkeep-after-build` (MUST): "After the UI build completes, the addon must synchronously write an empty .gitkeep file into the build result directory, so that the gitignored output folder structure survives into a published or packaged build."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -6020,5 +6038,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-core-app-modifiers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-core-app-utils-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-core-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-lib-css-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-ui-lib-keep-gitkeep-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-css-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-lib-keep-gitkeep-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-lib-kubernetes-addon-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-kubernetes-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
