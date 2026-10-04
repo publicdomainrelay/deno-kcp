@@ -3997,6 +3997,14 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.options-tune-and-error-message` (MUST): "The options saveModel task must call this.model.tune(data) with that payload; on an AdapterError it must return without rethrowing and must attempt to set this.model.errorMessage to err.errors[0] because model.save is not called and the model would otherwise never receive the error, wrapping that assignment so a failure is ignored; on any non-AdapterError it must rethrow."
 - added `r.positional-params` (MUST): "AuthConfigBase must declare the static positionalParams list as ['model'], so the model is passed positionally when the component is invoked."
 
+### third-party-openbao-ui-app-components-basic-dropdown
+
+- intent: "" -> "The context exists to record the local customization the application applies on top of the third-party `ember-basic-dropdown` addon. The addon's trigger component normally renders without a `type` attribute, which is a problem when the trigger element is a button, because the HTML default for a button inside a form is `type="submit"` and the trigger would submit the surrounding form. By extending the addon component and adding `attributeBindings: ['type']`, the app lets callers set the trigger element's `type` explicitly, so a dropdown trigger inside a form can be rendered as `type="button"` and behave as a plain toggle instead of submitting. It is a vendored, minimal override, kept in the third_party tree, and is expected only to widen the addon's attribute surface, not to change its dropdown behavior."
+- added `r.bind-type-attribute` (MUST): "The extended class must declare `attributeBindings: ['type']` so that a `type` property passed to the component is rendered as the `type` HTML attribute on the trigger element, letting a button trigger inside a form be set to `type="button"` instead of defaulting to submit."
+- added `r.extend-addon-trigger` (MUST): "The module's default export must be an Ember component class produced by calling `extend` on the default export of `ember-basic-dropdown/components/basic-dropdown/trigger`, so the local component inherits the addon trigger's dropdown open, close, and focus behavior unchanged."
+- added `r.license-header` (MUST): "The file must keep the HashiCorp copyright notice and the `SPDX-License-Identifier: MPL-2.0` header comment, since it is vendored third-party source under the third_party tree."
+- added `r.no-further-overrides` (SHOULD): "The subclass should add no properties or methods beyond the `attributeBindings` override, keeping this file a minimal vendored passthrough of the addon trigger so addon upgrades stay cheap."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4301,6 +4309,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-adapters-policy-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-components-auth-config-form-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-components-basic-dropdown-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-components-basic-dropdown-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-components-basic-dropdown-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-components-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

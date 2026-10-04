@@ -58398,7 +58398,48 @@ system_contexts:
   codeRefIndex:
   - file:third_party/openbao/ui/app/components/basic-dropdown/trigger.js trigger.js@third_party/openbao/ui/app/components/basic-dropdown/trigger.js
   id: sc.third-party-openbao-ui-app-components-basic-dropdown
+  intent: 'The context exists to record the local customization the application applies
+    on top of the third-party `ember-basic-dropdown` addon. The addon''s trigger component
+    normally renders without a `type` attribute, which is a problem when the trigger
+    element is a button, because the HTML default for a button inside a form is `type="submit"`
+    and the trigger would submit the surrounding form. By extending the addon component
+    and adding `attributeBindings: [''type'']`, the app lets callers set the trigger
+    element''s `type` explicitly, so a dropdown trigger inside a form can be rendered
+    as `type="button"` and behave as a plain toggle instead of submitting. It is a
+    vendored, minimal override, kept in the third_party tree, and is expected only
+    to widen the addon''s attribute surface, not to change its dropdown behavior.'
   name: third-party-openbao-ui-app-components-basic-dropdown
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/app/components/basic-dropdown/trigger.js
+    id: r.bind-type-attribute
+    level: MUST
+    text: 'The extended class must declare `attributeBindings: [''type'']` so that
+      a `type` property passed to the component is rendered as the `type` HTML attribute
+      on the trigger element, letting a button trigger inside a form be set to `type="button"`
+      instead of defaulting to submit.'
+  - codeRefs:
+    - file:third_party/openbao/ui/app/components/basic-dropdown/trigger.js
+    id: r.extend-addon-trigger
+    level: MUST
+    text: The module's default export must be an Ember component class produced by
+      calling `extend` on the default export of `ember-basic-dropdown/components/basic-dropdown/trigger`,
+      so the local component inherits the addon trigger's dropdown open, close, and
+      focus behavior unchanged.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/components/basic-dropdown/trigger.js
+    id: r.license-header
+    level: MUST
+    text: 'The file must keep the HashiCorp copyright notice and the `SPDX-License-Identifier:
+      MPL-2.0` header comment, since it is vendored third-party source under the third_party
+      tree.'
+  - codeRefs:
+    - file:third_party/openbao/ui/app/components/basic-dropdown/trigger.js
+    id: r.no-further-overrides
+    level: SHOULD
+    text: The subclass should add no properties or methods beyond the `attributeBindings`
+      override, keeping this file a minimal vendored passthrough of the addon trigger
+      so addon upgrades stay cheap.
   upstream: self
 - code:
   - third_party/openbao/ui/app/components/console/command-input.js
