@@ -4379,7 +4379,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 
 ### third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-clients
 
-- intent: "" -> "This context exists to specify the behavior of the OIDC client detail controller in the vendored OpenBao UI: it must observe route transitions, keep an isEditRoute flag in sync with the active route name, and expose a showHeader getter that suppresses the page header on the edit route. It is part of the vault cluster access OIDC clients area and depends on the Ember Controller base class, the router service, and the @tracked decorator for reactivity."
+- intent: "" -> "This context exists to pin down the observable contract of the OIDC client detail controller in the vendored OpenBao UI, so the route-observation behavior and the header-visibility rule cannot drift. It exists because the page header must disappear on the edit route, which requires the controller to track route transitions rather than assume a fixed route name. It depends on Ember's Controller base class for instantiation by the router, on the injected router service as the source of route-change events, and on the @tracked decorator so isEditRoute changes invalidate templates."
 - added `r.constructor-route-observer` (MUST): "The constructor must call super with the forwarded arguments and register a handler on the injected router's 'routeDidChange' event; the handler reads the event's targetName and sets isEditRoute to true when targetName includes the substring 'edit', and false otherwise."
 - added `r.default-export-controller` (MUST): "The file third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client.js must export as its default export a class OidcClientController that extends Ember's Controller base class, so the router can instantiate it as the controller for the OIDC client route."
 - added `r.router-service-injection` (MUST): "OidcClientController must inject the Ember router service via the @service decorator into a property named router, and must declare isEditRoute as a @tracked property, so route changes are observable by templates."
@@ -4743,6 +4743,8 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-clients-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-clients-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-clients-client-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-keys-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-keys-key-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
