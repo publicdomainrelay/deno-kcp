@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-This context exists so that the app tree of the OpenBao UI exposes the page breadcrumbs and page error components at the module paths the Ember resolver expects. The Ember build merges app/ and addon/ trees; these thin re-export modules make the addon-owned page components resolvable from the app tree without duplicating their code. The context documents the shim contract only: which addon module each file forwards to, and the license header both must keep.
+The Ember build merges the app/ and addon/ trees, so a component owned by the addon must also have a module at the app-tree path for the resolver to find it. These two files exist to satisfy that requirement for the page breadcrumbs and page error components without forking or duplicating the addon code, keeping the addon implementation as the single source of truth while making the components resolvable from the app tree. The context documents only that shim contract: which addon module each file forwards to, and the license header both must retain.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
