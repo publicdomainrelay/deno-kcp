@@ -6030,13 +6030,23 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 
 ### third-party-openbao-ui-lib-pki-config
 
-- intent: "" -> "The context exists to pin down the build-time environment configuration seam for the vendored OpenBao PKI UI addon, so that downstream tooling can rely on the module's exported shape without reading the whole third-party tree. It records that this file is the addon's identity and environment declaration point, that the module prefix is fixed at `pki`, and that no build flags, API hosts, or feature toggles are declared here."
+- intent: "" -> "This context exists to pin down the build-time environment configuration seam of the vendored OpenBao PKI UI addon, so downstream tooling can rely on the module's exported shape without reading the surrounding third-party tree. It records that this file is the addon's identity and environment declaration point, that the Ember module namespace is fixed at `pki`, that the caller-supplied build target is echoed back verbatim, and that no build flags, API hosts, or feature toggles are declared here. It also records the file-level conventions that must survive any vendoring or patch operation: the Node scoping directives and the upstream license header."
 - added `r.echo-environment` (MUST): "The returned ENV object must copy the `environment` argument into its `environment` key unchanged, so the caller-supplied build target is visible to the application."
-- added `r.exports-config-function` (MUST): "The module must export a single function that accepts the Ember environment name as its argument and returns the ENV object, so consumers can invoke it per build target."
-- added `r.license-header` (MUST): "The file must keep the HashiCorp copyright notice and the MPL-2.0 SPDX license identifier at the top."
+- added `r.exports-config-function` (MUST): "The module must export a single function through `module.exports` that accepts the Ember environment name as its only argument and returns the ENV object, so a consumer can invoke it once per build target."
+- added `r.license-header` (MUST): "The file must keep the HashiCorp copyright notice and the MPL-2.0 SPDX license identifier at the top, ahead of the directives and the export."
 - added `r.module-prefix-pki` (MUST): "The returned ENV object must set `modulePrefix` to the literal string `pki`, which fixes the Ember module namespace for the addon."
-- added `r.no-other-keys` (SHOULD): "The returned ENV object should stay limited to modulePrefix and environment, adding no API hostnames, feature flags, or nested configuration blocks."
-- added `r.node-strict-mode` (MUST): "The file must run as a CommonJS module under Node with `'use strict'` in effect and the `eslint-env node` directive marking it as Node-scoped."
+- added `r.no-other-keys` (SHOULD): "The returned ENV object should stay limited to `modulePrefix` and `environment`, adding no API hostnames, feature flags, or nested configuration blocks."
+- added `r.no-side-effects` (SHOULD): "The module should stay free of imports and top-level side effects, so requiring it only defines the exported function and mutates no shared state."
+- added `r.node-strict-mode` (MUST): "The file must run as a CommonJS module under Node with `'use strict'` in effect and the `/* eslint-env node */` directive marking it as Node-scoped."
+
+### third-party-openbao-ui-lib-service-worker-authenticated-download
+
+- intent: "" -> "The context exists to record the contract of the service-worker-authenticated-download addon: an Ember CLI addon whose only runtime effect is to add the `Service-Worker-Allowed: /` header to every dev-server response so a service worker scoped at the root can handle authenticated downloads. It is documented here because the header, not the addon wiring, is the behavior other parts of the UI depend on, and because the addon's identity is sourced from its own package manifest rather than hard-coded."
+- added `r.addon-name-from-package` (MUST): "The exported addon object reports its `name` by requiring the sibling `package.json` and reading its `name` field, so the addon identity stays in sync with the package manifest instead of being hard-coded."
+- added `r.developing-addon-flag` (MUST): "`isDevelopingAddon()` returns `true`, so Ember CLI treats this addon as in-development and does not skip its hooks when the host app is built or served."
+- added `r.middleware-pass-through` (MUST): "The middleware sets the header before the response is written and then calls `next()`, so the request continues down the dev-server middleware chain and the header is present on responses produced by later handlers."
+- added `r.no-request-condition` (SHOULD): "The header is applied unconditionally to all requests rather than filtered by path or method, so the behavior does not depend on which route the dev server is serving."
+- added `r.service-worker-allowed-header` (MUST): "`serverMiddleware({ app })` registers a middleware on the Ember dev server that sets the `Service-Worker-Allowed` response header to `/` on every request, widening the service worker's maximum scope to the site root so a root-scoped service worker can serve authenticated downloads."
 
 ## Realization
 
@@ -6587,5 +6597,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-config-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-lib-pki-config-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-ui-lib-service-worker-authenticated-download-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-pki-config-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-lib-service-worker-authenticated-download-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-lib-service-worker-authenticated-download-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-service-worker-authenticated-download-service-worker-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |

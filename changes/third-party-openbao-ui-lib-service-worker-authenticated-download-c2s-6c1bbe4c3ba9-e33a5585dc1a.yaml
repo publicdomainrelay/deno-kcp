@@ -10,5 +10,19 @@ spec:
   systemContext: third-party-openbao-ui-lib-service-worker-authenticated-download
   toCommit: e33a5585dc1ac9d3bf63bc1ebdcf5dbb45369989
 status:
-  message: the agent is summarizing third-party-openbao-ui-lib-service-worker-authenticated-download
+  agentLog: 'This context is a single-file Ember addon, `index.js` under `third_party/openbao/ui/lib/service-worker-authenticated-download/`,
+    vendored from OpenBao''s UI. The file is a CommonJS module that exports an addon
+    descriptor object: it takes its `name` from the sibling `package.json` via `require(''./package'').name`,
+    reports `isDevelopingAddon()` as `true`, and implements `serverMiddleware({ app
+    })`, which installs an Express-style middleware on the dev server that unconditionally
+    sets the `Service-Worker-Allowed` response header to `/` and then calls `next()`.
+    That header widens the service worker''s maximum allowed scope to the site root,
+    which is what lets an authenticated-download service worker intercept requests
+    outside the directory it is served from. There is no executable logic beyond this
+    middleware and no other exported surface.'
+  message: wrote 5 requirement(s) and 0 interface(s) for third-party-openbao-ui-lib-service-worker-authenticated-download
+  phase: Succeeded
+superseded:
+- message: the agent is summarizing third-party-openbao-ui-lib-service-worker-authenticated-download
+  name: third-party-openbao-ui-lib-service-worker-authenticated-download-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2
   phase: Running

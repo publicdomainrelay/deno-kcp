@@ -6,5 +6,47 @@ metadata:
   name: third-party-openbao-ui-lib-service-worker-authenticated-download
   namespace: default
 spec:
+  intent: 'The context exists to record the contract of the service-worker-authenticated-download
+    addon: an Ember CLI addon whose only runtime effect is to add the `Service-Worker-Allowed:
+    /` header to every dev-server response so a service worker scoped at the root
+    can handle authenticated downloads. It is documented here because the header,
+    not the addon wiring, is the behavior other parts of the UI depend on, and because
+    the addon''s identity is sourced from its own package manifest rather than hard-coded.'
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/service-worker-authenticated-download/index.js
+    id: r.addon-name-from-package
+    level: MUST
+    text: The exported addon object reports its `name` by requiring the sibling `package.json`
+      and reading its `name` field, so the addon identity stays in sync with the package
+      manifest instead of being hard-coded.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/service-worker-authenticated-download/index.js
+    id: r.developing-addon-flag
+    level: MUST
+    text: '`isDevelopingAddon()` returns `true`, so Ember CLI treats this addon as
+      in-development and does not skip its hooks when the host app is built or served.'
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/service-worker-authenticated-download/index.js
+    id: r.middleware-pass-through
+    level: MUST
+    text: The middleware sets the header before the response is written and then calls
+      `next()`, so the request continues down the dev-server middleware chain and
+      the header is present on responses produced by later handlers.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/service-worker-authenticated-download/index.js
+    id: r.no-request-condition
+    level: SHOULD
+    text: The header is applied unconditionally to all requests rather than filtered
+      by path or method, so the behavior does not depend on which route the dev server
+      is serving.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/service-worker-authenticated-download/index.js
+    id: r.service-worker-allowed-header
+    level: MUST
+    text: '`serverMiddleware({ app })` registers a middleware on the Ember dev server
+      that sets the `Service-Worker-Allowed` response header to `/` on every request,
+      widening the service worker''s maximum scope to the site root so a root-scoped
+      service worker can serve authenticated downloads.'
   upstream: self
