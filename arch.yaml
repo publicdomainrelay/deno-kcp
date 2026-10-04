@@ -17785,8 +17785,785 @@ system_contexts:
   - file:third_party/openbao/internal/command/healthcheck/pki_too_many_certs.go pki_too_many_certs.go@third_party/openbao/internal/command/healthcheck/pki_too_many_certs.go
   - file:third_party/openbao/internal/command/healthcheck/shared.go shared.go@third_party/openbao/internal/command/healthcheck/shared.go
   - file:third_party/openbao/internal/command/healthcheck/util.go util.go@third_party/openbao/internal/command/healthcheck/util.go
+  - function:095916289a578670387e0c999a08558f NewEnableAutoTidyCheck@third_party/openbao/internal/command/healthcheck/pki_enable_auto_tidy.go:27
+  - function:0ef5f642d30a554a0000f2cd937b320e ParsePEMCert@third_party/openbao/internal/command/healthcheck/pki.go:54
+  - function:1e1246a377112ae07852c5297cbfc93f NewAllowIfModifiedSinceCheck@third_party/openbao/internal/command/healthcheck/pki_allow_if_modified_since.go:21
+  - function:29c57787bee6a0f0aaaea01696396bb2 NewRootIssuedLeavesCheck@third_party/openbao/internal/command/healthcheck/pki_root_issued_leaves.go:25
+  - function:2fae00b4adc47924ab586547fae4c624 NewEnableAcmeIssuance@third_party/openbao/internal/command/healthcheck/pki_enable_acme_issuance.go:31
+  - function:33a4632b3c7ba9d554a2aad89a88864d NewCRLValidityPeriodCheck@third_party/openbao/internal/command/healthcheck/pki_crl_validity_period.go:31
+  - function:525a8f3a99ef64f1fc0a155612e676f5 NewTidyLastRunCheck@third_party/openbao/internal/command/healthcheck/pki_tidy_last_run.go:25
+  - function:54151063fbf0369ccf78f584562776b5 FormatDuration@third_party/openbao/internal/command/healthcheck/util.go:26
+  - function:6f16c4461b84933efd80d7ad5a028896 NewHardwareBackedRootCheck@third_party/openbao/internal/command/healthcheck/pki_hardware_backed_root.go:24
+  - function:830d611f7e5599ce053a0bbcd4a239d0 NewRoleAllowsGlobWildcardsCheck@third_party/openbao/internal/command/healthcheck/pki_role_allows_glob_wildcards.go:22
+  - function:8b24c7f72f2aa1a37b4edf282a607373 NewAuditVisibilityCheck@third_party/openbao/internal/command/healthcheck/pki_audit_visibility.go:68
+  - function:a240f05e1200f40f0e8fefbfd9b4505a StringList@third_party/openbao/internal/command/healthcheck/shared.go:12
+  - function:a9cc1007b9b56fe138dbf440ce6d99c0 ValidateMountType@third_party/openbao/internal/command/healthcheck/healthcheck.go:297
+  - function:c24e52358e5abe8d906baeb02bc8b1e0 NewExecutor@third_party/openbao/internal/command/healthcheck/healthcheck.go:53
+  - function:c2e7757edd9294fa5bbcecdd3fbeb87b NewRoleAllowsLocalhostCheck@third_party/openbao/internal/command/healthcheck/pki_role_allows_localhost.go:21
+  - function:d5a14ada5df01ecebbc5101d6149b1de NewTooManyCertsCheck@third_party/openbao/internal/command/healthcheck/pki_too_many_certs.go:23
+  - function:d7a2768569c134402c572a052a60cb71 NewAllowAcmeHeaders@third_party/openbao/internal/command/healthcheck/pki_allow_acme_headers.go:25
+  - function:e0270b356fd39d43e4fa6d4f90a867ee NewRoleNoStoreFalseCheck@third_party/openbao/internal/command/healthcheck/pki_role_no_store_false.go:26
+  - function:ec12110960e308662c5366933cfc5724 NewCAValidityPeriodCheck@third_party/openbao/internal/command/healthcheck/pki_ca_validity_period.go:27
+  - interface:13fa7f9db19906441b5ec0e8114f755a Check@third_party/openbao/internal/command/healthcheck/healthcheck.go:246
+  - method:0411c690a98eda426fdf6148f1163e55 Executor.Execute@third_party/openbao/internal/command/healthcheck/healthcheck.go:111
+  - method:1d2a57ceb86b7d83466ed6de90b18177 Check.Evaluate@third_party/openbao/internal/command/healthcheck/healthcheck.go:255
+  - method:203dfba5d97de1c106c7e63b864a55ee PathFetch.IsSecretOK@third_party/openbao/internal/command/healthcheck/healthcheck.go:213
+  - method:3f31381121011fd3a0d614321a89b1fc PathFetch.FetchSurfaceError@third_party/openbao/internal/command/healthcheck/healthcheck.go:217
+  - method:47ddf3321e43daa2267e6f1be5cbd7fd PathFetch.IsMissingResource@third_party/openbao/internal/command/healthcheck/healthcheck.go:238
+  - method:5500f0e6a49a2ab36d423f5843216db4 Check.FetchResources@third_party/openbao/internal/command/healthcheck/healthcheck.go:253
+  - method:56efce7a5b070904db4bf06ffa375390 Check.Name@third_party/openbao/internal/command/healthcheck/healthcheck.go:247
+  - method:61cd38eea299a604d0aedee7bf9e2430 Executor.BuildConfig@third_party/openbao/internal/command/healthcheck/healthcheck.go:67
+  - method:662f8b0a53635bbcd173fd267b205fde Check.DefaultConfig@third_party/openbao/internal/command/healthcheck/healthcheck.go:250
+  - method:6a0cc06c0bc8c6fea48bdb67b07af536 Check.LoadConfig@third_party/openbao/internal/command/healthcheck/healthcheck.go:251
+  - method:6d8744c3018fb7b0600143bb79618de2 Check.IsEnabled@third_party/openbao/internal/command/healthcheck/healthcheck.go:248
+  - method:8aafccf81e6b0223a7e5941a1a5071c8 PathFetch.IsOK@third_party/openbao/internal/command/healthcheck/healthcheck.go:209
+  - method:8f8d957c56e58deb9123430717f18a8f PathFetch.IsUnsupportedPathError@third_party/openbao/internal/command/healthcheck/healthcheck.go:234
+  - method:95d229150c4b8f8be156f956a8cbb3c7 Executor.AddCheck@third_party/openbao/internal/command/healthcheck/healthcheck.go:63
+  - method:b240af5af0ea94bf248c5c8de0b8bfd2 Executor.FetchIfNotFetched@third_party/openbao/internal/command/healthcheck/healthcheck.go:146
+  - method:ba222c4349c36446a5b6d00a5aeb4488 PathFetch.IsSecretPermissionsError@third_party/openbao/internal/command/healthcheck/healthcheck.go:230
+  - method:d0b387111db280483ed94bb19c21ad3e PathFetch.Is404NotFound@third_party/openbao/internal/command/healthcheck/healthcheck.go:242
+  - struct:44ae149a27be8e3ad4eeb2eba8e2deeb Result@third_party/openbao/internal/command/healthcheck/healthcheck.go:290
+  - struct:6f83eee817b431df747ba6b6192eabef Executor@third_party/openbao/internal/command/healthcheck/healthcheck.go:41
+  - struct:c2542e9fadad6ee439121ce316a0a050 PathFetch@third_party/openbao/internal/command/healthcheck/healthcheck.go:199
+  - type_alias:daac9847e15849439ef7a7e1eb6a71cf ResultStatus@third_party/openbao/internal/command/healthcheck/healthcheck.go:258
   id: sc.third-party-openbao-internal-command-healthcheck
+  intent: 'This context exists so that PKI health can be checked against a live OpenBao
+    server through one uniform executor, instead of one bespoke script per concern.
+    The Executor gives every check the same client, mount, config plumbing and path
+    cache, so a check only has to declare what it needs and how to judge it. The documented
+    surface is what the surrounding command code depends on: the Check interface and
+    the constructors that produce checks, the Executor lifecycle (add, build config,
+    execute), the cached fetch and its classification predicates, and the shared parsing
+    and formatting helpers used across the individual PKI checks.'
+  interfaces:
+  - file: third_party/openbao/internal/command/healthcheck/pki_allow_acme_headers.go
+    kind: struct
+    name: AllowAcmeHeaders
+    signature: type AllowAcmeHeaders struct
+  - file: third_party/openbao/internal/command/healthcheck/pki_allow_acme_headers.go
+    kind: method
+    name: AllowAcmeHeaders.DefaultConfig
+    signature: func (c *AllowAcmeHeaders) DefaultConfig() map[string]any
+  - file: third_party/openbao/internal/command/healthcheck/pki_allow_acme_headers.go
+    kind: method
+    name: AllowAcmeHeaders.Evaluate
+    signature: func (c *AllowAcmeHeaders) Evaluate(e *Executor) ([]*Result, error)
+  - file: third_party/openbao/internal/command/healthcheck/pki_allow_acme_headers.go
+    kind: method
+    name: AllowAcmeHeaders.FetchResources
+    signature: func (c *AllowAcmeHeaders) FetchResources(e *Executor) error
+  - file: third_party/openbao/internal/command/healthcheck/pki_allow_acme_headers.go
+    kind: method
+    name: AllowAcmeHeaders.IsEnabled
+    signature: func (c *AllowAcmeHeaders) IsEnabled() bool
+  - file: third_party/openbao/internal/command/healthcheck/pki_allow_acme_headers.go
+    kind: method
+    name: AllowAcmeHeaders.LoadConfig
+    signature: func (c *AllowAcmeHeaders) LoadConfig(config map[string]any) error
+  - file: third_party/openbao/internal/command/healthcheck/pki_allow_acme_headers.go
+    kind: method
+    name: AllowAcmeHeaders.Name
+    signature: func (c *AllowAcmeHeaders) Name() string
+  - file: third_party/openbao/internal/command/healthcheck/pki_allow_if_modified_since.go
+    kind: struct
+    name: AllowIfModifiedSince
+    signature: type AllowIfModifiedSince struct
+  - file: third_party/openbao/internal/command/healthcheck/pki_allow_if_modified_since.go
+    kind: method
+    name: AllowIfModifiedSince.DefaultConfig
+    signature: func (c *AllowIfModifiedSince) DefaultConfig() map[string]any
+  - file: third_party/openbao/internal/command/healthcheck/pki_allow_if_modified_since.go
+    kind: method
+    name: AllowIfModifiedSince.Evaluate
+    signature: func (c *AllowIfModifiedSince) Evaluate(e *Executor) (results []*Result,
+      err error)
+  - file: third_party/openbao/internal/command/healthcheck/pki_allow_if_modified_since.go
+    kind: method
+    name: AllowIfModifiedSince.FetchResources
+    signature: func (c *AllowIfModifiedSince) FetchResources(e *Executor) error
+  - file: third_party/openbao/internal/command/healthcheck/pki_allow_if_modified_since.go
+    kind: method
+    name: AllowIfModifiedSince.IsEnabled
+    signature: func (c *AllowIfModifiedSince) IsEnabled() bool
+  - file: third_party/openbao/internal/command/healthcheck/pki_allow_if_modified_since.go
+    kind: method
+    name: AllowIfModifiedSince.LoadConfig
+    signature: func (c *AllowIfModifiedSince) LoadConfig(config map[string]any) error
+  - file: third_party/openbao/internal/command/healthcheck/pki_allow_if_modified_since.go
+    kind: method
+    name: AllowIfModifiedSince.Name
+    signature: func (c *AllowIfModifiedSince) Name() string
+  - file: third_party/openbao/internal/command/healthcheck/pki_audit_visibility.go
+    kind: struct
+    name: AuditVisibility
+    signature: type AuditVisibility struct
+  - file: third_party/openbao/internal/command/healthcheck/pki_audit_visibility.go
+    kind: method
+    name: AuditVisibility.DefaultConfig
+    signature: func (c *AuditVisibility) DefaultConfig() map[string]any
+  - file: third_party/openbao/internal/command/healthcheck/pki_audit_visibility.go
+    kind: method
+    name: AuditVisibility.Evaluate
+    signature: func (c *AuditVisibility) Evaluate(e *Executor) (results []*Result,
+      err error)
+  - file: third_party/openbao/internal/command/healthcheck/pki_audit_visibility.go
+    kind: method
+    name: AuditVisibility.FetchResources
+    signature: func (c *AuditVisibility) FetchResources(e *Executor) error
+  - file: third_party/openbao/internal/command/healthcheck/pki_audit_visibility.go
+    kind: method
+    name: AuditVisibility.IsEnabled
+    signature: func (c *AuditVisibility) IsEnabled() bool
+  - file: third_party/openbao/internal/command/healthcheck/pki_audit_visibility.go
+    kind: method
+    name: AuditVisibility.LoadConfig
+    signature: func (c *AuditVisibility) LoadConfig(config map[string]any) error
+  - file: third_party/openbao/internal/command/healthcheck/pki_audit_visibility.go
+    kind: method
+    name: AuditVisibility.Name
+    signature: func (c *AuditVisibility) Name() string
+  - file: third_party/openbao/internal/command/healthcheck/pki_ca_validity_period.go
+    kind: struct
+    name: CAValidityPeriod
+    signature: type CAValidityPeriod struct
+  - file: third_party/openbao/internal/command/healthcheck/pki_ca_validity_period.go
+    kind: method
+    name: CAValidityPeriod.DefaultConfig
+    signature: func (c *CAValidityPeriod) DefaultConfig() map[string]any
+  - file: third_party/openbao/internal/command/healthcheck/pki_ca_validity_period.go
+    kind: method
+    name: CAValidityPeriod.Evaluate
+    signature: func (c *CAValidityPeriod) Evaluate(e *Executor) (results []*Result,
+      err error)
+  - file: third_party/openbao/internal/command/healthcheck/pki_ca_validity_period.go
+    kind: method
+    name: CAValidityPeriod.FetchResources
+    signature: func (c *CAValidityPeriod) FetchResources(e *Executor) error
+  - file: third_party/openbao/internal/command/healthcheck/pki_ca_validity_period.go
+    kind: method
+    name: CAValidityPeriod.IsEnabled
+    signature: func (c *CAValidityPeriod) IsEnabled() bool
+  - file: third_party/openbao/internal/command/healthcheck/pki_ca_validity_period.go
+    kind: method
+    name: CAValidityPeriod.LoadConfig
+    signature: func (c *CAValidityPeriod) LoadConfig(config map[string]any) error
+  - file: third_party/openbao/internal/command/healthcheck/pki_ca_validity_period.go
+    kind: method
+    name: CAValidityPeriod.Name
+    signature: func (c *CAValidityPeriod) Name() string
+  - file: third_party/openbao/internal/command/healthcheck/pki_crl_validity_period.go
+    kind: struct
+    name: CRLValidityPeriod
+    signature: type CRLValidityPeriod struct
+  - file: third_party/openbao/internal/command/healthcheck/pki_crl_validity_period.go
+    kind: method
+    name: CRLValidityPeriod.DefaultConfig
+    signature: func (c *CRLValidityPeriod) DefaultConfig() map[string]any
+  - file: third_party/openbao/internal/command/healthcheck/pki_crl_validity_period.go
+    kind: method
+    name: CRLValidityPeriod.Evaluate
+    signature: func (c *CRLValidityPeriod) Evaluate(e *Executor) (results []*Result,
+      err error)
+  - file: third_party/openbao/internal/command/healthcheck/pki_crl_validity_period.go
+    kind: method
+    name: CRLValidityPeriod.FetchResources
+    signature: func (c *CRLValidityPeriod) FetchResources(e *Executor) error
+  - file: third_party/openbao/internal/command/healthcheck/pki_crl_validity_period.go
+    kind: method
+    name: CRLValidityPeriod.IsEnabled
+    signature: func (c *CRLValidityPeriod) IsEnabled() bool
+  - file: third_party/openbao/internal/command/healthcheck/pki_crl_validity_period.go
+    kind: method
+    name: CRLValidityPeriod.LoadConfig
+    signature: func (c *CRLValidityPeriod) LoadConfig(config map[string]any) error
+  - file: third_party/openbao/internal/command/healthcheck/pki_crl_validity_period.go
+    kind: method
+    name: CRLValidityPeriod.Name
+    signature: func (c *CRLValidityPeriod) Name() string
+  - file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    kind: interface
+    name: Check
+    signature: type Check interface
+  - file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    kind: method
+    name: Check.DefaultConfig
+    signature: DefaultConfig() map[string]any
+  - file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    kind: method
+    name: Check.Evaluate
+    signature: Evaluate(e *Executor) ([]*Result, error)
+  - file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    kind: method
+    name: Check.FetchResources
+    signature: FetchResources(e *Executor) error
+  - file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    kind: method
+    name: Check.IsEnabled
+    signature: IsEnabled() bool
+  - file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    kind: method
+    name: Check.LoadConfig
+    signature: LoadConfig(config map[string]any) error
+  - file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    kind: method
+    name: Check.Name
+    signature: Name() string
+  - file: third_party/openbao/internal/command/healthcheck/pki_enable_acme_issuance.go
+    kind: struct
+    name: EnableAcmeIssuance
+    signature: type EnableAcmeIssuance struct
+  - file: third_party/openbao/internal/command/healthcheck/pki_enable_acme_issuance.go
+    kind: method
+    name: EnableAcmeIssuance.DefaultConfig
+    signature: func (c *EnableAcmeIssuance) DefaultConfig() map[string]any
+  - file: third_party/openbao/internal/command/healthcheck/pki_enable_acme_issuance.go
+    kind: method
+    name: EnableAcmeIssuance.Evaluate
+    signature: func (c *EnableAcmeIssuance) Evaluate(e *Executor) (results []*Result,
+      err error)
+  - file: third_party/openbao/internal/command/healthcheck/pki_enable_acme_issuance.go
+    kind: method
+    name: EnableAcmeIssuance.FetchResources
+    signature: func (c *EnableAcmeIssuance) FetchResources(e *Executor) error
+  - file: third_party/openbao/internal/command/healthcheck/pki_enable_acme_issuance.go
+    kind: method
+    name: EnableAcmeIssuance.IsEnabled
+    signature: func (c *EnableAcmeIssuance) IsEnabled() bool
+  - file: third_party/openbao/internal/command/healthcheck/pki_enable_acme_issuance.go
+    kind: method
+    name: EnableAcmeIssuance.LoadConfig
+    signature: func (c *EnableAcmeIssuance) LoadConfig(config map[string]any) error
+  - file: third_party/openbao/internal/command/healthcheck/pki_enable_acme_issuance.go
+    kind: method
+    name: EnableAcmeIssuance.Name
+    signature: func (c *EnableAcmeIssuance) Name() string
+  - file: third_party/openbao/internal/command/healthcheck/pki_enable_auto_tidy.go
+    kind: struct
+    name: EnableAutoTidy
+    signature: type EnableAutoTidy struct
+  - file: third_party/openbao/internal/command/healthcheck/pki_enable_auto_tidy.go
+    kind: method
+    name: EnableAutoTidy.DefaultConfig
+    signature: func (c *EnableAutoTidy) DefaultConfig() map[string]any
+  - file: third_party/openbao/internal/command/healthcheck/pki_enable_auto_tidy.go
+    kind: method
+    name: EnableAutoTidy.Evaluate
+    signature: func (c *EnableAutoTidy) Evaluate(e *Executor) (results []*Result,
+      err error)
+  - file: third_party/openbao/internal/command/healthcheck/pki_enable_auto_tidy.go
+    kind: method
+    name: EnableAutoTidy.FetchResources
+    signature: func (c *EnableAutoTidy) FetchResources(e *Executor) error
+  - file: third_party/openbao/internal/command/healthcheck/pki_enable_auto_tidy.go
+    kind: method
+    name: EnableAutoTidy.IsEnabled
+    signature: func (c *EnableAutoTidy) IsEnabled() bool
+  - file: third_party/openbao/internal/command/healthcheck/pki_enable_auto_tidy.go
+    kind: method
+    name: EnableAutoTidy.LoadConfig
+    signature: func (c *EnableAutoTidy) LoadConfig(config map[string]any) error
+  - file: third_party/openbao/internal/command/healthcheck/pki_enable_auto_tidy.go
+    kind: method
+    name: EnableAutoTidy.Name
+    signature: func (c *EnableAutoTidy) Name() string
+  - file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    kind: struct
+    name: Executor
+    signature: type Executor struct
+  - file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    kind: method
+    name: Executor.AddCheck
+    signature: func (e *Executor) AddCheck(c Check)
+  - file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    kind: method
+    name: Executor.BuildConfig
+    signature: func (e *Executor) BuildConfig(external map[string]any) error
+  - file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    kind: method
+    name: Executor.Execute
+    signature: func (e *Executor) Execute() (map[string][]*Result, error)
+  - file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    kind: method
+    name: Executor.FetchIfNotFetched
+    signature: func (e *Executor) FetchIfNotFetched(op logical.Operation, rawPath
+      string) (*PathFetch, error)
+  - file: third_party/openbao/internal/command/healthcheck/util.go
+    kind: function
+    name: FormatDuration
+    signature: func FormatDuration(d time.Duration) string
+  - file: third_party/openbao/internal/command/healthcheck/pki_hardware_backed_root.go
+    kind: struct
+    name: HardwareBackedRoot
+    signature: type HardwareBackedRoot struct
+  - file: third_party/openbao/internal/command/healthcheck/pki_hardware_backed_root.go
+    kind: method
+    name: HardwareBackedRoot.DefaultConfig
+    signature: func (c *HardwareBackedRoot) DefaultConfig() map[string]any
+  - file: third_party/openbao/internal/command/healthcheck/pki_hardware_backed_root.go
+    kind: method
+    name: HardwareBackedRoot.Evaluate
+    signature: func (c *HardwareBackedRoot) Evaluate(e *Executor) (results []*Result,
+      err error)
+  - file: third_party/openbao/internal/command/healthcheck/pki_hardware_backed_root.go
+    kind: method
+    name: HardwareBackedRoot.FetchResources
+    signature: func (c *HardwareBackedRoot) FetchResources(e *Executor) error
+  - file: third_party/openbao/internal/command/healthcheck/pki_hardware_backed_root.go
+    kind: method
+    name: HardwareBackedRoot.IsEnabled
+    signature: func (c *HardwareBackedRoot) IsEnabled() bool
+  - file: third_party/openbao/internal/command/healthcheck/pki_hardware_backed_root.go
+    kind: method
+    name: HardwareBackedRoot.LoadConfig
+    signature: func (c *HardwareBackedRoot) LoadConfig(config map[string]any) error
+  - file: third_party/openbao/internal/command/healthcheck/pki_hardware_backed_root.go
+    kind: method
+    name: HardwareBackedRoot.Name
+    signature: func (c *HardwareBackedRoot) Name() string
+  - file: third_party/openbao/internal/command/healthcheck/pki_allow_acme_headers.go
+    kind: function
+    name: NewAllowAcmeHeaders
+    signature: func NewAllowAcmeHeaders() Check
+  - file: third_party/openbao/internal/command/healthcheck/pki_allow_if_modified_since.go
+    kind: function
+    name: NewAllowIfModifiedSinceCheck
+    signature: func NewAllowIfModifiedSinceCheck() Check
+  - file: third_party/openbao/internal/command/healthcheck/pki_audit_visibility.go
+    kind: function
+    name: NewAuditVisibilityCheck
+    signature: func NewAuditVisibilityCheck() Check
+  - file: third_party/openbao/internal/command/healthcheck/pki_ca_validity_period.go
+    kind: function
+    name: NewCAValidityPeriodCheck
+    signature: func NewCAValidityPeriodCheck() Check
+  - file: third_party/openbao/internal/command/healthcheck/pki_crl_validity_period.go
+    kind: function
+    name: NewCRLValidityPeriodCheck
+    signature: func NewCRLValidityPeriodCheck() Check
+  - file: third_party/openbao/internal/command/healthcheck/pki_enable_acme_issuance.go
+    kind: function
+    name: NewEnableAcmeIssuance
+    signature: func NewEnableAcmeIssuance() Check
+  - file: third_party/openbao/internal/command/healthcheck/pki_enable_auto_tidy.go
+    kind: function
+    name: NewEnableAutoTidyCheck
+    signature: func NewEnableAutoTidyCheck() Check
+  - file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    kind: function
+    name: NewExecutor
+    signature: func NewExecutor(client *api.Client, mount string) *Executor
+  - file: third_party/openbao/internal/command/healthcheck/pki_hardware_backed_root.go
+    kind: function
+    name: NewHardwareBackedRootCheck
+    signature: func NewHardwareBackedRootCheck() Check
+  - file: third_party/openbao/internal/command/healthcheck/pki_role_allows_glob_wildcards.go
+    kind: function
+    name: NewRoleAllowsGlobWildcardsCheck
+    signature: func NewRoleAllowsGlobWildcardsCheck() Check
+  - file: third_party/openbao/internal/command/healthcheck/pki_role_allows_localhost.go
+    kind: function
+    name: NewRoleAllowsLocalhostCheck
+    signature: func NewRoleAllowsLocalhostCheck() Check
+  - file: third_party/openbao/internal/command/healthcheck/pki_role_no_store_false.go
+    kind: function
+    name: NewRoleNoStoreFalseCheck
+    signature: func NewRoleNoStoreFalseCheck() Check
+  - file: third_party/openbao/internal/command/healthcheck/pki_root_issued_leaves.go
+    kind: function
+    name: NewRootIssuedLeavesCheck
+    signature: func NewRootIssuedLeavesCheck() Check
+  - file: third_party/openbao/internal/command/healthcheck/pki_tidy_last_run.go
+    kind: function
+    name: NewTidyLastRunCheck
+    signature: func NewTidyLastRunCheck() Check
+  - file: third_party/openbao/internal/command/healthcheck/pki_too_many_certs.go
+    kind: function
+    name: NewTooManyCertsCheck
+    signature: func NewTooManyCertsCheck() Check
+  - file: third_party/openbao/internal/command/healthcheck/pki.go
+    kind: function
+    name: ParsePEMCert
+    signature: func ParsePEMCert(contents string) (*x509.Certificate, error)
+  - file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    kind: struct
+    name: PathFetch
+    signature: type PathFetch struct
+  - file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    kind: method
+    name: PathFetch.FetchSurfaceError
+    signature: func (p *PathFetch) FetchSurfaceError() error
+  - file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    kind: method
+    name: PathFetch.Is404NotFound
+    signature: func (p *PathFetch) Is404NotFound() bool
+  - file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    kind: method
+    name: PathFetch.IsMissingResource
+    signature: func (p *PathFetch) IsMissingResource() bool
+  - file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    kind: method
+    name: PathFetch.IsOK
+    signature: func (p *PathFetch) IsOK() bool
+  - file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    kind: method
+    name: PathFetch.IsSecretOK
+    signature: func (p *PathFetch) IsSecretOK() bool
+  - file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    kind: method
+    name: PathFetch.IsSecretPermissionsError
+    signature: func (p *PathFetch) IsSecretPermissionsError() bool
+  - file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    kind: method
+    name: PathFetch.IsUnsupportedPathError
+    signature: func (p *PathFetch) IsUnsupportedPathError() bool
+  - file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    kind: struct
+    name: Result
+    signature: type Result struct
+  - file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    kind: type_alias
+    name: ResultStatus
+    signature: type ResultStatus
+  - file: third_party/openbao/internal/command/healthcheck/pki_role_allows_glob_wildcards.go
+    kind: struct
+    name: RoleAllowsGlobWildcards
+    signature: type RoleAllowsGlobWildcards struct
+  - file: third_party/openbao/internal/command/healthcheck/pki_role_allows_glob_wildcards.go
+    kind: method
+    name: RoleAllowsGlobWildcards.DefaultConfig
+    signature: func (c *RoleAllowsGlobWildcards) DefaultConfig() map[string]any
+  - file: third_party/openbao/internal/command/healthcheck/pki_role_allows_glob_wildcards.go
+    kind: method
+    name: RoleAllowsGlobWildcards.Evaluate
+    signature: func (c *RoleAllowsGlobWildcards) Evaluate(e *Executor) (results []*Result,
+      err error)
+  - file: third_party/openbao/internal/command/healthcheck/pki_role_allows_glob_wildcards.go
+    kind: method
+    name: RoleAllowsGlobWildcards.FetchResources
+    signature: func (c *RoleAllowsGlobWildcards) FetchResources(e *Executor) error
+  - file: third_party/openbao/internal/command/healthcheck/pki_role_allows_glob_wildcards.go
+    kind: method
+    name: RoleAllowsGlobWildcards.IsEnabled
+    signature: func (c *RoleAllowsGlobWildcards) IsEnabled() bool
+  - file: third_party/openbao/internal/command/healthcheck/pki_role_allows_glob_wildcards.go
+    kind: method
+    name: RoleAllowsGlobWildcards.LoadConfig
+    signature: func (c *RoleAllowsGlobWildcards) LoadConfig(config map[string]any)
+      error
+  - file: third_party/openbao/internal/command/healthcheck/pki_role_allows_glob_wildcards.go
+    kind: method
+    name: RoleAllowsGlobWildcards.Name
+    signature: func (c *RoleAllowsGlobWildcards) Name() string
+  - file: third_party/openbao/internal/command/healthcheck/pki_role_allows_localhost.go
+    kind: struct
+    name: RoleAllowsLocalhost
+    signature: type RoleAllowsLocalhost struct
+  - file: third_party/openbao/internal/command/healthcheck/pki_role_allows_localhost.go
+    kind: method
+    name: RoleAllowsLocalhost.DefaultConfig
+    signature: func (c *RoleAllowsLocalhost) DefaultConfig() map[string]any
+  - file: third_party/openbao/internal/command/healthcheck/pki_role_allows_localhost.go
+    kind: method
+    name: RoleAllowsLocalhost.Evaluate
+    signature: func (c *RoleAllowsLocalhost) Evaluate(e *Executor) (results []*Result,
+      err error)
+  - file: third_party/openbao/internal/command/healthcheck/pki_role_allows_localhost.go
+    kind: method
+    name: RoleAllowsLocalhost.FetchResources
+    signature: func (c *RoleAllowsLocalhost) FetchResources(e *Executor) error
+  - file: third_party/openbao/internal/command/healthcheck/pki_role_allows_localhost.go
+    kind: method
+    name: RoleAllowsLocalhost.IsEnabled
+    signature: func (c *RoleAllowsLocalhost) IsEnabled() bool
+  - file: third_party/openbao/internal/command/healthcheck/pki_role_allows_localhost.go
+    kind: method
+    name: RoleAllowsLocalhost.LoadConfig
+    signature: func (c *RoleAllowsLocalhost) LoadConfig(config map[string]any) error
+  - file: third_party/openbao/internal/command/healthcheck/pki_role_allows_localhost.go
+    kind: method
+    name: RoleAllowsLocalhost.Name
+    signature: func (c *RoleAllowsLocalhost) Name() string
+  - file: third_party/openbao/internal/command/healthcheck/pki_role_no_store_false.go
+    kind: struct
+    name: RoleNoStoreFalse
+    signature: type RoleNoStoreFalse struct
+  - file: third_party/openbao/internal/command/healthcheck/pki_role_no_store_false.go
+    kind: method
+    name: RoleNoStoreFalse.DefaultConfig
+    signature: func (c *RoleNoStoreFalse) DefaultConfig() map[string]any
+  - file: third_party/openbao/internal/command/healthcheck/pki_role_no_store_false.go
+    kind: method
+    name: RoleNoStoreFalse.Evaluate
+    signature: func (c *RoleNoStoreFalse) Evaluate(e *Executor) (results []*Result,
+      err error)
+  - file: third_party/openbao/internal/command/healthcheck/pki_role_no_store_false.go
+    kind: method
+    name: RoleNoStoreFalse.FetchResources
+    signature: func (c *RoleNoStoreFalse) FetchResources(e *Executor) error
+  - file: third_party/openbao/internal/command/healthcheck/pki_role_no_store_false.go
+    kind: method
+    name: RoleNoStoreFalse.IsEnabled
+    signature: func (c *RoleNoStoreFalse) IsEnabled() bool
+  - file: third_party/openbao/internal/command/healthcheck/pki_role_no_store_false.go
+    kind: method
+    name: RoleNoStoreFalse.LoadConfig
+    signature: func (c *RoleNoStoreFalse) LoadConfig(config map[string]any) error
+  - file: third_party/openbao/internal/command/healthcheck/pki_role_no_store_false.go
+    kind: method
+    name: RoleNoStoreFalse.Name
+    signature: func (c *RoleNoStoreFalse) Name() string
+  - file: third_party/openbao/internal/command/healthcheck/pki_root_issued_leaves.go
+    kind: struct
+    name: RootIssuedLeaves
+    signature: type RootIssuedLeaves struct
+  - file: third_party/openbao/internal/command/healthcheck/pki_root_issued_leaves.go
+    kind: method
+    name: RootIssuedLeaves.DefaultConfig
+    signature: func (c *RootIssuedLeaves) DefaultConfig() map[string]any
+  - file: third_party/openbao/internal/command/healthcheck/pki_root_issued_leaves.go
+    kind: method
+    name: RootIssuedLeaves.Evaluate
+    signature: func (c *RootIssuedLeaves) Evaluate(e *Executor) (results []*Result,
+      err error)
+  - file: third_party/openbao/internal/command/healthcheck/pki_root_issued_leaves.go
+    kind: method
+    name: RootIssuedLeaves.FetchResources
+    signature: func (c *RootIssuedLeaves) FetchResources(e *Executor) error
+  - file: third_party/openbao/internal/command/healthcheck/pki_root_issued_leaves.go
+    kind: method
+    name: RootIssuedLeaves.IsEnabled
+    signature: func (c *RootIssuedLeaves) IsEnabled() bool
+  - file: third_party/openbao/internal/command/healthcheck/pki_root_issued_leaves.go
+    kind: method
+    name: RootIssuedLeaves.LoadConfig
+    signature: func (c *RootIssuedLeaves) LoadConfig(config map[string]any) error
+  - file: third_party/openbao/internal/command/healthcheck/pki_root_issued_leaves.go
+    kind: method
+    name: RootIssuedLeaves.Name
+    signature: func (c *RootIssuedLeaves) Name() string
+  - file: third_party/openbao/internal/command/healthcheck/shared.go
+    kind: function
+    name: StringList
+    signature: func StringList(source any) ([]string, error)
+  - file: third_party/openbao/internal/command/healthcheck/pki_tidy_last_run.go
+    kind: struct
+    name: TidyLastRun
+    signature: type TidyLastRun struct
+  - file: third_party/openbao/internal/command/healthcheck/pki_tidy_last_run.go
+    kind: method
+    name: TidyLastRun.DefaultConfig
+    signature: func (c *TidyLastRun) DefaultConfig() map[string]any
+  - file: third_party/openbao/internal/command/healthcheck/pki_tidy_last_run.go
+    kind: method
+    name: TidyLastRun.Evaluate
+    signature: func (c *TidyLastRun) Evaluate(e *Executor) (results []*Result, err
+      error)
+  - file: third_party/openbao/internal/command/healthcheck/pki_tidy_last_run.go
+    kind: method
+    name: TidyLastRun.FetchResources
+    signature: func (c *TidyLastRun) FetchResources(e *Executor) error
+  - file: third_party/openbao/internal/command/healthcheck/pki_tidy_last_run.go
+    kind: method
+    name: TidyLastRun.IsEnabled
+    signature: func (c *TidyLastRun) IsEnabled() bool
+  - file: third_party/openbao/internal/command/healthcheck/pki_tidy_last_run.go
+    kind: method
+    name: TidyLastRun.LoadConfig
+    signature: func (c *TidyLastRun) LoadConfig(config map[string]any) error
+  - file: third_party/openbao/internal/command/healthcheck/pki_tidy_last_run.go
+    kind: method
+    name: TidyLastRun.Name
+    signature: func (c *TidyLastRun) Name() string
+  - file: third_party/openbao/internal/command/healthcheck/pki_too_many_certs.go
+    kind: struct
+    name: TooManyCerts
+    signature: type TooManyCerts struct
+  - file: third_party/openbao/internal/command/healthcheck/pki_too_many_certs.go
+    kind: method
+    name: TooManyCerts.DefaultConfig
+    signature: func (c *TooManyCerts) DefaultConfig() map[string]any
+  - file: third_party/openbao/internal/command/healthcheck/pki_too_many_certs.go
+    kind: method
+    name: TooManyCerts.Evaluate
+    signature: func (c *TooManyCerts) Evaluate(e *Executor) (results []*Result, err
+      error)
+  - file: third_party/openbao/internal/command/healthcheck/pki_too_many_certs.go
+    kind: method
+    name: TooManyCerts.FetchResources
+    signature: func (c *TooManyCerts) FetchResources(e *Executor) error
+  - file: third_party/openbao/internal/command/healthcheck/pki_too_many_certs.go
+    kind: method
+    name: TooManyCerts.IsEnabled
+    signature: func (c *TooManyCerts) IsEnabled() bool
+  - file: third_party/openbao/internal/command/healthcheck/pki_too_many_certs.go
+    kind: method
+    name: TooManyCerts.LoadConfig
+    signature: func (c *TooManyCerts) LoadConfig(config map[string]any) error
+  - file: third_party/openbao/internal/command/healthcheck/pki_too_many_certs.go
+    kind: method
+    name: TooManyCerts.Name
+    signature: func (c *TooManyCerts) Name() string
+  - file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    kind: function
+    name: ValidateMountType
+    signature: func ValidateMountType(client *api.Client, mount string, expectedType
+      string) error
   name: third-party-openbao-internal-command-healthcheck
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/command/healthcheck/healthcheck.go
+    - method:61cd38eea299a604d0aedee7bf9e2430
+    id: r.build-config
+    level: MUST
+    text: BuildConfig must take an external map[string]any, merge each check's default
+      configuration with the supplied per-check configuration, and report an error
+      when the supplied configuration cannot be applied.
+  - codeRefs:
+    - interface:13fa7f9db19906441b5ec0e8114f755a
+    - method:1d2a57ceb86b7d83466ed6de90b18177
+    - method:5500f0e6a49a2ab36d423f5843216db4
+    - method:56efce7a5b070904db4bf06ffa375390
+    - method:662f8b0a53635bbcd173fd267b205fde
+    - method:6a0cc06c0bc8c6fea48bdb67b07af536
+    - method:6d8744c3018fb7b0600143bb79618de2
+    id: r.check-contract
+    level: MUST
+    text: The Check interface must require Name, IsEnabled, DefaultConfig, LoadConfig,
+      FetchResources and Evaluate, and every check in the package must satisfy it
+      so the executor can treat them uniformly.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/healthcheck/healthcheck.go
+    - method:662f8b0a53635bbcd173fd267b205fde
+    - method:6a0cc06c0bc8c6fea48bdb67b07af536
+    - method:6d8744c3018fb7b0600143bb79618de2
+    id: r.check-enablement-and-config
+    level: MUST
+    text: Each check must report its enabled state through IsEnabled, publish its
+      defaults through DefaultConfig, and accept external settings through LoadConfig,
+      so configuration can turn a check off or retune it before Execute runs.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/healthcheck/healthcheck.go
+    - method:1d2a57ceb86b7d83466ed6de90b18177
+    - method:5500f0e6a49a2ab36d423f5843216db4
+    id: r.check-two-phase
+    level: MUST
+    text: Each check must split its work into a FetchResources phase that gathers
+      remote data through the executor and an Evaluate phase that turns the gathered
+      data into []*Result, so fetching and judging stay separate.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/healthcheck/shared.go
+    - function:a240f05e1200f40f0e8fefbfd9b4505a
+    id: r.config-value-coercion
+    level: SHOULD
+    text: StringList must accept a loosely typed config value and return it as []string,
+      returning an error when the value cannot be read as a list of strings.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/healthcheck/util.go
+    - function:54151063fbf0369ccf78f584562776b5
+    id: r.duration-formatting
+    level: SHOULD
+    text: FormatDuration must render a time.Duration as a human-readable string so
+      checks that report validity periods and elapsed tidy times print consistent
+      text.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/healthcheck/healthcheck.go
+    - method:0411c690a98eda426fdf6148f1163e55
+    id: r.execute-all-checks
+    level: MUST
+    text: Execute must run the registered checks and return their results grouped
+      by check name in a map[string][]*Result, returning an error instead of partial
+      results when the run fails.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/healthcheck/healthcheck.go
+    - function:c24e52358e5abe8d906baeb02bc8b1e0
+    id: r.executor-defaults
+    level: MUST
+    text: NewExecutor must return an executor whose DefaultEnabled is true and whose
+      Config and Resources maps are initialized, so a caller can add checks and fetch
+      paths without further setup.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/healthcheck/healthcheck.go
+    - method:95d229150c4b8f8be156f956a8cbb3c7
+    - struct:6f83eee817b431df747ba6b6192eabef
+    id: r.executor-registry
+    level: MUST
+    text: The Executor struct must own the api client, the mount path, the per-check
+      configuration map and the fetched-resource cache, and AddCheck must append each
+      supplied Check to the executor's checker list so Execute runs them in registration
+      order.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/healthcheck/healthcheck.go
+    - method:b240af5af0ea94bf248c5c8de0b8bfd2
+    - struct:c2542e9fadad6ee439121ce316a0a050
+    id: r.fetch-once-per-operation
+    level: MUST
+    text: FetchIfNotFetched must read a raw path at most once per logical operation
+      and per path, returning the cached *PathFetch on later calls so checks sharing
+      a path do not repeat API traffic.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/healthcheck/healthcheck.go
+    - function:a9cc1007b9b56fe138dbf440ce6d99c0
+    id: r.mount-type-validation
+    level: MUST
+    text: ValidateMountType must confirm that the named mount reports the expected
+      type and return a non-nil error when the mount is missing or its type differs,
+      so a check run against the wrong mount fails before any check evaluates.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/healthcheck/healthcheck.go
+    - method:203dfba5d97de1c106c7e63b864a55ee
+    - method:3f31381121011fd3a0d614321a89b1fc
+    - method:47ddf3321e43daa2267e6f1be5cbd7fd
+    - method:8aafccf81e6b0223a7e5941a1a5071c8
+    - method:8f8d957c56e58deb9123430717f18a8f
+    - method:ba222c4349c36446a5b6d00a5aeb4488
+    - method:d0b387111db280483ed94bb19c21ad3e
+    id: r.pathfetch-classification
+    level: MUST
+    text: 'PathFetch must let a check classify a fetch outcome: IsOK and IsSecretOK
+      report usable data, FetchSurfaceError reports the surface-level error, and IsSecretPermissionsError,
+      IsUnsupportedPathError, IsMissingResource and Is404NotFound separate permission
+      denial, unsupported path, missing resource and plain 404 so a check can downgrade
+      or skip instead of failing hard.'
+  - codeRefs:
+    - file:third_party/openbao/internal/command/healthcheck/pki.go
+    - function:0ef5f642d30a554a0000f2cd937b320e
+    id: r.pem-parsing
+    level: MUST
+    text: ParsePEMCert must decode PEM certificate contents into an *x509.Certificate
+      and return an error when the contents are not a parseable certificate, since
+      the certificate-oriented checks depend on it.
+  - codeRefs:
+    - function:095916289a578670387e0c999a08558f
+    - function:1e1246a377112ae07852c5297cbfc93f
+    - function:29c57787bee6a0f0aaaea01696396bb2
+    - function:2fae00b4adc47924ab586547fae4c624
+    - function:33a4632b3c7ba9d554a2aad89a88864d
+    - function:525a8f3a99ef64f1fc0a155612e676f5
+    - function:6f16c4461b84933efd80d7ad5a028896
+    - function:830d611f7e5599ce053a0bbcd4a239d0
+    - function:8b24c7f72f2aa1a37b4edf282a607373
+    - function:c2e7757edd9294fa5bbcecdd3fbeb87b
+    - function:d5a14ada5df01ecebbc5101d6149b1de
+    - function:d7a2768569c134402c572a052a60cb71
+    - function:e0270b356fd39d43e4fa6d4f90a867ee
+    - function:ec12110960e308662c5366933cfc5724
+    id: r.pki-check-set
+    level: MUST
+    text: The package must provide PKI checks covering audit visibility, ACME header
+      allowance, ACME issuance, If-Modified-Since allowance, automatic tidy, CA validity
+      period, CRL validity period, hardware backed root, role glob wildcards, role
+      localhost allowance, role no-store-false, leaves issued by the root, tidy last
+      run and excessive certificate counts, each built by its own New* constructor
+      returning a Check.
+  - codeRefs:
+    - method:0411c690a98eda426fdf6148f1163e55
+    - struct:44ae149a27be8e3ad4eeb2eba8e2deeb
+    - type_alias:daac9847e15849439ef7a7e1eb6a71cf
+    id: r.result-shape
+    level: MUST
+    text: Every check must report findings as Result values tagged with a ResultStatus,
+      and the result set returned by Execute must preserve that per-check grouping
+      so callers can render one section per check.
   upstream: self
 - code:
   - third_party/openbao/internal/command/proxy/config/config.go

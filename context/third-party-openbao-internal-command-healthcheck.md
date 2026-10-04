@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so that PKI health can be checked against a live OpenBao server through one uniform executor, instead of one bespoke script per concern. The Executor gives every check the same client, mount, config plumbing and path cache, so a check only has to declare what it needs and how to judge it. The documented surface is what the surrounding command code depends on: the Check interface and the constructors that produce checks, the Executor lifecycle (add, build config, execute), the cached fetch and its classification predicates, and the shared parsing and formatting helpers used across the individual PKI checks.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

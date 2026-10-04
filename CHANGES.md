@@ -1286,6 +1286,25 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.test-coverage` (SHOULD): "The package's behaviour must stay covered by the tests in config_test.go, which exercise the exported loaders against the observed path resolution and parsing behaviour."
 - added `r.valid-listener-hook` (MUST): "IsValidListener must accept a *configutil.Listener and return nil for it, providing the listener validation seam without rejecting any listener definition."
 
+### third-party-openbao-internal-command-healthcheck
+
+- intent: "" -> "This context exists so that PKI health can be checked against a live OpenBao server through one uniform executor, instead of one bespoke script per concern. The Executor gives every check the same client, mount, config plumbing and path cache, so a check only has to declare what it needs and how to judge it. The documented surface is what the surrounding command code depends on: the Check interface and the constructors that produce checks, the Executor lifecycle (add, build config, execute), the cached fetch and its classification predicates, and the shared parsing and formatting helpers used across the individual PKI checks."
+- added `r.build-config` (MUST): "BuildConfig must take an external map[string]any, merge each check's default configuration with the supplied per-check configuration, and report an error when the supplied configuration cannot be applied."
+- added `r.check-contract` (MUST): "The Check interface must require Name, IsEnabled, DefaultConfig, LoadConfig, FetchResources and Evaluate, and every check in the package must satisfy it so the executor can treat them uniformly."
+- added `r.check-enablement-and-config` (MUST): "Each check must report its enabled state through IsEnabled, publish its defaults through DefaultConfig, and accept external settings through LoadConfig, so configuration can turn a check off or retune it before Execute runs."
+- added `r.check-two-phase` (MUST): "Each check must split its work into a FetchResources phase that gathers remote data through the executor and an Evaluate phase that turns the gathered data into []*Result, so fetching and judging stay separate."
+- added `r.config-value-coercion` (SHOULD): "StringList must accept a loosely typed config value and return it as []string, returning an error when the value cannot be read as a list of strings."
+- added `r.duration-formatting` (SHOULD): "FormatDuration must render a time.Duration as a human-readable string so checks that report validity periods and elapsed tidy times print consistent text."
+- added `r.execute-all-checks` (MUST): "Execute must run the registered checks and return their results grouped by check name in a map[string][]*Result, returning an error instead of partial results when the run fails."
+- added `r.executor-defaults` (MUST): "NewExecutor must return an executor whose DefaultEnabled is true and whose Config and Resources maps are initialized, so a caller can add checks and fetch paths without further setup."
+- added `r.executor-registry` (MUST): "The Executor struct must own the api client, the mount path, the per-check configuration map and the fetched-resource cache, and AddCheck must append each supplied Check to the executor's checker list so Execute runs them in registration order."
+- added `r.fetch-once-per-operation` (MUST): "FetchIfNotFetched must read a raw path at most once per logical operation and per path, returning the cached *PathFetch on later calls so checks sharing a path do not repeat API traffic."
+- added `r.mount-type-validation` (MUST): "ValidateMountType must confirm that the named mount reports the expected type and return a non-nil error when the mount is missing or its type differs, so a check run against the wrong mount fails before any check evaluates."
+- added `r.pathfetch-classification` (MUST): "PathFetch must let a check classify a fetch outcome: IsOK and IsSecretOK report usable data, FetchSurfaceError reports the surface-level error, and IsSecretPermissionsError, IsUnsupportedPathError, IsMissingResource and Is404NotFound separate permission denial, unsupported path, missing resource and plain 404 so a check can downgrade or skip instead of failing hard."
+- added `r.pem-parsing` (MUST): "ParsePEMCert must decode PEM certificate contents into an *x509.Certificate and return an error when the contents are not a parseable certificate, since the certificate-oriented checks depend on it."
+- added `r.pki-check-set` (MUST): "The package must provide PKI checks covering audit visibility, ACME header allowance, ACME issuance, If-Modified-Since allowance, automatic tidy, CA validity period, CRL validity period, hardware backed root, role glob wildcards, role localhost allowance, role no-store-false, leaves issued by the root, tidy last run and excessive certificate counts, each built by its own New* constructor returning a Check."
+- added `r.result-shape` (MUST): "Every check must report findings as Result values tagged with a ResultStatus, and the result set returned by Execute must preserve that per-check grouping so callers can render one section per check."
+
 ### third-party-openbao-internal-command-proxy-config
 
 - intent: "" -> "This context exists so the proxy command's configuration contract is described independently of the rest of the proxy implementation: which blocks and fields exist, what each loader does with a path, how multiple files combine, which defaults and environment variables are applied, and which combinations of blocks are rejected. It gives the reader the rules the proxy binary relies on when it starts, without needing to read the OpenBao agent config package it was forked from."
@@ -1366,6 +1385,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-command-agentproxyshared-winsvc-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-config-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-command-healthcheck-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-command-healthcheck-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-internal-command-healthcheck-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-internal-command-proxy-config-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-server-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
