@@ -2,10 +2,210 @@ apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
 - file:third_party/openbao/internal/command/agent/config/config.go config.go@third_party/openbao/internal/command/agent/config/config.go
 - file:third_party/openbao/internal/command/agent/config/config_test.go config_test.go@third_party/openbao/internal/command/agent/config/config_test.go
+- function:294cb86e42204c2b1e779df712442e7c NewConfig@third_party/openbao/internal/command/agent/config/config.go:174
+- function:7d03046ef74c3b4828473c26ca07b14e LoadConfig@third_party/openbao/internal/command/agent/config/config.go:465
+- function:7de4097c49ecd17b3154c91c54c4bc66 LoadConfigFile@third_party/openbao/internal/command/agent/config/config.go:554
+- function:cdf4d68dbad872e3cc019b30335916e8 LoadConfigDir@third_party/openbao/internal/command/agent/config/config.go:478
+- method:14758788adb7aaacf8bc499df1e36609 Config.Merge@third_party/openbao/internal/command/agent/config/config.go:181
+- method:159bd10ec29b623bd2509959fbb3378d Config.IsDefaultListerDefined@third_party/openbao/internal/command/agent/config/config.go:275
+- method:2de5b2addd58dfa33ca845032bbc3fda Config.Prune@third_party/openbao/internal/command/agent/config/config.go:63
+- method:33819d9eb533c481516c0e9f498b0efe transportDialer.DialContext@third_party/openbao/internal/command/agent/config/config.go:104
+- method:8fb9e5ef63e7856d62d727089b7b3173 Config.ValidateConfig@third_party/openbao/internal/command/agent/config/config.go:286
+- method:d51536a7e952ec0386af644c07169ec3 transportDialer.Dial@third_party/openbao/internal/command/agent/config/config.go:101
+- struct:1e61102ed4280e90915a3b0faa7abaef Method@third_party/openbao/internal/command/agent/config/config.go:134
+- struct:395626fce95617b4e4ef8719da52ce58 APIProxy@third_party/openbao/internal/command/agent/config/config.go:108
+- struct:44449fb715c31140e1e50908dc3e93ff ExecConfig@third_party/openbao/internal/command/agent/config/config.go:168
+- struct:5c371d991b82ea353ada34a8c5bd550f Sink@third_party/openbao/internal/command/agent/config/config.go:149
+- struct:5dcd267d8757551adf2d2b5e65efb7ad TemplateConfig@third_party/openbao/internal/command/agent/config/config.go:162
+- struct:ac66f17e5f4fabf2cf84d94fb54cb5ec Config@third_party/openbao/internal/command/agent/config/config.go:36
+- struct:b2749db8a09b8055c3236fd3f45afbfa Vault@third_party/openbao/internal/command/agent/config/config.go:85
+- struct:d94331f190c4482eddf512fb13aa508e AutoAuth@third_party/openbao/internal/command/agent/config/config.go:124
+- struct:ddbfb0c13f698324033d443acb021af5 Retry@third_party/openbao/internal/command/agent/config/config.go:80
+- struct:e690bcb76158075ce108dc746d196ce1 Cache@third_party/openbao/internal/command/agent/config/config.go:115
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-command-agent-config
   namespace: default
 spec:
+  intent: 'This context exists so the OpenBao agent can be configured from files:
+    it owns the schema of the agent configuration, the parsing of HCL config files
+    and directories, the merge of several sources into one effective Config, validation
+    of the result, and cleanup of parse bookkeeping before the config is used or printed.
+    It is the config layer of third_party/openbao that the agent command depends on,
+    and its behaviour is pinned by config_test.go.'
+  interfaces:
+  - file: third_party/openbao/internal/command/agent/config/config.go
+    kind: struct
+    name: APIProxy
+  - file: third_party/openbao/internal/command/agent/config/config.go
+    kind: struct
+    name: AutoAuth
+  - file: third_party/openbao/internal/command/agent/config/config.go
+    kind: struct
+    name: Cache
+  - file: third_party/openbao/internal/command/agent/config/config.go
+    kind: struct
+    name: Config
+  - file: third_party/openbao/internal/command/agent/config/config.go
+    kind: method
+    name: Config.IsDefaultListerDefined
+    signature: () bool
+  - file: third_party/openbao/internal/command/agent/config/config.go
+    kind: method
+    name: Config.Merge
+    signature: (c2 *Config) *Config
+  - file: third_party/openbao/internal/command/agent/config/config.go
+    kind: method
+    name: Config.Prune
+    signature: ()
+  - file: third_party/openbao/internal/command/agent/config/config.go
+    kind: method
+    name: Config.ValidateConfig
+    signature: () error
+  - file: third_party/openbao/internal/command/agent/config/config.go
+    kind: struct
+    name: ExecConfig
+  - file: third_party/openbao/internal/command/agent/config/config.go
+    kind: function
+    name: LoadConfig
+    signature: (path string) (*Config, error)
+  - file: third_party/openbao/internal/command/agent/config/config.go
+    kind: function
+    name: LoadConfigDir
+    signature: (dir string) (cfg *Config, err error)
+  - file: third_party/openbao/internal/command/agent/config/config.go
+    kind: function
+    name: LoadConfigFile
+    signature: (path string) (*Config, error)
+  - file: third_party/openbao/internal/command/agent/config/config.go
+    kind: struct
+    name: Method
+  - file: third_party/openbao/internal/command/agent/config/config.go
+    kind: function
+    name: NewConfig
+    signature: () *Config
+  - file: third_party/openbao/internal/command/agent/config/config.go
+    kind: struct
+    name: Retry
+  - file: third_party/openbao/internal/command/agent/config/config.go
+    kind: struct
+    name: Sink
+  - file: third_party/openbao/internal/command/agent/config/config.go
+    kind: struct
+    name: TemplateConfig
+  - file: third_party/openbao/internal/command/agent/config/config.go
+    kind: struct
+    name: Vault
+  - file: third_party/openbao/internal/command/agent/config/config.go
+    kind: method
+    name: transportDialer.Dial
+    signature: (network, address string) (net.Conn, error)
+  - file: third_party/openbao/internal/command/agent/config/config.go
+    kind: method
+    name: transportDialer.DialContext
+    signature: (ctx context.Context, network, address string) (net.Conn, error)
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - struct:1e61102ed4280e90915a3b0faa7abaef
+    - struct:395626fce95617b4e4ef8719da52ce58
+    - struct:44449fb715c31140e1e50908dc3e93ff
+    - struct:5c371d991b82ea353ada34a8c5bd550f
+    - struct:5dcd267d8757551adf2d2b5e65efb7ad
+    - struct:ac66f17e5f4fabf2cf84d94fb54cb5ec
+    - struct:b2749db8a09b8055c3236fd3f45afbfa
+    - struct:d94331f190c4482eddf512fb13aa508e
+    - struct:ddbfb0c13f698324033d443acb021af5
+    - struct:e690bcb76158075ce108dc746d196ce1
+    id: r.config-schema-blocks
+    level: MUST
+    text: 'Config is the decoded agent configuration: Retry, Vault, APIProxy, Cache,
+      AutoAuth, Method, Sink, TemplateConfig and ExecConfig are the HCL blocks LoadConfigFile
+      decodes into it, so the loader''s field names and block names stay in step with
+      the schema.'
+  - codeRefs:
+    - method:159bd10ec29b623bd2509959fbb3378d
+    id: r.is-default-lister-defined
+    level: MUST
+    text: Config.IsDefaultListerDefined reports whether the config defines a listener
+      at the default address, which drives the listener-related validation and defaults.
+  - codeRefs:
+    - function:cdf4d68dbad872e3cc019b30335916e8
+    - method:14758788adb7aaacf8bc499df1e36609
+    id: r.load-config-dir-merge
+    level: MUST
+    text: LoadConfigDir reads every configuration file in the directory and folds
+      them into a single Config by merging, so later files override earlier ones instead
+      of replacing the whole config.
+  - codeRefs:
+    - function:7d03046ef74c3b4828473c26ca07b14e
+    - function:7de4097c49ecd17b3154c91c54c4bc66
+    - function:cdf4d68dbad872e3cc019b30335916e8
+    id: r.load-config-dispatch
+    level: MUST
+    text: LoadConfig takes a path and returns a *Config plus error; when the path
+      names a directory it delegates to LoadConfigDir, otherwise it delegates to LoadConfigFile,
+      so callers get one entry point for either source shape.
+  - codeRefs:
+    - function:7de4097c49ecd17b3154c91c54c4bc66
+    - struct:ac66f17e5f4fabf2cf84d94fb54cb5ec
+    id: r.load-config-file-hcl
+    level: MUST
+    text: LoadConfigFile reads one file, parses its HCL body into a *Config, records
+      which keys were found and which were unused, and returns an error when the file
+      cannot be read or decoded.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agent/config/config_test.go
+    - method:2de5b2addd58dfa33ca845032bbc3fda
+    id: r.loader-behaviour-tested
+    level: SHOULD
+    text: config_test.go should keep covering LoadConfigFile and LoadConfigDir across
+      the cache, listener, auto-auth, vault, retry and templating blocks, pruning
+      the parsed config before comparing it, so schema and loader changes are caught.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agent/config/config.go
+    - method:14758788adb7aaacf8bc499df1e36609
+    id: r.merge-overlay
+    level: MUST
+    text: Config.Merge takes a second Config and returns the receiver with the second
+      config's set values applied on top, leaving unset fields at their existing values.
+  - codeRefs:
+    - function:294cb86e42204c2b1e779df712442e7c
+    - struct:ac66f17e5f4fabf2cf84d94fb54cb5ec
+    id: r.new-config-defaults
+    level: MUST
+    text: NewConfig returns a *Config pre-populated with the default agent settings,
+      so callers have a base to merge parsed files onto.
+  - codeRefs:
+    - method:2de5b2addd58dfa33ca845032bbc3fda
+    - struct:ac66f17e5f4fabf2cf84d94fb54cb5ec
+    id: r.prune-clears-parse-bookkeeping
+    level: MUST
+    text: Config.Prune clears RawConfig, Profiling.UnusedKeys, Telemetry.UnusedKeys
+      and CustomResponseHeaders on every listener, and nils FoundKeys and UnusedKeys
+      on the config and on the telemetry block, so a loaded config carries no raw
+      input or unused-key bookkeeping.
+  - codeRefs:
+    - struct:ddbfb0c13f698324033d443acb021af5
+    id: r.retry-num-retries
+    level: MUST
+    text: Retry carries a single NumRetries int decoded from the HCL key "num_retries",
+      giving the Vault block its retry count.
+  - codeRefs:
+    - method:33819d9eb533c481516c0e9f498b0efe
+    - method:d51536a7e952ec0386af644c07169ec3
+    id: r.transport-dialer-contract
+    level: MUST
+    text: The transportDialer interface requires Dial(network, address string) (net.Conn,
+      error) and DialContext(ctx context.Context, network, address string) (net.Conn,
+      error), matching net.Dialer, so the config can accept any dialer with the standard
+      net signatures.
+  - codeRefs:
+    - method:159bd10ec29b623bd2509959fbb3378d
+    - method:8fb9e5ef63e7856d62d727089b7b3173
+    id: r.validate-config
+    level: MUST
+    text: Config.ValidateConfig returns an error when the assembled config is not
+      usable, including checks around the default lister and the env template configuration,
+      so a bad config fails before the agent starts.
   upstream: self

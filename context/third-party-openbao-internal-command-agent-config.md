@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the OpenBao agent can be configured from files: it owns the schema of the agent configuration, the parsing of HCL config files and directories, the merge of several sources into one effective Config, validation of the result, and cleanup of parse bookkeeping before the config is used or printed. It is the config layer of third_party/openbao that the agent command depends on, and its behaviour is pinned by config_test.go.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
