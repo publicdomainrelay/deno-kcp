@@ -66090,15 +66090,15 @@ system_contexts:
   - file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item/show.js
     show.js@third_party/openbao/ui/app/routes/vault/cluster/access/method/item/show.js
   id: sc.third-party-openbao-ui-app-routes-vault-cluster-access-method-item
-  intent: This context exists so the vault cluster access UI can present create, list,
-    show, and edit pages for the items that belong to a given auth method (for example
-    users, groups, or roles of that method) without writing a route per item type.
-    The item type arrives as a route parameter, so one set of routes serves every
-    generated model by composing the Ember Data model name from the singularized item
-    type and the auth method type, and by passing the auth method path as adapter
-    context. The context matters because the model-name derivation, the singularize
-    step, the response path data.keys, and the transition guards are the contract
-    the item templates and controllers depend on.
+  intent: 'This context exists so the vault cluster access UI can present create,
+    list, show, and edit pages for the items that belong to a given auth method (users,
+    groups, roles of that method, for example) without writing a separate route per
+    item type. Because the item type arrives as a route parameter, one set of routes
+    serves every generated model: the model name is composed from the singularized
+    item type and the auth method type, and the auth method path is passed through
+    as adapter context. The model-name derivation, the singularize step, the data.keys
+    response path, and the transition guards form the contract the item templates
+    and controllers depend on.'
   name: third-party-openbao-ui-app-routes-vault-cluster-access-method-item
   requirements:
   - codeRefs:
@@ -66122,16 +66122,16 @@ system_contexts:
     id: r.create-exit-cleanup
     level: MUST
     text: When the create route is exited, resetController must invoke controller.cleanupModel
-      when that method is present, using optional call so a controller without it
-      does not throw.
+      when that method is present, using an optional call so a controller without
+      it does not throw.
   - codeRefs:
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item/create.js
     id: r.create-model-type-derivation
     level: MUST
     text: The create route's model hook must read item_type from the vault.cluster.access.method.item
       params and the type and path params from the vault.cluster.access.method route,
-      then derive the Ember Data model name as `generated-${singularize(itemType)}-${type}`
-      and create a record of that type carrying itemType, method and adapterOptions.path
+      derive the Ember Data model name as `generated-${singularize(itemType)}-${type}`,
+      and create a record of that type carrying itemType, method, and adapterOptions.path
       set to `${method}/${itemType}`.
   - codeRefs:
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item/edit.js
@@ -66153,7 +66153,7 @@ system_contexts:
     id: r.edit-exit-cleanup
     level: MUST
     text: When the edit route is exited, resetController must invoke controller.cleanupModel
-      when that method is present, using optional call.
+      when that method is present, using an optional call.
   - codeRefs:
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item/edit.js
     id: r.edit-model-query
@@ -66168,7 +66168,7 @@ system_contexts:
     level: MUST
     text: The list route's setupController must set the controller's itemType to the
       raw item type and methodModel to the parent method model, and set filter to
-      the pageFilter param or an empty string when absent and page to the resolved
+      the pageFilter param or an empty string when absent, and page to the resolved
       model's meta.currentPage or 1 when absent.
   - codeRefs:
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item/list.js
@@ -66190,7 +66190,7 @@ system_contexts:
     id: r.list-path-help-filtering
     level: MUST
     text: The list route's setupController must call pathHelp.getPaths with the method
-      model's apiPath, the auth method path and the item type, and set the controller's
+      model's apiPath, the auth method path, and the item type, and set the controller's
       paths to only those returned paths that have navigation truthy and whose itemType
       list includes the current item type.
   - codeRefs:
@@ -66229,11 +66229,11 @@ system_contexts:
   - class:34396245abe24178c1632c49362ed09b MfaConfigureRoute@third_party/openbao/ui/app/routes/vault/cluster/access/mfa/index.js:9
   - file:third_party/openbao/ui/app/routes/vault/cluster/access/mfa/index.js index.js@third_party/openbao/ui/app/routes/vault/cluster/access/mfa/index.js
   id: sc.third-party-openbao-ui-app-routes-vault-cluster-access-mfa
-  intent: The route is the landing route for the MFA configure path under the cluster
-    access area. It exists to route an operator away from the configure landing page
-    when MFA methods already exist, and to leave the operator on that landing page
-    when the query finds no methods, so the configure flow is only shown when there
-    is nothing configured yet.
+  intent: This context is the MFA configure landing route under the cluster access
+    area. It exists to route an operator away from the configure landing page when
+    MFA methods already exist, and to leave the operator on that landing page when
+    the query finds no methods, so the configure flow is only shown when there is
+    nothing configured yet.
   interfaces:
   - file: third_party/openbao/ui/app/routes/vault/cluster/access/mfa/index.js
     kind: class

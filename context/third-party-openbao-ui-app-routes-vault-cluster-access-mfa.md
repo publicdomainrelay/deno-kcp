@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-The route is the landing route for the MFA configure path under the cluster access area. It exists to route an operator away from the configure landing page when MFA methods already exist, and to leave the operator on that landing page when the query finds no methods, so the configure flow is only shown when there is nothing configured yet.
+This context is the MFA configure landing route under the cluster access area. It exists to route an operator away from the configure landing page when MFA methods already exist, and to leave the operator on that landing page when the query finds no methods, so the configure flow is only shown when there is nothing configured yet.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

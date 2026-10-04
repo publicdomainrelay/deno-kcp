@@ -13,15 +13,15 @@ metadata:
   name: third-party-openbao-ui-app-routes-vault-cluster-access-method-item
   namespace: default
 spec:
-  intent: This context exists so the vault cluster access UI can present create, list,
-    show, and edit pages for the items that belong to a given auth method (for example
-    users, groups, or roles of that method) without writing a route per item type.
-    The item type arrives as a route parameter, so one set of routes serves every
-    generated model by composing the Ember Data model name from the singularized item
-    type and the auth method type, and by passing the auth method path as adapter
-    context. The context matters because the model-name derivation, the singularize
-    step, the response path data.keys, and the transition guards are the contract
-    the item templates and controllers depend on.
+  intent: 'This context exists so the vault cluster access UI can present create,
+    list, show, and edit pages for the items that belong to a given auth method (users,
+    groups, roles of that method, for example) without writing a separate route per
+    item type. Because the item type arrives as a route parameter, one set of routes
+    serves every generated model: the model name is composed from the singularized
+    item type and the auth method type, and the auth method path is passed through
+    as adapter context. The model-name derivation, the singularize step, the data.keys
+    response path, and the transition guards form the contract the item templates
+    and controllers depend on.'
   repository: deno-kcp
   requirements:
   - codeRefs:
@@ -45,16 +45,16 @@ spec:
     id: r.create-exit-cleanup
     level: MUST
     text: When the create route is exited, resetController must invoke controller.cleanupModel
-      when that method is present, using optional call so a controller without it
-      does not throw.
+      when that method is present, using an optional call so a controller without
+      it does not throw.
   - codeRefs:
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item/create.js
     id: r.create-model-type-derivation
     level: MUST
     text: The create route's model hook must read item_type from the vault.cluster.access.method.item
       params and the type and path params from the vault.cluster.access.method route,
-      then derive the Ember Data model name as `generated-${singularize(itemType)}-${type}`
-      and create a record of that type carrying itemType, method and adapterOptions.path
+      derive the Ember Data model name as `generated-${singularize(itemType)}-${type}`,
+      and create a record of that type carrying itemType, method, and adapterOptions.path
       set to `${method}/${itemType}`.
   - codeRefs:
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item/edit.js
@@ -76,7 +76,7 @@ spec:
     id: r.edit-exit-cleanup
     level: MUST
     text: When the edit route is exited, resetController must invoke controller.cleanupModel
-      when that method is present, using optional call.
+      when that method is present, using an optional call.
   - codeRefs:
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item/edit.js
     id: r.edit-model-query
@@ -91,7 +91,7 @@ spec:
     level: MUST
     text: The list route's setupController must set the controller's itemType to the
       raw item type and methodModel to the parent method model, and set filter to
-      the pageFilter param or an empty string when absent and page to the resolved
+      the pageFilter param or an empty string when absent, and page to the resolved
       model's meta.currentPage or 1 when absent.
   - codeRefs:
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item/list.js
@@ -113,7 +113,7 @@ spec:
     id: r.list-path-help-filtering
     level: MUST
     text: The list route's setupController must call pathHelp.getPaths with the method
-      model's apiPath, the auth method path and the item type, and set the controller's
+      model's apiPath, the auth method path, and the item type, and set the controller's
       paths to only those returned paths that have navigation truthy and whose itemType
       list includes the current item type.
   - codeRefs:
