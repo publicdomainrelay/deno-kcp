@@ -10,5 +10,41 @@ spec:
   systemContext: third-party-openbao-internal-vault-external-tests-api
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-vault-external-tests-api
-  phase: Running
+  agentLog: 'This context is the external API test package of the vendored OpenBao
+    tree, at third_party/openbao/internal/vault/external_tests/api. All seven files
+    declare `package api` (in-package tests, not the `api_test` external package),
+    and together they exercise the public `api` client against a real in-process Vault
+    core: api_integration_test.go builds that core and returns a connected client
+    plus an unseal-key slice and a teardown function, index_test.go asserts the generated
+    HTTP index endpoint''s default and forward-missing responses, kv_helpers_test.go
+    checks the KV v2 helper accessors over a mounted secrets engine, secret_test.go
+    parses raw API secret JSON and asserts each token-derived accessor (ID, accessor,
+    remaining uses, policies, metadata, renewability, TTL) plus inline auth handling,
+    renewer_integration_test.go drives the client renewer against a live server, sudo_paths_test.go
+    enumerates the sudo paths the server''s OpenAPI spec declares and compares them
+    with the client''s known list, and sys_rotate_ext_test.go verifies rotate and
+    deprecated rekey flows for both root and recovery key types. No exported production
+    interface lives here; the only names the package offers are Go test functions
+    and unexported test helpers.'
+  message: wrote 8 requirement(s) and 0 interface(s) for third-party-openbao-internal-vault-external-tests-api;
+    interface testVaultServer is not in the observed facts; dropped; interface testVaultServerUnseal
+    is not in the observed facts; dropped; interface testVaultServerCoreConfig is
+    not in the observed facts; dropped; interface TestHTTP_Index_Defaults is not in
+    the observed facts; dropped; interface TestHTTP_Index_ForwardMissingAndAwait is
+    not in the observed facts; dropped; interface setupKVv2Test is not in the observed
+    facts; dropped; interface TestKVHelpers is not in the observed facts; dropped;
+    interface TestRenewer_Renew is not in the observed facts; dropped; interface TestParseSecret
+    is not in the observed facts; dropped; interface TestSecret_TokenID is not in
+    the observed facts; dropped; interface TestSecret_TokenAccessor is not in the
+    observed facts; dropped; interface TestSecret_TokenRemainingUses is not in the
+    observed facts; dropped; interface TestSecret_TokenPolicies is not in the observed
+    facts; dropped; interface TestSecret_TokenMetadata is not in the observed facts;
+    dropped; interface TestSecret_TokenIsRenewable is not in the observed facts; dropped;
+    interface TestSecret_TokenTTL is not in the observed facts; dropped; interface
+    TestInlineAuth is not in the observed facts; dropped; interface TestSudoPaths
+    is not in the observed facts; dropped; interface getSudoPathsFromSpec is not in
+    the observed facts; dropped; interface TestSysRotate_Verification is not in the
+    observed facts; dropped; interface testSysRekey_VerificationDeprecated is not
+    in the observed facts; dropped; interface testSysRotate_Verification is not in
+    the observed facts; dropped
+  phase: Succeeded

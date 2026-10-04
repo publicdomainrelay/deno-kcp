@@ -2297,6 +2297,18 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.registry-construction` (MUST): "NewRegistry MUST construct a Registry bound to the given kmsplugin.Catalog and logger, so every client opened by the registry comes from that catalog and every failure is logged through that logger."
 - added `r.verify-before-write` (MUST): "When the verify flag is set, ModifyConfig and ModifyKey MUST open the KMS client against the edited entry before writing storage and MUST leave storage untouched if that open fails, closing a successfully opened client again if the storage write fails."
 
+### third-party-openbao-internal-vault-external-tests-api
+
+- intent: "" -> "The context exists to specify the behavior the OpenBao external API test package must preserve, so that a change to the vendored tree or to the client it drives can be judged against the assertions these tests already encode. It matters because these are the only tests in the repository that check the `api` client against a genuinely running Vault core rather than a mock, so they pin down the wire contract (response envelope parsing, token accessor semantics, sudo path list, rotation and rekey verification) that any refactor of the client or of the test harness must keep true."
+- added `r.in-process-core-harness` (MUST): "Tests that need a live server must build one through the helpers in this package: an in-memory physical backend and a Vault core are constructed, the core is unsealed, and the helper returns an `*api.Client` pointed at the running listener together with the unseal keys and a teardown function the caller defers. The unsealing variant exists separately so a test can re-seal or re-unseal the core, and the core-config variant accepts a caller-supplied `*vault.CoreConfig` so a test can register extra backends or HA settings."
+- added `r.index-endpoint-defaults` (MUST): "The tests must assert the documented default shape of the generated HTTP index endpoint, including its listed paths and their descriptions, and must assert the response for a request to a path that is missing while forwarding is awaited."
+- added `r.kv-v2-helper-accessors` (MUST): "After mounting a KV version 2 secrets engine, the suite must assert that the client's KV v2 helper round-trips a write and read through the data and metadata accessors, and that the versioned read returns the value written at the requested version."
+- added `r.raw-secret-parsing` (MUST): "Raw JSON returned by the server must parse into the secret type such that a nil or empty payload yields a zero-valued secret, non-object payloads are handled, and the parsed auth, data, lease, and warning fields carry the values present in the JSON."
+- added `r.renewer-against-live-server` (MUST): "The renewer must, against a live server with a renewable token, renew the lease, deliver the renewed secret to the registered handler, and stop cleanly when renewal is stopped, with the test gated on the acceptance environment being available."
+- added `r.rotate-and-rekey-verification` (MUST): "Verification of a rotate or rekey operation must, given the new key shares, thresholds, and nonces, reconstruct the key material through the verification routine and assert the operation is accepted; the deprecated rekey verification path must remain covered alongside the current rotate path, and both the root and the recovery key types must be exercised."
+- added `r.sudo-paths-match-spec` (MUST): "The sudo path list compiled into the client must be derivable from the specification endpoint the server exposes: the test reads the spec through the client, extracts the paths marked as sudo operations, and asserts the extracted set equals the client's own list, so a path added on one side without the other fails the suite."
+- added `r.token-accessor-semantics` (MUST): "Each token accessor on the secret type must return the field of the auth block it names, and must return the zero value of its type rather than panic when the auth block is absent: token ID, token accessor, remaining uses, policies, metadata, renewable flag, and TTL. A token-auth response must also be usable for inline authentication, so a client configured with one can make an authenticated request."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -2442,5 +2454,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-vault-cluster-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-diagnose-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-keys-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-vault-external-tests-api-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-vault-external-tests-api-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-approle-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |

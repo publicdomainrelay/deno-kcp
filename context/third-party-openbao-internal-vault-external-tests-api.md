@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists to specify the behavior the OpenBao external API test package must preserve, so that a change to the vendored tree or to the client it drives can be judged against the assertions these tests already encode. It matters because these are the only tests in the repository that check the `api` client against a genuinely running Vault core rather than a mock, so they pin down the wire contract (response envelope parsing, token accessor semantics, sudo path list, rotation and rekey verification) that any refactor of the client or of the test harness must keep true.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
