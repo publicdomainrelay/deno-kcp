@@ -4255,6 +4255,19 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.oidc-router-subscription` (MUST): "OidcConfigureController's constructor calls super with the passed arguments and registers a routeDidChange listener on the injected router that forwards each transition to setHeader, so the header state follows routing without a per-route hook."
 - added `r.page-query-params` (MUST): "The controller declares page, pageFilter and filter state and lists them as query parameters, so paging and the name filter survive in the URL."
 
+### third-party-openbao-ui-app-controllers-vault-cluster-access-identity
+
+- intent: "" -> "This context exists so the identity management routes of the OpenBao UI have describable controller behavior: a single create controller carries the post-save/post-delete navigation and record cleanup contract, the edit and merge controllers reuse it verbatim, and the index controller carries the list screen's filtering, pagination, deletion, and enable/disable toggling contract. It captures the code as written, including that edit and merge add no behavior of their own."
+- added `r.create-cleanup-model` (MUST): "The create controller's cleanupModel method must return early when there is no model or the model is saving, destroyed, or destroying; otherwise it must roll back dirty attributes when the model supports rollbackAttributes, always null the singleton controller's model, and unload the record through removeRecord when the model supports unloadRecord."
+- added `r.create-nav-after-save` (MUST): "The create controller's navAfterSave task must derive the identity type from the saved model and, for a non-delete save, transition to the showRoute with the model id and showTab; for a delete save it must transition to the type-specific list route taken from a lookup table mapping 'entity-alias' and 'group-alias' to the aliases index route and 'group' and 'entity' to the identity index route."
+- added `r.edit-reuses-create` (MUST): "The edit controller must extend the create controller without adding or overriding behavior, so the edit route inherits create's navAfterSave and cleanupModel contract."
+- added `r.index-delete` (MUST): "The index controller's delete action must call destroyRecord on the model and, on success, send reload to the list route and flash a success message naming the identity type and id; on failure it must flash the type, id, and the joined error list or error message."
+- added `r.index-filter-matching` (MUST): "The index controller must compute filterMatchesKey as true only when the model list is non-empty and contains a record whose id equals the filter, and firstPartialMatch as the first id matching a regex anchored at the escaped filter, returning null when the filter already matches a key or nothing matches, and otherwise returning either that match or the model list's common prefix when the filter equals the shared prefix or only one entry matched."
+- added `r.index-list-actions` (MUST): "The index controller must provide setFilter and setFilterFocus actions that set the filter and filterFocused state, a refresh action that sends reload to the list route, and a reloadRecord action that reloads the given model."
+- added `r.index-query-params` (MUST): "The index controller must expose page and pageFilter as query params backed by the string keys 'page' and 'pageFilter', defaulting to page 1 and a null pageFilter, and must hold filter, filterFocused, and isLoading state."
+- added `r.index-toggle-disabled` (MUST): "The index controller's toggleDisabled action must pick the enable or disable verb pair from the model's current disabled flag, toggle the model's disabled property, save the model, and flash a message built from that verb and the identity type and id on both success and failure."
+- added `r.merge-reuses-create` (MUST): "The merge controller must extend the create controller without adding or overriding behavior, so the merge route inherits create's navAfterSave and cleanupModel contract."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4589,7 +4602,8 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-controllers-vault-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-identity-aliases-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-ui-app-controllers-vault-cluster-access-identity-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-access-identity-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-access-identity-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
