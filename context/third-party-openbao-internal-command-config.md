@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so commands in third_party/openbao/internal/command can obtain the client-side configuration file settings without each command re-implementing path resolution, file reading and parsing, and so token storage and listener checks have one shared implementation. Config and LoadConfig give the CLI a single entry point for reading the user's config file, ParseConfig separates parsing from file IO so contents can be supplied directly, DefaultTokenHelper turns the configured token_helper into a concrete token.TokenHelper (falling back to OpenBao's internal on-disk store), and IsValidListener provides the validation seam that listener definitions pass through.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

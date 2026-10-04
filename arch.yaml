@@ -17603,8 +17603,137 @@ system_contexts:
   - file:third_party/openbao/internal/command/config/config_test.go config_test.go@third_party/openbao/internal/command/config/config_test.go
   - file:third_party/openbao/internal/command/config/util.go util.go@third_party/openbao/internal/command/config/util.go
   - file:third_party/openbao/internal/command/config/validate_listener.go validate_listener.go@third_party/openbao/internal/command/config/validate_listener.go
+  - function:00ff8c6fcaed486ef644620e39fe1d52 LoadConfig@third_party/openbao/internal/command/config/config.go:52
+  - function:0ed1d5fca0cc285791fd3b30358158e6 ParseConfig@third_party/openbao/internal/command/config/config.go:81
+  - function:58bf7df6c635e4699997fc3c9bce2ab2 Config@third_party/openbao/internal/command/config/config.go:39
+  - function:9f9dc1297fd8e44b56a0a2ed424ee9cc DefaultTokenHelper@third_party/openbao/internal/command/config/util.go:12
+  - function:eb7f725cdde9e369c32c10727c5ab80e IsValidListener@third_party/openbao/internal/command/config/validate_listener.go:8
+  - struct:4b1ba5d63cf8dc198cfc08f9ef33fd77 DefaultConfig@third_party/openbao/internal/command/config/config.go:29
   id: sc.third-party-openbao-internal-command-config
+  intent: The context exists so commands in third_party/openbao/internal/command can
+    obtain the client-side configuration file settings without each command re-implementing
+    path resolution, file reading and parsing, and so token storage and listener checks
+    have one shared implementation. Config and LoadConfig give the CLI a single entry
+    point for reading the user's config file, ParseConfig separates parsing from file
+    IO so contents can be supplied directly, DefaultTokenHelper turns the configured
+    token_helper into a concrete token.TokenHelper (falling back to OpenBao's internal
+    on-disk store), and IsValidListener provides the validation seam that listener
+    definitions pass through.
+  interfaces:
+  - file: third_party/openbao/internal/command/config/config.go
+    kind: function
+    name: Config
+    signature: func Config() (*DefaultConfig, error)
+  - file: third_party/openbao/internal/command/config/config.go
+    kind: struct
+    name: DefaultConfig
+    signature: type DefaultConfig struct { TokenHelper string `hcl:"token_helper"`
+      }
+  - file: third_party/openbao/internal/command/config/util.go
+    kind: function
+    name: DefaultTokenHelper
+    signature: func DefaultTokenHelper(vaultAddr string) (token.TokenHelper, error)
+  - file: third_party/openbao/internal/command/config/validate_listener.go
+    kind: function
+    name: IsValidListener
+    signature: func IsValidListener(listener *configutil.Listener) error
+  - file: third_party/openbao/internal/command/config/config.go
+    kind: function
+    name: LoadConfig
+    signature: func LoadConfig(path string) (*DefaultConfig, error)
+  - file: third_party/openbao/internal/command/config/config.go
+    kind: function
+    name: ParseConfig
+    signature: func ParseConfig(contents string) (*DefaultConfig, error)
   name: third-party-openbao-internal-command-config
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/command/config/config.go
+    - function:00ff8c6fcaed486ef644620e39fe1d52
+    - function:58bf7df6c635e4699997fc3c9bce2ab2
+    id: r.config-loads-with-empty-path
+    level: MUST
+    text: Config must load the configuration by delegating to LoadConfig with the
+      empty path, so the default path and the environment override apply, and must
+      return nil and the error when loading fails.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/config/config.go
+    - struct:4b1ba5d63cf8dc198cfc08f9ef33fd77
+    id: r.default-config-shape
+    level: MUST
+    text: DefaultConfig must be an HCL-decodable struct carrying a single TokenHelper
+      string field tagged `hcl:"token_helper"`, documented as the executable or command
+      executed to store and retrieve the Vault CLI authentication token; when it is
+      not specified the internal token store is used, which stores the token on disk
+      unencrypted.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/config/util.go
+    - function:9f9dc1297fd8e44b56a0a2ed424ee9cc
+    id: r.default-token-helper-external
+    level: MUST
+    text: When a TokenHelper path is configured, DefaultTokenHelper must resolve it
+      with token.ExternalTokenHelperPath, return that error on failure, and otherwise
+      return a token.ExternalTokenHelper for the resolved binary whose environment
+      carries BAO_ADDR and VAULT_ADDR set to the vaultAddr argument, so the helper
+      does not read a different address than the one in use.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/config/util.go
+    - function:00ff8c6fcaed486ef644620e39fe1d52
+    - function:9f9dc1297fd8e44b56a0a2ed424ee9cc
+    id: r.default-token-helper-fallback
+    level: MUST
+    text: DefaultTokenHelper must load the configuration, return the load error on
+      failure, and when the loaded TokenHelper value is empty return token.NewInternalTokenHelper
+      so the internal on-disk token store is used.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/config/config.go
+    - function:00ff8c6fcaed486ef644620e39fe1d52
+    id: r.load-config-missing-file
+    level: MUST
+    text: 'LoadConfig must read the resolved path with os.ReadFile and must tolerate
+      a missing file: when the error satisfies os.IsNotExist the contents are treated
+      as empty and parsing continues, while any other read error is returned as-is.'
+  - codeRefs:
+    - file:third_party/openbao/internal/command/config/config.go
+    - function:00ff8c6fcaed486ef644620e39fe1d52
+    - function:0ed1d5fca0cc285791fd3b30358158e6
+    id: r.load-config-parse-error
+    level: MUST
+    text: LoadConfig must pass the file contents to ParseConfig and, on parse failure,
+      return an error that names the config file path and advises that the file must
+      be valid, noting that Ansible Vault is known to conflict with it.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/config/config.go
+    - function:00ff8c6fcaed486ef644620e39fe1d52
+    id: r.load-config-path-resolution
+    level: MUST
+    text: 'LoadConfig must resolve the path in this order: use the passed path, fall
+      back to DefaultConfigPath when the path is empty, and let the value of the config
+      path environment variable, read through api.ReadBaoVariable(ConfigPathEnv),
+      override both when it is non-empty; the resolved path must then be passed through
+      homedir.Expand, and an expansion failure must return an error naming the path.'
+  - codeRefs:
+    - file:third_party/openbao/internal/command/config/config.go
+    - function:0ed1d5fca0cc285791fd3b30358158e6
+    id: r.parse-config-contents
+    level: MUST
+    text: ParseConfig must turn config file contents supplied as a string into a *DefaultConfig,
+      separately from the file reading done by LoadConfig, and return an error when
+      the contents cannot be parsed.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/config/config_test.go
+    id: r.test-coverage
+    level: SHOULD
+    text: The package's behaviour must stay covered by the tests in config_test.go,
+      which exercise the exported loaders against the observed path resolution and
+      parsing behaviour.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/config/validate_listener.go
+    - function:eb7f725cdde9e369c32c10727c5ab80e
+    id: r.valid-listener-hook
+    level: MUST
+    text: IsValidListener must accept a *configutil.Listener and return nil for it,
+      providing the listener validation seam without rejecting any listener definition.
   upstream: self
 - code:
   - third_party/openbao/internal/command/healthcheck/healthcheck.go
