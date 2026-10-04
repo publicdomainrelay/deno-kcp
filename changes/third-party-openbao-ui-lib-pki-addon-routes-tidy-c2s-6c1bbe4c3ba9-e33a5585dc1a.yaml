@@ -10,5 +10,29 @@ spec:
   systemContext: third-party-openbao-ui-lib-pki-addon-routes-tidy
   toCommit: e33a5585dc1ac9d3bf63bc1ebdcf5dbb45369989
 status:
-  message: the agent is summarizing third-party-openbao-ui-lib-pki-addon-routes-tidy
-  phase: Running
+  agentLog: 'This context covers the three Ember route modules that back the PKI secrets-engine
+    tidy screens in the vendored OpenBao UI addon: third_party/openbao/ui/lib/pki/addon/routes/tidy/auto.js,
+    index.js and manual.js. PkiTidyIndexRoute owns the status view: it injects the
+    store and secretMountPath services, fetches the tidy status over the application
+    adapter with a GET to /v1/<mount>/tidy-status, stamps the response with timestamp.now(),
+    and builds a hash model of tidyStatus, hasConfig, autoTidyConfig and engine taken
+    from its parent tidy route; its setupController seeds the controller with the
+    default empty-state message and starts the pollTidyStatus task, and its resetController
+    cancels that polling when the route is exited. PkiTidyAutoRoute is a thin child
+    route that re-reads the parent tidy model and returns autoTidyConfig. PkiTidyManualRoute
+    builds a new unsaved pki/tidy record scoped to the current secret mount path and
+    sets the manual breadcrumb chain from secrets through the overview, configuration.index
+    and tidy routes.'
+  message: wrote 8 requirement(s) and 3 interface(s) for third-party-openbao-ui-lib-pki-addon-routes-tidy;
+    interface PkiTidyAutoRoute.model is not in the observed facts; dropped; interface
+    PkiTidyIndexRoute.store is not in the observed facts; dropped; interface PkiTidyIndexRoute.secretMountPath
+    is not in the observed facts; dropped; interface PkiTidyIndexRoute.fetchTidyStatus
+    is not in the observed facts; dropped; interface PkiTidyIndexRoute.model is not
+    in the observed facts; dropped; interface PkiTidyIndexRoute.setupController is
+    not in the observed facts; dropped; interface PkiTidyIndexRoute.resetController
+    is not in the observed facts; dropped; interface PkiTidyManualRoute.store is not
+    in the observed facts; dropped; interface PkiTidyManualRoute.secretMountPath is
+    not in the observed facts; dropped; interface PkiTidyManualRoute.model is not
+    in the observed facts; dropped; interface PkiTidyManualRoute.setupController is
+    not in the observed facts; dropped
+  phase: Succeeded
