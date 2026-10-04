@@ -10,5 +10,14 @@ spec:
   systemContext: third-party-openbao-internal-vault-external-tests-workflows
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-vault-external-tests-workflows
-  phase: Running
+  agentLog: This context is the OpenBao workflows acceptance test suite, held in a
+    single Go test file `third_party/openbao/internal/vault/external_tests/workflows/workflow_test.go`
+    in package `workflows`. It builds in-process test clusters from `vault.NewTestCluster`
+    with the `userpass` credential backend plus the `kv-v2` and `totp` logical backends,
+    and drives the `sys/workflows/manage`, `sys/workflows/execute`, and `sys/workflows/unauthed-execute`
+    HTTP endpoints through the `api.Client` logical layer. The suite covers namespace
+    creation, workflow recursion limits, login with TOTP MFA, unauthenticated execution,
+    and alias-lookahead rejection, and supplies the HCL workflow documents for each
+    case as package constants.
+  message: wrote 11 requirement(s) and 0 interface(s) for third-party-openbao-internal-vault-external-tests-workflows
+  phase: Succeeded
