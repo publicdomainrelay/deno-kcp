@@ -1,0 +1,214 @@
+conditions:
+- message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+  reason: InterfacesObserved
+  status: "True"
+  type: CodeSynced
+- message: no synced fingerprint has been recorded yet
+  reason: NotSyncedYet
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/physical/postgresql/index.go
+  - third_party/openbao/internal/physical/postgresql/postgresql.go
+  - third_party/openbao/internal/physical/postgresql/postgresql_test.go
+  - third_party/openbao/internal/physical/postgresql/testing.go
+  - third_party/openbao/internal/physical/postgresql/transaction.go
+  fingerprint: 7f42720dd97763f8998d26c904e40a179b136c68fc481d6efddc757bb3485b86
+  interfaces:
+  - codegraphId: method:68ab16bb6bfac8f9a92bd6e2cf9ed2a2
+    file: third_party/openbao/internal/physical/postgresql/index.go
+    kind: method
+    line: 30
+    name: PostgreSQLBackend.AppliedReplicationIndex
+    signature: (ctx context.Context) (string, error)
+  - codegraphId: method:6ad2c3b35a0b36ec21ea54728707ee0a
+    file: third_party/openbao/internal/physical/postgresql/index.go
+    kind: method
+    line: 39
+    name: PostgreSQLBackend.GreaterEqualReplicationIndex
+    signature: (ctx context.Context, left string, right string) (bool, error)
+  - codegraphId: struct:5bde59ab44ad6f3e3ad7304470df2314
+    file: third_party/openbao/internal/physical/postgresql/postgresql.go
+    kind: struct
+    line: 59
+    name: PostgreSQLBackend
+  - codegraphId: struct:7dde23d46da28ce4dfd7b89df5f14c69
+    file: third_party/openbao/internal/physical/postgresql/postgresql.go
+    kind: struct
+    line: 91
+    name: PostgreSQLLock
+  - codegraphId: function:08a0572b2b555e808a568079a0851101
+    file: third_party/openbao/internal/physical/postgresql/postgresql.go
+    kind: function
+    line: 111
+    name: NewPostgreSQLBackend
+    signature: (conf map[string]string, logger log.Logger) (physical.Backend, error)
+  - codegraphId: method:af03dc7cb686c930110d537a0574ca9f
+    file: third_party/openbao/internal/physical/postgresql/postgresql.go
+    kind: method
+    line: 415
+    name: PostgreSQLBackend.Put
+    signature: (ctx context.Context, entry *physical.Entry) error
+  - codegraphId: method:bd16c63ca59a7954fd1f61597809dcc4
+    file: third_party/openbao/internal/physical/postgresql/postgresql.go
+    kind: method
+    line: 432
+    name: PostgreSQLBackend.Get
+    signature: (ctx context.Context, fullPath string) (*physical.Entry, error)
+  - codegraphId: method:0000381cc721ee6432f04901bd6791f7
+    file: third_party/openbao/internal/physical/postgresql/postgresql.go
+    kind: method
+    line: 454
+    name: PostgreSQLBackend.Delete
+    signature: (ctx context.Context, fullPath string) error
+  - codegraphId: method:e3bce0ea8240f41a505cbfc2827311ff
+    file: third_party/openbao/internal/physical/postgresql/postgresql.go
+    kind: method
+    line: 472
+    name: PostgreSQLBackend.List
+    signature: (ctx context.Context, prefix string) ([]string, error)
+  - codegraphId: method:2676c4f536dcb702d9b6440a4a0dab14
+    file: third_party/openbao/internal/physical/postgresql/postgresql.go
+    kind: method
+    line: 497
+    name: PostgreSQLBackend.ListPage
+    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
+      error)
+  - codegraphId: method:e96d833040a42b79023bf6fd33334009
+    file: third_party/openbao/internal/physical/postgresql/postgresql.go
+    kind: method
+    line: 527
+    name: PostgreSQLBackend.LockWith
+    signature: (key, value string) (physical.Lock, error)
+  - codegraphId: method:19be9e462678b02a5d4f2415000888d2
+    file: third_party/openbao/internal/physical/postgresql/postgresql.go
+    kind: method
+    line: 543
+    name: PostgreSQLBackend.HAEnabled
+    signature: () bool
+  - codegraphId: method:6cad18e49e3431e07b874533cfee2073
+    file: third_party/openbao/internal/physical/postgresql/postgresql.go
+    kind: method
+    line: 547
+    name: PostgreSQLBackend.RegisterActiveNodeLock
+    signature: (l physical.Lock) error
+  - codegraphId: method:55b19d7b367f73868807c08961160741
+    file: third_party/openbao/internal/physical/postgresql/postgresql.go
+    kind: method
+    line: 588
+    name: PostgreSQLLock.Lock
+    signature: (stopCh <-chan struct{}) (<-chan struct{}, error)
+  - codegraphId: method:192628e65f5b77c7df2ac7508a836acf
+    file: third_party/openbao/internal/physical/postgresql/postgresql.go
+    kind: method
+    line: 616
+    name: PostgreSQLLock.Unlock
+    signature: () error
+  - codegraphId: method:c966d8f858bd6852c8f7b694fc2ecc28
+    file: third_party/openbao/internal/physical/postgresql/postgresql.go
+    kind: method
+    line: 630
+    name: PostgreSQLLock.Value
+    signature: () (bool, string, error)
+  - codegraphId: method:cc88a3a37c461351272682574e8e5d05
+    file: third_party/openbao/internal/physical/postgresql/postgresql.go
+    kind: method
+    line: 655
+    name: PostgreSQLLock.IsActivelyHeld
+    signature: (ctx context.Context) (bool, error)
+  - codegraphId: function:d6102f3f94bcbb3b936b5abf0c759eda
+    file: third_party/openbao/internal/physical/postgresql/testing.go
+    kind: function
+    line: 18
+    name: SetupDatabaseObjects
+    signature: (t *testing.T, pg *PostgreSQLBackend)
+  - codegraphId: function:3d3280124ea5f6af84087b4581714571
+    file: third_party/openbao/internal/physical/postgresql/testing.go
+    kind: function
+    line: 30
+    name: SetupDatabaseObjectsWithClient
+    signature: (client *sql.DB, table string, constraint string, index string, haTable
+      string, haTableConstraint string) error
+  - codegraphId: function:cbeaf4f781e114e66e84bc5ed1c390d6
+    file: third_party/openbao/internal/physical/postgresql/testing.go
+    kind: function
+    line: 75
+    name: GetTestPostgreSQLBackend
+    signature: (t *testing.T, logger log.Logger) (physical.Backend, func())
+  - codegraphId: function:88f2a443af52f35240ae32fae2ad240c
+    file: third_party/openbao/internal/physical/postgresql/testing.go
+    kind: function
+    line: 89
+    name: GetTestReplicatedPostgreSQLBackend
+    signature: (t *testing.T, name string, logger log.Logger) (physical.Backend, physical.Backend,
+      func())
+  - codegraphId: struct:1bf3e14c67fbffac5cf1d89908880397
+    file: third_party/openbao/internal/physical/postgresql/transaction.go
+    kind: struct
+    line: 16
+    name: PostgreSQLBackendTransaction
+  - codegraphId: method:97bd0df384588c9d2a7384aaf9898812
+    file: third_party/openbao/internal/physical/postgresql/transaction.go
+    kind: method
+    line: 72
+    name: PostgreSQLBackend.BeginTx
+    signature: (ctx context.Context) (physical.Transaction, error)
+  - codegraphId: method:2ba56e9e1f43bbe7cf58705a03d5117b
+    file: third_party/openbao/internal/physical/postgresql/transaction.go
+    kind: method
+    line: 76
+    name: PostgreSQLBackend.BeginReadOnlyTx
+    signature: (ctx context.Context) (physical.Transaction, error)
+  - codegraphId: method:039c3fc1bb85ea295bea2429c6b2ad59
+    file: third_party/openbao/internal/physical/postgresql/transaction.go
+    kind: method
+    line: 80
+    name: PostgreSQLBackendTransaction.Put
+    signature: (ctx context.Context, entry *physical.Entry) error
+  - codegraphId: method:2b07670b1f9c7b61335983a6351d37b2
+    file: third_party/openbao/internal/physical/postgresql/transaction.go
+    kind: method
+    line: 103
+    name: PostgreSQLBackendTransaction.Delete
+    signature: (ctx context.Context, fullPath string) error
+  - codegraphId: method:bc939ff14b265610696ce803016fe183
+    file: third_party/openbao/internal/physical/postgresql/transaction.go
+    kind: method
+    line: 126
+    name: PostgreSQLBackendTransaction.Get
+    signature: (ctx context.Context, fullPath string) (*physical.Entry, error)
+  - codegraphId: method:acecf2989fb52e674d44e14400b67dc0
+    file: third_party/openbao/internal/physical/postgresql/transaction.go
+    kind: method
+    line: 152
+    name: PostgreSQLBackendTransaction.List
+    signature: (ctx context.Context, prefix string) ([]string, error)
+  - codegraphId: method:b357c3eae2fcc718b3aef8632e7b9ec2
+    file: third_party/openbao/internal/physical/postgresql/transaction.go
+    kind: method
+    line: 180
+    name: PostgreSQLBackendTransaction.ListPage
+    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
+      error)
+  - codegraphId: method:52a8f4f10eda5f16c99139d884dd42f2
+    file: third_party/openbao/internal/physical/postgresql/transaction.go
+    kind: method
+    line: 214
+    name: PostgreSQLBackendTransaction.Commit
+    signature: (ctx context.Context) error
+  - codegraphId: method:c48c8feb6cc20849481c652c0ea17d16
+    file: third_party/openbao/internal/physical/postgresql/transaction.go
+    kind: method
+    line: 243
+    name: PostgreSQLBackendTransaction.Rollback
+    signature: (ctx context.Context) error
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 9f968bf30bdfa9b5ef2f93fd01c21c65ff6632aba1abc0e73b46991fd89edbbf
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 7f42720dd97763f8998d26c904e40a179b136c68fc481d6efddc757bb3485b86
