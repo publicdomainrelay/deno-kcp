@@ -4355,11 +4355,11 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 
 - intent: "" -> "This context exists to specify the page-level behavior of the MFA method detail controller: which services it depends on, how it exposes the active tab as a URL query parameter, and what the delete-method action must do on success and on failure. It captures the controller as an independently describable unit of the OpenBao UI so its query-parameter contract, service dependencies, and delete/redirect/notification flow can be verified against the code as written."
 - added `r.default-export-controller` (MUST): "The module default-exports one class, MfaMethodController, that extends Ember's Controller, so the route resolves it as the controller for the MFA method page."
-- added `r.delete-method-action` (MUST): "deleteMethod is exposed as an Ember @action so templates can invoke it as the destructive delete control for the displayed MFA method."
-- added `r.delete-method-failure` (MUST): "When the record destruction rejects, deleteMethod catches the error, reports a danger flash message with the text 'There was an error deleting this MFA method.', and performs no route transition."
-- added `r.delete-method-success` (MUST): "deleteMethod awaits destruction of the route model's method record, then reports a success flash message with the text 'MFA method deleted successfully.' and transitions to the vault.cluster.access.mfa.methods route through transitionToSafe using the injected router service."
-- added `r.injected-services` (MUST): "The controller declares router and flashMessages as injected Ember services before use, providing the routing and user-notification dependencies that deleteMethod consumes."
-- added `r.tab-query-param` (MUST): "The controller declares the query parameter list ['tab'] and initializes the tab property to 'config', so the selected tab is reflected in the URL and the page opens on the config tab when no tab parameter is given."
+- added `r.delete-method-action` (MUST): "deleteMethod is exposed as an Ember @action and declared async, so templates can invoke it as the destructive delete control for the displayed MFA method."
+- added `r.delete-method-failure` (MUST): "When the record destruction rejects, deleteMethod's catch block reports a danger flash message with the text 'There was an error deleting this MFA method.' and performs no route transition, leaving the page in place."
+- added `r.delete-method-success` (MUST): "deleteMethod awaits destroyRecord on the route model's method record, then reports a success flash message with the text 'MFA method deleted successfully.' and transitions to the vault.cluster.access.mfa.methods route through transitionToSafe using the injected router service."
+- added `r.injected-services` (MUST): "The controller declares router and flashMessages as @service-injected properties before use, providing the routing and user-notification dependencies that deleteMethod consumes."
+- added `r.tab-query-param` (MUST): "The controller declares queryParams as the single-element list ['tab'] and initializes tab to 'config', so the selected tab is reflected in the URL and the page opens on the config tab when no tab parameter is given."
 
 ### third-party-openbao-ui-app-controllers-vault-cluster-access-namespaces
 
@@ -4717,6 +4717,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-methods-method-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-namespaces-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-assignments-assignment-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-clients-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

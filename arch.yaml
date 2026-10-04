@@ -61345,22 +61345,22 @@ system_contexts:
     - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/method/index.js
     id: r.delete-method-action
     level: MUST
-    text: deleteMethod is exposed as an Ember @action so templates can invoke it as
-      the destructive delete control for the displayed MFA method.
+    text: deleteMethod is exposed as an Ember @action and declared async, so templates
+      can invoke it as the destructive delete control for the displayed MFA method.
   - codeRefs:
     - class:344497ad2abb8c229aa7cbc42719c21f
     - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/method/index.js
     id: r.delete-method-failure
     level: MUST
-    text: When the record destruction rejects, deleteMethod catches the error, reports
-      a danger flash message with the text 'There was an error deleting this MFA method.',
-      and performs no route transition.
+    text: When the record destruction rejects, deleteMethod's catch block reports
+      a danger flash message with the text 'There was an error deleting this MFA method.'
+      and performs no route transition, leaving the page in place.
   - codeRefs:
     - class:344497ad2abb8c229aa7cbc42719c21f
     - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/method/index.js
     id: r.delete-method-success
     level: MUST
-    text: deleteMethod awaits destruction of the route model's method record, then
+    text: deleteMethod awaits destroyRecord on the route model's method record, then
       reports a success flash message with the text 'MFA method deleted successfully.'
       and transitions to the vault.cluster.access.mfa.methods route through transitionToSafe
       using the injected router service.
@@ -61369,7 +61369,7 @@ system_contexts:
     - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/method/index.js
     id: r.injected-services
     level: MUST
-    text: The controller declares router and flashMessages as injected Ember services
+    text: The controller declares router and flashMessages as @service-injected properties
       before use, providing the routing and user-notification dependencies that deleteMethod
       consumes.
   - codeRefs:
@@ -61377,8 +61377,8 @@ system_contexts:
     - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/method/index.js
     id: r.tab-query-param
     level: MUST
-    text: The controller declares the query parameter list ['tab'] and initializes
-      the tab property to 'config', so the selected tab is reflected in the URL and
+    text: The controller declares queryParams as the single-element list ['tab'] and
+      initializes tab to 'config', so the selected tab is reflected in the URL and
       the page opens on the config tab when no tab parameter is given.
   upstream: self
 - code:
