@@ -20274,8 +20274,231 @@ system_contexts:
   - file:third_party/openbao/internal/helper/fairshare/simple_job.go simple_job.go@third_party/openbao/internal/helper/fairshare/simple_job.go
   - file:third_party/openbao/internal/helper/fairshare/workerpool.go workerpool.go@third_party/openbao/internal/helper/fairshare/workerpool.go
   - file:third_party/openbao/internal/helper/fairshare/workerpool_test.go workerpool_test.go@third_party/openbao/internal/helper/fairshare/workerpool_test.go
+  - function:4b129dd9f878e9e637aa9f571775c444 NewJobManager@third_party/openbao/internal/helper/fairshare/jobmanager.go:51
+  - function:a25203cc8fb9b9acd89054978492bd97 GetNumWorkers@third_party/openbao/internal/helper/fairshare/fairshare_testing_util.go:61
+  - interface:f20c7873181e8d9d7200218fdeb45888 Job@third_party/openbao/internal/helper/fairshare/workerpool.go:17
+  - method:1a3f27add3579cb8043963363c4de892 testJob.OnFailure@third_party/openbao/internal/helper/fairshare/fairshare_testing_util.go:24
+  - method:243171cf7d78d01d9825d3ad77eb7965 testJob.Execute@third_party/openbao/internal/helper/fairshare/fairshare_testing_util.go:20
+  - method:52fd9c225ff007a2c7a6526b56daf5e9 JobManager.GetPendingJobCount@third_party/openbao/internal/helper/fairshare/jobmanager.go:133
+  - method:5e17595d016c4f4cf6b061d94c1e2f55 SimpleJob.Execute@third_party/openbao/internal/helper/fairshare/simple_job.go:7
+  - method:7c89e7dbd7b4e50772d64ef3d857ac08 JobManager.Start@third_party/openbao/internal/helper/fairshare/jobmanager.go:86
+  - method:b11f823816dbf7962ffaa7493241f55b SimpleJob.OnFailure@third_party/openbao/internal/helper/fairshare/simple_job.go:12
+  - method:bd92c0739319b162b5bdf92aaca462ef JobManager.GetWorkerCounts@third_party/openbao/internal/helper/fairshare/jobmanager.go:146
+  - method:bdc00af64aa765049d89d9e6902b1142 JobManager.Stop@third_party/openbao/internal/helper/fairshare/jobmanager.go:95
+  - method:c21a7c1e65c595c0b5628fa9790f4fdd JobManager.AddJob@third_party/openbao/internal/helper/fairshare/jobmanager.go:105
+  - method:d5687b37193fcb4618d7ddabd0119c3d Job.Execute@third_party/openbao/internal/helper/fairshare/workerpool.go:20
+  - method:dc4a3f45feb63a80716378dfc1fed3c7 Job.OnFailure@third_party/openbao/internal/helper/fairshare/workerpool.go:24
+  - method:e29495e289a0e66c0fde8fe4092bbc90 JobManager.GetWorkQueueLengths@third_party/openbao/internal/helper/fairshare/jobmanager.go:153
+  - struct:09a3af83eb6b540ce9d54bf386603ef0 JobManager@third_party/openbao/internal/helper/fairshare/jobmanager.go:21
+  - type_alias:bc8a2d6a2a4a2d1c6a08271183ef8290 SimpleJob@third_party/openbao/internal/helper/fairshare/simple_job.go:5
   id: sc.third-party-openbao-internal-helper-fairshare
+  intent: 'This context exists because deno-kcp vendors OpenBao and the fairshare
+    package is the scheduler used where work must be spread across competing queues
+    instead of drained in arrival order. The spec records the package''s contract:
+    the Job interface worker code executes against, the JobManager lifecycle and its
+    idempotent start/stop guards, the round-robin plus saturation rule that makes
+    the sharing fair, and the narrow set of exported accessors other packages may
+    read.'
+  interfaces:
+  - file: third_party/openbao/internal/helper/fairshare/fairshare_testing_util.go
+    kind: function
+    name: GetNumWorkers
+    signature: func GetNumWorkers(j *JobManager) int
+  - file: third_party/openbao/internal/helper/fairshare/workerpool.go
+    kind: interface
+    name: Job
+    signature: type Job interface { Execute() error; OnFailure(err error) }
+  - file: third_party/openbao/internal/helper/fairshare/workerpool.go
+    kind: method
+    name: Job.Execute
+    signature: Execute() error
+  - file: third_party/openbao/internal/helper/fairshare/workerpool.go
+    kind: method
+    name: Job.OnFailure
+    signature: OnFailure(err error)
+  - file: third_party/openbao/internal/helper/fairshare/jobmanager.go
+    kind: struct
+    name: JobManager
+    signature: type JobManager struct { name string; queues map[string]*list.List;
+      quit chan struct{}; newWork chan struct{}; workerPool *dispatcher; workerCount
+      map[string]int; onceStart sync.Once; onceStop sync.Once; logger log.Logger;
+      totalJobs int; metricSink *metricsutil.ClusterMetricSink; wg sync.WaitGroup;
+      l sync.RWMutex; queuesIndex []string; lastQueueAccessed int }
+  - file: third_party/openbao/internal/helper/fairshare/jobmanager.go
+    kind: method
+    name: JobManager.AddJob
+    signature: func (j *JobManager) AddJob(job Job, queueID string)
+  - file: third_party/openbao/internal/helper/fairshare/jobmanager.go
+    kind: method
+    name: JobManager.GetPendingJobCount
+    signature: func (j *JobManager) GetPendingJobCount() int
+  - file: third_party/openbao/internal/helper/fairshare/jobmanager.go
+    kind: method
+    name: JobManager.GetWorkQueueLengths
+    signature: func (j *JobManager) GetWorkQueueLengths() map[string]int
+  - file: third_party/openbao/internal/helper/fairshare/jobmanager.go
+    kind: method
+    name: JobManager.GetWorkerCounts
+    signature: func (j *JobManager) GetWorkerCounts() map[string]int
+  - file: third_party/openbao/internal/helper/fairshare/jobmanager.go
+    kind: method
+    name: JobManager.Start
+    signature: func (j *JobManager) Start()
+  - file: third_party/openbao/internal/helper/fairshare/jobmanager.go
+    kind: method
+    name: JobManager.Stop
+    signature: func (j *JobManager) Stop()
+  - file: third_party/openbao/internal/helper/fairshare/jobmanager.go
+    kind: function
+    name: NewJobManager
+    signature: func NewJobManager(name string, numWorkers int, l log.Logger, metricSink
+      *metricsutil.ClusterMetricSink) *JobManager
+  - file: third_party/openbao/internal/helper/fairshare/simple_job.go
+    kind: type_alias
+    name: SimpleJob
+    signature: type SimpleJob func()
+  - file: third_party/openbao/internal/helper/fairshare/simple_job.go
+    kind: method
+    name: SimpleJob.Execute
+    signature: func (s SimpleJob) Execute() error
+  - file: third_party/openbao/internal/helper/fairshare/simple_job.go
+    kind: method
+    name: SimpleJob.OnFailure
+    signature: func (s SimpleJob) OnFailure(err error)
+  - file: third_party/openbao/internal/helper/fairshare/fairshare_testing_util.go
+    kind: method
+    name: testJob.Execute
+    signature: func (t *testJob) Execute() error
+  - file: third_party/openbao/internal/helper/fairshare/fairshare_testing_util.go
+    kind: method
+    name: testJob.OnFailure
+    signature: func (t *testJob) OnFailure(err error)
   name: third-party-openbao-internal-helper-fairshare
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/fairshare/jobmanager.go
+    - method:c21a7c1e65c595c0b5628fa9790f4fdd
+    id: r.add-job
+    level: MUST
+    text: AddJob must take the write lock, create the queue for queueID together with
+      its zeroed worker count when the queue does not yet exist, push the job onto
+      the back of that queue, increment the total job counter, and, when a metric
+      sink is configured, set the queue_length gauge labelled with queue_id and the
+      total_jobs gauge; when the manager had no queues at all it must also non-blockingly
+      signal the buffered newWork channel so work added before Start is not lost.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/fairshare/workerpool.go
+    id: r.dispatcher-defaults
+    level: MUST
+    text: Dispatcher construction must coerce a worker count of zero or less to one
+      and log a warning, substitute a discarding Vault logger for a nil logger, and
+      generate a uuid-based dispatcher-<guid> name when the name is empty.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/fairshare/jobmanager.go
+    id: r.fair-share-cap
+    level: MUST
+    text: Queue selection must proceed in round-robin order starting after lastQueueAccessed,
+      skipping any queue whose tracked worker count is already at or above ceil(0.9
+      * numWorkers / numberOfActiveQueues), and it must record the chosen queue index
+      in lastQueueAccessed; when every queue is saturated no job is handed out.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/fairshare/jobmanager.go
+    - method:52fd9c225ff007a2c7a6526b56daf5e9
+    - method:bd92c0739319b162b5bdf92aaca462ef
+    - method:e29495e289a0e66c0fde8fe4092bbc90
+    id: r.introspection
+    level: MUST
+    text: 'JobManager must expose read-locked accessors: GetPendingJobCount returns
+      the sum of all queue lengths, GetWorkerCounts returns the queue-id to active-worker
+      map, and GetWorkQueueLengths returns a fresh map of queue-id to queue length
+      so callers cannot mutate internal state.'
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/fairshare/workerpool.go
+    - interface:f20c7873181e8d9d7200218fdeb45888
+    - method:d5687b37193fcb4618d7ddabd0119c3d
+    - method:dc4a3f45feb63a80716378dfc1fed3c7
+    id: r.job-interface
+    level: MUST
+    text: A Job must expose Execute, which performs the work synchronously when a
+      cleanup function is supplied, and OnFailure, which handles the error Execute
+      returned; the worker pool calls Execute and, only on a non-nil error, calls
+      OnFailure(err) before invoking the job's cleanup function.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/fairshare/jobmanager.go
+    - function:4b129dd9f878e9e637aa9f571775c444
+    - struct:09a3af83eb6b540ce9d54bf386603ef0
+    id: r.new-job-manager
+    level: MUST
+    text: NewJobManager must accept a name, a worker count, a logger and a metric
+      sink; when the logger is nil it substitutes a Vault logger writing to io.Discard
+      at NoLevel, when the name is empty it generates a uuid-based name of the form
+      jobmanager-<guid> (falling back to the literal no-uuid when uuid generation
+      fails and logging a warning), and it must create the backing dispatcher named
+      <name>-dispatcher with the given worker count.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/fairshare/jobmanager.go
+    - method:243171cf7d78d01d9825d3ad77eb7965
+    id: r.queue-pruning
+    level: MUST
+    text: Popping a job must decrement the total job count and refresh the metric
+      gauges; when the popped queue becomes empty the manager must delete the queue
+      and its index entry, leave the worker count in place because workers may still
+      be finishing earlier jobs, correct lastQueueAccessed for continued round-robining,
+      and log a warning and return unchanged when the index is out of bounds.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/fairshare/jobmanager.go
+    id: r.round-robin-scheduling
+    level: MUST
+    text: The scheduling loop must run in its own goroutine, repeatedly call getNextJob
+      to pop the front job of the next eligible queue, dispatch it with callbacks
+      that increment then decrement that queue's worker count, break out when no queue
+      is eligible, and otherwise block on quit, the newWork signal, or a 50 millisecond
+      ticker that re-checks for queues newly able to take a worker.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/fairshare/simple_job.go
+    - method:5e17595d016c4f4cf6b061d94c1e2f55
+    - method:b11f823816dbf7962ffaa7493241f55b
+    - type_alias:bc8a2d6a2a4a2d1c6a08271183ef8290
+    id: r.simple-job
+    level: MUST
+    text: 'SimpleJob must adapt a bare func() to the Job interface: Execute calls
+      the function and returns nil, and OnFailure panics with a message stating that
+      SimpleJob cannot fail, since a SimpleJob never yields an error.'
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/fairshare/jobmanager.go
+    - method:7c89e7dbd7b4e50772d64ef3d857ac08
+    id: r.start-once
+    level: MUST
+    text: JobManager.Start must run its body at most once via sync.Once, starting
+      the dispatcher's workers and the background assignWork scheduling loop; a manager
+      that has been stopped must not be restartable.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/fairshare/jobmanager.go
+    - method:bdc00af64aa765049d89d9e6902b1142
+    id: r.stop-once
+    level: MUST
+    text: JobManager.Stop must run its body at most once via sync.Once, close the
+      quit channel, wait on the waitgroup that tracks the scheduling loop, and then
+      stop the worker pool so all workers exit.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/fairshare/fairshare_testing_util.go
+    - function:a25203cc8fb9b9acd89054978492bd97
+    - method:1a3f27add3579cb8043963363c4de892
+    - method:243171cf7d78d01d9825d3ad77eb7965
+    id: r.test-helpers
+    level: MUST
+    text: The package test utilities must build a testJob that delegates Execute to
+      its ex function with its id and OnFailure to its onFail function, require both
+      functions to be non-nil via newTestJob, and GetNumWorkers must read the underlying
+      worker pool's numWorkers for assertions.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/fairshare/jobmanager.go
+    id: r.worker-count-cleanup
+    level: MUST
+    text: Decrementing a queue's worker count must delete the worker tracking entry
+      once the queue no longer exists and the count has dropped below one, and re-adding
+      a queue must preserve an existing non-zero worker count rather than resetting
+      it.
   upstream: self
 - code:
   - third_party/openbao/internal/helper/flag-kv/flag.go

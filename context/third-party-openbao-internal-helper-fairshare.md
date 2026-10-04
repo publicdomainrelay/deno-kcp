@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists because deno-kcp vendors OpenBao and the fairshare package is the scheduler used where work must be spread across competing queues instead of drained in arrival order. The spec records the package's contract: the Job interface worker code executes against, the JobManager lifecycle and its idempotent start/stop guards, the round-robin plus saturation rule that makes the sharing fair, and the narrow set of exported accessors other packages may read.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
