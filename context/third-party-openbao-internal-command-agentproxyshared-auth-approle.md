@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so the agent proxy can log in to OpenBao with AppRole credentials that live on disk rather than in memory, reading a required role ID file and an optional secret ID file at authentication time, with support for unwrapping a response-wrapped secret ID and for deleting the secret ID file once read. It defines the configuration surface for that login path (role_id_file_path, secret_id_file_path, remove_secret_id_file_after_reading, secret_id_response_wrapping_path) and implements the auth.AuthMethod interface used by the shared auth package, including the no-op rotation hooks NewCreds, CredSuccess and Shutdown that tell the caller this method has no credential watch channel.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
