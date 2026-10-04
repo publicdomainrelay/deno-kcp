@@ -1,15 +1,113 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: DockerCluster, DockerCluster.Client, DockerCluster.Initialize,
+    DockerCluster.MountPath, DockerCluster.Name, DockerCluster.RootToken, DockerCluster.Setup,
+    DockerCluster.Teardown, DockerClusterOptions, NewEnvironment, Runner, Runner.Start,
+    dockerClusterNode.Cleanup, dockerClusterNode.Name, dockerClusterNode.NewAPIClient'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go
+  - third_party/openbao/sdk/helper/stepwise/environments/docker/runner.go
+  fingerprint: 89147d6f6126a9b860bab98fbbcf45c53f4f02a9febb23dff653cbd860b7cad9
+  interfaces:
+  - codegraphId: struct:cf0b804943aa85368e334cac79a14cba
+    file: third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go
+    kind: struct
+    line: 41
+    name: DockerCluster
+  - codegraphId: method:b2901421007bb75df8136ecac23b46bc
+    file: third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go
+    kind: method
+    line: 79
+    name: DockerCluster.Teardown
+    signature: () error
+  - codegraphId: method:8fbf76337dc27c365fdf1a56a2a217ae
+    file: third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go
+    kind: method
+    line: 104
+    name: DockerCluster.MountPath
+    signature: () string
+  - codegraphId: method:f0317d5bfa4d1a8f7118fb30843bc695
+    file: third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go
+    kind: method
+    line: 128
+    name: DockerCluster.RootToken
+    signature: () string
+  - codegraphId: method:c717acd5f677a837547f1a723e4a83d2
+    file: third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go
+    kind: method
+    line: 133
+    name: DockerCluster.Name
+    signature: () string
+  - codegraphId: method:8a2e245805b6d5f5c40ed2c5ca8c9429
+    file: third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go
+    kind: method
+    line: 138
+    name: DockerCluster.Client
+    signature: () (*api.Client, error)
+  - codegraphId: method:eeaf92de25aaf8737e543638ffb2b17b
+    file: third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go
+    kind: method
+    line: 153
+    name: dockerClusterNode.Name
+    signature: () string
+  - codegraphId: method:12633cff7d5160896bbe771ae1d27fec
+    file: third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go
+    kind: method
+    line: 157
+    name: DockerCluster.Initialize
+    signature: (ctx context.Context) error
+  - codegraphId: function:699d45430ec9f904a07c3cf1fb1820e4
+    file: third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go
+    kind: function
+    line: 450
+    name: NewEnvironment
+    signature: (name string, options *stepwise.MountOptions) *DockerCluster
+  - codegraphId: method:bd24cfbfe36aef93ff910aa7c1ccbf22
+    file: third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go
+    kind: method
+    line: 490
+    name: dockerClusterNode.NewAPIClient
+    signature: () (*api.Client, error)
+  - codegraphId: method:67f521b7b07124f75384f84fe46cf048
+    file: third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go
+    kind: method
+    line: 519
+    name: dockerClusterNode.Cleanup
+    signature: () error
+  - codegraphId: struct:95710b48337c71fb2829ac7b958bb1cc
+    file: third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go
+    kind: struct
+    line: 641
+    name: DockerClusterOptions
+  - codegraphId: method:83195a152fbda49bb45472a1d8986b4a
+    file: third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go
+    kind: method
+    line: 818
+    name: DockerCluster.Setup
+    signature: () error
+  - codegraphId: struct:cc22610728fc8ad8bf379c743f498a7f
+    file: third_party/openbao/sdk/helper/stepwise/environments/docker/runner.go
+    kind: struct
+    line: 16
+    name: Runner
+  - codegraphId: method:014442ecd4ea6b48a2999ed0bbfea921
+    file: third_party/openbao/sdk/helper/stepwise/environments/docker/runner.go
+    kind: method
+    line: 29
+    name: Runner.Start
+    signature: (ctx context.Context) (*container.InspectResponse, error)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: aa7de7b584589afc122c3591679b2b06d5e5dbec7f2b70817bfb02545ab38247
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 89147d6f6126a9b860bab98fbbcf45c53f4f02a9febb23dff653cbd860b7cad9

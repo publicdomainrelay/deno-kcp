@@ -9,5 +9,7 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/sdk/helper/testcluster/docker/cert.go` file cert.go (third_party/openbao/sdk/helper/testcluster/docker/cert.go)
+- `file:third_party/openbao/sdk/helper/testcluster/docker/environment.go` file environment.go (third_party/openbao/sdk/helper/testcluster/docker/environment.go)
+- `file:third_party/openbao/sdk/helper/testcluster/docker/storage.go` file storage.go (third_party/openbao/sdk/helper/testcluster/docker/storage.go)
 <!-- SPECD_MANAGED_END -->
