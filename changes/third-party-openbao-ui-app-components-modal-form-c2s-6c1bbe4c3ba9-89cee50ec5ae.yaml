@@ -10,5 +10,24 @@ spec:
   systemContext: third-party-openbao-ui-app-components-modal-form
   toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
 status:
-  message: the agent is summarizing third-party-openbao-ui-app-components-modal-form
-  phase: Running
+  agentLog: 'This context covers two Ember Glimmer components under the OpenBao UI,
+    both used inside modal dialogs to create a new record of a type the user has not
+    yet chosen. PolicyTemplate (third_party/openbao/ui/app/components/modal-form/policy-template.js)
+    injects the store service and tracks a nullable `policy` record plus a `showExamplePolicy`
+    flag; its `policyOptions` getter returns a single ACL Policy choice, and its `policyTemplates`
+    map holds the placeholder ACL policy text that the JsonEditor renders with preserved
+    whitespace. Its `setPolicyType` action unloads any previously created policy record
+    before creating a fresh `policy/<type>` record named from `args.nameInput`, and
+    its `onSave` action forwards the saved model to `args.onSave` then resets `policy`
+    to null for reuse. OidcAssignmentTemplate (third_party/openbao/ui/app/components/modal-form/oidc-assignment-template.js)
+    is the simpler sibling: it creates an `oidc/assignment` record from `args.nameInput`
+    in its constructor, and its `onSave` action forwards the model to `args.onSave`
+    and then nulls the tracked `assignment`. Both components share the same modal
+    contract: `@nameInput` for the new record name and `@onSave`/`@onCancel` callbacks,
+    with the created record handed to a type-specific form (policy-form or oidc/assignment-form).'
+  message: wrote 8 requirement(s) and 2 interface(s) for third-party-openbao-ui-app-components-modal-form;
+    interface OidcAssignmentTemplate.onSave is not in the observed facts; dropped;
+    interface PolicyTemplate.policyOptions is not in the observed facts; dropped;
+    interface PolicyTemplate.setPolicyType is not in the observed facts; dropped;
+    interface PolicyTemplate.onSave is not in the observed facts; dropped
+  phase: Succeeded

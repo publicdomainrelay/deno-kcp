@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+These components exist so the UI can open a modal before the record's concrete type is known. PolicyTemplate defers record creation until the operator picks a policy type from `policyOptions`, offering the ACL template as a starting point, while OidcAssignmentTemplate knows its single type up front and creates the record immediately. Each component owns the lifetime of the in-progress record: it creates the Ember Data record from the modal's `nameInput`, hands that record to the type-specific form, and clears its own tracked reference after save so the modal can be reused.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

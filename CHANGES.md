@@ -4091,6 +4091,18 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.setup-step-one` (MUST): "MfaSetupStepOne must exist as the first exported step component of the MFA enrollment flow and take its data from component arguments rather than from services."
 - added `r.setup-step-two` (MUST): "MfaSetupStepTwo must exist as the second exported step component of the MFA enrollment flow, presenting the verification or completion stage of the setup wizard."
 
+### third-party-openbao-ui-app-components-modal-form
+
+- intent: "" -> "These components exist so the UI can open a modal before the record's concrete type is known. PolicyTemplate defers record creation until the operator picks a policy type from `policyOptions`, offering the ACL template as a starting point, while OidcAssignmentTemplate knows its single type up front and creates the record immediately. Each component owns the lifetime of the in-progress record: it creates the Ember Data record from the modal's `nameInput`, hands that record to the type-specific form, and clears its own tracked reference after save so the modal can be reused."
+- added `r.oidc-assignment-created-on-construction` (MUST): "OidcAssignmentTemplate must create an `oidc/assignment` store record in its constructor, using the `nameInput` argument as the record name, and hold it in the tracked `assignment` property that is passed to the oidc/assignment-form."
+- added `r.oidc-assignment-save-forwards-and-resets` (MUST): "OidcAssignmentTemplate.onSave must forward the supplied assignment model to the `onSave` argument callback and then set its tracked `assignment` back to null so the component is ready for the next use."
+- added `r.policy-example-toggle-defaults-off` (SHOULD): "PolicyTemplate should track a boolean `showExamplePolicy` initialized to false so the example policy panel is hidden until the operator reveals it."
+- added `r.policy-save-forwards-and-resets` (MUST): "PolicyTemplate.onSave must forward the supplied policy model to the `onSave` argument callback and then set its tracked `policy` back to null so the component is ready for the next use."
+- added `r.policy-template-acl-only-options` (MUST): "PolicyTemplate.policyOptions must return exactly one selectable option, labeled 'ACL Policy' with value 'acl' and isDisabled false, so the modal offers only the ACL policy type."
+- added `r.policy-templates-acl-body` (MUST): "PolicyTemplate.policyTemplates must expose an `acl` key whose string value is the example ACL policy granting create, read, update and list on `secret/*` and explicitly denying `secret/super-secret`, with its whitespace laid out so the JsonEditor renders it correctly."
+- added `r.policy-type-selection-recreates-record` (MUST): "PolicyTemplate.setPolicyType must unload the existing tracked `policy` record when one is present, then create a new `policy/<type>` store record named from the `nameInput` argument and store it in `policy`."
+- added `r.shared-modal-argument-contract` (MUST): "Both components must read the new record's name from the `nameInput` argument and report results through the `onSave` (and, for the rendered modal, `onCancel`) callback arguments rather than writing to any global state."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4406,6 +4418,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-components-keymgmt-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-components-keymgmt-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-components-mfa-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-components-modal-form-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-components-modal-form-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-components-mount-backend-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

@@ -1,5 +1,7 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
+- class:92b5b3ab4cc1bf8c9a52a4af972a7387 PolicyTemplate@third_party/openbao/ui/app/components/modal-form/policy-template.js:27
+- class:c6201a0d3b1e1050851b276ebe9d3ea1 OidcAssignmentTemplate@third_party/openbao/ui/app/components/modal-form/oidc-assignment-template.js:27
 - file:third_party/openbao/ui/app/components/modal-form/oidc-assignment-template.js
   oidc-assignment-template.js@third_party/openbao/ui/app/components/modal-form/oidc-assignment-template.js
 - file:third_party/openbao/ui/app/components/modal-form/policy-template.js policy-template.js@third_party/openbao/ui/app/components/modal-form/policy-template.js
@@ -8,5 +10,87 @@ metadata:
   name: third-party-openbao-ui-app-components-modal-form
   namespace: default
 spec:
+  intent: 'These components exist so the UI can open a modal before the record''s
+    concrete type is known. PolicyTemplate defers record creation until the operator
+    picks a policy type from `policyOptions`, offering the ACL template as a starting
+    point, while OidcAssignmentTemplate knows its single type up front and creates
+    the record immediately. Each component owns the lifetime of the in-progress record:
+    it creates the Ember Data record from the modal''s `nameInput`, hands that record
+    to the type-specific form, and clears its own tracked reference after save so
+    the modal can be reused.'
+  interfaces:
+  - file: third_party/openbao/ui/app/components/modal-form/oidc-assignment-template.js
+    kind: class
+    name: OidcAssignmentTemplate
+    signature: class OidcAssignmentTemplate extends Component
+  - file: third_party/openbao/ui/app/components/modal-form/policy-template.js
+    kind: class
+    name: PolicyTemplate
+    signature: class PolicyTemplate extends Component
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - class:c6201a0d3b1e1050851b276ebe9d3ea1
+    - file:third_party/openbao/ui/app/components/modal-form/oidc-assignment-template.js
+    id: r.oidc-assignment-created-on-construction
+    level: MUST
+    text: OidcAssignmentTemplate must create an `oidc/assignment` store record in
+      its constructor, using the `nameInput` argument as the record name, and hold
+      it in the tracked `assignment` property that is passed to the oidc/assignment-form.
+  - codeRefs:
+    - class:c6201a0d3b1e1050851b276ebe9d3ea1
+    - file:third_party/openbao/ui/app/components/modal-form/oidc-assignment-template.js
+    id: r.oidc-assignment-save-forwards-and-resets
+    level: MUST
+    text: OidcAssignmentTemplate.onSave must forward the supplied assignment model
+      to the `onSave` argument callback and then set its tracked `assignment` back
+      to null so the component is ready for the next use.
+  - codeRefs:
+    - class:92b5b3ab4cc1bf8c9a52a4af972a7387
+    - file:third_party/openbao/ui/app/components/modal-form/policy-template.js
+    id: r.policy-example-toggle-defaults-off
+    level: SHOULD
+    text: PolicyTemplate should track a boolean `showExamplePolicy` initialized to
+      false so the example policy panel is hidden until the operator reveals it.
+  - codeRefs:
+    - class:92b5b3ab4cc1bf8c9a52a4af972a7387
+    - file:third_party/openbao/ui/app/components/modal-form/policy-template.js
+    id: r.policy-save-forwards-and-resets
+    level: MUST
+    text: PolicyTemplate.onSave must forward the supplied policy model to the `onSave`
+      argument callback and then set its tracked `policy` back to null so the component
+      is ready for the next use.
+  - codeRefs:
+    - class:92b5b3ab4cc1bf8c9a52a4af972a7387
+    - file:third_party/openbao/ui/app/components/modal-form/policy-template.js
+    id: r.policy-template-acl-only-options
+    level: MUST
+    text: PolicyTemplate.policyOptions must return exactly one selectable option,
+      labeled 'ACL Policy' with value 'acl' and isDisabled false, so the modal offers
+      only the ACL policy type.
+  - codeRefs:
+    - class:92b5b3ab4cc1bf8c9a52a4af972a7387
+    - file:third_party/openbao/ui/app/components/modal-form/policy-template.js
+    id: r.policy-templates-acl-body
+    level: MUST
+    text: PolicyTemplate.policyTemplates must expose an `acl` key whose string value
+      is the example ACL policy granting create, read, update and list on `secret/*`
+      and explicitly denying `secret/super-secret`, with its whitespace laid out so
+      the JsonEditor renders it correctly.
+  - codeRefs:
+    - class:92b5b3ab4cc1bf8c9a52a4af972a7387
+    - file:third_party/openbao/ui/app/components/modal-form/policy-template.js
+    id: r.policy-type-selection-recreates-record
+    level: MUST
+    text: PolicyTemplate.setPolicyType must unload the existing tracked `policy` record
+      when one is present, then create a new `policy/<type>` store record named from
+      the `nameInput` argument and store it in `policy`.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/components/modal-form/oidc-assignment-template.js
+    - file:third_party/openbao/ui/app/components/modal-form/policy-template.js
+    id: r.shared-modal-argument-contract
+    level: MUST
+    text: Both components must read the new record's name from the `nameInput` argument
+      and report results through the `onSave` (and, for the rendered modal, `onCancel`)
+      callback arguments rather than writing to any global state.
   upstream: self
