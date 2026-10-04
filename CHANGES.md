@@ -2185,6 +2185,17 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.unexpected-method` (MUST): "Any method other than GET or PATCH against the expected pod gets 400 with a message naming the unexpected method."
 - added `r.unknown-pod-not-found` (MUST): "A request whose namespace or pod name does not match ExpectedNamespace and ExpectedPodName gets 404 with the canned not-found response body, regardless of method."
 
+### third-party-openbao-internal-vault
+
+- intent: "" -> "This context exists so the vault core can emit an audit record for every request and response through one narrow interface, without the callers knowing which backend writes the record. The AuditLogger contract lets the HTTP handler and the rate-limit wrapper obtain an auditor from Core and log request and response inputs through it, while the concrete basicAuditor owns the sealed check and the broker delegation. Splitting basicAuditor from genericAuditor lets the same interface serve both whole-core auditing and auditing bound to a mount type and namespace. The code is vendored third-party OpenBao source inside deno-kcp, so it is described as it is observed rather than as something this repository authors."
+- added `r.audit-logger-interface` (MUST): "The vault package must define the AuditLogger interface with exactly the two methods AuditRequest and AuditResponse, each accepting a context.Context and a *logical.LogInput and returning an error, so a caller can audit both directions of an exchange through a single contract."
+- added `r.audit-logger-obtained-from-core` (SHOULD): "Callers that audit non-logical requests, such as the HTTP handler's handleAuditNonLogical and the rate-limit wrapper rateLimitQuotaWrapping, should obtain their AuditLogger from Core.AuditLogger rather than constructing a basicAuditor or reaching into the broker directly, keeping the sealed check in one place."
+- added `r.basic-auditor-broker-delegation` (MUST): "When the Core's auditBroker is non-nil, basicAuditor.AuditRequest must delegate to auditBroker.LogRequest, passing the incoming context, the logical.LogInput, and the Core's auditedHeaders so the header allow-list governs what reaches the audit record; the broker's error is returned to the caller unchanged."
+- added `r.basic-auditor-full-interface` (MUST): "basicAuditor must satisfy the whole AuditLogger interface, providing AuditResponse in addition to AuditRequest, so the same value returned by Core.AuditLogger covers responses as well as requests."
+- added `r.basic-auditor-sealed-guard` (MUST): "basicAuditor.AuditRequest must return consts.ErrSealed when the bound Core's auditBroker is nil, so no audit write is attempted before the barrier has an audit broker available."
+- added `r.core-audit-logger-accessor` (MUST): "Core.AuditLogger must return an AuditLogger value implemented by &basicAuditor{c: c}, binding every auditor it hands out to the receiving Core instance."
+- added `r.generic-auditor-scope` (MUST): "genericAuditor must carry a *Core, a mountType string and a *namespace.Namespace, so an auditor can be bound to one mount type and one namespace instead of auditing the whole Core."
+
 ### third-party-openbao-internal-vault-backend
 
 - intent: "" -> "This context exists to give the vault test suite a controllable backend double without a real secrets engine. Tests need to drive the core's routing, rollback and lifecycle paths and then inspect what the core sent; Noop supplies that by recording paths, requests and invalidated keys while returning canned or handler-supplied responses, and by letting a test force rollback failures or a panic on a chosen path. The two factories keep construction uniform with real backends, and the credential-backend registry lets tests register an auth method before the test core is built and clear it afterwards so state does not leak between tests."
@@ -2344,4 +2355,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-serviceregistration-kubernetes-client-cmd-kubeclient-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-serviceregistration-kubernetes-testing-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-backend-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-vault-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-vault-barrier-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-vault-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-internal-vault-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Running |  | 0 | - |
