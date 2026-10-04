@@ -4855,6 +4855,22 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.identity-show-model-resolution` (MUST): "The identity show route resolves its model by peeking at the store for `identity/${itemType}` with params.item_id, reloading that record when it exists but has no creationTime (indicating a partial record), falling back to store.findRecord when no record is present, and returning a hash of the model and the requested section."
 - added `r.identity-show-section-validation` (MUST): "The identity show route validates the requested section against TABS[itemType] for the parent route's item type and, when the section is not in that list, throws an AdapterError whose httpStatus is set to 404 so the route is treated as not found."
 
+### third-party-openbao-ui-app-routes-vault-cluster-access-identity-aliases
+
+- intent: "" -> "This context exists to specify the routing behavior of the OpenBao UI identity-alias screens: how each of the add, edit, index and show routes resolves its model, which params drive it, how it reacts to an invalid section, and how it cleans up controller state and cached datasets when leaving. It defines the contract that the templates and controllers of the alias screens rely on, without describing those templates."
+- added `r.add-confirms-dirty-navigation` (MUST): "The add route's willTransition action must return true when there is no current model, prompt with window.confirm when the current model has dirty attributes, return true when the user accepts, and otherwise abort the transition and return false."
+- added `r.add-creates-unsaved-alias` (MUST): "The add route's model hook must create a new, unsaved record of the derived alias model type and set its canonicalId to the item_id route param, so the new alias is bound to the identity the user came from."
+- added `r.alias-model-type-derived-from-parent` (MUST): "Every alias route must read the parent identity item type with modelFor('vault.cluster.access.identity') and use it to build the Ember Data model name 'identity/<itemType>-alias', so the alias model follows the identity type resolved by the parent route rather than a hard-coded alias type."
+- added `r.edit-loads-alias-by-id` (MUST): "The edit route's model hook must load the alias record of the derived model type using findRecord with the item_alias_id route param as the identifier."
+- added `r.index-controller-state` (MUST): "The index route's setupController must set identityType on the controller from the parent identity modelFor value, set filter to the pageFilter param or an empty string when absent, and set page to the resolved model's meta.currentPage, defaulting to 1."
+- added `r.index-paginated-query` (MUST): "The index route's model hook must run a lazyPaginatedQuery on the derived alias model type with responsePath 'data.keys', the page and pageFilter params, and sortBy 'name'; it must convert an HTTP 404 error into an empty array and rethrow every other error."
+- added `r.index-refreshing-query-params` (MUST): "The index route must declare page and pageFilter as query params with refreshModel true, so that changing either one re-runs the model hook."
+- added `r.index-reset-controller` (MUST): "The index route's resetController must call super and, when exiting, clear the controller's pageFilter and filter properties to null."
+- added `r.index-transition-and-reload` (SHOULD): "The index route's willTransition action must scroll the window to the top and clear all cached datasets when the transition leaves this route, and its reload action must clear all cached datasets before refreshing the route."
+- added `r.reset-controller-cleanup` (MUST): "The add and edit routes must call the super resetController implementation and, only when the controller is exiting the route, invoke cleanupModel on the controller when that method exists."
+- added `r.show-model-and-controller` (MUST): "The show route's model hook must resolve a hash of the alias record found by item_alias_id together with the section param, and its setupController must set both model and section on the controller from that resolved hash."
+- added `r.show-validates-section` (MUST): "The show route must take the tabs registered in TABS for the '<itemType>-alias' identity type and, when the requested section param is not one of them, throw an AdapterError with httpStatus set to 404."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
