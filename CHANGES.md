@@ -923,6 +923,17 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.setup-delegates` (SHOULD): "Setup must delegate to the currently wrapped backend under the read lock, so a plugin that is already loaded receives the backend config directly."
 - added `r.v5-then-v1-fallback` (MUST): "Factory must first call v5.Backend and, on success, Setup and return it; when the v5 backend fails it must fall back to Backend, accumulate both errors in a multierror, and if the fallback also fails return an error of the form "invalid backend version: <multierror>"."
 
+### third-party-openbao-internal-builtin-plugin-v5
+
+- intent: "" -> "This context exists so the plugin v5 backend shim can be specified independently of the rest of OpenBao: it is the adapter that turns a plugin's RPC-backed logical.Backend into one that survives plugin restarts. It matters because request handling, existence checks and invalidation are the paths that cross the plugin boundary, and the reload-and-retry contract on those paths is the behaviour other code depends on."
+- added `r.backend-constructor` (MUST): "Backend must act as the factory for the plugin v5 shim: given a context and a *logical.BackendConfig it returns a logical.Backend together with an error, so callers receive the interface rather than the unexported backend struct."
+- added `r.canary-guards-single-reload` (MUST): "The canary UUID comparison under the write lock must ensure that when another goroutine has already reloaded the backend, the caller skips its own reload and only retries the request, so concurrent shutdowns do not trigger duplicate reloads."
+- added `r.handle-existence-check-reload-retry` (MUST): "HandleExistenceCheck must follow the same read-lock, canary-capture, delegate, reload and single-retry sequence as HandleRequest, but return the three-valued (checkFound, exists, error) result; on a reload or UUID generation failure it must return (false, false, error)."
+- added `r.handle-request-reload-retry` (MUST): "HandleRequest must take a read lock, capture the current canary UUID, and delegate to the wrapped backend's HandleRequest. If the error is rpc.ErrShutdown or plugin.ErrPluginShutdown, it must take the write lock and, only when the canary still equals the captured value, reload the backend using the request storage and generate a new canary UUID; a reload or UUID failure must be returned as (nil, error). After reload it must retry the wrapped HandleRequest once while holding a read lock, and any other error or a successful response must be returned unchanged."
+- added `r.invalidate-key` (MUST): "InvalidateKey must accept a context and a key string and return nothing, so invalidation of a key in the wrapped plugin backend cannot report an error back to the caller."
+- added `r.is-external` (MUST): "IsExternal must take no arguments and return a bool, reporting whether the wrapped backend is external without needing a context."
+- added `r.logical-backend-satisfaction` (MUST): "The four methods HandleRequest, HandleExistenceCheck, InvalidateKey and IsExternal must together satisfy the logical.Backend interface so the Backend constructor can return the shim as a logical.Backend."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -953,4 +964,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-builtin-logical-transit-cmd-transit-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-plugin-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-plugin-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-internal-builtin-plugin-v5-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-builtin-plugin-v5-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-internal-command-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |

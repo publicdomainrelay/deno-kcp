@@ -1,10 +1,108 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
 - file:third_party/openbao/internal/builtin/plugin/v5/backend.go backend.go@third_party/openbao/internal/builtin/plugin/v5/backend.go
+- function:134f6df1002aaf8b0c8827e0d5ddeab5 Backend@third_party/openbao/internal/builtin/plugin/v5/backend.go:19
+- method:08637e5ce9fcaf096f490e178acb78c6 backend.HandleExistenceCheck@third_party/openbao/internal/builtin/plugin/v5/backend.go:124
+- method:26aae3c4cbf2510b0890ce91ad9b8fcb backend.InvalidateKey@third_party/openbao/internal/builtin/plugin/v5/backend.go:156
+- method:721bcb8809f4a8a04bdabcce26020083 backend.IsExternal@third_party/openbao/internal/builtin/plugin/v5/backend.go:162
+- method:90c4b0c62a3d2594ac9c7bbbcb9710c2 backend.HandleRequest@third_party/openbao/internal/builtin/plugin/v5/backend.go:90
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-builtin-plugin-v5
   namespace: default
 spec:
+  intent: 'This context exists so the plugin v5 backend shim can be specified independently
+    of the rest of OpenBao: it is the adapter that turns a plugin''s RPC-backed logical.Backend
+    into one that survives plugin restarts. It matters because request handling, existence
+    checks and invalidation are the paths that cross the plugin boundary, and the
+    reload-and-retry contract on those paths is the behaviour other code depends on.'
+  interfaces:
+  - file: third_party/openbao/internal/builtin/plugin/v5/backend.go
+    kind: function
+    name: Backend
+    signature: func Backend(ctx context.Context, conf *logical.BackendConfig) (logical.Backend,
+      error)
+  - file: third_party/openbao/internal/builtin/plugin/v5/backend.go
+    kind: method
+    name: backend.HandleExistenceCheck
+    signature: func (b *backend) HandleExistenceCheck(ctx context.Context, req *logical.Request)
+      (bool, bool, error)
+  - file: third_party/openbao/internal/builtin/plugin/v5/backend.go
+    kind: method
+    name: backend.HandleRequest
+    signature: func (b *backend) HandleRequest(ctx context.Context, req *logical.Request)
+      (*logical.Response, error)
+  - file: third_party/openbao/internal/builtin/plugin/v5/backend.go
+    kind: method
+    name: backend.InvalidateKey
+    signature: func (b *backend) InvalidateKey(ctx context.Context, key string)
+  - file: third_party/openbao/internal/builtin/plugin/v5/backend.go
+    kind: method
+    name: backend.IsExternal
+    signature: func (b *backend) IsExternal() bool
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/plugin/v5/backend.go
+    - function:134f6df1002aaf8b0c8827e0d5ddeab5
+    id: r.backend-constructor
+    level: MUST
+    text: 'Backend must act as the factory for the plugin v5 shim: given a context
+      and a *logical.BackendConfig it returns a logical.Backend together with an error,
+      so callers receive the interface rather than the unexported backend struct.'
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/plugin/v5/backend.go
+    - method:08637e5ce9fcaf096f490e178acb78c6
+    - method:90c4b0c62a3d2594ac9c7bbbcb9710c2
+    id: r.canary-guards-single-reload
+    level: MUST
+    text: The canary UUID comparison under the write lock must ensure that when another
+      goroutine has already reloaded the backend, the caller skips its own reload
+      and only retries the request, so concurrent shutdowns do not trigger duplicate
+      reloads.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/plugin/v5/backend.go
+    - method:08637e5ce9fcaf096f490e178acb78c6
+    id: r.handle-existence-check-reload-retry
+    level: MUST
+    text: HandleExistenceCheck must follow the same read-lock, canary-capture, delegate,
+      reload and single-retry sequence as HandleRequest, but return the three-valued
+      (checkFound, exists, error) result; on a reload or UUID generation failure it
+      must return (false, false, error).
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/plugin/v5/backend.go
+    - method:90c4b0c62a3d2594ac9c7bbbcb9710c2
+    id: r.handle-request-reload-retry
+    level: MUST
+    text: HandleRequest must take a read lock, capture the current canary UUID, and
+      delegate to the wrapped backend's HandleRequest. If the error is rpc.ErrShutdown
+      or plugin.ErrPluginShutdown, it must take the write lock and, only when the
+      canary still equals the captured value, reload the backend using the request
+      storage and generate a new canary UUID; a reload or UUID failure must be returned
+      as (nil, error). After reload it must retry the wrapped HandleRequest once while
+      holding a read lock, and any other error or a successful response must be returned
+      unchanged.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/plugin/v5/backend.go
+    - method:26aae3c4cbf2510b0890ce91ad9b8fcb
+    id: r.invalidate-key
+    level: MUST
+    text: InvalidateKey must accept a context and a key string and return nothing,
+      so invalidation of a key in the wrapped plugin backend cannot report an error
+      back to the caller.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/plugin/v5/backend.go
+    - method:721bcb8809f4a8a04bdabcce26020083
+    id: r.is-external
+    level: MUST
+    text: IsExternal must take no arguments and return a bool, reporting whether the
+      wrapped backend is external without needing a context.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/plugin/v5/backend.go
+    - function:134f6df1002aaf8b0c8827e0d5ddeab5
+    id: r.logical-backend-satisfaction
+    level: MUST
+    text: The four methods HandleRequest, HandleExistenceCheck, InvalidateKey and
+      IsExternal must together satisfy the logical.Backend interface so the Backend
+      constructor can return the shim as a logical.Backend.
   upstream: self

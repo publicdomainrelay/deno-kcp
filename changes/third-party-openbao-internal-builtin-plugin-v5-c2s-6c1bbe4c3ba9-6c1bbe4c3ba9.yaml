@@ -10,5 +10,18 @@ spec:
   systemContext: third-party-openbao-internal-builtin-plugin-v5
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-builtin-plugin-v5
-  phase: Running
+  agentLog: 'This context covers third_party/openbao/internal/builtin/plugin/v5/backend.go,
+    the OpenBao built-in plugin backend shim for plugin protocol v5. The file exports
+    a Backend constructor that returns a logical.Backend, and defines the unexported
+    backend type that wraps a real logical.Backend and transparently reloads the plugin
+    when its RPC connection dies. HandleRequest and HandleExistenceCheck both read
+    a canary UUID under a read lock, delegate to the wrapped backend, and on an rpc.ErrShutdown
+    or plugin.ErrPluginShutdown error re-acquire the write lock, reload the backend
+    against the request storage, generate a fresh canary UUID, and retry the call
+    once. InvalidateKey and IsExternal complete the logical.Backend surface, forwarding
+    key invalidation and reporting whether the wrapped backend is external. The whole
+    file exists to hide plugin process restarts from callers: a shutdown mid-request
+    is retried instead of surfaced, and the canary guards against two goroutines reloading
+    at the same time.'
+  message: wrote 7 requirement(s) and 5 interface(s) for third-party-openbao-internal-builtin-plugin-v5
+  phase: Succeeded

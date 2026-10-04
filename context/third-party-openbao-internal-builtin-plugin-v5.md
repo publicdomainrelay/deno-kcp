@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the plugin v5 backend shim can be specified independently of the rest of OpenBao: it is the adapter that turns a plugin's RPC-backed logical.Backend into one that survives plugin restarts. It matters because request handling, existence checks and invalidation are the paths that cross the plugin boundary, and the reload-and-retry contract on those paths is the behaviour other code depends on.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
