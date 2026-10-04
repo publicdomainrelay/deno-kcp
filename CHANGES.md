@@ -4516,6 +4516,39 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.validations-result-shape` (MUST): "validate() keeps per-property state objects shaped { errors, warnings, isValid }, pushes a failed rule's message (resolving it as message(this) when it is a function) into warnings when rule.level is 'warn' and into errors otherwise, and returns { isValid, state, invalidFormMessage: this.generateErrorCountMessage(errorCount) } where isValid is false as soon as any error is recorded."
 - added `r.validations-rule-resolution` (MUST): "validate() requires each property's rules to be an array, logging an error and skipping the key otherwise; per rule it uses rule.validator when it is a function, otherwise the validators utility entry named by rule.type, logging an error and skipping when neither is found; it invokes a custom validator as validator(this) and a built-in as validator(get(this, key), options), where the key may use dot notation for nested properties."
 
+### third-party-openbao-ui-app-helpers
+
+- intent: "" -> "This context exists to document the helper surface that OpenBao UI templates call. Because the directory is vendored third-party code inside the deno-kcp repository, the context records what each helper guarantees so that callers, adapters, and any local patches can rely on stable behavior and on the exact exported names. It also marks which helpers are pure functions of their arguments and which depend on injected Ember services, so a reader knows where a helper can be evaluated in isolation and where it needs a router, permissions service, or namespace context to produce a value."
+- added `r.add-numeric-sum` (MUST): "add reduces its params array to a numeric sum, parsing each element with parseInt and starting the accumulator at zero."
+- added `r.add-to-array-dedupe` (MUST): "addToArray copies the input array, appends the given value, and returns the result deduplicated; when the first argument is not an array it must fail an assertion instead of returning a value."
+- added `r.auth-section-tabs` (MUST): "tabsForAuthSection builds the tab list for an auth method from the model, the current section type defaulting to authSettings, and the available paths, so the rendered tabs follow the routes the caller passes in."
+- added `r.await-helper-settled-value` (MUST): "AwaitHelper.compute returns a non-thenable argument unchanged, but for a thenable it returns the last settled value and only starts a new resolve when the promise differs from the stored lastPromise, clearing the cached value first; AwaitHelper.resolve awaits the promise, stores a caught rejection as the value, and calls recompute only when the resolved promise is still the newest one."
+- added `r.aws-regions-copy` (MUST): "regions returns a copy of the internal AWS region list so that callers cannot mutate the module-level REGIONS constant."
+- added `r.coerce-eq-comparison` (MUST): "coerceEq compares its two params under coercion and reports whether they are equal, so template conditionals work across string and number forms of the same value."
+- added `r.current-mount-path-service` (MUST): "CurrentMountPathHelper derives the active mount path from the injected router service rather than from a static value, so the helper updates as the application navigates between mounts."
+- added `r.date-from-now-options` (SHOULD): "dateFromNow renders a date relative to the current time and accepts an options object that adjusts the rendering, with the shared date behavior coming from the -date-base module used by the other date helpers."
+- added `r.date-ordering-predicates` (MUST): "The is-after and is-before helpers compare two dates and return the corresponding ordering result for use in template conditionals."
+- added `r.empty-value-default` (MUST): "isEmptyValue reports whether a value counts as empty, and the hasDefault option in its options object changes that judgement for values that carry a default."
+- added `r.filter-wildcard-count` (MUST): "filterWildcard treats a non-object first argument as an id, converts the wildcard characters in it to a regular expression anchored at both ends, and returns the count of array items matching that pattern; it returns undefined when either argument is missing."
+- added `r.identity-show-tabs` (MUST): "tabsForIdentityShow builds the tab list for an identity show view from the model type and group type, selecting the tabs that apply to that combination."
+- added `r.jsonify-and-stringify` (MUST): "jsonify serializes its target to a JSON string, and stringify serializes its target while honoring a skipFormat option that suppresses the formatted output."
+- added `r.mountable-auth-methods-list` (MUST): "methods returns the list of auth method types that the UI offers for mounting, drawn from the supported auth backend metadata."
+- added `r.mountable-secret-engines-lists` (MUST): "mountableEngines returns the secret engines that may be mounted, and allEngines returns the full engine list, so templates can distinguish mountable choices from the complete set."
+- added `r.multi-line-join` (MUST): "multiLineJoin joins an array of strings into a single newline-separated string for display in a single template slot."
+- added `r.number-to-word-capitalize` (MUST): "numberToWord converts a number to its word form and capitalizes the result when the capitalize argument is set."
+- added `r.permission-check-helper` (MUST): "has-permission consults the permissions service for the requested capability and reports whether the current user holds it, so templates gate controls on real authorization rather than on role names."
+- added `r.remove-from-array` (MUST): "removeFromArray returns a new array with the given value removed, asserting that the first argument is an array and leaving the input array unmodified."
+- added `r.router-facing-helpers` (SHOULD): "nav-to-route performs a transition through the injected router service and route-params-for assembles the parameter object a route needs, so templates can link and navigate without building router state by hand."
+- added `r.secret-query-params` (MUST): "secretQueryParams builds the query parameters for a secret backend type, defaulting the type when it is absent and emitting them in query-parameter form when the asQueryParams option is set."
+- added `r.sha2-digest-sizes` (MUST): "sha2DigestSizes returns the list of digest sizes the UI offers for SHA-2 hashing operations."
+- added `r.split-object-by-keys` (MUST): "splitObject divides the original object into two groups according to the supplied key array, so a caller can render one subset separately from the rest."
+- added `r.sub-arithmetic` (MUST): "sub subtracts its operands and returns the numeric difference, complementing add for template arithmetic."
+- added `r.supported-backend-lists` (MUST): "supportedAuthBackends, supportedManagedAuthBackends, and supportedSecretBackends each return the backend type list the UI recognizes for their category, and these lists are the source the mountable and tab helpers draw from."
+- added `r.to-label-formatting` (MUST): "toLabel converts an incoming value into its human-readable label form for display."
+- added `r.tools-actions-list` (MUST): "toolsActions returns the list of actions offered on the tools page, which the tools templates iterate to render their entries."
+- added `r.wildcard-string-predicate` (MUST): "isWildcardString reports whether the supplied string contains wildcard syntax, letting callers branch before applying wildcard matching."
+- added `r.wizard-constants` (SHOULD): "wizard-constants exposes the fixed values the wizard flow reads, keeping those values in one module instead of repeating them across wizard templates and components."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4884,6 +4917,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-controllers-vault-cluster-settings-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-settings-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-decorators-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-helpers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-helpers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-initializers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

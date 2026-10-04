@@ -10,5 +10,24 @@ spec:
   systemContext: third-party-openbao-ui-app-helpers
   toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
 status:
-  message: the agent is summarizing third-party-openbao-ui-app-helpers
-  phase: Running
+  agentLog: 'This context is the Ember helper layer of the vendored OpenBao UI, held
+    under third_party/openbao/ui/app/helpers. It is a flat directory of standalone
+    template helpers and two service-backed helper classes. The plain helpers are
+    pure value transforms: arithmetic (add, sub), array edits (addToArray, removeFromArray),
+    string formatting (multiLineJoin, numberToWord, toLabel, stringify, jsonify),
+    emptiness and wildcard predicates (isEmptyValue, isWildcardString, filterWildcard),
+    date handling (dateFromNow over a shared -date-base, is-after, is-before, now),
+    comparison (coerceEq), object reshaping (splitObject), and static lookup tables
+    for AWS regions, SHA-2 digest sizes, and supported/mountable auth and secret backends.
+    The two classes, CurrentMountPathHelper and AwaitHelper, instead reach into runtime
+    state: CurrentMountPathHelper reads the router service to report the active mount
+    path, and AwaitHelper wraps a promise so the template renders the last settled
+    value and recomputes when a newer promise replaces an in-flight one. Tab-listing
+    helpers (tabsForAuthSection, tabsForIdentityShow), nav-to-route, route-params-for,
+    secret-query-params, has-permission, and tools-actions sit at the boundary between
+    templates and routing, permissions, and backend metadata, and wizard-constants
+    supplies fixed configuration values to the wizard flow.'
+  message: wrote 29 requirement(s) and 28 interface(s) for third-party-openbao-ui-app-helpers;
+    interface AwaitHelper.compute is not in the observed facts; dropped; interface
+    AwaitHelper.resolve is not in the observed facts; dropped
+  phase: Succeeded

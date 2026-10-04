@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to document the helper surface that OpenBao UI templates call. Because the directory is vendored third-party code inside the deno-kcp repository, the context records what each helper guarantees so that callers, adapters, and any local patches can rely on stable behavior and on the exact exported names. It also marks which helpers are pure functions of their arguments and which depend on injected Ember services, so a reader knows where a helper can be evaluated in isolation and where it needs a router, permissions service, or namespace context to produce a value.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
