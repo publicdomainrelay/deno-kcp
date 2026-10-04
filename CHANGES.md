@@ -2530,10 +2530,10 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 ### third-party-openbao-internal-vault-external-tests-raft-raft-binary
 
 - intent: "" -> "This context exists so the raft configuration behaviour exercised by the shared external raft test suite is also covered against real docker-hosted vault nodes driven by a locally built binary, rather than only in-process nodes. It guards the join and reconfiguration path: the cluster must behave correctly both before and after a node is added, and the test only runs where a binary path is supplied, so developers without docker or a built binary get a skip instead of a failure."
-- added `r.config-test-before-and-after-add-node` (MUST): "rafttest.Raft_Configuration_Test runs against the cluster once before cluster.AddNode and again after AddNode succeeds; a non-nil error from AddNode fails the test with t.Fatal and prevents the second run."
-- added `r.docker-cluster-options` (MUST): "The cluster is built from docker.DockerClusterOptions with ImageRepo "quay.io/openbao/openbao", ImageTag "latest", VaultBinary set to the BAO_BINARY value, and VaultNodeConfig LogLevel "TRACE", then passed to docker.NewTestDockerCluster."
-- added `r.parallel-and-cleanup` (MUST): "The test calls t.Parallel() before any setup and defers cluster.Cleanup() immediately after creating the docker cluster, so clusters do not leak when the test fails."
-- added `r.skip-without-binary` (MUST): "TestRaft_Configuration_Docker reads api.ReadBaoVariable("BAO_BINARY") and skips with the message "only running docker test when $BAO_BINARY present" when that variable is empty, so the docker test runs only where a binary path is provided."
+- added `r.config-test-before-and-after-add-node` (MUST): "rafttest.Raft_Configuration_Test runs against the cluster once before cluster.AddNode, and again after AddNode succeeds; AddNode is called with the context from t.Context() and the same options value, and a non-nil error return fails the test with t.Fatal and prevents the second run."
+- added `r.docker-cluster-options` (MUST): "The cluster is built from a docker.DockerClusterOptions value with ImageRepo "quay.io/openbao/openbao", ImageTag "latest", VaultBinary set to the BAO_BINARY value, and ClusterOptions.VaultNodeConfig.LogLevel "TRACE", then that options value is passed to docker.NewTestDockerCluster along with the testing.T."
+- added `r.parallel-and-cleanup` (MUST): "The test calls t.Parallel() before any other setup, and defers cluster.Cleanup() immediately after docker.NewTestDockerCluster returns, so docker clusters do not leak when the test fails or is skipped over later."
+- added `r.skip-without-binary` (MUST): "TestRaft_Configuration_Docker reads api.ReadBaoVariable("BAO_BINARY") into a binary variable and calls t.Skip with the message "only running docker test when $BAO_BINARY present" when that variable is empty, so the docker test runs only where a binary path is provided."
 
 ## Realization
 
@@ -2708,5 +2708,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-vault-external-tests-quotas-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-raft-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-raft-raft-binary-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-vault-external-tests-raft-raft-binary-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-vault-external-tests-raft-raft-binary-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-raftha-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
