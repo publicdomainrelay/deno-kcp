@@ -50713,8 +50713,503 @@ system_contexts:
   - file:third_party/openbao/sdk/helper/testcluster/logging.go logging.go@third_party/openbao/sdk/helper/testcluster/logging.go
   - file:third_party/openbao/sdk/helper/testcluster/types.go types.go@third_party/openbao/sdk/helper/testcluster/types.go
   - file:third_party/openbao/sdk/helper/testcluster/util.go util.go@third_party/openbao/sdk/helper/testcluster/util.go
+  - function:0146bb5ccbb0ec8d4a996677dda5aaf9 WaitForActiveNode@third_party/openbao/sdk/helper/testcluster/util.go:201
+  - function:2df1b9fc77d27beae39d19d3b2923415 WaitForNCoresSealed@third_party/openbao/sdk/helper/testcluster/util.go:94
+  - function:5f7f2b4a9e59daae077b4bd648402dc1 NewExecDevCluster@third_party/openbao/sdk/helper/testcluster/exec.go:77
+  - function:60ad00a57c7dcfae83ed622d5a21f3b1 GenerateRoot@third_party/openbao/sdk/helper/testcluster/util.go:218
+  - function:6aa04bce1ab30e35ac4040a1e16e4d95 JSONLogNoTimestamp@third_party/openbao/sdk/helper/testcluster/logging.go:13
+  - function:880628a9238a2c5b4cf3909f898c06d6 NodeHealthy@third_party/openbao/sdk/helper/testcluster/util.go:134
+  - function:99757a60b985a6c8541eb571d3e825b2 SealNode@third_party/openbao/sdk/helper/testcluster/util.go:21
+  - function:cdc6803ac291cc8c807424b7aad5978e UnsealNode@third_party/openbao/sdk/helper/testcluster/util.go:45
+  - function:d1e7f7d30fffd1f72669f6e45899dacd NewTestExecDevCluster@third_party/openbao/sdk/helper/testcluster/exec.go:56
+  - function:eb87099bb9833b31e8d9a06d9b69bb9d UnsealAllNodes@third_party/openbao/sdk/helper/testcluster/util.go:62
+  - function:ec1223d1172264fbf95ed6585041b34d NodeSealed@third_party/openbao/sdk/helper/testcluster/util.go:71
+  - function:ee2aca76a6bad467eb4a4d1af3d0d339 SealAllNodes@third_party/openbao/sdk/helper/testcluster/util.go:36
+  - function:fe4ea10fed896bc137e8020d551a9fef LeaderNode@third_party/openbao/sdk/helper/testcluster/util.go:159
+  - interface:0bfa70e287a4b23775516953f3803ce0 NodeStorage@third_party/openbao/sdk/helper/testcluster/types.go:147
+  - interface:3a94c6fcfb2896122e745b296f92a9a2 ClusterStorage@third_party/openbao/sdk/helper/testcluster/types.go:136
+  - interface:7af47d1788aea06db6e011e65491b444 Storage@third_party/openbao/sdk/helper/testcluster/types.go:128
+  - interface:c82e80352814240122d396841bd63b91 VaultCluster@third_party/openbao/sdk/helper/testcluster/types.go:22
+  - interface:c8b5888ea5fd84ceac6bbf7132de69fa VaultClusterNode@third_party/openbao/sdk/helper/testcluster/types.go:17
+  - method:012ca9cbcc878acb3dd88e32af7e2afa VaultClusterNode.TLSConfig@third_party/openbao/sdk/helper/testcluster/types.go:19
+  - method:040473ed5c9a317f5e4b23187f930d25 ClusterStorage.ForNode@third_party/openbao/sdk/helper/testcluster/types.go:138
+  - method:08f8c5c734a5cc379d244d844d9bbee1 NodeStorage.Opts@third_party/openbao/sdk/helper/testcluster/types.go:153
+  - method:0e85dcfe431d8254745b6cda78c6f3bf execDevClusterNode.APIClient@third_party/openbao/sdk/helper/testcluster/exec.go:236
+  - method:1252b6fc28586b9f87b1fcae5210834e VaultCluster.GetBarrierKeys@third_party/openbao/sdk/helper/testcluster/types.go:24
+  - method:1ad1a571366e43507e26a719a8f71892 ExecDevCluster.GetCACertPEMFile@third_party/openbao/sdk/helper/testcluster/exec.go:309
+  - method:202edc02b59cad312a7b09b10a41a9e2 execDevClusterNode.TLSConfig@third_party/openbao/sdk/helper/testcluster/exec.go:257
+  - method:274aadfca451345fa3f0891b9ca8ecc7 ExecDevCluster.GetBarrierOrRecoveryKeys@third_party/openbao/sdk/helper/testcluster/exec.go:291
+  - method:48e911144da687228f7496bb10771ff4 ExecDevCluster.GetRootToken@third_party/openbao/sdk/helper/testcluster/exec.go:318
+  - method:5fa6dc622da3639235b51a84613c3edb execDevClusterNode.Name@third_party/openbao/sdk/helper/testcluster/exec.go:232
+  - method:70f02699552b028ad747b957c560408e ExecDevCluster.SetRootToken@third_party/openbao/sdk/helper/testcluster/exec.go:39
+  - method:785d1f28440789f61017bfd43aded710 ExecDevCluster.Cleanup@third_party/openbao/sdk/helper/testcluster/exec.go:313
+  - method:887a90c1eb74b3997ca40b322db2d763 VaultCluster.Cleanup@third_party/openbao/sdk/helper/testcluster/types.go:30
+  - method:919422381644f8246877da487a66e01b VaultCluster.GetRootToken@third_party/openbao/sdk/helper/testcluster/types.go:34
+  - method:9233390135dc4ccafb32746ced567f0e Storage.Type@third_party/openbao/sdk/helper/testcluster/types.go:129
+  - method:96cad317df0450e700bff0dc32da0f05 ExecDevCluster.NamedLogger@third_party/openbao/sdk/helper/testcluster/exec.go:43
+  - method:96f121c4d347c1098605379fb209c2db VaultCluster.SetBarrierKeys@third_party/openbao/sdk/helper/testcluster/types.go:27
+  - method:9b22cfbbd5903ebd87e7fac8a6690b2a VaultCluster.GetRecoveryKeys@third_party/openbao/sdk/helper/testcluster/types.go:25
+  - method:aa1274cc5540d299e9e6c460ee88acfb VaultCluster.SetRootToken@third_party/openbao/sdk/helper/testcluster/types.go:33
+  - method:aafa30d30ff3a883aa151fe8e8bd63fd Storage.Cleanup@third_party/openbao/sdk/helper/testcluster/types.go:132
+  - method:b4e4b6396185342bbdfc9a9bc7b9c838 VaultCluster.GetBarrierOrRecoveryKeys@third_party/openbao/sdk/helper/testcluster/types.go:26
+  - method:b52e7d106976e2e26643adaa754da2a7 VaultCluster.NamedLogger@third_party/openbao/sdk/helper/testcluster/types.go:32
+  - method:c5fcc7809638b702bc7f0d40bcf14c3c ExecDevCluster.Nodes@third_party/openbao/sdk/helper/testcluster/exec.go:265
+  - method:d26957a0d53aa792cc426ba7f4141bdc NodeStorage.Start@third_party/openbao/sdk/helper/testcluster/types.go:152
+  - method:d55deec43933db81eb5ce8e4a0cd98d8 VaultClusterNode.APIClient@third_party/openbao/sdk/helper/testcluster/types.go:18
+  - method:db565ee951ff9bda1584ca64b8e61977 VaultCluster.SetRecoveryKeys@third_party/openbao/sdk/helper/testcluster/types.go:28
+  - method:e6961cf0bcb356cc75ac7bd4906779b6 VaultCluster.GetCACertPEMFile@third_party/openbao/sdk/helper/testcluster/types.go:29
+  - method:eb7440990687eb0496251820bcd2e8c7 ExecDevCluster.ClusterID@third_party/openbao/sdk/helper/testcluster/exec.go:261
+  - method:ee9c01968069df3f55e7129f7bbb9dd6 VaultCluster.ClusterID@third_party/openbao/sdk/helper/testcluster/types.go:31
+  - method:fbf03b9479496c328080e369483baed1 VaultCluster.Nodes@third_party/openbao/sdk/helper/testcluster/types.go:23
+  - struct:1137551a669c9a1795131dc1878ccfa2 ExecDevCluster@third_party/openbao/sdk/helper/testcluster/exec.go:25
+  - struct:186f3124f9de999f4e6e8bbb3054bdcb ExecDevClusterOptions@third_party/openbao/sdk/helper/testcluster/exec.go:49
+  - struct:1962c531b8ad524f191991066de38616 ClusterJson@third_party/openbao/sdk/helper/testcluster/types.go:97
+  - struct:72bc04bf19dfe8384f3cc068eaa3c953 VaultNodeConfig@third_party/openbao/sdk/helper/testcluster/types.go:37
+  - struct:8b04fe576a676af7eaf37e81fc7501b9 ClusterOptions@third_party/openbao/sdk/helper/testcluster/types.go:103
+  - struct:9b5ab73e6fa3935d62b44b2055b75f51 CA@third_party/openbao/sdk/helper/testcluster/types.go:114
+  - struct:b0e422339a6c710883246ff3cd25b199 ClusterNode@third_party/openbao/sdk/helper/testcluster/types.go:93
+  - type_alias:1adf274654aabe0496dd61437ea06cb2 GenerateRootKind@third_party/openbao/sdk/helper/testcluster/util.go:211
   id: sc.third-party-openbao-sdk-helper-testcluster
+  intent: This context exists so the repository can stand up disposable OpenBao/Vault
+    clusters inside Go tests without a container runtime, and so test code can drive
+    those clusters through a stable interface. types.go fixes the contract (cluster,
+    node, storage), exec.go supplies the subprocess-backed implementation of that
+    contract, util.go supplies the polling helpers that wait for sealing, health and
+    leader election, and logging.go and consts.go carry the shared logging and constant
+    surface. The package is vendored under third_party so the wider deno-kcp project
+    can import testcluster directly and reuse the upstream test topology rather than
+    reimplementing it.
+  interfaces:
+  - file: third_party/openbao/sdk/helper/testcluster/types.go
+    kind: struct
+    name: CA
+    signature: CA
+  - file: third_party/openbao/sdk/helper/testcluster/types.go
+    kind: struct
+    name: ClusterJson
+    signature: ClusterJson
+  - file: third_party/openbao/sdk/helper/testcluster/types.go
+    kind: struct
+    name: ClusterNode
+    signature: ClusterNode
+  - file: third_party/openbao/sdk/helper/testcluster/types.go
+    kind: struct
+    name: ClusterOptions
+    signature: ClusterOptions
+  - file: third_party/openbao/sdk/helper/testcluster/types.go
+    kind: interface
+    name: ClusterStorage
+    signature: type ClusterStorage interface
+  - file: third_party/openbao/sdk/helper/testcluster/types.go
+    kind: method
+    name: ClusterStorage.ForNode
+    signature: ForNode(ctx context.Context, index int) (NodeStorage, error)
+  - file: third_party/openbao/sdk/helper/testcluster/exec.go
+    kind: struct
+    name: ExecDevCluster
+    signature: ExecDevCluster
+  - file: third_party/openbao/sdk/helper/testcluster/exec.go
+    kind: method
+    name: ExecDevCluster.Cleanup
+    signature: func (dc *ExecDevCluster) Cleanup()
+  - file: third_party/openbao/sdk/helper/testcluster/exec.go
+    kind: method
+    name: ExecDevCluster.ClusterID
+    signature: func (dc *ExecDevCluster) ClusterID() string
+  - file: third_party/openbao/sdk/helper/testcluster/exec.go
+    kind: method
+    name: ExecDevCluster.GetBarrierKeys
+    signature: func (dc *ExecDevCluster) GetBarrierKeys() [][]byte
+  - file: third_party/openbao/sdk/helper/testcluster/exec.go
+    kind: method
+    name: ExecDevCluster.GetBarrierOrRecoveryKeys
+    signature: func (dc *ExecDevCluster) GetBarrierOrRecoveryKeys() [][]byte
+  - file: third_party/openbao/sdk/helper/testcluster/exec.go
+    kind: method
+    name: ExecDevCluster.GetCACertPEMFile
+    signature: func (dc *ExecDevCluster) GetCACertPEMFile() string
+  - file: third_party/openbao/sdk/helper/testcluster/exec.go
+    kind: method
+    name: ExecDevCluster.GetRecoveryKeys
+    signature: func (dc *ExecDevCluster) GetRecoveryKeys() [][]byte
+  - file: third_party/openbao/sdk/helper/testcluster/exec.go
+    kind: method
+    name: ExecDevCluster.GetRootToken
+    signature: func (dc *ExecDevCluster) GetRootToken() string
+  - file: third_party/openbao/sdk/helper/testcluster/exec.go
+    kind: method
+    name: ExecDevCluster.NamedLogger
+    signature: func (dc *ExecDevCluster) NamedLogger(s string) log.Logger
+  - file: third_party/openbao/sdk/helper/testcluster/exec.go
+    kind: method
+    name: ExecDevCluster.Nodes
+    signature: func (dc *ExecDevCluster) Nodes() []VaultClusterNode
+  - file: third_party/openbao/sdk/helper/testcluster/exec.go
+    kind: method
+    name: ExecDevCluster.SetBarrierKeys
+    signature: func (dc *ExecDevCluster) SetBarrierKeys(keys [][]byte)
+  - file: third_party/openbao/sdk/helper/testcluster/exec.go
+    kind: method
+    name: ExecDevCluster.SetRecoveryKeys
+    signature: func (dc *ExecDevCluster) SetRecoveryKeys(keys [][]byte)
+  - file: third_party/openbao/sdk/helper/testcluster/exec.go
+    kind: method
+    name: ExecDevCluster.SetRootToken
+    signature: func (dc *ExecDevCluster) SetRootToken(token string)
+  - file: third_party/openbao/sdk/helper/testcluster/exec.go
+    kind: struct
+    name: ExecDevClusterOptions
+    signature: ExecDevClusterOptions
+  - file: third_party/openbao/sdk/helper/testcluster/util.go
+    kind: function
+    name: GenerateRoot
+    signature: func GenerateRoot(cluster VaultCluster, kind GenerateRootKind) (string,
+      error)
+  - file: third_party/openbao/sdk/helper/testcluster/util.go
+    kind: type
+    name: GenerateRootKind
+    signature: type GenerateRootKind
+  - file: third_party/openbao/sdk/helper/testcluster/logging.go
+    kind: function
+    name: JSONLogNoTimestamp
+    signature: func JSONLogNoTimestamp(outlog hclog.Logger, text string)
+  - file: third_party/openbao/sdk/helper/testcluster/util.go
+    kind: function
+    name: LeaderNode
+    signature: func LeaderNode(ctx context.Context, cluster VaultCluster) (int, error)
+  - file: third_party/openbao/sdk/helper/testcluster/exec.go
+    kind: function
+    name: NewExecDevCluster
+    signature: func NewExecDevCluster(ctx context.Context, opts *ExecDevClusterOptions)
+      (*ExecDevCluster, error)
+  - file: third_party/openbao/sdk/helper/testcluster/exec.go
+    kind: function
+    name: NewTestExecDevCluster
+    signature: func NewTestExecDevCluster(t *testing.T, opts *ExecDevClusterOptions)
+      *ExecDevCluster
+  - file: third_party/openbao/sdk/helper/testcluster/util.go
+    kind: function
+    name: NodeHealthy
+    signature: func NodeHealthy(ctx context.Context, cluster VaultCluster, nodeIdx
+      int) error
+  - file: third_party/openbao/sdk/helper/testcluster/util.go
+    kind: function
+    name: NodeSealed
+    signature: func NodeSealed(ctx context.Context, cluster VaultCluster, nodeIdx
+      int) error
+  - file: third_party/openbao/sdk/helper/testcluster/types.go
+    kind: interface
+    name: NodeStorage
+    signature: type NodeStorage interface
+  - file: third_party/openbao/sdk/helper/testcluster/types.go
+    kind: method
+    name: NodeStorage.Opts
+    signature: Opts() map[string]any
+  - file: third_party/openbao/sdk/helper/testcluster/types.go
+    kind: method
+    name: NodeStorage.Start
+    signature: Start(context.Context, *ClusterOptions) error
+  - file: third_party/openbao/sdk/helper/testcluster/util.go
+    kind: function
+    name: SealAllNodes
+    signature: func SealAllNodes(ctx context.Context, cluster VaultCluster) error
+  - file: third_party/openbao/sdk/helper/testcluster/util.go
+    kind: function
+    name: SealNode
+    signature: func SealNode(ctx context.Context, cluster VaultCluster, nodeIdx int)
+      error
+  - file: third_party/openbao/sdk/helper/testcluster/types.go
+    kind: interface
+    name: Storage
+    signature: type Storage interface
+  - file: third_party/openbao/sdk/helper/testcluster/types.go
+    kind: method
+    name: Storage.Cleanup
+    signature: Cleanup() error
+  - file: third_party/openbao/sdk/helper/testcluster/types.go
+    kind: method
+    name: Storage.Type
+    signature: Type() string
+  - file: third_party/openbao/sdk/helper/testcluster/util.go
+    kind: function
+    name: UnsealAllNodes
+    signature: func UnsealAllNodes(ctx context.Context, cluster VaultCluster) error
+  - file: third_party/openbao/sdk/helper/testcluster/util.go
+    kind: function
+    name: UnsealNode
+    signature: func UnsealNode(ctx context.Context, cluster VaultCluster, nodeIdx
+      int) error
+  - file: third_party/openbao/sdk/helper/testcluster/types.go
+    kind: interface
+    name: VaultCluster
+    signature: type VaultCluster interface
+  - file: third_party/openbao/sdk/helper/testcluster/types.go
+    kind: method
+    name: VaultCluster.Cleanup
+    signature: Cleanup()
+  - file: third_party/openbao/sdk/helper/testcluster/types.go
+    kind: method
+    name: VaultCluster.ClusterID
+    signature: ClusterID() string
+  - file: third_party/openbao/sdk/helper/testcluster/types.go
+    kind: method
+    name: VaultCluster.GetBarrierKeys
+    signature: GetBarrierKeys() [][]byte
+  - file: third_party/openbao/sdk/helper/testcluster/types.go
+    kind: method
+    name: VaultCluster.GetBarrierOrRecoveryKeys
+    signature: GetBarrierOrRecoveryKeys() [][]byte
+  - file: third_party/openbao/sdk/helper/testcluster/types.go
+    kind: method
+    name: VaultCluster.GetCACertPEMFile
+    signature: GetCACertPEMFile() string
+  - file: third_party/openbao/sdk/helper/testcluster/types.go
+    kind: method
+    name: VaultCluster.GetRecoveryKeys
+    signature: GetRecoveryKeys() [][]byte
+  - file: third_party/openbao/sdk/helper/testcluster/types.go
+    kind: method
+    name: VaultCluster.GetRootToken
+    signature: GetRootToken() string
+  - file: third_party/openbao/sdk/helper/testcluster/types.go
+    kind: method
+    name: VaultCluster.NamedLogger
+    signature: NamedLogger(string) hclog.Logger
+  - file: third_party/openbao/sdk/helper/testcluster/types.go
+    kind: method
+    name: VaultCluster.Nodes
+    signature: Nodes() []VaultClusterNode
+  - file: third_party/openbao/sdk/helper/testcluster/types.go
+    kind: method
+    name: VaultCluster.SetBarrierKeys
+    signature: SetBarrierKeys([][]byte)
+  - file: third_party/openbao/sdk/helper/testcluster/types.go
+    kind: method
+    name: VaultCluster.SetRecoveryKeys
+    signature: SetRecoveryKeys([][]byte)
+  - file: third_party/openbao/sdk/helper/testcluster/types.go
+    kind: method
+    name: VaultCluster.SetRootToken
+    signature: SetRootToken(token string)
+  - file: third_party/openbao/sdk/helper/testcluster/types.go
+    kind: interface
+    name: VaultClusterNode
+    signature: type VaultClusterNode interface
+  - file: third_party/openbao/sdk/helper/testcluster/types.go
+    kind: method
+    name: VaultClusterNode.APIClient
+    signature: APIClient() *api.Client
+  - file: third_party/openbao/sdk/helper/testcluster/types.go
+    kind: method
+    name: VaultClusterNode.TLSConfig
+    signature: TLSConfig() *tls.Config
+  - file: third_party/openbao/sdk/helper/testcluster/types.go
+    kind: struct
+    name: VaultNodeConfig
+    signature: VaultNodeConfig
+  - file: third_party/openbao/sdk/helper/testcluster/util.go
+    kind: function
+    name: WaitForActiveNode
+    signature: func WaitForActiveNode(ctx context.Context, cluster VaultCluster) (int,
+      error)
+  - file: third_party/openbao/sdk/helper/testcluster/util.go
+    kind: function
+    name: WaitForNCoresSealed
+    signature: func WaitForNCoresSealed(ctx context.Context, cluster VaultCluster,
+      n int) error
+  - file: third_party/openbao/sdk/helper/testcluster/exec.go
+    kind: method
+    name: execDevClusterNode.APIClient
+    signature: func (n *execDevClusterNode) APIClient() *api.Client
+  - file: third_party/openbao/sdk/helper/testcluster/exec.go
+    kind: method
+    name: execDevClusterNode.Name
+    signature: func (n *execDevClusterNode) Name() string
+  - file: third_party/openbao/sdk/helper/testcluster/exec.go
+    kind: method
+    name: execDevClusterNode.TLSConfig
+    signature: func (n *execDevClusterNode) TLSConfig() *tls.Config
   name: third-party-openbao-sdk-helper-testcluster
+  requirements:
+  - codeRefs:
+    - method:274aadfca451345fa3f0891b9ca8ecc7
+    - method:b4e4b6396185342bbdfc9a9bc7b9c838
+    id: r.barrier-or-recovery-fallback
+    level: MUST
+    text: GetBarrierOrRecoveryKeys returns the barrier keys when the cluster has them
+      and falls back to the recovery keys otherwise, so callers can unseal clusters
+      that do not expose barrier keys.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/testcluster/exec.go
+    - struct:186f3124f9de999f4e6e8bbb3054bdcb
+    id: r.cluster-options-surface
+    level: MUST
+    text: ExecDevClusterOptions is the configuration surface for a dev cluster and
+      carries the cluster name, binary path, temp directory, core count, base listen
+      address and logger that setup consumes.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/testcluster/exec.go
+    - function:5f7f2b4a9e59daae077b4bd648402dc1
+    id: r.core-count
+    level: MUST
+    text: 'Setup accepts only NumCores 1 or 3: 3 appends -dev-three-node and 1 appends
+      -dev-tls; any other value returns the error "NumCores=1 and NumCores=3 are the
+      only supported options right now".'
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/testcluster/exec.go
+    - function:5f7f2b4a9e59daae077b4bd648402dc1
+    - function:d1e7f7d30fffd1f72669f6e45899dacd
+    id: r.dev-cluster-construction
+    level: MUST
+    text: NewExecDevCluster builds an ExecDevCluster from ExecDevClusterOptions, treating
+      a nil options pointer as an empty struct, defaulting NumCores of 0 to 3, allocating
+      the stop channel, and calling Cleanup plus returning the error when setup fails.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/testcluster/exec.go
+    id: r.dev-server-subprocess
+    level: MUST
+    text: Setup launches the binary named by BinaryPath, defaulting to "vault", with
+      arguments "server -dev -dev-cluster-json <tmpdir>/cluster.json", appends -dev-listen-address
+      when BaseListenAddress is set, inherits the process environment and adds BAO_LOG_FORMAT=json.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/testcluster/exec.go
+    - method:0e85dcfe431d8254745b6cda78c6f3bf
+    - method:1ad1a571366e43507e26a719a8f71892
+    - method:202edc02b59cad312a7b09b10a41a9e2
+    - method:48e911144da687228f7496bb10771ff4
+    - method:5fa6dc622da3639235b51a84613c3edb
+    - method:70f02699552b028ad747b957c560408e
+    - method:785d1f28440789f61017bfd43aded710
+    - method:96cad317df0450e700bff0dc32da0f05
+    - method:c5fcc7809638b702bc7f0d40bcf14c3c
+    - method:eb7440990687eb0496251820bcd2e8c7
+    - struct:1137551a669c9a1795131dc1878ccfa2
+    id: r.exec-cluster-implements-contract
+    level: MUST
+    text: 'ExecDevCluster and execDevClusterNode are the subprocess-backed implementations
+      of VaultCluster and VaultClusterNode: the cluster reports ClusterID, Nodes,
+      barrier and recovery keys, CA certificate PEM file, root token and Cleanup,
+      and each node reports Name, APIClient and TLSConfig.'
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/testcluster/util.go
+    - function:60ad00a57c7dcfae83ed622d5a21f3b1
+    - type_alias:1adf274654aabe0496dd61437ea06cb2
+    id: r.generate-root
+    level: MUST
+    text: GenerateRoot takes a VaultCluster and a GenerateRootKind selecting root,
+      recovery or generation, runs the matching root-token generation path and returns
+      the new token as a string.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/testcluster/util.go
+    - function:0146bb5ccbb0ec8d4a996677dda5aaf9
+    - function:2df1b9fc77d27beae39d19d3b2923415
+    - function:880628a9238a2c5b4cf3909f898c06d6
+    - function:ec1223d1172264fbf95ed6585041b34d
+    - function:fe4ea10fed896bc137e8020d551a9fef
+    id: r.health-and-leader-waits
+    level: MUST
+    text: NodeSealed and NodeHealthy block until the indexed node is sealed or healthy,
+      WaitForNCoresSealed and WaitForActiveNode poll until n cores are sealed or an
+      active node appears, and LeaderNode returns the index of the current leader,
+      all aborting on context cancellation.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/testcluster/logging.go
+    - function:6aa04bce1ab30e35ac4040a1e16e4d95
+    id: r.json-log-no-timestamp
+    level: MUST
+    text: JSONLogNoTimestamp writes the supplied text as a single JSON log record
+      through the given hclog.Logger with no timestamp field, so log output stays
+      stable across test runs.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/testcluster/util.go
+    - function:99757a60b985a6c8541eb571d3e825b2
+    - function:cdc6803ac291cc8c807424b7aad5978e
+    - function:eb87099bb9833b31e8d9a06d9b69bb9d
+    - function:ee2aca76a6bad467eb4a4d1af3d0d339
+    id: r.seal-unseal-helpers
+    level: MUST
+    text: SealNode and UnsealNode act on the core at nodeIdx while SealAllNodes and
+      UnsealAllNodes act on every node, and UnsealNode unseals with the cluster's
+      barrier-or-recovery keys.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/testcluster/consts.go
+    id: r.shared-constants
+    level: MAY
+    text: consts.go holds the package-level constants shared by the exec, logging
+      and util files.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/testcluster/types.go
+    - interface:0bfa70e287a4b23775516953f3803ce0
+    - interface:3a94c6fcfb2896122e745b296f92a9a2
+    - interface:7af47d1788aea06db6e011e65491b444
+    - method:040473ed5c9a317f5e4b23187f930d25
+    - method:08f8c5c734a5cc379d244d844d9bbee1
+    - method:9233390135dc4ccafb32746ced567f0e
+    - method:aafa30d30ff3a883aa151fe8e8bd63fd
+    - method:d26957a0d53aa792cc426ba7f4141bdc
+    id: r.storage-backends
+    level: MUST
+    text: 'Storage, ClusterStorage and NodeStorage describe the pluggable storage
+      backend: Storage reports its Type and cleans itself up returning an error, ClusterStorage
+      yields a NodeStorage for a node index within a context, and NodeStorage starts
+      a node from ClusterOptions and reports its options as a string-keyed map.'
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/testcluster/exec.go
+    id: r.temp-directory
+    level: MUST
+    text: Setup uses opts.TmpDir as the cluster directory, creating it with mode 0700
+      when missing, and falls back to os.MkdirTemp with prefix "vault-test-cluster-"
+      when no temp directory is configured.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/testcluster/exec.go
+    - function:d1e7f7d30fffd1f72669f6e45899dacd
+    id: r.test-cluster-helper
+    level: MUST
+    text: NewTestExecDevCluster defaults ClusterName to t.Name() with every "/" replaced
+      by "-", installs a test-named trace logger when none is given, wraps NewExecDevCluster
+      in a 60 second context registered with t.Cleanup, and calls t.Fatal on construction
+      error.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/testcluster/types.go
+    - struct:1962c531b8ad524f191991066de38616
+    - struct:72bc04bf19dfe8384f3cc068eaa3c953
+    - struct:8b04fe576a676af7eaf37e81fc7501b9
+    - struct:9b5ab73e6fa3935d62b44b2055b75f51
+    - struct:b0e422339a6c710883246ff3cd25b199
+    id: r.util-types-exist
+    level: SHOULD
+    text: VaultNodeConfig, ClusterNode, ClusterJson, ClusterOptions and CA carry the
+      serialized cluster description exchanged with the dev server over the cluster.json
+      file, matching the JSON shape the subprocess writes.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/testcluster/types.go
+    - interface:c82e80352814240122d396841bd63b91
+    - method:1252b6fc28586b9f87b1fcae5210834e
+    - method:887a90c1eb74b3997ca40b322db2d763
+    - method:919422381644f8246877da487a66e01b
+    - method:96f121c4d347c1098605379fb209c2db
+    - method:9b22cfbbd5903ebd87e7fac8a6690b2a
+    - method:aa1274cc5540d299e9e6c460ee88acfb
+    - method:b4e4b6396185342bbdfc9a9bc7b9c838
+    - method:b52e7d106976e2e26643adaa754da2a7
+    - method:db565ee951ff9bda1584ca64b8e61977
+    - method:e6961cf0bcb356cc75ac7bd4906779b6
+    - method:ee9c01968069df3f55e7129f7bbb9dd6
+    - method:fbf03b9479496c328080e369483baed1
+    id: r.vaultcluster-contract
+    level: MUST
+    text: VaultCluster exposes the node list, barrier key access and mutation, recovery
+      key access and mutation, a barrier-or-recovery fallback, the CA certificate
+      PEM file path, Cleanup, ClusterID, NamedLogger, and root token get and set.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/testcluster/types.go
+    - interface:c8b5888ea5fd84ceac6bbf7132de69fa
+    - method:012ca9cbcc878acb3dd88e32af7e2afa
+    - method:d55deec43933db81eb5ce8e4a0cd98d8
+    id: r.vaultcluster-node-contract
+    level: MUST
+    text: VaultClusterNode is the per-node view of a cluster and exposes only an API
+      client and a TLS config for that node.
   upstream: self
 - code:
   - third_party/openbao/sdk/helper/testcluster/docker/cert.go

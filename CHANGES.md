@@ -3453,6 +3453,27 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.template-option-sets-raw-template` (MUST): "Template(rawTemplate string) returns an Opt that stores the raw template string on the StringTemplate field rawTemplate and never returns an error from the closure."
 - added `r.tests-cover-options-and-generation` (SHOULD): "template_test.go exercises generation, bad constructor arguments and template glob behavior, and funcs_test.go exercises the helper functions, so changes to the option set, constructor validation or the function map stay covered."
 
+### third-party-openbao-sdk-helper-testcluster
+
+- intent: "" -> "This context exists so the repository can stand up disposable OpenBao/Vault clusters inside Go tests without a container runtime, and so test code can drive those clusters through a stable interface. types.go fixes the contract (cluster, node, storage), exec.go supplies the subprocess-backed implementation of that contract, util.go supplies the polling helpers that wait for sealing, health and leader election, and logging.go and consts.go carry the shared logging and constant surface. The package is vendored under third_party so the wider deno-kcp project can import testcluster directly and reuse the upstream test topology rather than reimplementing it."
+- added `r.barrier-or-recovery-fallback` (MUST): "GetBarrierOrRecoveryKeys returns the barrier keys when the cluster has them and falls back to the recovery keys otherwise, so callers can unseal clusters that do not expose barrier keys."
+- added `r.cluster-options-surface` (MUST): "ExecDevClusterOptions is the configuration surface for a dev cluster and carries the cluster name, binary path, temp directory, core count, base listen address and logger that setup consumes."
+- added `r.core-count` (MUST): "Setup accepts only NumCores 1 or 3: 3 appends -dev-three-node and 1 appends -dev-tls; any other value returns the error "NumCores=1 and NumCores=3 are the only supported options right now"."
+- added `r.dev-cluster-construction` (MUST): "NewExecDevCluster builds an ExecDevCluster from ExecDevClusterOptions, treating a nil options pointer as an empty struct, defaulting NumCores of 0 to 3, allocating the stop channel, and calling Cleanup plus returning the error when setup fails."
+- added `r.dev-server-subprocess` (MUST): "Setup launches the binary named by BinaryPath, defaulting to "vault", with arguments "server -dev -dev-cluster-json <tmpdir>/cluster.json", appends -dev-listen-address when BaseListenAddress is set, inherits the process environment and adds BAO_LOG_FORMAT=json."
+- added `r.exec-cluster-implements-contract` (MUST): "ExecDevCluster and execDevClusterNode are the subprocess-backed implementations of VaultCluster and VaultClusterNode: the cluster reports ClusterID, Nodes, barrier and recovery keys, CA certificate PEM file, root token and Cleanup, and each node reports Name, APIClient and TLSConfig."
+- added `r.generate-root` (MUST): "GenerateRoot takes a VaultCluster and a GenerateRootKind selecting root, recovery or generation, runs the matching root-token generation path and returns the new token as a string."
+- added `r.health-and-leader-waits` (MUST): "NodeSealed and NodeHealthy block until the indexed node is sealed or healthy, WaitForNCoresSealed and WaitForActiveNode poll until n cores are sealed or an active node appears, and LeaderNode returns the index of the current leader, all aborting on context cancellation."
+- added `r.json-log-no-timestamp` (MUST): "JSONLogNoTimestamp writes the supplied text as a single JSON log record through the given hclog.Logger with no timestamp field, so log output stays stable across test runs."
+- added `r.seal-unseal-helpers` (MUST): "SealNode and UnsealNode act on the core at nodeIdx while SealAllNodes and UnsealAllNodes act on every node, and UnsealNode unseals with the cluster's barrier-or-recovery keys."
+- added `r.shared-constants` (MAY): "consts.go holds the package-level constants shared by the exec, logging and util files."
+- added `r.storage-backends` (MUST): "Storage, ClusterStorage and NodeStorage describe the pluggable storage backend: Storage reports its Type and cleans itself up returning an error, ClusterStorage yields a NodeStorage for a node index within a context, and NodeStorage starts a node from ClusterOptions and reports its options as a string-keyed map."
+- added `r.temp-directory` (MUST): "Setup uses opts.TmpDir as the cluster directory, creating it with mode 0700 when missing, and falls back to os.MkdirTemp with prefix "vault-test-cluster-" when no temp directory is configured."
+- added `r.test-cluster-helper` (MUST): "NewTestExecDevCluster defaults ClusterName to t.Name() with every "/" replaced by "-", installs a test-named trace logger when none is given, wraps NewExecDevCluster in a 60 second context registered with t.Cleanup, and calls t.Fatal on construction error."
+- added `r.util-types-exist` (SHOULD): "VaultNodeConfig, ClusterNode, ClusterJson, ClusterOptions and CA carry the serialized cluster description exchanged with the dev server over the cluster.json file, matching the JSON shape the subprocess writes."
+- added `r.vaultcluster-contract` (MUST): "VaultCluster exposes the node list, barrier key access and mutation, recovery key access and mutation, a barrier-or-recovery fallback, the CA certificate PEM file path, Cleanup, ClusterID, NamedLogger, and root token get and set."
+- added `r.vaultcluster-node-contract` (MUST): "VaultClusterNode is the per-node view of a cluster and exposes only an API client and a TLS config for that node."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -3708,5 +3729,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-sdk-helper-stepwise-environments-docker-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-structtomap-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-template-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-sdk-helper-testcluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-helper-testcluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-testcluster-docker-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |

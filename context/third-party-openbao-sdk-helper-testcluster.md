@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the repository can stand up disposable OpenBao/Vault clusters inside Go tests without a container runtime, and so test code can drive those clusters through a stable interface. types.go fixes the contract (cluster, node, storage), exec.go supplies the subprocess-backed implementation of that contract, util.go supplies the polling helpers that wait for sealing, health and leader election, and logging.go and consts.go carry the shared logging and constant surface. The package is vendored under third_party so the wider deno-kcp project can import testcluster directly and reuse the upstream test topology rather than reimplementing it.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
