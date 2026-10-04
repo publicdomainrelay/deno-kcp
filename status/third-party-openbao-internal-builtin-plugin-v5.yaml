@@ -1,0 +1,54 @@
+conditions:
+- message: 'undeclared: Backend, backend.HandleExistenceCheck, backend.HandleRequest,
+    backend.InvalidateKey, backend.IsExternal'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/builtin/plugin/v5/backend.go
+  fingerprint: 7786538b37d4cf392e8f77d2940843a2b196259c4dd667adcb6d45f9e83494f6
+  interfaces:
+  - codegraphId: function:134f6df1002aaf8b0c8827e0d5ddeab5
+    file: third_party/openbao/internal/builtin/plugin/v5/backend.go
+    kind: function
+    line: 19
+    name: Backend
+    signature: (ctx context.Context, conf *logical.BackendConfig) (logical.Backend,
+      error)
+  - codegraphId: method:90c4b0c62a3d2594ac9c7bbbcb9710c2
+    file: third_party/openbao/internal/builtin/plugin/v5/backend.go
+    kind: method
+    line: 90
+    name: backend.HandleRequest
+    signature: (ctx context.Context, req *logical.Request) (*logical.Response, error)
+  - codegraphId: method:08637e5ce9fcaf096f490e178acb78c6
+    file: third_party/openbao/internal/builtin/plugin/v5/backend.go
+    kind: method
+    line: 124
+    name: backend.HandleExistenceCheck
+    signature: (ctx context.Context, req *logical.Request) (bool, bool, error)
+  - codegraphId: method:26aae3c4cbf2510b0890ce91ad9b8fcb
+    file: third_party/openbao/internal/builtin/plugin/v5/backend.go
+    kind: method
+    line: 156
+    name: backend.InvalidateKey
+    signature: (ctx context.Context, key string)
+  - codegraphId: method:721bcb8809f4a8a04bdabcce26020083
+    file: third_party/openbao/internal/builtin/plugin/v5/backend.go
+    kind: method
+    line: 162
+    name: backend.IsExternal
+    signature: () bool
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: ba16d8cd1317d83184675bd0a26e0ffd45bf9d939b6e158b91ed8510d9a9adcb
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 7786538b37d4cf392e8f77d2940843a2b196259c4dd667adcb6d45f9e83494f6
