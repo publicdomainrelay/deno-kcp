@@ -2,13 +2,45 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so the Cassandra database plugin can be exercised against a real server that speaks plain, unencrypted CQL. Acceptance tests for the plugin need a deterministic local node, so this fixture pins a fixed cluster name, a fixed seed address, and disabled client encryption, removing TLS certificate setup from the test path. Keeping the fixture under a directory named no_tls makes the encrypted and unencrypted test topologies separate and self-describing, and isolating it from Go source keeps the configuration editable as data rather than code.
 
 _Write the prose above and the fields in the spec block. `codeRefs` and the resolved references below are maintained by the tool; an edit there is lost._
 
 ## spec
 
 ```yaml spec
+requirements:
+- codeRefs:
+  - file:third_party/openbao/internal/builtin/database/cassandra/test-fixtures/no_tls/cassandra.yaml
+  id: r.cassandra-yaml-fixture-present
+  level: MUST
+  text: The no_tls Cassandra test fixture MUST provide a cassandra.yaml node configuration
+    at third_party/openbao/internal/builtin/database/cassandra/test-fixtures/no_tls/cassandra.yaml.
+- codeRefs:
+  - file:third_party/openbao/internal/builtin/database/cassandra/test-fixtures/no_tls/cassandra.yaml
+  id: r.client-encryption-disabled
+  level: MUST
+  text: client_encryption_options.enabled MUST be false, so the node accepts unencrypted
+    native transport connections and the fixture matches its no_tls directory name.
+- codeRefs:
+  - file:third_party/openbao/internal/builtin/database/cassandra/test-fixtures/no_tls/cassandra.yaml
+  id: r.cluster-name-fixed
+  level: MUST
+  text: cluster_name MUST be set to the fixed value 'Test Cluster' so the test node
+    cannot accidentally join another logical cluster.
+- codeRefs:
+  - file:third_party/openbao/internal/builtin/database/cassandra/test-fixtures/no_tls/cassandra.yaml
+  id: r.native-transport-default-port
+  level: SHOULD
+  text: The native transport SHOULD stay on its standard native_transport_port so
+    the Cassandra plugin tests can connect with default port settings.
+- codeRefs:
+  - file:third_party/openbao/internal/builtin/database/cassandra/test-fixtures/no_tls/cassandra.yaml
+  id: r.seed-provider-contact-point
+  level: MUST
+  text: seed_provider MUST use org.apache.cassandra.locator.SimpleSeedProvider with
+    seeds set to 127.0.0.1:7000, giving the test node a deterministic local contact
+    point.
 upstream: self
 ```
 
