@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so every agent-proxy command can share one implementation of auto-auth method selection and of persistent lease caching, instead of each command re-deriving how a config string becomes an auth method and how a bolt database file on disk is opened, keyed, restored and optionally deleted. It centralizes the required validation (nil config, missing path, unsupported key protection type), the Kubernetes service-account-JWT lookup used as additional authenticated data, and the keep_after_import / exit_on_err policy that decides whether the bolt file survives the import and whether errors are fatal.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

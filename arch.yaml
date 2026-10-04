@@ -15138,8 +15138,126 @@ system_contexts:
   codeRefIndex:
   - file:third_party/openbao/internal/command/agentproxyshared/helpers.go helpers.go@third_party/openbao/internal/command/agentproxyshared/helpers.go
   - file:third_party/openbao/internal/command/agentproxyshared/helpers_test.go helpers_test.go@third_party/openbao/internal/command/agentproxyshared/helpers_test.go
+  - function:558242af32f8480a238cc113a963d2c4 GetAutoAuthMethodFromConfig@third_party/openbao/internal/command/agentproxyshared/helpers.go:30
+  - function:66faeada19cce16e9efb4b9fcfb6016d AddPersistentStorageToLeaseCache@third_party/openbao/internal/command/agentproxyshared/helpers.go:58
+  - struct:0524d0ccf8fc5e3a4157d968c7521a94 PersistConfig@third_party/openbao/internal/command/agentproxyshared/helpers.go:48
   id: sc.third-party-openbao-internal-command-agentproxyshared
+  intent: The context exists so every agent-proxy command can share one implementation
+    of auto-auth method selection and of persistent lease caching, instead of each
+    command re-deriving how a config string becomes an auth method and how a bolt
+    database file on disk is opened, keyed, restored and optionally deleted. It centralizes
+    the required validation (nil config, missing path, unsupported key protection
+    type), the Kubernetes service-account-JWT lookup used as additional authenticated
+    data, and the keep_after_import / exit_on_err policy that decides whether the
+    bolt file survives the import and whether errors are fatal.
+  interfaces:
+  - file: third_party/openbao/internal/command/agentproxyshared/helpers.go
+    kind: function
+    name: AddPersistentStorageToLeaseCache
+    signature: (ctx context.Context, leaseCache *cache.LeaseCache, persistConfig *PersistConfig,
+      logger log.Logger) (func() error, string, error)
+  - file: third_party/openbao/internal/command/agentproxyshared/helpers.go
+    kind: function
+    name: GetAutoAuthMethodFromConfig
+    signature: (autoAuthMethodType string, authConfig *auth.AuthConfig, vaultAddress
+      string) (auth.AuthMethod, error)
+  - file: third_party/openbao/internal/command/agentproxyshared/helpers.go
+    kind: struct
+    name: PersistConfig
+    signature: type PersistConfig struct { Type string; Path string; KeepAfterImport
+      bool; ExitOnErr bool; ServiceAccountTokenFile string }
   name: third-party-openbao-internal-command-agentproxyshared
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/helpers.go
+    - function:558242af32f8480a238cc113a963d2c4
+    id: r.auto-auth-method-dispatch
+    level: MUST
+    text: GetAutoAuthMethodFromConfig maps the autoAuthMethodType string to a concrete
+      auth.AuthMethod by constructing cert, jwt, kubernetes, approle or token_file
+      method from the given auth.AuthConfig, and returns an error of the form `unknown
+      auth method %q` naming the type for any other value.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/helpers.go
+    - function:66faeada19cce16e9efb4b9fcfb6016d
+    id: r.existing-db-restore
+    level: MUST
+    text: When the bolt database file already exists, the function opens it without
+      a wrapper, reads the retrieval token, closes it, builds a passthrough key manager
+      from that token, reopens the storage with the key manager wrapper and the AAD,
+      and restores the persisted entries into the lease cache via leaseCache.Restore.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/helpers.go
+    - function:66faeada19cce16e9efb4b9fcfb6016d
+    id: r.exit-on-err-policy
+    level: MUST
+    text: Restore failures, auto-auth token fetch failures, token deserialization
+      failures and removal failures are logged rather than returned; if PersistConfig.ExitOnErr
+      is set the function instead aborts and returns `exiting with error as exit_on_err
+      is set to true`.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/helpers.go
+    - function:66faeada19cce16e9efb4b9fcfb6016d
+    id: r.fresh-db-initialise
+    level: MUST
+    text: When no bolt database file exists, the function creates a passthrough key
+      manager with no prior token, opens new bolt storage with its wrapper and AAD,
+      stores the generated retrieval token into the storage, installs it on the lease
+      cache and returns the storage Close method with an empty previous token.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/helpers.go
+    - function:66faeada19cce16e9efb4b9fcfb6016d
+    id: r.keep-after-import
+    level: MUST
+    text: With KeepAfterImport set the opened storage is installed on the lease cache
+      through leaseCache.SetPersistentStorage and its Close method is returned as
+      the deferred close function; otherwise the storage is closed and the bolt database
+      file (joined from Path and cacheboltdb.DatabaseFileName) is removed, and a nil
+      close function is returned alongside the previous auto-auth token.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/helpers.go
+    - function:66faeada19cce16e9efb4b9fcfb6016d
+    id: r.kubernetes-aad
+    level: MUST
+    text: 'For the kubernetes key protection type the function reads the service account
+      JWT and uses its trimmed contents as the bolt storage AAD; when ServiceAccountTokenFile
+      is empty it reads the default path /var/run/secrets/kubernetes.io/serviceaccount/token,
+      and a read failure returns `failed to read service account token from %s: %w`
+      naming the path it tried.'
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/helpers.go
+    - struct:0524d0ccf8fc5e3a4157d968c7521a94
+    id: r.persist-config-shape
+    level: MUST
+    text: PersistConfig carries the persistent cache configuration as Type plus HCL-tagged
+      fields Path (path), KeepAfterImport (keep_after_import), ExitOnErr (exit_on_err)
+      and ServiceAccountTokenFile (service_account_token_file), so the struct decodes
+      directly from agent config files.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/helpers.go
+    - function:66faeada19cce16e9efb4b9fcfb6016d
+    id: r.persistence-input-validation
+    level: MUST
+    text: AddPersistentStorageToLeaseCache rejects a nil PersistConfig with `persist
+      config was nil` and an empty Path with `must specify persistent cache path`,
+      and rejects any Type other than "kubernetes" with `persistent key protection
+      type %q not supported`.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/helpers_test.go
+    - function:66faeada19cce16e9efb4b9fcfb6016d
+    id: r.persistence-test-coverage
+    level: SHOULD
+    text: Test_AddPersistentStorageToLeaseCache in helpers_test.go drives PersistConfig
+      through AddPersistentStorageToLeaseCache so the persistence paths stay covered
+      by the package test suite.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/helpers.go
+    - function:66faeada19cce16e9efb4b9fcfb6016d
+    id: r.previous-token-return
+    level: MUST
+    text: The function returns, as its second result, the auto-auth token recovered
+      from the persisted cache when a stored token exists, and an empty string on
+      a fresh cache, so callers can resume auto-auth without re-authenticating.
   upstream: self
 - code:
   - third_party/openbao/internal/command/agentproxyshared/auth/auth.go
