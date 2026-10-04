@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the repository records the contract of the custommetadata helper as referenceable specification rather than as vendored OpenBao source. Custom metadata is the arbitrary user-supplied key-value supplemental information attached to a resource, so two things must be pinned down: the wire-to-storage conversion (TypeMap to TypeKVPairs) and its interaction with PATCH semantics, and the hard limits every writer of metadata is held to. Encoding those limits as spec lets callers and validators agree on the same bounds without re-reading the vendored package, and makes the nil-filtering rule of Parse explicit, since a null value is meaningful only during a patch and is otherwise flattened to an empty string.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
