@@ -4278,6 +4278,25 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.list-actions` (MUST): "The list controller actions set the filter, set the filter focus flag, and reload the list: setFilter and setFilterFocus write their argument to filter and filterFocused, while refresh and onDelete both send 'reload' to the parent list route."
 - added `r.list-query-params` (MUST): "The alias list controller binds query params page to 'page' and pageFilter to 'pageFilter', defaults page to 1 and pageFilter to null, and exposes filter, filterFocused (false) and isLoading (false) as its remaining state."
 
+### third-party-openbao-ui-app-controllers-vault-cluster-access-leases
+
+- intent: "" -> "This context exists so the leases UI controllers can be described and changed as a unit: they share the list-root alias, the cluster breadcrumb, the lease adapter calls, and the safe-transition helper, and a change to one of them (for example the revoke flow or the filter behavior) usually has to stay consistent with the others. It exists to pin down what the list and detail screens must do, without restating the templates or routes that consume them."
+- added `r.adapter-access` (SHOULD): "Lease mutations should be issued through the lease adapter resolved from the Ember store (adapterFor('lease')) rather than direct network calls, so revoke, force-revoke and renew stay behind one adapter surface."
+- added `r.index-lookup-lease-transition` (MUST): "The index controller defines a lookupLease action that takes a lease id and navigates with transitionToSafe to the route vault.cluster.access.leases.show, passing that id as the model argument."
+- added `r.list-backend-crumb` (MUST): "The list controller computes backendCrumb from the vault.cluster controller model name, producing a crumb labelled and titled leases whose path is vault.cluster.access.leases.list-root and whose model is that cluster name."
+- added `r.list-empty-title` (MUST): "The list controller computes emptyTitle from the base key id and the filter: when the id is empty it reads 'There are currently no leases.', when the filter is a folder it distinguishes an exact prefix match from a missing prefix match with the two filter-specific messages, and otherwise it yields an empty string."
+- added `r.list-filter-computeds` (MUST): "The list controller derives filterIsFolder from whether the filter is a key folder, filterMatchesKey from whether any model entry has an id equal to the filter, and firstPartialMatch by matching model ids against a regular expression built from the escaped filter, returning null when the filter already matches a key or nothing matches, the single match when the filter equals the shared prefix of the model or only one entry matches, and otherwise an object carrying the shared prefix as its id."
+- added `r.list-filter-state` (MUST): "The list controller holds filter, filterFocused and isLoading state, and its setFilter and setFilterFocus actions write the submitted value into filter and filterFocused respectively."
+- added `r.list-query-params` (MUST): "The list controller declares page and pageFilter as query params, backed by the page property defaulting to 1 and pageFilter defaulting to null, so list position and filter survive a route transition."
+- added `r.list-refresh-bubbles` (MUST): "The list controller's refresh action sends the reload action so the refresh request bubbles to the list route rather than being handled in the controller."
+- added `r.list-revoke-prefix` (MUST): "The list controller's revokePrefix action takes a prefix and an isForce flag, picks forceRevokePrefix or revokePrefix on the lease adapter obtained from the store, and on success transitions safely to vault.cluster.access.leases.list-root and raises a success flash message saying all leases under the prefix will be revoked, while on failure it joins the error messages and raises a danger flash message naming the prefix."
+- added `r.list-root-alias` (MUST): "list-root.js must re-export the default export of ./list, so the root leases list route uses the same controller implementation as the nested list route instead of a separate copy."
+- added `r.safe-transitions` (SHOULD): "All navigation performed by these controllers should go through the transitionToSafe helper instead of a plain transitionTo, so an aborted or failed transition does not raise an unhandled rejection."
+- added `r.show-backend-crumb` (MUST): "The show controller computes the same leases backendCrumb from the vault.cluster controller model name, with path vault.cluster.access.leases.list-root, so the detail screen keeps the list route in its breadcrumb."
+- added `r.show-cleanup-model` (MUST): "The show controller's cleanupModel must return without touching the model when there is no model or when the model is saving, destroyed or destroying, and otherwise unset the controller's model and unload the record through removeRecord when the model exposes unloadRecord, because controllers are singletons."
+- added `r.show-renew-lease` (MUST): "The show controller's renewLease action takes a model and an increment, calls renew on the lease adapter obtained from the model's store with the model id and the increment seconds when present, then sends refreshModel and schedules a success flash message naming the renewed lease id, and on failure joins the error messages into a danger flash message about renewing the lease."
+- added `r.show-revoke-lease` (MUST): "The show controller's revokeLease action calls destroyRecord on the passed model and then transitions safely to vault.cluster.access.leases.list-root."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4615,7 +4634,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-controllers-vault-cluster-access-identity-aliases-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-identity-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-identity-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-controllers-vault-cluster-access-leases-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-access-leases-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-method-item-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
