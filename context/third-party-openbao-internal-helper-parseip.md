@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to document the small text-normalization helper OpenBao uses before parsing addresses, kept as vendored third-party code inside the deno-kcp repository. Its purpose is to make address strings with leading zeroes in octets (for example 010.010.20.5 or ::192.00.002.33) comparable and parseable by canonicalizing them, since Go's net.ParseIPSloppy rejects or mishandles such forms. The spec pins down the contract that callers depend on: CIDR input has only its address portion rewritten and its prefix length preserved verbatim, while anything that is not a well-formed CIDR string passes through untouched.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

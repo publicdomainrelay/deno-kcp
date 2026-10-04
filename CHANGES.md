@@ -1664,6 +1664,14 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.uid-gid-equality` (MUST): "FileUIDEqual and FileGIDEqual must read the underlying syscall.Stat_t through fs.FileInfo.Sys() and return true only when its Uid, respectively Gid, equals the requested value, returning false when the type assertion fails or the ids differ."
 - added `r.umask` (MUST): "Umask must install newmask as the process umask and return the umask value that was in effect before the call, so a caller can restore the previous mask after temporarily tightening it."
 
+### third-party-openbao-internal-helper-parseip
+
+- intent: "" -> "This context exists to document the small text-normalization helper OpenBao uses before parsing addresses, kept as vendored third-party code inside the deno-kcp repository. Its purpose is to make address strings with leading zeroes in octets (for example 010.010.20.5 or ::192.00.002.33) comparable and parseable by canonicalizing them, since Go's net.ParseIPSloppy rejects or mishandles such forms. The spec pins down the contract that callers depend on: CIDR input has only its address portion rewritten and its prefix length preserved verbatim, while anything that is not a well-formed CIDR string passes through untouched."
+- added `r.embedded-ipv4-tail` (MUST): "Address normalization handles IPv6 addresses whose final colon-delimited segment is an embedded IPv4 address: the helper scans from the end of the string for a colon at which the remainder parses as a sloppy IP, strips leading zeroes from that IPv4 tail, and keeps the IPv6 prefix unchanged; if no such colon is found, the whole string is treated as IPv4."
+- added `r.invalid-cidr-passthrough` (MUST): "When the input does not split into exactly two "/"-separated pieces, TrimLeadingZeroesCIDR returns the input string unchanged, so plain IP addresses, empty strings, and strings with multiple or zero slashes are passed through byte for byte."
+- added `r.table-driven-test` (SHOULD): "The package's behavior is pinned by a table-driven test that, for each case, asserts trimLeadingZeroesIP produces the canonical address, that TrimLeadingZeroesCIDR returns non-CIDR input verbatim, and that appending "/32" to the input yields the canonical address followed by "/32"."
+- added `r.trim-leading-zeroes-cidr` (MUST): "TrimLeadingZeroesCIDR accepts a string, splits it on "/", and, when the split yields exactly two pieces, rewrites the address piece with trimLeadingZeroesIP and rejoins the pieces with "/", returning the normalized CIDR; the prefix-length piece is never altered."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -1756,5 +1764,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-helper-monitor-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-namespace-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-osutil-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-helper-parseip-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-helper-parseip-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-pgpkeys-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
