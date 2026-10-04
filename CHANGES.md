@@ -3277,6 +3277,16 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.shard-selection-from-key` (MUST): "LockIndexForKey derives a uint8 shard index from a key string, and LockForKey applies that index to a []*L to return the single lock responsible for the key, so the same key always resolves to the same shard."
 - added `r.sharded-lock-sets-construction` (MUST): "CreateLocks returns a preallocated slice of *LockEntry, and CreateGenericLocks returns the same shape generically as []*L, giving callers a fixed set of shards to spread keys across."
 
+### third-party-openbao-sdk-helper-logging
+
+- intent: "" -> "This context exists so that SDK consumers and OpenBao components share one definition of log format and one place to construct a logger, rather than each caller re-implementing format parsing or logger wiring. The LogFormat type carries the three accepted states so callers can compare results by value, the parsers centralise the accepted spellings of each format (including the trimmed, lower-cased, and vault-prefixed aliases), and the constructors fix the logger options — level, independent levels, output writer, and JSON formatting decided from the environment — so that a logger created through this package behaves consistently no matter which entry point is used."
+- added `r.log-format-enum` (MUST): "LogFormat must be an integer enum with exactly three defined values — UnspecifiedFormat, StandardFormat and JSONFormat — and its String method must render them as the strings "unspecified", "standard" and "json" respectively, falling back to "unknown" for any value outside that set."
+- added `r.new-vault-logger-default-output` (MUST): "NewVaultLogger must create a logger at the requested level that writes to log.DefaultOutput, delegating to NewVaultLoggerWithWriter so both constructors produce identically configured loggers apart from the writer."
+- added `r.new-vault-logger-with-writer` (MUST): "NewVaultLoggerWithWriter must build a log.Logger through log.New with the caller's level and writer, IndependentLevels set to true, and JSONFormat set from ParseEnvLogFormat() equalling JSONFormat, so that JSON output is selected by the environment variable rather than by an argument."
+- added `r.parse-env-log-format` (MUST): "ParseEnvLogFormat must read the BAO_LOG_FORMAT variable, lower-case it, map "json", "vault_json", "vault-json" and "vaultjson" to JSONFormat and "standard" to StandardFormat, and return UnspecifiedFormat for an unset variable or any unrecognised value, without ever returning an error."
+- added `r.parse-log-format` (MUST): "ParseLogFormat must lower-case and trim the supplied string before matching, so that "" and whitespace-only input yield UnspecifiedFormat with no error, "standard" in any case yields StandardFormat, and "json" in any case (including surrounding whitespace) yields JSONFormat; any other input must yield UnspecifiedFormat together with an error whose message is "unknown log format: <format>" carrying the original, untrimmed argument."
+- added `r.parse-log-format-tested` (SHOULD): "ParseLogFormat's accepted inputs and error text must stay covered by Test_ParseLogFormat, which asserts the empty string, a single space, "standard", "STANDARD", "json", " json " and "bogus", and must hold the expected LogFormat and error for each case."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -3517,5 +3527,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-sdk-helper-ldaputil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-locksutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-locksutil-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-sdk-helper-logging-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-helper-logging-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-sdk-helper-logging-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-sdk-helper-ocsp-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |

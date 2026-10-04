@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so that SDK consumers and OpenBao components share one definition of log format and one place to construct a logger, rather than each caller re-implementing format parsing or logger wiring. The LogFormat type carries the three accepted states so callers can compare results by value, the parsers centralise the accepted spellings of each format (including the trimmed, lower-cased, and vault-prefixed aliases), and the constructors fix the logger options — level, independent levels, output writer, and JSON formatting decided from the environment — so that a logger created through this package behaves consistently no matter which entry point is used.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
