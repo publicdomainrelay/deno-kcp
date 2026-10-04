@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so that the PKI addon's page components are specified as a unit: what each page class is, which action methods it exposes, and what those methods must do when a user downloads a certificate, revokes it, edits or deletes configuration, generates or rotates an issuer, imports an issuer, deletes a key or role, navigates from the overview, or watches tidy state. It anchors the page layer of the vendored OpenBao UI PKI addon inside this repository so that downstream consumers and tests can refer to the exported component and method identities without depending on the rest of the OpenBao UI tree.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
