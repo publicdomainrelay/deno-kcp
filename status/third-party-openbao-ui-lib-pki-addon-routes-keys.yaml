@@ -1,15 +1,45 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: PkiKeyRoute, PkiKeysCreateRoute, PkiKeysImportRoute, PkiKeysIndexRoute'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/ui/lib/pki/addon/routes/keys/create.js
+  - third_party/openbao/ui/lib/pki/addon/routes/keys/import.js
+  - third_party/openbao/ui/lib/pki/addon/routes/keys/index.js
+  - third_party/openbao/ui/lib/pki/addon/routes/keys/key.js
+  fingerprint: 004c2352c950f1a7f66c832585fb4a1664db755e17fb5215e3fec844d2c0bbcb
+  interfaces:
+  - codegraphId: class:73e01ac26d48967ac2bdf15106dea6d0
+    file: third_party/openbao/ui/lib/pki/addon/routes/keys/create.js
+    kind: class
+    line: 11
+    name: PkiKeysCreateRoute
+  - codegraphId: class:4eba34bb416d84110ce26b87da1bbd25
+    file: third_party/openbao/ui/lib/pki/addon/routes/keys/import.js
+    kind: class
+    line: 11
+    name: PkiKeysImportRoute
+  - codegraphId: class:e21e36f661b11fbe5464cb8d4e66462f
+    file: third_party/openbao/ui/lib/pki/addon/routes/keys/index.js
+    kind: class
+    line: 13
+    name: PkiKeysIndexRoute
+  - codegraphId: class:fd3b3170391f9e34d1a50faeefded6d8
+    file: third_party/openbao/ui/lib/pki/addon/routes/keys/key.js
+    kind: class
+    line: 9
+    name: PkiKeyRoute
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 22e18bd2f67374823649af932cb026c4f67292bb6ad56047c1f5cde85762263c
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 004c2352c950f1a7f66c832585fb4a1664db755e17fb5215e3fec844d2c0bbcb
