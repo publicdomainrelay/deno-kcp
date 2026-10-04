@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to specify the navigation and breadcrumb behavior of the OpenBao PKI key details and key edit routes, so that the two pages can be reimplemented or verified against a single shared contract: both must reuse the parent keys.key model rather than fetching their own, and both must publish the same four-level breadcrumb trail rooted at the secrets engine, the current mount path, and the keys index, terminated by the key's own id.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

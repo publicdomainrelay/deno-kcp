@@ -1,5 +1,7 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
+- class:4932e12b5fa3c670ed5f83fe9260caa6 PkiKeyDetailsRoute@third_party/openbao/ui/lib/pki/addon/routes/keys/key/details.js:9
+- class:7eab7a696dab841ab9d925a60df1b7d9 PkiKeyEditRoute@third_party/openbao/ui/lib/pki/addon/routes/keys/key/edit.js:11
 - file:third_party/openbao/ui/lib/pki/addon/routes/keys/key/details.js details.js@third_party/openbao/ui/lib/pki/addon/routes/keys/key/details.js
 - file:third_party/openbao/ui/lib/pki/addon/routes/keys/key/edit.js edit.js@third_party/openbao/ui/lib/pki/addon/routes/keys/key/edit.js
 kind: SystemContext
@@ -7,5 +9,74 @@ metadata:
   name: third-party-openbao-ui-lib-pki-addon-routes-keys-key
   namespace: default
 spec:
+  intent: 'This context exists to specify the navigation and breadcrumb behavior of
+    the OpenBao PKI key details and key edit routes, so that the two pages can be
+    reimplemented or verified against a single shared contract: both must reuse the
+    parent keys.key model rather than fetching their own, and both must publish the
+    same four-level breadcrumb trail rooted at the secrets engine, the current mount
+    path, and the keys index, terminated by the key''s own id.'
+  interfaces:
+  - file: third_party/openbao/ui/lib/pki/addon/routes/keys/key/details.js
+    kind: class
+    name: PkiKeyDetailsRoute
+    signature: class PkiKeyDetailsRoute extends Route
+  - file: third_party/openbao/ui/lib/pki/addon/routes/keys/key/edit.js
+    kind: class
+    name: PkiKeyEditRoute
+    signature: class PkiKeyEditRoute extends Route
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - class:4932e12b5fa3c670ed5f83fe9260caa6
+    - class:7eab7a696dab841ab9d925a60df1b7d9
+    - file:third_party/openbao/ui/lib/pki/addon/routes/keys/key/details.js
+    - file:third_party/openbao/ui/lib/pki/addon/routes/keys/key/edit.js
+    id: r.both-routes-forward-model-to-parent-keys-key
+    level: MUST
+    text: PkiKeyDetailsRoute.model and PkiKeyEditRoute.model each return this.modelFor('keys.key'),
+      so neither route loads its own record and both detail and edit pages operate
+      on the same model resolved by the parent keys.key route.
+  - codeRefs:
+    - class:4932e12b5fa3c670ed5f83fe9260caa6
+    - class:7eab7a696dab841ab9d925a60df1b7d9
+    id: r.breadcrumbs-four-entries-identical
+    level: MUST
+    text: 'setupController assigns controller.breadcrumbs a four-element array: {label:
+      ''secrets'', route: ''secrets'', linkExternal: true}; {label: this.secretMountPath.currentPath,
+      route: ''overview'', models: [this.secretMountPath.currentPath]}; {label: ''keys'',
+      route: ''keys.index'', models: [this.secretMountPath.currentPath]}; and {label:
+      resolvedModel.id}, where the last entry carries no route so it renders as the
+      trailing non-link crumb.'
+  - codeRefs:
+    - class:4932e12b5fa3c670ed5f83fe9260caa6
+    - class:7eab7a696dab841ab9d925a60df1b7d9
+    id: r.inject-secret-mount-path-service
+    level: MUST
+    text: Both route classes declare `@service secretMountPath` and read this.secretMountPath.currentPath
+      when building breadcrumbs, so the mount path crumb and the keys index crumb
+      always reflect the mount currently being browsed.
+  - codeRefs:
+    - class:4932e12b5fa3c670ed5f83fe9260caa6
+    - class:7eab7a696dab841ab9d925a60df1b7d9
+    id: r.routes-extend-ember-route
+    level: MUST
+    text: Both classes are default-exported subclasses of Ember's Route, so the addon
+      router can resolve keys.key.details and keys.key.edit to them as standard route
+      modules.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/pki/addon/routes/keys/key/details.js
+    - file:third_party/openbao/ui/lib/pki/addon/routes/keys/key/edit.js
+    id: r.secrets-crumb-external-link
+    level: MUST
+    text: 'The first breadcrumb sets linkExternal: true so the ''secrets'' label navigates
+      out of the PKI addon to the core secrets route rather than resolving inside
+      the addon''s own router.'
+  - codeRefs:
+    - class:4932e12b5fa3c670ed5f83fe9260caa6
+    - class:7eab7a696dab841ab9d925a60df1b7d9
+    id: r.setup-controller-calls-super
+    level: MUST
+    text: Both PkiKeyDetailsRoute.setupController and PkiKeyEditRoute.setupController
+      call super.setupController(controller, resolvedModel) before setting breadcrumbs,
+      so Ember's default model-to-controller wiring is preserved.
   upstream: self

@@ -5959,6 +5959,16 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.key-detail-no-breadcrumbs` (SHOULD): "PkiKeyRoute defines only a model hook and no setupController, so the key detail route relies on the parent keys route for its controller state rather than installing its own breadcrumbs."
 - added `r.mount-path-as-backend` (MUST): "Every route in this section injects the secretMountPath and store services and passes secretMountPath.currentPath as the backend option of every pki/key store call, so key operations always address the secrets mount the user is currently viewing."
 
+### third-party-openbao-ui-lib-pki-addon-routes-keys-key
+
+- intent: "" -> "This context exists to specify the navigation and breadcrumb behavior of the OpenBao PKI key details and key edit routes, so that the two pages can be reimplemented or verified against a single shared contract: both must reuse the parent keys.key model rather than fetching their own, and both must publish the same four-level breadcrumb trail rooted at the secrets engine, the current mount path, and the keys index, terminated by the key's own id."
+- added `r.both-routes-forward-model-to-parent-keys-key` (MUST): "PkiKeyDetailsRoute.model and PkiKeyEditRoute.model each return this.modelFor('keys.key'), so neither route loads its own record and both detail and edit pages operate on the same model resolved by the parent keys.key route."
+- added `r.breadcrumbs-four-entries-identical` (MUST): "setupController assigns controller.breadcrumbs a four-element array: {label: 'secrets', route: 'secrets', linkExternal: true}; {label: this.secretMountPath.currentPath, route: 'overview', models: [this.secretMountPath.currentPath]}; {label: 'keys', route: 'keys.index', models: [this.secretMountPath.currentPath]}; and {label: resolvedModel.id}, where the last entry carries no route so it renders as the trailing non-link crumb."
+- added `r.inject-secret-mount-path-service` (MUST): "Both route classes declare `@service secretMountPath` and read this.secretMountPath.currentPath when building breadcrumbs, so the mount path crumb and the keys index crumb always reflect the mount currently being browsed."
+- added `r.routes-extend-ember-route` (MUST): "Both classes are default-exported subclasses of Ember's Route, so the addon router can resolve keys.key.details and keys.key.edit to them as standard route modules."
+- added `r.secrets-crumb-external-link` (MUST): "The first breadcrumb sets linkExternal: true so the 'secrets' label navigates out of the PKI addon to the core secrets route rather than resolving inside the addon's own router."
+- added `r.setup-controller-calls-super` (MUST): "Both PkiKeyDetailsRoute.setupController and PkiKeyEditRoute.setupController call super.setupController(controller, resolvedModel) before setting breadcrumbs, so Ember's default model-to-controller wiring is preserved."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -6494,7 +6504,8 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-pki-addon-routes-issuers-issuer-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-routes-issuers-issuer-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-routes-keys-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-lib-pki-addon-routes-keys-key-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-pki-addon-routes-keys-key-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-lib-pki-addon-routes-keys-key-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-routes-roles-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
