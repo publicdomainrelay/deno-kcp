@@ -1,0 +1,29 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-sdk-plugin-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-sdk-plugin
+  toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
+status:
+  agentLog: 'This context is the vendored OpenBao/Vault SDK plugin package under third_party/openbao/sdk/plugin.
+    It carries both halves of the go-plugin gRPC contract for logical backends: GRPCBackendPlugin,
+    which registers the backend and PluginVersion services on the plugin side and
+    constructs the dispensed client on the host side; the server and client transceivers
+    in grpc_backend_server.go and grpc_backend_client.go; and the brokers a backend
+    needs to reach host facilities, namely the storage broker (GRPCStorageClient/GRPCStorageServer
+    with NOOPStorage and transactional support), the system-view broker (gRPCSystemViewClient/gRPCSystemViewServer),
+    and the logger RPC surface in logger.go. The plugin and plugin_v5 files cover
+    dispensing, version negotiation, reload-safe cleanup and the external-plugin flag,
+    while serve.go provides the Serve and ServeMultiplex entrypoints, and middleware.go
+    adds a tracing wrapper over a logical.Backend.'
+  message: wrote 15 requirement(s) and 130 interface(s) for third-party-openbao-sdk-plugin
+  phase: Succeeded
+superseded:
+- message: wrote 15 requirement(s) and 130 interface(s) for third-party-openbao-sdk-plugin
+  name: third-party-openbao-sdk-plugin-c2s-6c1bbe4c3ba9-89cee50ec5ae
+  phase: Succeeded

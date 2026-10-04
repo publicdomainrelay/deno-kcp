@@ -3669,7 +3669,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 
 ### third-party-openbao-sdk-plugin
 
-- intent: "" -> "Exists so that the repository can compile against and link the OpenBao/Vault plugin protocol without depending on an external module path for the SDK. It provides the full server and client halves of the go-plugin gRPC contract for logical backends, plus the storage, system-view and logger brokers that a backend needs, and the serve helpers that a plugin binary's main function calls. Consumers inside this repository use it to build, dispense and host logical backends."
+- intent: "" -> "Exists so that the repository can compile against and link the OpenBao/Vault plugin protocol without depending on an external module path for the SDK. It defines the full server and client halves of the go-plugin gRPC contract for logical backends, plus the storage, system-view and logger brokers a backend needs, and the serve helpers a plugin binary's main function calls. Consumers inside this repository use it to build, dispense and host logical backends."
 - added `r.backend-client-forwarding` (MUST): "Every backendGRPCPluginClient method forwards to the remote backend over gRPC, so Initialize, HandleRequest, HandleExistenceCheck, SpecialPaths, Setup, InvalidateKey, Cleanup, Type, PluginVersion, System, Logger and IsExternal all reflect the plugin process's backend rather than local state."
 - added `r.backend-plugin-client-capabilities` (MUST): "BackendPluginClient carries the remote backend handle plus its version metadata, so Cleanup tears down the plugin client and PluginVersion reports the negotiated version; the v5 variant additionally reports IsExternal from the plugin handshake."
 - added `r.backend-server-dispatch` (MUST): "backendGRPCPluginServer decodes each protobuf request into the logical types, invokes the corresponding method on the obtained backend instance and encodes the result or the error into the protobuf reply."
@@ -3975,6 +3975,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-sdk-physical-inmem-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-physical-inmem-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-plugin-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-sdk-plugin-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-plugin-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-plugin-mock-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-plugin-pb-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-queue-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
