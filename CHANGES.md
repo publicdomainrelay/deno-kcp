@@ -2816,6 +2816,22 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.toggleable-error-injection` (MUST): "ToggleableWrapper.SetError records an error, and while it is set ToggleableWrapper.Encrypt and ToggleableWrapper.Decrypt return that error instead of performing the operation, letting tests drive the error paths of callers that hold only the Access."
 - added `r.toggleable-wrapper-type` (MUST): "ToggleableWrapper answers the wrapper Type query as well, so a toggleable test seal is interchangeable with a production wrapper anywhere an Access or wrapping.Wrapper is accepted."
 
+### third-party-openbao-internal-vault-tokens
+
+- intent: "" -> "The context exists so the token wire format is described where the rest of the codebase can reason about it without reading the whole vendored file. Token signing, token lookup and token indexing in OpenBao all pass these two structs across package boundaries, so anything that mints, parses, hashes or stores a vault token depends on the field numbering, the protobuf tags and the nil-safe getters recorded here. Recording them as a specification fixes the shape that other contexts must not break: field numbers are part of the on-disk and over-the-wire contract, and the getters are part of the in-process contract."
+- added `r.message-internal-state` (MUST): "Both message types keep a protoimpl.MessageState, an unknownFields block and a sizeCache beside their declared fields, so unknown wire fields survive a round trip and the encoded size is cached; these members stay unexported and are not part of the token data."
+- added `r.signed-token-descriptor` (MUST): "SignedToken.Descriptor returns the raw gzipped file descriptor bytes and the index path that locates SignedToken inside that descriptor."
+- added `r.signed-token-getters-nil-safe` (MUST): "SignedToken.GetTokenVersion, SignedToken.GetHmac and SignedToken.GetToken return the corresponding field of the receiver, and each returns the field's zero value (0 or nil) when the receiver is nil, so callers read signed token material without a nil check."
+- added `r.signed-token-reflection` (MUST): "SignedToken.ProtoMessage marks the type as a proto message, and SignedToken.ProtoReflect returns the protoreflect.Message view of the receiver for reflective read and write of its fields."
+- added `r.signed-token-reset-zeroes` (MUST): "SignedToken.Reset replaces the receiver with a zero-value SignedToken and stores the file-level message info for message index 0 in the proto message state, so a reused value carries no data from its previous use."
+- added `r.signed-token-string-renders` (MUST): "SignedToken.String returns the protobuf text representation produced by protoimpl.X.MessageStringOf for the receiver."
+- added `r.token-descriptor` (MUST): "Token.Descriptor returns the raw gzipped file descriptor bytes and the index path that locates Token inside that descriptor."
+- added `r.token-getters-nil-safe` (MUST): "Token.GetRandom, Token.GetIndexEpoch and Token.GetLocalIndex return the corresponding field of the receiver, and each returns the field's zero value (empty string or 0) when the receiver is nil."
+- added `r.token-reflection` (MUST): "Token.ProtoMessage marks the type as a proto message, and Token.ProtoReflect returns the protoreflect.Message view of the receiver."
+- added `r.token-reset-zeroes` (MUST): "Token.Reset replaces the receiver with a zero-value Token and stores the file-level message info for message index 1 in the proto message state."
+- added `r.token-string-renders` (MUST): "Token.String returns the protobuf text representation produced by protoimpl.X.MessageStringOf for the receiver."
+- added `r.token-wire-field-numbers` (MUST): "Token carries Random as protobuf field 1 (string, the unencoded equivalent of the former randbase62 value), IndexEpoch as field 3 (uint32 varint, JSON name indexEpoch) and LocalIndex as field 50 (string, JSON name localIndex, the storage state required to have this token); these numbers and JSON names are the wire and JSON contract."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -3013,5 +3029,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-vault-routing-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-seal-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-seal-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-vault-tokens-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-vault-tokens-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-version-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |

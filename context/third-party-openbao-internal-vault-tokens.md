@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so the token wire format is described where the rest of the codebase can reason about it without reading the whole vendored file. Token signing, token lookup and token indexing in OpenBao all pass these two structs across package boundaries, so anything that mints, parses, hashes or stores a vault token depends on the field numbering, the protobuf tags and the nil-safe getters recorded here. Recording them as a specification fixes the shape that other contexts must not break: field numbers are part of the on-disk and over-the-wire contract, and the getters are part of the in-process contract.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
