@@ -4270,7 +4270,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 
 ### third-party-openbao-ui-app-controllers-vault-cluster-access-identity-aliases
 
-- intent: "" -> "This context exists to specify the list, add and edit controllers for identity aliases in the OpenBao UI: the filtering, pagination and reload behavior of the alias list, and the create/edit forms' reuse of the shared identity create controller with an alias-specific show route."
+- intent: "" -> "This context exists to pin down the behavior of the identity-alias add, edit and list controllers in the OpenBao UI, so that the create/edit forms' reuse of the shared identity create controller with an alias-specific show route, and the alias list's filtering, pagination params and reload behavior, stay specified independently of the templates and routes that consume them."
 - added `r.add-controller-extends-create` (MUST): "The alias add controller extends the shared identity create controller imported from '../create' and sets showRoute to the route name 'vault.cluster.access.identity.aliases.show', so a successful creation navigates to the alias show route."
 - added `r.edit-controller-extends-add` (MUST): "The alias edit controller extends the alias add controller with no further overrides, inheriting its create form behavior and the alias show route."
 - added `r.filter-matches-key` (MUST): "The list controller computes filterMatchesKey from filter and model: it is true only when the model is non-empty and contains an item whose id equals the current filter."
@@ -4616,6 +4616,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-controllers-vault-cluster-access-identity-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-identity-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-leases-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-access-method-item-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
