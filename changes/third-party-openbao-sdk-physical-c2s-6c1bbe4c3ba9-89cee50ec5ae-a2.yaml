@@ -1,0 +1,32 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-sdk-physical-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-sdk-physical
+  toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
+status:
+  agentLog: 'The physical package is the storage contract for the whole project. Backend
+    names the five operations every store must support (Put, Get, Delete, List, ListPage),
+    and Entry is the unit moved through them. Everything else in the package is either
+    an optional capability interface discovered by type assertion (HABackend, FencingHABackend,
+    ToggleablePurgemonster, CacheInvalidationBackend, RedirectDetect, ReplicationIndexBackend)
+    or a decorator that wraps a Backend and adds one behaviour: NewCache adds an LRU
+    read cache with transactions, NewStorageEncoding encodes values on write and decodes
+    on read, NewErrorInjector and NewLatencyInjector inject faults and delay, NewView
+    scopes a backend to a fixed prefix, NewPhysicalAccess exposes Purge over a whole
+    keyspace, NewWriteNotifier reports successful writes and hooks invalidation. Transactional,
+    Transaction and TransactionalBackend model begin/commit/rollback, and PermitPool,
+    Prefixes, UnfencedWriteCtx and the Exercise* helpers supply concurrency limits,
+    prefix walking, fence-bypass marking and the conformance suite every backend runs
+    against itself.'
+  message: wrote 21 requirement(s) and 140 interface(s) for third-party-openbao-sdk-physical
+  phase: Succeeded
+superseded:
+- message: wrote 21 requirement(s) and 140 interface(s) for third-party-openbao-sdk-physical
+  name: third-party-openbao-sdk-physical-c2s-6c1bbe4c3ba9-89cee50ec5ae
+  phase: Succeeded
