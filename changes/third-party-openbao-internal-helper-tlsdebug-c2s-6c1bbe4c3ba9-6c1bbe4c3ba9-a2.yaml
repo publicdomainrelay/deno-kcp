@@ -10,8 +10,17 @@ spec:
   systemContext: third-party-openbao-internal-helper-tlsdebug
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-helper-tlsdebug
-  phase: Running
+  agentLog: 'third_party/openbao/internal/helper/tlsdebug holds the TLS session-key
+    logging helper that OpenBao injects into TLS configs for debugging handshakes.
+    Two build variants of the same exported entry point exist side by side: dummy_inject.go
+    carries a no-op stub that returns the caller''s *tls.Config untouched and discards
+    its hclog.Logger, while inject.go carries the real implementation that opens a
+    key log file through the unexported openKeyLogFile helper, logs a warning naming
+    that file, assigns it to config.KeyLogWriter and returns the same config pointer.
+    Both are selected at build time by tags, and both keep the identical hclog.Logger
+    plus *tls.Config signature so callers do not branch on which variant is linked.'
+  message: wrote 6 requirement(s) and 1 interface(s) for third-party-openbao-internal-helper-tlsdebug
+  phase: Succeeded
 superseded:
 - message: |-
     ...g file or touching the logger.",

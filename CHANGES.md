@@ -1973,6 +1973,16 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.start-of-next-month` (MUST): "StartOfNextMonth returns the first instant of the month after t's month, at midnight in t's location, computed as the month start plus AddDate(0, 1, 0)."
 - added `r.start-of-previous-month` (MUST): "StartOfPreviousMonth returns the first instant of the month before t's month, at midnight in t's location, computed by snapping t to its month start and subtracting one month with AddDate(0, -1, 0) so month lengths and leap years stay correct."
 
+### third-party-openbao-internal-helper-tlsdebug
+
+- intent: "" -> "This context documents the tlsdebug helper package as vendored under third_party/openbao: it exists so that builds can turn TLS session-key logging on or off without touching call sites, by swapping one file for another behind a build tag. The spec pins the observable contract of both variants, the nil-config guard, the error path when the key log file cannot be opened, and the configuration side effect of setting KeyLogWriter, so a re-vendoring or local patch can be checked against what the code actually does rather than what the release build happens to compile in."
+- added `r.noop-variant-returns-config-unchanged` (MUST): "The stub variant of Inject in dummy_inject.go must return the config argument exactly as received and must not read or use the hclog.Logger argument, so a build that compiles this file links no key-logging behaviour and mutates no TLS config."
+- added `r.real-variant-injects-key-log-writer` (MUST): "When config is non-nil, Inject must open the key log file via openKeyLogFile, assign the resulting file to config.KeyLogWriter, and return that same config pointer so the caller's TLS config gains a session-key log sink in place."
+- added `r.real-variant-logs-warning-with-file-name` (MUST): "After opening the file, Inject must emit a warning through the passed logger carrying the message "injecting session key logger into TLS config" with the opened file's name as the log_file value."
+- added `r.real-variant-nil-config-guard` (MUST): "The real Inject implementation in inject.go must return nil immediately when the passed *tls.Config is nil, before any key log file is opened or any log line is emitted."
+- added `r.real-variant-open-failure-logs-and-continues` (MUST): "When openKeyLogFile fails, Inject must report the failure with logger.Error under the message "could not open TLS key log file" and the error value, then continue in the same call rather than returning early; the returned file value is used unguarded afterwards, so the error path assumes openKeyLogFile yields a usable non-nil file."
+- added `r.variants-share-signature` (MUST): "The stub and the real implementation must expose the identical exported symbol Inject with the signature taking an hclog.Logger and a *tls.Config and returning a *tls.Config, so that swapping the compiled file selects the behaviour without any call site change."
+
 ### third-party-openbao-internal-helper-useragent
 
 - intent: "" -> "The package exists so that every OpenBao client role emits a distinct, machine-recognizable User-Agent string in one canonical format, instead of each caller hand-assembling its own. Centralizing the format keeps the version, project URL and runtime fields consistent across roles and lets callers be identified by role from server-side request logs."
@@ -2105,6 +2115,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-helper-timeutil-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-timeutil-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-tlsdebug-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Failed |  | 0 | - |
-| third-party-openbao-internal-helper-tlsdebug-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-helper-tlsdebug-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-useragent-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-versions-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-http-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
