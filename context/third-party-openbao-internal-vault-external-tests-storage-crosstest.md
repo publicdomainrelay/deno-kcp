@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-This context exists to pin down the behavioural contract that OpenBao's logical.Storage implementations must satisfy collectively. The file is a conformance harness: any backend registered in allLogical or allTransactionalLogical must be indistinguishable from its peers under the same operation stream, so adding a new storage backend means adding it to these maps and letting the shared assertions prove parity. It documents the edge cases the project cares about — storage-root listing, prefix versus exact-key deletion, nil versus empty list results, write ordering, pagination with after and limit, and transactional conflict detection — as executable assertions rather than prose.
+This context pins down the behavioural contract that OpenBao's logical.Storage implementations must satisfy collectively. The file is a conformance harness: any backend registered in allLogical or allTransactionalLogical must be indistinguishable from its peers under the same operation stream, so adding a storage backend means adding it to those maps and letting the shared assertions prove parity. It encodes the edge cases the project cares about — storage-root listing, prefix versus exact-key deletion, nil versus empty list results, write ordering, pagination with after and limit, and transactional conflict detection — as executable assertions rather than prose.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

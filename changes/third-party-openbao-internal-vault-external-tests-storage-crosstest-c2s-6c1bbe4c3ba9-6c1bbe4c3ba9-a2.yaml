@@ -1,0 +1,35 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-internal-vault-external-tests-storage-crosstest-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-internal-vault-external-tests-storage-crosstest
+  toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+status:
+  agentLog: 'A single Go test file in the vendored OpenBao tree, package crosstest,
+    at third_party/openbao/internal/vault/external_tests/storage/crosstest/cross_test.go.
+    It is the logical.Storage analogue of the physical/crosstest suite: instead of
+    exercising one backend it builds maps of named logical.Storage and logical.TransactionalStorage
+    implementations — pure-raft, raft, raft-in-tx, file, inmem, inmem-via-wrapper,
+    txinmem-via-wrapper, psql for the non-transactional set and raft, txinmem, inmem+sv,
+    inmem+aes+sv, inmem+aes+bv, inmem+cache+encoding+aes+bv and raft+cache+encoding+aes+bv
+    for the transactional set — and drives one operation sequence through all of them.
+    Hand-written scenario tests and randomized op streams cover the full Storage surface
+    (Get, Put, Delete, List, ListPage) and the Transaction surface (BeginTx, BeginReadOnlyTx,
+    Commit, Rollback) with conflict and read-only-write semantics, using require,
+    go-test/deep, raft.GetRaft, internal/physical/inmem and internal/physical/postgresql
+    test helpers, and an AES-GCM barrier helper.'
+  message: wrote 11 requirement(s) and 0 interface(s) for third-party-openbao-internal-vault-external-tests-storage-crosstest
+  phase: Succeeded
+superseded:
+- message: wrote 11 requirement(s) and 0 interface(s) for third-party-openbao-internal-vault-external-tests-storage-crosstest;
+    interface Test_ExerciseBackends is not in the observed facts; dropped; interface
+    Test_RandomOpsBackends is not in the observed facts; dropped; interface Test_RandomOpsTransactionalBackends
+    is not in the observed facts; dropped; interface Test_ExerciseTransactionalBackends
+    is not in the observed facts; dropped
+  name: third-party-openbao-internal-vault-external-tests-storage-crosstest-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9
+  phase: Succeeded

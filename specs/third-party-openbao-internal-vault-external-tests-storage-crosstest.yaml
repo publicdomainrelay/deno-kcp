@@ -7,15 +7,15 @@ metadata:
   name: third-party-openbao-internal-vault-external-tests-storage-crosstest
   namespace: default
 spec:
-  intent: 'This context exists to pin down the behavioural contract that OpenBao''s
-    logical.Storage implementations must satisfy collectively. The file is a conformance
-    harness: any backend registered in allLogical or allTransactionalLogical must
-    be indistinguishable from its peers under the same operation stream, so adding
-    a new storage backend means adding it to these maps and letting the shared assertions
-    prove parity. It documents the edge cases the project cares about — storage-root
-    listing, prefix versus exact-key deletion, nil versus empty list results, write
-    ordering, pagination with after and limit, and transactional conflict detection
-    — as executable assertions rather than prose.'
+  intent: 'This context pins down the behavioural contract that OpenBao''s logical.Storage
+    implementations must satisfy collectively. The file is a conformance harness:
+    any backend registered in allLogical or allTransactionalLogical must be indistinguishable
+    from its peers under the same operation stream, so adding a storage backend means
+    adding it to those maps and letting the shared assertions prove parity. It encodes
+    the edge cases the project cares about — storage-root listing, prefix versus exact-key
+    deletion, nil versus empty list results, write ordering, pagination with after
+    and limit, and transactional conflict detection — as executable assertions rather
+    than prose.'
   repository: deno-kcp
   requirements:
   - codeRefs:
@@ -31,7 +31,7 @@ spec:
     id: r.backend-sets
     level: MUST
     text: allLogical must supply map entries named pure-raft, raft, raft-in-tx, file,
-      inmem, inmem-via-wrapper, txinmem-via-wrapper and psql, begun via logical.NewLogicalStorage
+      inmem, inmem-via-wrapper, txinmem-via-wrapper and psql, each begun via logical.NewLogicalStorage
       over the corresponding physical backend, and allTransactionalLogical must supply
       raft, txinmem, inmem+sv, inmem+aes+sv, inmem+aes+bv, inmem+cache+encoding+aes+bv
       and raft+cache+encoding+aes+bv.
@@ -87,7 +87,7 @@ spec:
     id: r.storage-semantics
     level: MUST
     text: 'The exercised storage contract must hold: the empty prefix is the root;
-      Delete of a missing key succeeds; Get of a missing key returns nil entry and
+      Delete of a missing key succeeds; Get of a missing key returns a nil entry and
       no error; Put then Get returns the stored value; List of a key with children
       returns both the key and its trailing-slash subtree entry; Delete of a parent
       removes only the base entry and leaves children; repeated writes to one key
