@@ -95,43 +95,61 @@ spec:
   repository: deno-kcp
   requirements:
   - codeRefs:
+    - function:279285827f28c5fefc4e75c39b7fc39b
+    - struct:aac12544428d4d44fc72971986a2d518
+    id: r.config-stored-for-deferred-start
+    level: MUST
+    text: Backend must store the passed logical.BackendConfig on the returned PluginBackend
+      as config, because startBackend later reads plugin_name, plugin_type, plugin_version
+      and System from it instead of from the caller.
+  - codeRefs:
     - method:9eff9c5894c27395cd43737fb5d364a4
     - struct:aac12544428d4d44fc72971986a2d518
     id: r.initialize-deferred
     level: MUST
-    text: PluginBackend.Initialize must be a no-op returning nil, because the real
-      backend Initialize is called explicitly by startBackend with the request storage
-      after the plugin process starts.
+    text: PluginBackend.Initialize must be a no-op returning nil, because startBackend
+      calls the real backend Initialize explicitly with a logical.InitializationRequest
+      carrying the request storage after the plugin process starts.
   - codeRefs:
-    - method:1d5b59bbcacffc0d501f10e5157bc440
     - method:25485adf3c6948547038555a16260759
     - method:e9311d1022b961fc21571d99db324f56
+    - struct:aac12544428d4d44fc72971986a2d518
     id: r.lazy-load-on-request
     level: MUST
     text: HandleRequest and HandleExistenceCheck must route through lazyLoadBackend,
-      which starts the plugin under the write lock only when loaded is false, re-checking
-      loaded after the lock upgrade so concurrent first requests start the plugin
-      once.
+      which takes the read lock, starts the plugin only when loaded is false, releases
+      the read lock, takes the write lock, re-checks loaded after the lock upgrade
+      so concurrent first requests start the plugin once, then runs the method wrapper.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/plugin/backend_lazyLoad_test.go
+    id: r.lazy-load-test-contract
+    level: SHOULD
+    text: TestBackend_lazyLoad must show that a normal lazy load invokes the method
+      wrapper once and leaves canary empty, that a wrapper returning plugin.ErrPluginShutdown
+      invokes it twice and leaves a non-empty canary, and that the replaced placeholder
+      is cleaned but never set up or initialized while the newly started backend is
+      set up and initialized.
   - codeRefs:
     - function:279285827f28c5fefc4e75c39b7fc39b
     - struct:aac12544428d4d44fc72971986a2d518
     id: r.metadata-mode-probe
     level: MUST
     text: Backend must start the plugin with bplugin.NewBackendWithVersion in metadata
-      mode (isMetadataMode true), read its SpecialPaths, Type and, when it implements
-      logical.PluginVersioner, its PluginVersion().Version, then Cleanup the probe
-      process and install a placeholder framework.Backend carrying those paths, type
-      and running version so the plugin is not yet loaded.
+      mode (isMetadataMode true) using plugin_name, the parsed type, conf.System,
+      conf and plugin_version, call Setup on it (cleaning it up and returning on error),
+      read SpecialPaths, Type and, when it implements logical.PluginVersioner, its
+      PluginVersion().Version, then Cleanup the probe process and install a placeholder
+      framework.Backend carrying those three values so the plugin is not yet loaded.
   - codeRefs:
     - file:third_party/openbao/internal/builtin/plugin/backend.go
     - struct:aac12544428d4d44fc72971986a2d518
     id: r.mismatch-guard
     level: MUST
     text: While the backend has not yet been loaded, startBackend must refuse a plugin
-      whose Type differs from the metadata probe (ErrMismatchType) or whose SpecialPaths
-      are not reflect.DeepEqual to the probe (ErrMismatchPaths), cleaning up the new
-      process, logging a warning with the plugin name and error, and returning the
-      sentinel error.
+      whose Type differs from the metadata probe by cleaning up the new process, logging
+      a warning with the plugin name and ErrMismatchType, and returning ErrMismatchType,
+      and must likewise refuse a plugin whose SpecialPaths are not reflect.DeepEqual
+      to the probe with ErrMismatchPaths.
   - codeRefs:
     - file:third_party/openbao/internal/builtin/plugin/backend.go
     - function:54cad82c274bb42c350b1fc292eccfd2
@@ -144,17 +162,17 @@ spec:
     - function:279285827f28c5fefc4e75c39b7fc39b
     id: r.plugin-type-parsed
     level: MUST
-    text: Both Factory/Backend and startBackend must parse conf.Config["plugin_type"]
-      with consts.ParsePluginType and return that error unchanged when the type string
-      is invalid.
+    text: Backend and startBackend must parse conf.Config["plugin_type"] with consts.ParsePluginType
+      and return that error unchanged when the type string is invalid.
   - codeRefs:
     - method:eb22d417068f282674a039b8d17d06a4
     - struct:aac12544428d4d44fc72971986a2d518
     id: r.plugin-version-delegation
     level: MUST
     text: PluginVersion must return the wrapped backend's PluginVersion when it implements
-      logical.PluginVersioner, and logical.EmptyPluginVersion otherwise; PluginBackend
-      must satisfy logical.PluginVersioner via a compile-time assertion.
+      logical.PluginVersioner, and logical.EmptyPluginVersion otherwise, and must
+      not take the read lock; PluginBackend must satisfy logical.PluginVersioner via
+      the compile-time assertion var _ logical.PluginVersioner = (*PluginBackend)(nil).
   - codeRefs:
     - method:1827cfcd152d3afd0a38f2a6e8f0fc68
     - method:1d5b59bbcacffc0d501f10e5157bc440
@@ -170,27 +188,30 @@ spec:
       so the wrapped backend pointer can be swapped under lock without races.
   - codeRefs:
     - file:third_party/openbao/internal/builtin/plugin/backend.go
-    - method:1d5b59bbcacffc0d501f10e5157bc440
+    - struct:aac12544428d4d44fc72971986a2d518
     id: r.reload-on-shutdown
     level: MUST
-    text: When a wrapped call fails with rpc.ErrShutdown or bplugin.ErrPluginShutdown,
-      lazyLoadBackend must restart the plugin once, guarded by comparing the captured
-      canary against the current UUID canary so only the first observer reloads, then
-      retry the method wrapper exactly once.
+    text: When the method wrapper fails with an error whose string equals rpc.ErrShutdown.Error()
+      or with bplugin.ErrPluginShutdown, lazyLoadBackend must restart the plugin once
+      under the write lock, guarded by comparing the canary captured before the call
+      against the current canary so only the first observer reloads, set a fresh UUID
+      canary, then retry the method wrapper exactly once under the read lock.
   - codeRefs:
+    - file:third_party/openbao/internal/builtin/plugin/backend.go
     - method:1d5b59bbcacffc0d501f10e5157bc440
-    - method:5dbccf29070dfb9dc7c08eea2b372bb7
     id: r.setup-delegates
     level: SHOULD
-    text: Setup must delegate to the currently wrapped backend under the read lock,
-      so a plugin that is already loaded receives the backend config directly.
+    text: Setup must delegate under the read lock to the currently wrapped backend,
+      so a plugin that Factory already loaded receives the backend config directly
+      while an unloaded placeholder only records it.
   - codeRefs:
     - function:279285827f28c5fefc4e75c39b7fc39b
     - function:54cad82c274bb42c350b1fc292eccfd2
     id: r.v5-then-v1-fallback
     level: MUST
-    text: 'Factory must first call v5.Backend and, on success, Setup and return it;
-      when the v5 backend fails it must fall back to Backend, accumulate both errors
-      in a multierror, and if the fallback also fails return an error of the form
-      "invalid backend version: <multierror>".'
+    text: 'Factory must first call v5.Backend and, on success, call Setup on it and
+      return it; when the v5 backend fails it must append that error to a multierror
+      and fall back to Backend, returning fmt.Errorf("invalid backend version: %s",
+      merr) if the fallback also fails, or merr.ErrorOrNil() if the fallback''s Setup
+      fails.'
   upstream: self

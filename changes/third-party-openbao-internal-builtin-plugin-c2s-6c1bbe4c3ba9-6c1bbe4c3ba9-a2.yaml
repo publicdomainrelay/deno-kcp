@@ -1,0 +1,38 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-internal-builtin-plugin-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-internal-builtin-plugin
+  toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+status:
+  agentLog: 'third_party/openbao/internal/builtin/plugin/backend.go exposes Factory
+    and Backend, the entry points OpenBao uses to mount an external plugin as a builtin
+    logical backend. Factory requires a plugin_name in logical.BackendConfig.Config,
+    tries the v5 plugin backend first and falls back to the v1 PluginBackend, returning
+    a multierror of the form "invalid backend version: <multierror>" when both fail.
+    Backend starts the plugin once with bplugin.NewBackendWithVersion in metadata
+    mode, copies SpecialPaths, BackendType and the running version from the probe
+    into a placeholder framework.Backend, kills the probe process and keeps the real
+    BackendConfig so the process can be started later. PluginBackend embeds that placeholder
+    plus sync.RWMutex, config, canary and loaded; HandleRequest and HandleExistenceCheck
+    route through lazyLoadBackend, which starts the plugin under the write lock on
+    first use, re-checks loaded after the lock upgrade, and restarts the plugin once
+    when a call returns rpc.ErrShutdown or bplugin.ErrPluginShutdown, retrying the
+    method exactly once. startBackend re-validates the newly started plugin against
+    the metadata probe while the backend is still unloaded, rejecting a type mismatch
+    with ErrMismatchType or non-DeepEqual special paths with ErrMismatchPaths. All
+    other delegated accessors take the read lock so the wrapped backend pointer can
+    be swapped safely; Initialize is a deliberate no-op. backend_lazyLoad_test.go
+    exercises the normal one-invocation load, the shutdown reload with canary, and
+    the placeholder cleanup/setup/initialize sequence.'
+  message: wrote 13 requirement(s) and 14 interface(s) for third-party-openbao-internal-builtin-plugin
+  phase: Succeeded
+superseded:
+- message: wrote 11 requirement(s) and 14 interface(s) for third-party-openbao-internal-builtin-plugin
+  name: third-party-openbao-internal-builtin-plugin-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9
+  phase: Succeeded

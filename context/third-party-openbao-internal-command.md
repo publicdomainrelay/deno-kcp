@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists because deno-kcp vendors OpenBao, and the vendored CLI command package is the layer that turns user arguments into agent, audit, auth, KV, operator, and policy operations. It is specified here so that the command surface of the agent command — what it prints, how it predicts arguments, how it loads and reloads configuration, and how it manages its process and HTTP endpoints — is described from the code that is present rather than from assumptions about OpenBao's documentation. Reading this context tells a consumer which command methods are available, what each returns, and that the whole family of commands is wired into one registry.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
