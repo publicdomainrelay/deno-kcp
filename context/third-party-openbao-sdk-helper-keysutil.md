@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so a caller can create, cache, lock, persist, rotate and use encryption/signing key policies without touching the crypto or storage plumbing directly. It is the third-party vendored OpenBao SDK surface that the rest of deno-kcp consumes; the specification records the exported contracts, the invariants the package enforces (bounded vs unbounded cache, policy upsert semantics, encrypted-key-storage policy preconditions) and the error behaviour callers depend on.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
