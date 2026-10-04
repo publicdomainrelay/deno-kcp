@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the routing layer of the vendored OpenBao tree can be described and reasoned about on its own: how mounts are registered, looked up, tainted, remounted and removed, how a request path is matched to a backend, and how unauthenticated login paths are parsed into radix trees. It gives the specification a single place to state the invariants the router must keep, because the surrounding vault core calls into these functions on every request and on every mount change.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
