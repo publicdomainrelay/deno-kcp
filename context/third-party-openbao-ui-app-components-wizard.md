@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists to describe the wizard UI layer that walks a user through enabling secrets key management in OpenBao. WizardSecretsKeymgmtComponent turns the current wizard step, carried on this.args.featureState, into the three pieces of copy the template needs: a short header, a paragraph of body text explaining what the step does, and a line of instruction telling the user which action to take next. Keeping these strings in three parallel getters means a step's presentation is data-driven from a single state value rather than being branched over in the template, and it gives a single place to change wording for the provider, displayProvider and distribute steps.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

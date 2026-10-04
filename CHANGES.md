@@ -4184,6 +4184,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.tracked-export-version` (MUST): "ExportComponent MUST declare a tracked property exportVersion whose initial value is false, so that the export-version toggle defaults to off and mutating it invalidates any template or computed value that depends on it."
 - added `r.tracked-wrap-ttl` (MUST): "ExportComponent MUST declare a tracked property wrapTTL whose initial value is null, so that the wrap time-to-live starts unset and any binding or template read of wrapTTL before user input resolves to null rather than undefined."
 
+### third-party-openbao-ui-app-components-wizard
+
+- intent: "" -> "The context exists to describe the wizard UI layer that walks a user through enabling secrets key management in OpenBao. WizardSecretsKeymgmtComponent turns the current wizard step, carried on this.args.featureState, into the three pieces of copy the template needs: a short header, a paragraph of body text explaining what the step does, and a line of instruction telling the user which action to take next. Keeping these strings in three parallel getters means a step's presentation is data-driven from a single state value rather than being branched over in the template, and it gives a single place to change wording for the provider, displayProvider and distribute steps."
+- added `r.body-text-per-feature-state` (MUST): "WizardSecretsKeymgmtComponent must derive its body text from this.args.featureState, returning provider copy that says the process connects an external provider and its credentials are needed, displayProvider copy that says a key can now be created and distributed to the destination, and distribute copy that says the process creates a key and distributes it to the provider."
+- added `r.feature-state-drives-all-copy` (MUST): "Each of the three getters must select its string by indexing a literal keyed by the same three feature state values, so that changing args.featureState changes all three outputs together and an unrecognised state yields undefined rather than a fallback string."
+- added `r.header-text-per-feature-state` (MUST): "WizardSecretsKeymgmtComponent must derive its header text from this.args.featureState, returning 'Creating a provider' for provider, 'Distributing a key' for displayProvider and 'Creating a key' for distribute."
+- added `r.instructions-per-feature-state` (MUST): "WizardSecretsKeymgmtComponent must derive its user instructions from this.args.featureState, telling the user to enter provider details and click 'Create provider' for provider, to click 'Distribute key' in the toolbar for displayProvider, and to enter key details and click 'Distribute key' for distribute."
+- added `r.wizard-step-component-files` (SHOULD): "The wizard step components should stay together in the wizard directory, with features-selection.js and mounts-wizard.js sitting alongside secrets-keymgmt.js as the other steps of the same flow."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4512,6 +4521,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-components-splash-page-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-components-transit-key-action-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-components-transit-key-action-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-components-wizard-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-components-wizard-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-config-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

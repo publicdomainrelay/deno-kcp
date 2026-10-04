@@ -1,5 +1,6 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
+- class:656df5a359affa07968d6ed808e4c3f9 WizardSecretsKeymgmtComponent@third_party/openbao/ui/app/components/wizard/secrets-keymgmt.js:8
 - file:third_party/openbao/ui/app/components/wizard/features-selection.js features-selection.js@third_party/openbao/ui/app/components/wizard/features-selection.js
 - file:third_party/openbao/ui/app/components/wizard/mounts-wizard.js mounts-wizard.js@third_party/openbao/ui/app/components/wizard/mounts-wizard.js
 - file:third_party/openbao/ui/app/components/wizard/secrets-keymgmt.js secrets-keymgmt.js@third_party/openbao/ui/app/components/wizard/secrets-keymgmt.js
@@ -8,5 +9,65 @@ metadata:
   name: third-party-openbao-ui-app-components-wizard
   namespace: default
 spec:
+  intent: 'The context exists to describe the wizard UI layer that walks a user through
+    enabling secrets key management in OpenBao. WizardSecretsKeymgmtComponent turns
+    the current wizard step, carried on this.args.featureState, into the three pieces
+    of copy the template needs: a short header, a paragraph of body text explaining
+    what the step does, and a line of instruction telling the user which action to
+    take next. Keeping these strings in three parallel getters means a step''s presentation
+    is data-driven from a single state value rather than being branched over in the
+    template, and it gives a single place to change wording for the provider, displayProvider
+    and distribute steps.'
+  interfaces:
+  - file: third_party/openbao/ui/app/components/wizard/secrets-keymgmt.js
+    kind: class
+    name: WizardSecretsKeymgmtComponent
+    signature: ()
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - class:656df5a359affa07968d6ed808e4c3f9
+    - file:third_party/openbao/ui/app/components/wizard/secrets-keymgmt.js
+    id: r.body-text-per-feature-state
+    level: MUST
+    text: WizardSecretsKeymgmtComponent must derive its body text from this.args.featureState,
+      returning provider copy that says the process connects an external provider
+      and its credentials are needed, displayProvider copy that says a key can now
+      be created and distributed to the destination, and distribute copy that says
+      the process creates a key and distributes it to the provider.
+  - codeRefs:
+    - class:656df5a359affa07968d6ed808e4c3f9
+    - file:third_party/openbao/ui/app/components/wizard/secrets-keymgmt.js
+    id: r.feature-state-drives-all-copy
+    level: MUST
+    text: Each of the three getters must select its string by indexing a literal keyed
+      by the same three feature state values, so that changing args.featureState changes
+      all three outputs together and an unrecognised state yields undefined rather
+      than a fallback string.
+  - codeRefs:
+    - class:656df5a359affa07968d6ed808e4c3f9
+    - file:third_party/openbao/ui/app/components/wizard/secrets-keymgmt.js
+    id: r.header-text-per-feature-state
+    level: MUST
+    text: WizardSecretsKeymgmtComponent must derive its header text from this.args.featureState,
+      returning 'Creating a provider' for provider, 'Distributing a key' for displayProvider
+      and 'Creating a key' for distribute.
+  - codeRefs:
+    - class:656df5a359affa07968d6ed808e4c3f9
+    - file:third_party/openbao/ui/app/components/wizard/secrets-keymgmt.js
+    id: r.instructions-per-feature-state
+    level: MUST
+    text: WizardSecretsKeymgmtComponent must derive its user instructions from this.args.featureState,
+      telling the user to enter provider details and click 'Create provider' for provider,
+      to click 'Distribute key' in the toolbar for displayProvider, and to enter key
+      details and click 'Distribute key' for distribute.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/components/wizard/features-selection.js
+    - file:third_party/openbao/ui/app/components/wizard/mounts-wizard.js
+    - file:third_party/openbao/ui/app/components/wizard/secrets-keymgmt.js
+    id: r.wizard-step-component-files
+    level: SHOULD
+    text: The wizard step components should stay together in the wizard directory,
+      with features-selection.js and mounts-wizard.js sitting alongside secrets-keymgmt.js
+      as the other steps of the same flow.
   upstream: self
