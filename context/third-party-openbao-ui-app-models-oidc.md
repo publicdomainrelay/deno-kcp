@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to pin down the contract of the vendored OpenBao OIDC UI models that the rest of the OpenBao front end builds on. Routes, components and serializers in the same application read attributes, form field lists, capability getters and API path properties off these five classes, so their names and semantics must stay stable when the vendored tree is updated or when another part of the repository consumes it. The spec states which attributes each model carries, which getters derive presentation and permission data from them, and which path properties the capability getters read, so a change to any of those is visible as a change to this contract rather than as a silent break in the OIDC screens.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

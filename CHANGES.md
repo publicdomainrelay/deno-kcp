@@ -4707,6 +4707,21 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.role-model-scope-fields` (MUST): "KubernetesRoleModel exposes the allowed Kubernetes namespaces attribute, documented so that '*' allows all namespaces, together with the optional name template, extra annotations and extra labels attributes."
 - added `r.role-model-ttl-fields` (MUST): "KubernetesRoleModel exposes the token max TTL and token default TTL attributes with the 'ttl' edit type so the form renders TTL inputs for the leases issued to this role."
 
+### third-party-openbao-ui-app-models-oidc
+
+- intent: "" -> "This context exists to pin down the contract of the vendored OpenBao OIDC UI models that the rest of the OpenBao front end builds on. Routes, components and serializers in the same application read attributes, form field lists, capability getters and API path properties off these five classes, so their names and semantics must stay stable when the vendored tree is updated or when another part of the repository consumes it. The spec states which attributes each model carries, which getters derive presentation and permission data from them, and which path properties the capability getters read, so a change to any of those is visible as a change to this contract rather than as a silent break in the OIDC screens."
+- added `r.oidc-assignment-attributes` (MUST): "OidcAssignmentModel carries the assignment attributes name, entityIds and groupIds, and exposes an assignmentPath property that capability getters read."
+- added `r.oidc-assignment-capabilities` (MUST): "OidcAssignmentModel resolves read, edit and delete permission for an assignment through the canRead, canEdit and canDelete getters, which read the permission state held at assignmentPath."
+- added `r.oidc-client-attributes` (MUST): "OidcClientModel declares the client attributes name, clientType, redirectUris, key, accessTokenTtl, idTokenTtl, authorizationCode, clientCredentials, assignments, clientId and clientSecret, and keeps a clientPath property that the capability getters read."
+- added `r.oidc-client-capabilities` (MUST): "OidcClientModel resolves read, edit and delete permission for a client through the canRead, canEdit and canDelete getters, which read the permission state held at clientPath."
+- added `r.oidc-client-form-fields` (MUST): "OidcClientModel exposes a formFields getter that returns the ordered list of attributes to render in the client form, and a fieldGroups getter that groups those fields using the _fieldToAttrsGroups map over the per-attribute metadata held in _attributeMeta."
+- added `r.oidc-key-attributes` (MUST): "OidcKeyModel declares the key attributes name, algorithm, rotationPeriod, verificationTtl and allowedClientIds, and keeps a keyPath property and a rotatePath property for the key and its rotation endpoint."
+- added `r.oidc-key-capabilities` (MUST): "OidcKeyModel resolves read, edit, rotate and delete permission for a key through the canRead, canEdit, canRotate and canDelete getters, reading the permission state held at keyPath and the rotation permission held at rotatePath."
+- added `r.oidc-key-form-fields` (MUST): "OidcKeyModel exposes a formFields getter that returns the attributes to render in the key form, driven by the per-attribute metadata held in _attributeMeta."
+- added `r.oidc-models-single-directory` (SHOULD): "All five OIDC model modules live in one directory, third_party/openbao/ui/app/models/oidc, so a change to one OIDC object type stays next to the others."
+- added `r.oidc-provider-model` (MUST): "OidcProviderModel is the model class for OIDC provider records in the oidc model namespace, so the application resolves provider records to this class."
+- added `r.oidc-scope-model` (MUST): "OidcScopeModel is the model class for OIDC scope records in the oidc model namespace, so the application resolves scope records to this class."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5092,6 +5107,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-models-identity-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-models-keymgmt-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-models-kubernetes-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-models-oidc-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-models-oidc-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-models-pki-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-models-pki-certificate-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
