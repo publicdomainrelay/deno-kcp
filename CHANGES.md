@@ -5105,13 +5105,13 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 ### third-party-openbao-ui-app-routes-vault-cluster-policy
 
 - intent: "" -> "The context exists so the generated specification records the observable navigation, data-loading, and unsaved-change behavior of the OpenBao policy UI routes without depending on the surrounding Ember application code. It describes what the routes must do: which transitions they force, which Ember Data records they fetch, what they set on the controller, and when they protect the user from losing dirty form state."
-- added `r.policy-edit-guards-dirty-transition` (MUST): "The policy edit route must extend the show route and, in its willTransition action, abort the pending transition and return false when the current model has dirty attributes and the user declines the unsaved-changes confirmation; it must allow the transition when there is no model, the model is clean, or the user confirms."
+- added `r.policy-edit-guards-dirty-transition` (MUST): "The policy edit route must extend the show route and, in its willTransition action, allow the transition when there is no current model or the model has no dirty attributes, allow it when the user confirms the unsaved-changes window.confirm prompt, and otherwise abort the transition and return false so dirty policy edits are not lost."
 - added `r.policy-index-redirects-to-acl-list` (MUST): "The policy index route must redirect on beforeModel to the vault.cluster.policies route passing 'acl' as the model, so that visiting the bare policy path always lands on the ACL policy list."
 - added `r.policy-show-cleanup-on-exit` (MUST): "When the show route is exited, resetController must call cleanupModel on the controller if that method is present, so policy state is released on navigation away."
-- added `r.policy-show-derives-type-from-parent-params` (MUST): "The policy show route must derive the active policy type by reading the type param of the parent vault.cluster.policy route, and use that value for all type-dependent behavior and record lookup."
-- added `r.policy-show-loads-policy-and-capabilities` (MUST): "The show route model hook must return a hash that resolves two records concurrently: the policy record addressed as policy/<type> with the policy_name param as id, and the capabilities record addressed as sys/policies/<type>/<policy_name>."
+- added `r.policy-show-derives-type-from-parent-params` (MUST): "The policy show route must derive the active policy type from the type param of the parent vault.cluster.policy route, and that derived value must drive the root-redirect check, the store addresses used in the model hook, and the policyType property set on the controller."
+- added `r.policy-show-loads-policy-and-capabilities` (MUST): "The show route model hook must return an RSVP hash that resolves two records concurrently: the policy record found at the address policy/<type> with the policy_name param as its id, and the capabilities record found at sys/policies/<type>/<policy_name>."
 - added `r.policy-show-populates-controller` (MUST): "The show route setupController hook must set the controller's model to the resolved policy record, capabilities to the resolved capabilities record, and policyType to the derived policy type."
-- added `r.policy-show-redirects-root-acl` (MUST): "When the derived policy type is 'acl' and the policy_name param is 'root', the show route must not render the detail view and must transition instead to the vault.cluster.policies route with 'acl'."
+- added `r.policy-show-redirects-root-acl` (MUST): "In beforeModel, when the derived policy type is 'acl' and the policy_name param is 'root', the show route must not render the detail view and must transition to the vault.cluster.policies route with 'acl'."
 
 ## Realization
 
@@ -5543,5 +5543,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-routes-vault-cluster-policies-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-policy-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-policy-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-routes-vault-cluster-secrets-backend-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-secrets-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

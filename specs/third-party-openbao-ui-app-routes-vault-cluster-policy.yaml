@@ -21,10 +21,10 @@ spec:
     id: r.policy-edit-guards-dirty-transition
     level: MUST
     text: The policy edit route must extend the show route and, in its willTransition
-      action, abort the pending transition and return false when the current model
-      has dirty attributes and the user declines the unsaved-changes confirmation;
-      it must allow the transition when there is no model, the model is clean, or
-      the user confirms.
+      action, allow the transition when there is no current model or the model has
+      no dirty attributes, allow it when the user confirms the unsaved-changes window.confirm
+      prompt, and otherwise abort the transition and return false so dirty policy
+      edits are not lost.
   - codeRefs:
     - file:third_party/openbao/ui/app/routes/vault/cluster/policy/index.js
     id: r.policy-index-redirects-to-acl-list
@@ -43,16 +43,17 @@ spec:
     - file:third_party/openbao/ui/app/routes/vault/cluster/policy/show.js
     id: r.policy-show-derives-type-from-parent-params
     level: MUST
-    text: The policy show route must derive the active policy type by reading the
-      type param of the parent vault.cluster.policy route, and use that value for
-      all type-dependent behavior and record lookup.
+    text: The policy show route must derive the active policy type from the type param
+      of the parent vault.cluster.policy route, and that derived value must drive
+      the root-redirect check, the store addresses used in the model hook, and the
+      policyType property set on the controller.
   - codeRefs:
     - file:third_party/openbao/ui/app/routes/vault/cluster/policy/show.js
     id: r.policy-show-loads-policy-and-capabilities
     level: MUST
-    text: 'The show route model hook must return a hash that resolves two records
-      concurrently: the policy record addressed as policy/<type> with the policy_name
-      param as id, and the capabilities record addressed as sys/policies/<type>/<policy_name>.'
+    text: 'The show route model hook must return an RSVP hash that resolves two records
+      concurrently: the policy record found at the address policy/<type> with the
+      policy_name param as its id, and the capabilities record found at sys/policies/<type>/<policy_name>.'
   - codeRefs:
     - file:third_party/openbao/ui/app/routes/vault/cluster/policy/show.js
     id: r.policy-show-populates-controller
@@ -64,7 +65,7 @@ spec:
     - file:third_party/openbao/ui/app/routes/vault/cluster/policy/show.js
     id: r.policy-show-redirects-root-acl
     level: MUST
-    text: When the derived policy type is 'acl' and the policy_name param is 'root',
-      the show route must not render the detail view and must transition instead to
-      the vault.cluster.policies route with 'acl'.
+    text: In beforeModel, when the derived policy type is 'acl' and the policy_name
+      param is 'root', the show route must not render the detail view and must transition
+      to the vault.cluster.policies route with 'acl'.
   upstream: self
