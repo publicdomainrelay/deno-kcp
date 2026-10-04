@@ -1,0 +1,66 @@
+conditions:
+- message: 'undeclared: New, Observed, Op, Options, Reconciler, Reconciler.Reconcile,
+    Result, RunObservation'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - internal/trigger/trigger.go
+  - internal/trigger/trigger_test.go
+  fingerprint: acd447f4a0a415cfef06702f976b824f3a6056e0c8033973ef43b564d7b0818c
+  interfaces:
+  - codegraphId: struct:128da6e45c96bafe5081998013f47ffe
+    file: internal/trigger/trigger.go
+    kind: struct
+    line: 15
+    name: RunObservation
+  - codegraphId: struct:dc3e99d1633068172953c5024a851849
+    file: internal/trigger/trigger.go
+    kind: struct
+    line: 23
+    name: Observed
+  - codegraphId: type_alias:ea5d49f390b7f0cb47a28a95e8f58b81
+    file: internal/trigger/trigger.go
+    kind: type_alias
+    line: 33
+    name: Op
+  - codegraphId: struct:a3fbb6626d9d915cb17e70f240a59a55
+    file: internal/trigger/trigger.go
+    kind: struct
+    line: 41
+    name: Result
+  - codegraphId: struct:ce2bb0551ed1ce86badc642077aab120
+    file: internal/trigger/trigger.go
+    kind: struct
+    line: 57
+    name: Options
+  - codegraphId: struct:9094b81797efe240a545142966b526c0
+    file: internal/trigger/trigger.go
+    kind: struct
+    line: 61
+    name: Reconciler
+  - codegraphId: function:f347057cde00720e2ba57c3dd951470c
+    file: internal/trigger/trigger.go
+    kind: function
+    line: 65
+    name: New
+    signature: (opts Options) *Reconciler
+  - codegraphId: method:5926281263a64123a37f6099290debee
+    file: internal/trigger/trigger.go
+    kind: method
+    line: 73
+    name: Reconciler.Reconcile
+    signature: (ctx context.Context, o Observed) (Result, error)
+observedCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
+realizedSpecHash: aef2be7982d7e3e80a3190234f112aed96df87939d3925ee86dc0203b0bc9b86
+syncedCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
+syncedFingerprint: acd447f4a0a415cfef06702f976b824f3a6056e0c8033973ef43b564d7b0818c
