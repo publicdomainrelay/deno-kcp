@@ -1973,6 +1973,18 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.start-of-next-month` (MUST): "StartOfNextMonth returns the first instant of the month after t's month, at midnight in t's location, computed as the month start plus AddDate(0, 1, 0)."
 - added `r.start-of-previous-month` (MUST): "StartOfPreviousMonth returns the first instant of the month before t's month, at midnight in t's location, computed by snapping t to its month start and subtracting one month with AddDate(0, -1, 0) so month lengths and leap years stay correct."
 
+### third-party-openbao-internal-helper-useragent
+
+- intent: "" -> "The package exists so that every OpenBao client role emits a distinct, machine-recognizable User-Agent string in one canonical format, instead of each caller hand-assembling its own. Centralizing the format keeps the version, project URL and runtime fields consistent across roles and lets callers be identified by role from server-side request logs."
+- added `r.agent-auto-auth-string-format` (MUST): "AgentAutoAuthString returns the string formatted as "Vault Agent Auto-Auth/<version> (+<projectURL>; <runtime>)", using the same three package-level inputs as AgentString."
+- added `r.agent-string-format` (MUST): "AgentString returns the string formatted as "Vault Agent/<version> (+<projectURL>; <runtime>)", taking the version from versionFunc(), the URL from projectURL and the runtime from rt."
+- added `r.agent-templating-string-format` (MUST): "AgentTemplatingString returns the string formatted as "Vault Agent Templating/<version> (+<projectURL>; <runtime>)", using the same three package-level inputs as AgentString."
+- added `r.base-string` (MUST): "String returns the base user-agent string for the product, built from the same version, project URL and runtime inputs as the role-specific variants."
+- added `r.exact-string-tests` (SHOULD): "The tests set projectURL, rt and versionFunc to known values and assert the produced user-agent strings exactly, covering at minimum the agent, agent templating and agent auto-auth variants."
+- added `r.overridable-inputs` (MUST): "Version, project URL and runtime are read from package-level variables that callers and tests can reassign, so the produced strings change accordingly without rebuilding."
+- added `r.proxied-user-agent-embedding` (MUST): "AgentProxyStringWithProxiedUserAgent and ProxyStringWithProxiedUserAgent take the proxied user agent as an argument and embed it in the returned string, so a proxy can report both its own role and the client it is forwarding for."
+- added `r.role-specific-prefixes` (MUST): "Each remaining variant function returns a string carrying its own role prefix, so the roles stay distinguishable in a User-Agent header: AgentProxyString for the agent proxy, ProxyString for the plain proxy, ProxyAPIProxyString for the API proxy, and ProxyAutoAuthString for the proxy auto-auth path."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |

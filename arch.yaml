@@ -28877,8 +28877,131 @@ system_contexts:
   codeRefIndex:
   - file:third_party/openbao/internal/helper/useragent/useragent.go useragent.go@third_party/openbao/internal/helper/useragent/useragent.go
   - file:third_party/openbao/internal/helper/useragent/useragent_test.go useragent_test.go@third_party/openbao/internal/helper/useragent/useragent_test.go
+  - function:0540a1c3f7e8b769d526c0fa22421d14 AgentAutoAuthString@third_party/openbao/internal/helper/useragent/useragent.go:71
+  - function:2fc07571c238d7008d527d3eac569eeb AgentString@third_party/openbao/internal/helper/useragent/useragent.go:37
+  - function:43479e6347cef214b37644e54ea567a6 ProxyAutoAuthString@third_party/openbao/internal/helper/useragent/useragent.go:105
+  - function:4fd2a58c556af6d158f49130100a4f22 String@third_party/openbao/internal/helper/useragent/useragent.go:29
+  - function:53ee8f13ba6c24a43a7685ccc5b15345 ProxyString@third_party/openbao/internal/helper/useragent/useragent.go:79
+  - function:7096f17113cb1ac98f077011b92d1de5 ProxyStringWithProxiedUserAgent@third_party/openbao/internal/helper/useragent/useragent.go:97
+  - function:950e60307c0666349c6f251b327ac365 AgentTemplatingString@third_party/openbao/internal/helper/useragent/useragent.go:45
+  - function:aea5226edd3ccc4d682271de1d551629 ProxyAPIProxyString@third_party/openbao/internal/helper/useragent/useragent.go:87
+  - function:c5a679ecc2f18d5ea45917805d9dbfeb AgentProxyString@third_party/openbao/internal/helper/useragent/useragent.go:53
+  - function:d94f90d426b5ad25514095e3f36ca51c AgentProxyStringWithProxiedUserAgent@third_party/openbao/internal/helper/useragent/useragent.go:63
   id: sc.third-party-openbao-internal-helper-useragent
+  intent: The package exists so that every OpenBao client role emits a distinct, machine-recognizable
+    User-Agent string in one canonical format, instead of each caller hand-assembling
+    its own. Centralizing the format keeps the version, project URL and runtime fields
+    consistent across roles and lets callers be identified by role from server-side
+    request logs.
+  interfaces:
+  - file: third_party/openbao/internal/helper/useragent/useragent.go
+    kind: function
+    name: AgentAutoAuthString
+    signature: func AgentAutoAuthString() string
+  - file: third_party/openbao/internal/helper/useragent/useragent.go
+    kind: function
+    name: AgentProxyString
+    signature: func AgentProxyString() string
+  - file: third_party/openbao/internal/helper/useragent/useragent.go
+    kind: function
+    name: AgentProxyStringWithProxiedUserAgent
+    signature: func AgentProxyStringWithProxiedUserAgent(proxiedUserAgent string)
+      string
+  - file: third_party/openbao/internal/helper/useragent/useragent.go
+    kind: function
+    name: AgentString
+    signature: func AgentString() string
+  - file: third_party/openbao/internal/helper/useragent/useragent.go
+    kind: function
+    name: AgentTemplatingString
+    signature: func AgentTemplatingString() string
+  - file: third_party/openbao/internal/helper/useragent/useragent.go
+    kind: function
+    name: ProxyAPIProxyString
+    signature: func ProxyAPIProxyString() string
+  - file: third_party/openbao/internal/helper/useragent/useragent.go
+    kind: function
+    name: ProxyAutoAuthString
+    signature: func ProxyAutoAuthString() string
+  - file: third_party/openbao/internal/helper/useragent/useragent.go
+    kind: function
+    name: ProxyString
+    signature: func ProxyString() string
+  - file: third_party/openbao/internal/helper/useragent/useragent.go
+    kind: function
+    name: ProxyStringWithProxiedUserAgent
+    signature: func ProxyStringWithProxiedUserAgent(proxiedUserAgent string) string
+  - file: third_party/openbao/internal/helper/useragent/useragent.go
+    kind: function
+    name: String
+    signature: func String() string
   name: third-party-openbao-internal-helper-useragent
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/useragent/useragent.go
+    - function:0540a1c3f7e8b769d526c0fa22421d14
+    id: r.agent-auto-auth-string-format
+    level: MUST
+    text: AgentAutoAuthString returns the string formatted as "Vault Agent Auto-Auth/<version>
+      (+<projectURL>; <runtime>)", using the same three package-level inputs as AgentString.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/useragent/useragent.go
+    - function:2fc07571c238d7008d527d3eac569eeb
+    id: r.agent-string-format
+    level: MUST
+    text: AgentString returns the string formatted as "Vault Agent/<version> (+<projectURL>;
+      <runtime>)", taking the version from versionFunc(), the URL from projectURL
+      and the runtime from rt.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/useragent/useragent.go
+    - function:950e60307c0666349c6f251b327ac365
+    id: r.agent-templating-string-format
+    level: MUST
+    text: AgentTemplatingString returns the string formatted as "Vault Agent Templating/<version>
+      (+<projectURL>; <runtime>)", using the same three package-level inputs as AgentString.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/useragent/useragent.go
+    - function:4fd2a58c556af6d158f49130100a4f22
+    id: r.base-string
+    level: MUST
+    text: String returns the base user-agent string for the product, built from the
+      same version, project URL and runtime inputs as the role-specific variants.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/useragent/useragent_test.go
+    id: r.exact-string-tests
+    level: SHOULD
+    text: The tests set projectURL, rt and versionFunc to known values and assert
+      the produced user-agent strings exactly, covering at minimum the agent, agent
+      templating and agent auto-auth variants.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/useragent/useragent.go
+    - file:third_party/openbao/internal/helper/useragent/useragent_test.go
+    id: r.overridable-inputs
+    level: MUST
+    text: Version, project URL and runtime are read from package-level variables that
+      callers and tests can reassign, so the produced strings change accordingly without
+      rebuilding.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/useragent/useragent.go
+    - function:7096f17113cb1ac98f077011b92d1de5
+    - function:d94f90d426b5ad25514095e3f36ca51c
+    id: r.proxied-user-agent-embedding
+    level: MUST
+    text: AgentProxyStringWithProxiedUserAgent and ProxyStringWithProxiedUserAgent
+      take the proxied user agent as an argument and embed it in the returned string,
+      so a proxy can report both its own role and the client it is forwarding for.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/useragent/useragent.go
+    - function:43479e6347cef214b37644e54ea567a6
+    - function:53ee8f13ba6c24a43a7685ccc5b15345
+    - function:aea5226edd3ccc4d682271de1d551629
+    - function:c5a679ecc2f18d5ea45917805d9dbfeb
+    id: r.role-specific-prefixes
+    level: MUST
+    text: 'Each remaining variant function returns a string carrying its own role
+      prefix, so the roles stay distinguishable in a User-Agent header: AgentProxyString
+      for the agent proxy, ProxyString for the plain proxy, ProxyAPIProxyString for
+      the API proxy, and ProxyAutoAuthString for the proxy auto-auth path.'
   upstream: self
 - code:
   - third_party/openbao/internal/helper/versions/version.go

@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The package exists so that every OpenBao client role emits a distinct, machine-recognizable User-Agent string in one canonical format, instead of each caller hand-assembling its own. Centralizing the format keeps the version, project URL and runtime fields consistent across roles and lets callers be identified by role from server-side request logs.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
