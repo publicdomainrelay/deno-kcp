@@ -10,11 +10,11 @@ metadata:
 spec:
   intent: 'The context exists so the confirm-leave decorator can be described and
     reimplemented from its observable behavior: a mixin-style class decorator that
-    intercepts route transitions to protect unsaved model edits. It documents the
-    contract for callers (the PKI route modules that apply it), the Route-subclass
-    precondition and its silent fallback, the rollback semantics that distinguish
-    new from persisted records, the confirmation prompt text, the test-mode bypass,
-    and the silent cleanup paths that are discarded without confirmation.'
+    intercepts route transitions to protect unsaved model edits. It records the contract
+    for callers, the Route-subclass precondition and its silent fallback, the rollback
+    semantics that distinguish new records from persisted ones, the exact confirmation
+    prompt text, the test-mode bypass, and the silent cleanup paths that are discarded
+    without confirmation.'
   interfaces:
   - file: third_party/openbao/ui/lib/core/addon/decorators/confirm-leave.js
     kind: function
@@ -40,38 +40,47 @@ spec:
     - function:e1dc261ffaeb8fbe0af87837f1f215f6
     id: r.rollback-dirty-only
     level: MUST
-    text: Rollback of a model must occur only when the model exists, reports hasDirtyAttributes,
-      and is not isSaving; the returned subclass must call unloadRecord when the model
-      isNew and rollbackAttributes otherwise, reading the model from the controller
-      at the given path.
+    text: The subclass helper _rollbackModel(modelPath) must read the model from this.controller.get(modelPath)
+      and roll back only when the model is truthy, reports hasDirtyAttributes, and
+      is not isSaving; it must call unloadRecord when the model isNew and rollbackAttributes
+      otherwise, and do nothing when the model is absent, clean, or saving.
   - codeRefs:
     - file:third_party/openbao/ui/lib/core/addon/decorators/confirm-leave.js
     - function:e1dc261ffaeb8fbe0af87837f1f215f6
     id: r.route-subclass-precondition
     level: MUST
     text: The decorator must check that the decorated SuperClass has Ember's Route
-      on its prototype chain before applying; when the check fails it must log an
-      error stating the decorator must be used on an instance of the ember Route class
-      and return the original SuperClass unchanged, so the decorator is a no-op rather
-      than a hard failure.
+      on its prototype chain via Object.prototype.isPrototypeOf.call(Route, SuperClass)
+      before applying; when the check fails it must log an error stating 'withConfirmLeave
+      decorator must be used on instance of ember Route class. Decorator not applied
+      to returned class' and return the original SuperClass unchanged, so the decorator
+      is a no-op rather than a hard failure.
   - codeRefs:
     - function:48358543c311fcd8d07cb521cfab9639
     - function:e1dc261ffaeb8fbe0af87837f1f215f6
     id: r.silent-cleanup-paths
     level: MUST
     text: After the confirmation decision, the action must iterate the optional silentCleanupPaths
-      collection and roll back each named model without prompting, then return true
-      so the transition proceeds.
+      collection, calling _rollbackModel for each named path so those models are discarded
+      without prompting, then return true so the transition proceeds.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/addon/decorators/confirm-leave.js
+    - function:e1dc261ffaeb8fbe0af87837f1f215f6
+    id: r.store-injection
+    level: MUST
+    text: The returned ConfirmLeave subclass must inject the store service with @service
+      store so the decorated route keeps Ember Data access even when the parent route
+      class did not declare it.
   - codeRefs:
     - file:third_party/openbao/ui/lib/core/addon/decorators/confirm-leave.js
     - function:e1dc261ffaeb8fbe0af87837f1f215f6
     id: r.will-transition-confirm
     level: MUST
-    text: The overridden willTransition(transition) action must call the superclass
-      implementation first inside a try/catch so that a missing parent hook does not
-      throw; if the model at modelPath is dirty and not saving it must roll the model
-      back when Ember.testing is true or when the user accepts window.confirm('You
-      have unsaved changes. Navigating away will discard these changes. Are you sure
-      you want to discard your changes?'), otherwise it must call transition.abort()
-      and return false to block navigation.
+    text: The overridden willTransition(transition) action must be @action-decorated
+      and must call super.willTransition(...arguments) first inside a try/catch so
+      that a missing parent hook does not throw; if the model at modelPath is dirty
+      and not saving it must roll the model back when Ember.testing is true or when
+      the user accepts window.confirm('You have unsaved changes. Navigating away will
+      discard these changes. Are you sure you want to discard your changes?'), otherwise
+      it must call transition.abort() and return false to block navigation.
   upstream: self

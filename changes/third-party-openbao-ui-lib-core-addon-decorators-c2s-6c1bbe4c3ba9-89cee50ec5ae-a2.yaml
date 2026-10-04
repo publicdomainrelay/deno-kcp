@@ -1,0 +1,39 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-ui-lib-core-addon-decorators-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-ui-lib-core-addon-decorators
+  toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
+status:
+  agentLog: 'This context covers a single Ember.js decorator module, third_party/openbao/ui/lib/core/addon/decorators/confirm-leave.js,
+    that guards against losing unsaved form changes when a user navigates away from
+    a route. The exported factory withConfirmLeave(modelPath = ''model'', silentCleanupPaths)
+    returns an inner decorator(SuperClass) function which first verifies that the
+    target class inherits from Ember''s Route; when it does not, the decorator logs
+    an error and returns the original class unchanged, so misuse degrades to a no-op
+    instead of breaking the route. When the check passes it returns an anonymous ConfirmLeave
+    subclass of the decorated route. That subclass injects the store service and defines
+    _rollbackModel(modelPath), which fetches the model off the controller and calls
+    unloadRecord for a new record or rollbackAttributes otherwise, but only when the
+    model exists, has dirty attributes, and is not saving. It overrides the @action-decorated
+    willTransition(transition) hook: it calls the superclass hook inside a try/catch
+    so a missing parent implementation does not throw, inspects the model at modelPath,
+    and when that model is dirty and not saving it either rolls the model back (when
+    Ember.testing is true or the user accepts the ''You have unsaved changes...''
+    prompt) or calls transition.abort() and returns false. After that it walks the
+    optional silentCleanupPaths list, rolling back each named model without prompting,
+    then returns true so navigation proceeds. Callers are the PKI route modules, which
+    apply the decorator to routes such as configuration create/edit, issuer generate-root,
+    generate-intermediate, import, cross-sign, edit, rotate-root and sign, and key
+    create, import and edit.'
+  message: wrote 6 requirement(s) and 2 interface(s) for third-party-openbao-ui-lib-core-addon-decorators
+  phase: Succeeded
+superseded:
+- message: wrote 5 requirement(s) and 2 interface(s) for third-party-openbao-ui-lib-core-addon-decorators
+  name: third-party-openbao-ui-lib-core-addon-decorators-c2s-6c1bbe4c3ba9-89cee50ec5ae
+  phase: Succeeded
