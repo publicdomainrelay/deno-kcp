@@ -5158,6 +5158,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.auth-enable-store-injection` (MUST): "VaultClusterSettingsAuthEnableRoute must declare a store property, giving the route access to the Ember Data store when it loads auth method records."
 - added `r.auth-index-route-module` (SHOULD): "The index route module must remain at third_party/openbao/ui/app/routes/vault/cluster/settings/auth/index.js so the bare auth settings path resolves to a listing route."
 
+### third-party-openbao-ui-app-routes-vault-cluster-tools
+
+- intent: "" -> "This context exists so the cluster tools routing behavior of the vendored OpenBao UI can be described and relied upon without reading the route files. It documents how the tools index route canonicalizes an entry into a concrete tool, how the tool route validates the requested action against the shared toolsActions helper, and how the selected action is propagated to the controller for rendering and title/URL state."
+- added `r.index-redirects-to-first-supported-tool` (MUST): "The tools index route's beforeModel hook MUST obtain the current cluster name from the currentCluster service and the supported action list from the toolsActions helper, and when the incoming transition's targetName equals the route's own routeName it MUST abort the transition and replace it with the vault.cluster.tools.tool route, passing the current cluster name and the first element of the supported actions list as the two dynamic segments."
+- added `r.routes-derive-actions-from-shared-helper` (MUST): "Both routes MUST source their accepted action list from the vault/helpers/tools-actions toolsActions helper rather than from a locally declared list, so the index redirect target and the tool route validation stay consistent."
+- added `r.tool-did-transition-propagates-params` (SHOULD): "The tool route's didTransition action MUST read the params for its own routeName via paramsFor, set those params as properties on the route's controller, and return true to signal the transition completed."
+- added `r.tool-model-validates-action` (MUST): "The tool route's model hook MUST return params.selected_action when that value is present in the list produced by the toolsActions helper, and MUST throw an Error with the message 'Given param is not a supported tool action' when it is not."
+- added `r.tool-setup-controller-selected-action` (MUST): "The tool route's setupController hook MUST call the super implementation and then set the controller's selectedAction property to the model returned by the model hook, so the resolved tool action is available to the controller."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5593,5 +5602,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-routes-vault-cluster-settings-auth-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-settings-auth-configure-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-settings-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-routes-vault-cluster-tools-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-routes-vault-cluster-tools-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-serializers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

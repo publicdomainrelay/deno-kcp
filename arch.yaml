@@ -68156,7 +68156,54 @@ system_contexts:
   - file:third_party/openbao/ui/app/routes/vault/cluster/tools/index.js index.js@third_party/openbao/ui/app/routes/vault/cluster/tools/index.js
   - file:third_party/openbao/ui/app/routes/vault/cluster/tools/tool.js tool.js@third_party/openbao/ui/app/routes/vault/cluster/tools/tool.js
   id: sc.third-party-openbao-ui-app-routes-vault-cluster-tools
+  intent: This context exists so the cluster tools routing behavior of the vendored
+    OpenBao UI can be described and relied upon without reading the route files. It
+    documents how the tools index route canonicalizes an entry into a concrete tool,
+    how the tool route validates the requested action against the shared toolsActions
+    helper, and how the selected action is propagated to the controller for rendering
+    and title/URL state.
   name: third-party-openbao-ui-app-routes-vault-cluster-tools
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/tools/index.js
+    id: r.index-redirects-to-first-supported-tool
+    level: MUST
+    text: The tools index route's beforeModel hook MUST obtain the current cluster
+      name from the currentCluster service and the supported action list from the
+      toolsActions helper, and when the incoming transition's targetName equals the
+      route's own routeName it MUST abort the transition and replace it with the vault.cluster.tools.tool
+      route, passing the current cluster name and the first element of the supported
+      actions list as the two dynamic segments.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/tools/index.js
+    - file:third_party/openbao/ui/app/routes/vault/cluster/tools/tool.js
+    id: r.routes-derive-actions-from-shared-helper
+    level: MUST
+    text: Both routes MUST source their accepted action list from the vault/helpers/tools-actions
+      toolsActions helper rather than from a locally declared list, so the index redirect
+      target and the tool route validation stay consistent.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/tools/tool.js
+    id: r.tool-did-transition-propagates-params
+    level: SHOULD
+    text: The tool route's didTransition action MUST read the params for its own routeName
+      via paramsFor, set those params as properties on the route's controller, and
+      return true to signal the transition completed.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/tools/tool.js
+    id: r.tool-model-validates-action
+    level: MUST
+    text: The tool route's model hook MUST return params.selected_action when that
+      value is present in the list produced by the toolsActions helper, and MUST throw
+      an Error with the message 'Given param is not a supported tool action' when
+      it is not.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/tools/tool.js
+    id: r.tool-setup-controller-selected-action
+    level: MUST
+    text: The tool route's setupController hook MUST call the super implementation
+      and then set the controller's selectedAction property to the model returned
+      by the model hook, so the resolved tool action is available to the controller.
   upstream: self
 - code:
   - third_party/openbao/ui/app/serializers/application.js
