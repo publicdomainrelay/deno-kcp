@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This controller exists to back the detail view of one OIDC assignment in the OpenBao web UI. It gives that view the behaviour needed to remove the assignment record and to tell the user what happened, so the UI file itself stays presentational and the deletion, feedback and navigation logic live in one place.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

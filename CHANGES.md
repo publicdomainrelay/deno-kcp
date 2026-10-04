@@ -4370,6 +4370,13 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.namespace-list-controller-state` (MUST): "The namespaces index controller aliases accessibleNamespaces to namespaceService.accessibleNamespaces and currentNamespace to namespaceService.path, so templates read live namespace service state rather than controller-owned copies, and it injects the namespace and store services."
 - added `r.refresh-namespace-list-action` (MUST): "The refreshNamespaceList action MUST refetch the namespaces available to the user by performing namespaceService.findNamespacesForUser and then send the reload action, so the namespace picker is repopulated before the route data reloads."
 
+### third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-assignments-assignment
+
+- intent: "" -> "This controller exists to back the detail view of one OIDC assignment in the OpenBao web UI. It gives that view the behaviour needed to remove the assignment record and to tell the user what happened, so the UI file itself stays presentational and the deletion, feedback and navigation logic live in one place."
+- added `r.default-export-controller` (MUST): "The module exports OidcAssignmentDetailsController as its default, and the class extends Ember Controller. It injects the router service so it can navigate, and the flashMessages service so it can report outcomes to the user."
+- added `r.delete-action-failure` (MUST): "If destroying the record fails, the delete action catches the error, rolls the model back with rollbackAttributes so no half-deleted state is shown, and pushes a danger flash message. The message body is error.errors joined with '. ' when that array is present, and otherwise error.message."
+- added `r.delete-action-success` (MUST): "The delete action is exposed as an Ember action and is async. On success it destroys the current model record with destroyRecord, pushes a success flash message with the text 'Assignment deleted successfully', then calls transitionToSafe with the router and the route 'vault.cluster.access.oidc.assignments' to leave the detail page."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4716,7 +4723,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-methods-method-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-methods-method-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-namespaces-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-assignments-assignment-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-assignments-assignment-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-clients-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
