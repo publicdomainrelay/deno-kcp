@@ -1,0 +1,84 @@
+conditions:
+- message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+  reason: InterfacesObserved
+  status: "True"
+  type: CodeSynced
+- message: no synced fingerprint has been recorded yet
+  reason: NotSyncedYet
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/builtin/logical/ssh/backend.go
+  - third_party/openbao/internal/builtin/logical/ssh/backend_test.go
+  - third_party/openbao/internal/builtin/logical/ssh/fields.go
+  - third_party/openbao/internal/builtin/logical/ssh/path_cleanup_dynamic_host_keys.go
+  - third_party/openbao/internal/builtin/logical/ssh/path_config_ca.go
+  - third_party/openbao/internal/builtin/logical/ssh/path_config_ca_test.go
+  - third_party/openbao/internal/builtin/logical/ssh/path_config_issuers.go
+  - third_party/openbao/internal/builtin/logical/ssh/path_config_issuers_test.go
+  - third_party/openbao/internal/builtin/logical/ssh/path_config_zeroaddress.go
+  - third_party/openbao/internal/builtin/logical/ssh/path_creds_create.go
+  - third_party/openbao/internal/builtin/logical/ssh/path_fetch.go
+  - third_party/openbao/internal/builtin/logical/ssh/path_issue.go
+  - third_party/openbao/internal/builtin/logical/ssh/path_issue_sign.go
+  - third_party/openbao/internal/builtin/logical/ssh/path_issuers.go
+  - third_party/openbao/internal/builtin/logical/ssh/path_lookup.go
+  - third_party/openbao/internal/builtin/logical/ssh/path_roles.go
+  - third_party/openbao/internal/builtin/logical/ssh/path_sign.go
+  - third_party/openbao/internal/builtin/logical/ssh/path_verify.go
+  - third_party/openbao/internal/builtin/logical/ssh/secret_otp.go
+  - third_party/openbao/internal/builtin/logical/ssh/storage.go
+  - third_party/openbao/internal/builtin/logical/ssh/storage_migrations.go
+  - third_party/openbao/internal/builtin/logical/ssh/storage_migrations_test.go
+  - third_party/openbao/internal/builtin/logical/ssh/util.go
+  fingerprint: c7d6df1448d199fe55af7211ca86d445f0f95df28b97cf03c9d2459ebea6c143
+  interfaces:
+  - codegraphId: function:c2b7d0361f5eafc6475122f4c56203c6
+    file: third_party/openbao/internal/builtin/logical/ssh/backend.go
+    kind: function
+    line: 28
+    name: Factory
+    signature: (ctx context.Context, conf *logical.BackendConfig) (logical.Backend,
+      error)
+  - codegraphId: function:037f39ba0ac57e174e05ae9374e76e10
+    file: third_party/openbao/internal/builtin/logical/ssh/backend.go
+    kind: function
+    line: 39
+    name: Backend
+    signature: (conf *logical.BackendConfig) (*backend, error)
+  - codegraphId: method:b711565dc7aa5d7abd2bc98af43d3910
+    file: third_party/openbao/internal/builtin/logical/ssh/backend.go
+    kind: method
+    line: 96
+    name: backend.Salt
+    signature: (ctx context.Context) (*salt.Salt, error)
+  - codegraphId: method:fe22f086c35e63161dcc4274917101f5
+    file: third_party/openbao/internal/builtin/logical/ssh/path_creds_create.go
+    kind: method
+    line: 174
+    name: backend.GenerateSaltedOTP
+    signature: (ctx context.Context) (string, string, error)
+  - codegraphId: method:dd56bad67918a3338d35147c3aaac35d
+    file: third_party/openbao/internal/builtin/logical/ssh/path_creds_create.go
+    kind: method
+    line: 188
+    name: backend.GenerateOTPCredential
+    signature: (ctx context.Context, req *logical.Request, sshOTPEntry *sshOTP) (string,
+      error)
+  - codegraphId: method:6cded66dc09b14f10f6cdf87c2bfbb94
+    file: third_party/openbao/internal/builtin/logical/ssh/storage.go
+    kind: method
+    line: 294
+    name: storageContext.ImportIssuer
+    signature: (publicKey string, privateKey string, generatedKeyMaterial bool, issuerName
+      string, setDefault bool) (*issuerEntry, bool, error)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: fc589f3d6d537ecd374fc0aca853ef1d7d8fa1e494acb1fdd0c3afe34bb6432b
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: c7d6df1448d199fe55af7211ca86d445f0f95df28b97cf03c9d2459ebea6c143

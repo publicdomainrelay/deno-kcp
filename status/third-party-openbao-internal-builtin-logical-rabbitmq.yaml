@@ -1,0 +1,69 @@
+conditions:
+- message: 'undeclared: Backend, Factory, UsernameMetadata, backend.Client, backend.Lease,
+    backend.Role'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/builtin/logical/rabbitmq/backend.go
+  - third_party/openbao/internal/builtin/logical/rabbitmq/backend_test.go
+  - third_party/openbao/internal/builtin/logical/rabbitmq/passwords.go
+  - third_party/openbao/internal/builtin/logical/rabbitmq/path_config_connection.go
+  - third_party/openbao/internal/builtin/logical/rabbitmq/path_config_connection_test.go
+  - third_party/openbao/internal/builtin/logical/rabbitmq/path_config_lease.go
+  - third_party/openbao/internal/builtin/logical/rabbitmq/path_config_lease_test.go
+  - third_party/openbao/internal/builtin/logical/rabbitmq/path_role_create.go
+  - third_party/openbao/internal/builtin/logical/rabbitmq/path_role_create_test.go
+  - third_party/openbao/internal/builtin/logical/rabbitmq/path_roles.go
+  - third_party/openbao/internal/builtin/logical/rabbitmq/secret_creds.go
+  fingerprint: a706595cbb397445d326821a25f8fd0411d125545040e38787dbe4ec39252c2b
+  interfaces:
+  - codegraphId: function:7249d246c1bcaad7ca4c445ca6199410
+    file: third_party/openbao/internal/builtin/logical/rabbitmq/backend.go
+    kind: function
+    line: 20
+    name: Factory
+    signature: (ctx context.Context, conf *logical.BackendConfig) (logical.Backend,
+      error)
+  - codegraphId: function:af02f0c800c326f9a0242c86e058e628
+    file: third_party/openbao/internal/builtin/logical/rabbitmq/backend.go
+    kind: function
+    line: 29
+    name: Backend
+    signature: () *backend
+  - codegraphId: method:19c459f7c4669101020cc5f7761933c1
+    file: third_party/openbao/internal/builtin/logical/rabbitmq/backend.go
+    kind: method
+    line: 68
+    name: backend.Client
+    signature: (ctx context.Context, s logical.Storage) (*rabbithole.Client, error)
+  - codegraphId: method:03d02022be39269f293bd7155ec1aa16
+    file: third_party/openbao/internal/builtin/logical/rabbitmq/backend.go
+    kind: method
+    line: 119
+    name: backend.Lease
+    signature: (ctx context.Context, s logical.Storage) (*configLease, error)
+  - codegraphId: struct:f988e041fca99538d35ef5814b06d3f2
+    file: third_party/openbao/internal/builtin/logical/rabbitmq/path_role_create.go
+    kind: struct
+    line: 242
+    name: UsernameMetadata
+  - codegraphId: method:27372aea34df6f50e52b393c04bbff6e
+    file: third_party/openbao/internal/builtin/logical/rabbitmq/path_roles.go
+    kind: method
+    line: 87
+    name: backend.Role
+    signature: (ctx context.Context, s logical.Storage, n string) (*roleEntry, error)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 1bb6596616baf0cf0bed41fa991969ddb5ac0509cf82be1aa06503fd2eaaf7a6
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: a706595cbb397445d326821a25f8fd0411d125545040e38787dbe4ec39252c2b

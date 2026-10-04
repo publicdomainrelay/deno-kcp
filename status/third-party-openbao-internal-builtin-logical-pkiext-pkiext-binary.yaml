@@ -1,0 +1,239 @@
+conditions:
+- message: 'undeclared: NewVaultPkiCluster, NewVaultPkiClusterWithDNS, VaultPkiCluster,
+    VaultPkiCluster.AddDNSRecord, VaultPkiCluster.AddHostname, VaultPkiCluster.AddNameToHostFiles,
+    VaultPkiCluster.Cleanup, VaultPkiCluster.CreateAcmeMount, VaultPkiCluster.CreateMount,
+    VaultPkiCluster.GetActiveClusterNode, VaultPkiCluster.GetActiveContainerHostPort,
+    VaultPkiCluster.GetActiveContainerID, VaultPkiCluster.GetActiveContainerIP, VaultPkiCluster.GetActiveNode,
+    VaultPkiCluster.GetContainerNetworkName, VaultPkiCluster.GetListenerCACertPEM,
+    VaultPkiCluster.GetNonActiveNodes, VaultPkiCluster.RemoveAllDNSRecords, VaultPkiCluster.RemoveDNSRecord,
+    VaultPkiCluster.RemoveDNSRecordsForDomain, VaultPkiCluster.RemoveDNSRecordsOfTypeForDomain,
+    VaultPkiMount, VaultPkiMount.GenerateIntermediateInternal, VaultPkiMount.GenerateRootInternal,
+    VaultPkiMount.GetCACertPEM, VaultPkiMount.GetEabKey, VaultPkiMount.ImportBundle,
+    VaultPkiMount.SignIntermediary, VaultPkiMount.UpdateAcmeConfig, VaultPkiMount.UpdateClusterConfig,
+    VaultPkiMount.UpdateClusterConfigLocalAddr, VaultPkiMount.UpdateDefaultIssuer,
+    VaultPkiMount.UpdateIssuer, VaultPkiMount.UpdateRole'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/builtin/logical/pkiext/pkiext_binary/acme_test.go
+  - third_party/openbao/internal/builtin/logical/pkiext/pkiext_binary/pki_cluster.go
+  - third_party/openbao/internal/builtin/logical/pkiext/pkiext_binary/pki_mount.go
+  fingerprint: 979dac5d65f06d4e64b3b9305d1b958989f1f8f086bab4d9d1e76bc069907384
+  interfaces:
+  - codegraphId: struct:edd27c7fe3f423b1d448cf7d9f2823f9
+    file: third_party/openbao/internal/builtin/logical/pkiext/pkiext_binary/pki_cluster.go
+    kind: struct
+    line: 20
+    name: VaultPkiCluster
+  - codegraphId: function:c997624527a7b677725dde6d9e51cd3f
+    file: third_party/openbao/internal/builtin/logical/pkiext/pkiext_binary/pki_cluster.go
+    kind: function
+    line: 25
+    name: NewVaultPkiCluster
+    signature: (t *testing.T) *VaultPkiCluster
+  - codegraphId: function:9eaae345fdc57ae816fc40eb0786fa08
+    file: third_party/openbao/internal/builtin/logical/pkiext/pkiext_binary/pki_cluster.go
+    kind: function
+    line: 50
+    name: NewVaultPkiClusterWithDNS
+    signature: (t *testing.T) *VaultPkiCluster
+  - codegraphId: method:9a8536a708a604691e34aa6126267a31
+    file: third_party/openbao/internal/builtin/logical/pkiext/pkiext_binary/pki_cluster.go
+    kind: method
+    line: 57
+    name: VaultPkiCluster.Cleanup
+    signature: ()
+  - codegraphId: method:e59db6b960c0e5b47bc518975cd9d5ef
+    file: third_party/openbao/internal/builtin/logical/pkiext/pkiext_binary/pki_cluster.go
+    kind: method
+    line: 64
+    name: VaultPkiCluster.GetActiveClusterNode
+    signature: () *docker.DockerClusterNode
+  - codegraphId: method:4d9d1aca602ade0801d4626b02307809
+    file: third_party/openbao/internal/builtin/logical/pkiext/pkiext_binary/pki_cluster.go
+    kind: method
+    line: 76
+    name: VaultPkiCluster.GetNonActiveNodes
+    signature: () []*docker.DockerClusterNode
+  - codegraphId: method:f02d0147d48ec1c0baa749dac63b63f9
+    file: third_party/openbao/internal/builtin/logical/pkiext/pkiext_binary/pki_cluster.go
+    kind: method
+    line: 92
+    name: VaultPkiCluster.GetActiveContainerHostPort
+    signature: () string
+  - codegraphId: method:5a05da1ae3644ea9574ed6c9adda789f
+    file: third_party/openbao/internal/builtin/logical/pkiext/pkiext_binary/pki_cluster.go
+    kind: method
+    line: 96
+    name: VaultPkiCluster.GetContainerNetworkName
+    signature: () string
+  - codegraphId: method:ff56478b91a4db4309b8983b4af1669c
+    file: third_party/openbao/internal/builtin/logical/pkiext/pkiext_binary/pki_cluster.go
+    kind: method
+    line: 100
+    name: VaultPkiCluster.GetActiveContainerIP
+    signature: () string
+  - codegraphId: method:c6f4d78b33dfc2896722daa9acdebf3a
+    file: third_party/openbao/internal/builtin/logical/pkiext/pkiext_binary/pki_cluster.go
+    kind: method
+    line: 104
+    name: VaultPkiCluster.GetActiveContainerID
+    signature: () string
+  - codegraphId: method:766c97cabad6def992956a67235dec8c
+    file: third_party/openbao/internal/builtin/logical/pkiext/pkiext_binary/pki_cluster.go
+    kind: method
+    line: 108
+    name: VaultPkiCluster.GetActiveNode
+    signature: () *api.Client
+  - codegraphId: method:2bbff707a0712d921b3c3e76f0d1d9d6
+    file: third_party/openbao/internal/builtin/logical/pkiext/pkiext_binary/pki_cluster.go
+    kind: method
+    line: 113
+    name: VaultPkiCluster.GetListenerCACertPEM
+    signature: () []byte
+  - codegraphId: method:9be16e343bf52f3d11d9093c06054b8b
+    file: third_party/openbao/internal/builtin/logical/pkiext/pkiext_binary/pki_cluster.go
+    kind: method
+    line: 117
+    name: VaultPkiCluster.AddHostname
+    signature: (hostname, ip string) error
+  - codegraphId: method:272023ce0f6d0ba54f2c0b9d231b6b76
+    file: third_party/openbao/internal/builtin/logical/pkiext/pkiext_binary/pki_cluster.go
+    kind: method
+    line: 127
+    name: VaultPkiCluster.AddNameToHostFiles
+    signature: (hostname, ip string) error
+  - codegraphId: method:894299a2bb5070bf1ce58e073443c268
+    file: third_party/openbao/internal/builtin/logical/pkiext/pkiext_binary/pki_cluster.go
+    kind: method
+    line: 147
+    name: VaultPkiCluster.AddDNSRecord
+    signature: (hostname, recordType, ip string) error
+  - codegraphId: method:7471a9800221a22f6c320f240f8c2b08
+    file: third_party/openbao/internal/builtin/logical/pkiext/pkiext_binary/pki_cluster.go
+    kind: method
+    line: 157
+    name: VaultPkiCluster.RemoveDNSRecord
+    signature: (domain string, record string, value string) error
+  - codegraphId: method:5592a94865af2c0cc40fdfc166cfad44
+    file: third_party/openbao/internal/builtin/logical/pkiext/pkiext_binary/pki_cluster.go
+    kind: method
+    line: 166
+    name: VaultPkiCluster.RemoveDNSRecordsOfTypeForDomain
+    signature: (domain string, record string) error
+  - codegraphId: method:81e31d3976a83aa28bd7a05ffa29f4e1
+    file: third_party/openbao/internal/builtin/logical/pkiext/pkiext_binary/pki_cluster.go
+    kind: method
+    line: 175
+    name: VaultPkiCluster.RemoveDNSRecordsForDomain
+    signature: (domain string) error
+  - codegraphId: method:892278ed6844d08f864a570fd92fcfa6
+    file: third_party/openbao/internal/builtin/logical/pkiext/pkiext_binary/pki_cluster.go
+    kind: method
+    line: 184
+    name: VaultPkiCluster.RemoveAllDNSRecords
+    signature: () error
+  - codegraphId: method:2dd0b692b59a28efdce91a8b728cfe36
+    file: third_party/openbao/internal/builtin/logical/pkiext/pkiext_binary/pki_cluster.go
+    kind: method
+    line: 193
+    name: VaultPkiCluster.CreateMount
+    signature: (name string) (*VaultPkiMount, error)
+  - codegraphId: method:dcaccd9c31d26ee0674de4e393597b13
+    file: third_party/openbao/internal/builtin/logical/pkiext/pkiext_binary/pki_cluster.go
+    kind: method
+    line: 215
+    name: VaultPkiCluster.CreateAcmeMount
+    signature: (mountName string) (*VaultPkiMount, error)
+  - codegraphId: struct:5d0e2ae3198df0d9bf25f6c7a829cef5
+    file: third_party/openbao/internal/builtin/logical/pkiext/pkiext_binary/pki_mount.go
+    kind: struct
+    line: 15
+    name: VaultPkiMount
+  - codegraphId: method:a0bb53a10c45f7f7b9756e37a8d20217
+    file: third_party/openbao/internal/builtin/logical/pkiext/pkiext_binary/pki_mount.go
+    kind: method
+    line: 20
+    name: VaultPkiMount.UpdateClusterConfig
+    signature: (config map[string]any) error
+  - codegraphId: method:f637bfa6f3165a25614fa806acc5451a
+    file: third_party/openbao/internal/builtin/logical/pkiext/pkiext_binary/pki_mount.go
+    kind: method
+    line: 32
+    name: VaultPkiMount.UpdateClusterConfigLocalAddr
+    signature: () (string, error)
+  - codegraphId: method:2192940a606ebfc5254769062c6fef69
+    file: third_party/openbao/internal/builtin/logical/pkiext/pkiext_binary/pki_mount.go
+    kind: method
+    line: 39
+    name: VaultPkiMount.UpdateAcmeConfig
+    signature: (enable bool, config map[string]any) error
+  - codegraphId: method:d51bc803931d37dae021f30d24b6cc48
+    file: third_party/openbao/internal/builtin/logical/pkiext/pkiext_binary/pki_mount.go
+    kind: method
+    line: 49
+    name: VaultPkiMount.GenerateRootInternal
+    signature: (props map[string]any) (*api.Secret, error)
+  - codegraphId: method:463b87cdab66460f04c2e946fa0ea5a9
+    file: third_party/openbao/internal/builtin/logical/pkiext/pkiext_binary/pki_mount.go
+    kind: method
+    line: 60
+    name: VaultPkiMount.GenerateIntermediateInternal
+    signature: (props map[string]any) (*api.Secret, error)
+  - codegraphId: method:cbc8183511af527b6fa02e64bdb66b07
+    file: third_party/openbao/internal/builtin/logical/pkiext/pkiext_binary/pki_mount.go
+    kind: method
+    line: 71
+    name: VaultPkiMount.SignIntermediary
+    signature: (signingIssuer string, csr any, props map[string]any) (*api.Secret,
+      error)
+  - codegraphId: method:8984fe72b80f3626cd5d97bc983a5d7a
+    file: third_party/openbao/internal/builtin/logical/pkiext/pkiext_binary/pki_mount.go
+    kind: method
+    line: 81
+    name: VaultPkiMount.ImportBundle
+    signature: (pemBundle any, props map[string]any) (*api.Secret, error)
+  - codegraphId: method:8fd3fd478b2bf259c102cb3e9bccb4cb
+    file: third_party/openbao/internal/builtin/logical/pkiext/pkiext_binary/pki_mount.go
+    kind: method
+    line: 90
+    name: VaultPkiMount.UpdateDefaultIssuer
+    signature: (issuerId string, props map[string]any) error
+  - codegraphId: method:782cfb8f1fcdedacfe38281788b9c47f
+    file: third_party/openbao/internal/builtin/logical/pkiext/pkiext_binary/pki_mount.go
+    kind: method
+    line: 101
+    name: VaultPkiMount.UpdateIssuer
+    signature: (issuerRef string, props map[string]any) error
+  - codegraphId: method:d1fd934cc7870f5c5ae76e3c1b4b6098
+    file: third_party/openbao/internal/builtin/logical/pkiext/pkiext_binary/pki_mount.go
+    kind: method
+    line: 110
+    name: VaultPkiMount.UpdateRole
+    signature: (roleName string, config map[string]any) error
+  - codegraphId: method:765f4e34a7317219b406da4484a562a9
+    file: third_party/openbao/internal/builtin/logical/pkiext/pkiext_binary/pki_mount.go
+    kind: method
+    line: 119
+    name: VaultPkiMount.GetEabKey
+    signature: (acmeDirectory string) (string, string, error)
+  - codegraphId: method:e383767a1aa2d4027fcf4ca479fce31d
+    file: third_party/openbao/internal/builtin/logical/pkiext/pkiext_binary/pki_mount.go
+    kind: method
+    line: 137
+    name: VaultPkiMount.GetCACertPEM
+    signature: () (string, error)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: ed01ab52c62cf2b44ea301d83aee0163322fe6c8ac760916aef471e3722425f5
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 979dac5d65f06d4e64b3b9305d1b958989f1f8f086bab4d9d1e76bc069907384
