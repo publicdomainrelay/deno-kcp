@@ -2,13 +2,117 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to pin down the deploy/examples/atproto/market example as an executable specification of what the kcp deno runtime must support: three peer services that reach each other only by cluster-local name over TLS, with identity and certificates supplied from outside the pod. It is the reference topology that exercises workspace creation, per-workspace API bindings, per-workspace RBAC, per-workspace OpenBao certificate authority selection, the provider's virtual DNS table and shim, and the TLS leaf injection path, and it exists so that a regression in any of those surfaces shows up as a failing verifier pod rather than as an untested assumption in the provider.
 
 _Write the prose above and the fields in the spec block. `codeRefs` and the resolved references below are maintained by the tool; an edit there is lost._
 
 ## spec
 
 ```yaml spec
+interfaces:
+- file: .tools/open-architecture/validate.py
+  kind: variable
+  name: MARKET_WORKSPACES
+  signature: MARKET_WORKSPACES = "deploy/examples/atproto/market/00-workspaces.yaml"
+- file: test/integration/examples.go
+  kind: function
+  name: exampleByName
+  signature: func exampleByName(file string) (example, bool)
+- file: test/integration/examples.go
+  kind: function
+  name: exampleFiles
+  signature: func exampleFiles() []example
+requirements:
+- codeRefs:
+  - file:deploy/examples/atproto/market/15-openbao-alice.yaml
+  - file:deploy/examples/atproto/market/15-openbao-global.yaml
+  - file:deploy/examples/atproto/market/15-openbao-relay.yaml
+  id: r.openbao-object-per-workspace
+  level: MUST
+  text: 'Each workspace applies one OpenBao object named openbao in namespace default,
+    carrying the finalizer openbao.deno.computer/namespace and naming the OpenBao
+    namespace that serves it: global.default, relay.default and alice.default respectively.'
+- codeRefs:
+  - file:deploy/examples/atproto/market/40-alice-pds.yaml
+  id: r.pds-pod
+  level: MUST
+  text: The alice workspace runs DenoPod pds under the deno-runner service account
+    with restartPolicy Always, SERVICE_TLS true, --unstable-kv in SERVICE_DENO_FLAGS,
+    port 2583, PDS_PUBLIC_HOSTNAME pds.default.alice.svc.kcp.local, PDS_PLC_DIRECTORY_URL
+    pointed at the global PLC name, PDS_CRAWLERS pointed at the relay name, and PDS_PRIVATE_KEY_HEX
+    in SERVICE_ENV.
+- codeRefs:
+  - file:deploy/examples/atproto/market/20-global-plc.yaml
+  id: r.plc-directory-pod
+  level: MUST
+  text: The global workspace runs DenoPod plc with restartPolicy Always, the denopod.deno.computer/run
+    finalizer, SERVICE_TLS true, port 2587, and a readiness probe that resolves plc.default.global.svc.kcp.local
+    and requests /health.
+- codeRefs:
+  - file:deploy/examples/atproto/market/30-relay-relay.yaml
+  id: r.relay-pod
+  level: MUST
+  text: The relay workspace runs DenoPod relay with restartPolicy Always, SERVICE_TLS
+    true, HOSTNAME relay.default.relay.svc.kcp.local on port 2584, and a readiness
+    probe that resolves relay.default.relay.svc.kcp.local and requests /xrpc/_health.
+- codeRefs:
+  - file:deploy/examples/atproto/market/10-rbac.yaml
+  id: r.runner-rbac-reads-denopods
+  level: MUST
+  text: The example creates a ServiceAccount named deno-runner in namespace default,
+    a ClusterRole named deno-runner-read-pods granting get and list on deno.computer
+    denopods, and a ClusterRoleBinding of that role to that ServiceAccount.
+- codeRefs:
+  - file:deploy/examples/atproto/market/20-global-plc.yaml
+  - file:deploy/examples/atproto/market/30-relay-relay.yaml
+  - file:deploy/examples/atproto/market/40-alice-pds.yaml
+  id: r.supervisor-env-allowlist
+  level: MUST
+  text: Every service pod's env allowList admits the shim's keys (SERVICE_*, KCP_SHIM,
+    KCP_TLS_CERT, KCP_TLS_KEY, KCP_CA_BUNDLE, KCP_SERVICE_NAME, KCP_SERVICE_DOMAIN,
+    KCP_DNS_TABLE, KCP_TOKENS, KCP_SERVER, KCP_NAMESPACE, PATH, HOME) and its write
+    allowList admits only result.json, tls.crt, tls.key and ca.pem, with read and
+    run allowed and noPrompt true.
+- codeRefs:
+  - file:deploy/examples/atproto/market/20-global-plc.yaml
+  - file:deploy/examples/atproto/market/30-relay-relay.yaml
+  - file:deploy/examples/atproto/market/40-alice-pds.yaml
+  id: r.supervisor-injects-tls-and-shim
+  level: MUST
+  text: The service pods' supervisor script writes the injected KCP_CA_BUNDLE to ca.pem
+    and sets DENO_CERT to it, writes KCP_TLS_CERT and KCP_TLS_KEY to tls.crt and tls.key
+    and appends --tls-cert-file and --tls-key-file to the child argv, prepends KCP_SHIM
+    to the Deno flags as --preload, spawns the entry module as a child process with
+    stdin null and inherited stdio, and writes the child exitCode to result.json.
+- codeRefs:
+  - file:deploy/examples/atproto/market/00-workspaces.yaml
+  id: r.three-workspaces-at-root
+  level: MUST
+  text: The example creates exactly the three workspaces global, relay and alice,
+    each with spec.type.name denoruntime and spec.type.path root.
+- codeRefs:
+  - file:deploy/examples/atproto/market/50-verifier.yaml
+  id: r.verifier-bounded-wait
+  level: MUST
+  text: The verifier's relay watch settles exactly once, with a 90 second timeout,
+    closing the WebSocket on settle and reporting error or closed instead of hanging.
+- codeRefs:
+  - file:deploy/examples/atproto/market/50-verifier.yaml
+  id: r.verifier-end-to-end-check
+  level: MUST
+  text: The alice workspace runs DenoPod verifier with restartPolicy Never, importing
+    KCP_SHIM before anything else, creating an account on VERIFY_PDS, reading the
+    returned DID back from VERIFY_PLC, making a first write so the PDS announces itself,
+    then writing a second record while watching VERIFY_RELAY's subscribeRepos WebSocket,
+    and exiting 0 only when plcStatus is 200, gotAccessJwt is yes and relaySawCommit
+    is yes.
+- codeRefs:
+  - file:deploy/examples/atproto/market/50-verifier.yaml
+  id: r.verifier-judges-decode-frames
+  level: SHOULD
+  text: The verifier treats relay frames as bytes, decoding ArrayBuffer and Blob payloads
+    with TextDecoder before searching for its own DID, because the relay emits DRISL
+    where a CBOR string is its bytes verbatim.
 upstream: self
 ```
 
