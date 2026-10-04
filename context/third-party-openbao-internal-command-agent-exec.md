@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so the agent exec server's contract is described independently of the surrounding OpenBao agent: which configuration the server accepts, how it derives runner state from environment templates, under what conditions it restarts or stops the child process, what it returns on cancellation, template error and child exit, and how restart-on-secret-changes values are interpreted. It documents the boundary between the template-render path (incoming token and rendered events) and the process-supervision path so a reader can reason about restart, debounce and shutdown behavior without reading the whole agent command tree.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

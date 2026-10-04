@@ -2,10 +2,196 @@ apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
 - file:third_party/openbao/internal/command/agent/exec/exec.go exec.go@third_party/openbao/internal/command/agent/exec/exec.go
 - file:third_party/openbao/internal/command/agent/exec/exec_test.go exec_test.go@third_party/openbao/internal/command/agent/exec/exec_test.go
+- function:e33e1ebed1f36c917fef8deab4475932 NewServer@third_party/openbao/internal/command/agent/exec/exec.go:84
+- method:6e442a147416a14cb234be2ec46b6ebe ProcessExitError.Error@third_party/openbao/internal/command/agent/exec/exec.go:80
+- method:db69fdf5be5c51d15f8e995d1175c4a5 Server.Run@third_party/openbao/internal/command/agent/exec/exec.go:95
+- struct:021265e04d39a5bf274b9d3278a1e0aa Server@third_party/openbao/internal/command/agent/exec/exec.go:48
+- struct:1c43932d16944fc9cc3f63f66ca570d9 ProcessExitError@third_party/openbao/internal/command/agent/exec/exec.go:76
+- struct:aba0f8b75a0682a2aedeae8345a175fc ServerConfig@third_party/openbao/internal/command/agent/exec/exec.go:32
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-command-agent-exec
   namespace: default
 spec:
+  intent: 'The context exists so the agent exec server''s contract is described independently
+    of the surrounding OpenBao agent: which configuration the server accepts, how
+    it derives runner state from environment templates, under what conditions it restarts
+    or stops the child process, what it returns on cancellation, template error and
+    child exit, and how restart-on-secret-changes values are interpreted. It documents
+    the boundary between the template-render path (incoming token and rendered events)
+    and the process-supervision path so a reader can reason about restart, debounce
+    and shutdown behavior without reading the whole agent command tree.'
+  interfaces:
+  - file: third_party/openbao/internal/command/agent/exec/exec.go
+    kind: function
+    name: NewServer
+    signature: func NewServer(cfg *ServerConfig) *Server
+  - file: third_party/openbao/internal/command/agent/exec/exec.go
+    kind: struct
+    name: ProcessExitError
+    signature: type ProcessExitError struct
+  - file: third_party/openbao/internal/command/agent/exec/exec.go
+    kind: method
+    name: ProcessExitError.Error
+    signature: func (e *ProcessExitError) Error() string
+  - file: third_party/openbao/internal/command/agent/exec/exec.go
+    kind: struct
+    name: Server
+    signature: type Server struct
+  - file: third_party/openbao/internal/command/agent/exec/exec.go
+    kind: method
+    name: Server.Run
+    signature: func (s *Server) Run(ctx context.Context, incomingVaultToken chan string)
+      error
+  - file: third_party/openbao/internal/command/agent/exec/exec.go
+    kind: struct
+    name: ServerConfig
+    signature: type ServerConfig struct
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agent/exec/exec.go
+    id: r.child-exit-forwarding
+    level: MUST
+    text: After a successful child Start, restartChildProcess starts a goroutine that
+      reads proc.ExitCh() and forwards a received exit code onto childProcessExitCh
+      so the main Run loop can surface it as a ProcessExitError; the read must happen
+      after Start to avoid racing with ExitCh initialization.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agent/exec/exec.go
+    id: r.child-process-launch
+    level: MUST
+    text: restartChildProcess prepares the command with child.CommandPrep and returns
+      a wrapped error when parsing fails, then builds a child.NewInput that wires
+      os.Stdin, os.Stdout and os.Stderr, sets Timeout to 0 so the process runs forever,
+      sets Env to os.Environ() plus the newly rendered variables, leaves ReloadSignal
+      nil because reloading cannot change environment variables, uses AgentConfig.Exec.RestartStopSignal
+      as KillSignal and a 30-second KillTimeout, and sets Setpgid from the subshell
+      flag returned by CommandPrep. After child.New and Start it records the process
+      and sets childProcessState to childProcessStateRunning, returning a wrapped
+      error if Start fails.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agent/exec/exec_test.go
+    id: r.exec-test-coverage
+    level: SHOULD
+    text: exec_test.go drives the exec server by building a test-app binary with the
+      go tool because go run does not propagate signals correctly, and covers environment-variable
+      injection, restart parameters and simulated agent shutdown, so changes to Run
+      and restartChildProcess stay observable through TestExecServer_Run.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agent/exec/exec.go
+    - method:6e442a147416a14cb234be2ec46b6ebe
+    id: r.exit-error-message
+    level: MUST
+    text: ProcessExitError.Error renders the message as "process exited with %d" using
+      the stored ExitCode, so the value satisfies the error interface.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agent/exec/exec.go
+    - function:e33e1ebed1f36c917fef8deab4475932
+    - struct:021265e04d39a5bf274b9d3278a1e0aa
+    id: r.new-server-initial-state
+    level: MUST
+    text: NewServer copies cfg.Logger into the server logger, retains cfg as the server
+      config, sets childProcessState to childProcessStateNotStarted, allocates an
+      unbuffered childProcessExitCh channel, and returns a pointer to the server so
+      Run can be invoked on it.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agent/exec/exec.go
+    id: r.restart-policy-switch
+    level: MUST
+    text: 'restartChildProcess takes the child-process lock for its whole body and
+      switches on AgentConfig.Exec.RestartOnSecretChanges: "always" stops the running
+      child process after marking the state childProcessStateRestarting, "never" returns
+      nil without restarting when the process is running, and any other value returns
+      an error of the form invalid value for restart-on-secret-changes with the quoted
+      value.'
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agent/exec/exec.go
+    - method:db69fdf5be5c51d15f8e995d1175c4a5
+    id: r.run-cancel-shutdown
+    level: MUST
+    text: When ctx is done Server.Run stops the runner, and under the child-process
+      lock stops the child process if one exists and sets childProcessState to childProcessStateStopped,
+      then returns nil.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agent/exec/exec.go
+    - method:db69fdf5be5c51d15f8e995d1175c4a5
+    - struct:1c43932d16944fc9cc3f63f66ca570d9
+    id: r.run-child-exit-error
+    level: MUST
+    text: When an exit code arrives on childProcessExitCh because the child process
+      exited on its own, Server.Run returns a *ProcessExitError carrying that code.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agent/exec/exec.go
+    - method:db69fdf5be5c51d15f8e995d1175c4a5
+    id: r.run-idle-when-unconfigured
+    level: MUST
+    text: Server.Run logs that it is starting, and when AgentConfig.EnvTemplates is
+      empty or AgentConfig.Exec is nil it logs that there are no env templates or
+      exec config, blocks on ctx.Done(), then returns nil rather than starting a runner
+      or a child process.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agent/exec/exec.go
+    - method:db69fdf5be5c51d15f8e995d1175c4a5
+    id: r.run-render-and-restart
+    level: MUST
+    text: On each TemplateRenderedCh event Server.Run reads the runner render events
+      and proceeds only when the event count reaches numberOfTemplates and no event
+      has a zero LastWouldRender, so an incomplete render batch is skipped. It formats
+      one NAME=value string per template config from MapToEnvironmentVariable and
+      event contents, sorts the variables for deterministic comparison, and skips
+      restarting when they equal lastRenderedEnvVars; on a change it records the new
+      variables, and after a 2-second debounce timer fires it calls restartChildProcess,
+      sending any error to the loop over restartChildProcessErrCh so Run returns it.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agent/exec/exec.go
+    - method:db69fdf5be5c51d15f8e995d1175c4a5
+    id: r.run-runner-error
+    level: MUST
+    text: On a runner error Server.Run logs it and calls StopImmediately; it returns
+      an error wrapping the runner error when AgentConfig.TemplateConfig is set and
+      ExitOnRetryFailure is true, otherwise it rebuilds the runner from the existing
+      runner config in dry mode and restarts it in a goroutine.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agent/exec/exec.go
+    - method:db69fdf5be5c51d15f8e995d1175c4a5
+    id: r.run-runner-setup
+    level: MUST
+    text: Server.Run builds a ctmanager.ManagerConfig from the agent config, namespace,
+      log level and log writer, derives a runner config with ctmanager.NewConfig over
+      AgentConfig.EnvTemplates, and creates the consul-template runner in dry mode
+      with manager.NewRunner; a failure at either step returns an error wrapping the
+      template-server failure. It discards the runner output stream because no files
+      are rendered, and records numberOfTemplates from the runner's TemplateConfigMapping
+      so it can tell when every template has rendered.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agent/exec/exec.go
+    - method:db69fdf5be5c51d15f8e995d1175c4a5
+    id: r.run-token-rotation
+    level: MUST
+    text: When a token arrives on incomingVaultToken and differs from the latest token
+      held, Server.Run logs receipt of a new token, stops the current runner, merges
+      a ctconfig.Config carrying the new Vault token and the templating client user
+      agent into the runner config, rebuilds the runner in dry mode with the merged
+      config and starts it in a goroutine; if rebuilding fails it logs the error and
+      continues the loop without changing the latest token state it already recorded.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agent/exec/exec.go
+    - struct:aba0f8b75a0682a2aedeae8345a175fc
+    id: r.server-config-fields
+    level: MUST
+    text: ServerConfig carries the hclog.Logger and *config.Config agent configuration
+      plus the Namespace, LogLevel and LogWriter settings; LogLevel and LogWriter
+      exist so the internal consul-template runner's own logger matches the agent's
+      log level and writes to the same io.Writer, since that logger cannot be set
+      or copied externally.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agent/exec/exec.go
+    - struct:021265e04d39a5bf274b9d3278a1e0aa
+    id: r.server-state-guarded
+    level: SHOULD
+    text: Server keeps its childProcess, childProcessState, lastRenderedEnvVars, numberOfTemplates
+      and runner fields internal to the package, and guards childProcess and childProcessState
+      with childProcessLock so shutdown in Run and restart in restartChildProcess
+      cannot observe a half-updated process.
   upstream: self
