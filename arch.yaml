@@ -65217,8 +65217,100 @@ system_contexts:
   codeRefIndex:
   - file:third_party/openbao/ui/app/routes/vault/cluster-base.js cluster-base.js@third_party/openbao/ui/app/routes/vault/cluster-base.js
   - file:third_party/openbao/ui/app/routes/vault/cluster.js cluster.js@third_party/openbao/ui/app/routes/vault/cluster.js
+  - function:7dff5fec12a74a84209530d6104c89e0 getManagedNamespace@third_party/openbao/ui/app/routes/vault/cluster.js:17
   id: sc.third-party-openbao-ui-app-routes-vault
+  intent: Exists so the Vault/OpenBao UI sends a user to the correct screen (init,
+    unseal, auth, OIDC flows, or the cluster itself) before any cluster route renders,
+    and so cluster-scoped state (current namespace, current cluster, permissions,
+    polled model) is established once per visit and torn down on leave. getManagedNamespace
+    exists as the single place that turns a user-supplied namespace query parameter
+    into a fully qualified namespace path rooted at the user's root namespace.
+  interfaces:
+  - file: third_party/openbao/ui/app/routes/vault/cluster.js
+    kind: function
+    name: getManagedNamespace
+    signature: (nsParam, root)
   name: third-party-openbao-ui-app-routes-vault
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster.js
+    id: r.after-model-and-teardown
+    level: MUST
+    text: afterModel sets the current cluster on the currentCluster service and proceeds
+      to the target route; deactivate unloads all records for the modelTypes node,
+      secret and secret-engine; the error action refreshes the route when the error
+      has httpStatus 503 and first error text 'Vault is sealed', and always returns
+      true.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster-base.js
+    id: r.base-model-lookup
+    level: MUST
+    text: clusterModel returns the model for the cluster route when present, falling
+      back to store.peekRecord('cluster', 'vault'); authToken returns auth.currentToken;
+      hasKeyData returns whether the init controller holds keyData; beforeModel delegates
+      to transitionToTargetRoute.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster.js
+    id: r.cluster-before-model
+    level: MUST
+    text: 'beforeModel reads namespaceQueryParam for the current route and, when it
+      is absent while a current token name exists and Ember.testing is false, reads
+      the stored userRootNamespace for that token and transitions to the same route
+      with that namespace as a query param. It then sets the namespace on the namespace
+      service, resolves the cluster id from the vault model by cluster_name, sets
+      the cluster on the auth service and, when a current token exists, performs permissions.getPaths;
+      when no cluster matches it rejects with { httpStatus: 404, message: ''not found'',
+      path: cluster_name }.'
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster.js
+    id: r.cluster-model
+    level: MUST
+    text: model asserts local storage support through localStorage.isLocalStorageSupported()
+      and returns store.findRecord('cluster', id) for the resolved cluster id, so
+      a browser that blocks local storage fails the route instead of loading the application.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster.js
+    id: r.cluster-route-params
+    level: MUST
+    text: The cluster route declares namespaceQueryParam as a query param with refreshModel
+      true so that changing the namespace parameter re-runs the model hooks.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster-base.js
+    id: r.cluster-route-target-selection
+    level: MUST
+    text: 'The base cluster route computes a target route name from the cluster model
+      and auth state in priority order: needsInit yields the init route; presence
+      of controller key data while not already on unseal or auth yields init; sealed
+      yields unseal; unauthenticated yields the OIDC provider, namespaced OIDC provider
+      or OIDC callback route when the transition targets one of those, otherwise the
+      auth route; a non-initializing cluster on the init route or an unsealed cluster
+      on the unseal route yields the cluster route; an authenticated user on the auth
+      route yields the redirect route; otherwise no target.'
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster.js
+    - function:7dff5fec12a74a84209530d6104c89e0
+    id: r.namespace-normalization
+    level: MUST
+    text: getManagedNamespace(nsParam, root) returns root unchanged when nsParam is
+      falsy or when nsParam with every '/' removed equals root; returns nsParam unchanged
+      when nsParam starts with `${root}/`; otherwise returns `${root}/${nsParam}`.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster.js
+    id: r.poll-loop
+    level: MUST
+    text: A poll task started from setupController loops indefinitely, returns immediately
+      when Ember.testing is true, otherwise waits 10000 ms between iterations and
+      reloads controller.model followed by transitionToTargetRoute, swallowing reload
+      errors so polling continues; it is configured cancelOn('deactivate') and keepLatest().
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster-base.js
+    id: r.transition-guard
+    level: MUST
+    text: transitionToTargetRoute only transitions when a target route exists, differs
+      from the current routeName, differs from transition.targetName and differs from
+      router.currentRouteName; it resolves with RSVP.resolve() otherwise, and it appends
+      redirect_to equal to router.currentURL only for the auth target that is not
+      cluster.index and whose current URL does not contain an excluded redirect URL.
   upstream: self
 - code:
   - third_party/openbao/ui/app/routes/vault/cluster/access.js

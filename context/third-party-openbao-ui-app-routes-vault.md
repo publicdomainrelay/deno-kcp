@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+Exists so the Vault/OpenBao UI sends a user to the correct screen (init, unseal, auth, OIDC flows, or the cluster itself) before any cluster route renders, and so cluster-scoped state (current namespace, current cluster, permissions, polled model) is established once per visit and torn down on leave. getManagedNamespace exists as the single place that turns a user-supplied namespace query parameter into a fully qualified namespace path rooted at the user's root namespace.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
