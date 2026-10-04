@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-The context exists to pin down the behaviour of the keymgmt provider/key administration surface of the vendored OpenBao UI so changes to it can be checked against a written contract. It matters because these components carry the non-obvious domain rules: which key types each KMS provider accepts, which operations each provider/key-type pairing exposes, when the distribute form must be blocked, and how store adapters (distribute, removeFromProvider, rotateKey) and route transitions are expected to sequence. It is a third-party subtree, so the spec describes the code as observed rather than prescribing a preferred design.
+The context exists to pin down the behaviour of the keymgmt provider and key administration surface of the vendored OpenBao UI so changes to it can be checked against a written contract. It matters because these components carry the non-obvious domain rules: which key types each KMS provider accepts, which operations each provider and key-type pairing exposes, when the distribute form must be blocked, and how the store adapters (distribute, removeFromProvider, rotateKey) and route transitions are expected to sequence. It is a third-party subtree, so the spec describes the code as observed rather than prescribing a preferred design.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
