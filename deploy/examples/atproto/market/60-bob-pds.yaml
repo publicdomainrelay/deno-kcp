@@ -13,9 +13,9 @@ spec:
   env:
     SERVICE_ENTRY: "/home/johnandersen777/src/publicdomainrelay-kcp/hono-pds/main.ts"
     SERVICE_CWD: "/home/johnandersen777/src/publicdomainrelay-kcp/hono-pds"
-    SERVICE_ARGS: '["--port","2583","--hostname","127.0.0.1"]'
+    SERVICE_ARGS: '["--port","2585","--hostname","127.0.0.1"]'
     SERVICE_DENO_FLAGS: '["--unstable-kv"]'
-    SERVICE_ENV: '{"PORT":"2583","HOSTNAME":"127.0.0.1","PDS_PUBLIC_HOSTNAME":"pds.default.alice.svc.kcp.local","PDS_PLC_DIRECTORY_URL":"https://plc.default.global.svc.kcp.local","PDS_CRAWLERS":"https://127.0.0.1:2584","PDS_SUBSCRIBE_REPOS_FORMAT":"json","PDS_PRIVATE_KEY_HEX":"__PDS_PRIVATE_KEY_HEX__"}'
+    SERVICE_ENV: '{"PORT":"2585","HOSTNAME":"127.0.0.1","PDS_PUBLIC_HOSTNAME":"pds.default.bob.svc.kcp.local","PDS_PLC_DIRECTORY_URL":"https://plc.default.global.svc.kcp.local","PDS_CRAWLERS":"https://127.0.0.1:2584","PDS_SUBSCRIBE_REPOS_FORMAT":"json","PDS_PRIVATE_KEY_HEX":"__BOB_PDS_PRIVATE_KEY_HEX__"}'
     SERVICE_TLS: "true"
   script: |
     const entry = Deno.env.get("SERVICE_ENTRY") ?? "";
@@ -56,7 +56,7 @@ spec:
       args.push("--tls-cert-file", certPath, "--tls-key-file", keyPath);
     }
 
-    // The PDS resolves the PLC directory and the relay with the same shim this
+    // Bob's PDS resolves the PLC directory and the relay with the same shim this
     // pod was probed with. A workload's own argv cannot carry --preload, so it
     // is added here, before the entry module.
     const shim = Deno.env.get("KCP_SHIM") ?? "";
@@ -109,7 +109,7 @@ spec:
   readinessProbe:
     command:
       - kcpdns
-      - pds.default.alice.svc.kcp.local
+      - pds.default.bob.svc.kcp.local
       - /xrpc/_health
     periodSeconds: 5
     failureThreshold: 6

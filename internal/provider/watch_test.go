@@ -1,10 +1,14 @@
 package provider
 
 import (
+	"context"
+	"io"
+	"log/slog"
+	"sync/atomic"
 	"testing"
+	"time"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
 
 	"github.com/johnandersen777/deno-kcp/api/v1alpha1"
@@ -35,6 +39,18 @@ func policyRunObject(name, lc, phase string, labels map[string]string) *unstruct
 	return runObject("PolicyWorkflowRun", name, lc, phase, labels)
 }
 
+func podObject(name, ns, lc string) *unstructured.Unstructured {
+	return &unstructured.Unstructured{Object: map[string]any{
+		"apiVersion": "deno.computer/v1alpha1",
+		"kind":       "DenoPod",
+		"metadata": map[string]any{
+			"name":        name,
+			"namespace":   ns,
+			"annotations": map[string]any{kcp.ClusterAnnotation: lc},
+		},
+	}}
+}
+
 func triggerObject(name, lc, pod string) *unstructured.Unstructured {
 	return triggerObjectNS(name, lc, "", pod)
 }
@@ -57,13 +73,9 @@ func triggerObjectNS(name, lc, ns, pod string) *unstructured.Unstructured {
 
 func triggerReader(t *testing.T, objects ...*unstructured.Unstructured) *cacheReader {
 	t.Helper()
-	indexer := cache.NewIndexer(cache.MetaNamespaceKeyFunc, watchIndexers)
 	reader := newCacheReader()
-	reader.add(workTrigger, indexer)
 	for _, obj := range objects {
-		if err := indexer.Add(obj); err != nil {
-			t.Fatal(err)
-		}
+		reader.upsert(workTrigger, obj)
 	}
 	return reader
 }
@@ -201,5 +213,128 @@ func TestATriggerWithoutAPodIsNotWoken(t *testing.T) {
 		if key.kind == workTrigger {
 			t.Fatalf("a trigger with no pod reference was woken: %v", key)
 		}
+	}
+}
+
+// ponytail: one wildcard informer serves every workspace, so root:alice and
+// root:bob each hold a DenoPod named pds in namespace default. A cache keyed by
+// namespace and name alone keeps one entry and evicts the other; this test
+// fails then.
+func TestTheWatchCacheKeepsSameNamedPodsFromDifferentWorkspaces(t *testing.T) {
+	reader := newCacheReader()
+	alice := podObject("pds", "default", "root:alice")
+	bob := podObject("pds", "default", "root:bob")
+	reader.upsert(workPod, alice)
+	reader.upsert(workPod, bob)
+
+	// A wildcard informer re-list adds every workspace's object again; neither
+	// may displace the other.
+	reader.upsert(workPod, alice)
+	reader.upsert(workPod, bob)
+
+	pods := reader.allPods()
+	if len(pods) != 2 {
+		t.Fatalf("allPods returned %d pods, want both workspaces' pds", len(pods))
+	}
+	seen := map[string]bool{}
+	for _, p := range pods {
+		seen[p.GetAnnotations()[kcp.ClusterAnnotation]] = true
+	}
+	if !seen["root:alice"] || !seen["root:bob"] {
+		t.Fatalf("allPods clusters = %v, want root:alice and root:bob", seen)
+	}
+
+	gotAlice, err := reader.ReadPod(context.Background(), Ref{LogicalCluster: "root:alice", Namespace: "default", Name: "pds"})
+	if err != nil {
+		t.Fatalf("read root:alice pds: %v", err)
+	}
+	gotBob, err := reader.ReadPod(context.Background(), Ref{LogicalCluster: "root:bob", Namespace: "default", Name: "pds"})
+	if err != nil {
+		t.Fatalf("read root:bob pds: %v", err)
+	}
+	if lc := gotAlice.GetAnnotations()[kcp.ClusterAnnotation]; lc != "root:alice" {
+		t.Fatalf("ReadPod(root:alice) returned the pod of %q", lc)
+	}
+	if lc := gotBob.GetAnnotations()[kcp.ClusterAnnotation]; lc != "root:bob" {
+		t.Fatalf("ReadPod(root:bob) returned the pod of %q", lc)
+	}
+}
+
+func quietProvider() *Provider {
+	return &Provider{opts: Options{Log: slog.New(slog.NewTextHandler(io.Discard, nil))}}
+}
+
+// ponytail: an informer whose initial list never ends leaves its cache unsynced
+// forever; a provider that waits on the first attempt without a deadline sits
+// there reconciling nothing while looking healthy. This test fails -- by timing
+// out -- against that provider.
+func TestTheCacheSyncWaitRetriesWhenNoCacheSyncs(t *testing.T) {
+	p := quietProvider()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	var attempts atomic.Int32
+	start := func(stop <-chan struct{}) ([]kindInformer, error) {
+		if attempts.Add(1) == 2 {
+			cancel()
+		}
+		return []kindInformer{{kind: workPod, synced: func() bool { return false }}}, nil
+	}
+
+	begin := time.Now()
+	done := make(chan error, 1)
+	go func() {
+		_, _, err := p.syncWatchCaches(ctx, 40*time.Millisecond, 5*time.Millisecond, start)
+		done <- err
+	}()
+	select {
+	case err := <-done:
+		if err != nil {
+			t.Fatalf("syncWatchCaches: %v", err)
+		}
+	case <-time.After(2 * time.Second):
+		// A provider that waits on its first attempt without a deadline blocks
+		// here forever; this is the failure this test exists to catch.
+		t.Fatal("the cache-sync wait never retried a stalled informer")
+	}
+	if got := attempts.Load(); got < 2 {
+		t.Fatalf("a stalled cache sync started the informers %d time(s), want a retry", got)
+	}
+	if elapsed := time.Since(begin); elapsed > time.Second {
+		t.Fatalf("the bounded wait blocked for %s, want a retry inside a second", elapsed)
+	}
+}
+
+func TestTheCacheSyncWaitReturnsWithoutAnotherAttemptOnceSynced(t *testing.T) {
+	p := quietProvider()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	attempts := 0
+	start := func(stop <-chan struct{}) ([]kindInformer, error) {
+		attempts++
+		return []kindInformer{
+			{kind: workPod, synced: func() bool { return true }},
+			{kind: workPolicyRun, synced: func() bool { return true }},
+		}, nil
+	}
+
+	begin := time.Now()
+	informers, stopWatch, err := p.syncWatchCaches(ctx, 30*time.Second, time.Second, start)
+	if err != nil {
+		t.Fatalf("syncWatchCaches: %v", err)
+	}
+	if stopWatch == nil {
+		t.Fatal("a synced attempt returned no way to stop its informers")
+	}
+	defer stopWatch()
+	if len(informers) != 2 {
+		t.Fatalf("synced attempt returned %d informers, want both kinds", len(informers))
+	}
+	if attempts != 1 {
+		t.Fatalf("a synced cache sync started the informers %d time(s), want one attempt", attempts)
+	}
+	if elapsed := time.Since(begin); elapsed > time.Second {
+		t.Fatalf("a synced cache sync took %s to return, want promptly", elapsed)
 	}
 }

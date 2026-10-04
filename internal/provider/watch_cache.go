@@ -17,23 +17,34 @@ import (
 type cacheReader struct {
 	mu sync.RWMutex
 
-	indexers map[workKind][]cache.Indexer
+	stores map[workKind]cache.Indexer
 }
 
 func newCacheReader() *cacheReader {
-	return &cacheReader{indexers: map[workKind][]cache.Indexer{}}
+	return &cacheReader{stores: map[workKind]cache.Indexer{}}
 }
 
-func (r *cacheReader) add(kind workKind, indexer cache.Indexer) {
+// store returns the indexer for a kind, creating it on first use. Every store
+// is keyed by watchKeyFunc, so an object's identity includes its logical
+// cluster: one wildcard informer serves every workspace, and two workspaces can
+// hold an object with the same namespace and name.
+func (r *cacheReader) store(kind workKind) cache.Indexer {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	r.indexers[kind] = append(r.indexers[kind], indexer)
+	idx, ok := r.stores[kind]
+	if !ok {
+		idx = cache.NewIndexer(watchKeyFunc, watchIndexers)
+		r.stores[kind] = idx
+	}
+	return idx
 }
 
-func (r *cacheReader) kindIndexers(kind workKind) []cache.Indexer {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-	return append([]cache.Indexer(nil), r.indexers[kind]...)
+func (r *cacheReader) upsert(kind workKind, obj any) {
+	_ = r.store(kind).Update(obj)
+}
+
+func (r *cacheReader) remove(kind workKind, obj any) {
+	_ = r.store(kind).Delete(obj)
 }
 
 // ponytail: List() rather than an index lookup, because the caller wants every
@@ -41,41 +52,34 @@ func (r *cacheReader) kindIndexers(kind workKind) []cache.Indexer {
 // holds them all.
 func (r *cacheReader) allPods() []*unstructured.Unstructured {
 	var out []*unstructured.Unstructured
-	for _, indexer := range r.kindIndexers(workPod) {
-		for _, obj := range indexer.List() {
-			if u, ok := obj.(*unstructured.Unstructured); ok {
-				out = append(out, u)
-			}
+	for _, obj := range r.store(workPod).List() {
+		if u, ok := obj.(*unstructured.Unstructured); ok {
+			out = append(out, u)
 		}
 	}
 	return out
 }
 
 func (r *cacheReader) get(kind workKind, ref Ref) *unstructured.Unstructured {
-	key := ref.Key()
-	for _, indexer := range r.kindIndexers(kind) {
-		objs, err := indexer.ByIndex(indexByClusterName, key)
-		if err != nil || len(objs) == 0 {
-			continue
-		}
-		if u, ok := objs[0].(*unstructured.Unstructured); ok {
-			return u
-		}
+	objs, err := r.store(kind).ByIndex(indexByClusterName, ref.Key())
+	if err != nil || len(objs) == 0 {
+		return nil
+	}
+	if u, ok := objs[0].(*unstructured.Unstructured); ok {
+		return u
 	}
 	return nil
 }
 
 func (r *cacheReader) list(kind workKind, logicalCluster string) []*unstructured.Unstructured {
+	objs, err := r.store(kind).ByIndex(indexByCluster, logicalCluster)
+	if err != nil {
+		return nil
+	}
 	var out []*unstructured.Unstructured
-	for _, indexer := range r.kindIndexers(kind) {
-		objs, err := indexer.ByIndex(indexByCluster, logicalCluster)
-		if err != nil {
-			continue
-		}
-		for _, obj := range objs {
-			if u, ok := obj.(*unstructured.Unstructured); ok {
-				out = append(out, u)
-			}
+	for _, obj := range objs {
+		if u, ok := obj.(*unstructured.Unstructured); ok {
+			out = append(out, u)
 		}
 	}
 	return out
@@ -126,16 +130,14 @@ func (r *cacheReader) ListRuns(_ context.Context, logicalCluster string) ([]v1al
 
 func (r *cacheReader) ListRunsForJob(_ context.Context, logicalCluster, namespace, jobName string) ([]v1alpha1.DenoRun, error) {
 	key := ref.Key(logicalCluster, namespace, jobName)
+	objs, err := r.store(workRun).ByIndex(indexByClusterJob, key)
+	if err != nil {
+		return nil, nil
+	}
 	var out []*unstructured.Unstructured
-	for _, indexer := range r.kindIndexers(workRun) {
-		objs, err := indexer.ByIndex(indexByClusterJob, key)
-		if err != nil {
-			continue
-		}
-		for _, obj := range objs {
-			if u, ok := obj.(*unstructured.Unstructured); ok {
-				out = append(out, u)
-			}
+	for _, obj := range objs {
+		if u, ok := obj.(*unstructured.Unstructured); ok {
+			out = append(out, u)
 		}
 	}
 	return cachedTypedList[v1alpha1.DenoRun](out)
@@ -171,35 +173,31 @@ func (r *cacheReader) ListWorkflowRuns(_ context.Context, logicalCluster string)
 
 func (r *cacheReader) triggerNamesForPod(logicalCluster, namespace, podName string) []string {
 	key := ref.Key(logicalCluster, namespace, podName)
+	objs, err := r.store(workTrigger).ByIndex(indexByClusterTriggerPod, key)
+	if err != nil {
+		return nil
+	}
 	var out []string
-	for _, indexer := range r.kindIndexers(workTrigger) {
-		objs, err := indexer.ByIndex(indexByClusterTriggerPod, key)
-		if err != nil {
+	for _, obj := range objs {
+		u, ok := obj.(*unstructured.Unstructured)
+		if !ok {
 			continue
 		}
-		for _, obj := range objs {
-			u, ok := obj.(*unstructured.Unstructured)
-			if !ok {
-				continue
-			}
-			out = append(out, u.GetName())
-		}
+		out = append(out, u.GetName())
 	}
 	return out
 }
 
 func (r *cacheReader) ListWorkflowRunsForPod(_ context.Context, logicalCluster, namespace, podName string) ([]v1alpha1.PolicyWorkflowRun, error) {
 	key := ref.Key(logicalCluster, namespace, podName)
+	objs, err := r.store(workPolicyRun).ByIndex(indexByClusterPod, key)
+	if err != nil {
+		return nil, nil
+	}
 	var out []*unstructured.Unstructured
-	for _, indexer := range r.kindIndexers(workPolicyRun) {
-		objs, err := indexer.ByIndex(indexByClusterPod, key)
-		if err != nil {
-			continue
-		}
-		for _, obj := range objs {
-			if u, ok := obj.(*unstructured.Unstructured); ok {
-				out = append(out, u)
-			}
+	for _, obj := range objs {
+		if u, ok := obj.(*unstructured.Unstructured); ok {
+			out = append(out, u)
 		}
 	}
 	return cachedTypedList[v1alpha1.PolicyWorkflowRun](out)

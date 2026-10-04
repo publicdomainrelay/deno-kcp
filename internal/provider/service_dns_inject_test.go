@@ -11,7 +11,6 @@ import (
 	"testing"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/client-go/tools/cache"
 
 	"github.com/johnandersen777/deno-kcp/api/v1alpha1"
 	"github.com/publicdomainrelay/kcp-libs/common/kcp"
@@ -73,13 +72,9 @@ func withPaths(p *Provider, _ ...string) *Provider {
 
 func podTableReader(t *testing.T, pods ...*unstructured.Unstructured) *cacheReader {
 	t.Helper()
-	indexer := cache.NewIndexer(cache.MetaNamespaceKeyFunc, watchIndexers)
 	reader := newCacheReader()
-	reader.add(workPod, indexer)
 	for _, pod := range pods {
-		if err := indexer.Add(pod); err != nil {
-			t.Fatal(err)
-		}
+		reader.upsert(workPod, pod)
 	}
 	return reader
 }

@@ -1302,7 +1302,7 @@ system_contexts:
                       code: ["internal/provider/watch.go:discoverWorkspaces", "internal/provider/watch.go:watchFactory", deploy/denoruntime-apiexport.yaml]
                 - id: tb.tenant-workspace
                   kind: logical_cluster
-                  workspaces: [root:runtime, root:global, root:relay, root:alice, root:demo]
+                  workspaces: [root:runtime, root:global, root:relay, root:alice, root:bob, root:demo]
                   principals:
                     cred.admin-kubeconfig: [orch.demo-deno-runtime, orch.demo, orch.apply-market, orch.test-integration, orch.test-live, sc.deno-kcp-provider]
                     cred.sa-token: [sc.demo.native-fire.script, sc.example.deno-run.script, sc.example.deno-job.script, sc.example.deno-pod.script]
@@ -2632,13 +2632,13 @@ system_contexts:
   - id: sc.example.atproto-market
     upstream: sc.deno-kcp
     overlay:
-      - {id: ov.market-workspaces, target: sc.kcp-local, manifest: deploy/examples/atproto/market/00-workspaces.yaml, data: [{path: root:global, type: root:denoruntime}, {path: root:relay, type: root:denoruntime}, {path: root:alice, type: root:denoruntime}]}
+      - {id: ov.market-workspaces, target: sc.kcp-local, manifest: deploy/examples/atproto/market/00-workspaces.yaml, data: [{path: root:global, type: root:denoruntime}, {path: root:relay, type: root:denoruntime}, {path: root:alice, type: root:denoruntime}, {path: root:bob, type: root:denoruntime}]}
       - id: ov.market-rbac
         target: sc.kcp-local
         manifest: deploy/examples/atproto/market/10-rbac.yaml
         purpose: kcpdns_peer_discovery
         data:
-          workspaces: [root:global, root:relay, root:alice]
+          workspaces: [root:global, root:relay, root:alice, root:bob]
           serviceaccount: default/deno-runner
           clusterrole: {name: deno-runner-read-pods, rules: [{apiGroups: [deno.computer], resources: [denopods], verbs: [get, list]}]}
           clusterrolebinding: {name: deno-runner-read-pods, subject: default/deno-runner}

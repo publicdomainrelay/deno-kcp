@@ -99,35 +99,7 @@ func (p *Provider) RunWatch(ctx context.Context) error {
 	p.reader = reader
 	p.watch = &watchState{queue: queue}
 
-	stop := ctx.Done()
-	var factories []dynamicinformer.DynamicSharedInformerFactory
-	for _, url := range endpoints[exportDenoRuntime] {
-		factory, err := p.watchFactory(url)
-		if err != nil {
-			return err
-		}
-		for _, res := range denoRuntimeResources {
-			p.registerInformer(factory, res, reader, queue)
-		}
-		factory.Start(stop)
-		factories = append(factories, factory)
-	}
-	for _, url := range endpoints[exportPolicyWorkflowRun] {
-		factory, err := p.watchFactory(url)
-		if err != nil {
-			return err
-		}
-		p.registerInformer(factory, watchResource{kind: workPolicyRun, gvr: gvrPolicyWorkflowRuns}, reader, queue)
-		factory.Start(stop)
-		factories = append(factories, factory)
-	}
 	// ponytail: workers start before caches sync; handlers enqueue only after the object is in the store, so a reconcile never reads an unseen object.
-	go func() {
-		for _, factory := range factories {
-			factory.WaitForCacheSync(stop)
-		}
-	}()
-
 	var wg sync.WaitGroup
 	for i := 0; i < p.opts.WatchWorkers; i++ {
 		wg.Add(1)
@@ -136,10 +108,149 @@ func (p *Provider) RunWatch(ctx context.Context) error {
 			p.runWatchWorker(ctx, queue)
 		}()
 	}
+	defer func() {
+		queue.ShutDown()
+		wg.Wait()
+	}()
+
+	// start builds one attempt's informers over the discovered endpoints,
+	// registers the handlers and starts the factories. A cache-sync wait that
+	// times out abandons the attempt and the next one builds fresh informers
+	// from fresh endpoints, so each attempt gets its own stop channel.
+	start := func(stop <-chan struct{}) ([]kindInformer, error) {
+		var informers []kindInformer
+		add := func(factory dynamicinformer.DynamicSharedInformerFactory, res watchResource) {
+			informers = append(informers, kindInformer{
+				kind:   res.kind,
+				synced: p.registerInformer(factory, res, reader, queue).HasSynced,
+			})
+		}
+		for _, url := range endpoints[exportDenoRuntime] {
+			factory, err := p.watchFactory(url)
+			if err != nil {
+				return nil, err
+			}
+			for _, res := range denoRuntimeResources {
+				add(factory, res)
+			}
+			factory.Start(stop)
+		}
+		for _, url := range endpoints[exportPolicyWorkflowRun] {
+			factory, err := p.watchFactory(url)
+			if err != nil {
+				return nil, err
+			}
+			add(factory, watchResource{kind: workPolicyRun, gvr: gvrPolicyWorkflowRuns})
+			factory.Start(stop)
+		}
+		return informers, nil
+	}
+
+	_, stopWatch, err := p.syncWatchCaches(ctx, cacheSyncDeadline, cacheSyncRetry, start)
+	if err != nil {
+		return err
+	}
+	if stopWatch != nil {
+		defer stopWatch()
+	}
 	<-ctx.Done()
-	queue.ShutDown()
-	wg.Wait()
 	return nil
+}
+
+// cacheSyncDeadline bounds one attempt at syncing the informer caches. An
+// APIExport virtual workspace is a list that can fail to end, and an initial
+// list that never completes leaves the kind's cache unsynced forever. Waited on
+// without a bound the provider then looks healthy -- workers running, queue
+// empty -- while it holds no cache and gives no workload a status. The deadline
+// turns that state into a retry. A real list of these seven kinds completes in
+// well under a second, so thirty is slack, not a budget.
+const cacheSyncDeadline = 30 * time.Second
+
+// cacheSyncRetry is the pause between a failed attempt and the next one; long
+// enough that a workspace which never lists is not re-opened in a hot loop,
+// short enough that a workspace that comes up is picked up promptly.
+const cacheSyncRetry = 5 * time.Second
+
+// cacheSyncPoll is how often the bounded wait re-checks the kinds that have not
+// reported their cache synced yet.
+const cacheSyncPoll = 100 * time.Millisecond
+
+// kindInformer is one kind's informer reduced to the question the sync wait
+// asks of it. Keeping the seam this narrow lets an offline test drive the wait
+// without a cluster.
+type kindInformer struct {
+	kind   workKind
+	synced func() bool
+}
+
+// syncWatchCaches starts informers through start and waits, bounded by
+// deadline, for every kind's cache to sync. When the deadline passes without
+// every cache synced it stops that attempt's informers, logs the retry at info
+// level, waits retry and starts the next attempt, repeating while ctx lives. It
+// returns the synced informers and a function that stops them, or (nil, nil,
+// nil) when ctx ended first. Logging each kind's sync and each retry makes a
+// stalled cache visible from the log alone rather than only as a provider that
+// reconciles nothing.
+func (p *Provider) syncWatchCaches(ctx context.Context, deadline, retry time.Duration, start func(stop <-chan struct{}) ([]kindInformer, error)) ([]kindInformer, func(), error) {
+	for attempt := 1; ; attempt++ {
+		stop := make(chan struct{})
+		informers, err := start(stop)
+		if err != nil {
+			close(stop)
+			return nil, nil, err
+		}
+		if p.awaitCacheSync(ctx, stop, informers, deadline) {
+			return informers, func() { close(stop) }, nil
+		}
+		close(stop)
+		if ctx.Err() != nil {
+			return nil, nil, nil
+		}
+		p.opts.Log.Info("watch: informer caches did not sync before the deadline, restarting informers",
+			"attempt", attempt, "deadline", deadline)
+		select {
+		case <-ctx.Done():
+			return nil, nil, nil
+		case <-time.After(retry):
+		}
+	}
+}
+
+// awaitCacheSync waits until every kind's informer reports its cache synced,
+// logging at info level each kind the moment it does. It returns false when the
+// context ends, stop closes or the deadline passes first, leaving the caller to
+// restart the informers rather than wait on them forever.
+func (p *Provider) awaitCacheSync(ctx context.Context, stop <-chan struct{}, informers []kindInformer, deadline time.Duration) bool {
+	waiting := make([]bool, len(informers))
+	for i := range waiting {
+		waiting[i] = true
+	}
+	left := len(waiting)
+	timer := time.NewTimer(deadline)
+	defer timer.Stop()
+	ticker := time.NewTicker(cacheSyncPoll)
+	defer ticker.Stop()
+	for {
+		for i := range informers {
+			if waiting[i] && informers[i].synced() {
+				waiting[i] = false
+				left--
+				p.opts.Log.Info("watch: informer cache synced", "kind", string(informers[i].kind))
+			}
+		}
+		if left == 0 {
+			return true
+		}
+		select {
+		case <-ctx.Done():
+			return false
+		case <-stop:
+			return false
+		case <-timer.C:
+			return false
+		case <-ticker.C:
+		}
+	}
 }
 
 var gvrAPIExportEndpointSlices = schema.GroupVersionResource{Group: "apis.kcp.io", Version: "v1alpha1", Resource: "apiexportendpointslices"}
@@ -285,6 +396,26 @@ func (p *Provider) watchFactory(url string) (dynamicinformer.DynamicSharedInform
 	return dynamicinformer.NewFilteredDynamicSharedInformerFactory(client, 0, metav1.NamespaceAll, nil), nil
 }
 
+// watchKeyFunc keys a cached object by its logical cluster as well as its
+// namespace and name. One wildcard informer serves every workspace at once, so
+// root:alice and root:bob can each hold a DenoPod named pds in namespace
+// default; the client-go default key would collapse the two into one store
+// entry and the second would evict the first.
+func watchKeyFunc(obj any) (string, error) {
+	if tombstone, ok := obj.(cache.DeletedFinalStateUnknown); ok {
+		obj = tombstone.Obj
+	}
+	u, ok := obj.(*unstructured.Unstructured)
+	if !ok {
+		return cache.MetaNamespaceKeyFunc(obj)
+	}
+	lc := u.GetAnnotations()[kcp.ClusterAnnotation]
+	if lc == "" {
+		return cache.MetaNamespaceKeyFunc(obj)
+	}
+	return ref.Key(lc, u.GetNamespace(), u.GetName()), nil
+}
+
 var watchIndexers = cache.Indexers{
 	indexByCluster: func(obj any) ([]string, error) {
 		u, ok := obj.(*unstructured.Unstructured)
@@ -346,21 +477,28 @@ var watchIndexers = cache.Indexers{
 	},
 }
 
-func (p *Provider) registerInformer(factory dynamicinformer.DynamicSharedInformerFactory, res watchResource, reader *cacheReader, queue workqueue.TypedRateLimitingInterface[workKey]) {
+func (p *Provider) registerInformer(factory dynamicinformer.DynamicSharedInformerFactory, res watchResource, reader *cacheReader, queue workqueue.TypedRateLimitingInterface[workKey]) cache.SharedIndexInformer {
 	informer := factory.ForResource(res.gvr).Informer()
-	indexer := informer.GetIndexer()
-	_ = indexer.AddIndexers(watchIndexers)
-	reader.add(res.kind, indexer)
+	// ponytail: the cache the reader serves is the reader's own cluster-keyed
+	// store, not the informer's indexer. The informer keys its store by
+	// namespace and name, which cannot hold two workspaces' objects of the same
+	// name; the reader feeds its store from the events instead.
 	_, _ = informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj any) {
+			reader.upsert(res.kind, obj)
 			p.recordEvent()
 			enqueueWatchObject(res.kind, obj, reader, queue)
 		},
 		UpdateFunc: func(oldObj, obj any) {
+			reader.upsert(res.kind, obj)
 			p.recordEvent()
 			enqueueWatchUpdate(res.kind, oldObj, obj, reader, queue)
 		},
+		DeleteFunc: func(obj any) {
+			reader.remove(res.kind, obj)
+		},
 	})
+	return informer
 }
 
 func enqueueWatchObject(kind workKind, obj any, reader *cacheReader, queue workqueue.TypedRateLimitingInterface[workKey]) {
