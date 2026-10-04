@@ -7753,7 +7753,72 @@ system_contexts:
 - code:
   - third_party/openbao/internal/builtin/database/cassandra/test-fixtures/with_tls/cassandra.yaml
   id: sc.third-party-openbao-internal-builtin-database-cassandra-test-fixtures-with-tls
+  intent: The fixture exists so the Cassandra database backend tests can run against
+    a Cassandra instance whose CQL native transport speaks TLS. The test helpers start
+    Cassandra with this file mounted in place of the default cassandra.yaml, so the
+    client-side connection producer exercises its TLS configuration path (CA certificate,
+    client certificate and key, or insecure skip-verify) against a server that presents
+    a real PEM certificate from /etc/cassandra/server.pem and rejects plaintext clients
+    because optional is false. Keeping the fixture as a checked-in YAML rather than
+    generated content makes the TLS assumptions explicit and reproducible for anyone
+    running the acceptance tests.
   name: third-party-openbao-internal-builtin-database-cassandra-test-fixtures-with-tls
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/database/cassandra/test-fixtures/with_tls/cassandra.yaml
+    id: r.client-encryption-enabled
+    level: MUST
+    text: 'client_encryption_options must keep enabled: true so the native transport
+      port requires TLS, which is the property the with_tls fixture exists to provide.'
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/database/cassandra/test-fixtures/with_tls/cassandra.yaml
+    id: r.client-encryption-not-optional
+    level: MUST
+    text: 'client_encryption_options must keep optional: false so plaintext client
+      connections on native_transport_port are refused and tests cannot silently pass
+      without TLS.'
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/database/cassandra/test-fixtures/with_tls/cassandra.yaml
+    id: r.fixture-is-cassandra-storage-config
+    level: MUST
+    text: The file must remain a valid Cassandra storage configuration YAML, parseable
+      by Cassandra as cassandra.yaml, with cluster_name 'Test Cluster' and a single-node
+      seed provider listing seeds '127.0.0.1:7000'.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/database/cassandra/test-fixtures/with_tls/cassandra.yaml
+    id: r.internode-encryption-off
+    level: MUST
+    text: 'server_encryption_options must keep internode_encryption: none, require_client_auth:
+      false and legacy_ssl_storage_port_enabled: false, so only the client path is
+      encrypted and internode encryption stays out of scope for this fixture.'
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/database/cassandra/test-fixtures/with_tls/cassandra.yaml
+    id: r.native-transport-reachable
+    level: MUST
+    text: start_native_transport must stay true with native_transport_port 9042 bound
+      at rpc_address 'localhost', so the test client can reach the TLS-enabled CQL
+      endpoint on the default port.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/database/cassandra/test-fixtures/with_tls/cassandra.yaml
+    id: r.no-client-cert-required
+    level: MUST
+    text: 'client_encryption_options must keep require_client_auth: false and leave
+      truststore unset, so the client needs no client certificate and the fixture
+      tests one-way TLS rather than mTLS.'
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/database/cassandra/test-fixtures/with_tls/cassandra.yaml
+    id: r.password-auth-for-credential-tests
+    level: SHOULD
+    text: authenticator must stay PasswordAuthenticator with role_manager CassandraRoleManager
+      and authorizer CassandraAuthorizer, so role creation and credential-based logins
+      exercised by the database backend tests remain available.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/database/cassandra/test-fixtures/with_tls/cassandra.yaml
+    id: r.pem-based-ssl-context
+    level: MUST
+    text: ssl_context_factory must name org.apache.cassandra.security.PEMBasedSslContextFactory
+      and keystore must point at a PEM file (/etc/cassandra/server.pem), so the server
+      certificate is loaded from PEM key material rather than a JKS keystore.
   upstream: self
 - code:
   - third_party/openbao/internal/builtin/database/influxdb/connection_producer.go
