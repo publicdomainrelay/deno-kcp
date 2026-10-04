@@ -260,6 +260,11 @@ func New(opts Options) (*Provider, error) {
 			opts.BundledActionsDir = abs
 		}
 	}
+	// The DNS layer and the pod reconciler both mint for a pod's own service
+	// account, so one workload mints one token rather than two.
+	if opts.Minter != nil {
+		opts.Minter = newTokenMemo(opts.Minter, opts.TokenTTL)
+	}
 	p := &Provider{opts: opts, probes: probe.NewTracker(), reader: opts.Reader, jobWriteAt: map[string]time.Time{}, jobAlloc: joballoc.New(2 * time.Minute), runRefs: runref.New(runRefTTL), paths: kcpstore.NewPathCache(storeOf(opts.Registry))}
 	p.admissions = newRunAdmitter(p)
 	p.initMetrics()

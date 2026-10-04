@@ -2,7 +2,11 @@ package provider
 
 import (
 	"context"
+	"io"
+	"log/slog"
+	"sync/atomic"
 	"testing"
+	"time"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/client-go/util/workqueue"
@@ -253,5 +257,84 @@ func TestTheWatchCacheKeepsSameNamedPodsFromDifferentWorkspaces(t *testing.T) {
 	}
 	if lc := gotBob.GetAnnotations()[kcp.ClusterAnnotation]; lc != "root:bob" {
 		t.Fatalf("ReadPod(root:bob) returned the pod of %q", lc)
+	}
+}
+
+func quietProvider() *Provider {
+	return &Provider{opts: Options{Log: slog.New(slog.NewTextHandler(io.Discard, nil))}}
+}
+
+// ponytail: an informer whose initial list never ends leaves its cache unsynced
+// forever; a provider that waits on the first attempt without a deadline sits
+// there reconciling nothing while looking healthy. This test fails -- by timing
+// out -- against that provider.
+func TestTheCacheSyncWaitRetriesWhenNoCacheSyncs(t *testing.T) {
+	p := quietProvider()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	var attempts atomic.Int32
+	start := func(stop <-chan struct{}) ([]kindInformer, error) {
+		if attempts.Add(1) == 2 {
+			cancel()
+		}
+		return []kindInformer{{kind: workPod, synced: func() bool { return false }}}, nil
+	}
+
+	begin := time.Now()
+	done := make(chan error, 1)
+	go func() {
+		_, _, err := p.syncWatchCaches(ctx, 40*time.Millisecond, 5*time.Millisecond, start)
+		done <- err
+	}()
+	select {
+	case err := <-done:
+		if err != nil {
+			t.Fatalf("syncWatchCaches: %v", err)
+		}
+	case <-time.After(2 * time.Second):
+		// A provider that waits on its first attempt without a deadline blocks
+		// here forever; this is the failure this test exists to catch.
+		t.Fatal("the cache-sync wait never retried a stalled informer")
+	}
+	if got := attempts.Load(); got < 2 {
+		t.Fatalf("a stalled cache sync started the informers %d time(s), want a retry", got)
+	}
+	if elapsed := time.Since(begin); elapsed > time.Second {
+		t.Fatalf("the bounded wait blocked for %s, want a retry inside a second", elapsed)
+	}
+}
+
+func TestTheCacheSyncWaitReturnsWithoutAnotherAttemptOnceSynced(t *testing.T) {
+	p := quietProvider()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	attempts := 0
+	start := func(stop <-chan struct{}) ([]kindInformer, error) {
+		attempts++
+		return []kindInformer{
+			{kind: workPod, synced: func() bool { return true }},
+			{kind: workPolicyRun, synced: func() bool { return true }},
+		}, nil
+	}
+
+	begin := time.Now()
+	informers, stopWatch, err := p.syncWatchCaches(ctx, 30*time.Second, time.Second, start)
+	if err != nil {
+		t.Fatalf("syncWatchCaches: %v", err)
+	}
+	if stopWatch == nil {
+		t.Fatal("a synced attempt returned no way to stop its informers")
+	}
+	defer stopWatch()
+	if len(informers) != 2 {
+		t.Fatalf("synced attempt returned %d informers, want both kinds", len(informers))
+	}
+	if attempts != 1 {
+		t.Fatalf("a synced cache sync started the informers %d time(s), want one attempt", attempts)
+	}
+	if elapsed := time.Since(begin); elapsed > time.Second {
+		t.Fatalf("a synced cache sync took %s to return, want promptly", elapsed)
 	}
 }
