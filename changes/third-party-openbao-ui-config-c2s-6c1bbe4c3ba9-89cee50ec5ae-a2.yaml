@@ -1,0 +1,32 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-ui-config-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-ui-config
+  toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
+status:
+  agentLog: 'The vendored OpenBao web UI keeps its build-time configuration in three
+    CommonJS modules under third_party/openbao/ui/config. environment.js exports a
+    function that takes the Ember environment name and returns the ENV object: it
+    fixes modulePrefix ''vault'', rootURL ''/ui/'', serviceWorkerScope ''/v1/sys/storage/raft/snapshot'',
+    locationType ''history'', disables Date and String prototype extension, seeds
+    APP with the polling URL list, the namespace-root URL list and DEFAULT_PAGE_SIZE
+    100, sets flash-message defaults, then branches per environment — development
+    turns on APP.LOG_TRANSITIONS and conditionally enables ember-cli-mirage from MIRAGE_DEV_HANDLER,
+    test switches locationType to ''none'' and adopts the test harness selectors and
+    a 50 ms flash timeout with Mirage off, and every non-production environment lowers
+    the page size to 15 — and finally copies UI_AUTH_WELCOME into ENV.welcomeMessage.
+    content-security-policy.js exports a function of the same environment name returning
+    the ember-cli-content-security-policy settings, and targets.js exports the browserslist
+    target list.'
+  message: wrote 7 requirement(s) and 0 interface(s) for third-party-openbao-ui-config
+  phase: Succeeded
+superseded:
+- message: wrote 6 requirement(s) and 0 interface(s) for third-party-openbao-ui-config
+  name: third-party-openbao-ui-config-c2s-6c1bbe4c3ba9-89cee50ec5ae
+  phase: Succeeded
