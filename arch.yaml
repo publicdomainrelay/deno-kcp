@@ -40332,8 +40332,262 @@ system_contexts:
   - file:third_party/openbao/internal/vault/seal/seal.go seal.go@third_party/openbao/internal/vault/seal/seal.go
   - file:third_party/openbao/internal/vault/seal/seal_testing.go seal_testing.go@third_party/openbao/internal/vault/seal/seal_testing.go
   - file:third_party/openbao/internal/vault/seal/shamirwrapper.go shamirwrapper.go@third_party/openbao/internal/vault/seal/shamirwrapper.go
+  - function:1aaf573ed2a8369b18e6a50d2749296a NewShamirWrapper@third_party/openbao/internal/vault/seal/shamirwrapper.go:23
+  - function:3e10133f89ef87ae59ed5ee7d8a3b7f4 NewEnvelope@third_party/openbao/internal/vault/seal/envelope.go:19
+  - function:6e518653c302086fa5426b31ecc2f2ae NewToggleableTestSeal@third_party/openbao/internal/vault/seal/seal_testing.go:32
+  - function:7b45c9a04bd194309dce481869223099 NewAccess@third_party/openbao/internal/vault/seal/seal.go:29
+  - function:cca408f342c172647650ff95c4dd9415 NewTestSeal@third_party/openbao/internal/vault/seal/seal_testing.go:20
+  - interface:afaac00a9d21de40718500c5552db29b Access@third_party/openbao/internal/vault/seal/seal.go:16
+  - method:08dd01392a2ffad48955b6e6d56b4249 Envelope.Decrypt@third_party/openbao/internal/vault/seal/envelope.go:34
+  - method:198506727e64615a95ab6e16470c9be7 access.Decrypt@third_party/openbao/internal/vault/seal/seal.go:84
+  - method:2fb2247f7429da01a67ba082d67f21f6 ToggleableWrapper.Encrypt@third_party/openbao/internal/vault/seal/seal_testing.go:48
+  - method:376305645ff538bdb39da47f01e54f53 access.SetConfig@third_party/openbao/internal/vault/seal/seal.go:39
+  - method:3c14682bf7bce86369e14e82117840c6 ToggleableWrapper.Decrypt@third_party/openbao/internal/vault/seal/seal_testing.go:57
+  - method:406d3ef61e8e1597a161b9ded005a763 ShamirWrapper.Type@third_party/openbao/internal/vault/seal/shamirwrapper.go:29
+  - method:534a067b023f95ddc90393842d539036 access.Type@third_party/openbao/internal/vault/seal/seal.go:54
+  - method:659bdc903ad58e0381560759a2574fa5 access.Encrypt@third_party/openbao/internal/vault/seal/seal.go:59
+  - method:78a01eaa48707823c0b739d357034194 ToggleableWrapper.Type@third_party/openbao/internal/vault/seal/seal_testing.go:72
+  - method:7c2f8152d3977a09f192703547cc2575 access.Init@third_party/openbao/internal/vault/seal/seal.go:47
+  - method:89fa7ef068356304b22bb4e499ea7e7d Envelope.Encrypt@third_party/openbao/internal/vault/seal/envelope.go:27
+  - method:950b7978c38d4d12e8235cca4cf10175 Access.GetWrapper@third_party/openbao/internal/vault/seal/seal.go:20
+  - method:a5e27741c3a39dd34050d0b0e1961eb8 access.GetWrapper@third_party/openbao/internal/vault/seal/seal.go:43
+  - method:a8e0030bbe3e6d000d2d42e7ce9d1e05 access.Finalize@third_party/openbao/internal/vault/seal/seal.go:102
+  - method:bc4a91e21f497d9d9430cf90f7a7ac3e ToggleableWrapper.SetError@third_party/openbao/internal/vault/seal/seal_testing.go:66
+  - method:dd0c7dd26901375dc159bc6bb8b7895e access.KeyId@third_party/openbao/internal/vault/seal/seal.go:35
+  - struct:34990802a106e2116f074603b03f9633 ShamirWrapper@third_party/openbao/internal/vault/seal/shamirwrapper.go:17
+  - struct:479850c12230725a85d5623e41c503de TestSealOpts@third_party/openbao/internal/vault/seal/seal_testing.go:14
+  - struct:a72f879be1bbf0cdf0f1372de5ca30cb ToggleableWrapper@third_party/openbao/internal/vault/seal/seal_testing.go:41
+  - struct:cde35b63b8efef4de773f1fe38d109cc Envelope@third_party/openbao/internal/vault/seal/envelope.go:14
   id: sc.third-party-openbao-internal-vault-seal
+  intent: 'The context exists so the vault''s seal access path is described as an
+    interface plus adapters rather than as concrete wrapper types. Access is the contract
+    the barrier depends on: it is a wrapping.Wrapper and a wrapping.InitFinalizer,
+    and it additionally hands out the underlying wrapper through GetWrapper. NewAccess
+    turns an arbitrary wrapping.Wrapper into that contract, delegating KeyId, Type,
+    Encrypt, Decrypt, Init, Finalize and SetConfig straight through. The remaining
+    types exist to satisfy that contract in specific roles: ShamirWrapper reports
+    the Shamir wrapper type, Envelope adds AAD-carrying envelope encryption with a
+    one-time init and per-call timing metrics, and the testing helpers produce Access
+    values whose Encrypt/Decrypt can be made to fail on demand so callers can exercise
+    error paths.'
+  interfaces:
+  - file: third_party/openbao/internal/vault/seal/seal.go
+    kind: interface
+    name: Access
+    signature: type Access interface { wrapping.Wrapper; wrapping.InitFinalizer; GetWrapper()
+      wrapping.Wrapper }
+  - file: third_party/openbao/internal/vault/seal/seal.go
+    kind: method
+    name: Access.GetWrapper
+    signature: GetWrapper() wrapping.Wrapper
+  - file: third_party/openbao/internal/vault/seal/envelope.go
+    kind: struct
+    name: Envelope
+    signature: type Envelope struct
+  - file: third_party/openbao/internal/vault/seal/envelope.go
+    kind: method
+    name: Envelope.Decrypt
+    signature: func (e *Envelope) Decrypt(data *wrapping.EnvelopeInfo, aad []byte)
+      ([]byte, error)
+  - file: third_party/openbao/internal/vault/seal/envelope.go
+    kind: method
+    name: Envelope.Encrypt
+    signature: func (e *Envelope) Encrypt(plaintext, aad []byte) (*wrapping.EnvelopeInfo,
+      error)
+  - file: third_party/openbao/internal/vault/seal/seal.go
+    kind: function
+    name: NewAccess
+    signature: func NewAccess(w wrapping.Wrapper) Access
+  - file: third_party/openbao/internal/vault/seal/envelope.go
+    kind: function
+    name: NewEnvelope
+    signature: func NewEnvelope() *Envelope
+  - file: third_party/openbao/internal/vault/seal/shamirwrapper.go
+    kind: function
+    name: NewShamirWrapper
+    signature: func NewShamirWrapper() *ShamirWrapper
+  - file: third_party/openbao/internal/vault/seal/seal_testing.go
+    kind: function
+    name: NewTestSeal
+    signature: func NewTestSeal(opts *TestSealOpts) (Access, *ToggleableWrapper)
+  - file: third_party/openbao/internal/vault/seal/seal_testing.go
+    kind: function
+    name: NewToggleableTestSeal
+    signature: func NewToggleableTestSeal(opts *TestSealOpts) (Access, func(error))
+  - file: third_party/openbao/internal/vault/seal/shamirwrapper.go
+    kind: struct
+    name: ShamirWrapper
+    signature: type ShamirWrapper struct
+  - file: third_party/openbao/internal/vault/seal/shamirwrapper.go
+    kind: method
+    name: ShamirWrapper.Type
+    signature: func (s *ShamirWrapper) Type(context.Context) (wrapping.WrapperType,
+      error)
+  - file: third_party/openbao/internal/vault/seal/seal_testing.go
+    kind: struct
+    name: TestSealOpts
+    signature: type TestSealOpts struct
+  - file: third_party/openbao/internal/vault/seal/seal_testing.go
+    kind: struct
+    name: ToggleableWrapper
+    signature: type ToggleableWrapper struct
+  - file: third_party/openbao/internal/vault/seal/seal_testing.go
+    kind: method
+    name: ToggleableWrapper.Decrypt
+    signature: func (t *ToggleableWrapper) Decrypt(ctx context.Context, info *wrapping.BlobInfo,
+      opts ...wrapping.Option) ([]byte, error)
+  - file: third_party/openbao/internal/vault/seal/seal_testing.go
+    kind: method
+    name: ToggleableWrapper.Encrypt
+    signature: func (t *ToggleableWrapper) Encrypt(ctx context.Context, bytes []byte,
+      opts ...wrapping.Option) (*wrapping.BlobInfo, error)
+  - file: third_party/openbao/internal/vault/seal/seal_testing.go
+    kind: method
+    name: ToggleableWrapper.SetError
+    signature: func (t *ToggleableWrapper) SetError(err error)
+  - file: third_party/openbao/internal/vault/seal/seal_testing.go
+    kind: method
+    name: ToggleableWrapper.Type
+    signature: func (t *ToggleableWrapper) Type(ctx context.Context) (wrapping.WrapperType,
+      error)
+  - file: third_party/openbao/internal/vault/seal/seal.go
+    kind: method
+    name: access.Decrypt
+    signature: func (a *access) Decrypt(ctx context.Context, data *wrapping.BlobInfo,
+      options ...wrapping.Option) (pt []byte, err error)
+  - file: third_party/openbao/internal/vault/seal/seal.go
+    kind: method
+    name: access.Encrypt
+    signature: func (a *access) Encrypt(ctx context.Context, plaintext []byte, options
+      ...wrapping.Option) (blob *wrapping.BlobInfo, err error)
+  - file: third_party/openbao/internal/vault/seal/seal.go
+    kind: method
+    name: access.Finalize
+    signature: func (a *access) Finalize(ctx context.Context, options ...wrapping.Option)
+      error
+  - file: third_party/openbao/internal/vault/seal/seal.go
+    kind: method
+    name: access.GetWrapper
+    signature: func (a *access) GetWrapper() wrapping.Wrapper
+  - file: third_party/openbao/internal/vault/seal/seal.go
+    kind: method
+    name: access.Init
+    signature: func (a *access) Init(ctx context.Context, options ...wrapping.Option)
+      error
+  - file: third_party/openbao/internal/vault/seal/seal.go
+    kind: method
+    name: access.KeyId
+    signature: func (a *access) KeyId(ctx context.Context) (string, error)
+  - file: third_party/openbao/internal/vault/seal/seal.go
+    kind: method
+    name: access.SetConfig
+    signature: func (a *access) SetConfig(ctx context.Context, options ...wrapping.Option)
+      (*wrapping.WrapperConfig, error)
+  - file: third_party/openbao/internal/vault/seal/seal.go
+    kind: method
+    name: access.Type
+    signature: func (a *access) Type(ctx context.Context) (wrapping.WrapperType, error)
   name: third-party-openbao-internal-vault-seal
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/seal/seal.go
+    - method:198506727e64615a95ab6e16470c9be7
+    - method:376305645ff538bdb39da47f01e54f53
+    - method:534a067b023f95ddc90393842d539036
+    - method:659bdc903ad58e0381560759a2574fa5
+    - method:7c2f8152d3977a09f192703547cc2575
+    - method:a8e0030bbe3e6d000d2d42e7ce9d1e05
+    - method:dd0c7dd26901375dc159bc6bb8b7895e
+    id: r.access-delegates-to-wrapper
+    level: MUST
+    text: 'Every access method forwards to the wrapped wrapping.Wrapper: KeyId, SetConfig,
+      Init, Type, Encrypt, Decrypt and Finalize take a context and the caller''s wrapping.Option
+      values and return the wrapped wrapper''s results unchanged, so the access type
+      adds no policy of its own.'
+  - codeRefs:
+    - interface:afaac00a9d21de40718500c5552db29b
+    - method:950b7978c38d4d12e8235cca4cf10175
+    id: r.access-interface-shape
+    level: MUST
+    text: Access is satisfied only by a type that is simultaneously a wrapping.Wrapper
+      with an InitFinalizer and that also provides GetWrapper returning the wrapping.Wrapper
+      behind it, so callers can both use the seal directly and reach the concrete
+      wrapper underneath.
+  - codeRefs:
+    - function:3e10133f89ef87ae59ed5ee7d8a3b7f4
+    - struct:cde35b63b8efef4de773f1fe38d109cc
+    id: r.envelope-lazy-init
+    level: MUST
+    text: Envelope performs its initialization exactly once, on the first call to
+      Encrypt, through a sync.Once guard, so that a zero-value Envelope obtained from
+      NewEnvelope is usable without any separate setup call.
+  - codeRefs:
+    - method:89fa7ef068356304b22bb4e499ea7e7d
+    id: r.envelope-metrics
+    level: SHOULD
+    text: Envelope.Encrypt measures its own duration under the metrics key seal/envelope/encrypt
+      before returning, so envelope encryption latency is observable.
+  - codeRefs:
+    - method:08dd01392a2ffad48955b6e6d56b4249
+    - method:89fa7ef068356304b22bb4e499ea7e7d
+    id: r.envelope-round-trip
+    level: MUST
+    text: Envelope.Encrypt takes plaintext and additional authenticated data and returns
+      a wrapping.EnvelopeInfo produced by wrapping.EnvelopeEncrypt with wrapping.WithAad(aad);
+      Envelope.Decrypt takes a wrapping.EnvelopeInfo and the same additional authenticated
+      data and returns the recovered plaintext, so that data encrypted by Envelope
+      can be decrypted by the same Envelope.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/seal/envelope_test.go
+    id: r.envelope-test-coverage
+    level: SHOULD
+    text: The envelope test exercises Envelope through NewEnvelope, encrypting and
+      then decrypting with matching additional authenticated data to assert the recovered
+      plaintext equals the input.
+  - codeRefs:
+    - function:7b45c9a04bd194309dce481869223099
+    - method:a5e27741c3a39dd34050d0b0e1961eb8
+    id: r.newaccess-wraps-wrapper
+    level: MUST
+    text: NewAccess takes a wrapping.Wrapper and returns an Access whose GetWrapper
+      returns that same wrapper, making any wrapping.Wrapper usable as a seal Access
+      without the caller implementing the interface.
+  - codeRefs:
+    - function:1aaf573ed2a8369b18e6a50d2749296a
+    - method:406d3ef61e8e1597a161b9ded005a763
+    - struct:34990802a106e2116f074603b03f9633
+    id: r.shamir-wrapper-type
+    level: MUST
+    text: ShamirWrapper implements the wrapper Type query and reports the Shamir wrapper
+      type, and NewShamirWrapper returns a ready-to-use *ShamirWrapper so the type
+      can be obtained without constructing the struct literal.
+  - codeRefs:
+    - function:6e518653c302086fa5426b31ecc2f2ae
+    - function:cca408f342c172647650ff95c4dd9415
+    - struct:479850c12230725a85d5623e41c503de
+    id: r.test-seal-construction
+    level: MUST
+    text: NewTestSeal takes a *TestSealOpts and returns both an Access and the *ToggleableWrapper
+      backing it, while NewToggleableTestSeal takes the same options and returns an
+      Access plus a func(error) that sets the failure on that wrapper, so tests can
+      hold the Access and still reach in to break it.
+  - codeRefs:
+    - method:2fb2247f7429da01a67ba082d67f21f6
+    - method:3c14682bf7bce86369e14e82117840c6
+    - method:bc4a91e21f497d9d9430cf90f7a7ac3e
+    - struct:a72f879be1bbf0cdf0f1372de5ca30cb
+    id: r.toggleable-error-injection
+    level: MUST
+    text: ToggleableWrapper.SetError records an error, and while it is set ToggleableWrapper.Encrypt
+      and ToggleableWrapper.Decrypt return that error instead of performing the operation,
+      letting tests drive the error paths of callers that hold only the Access.
+  - codeRefs:
+    - method:78a01eaa48707823c0b739d357034194
+    id: r.toggleable-wrapper-type
+    level: MUST
+    text: ToggleableWrapper answers the wrapper Type query as well, so a toggleable
+      test seal is interchangeable with a production wrapper anywhere an Access or
+      wrapping.Wrapper is accepted.
   upstream: self
 - code:
   - third_party/openbao/internal/vault/tokens/token.pb.go

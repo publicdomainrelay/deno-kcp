@@ -2801,6 +2801,21 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.routing-test-coverage` (SHOULD): "The package's test file exercises the mount lifecycle and path classification, covering mount, credential mount, unmount, remount, namespace mount conflicts, root path, login path, taint and untaint behaviour."
 - added `r.unauthenticated-path-parsing` (MUST): "ParseUnauthenticatedPaths validates the supplied path patterns and builds a loginPathsEntry from them, returning an error for a malformed pattern, and PathsToRadix builds a radix tree keyed by those paths so login path matching is a tree lookup."
 
+### third-party-openbao-internal-vault-seal
+
+- intent: "" -> "The context exists so the vault's seal access path is described as an interface plus adapters rather than as concrete wrapper types. Access is the contract the barrier depends on: it is a wrapping.Wrapper and a wrapping.InitFinalizer, and it additionally hands out the underlying wrapper through GetWrapper. NewAccess turns an arbitrary wrapping.Wrapper into that contract, delegating KeyId, Type, Encrypt, Decrypt, Init, Finalize and SetConfig straight through. The remaining types exist to satisfy that contract in specific roles: ShamirWrapper reports the Shamir wrapper type, Envelope adds AAD-carrying envelope encryption with a one-time init and per-call timing metrics, and the testing helpers produce Access values whose Encrypt/Decrypt can be made to fail on demand so callers can exercise error paths."
+- added `r.access-delegates-to-wrapper` (MUST): "Every access method forwards to the wrapped wrapping.Wrapper: KeyId, SetConfig, Init, Type, Encrypt, Decrypt and Finalize take a context and the caller's wrapping.Option values and return the wrapped wrapper's results unchanged, so the access type adds no policy of its own."
+- added `r.access-interface-shape` (MUST): "Access is satisfied only by a type that is simultaneously a wrapping.Wrapper with an InitFinalizer and that also provides GetWrapper returning the wrapping.Wrapper behind it, so callers can both use the seal directly and reach the concrete wrapper underneath."
+- added `r.envelope-lazy-init` (MUST): "Envelope performs its initialization exactly once, on the first call to Encrypt, through a sync.Once guard, so that a zero-value Envelope obtained from NewEnvelope is usable without any separate setup call."
+- added `r.envelope-metrics` (SHOULD): "Envelope.Encrypt measures its own duration under the metrics key seal/envelope/encrypt before returning, so envelope encryption latency is observable."
+- added `r.envelope-round-trip` (MUST): "Envelope.Encrypt takes plaintext and additional authenticated data and returns a wrapping.EnvelopeInfo produced by wrapping.EnvelopeEncrypt with wrapping.WithAad(aad); Envelope.Decrypt takes a wrapping.EnvelopeInfo and the same additional authenticated data and returns the recovered plaintext, so that data encrypted by Envelope can be decrypted by the same Envelope."
+- added `r.envelope-test-coverage` (SHOULD): "The envelope test exercises Envelope through NewEnvelope, encrypting and then decrypting with matching additional authenticated data to assert the recovered plaintext equals the input."
+- added `r.newaccess-wraps-wrapper` (MUST): "NewAccess takes a wrapping.Wrapper and returns an Access whose GetWrapper returns that same wrapper, making any wrapping.Wrapper usable as a seal Access without the caller implementing the interface."
+- added `r.shamir-wrapper-type` (MUST): "ShamirWrapper implements the wrapper Type query and reports the Shamir wrapper type, and NewShamirWrapper returns a ready-to-use *ShamirWrapper so the type can be obtained without constructing the struct literal."
+- added `r.test-seal-construction` (MUST): "NewTestSeal takes a *TestSealOpts and returns both an Access and the *ToggleableWrapper backing it, while NewToggleableTestSeal takes the same options and returns an Access plus a func(error) that sets the failure on that wrapper, so tests can hold the Access and still reach in to break it."
+- added `r.toggleable-error-injection` (MUST): "ToggleableWrapper.SetError records an error, and while it is set ToggleableWrapper.Encrypt and ToggleableWrapper.Decrypt return that error instead of performing the operation, letting tests drive the error paths of callers that hold only the Access."
+- added `r.toggleable-wrapper-type` (MUST): "ToggleableWrapper answers the wrapper Type query as well, so a toggleable test seal is interchangeable with a production wrapper anywhere an Access or wrapping.Wrapper is accepted."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -2996,4 +3011,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-vault-quotas-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-routing-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-routing-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-internal-vault-seal-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-vault-seal-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-internal-vault-seal-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Running |  | 0 | - |

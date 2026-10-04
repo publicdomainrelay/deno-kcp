@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so the vault's seal access path is described as an interface plus adapters rather than as concrete wrapper types. Access is the contract the barrier depends on: it is a wrapping.Wrapper and a wrapping.InitFinalizer, and it additionally hands out the underlying wrapper through GetWrapper. NewAccess turns an arbitrary wrapping.Wrapper into that contract, delegating KeyId, Type, Encrypt, Decrypt, Init, Finalize and SetConfig straight through. The remaining types exist to satisfy that contract in specific roles: ShamirWrapper reports the Shamir wrapper type, Envelope adds AAD-carrying envelope encryption with a one-time init and per-call timing metrics, and the testing helpers produce Access values whose Encrypt/Decrypt can be made to fail on demand so callers can exercise error paths.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
