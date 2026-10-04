@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-These files exist so the OpenBao UI has one declarative place for its environment-dependent build settings, its Content-Security-Policy directives, and its browser support targets. The context documents the contract each config module must keep: what ember-cli reads from ENV, what the CSP plugin enforces, and which browsers the build targets, so that changes to the vendored OpenBao UI stay reviewable and auditable.
+The context exists so the environment-dependent build knobs of the OpenBao UI — the ENV object ember-cli reads, the Content-Security-Policy directive map the CSP plugin enforces, and the browserslist targets the build compiles against — have one declarative, auditable home. Recording the exact contract of each module keeps changes to the vendored UI reviewable, so a reviewer can see when a policy directive, an endpoint list, or an environment branch moves.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

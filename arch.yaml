@@ -69936,63 +69936,74 @@ system_contexts:
   - file:third_party/openbao/ui/config/environment.js environment.js@third_party/openbao/ui/config/environment.js
   - file:third_party/openbao/ui/config/targets.js targets.js@third_party/openbao/ui/config/targets.js
   id: sc.third-party-openbao-ui-config
-  intent: 'These files exist so the OpenBao UI has one declarative place for its environment-dependent
-    build settings, its Content-Security-Policy directives, and its browser support
-    targets. The context documents the contract each config module must keep: what
-    ember-cli reads from ENV, what the CSP plugin enforces, and which browsers the
-    build targets, so that changes to the vendored OpenBao UI stay reviewable and
-    auditable.'
+  intent: The context exists so the environment-dependent build knobs of the OpenBao
+    UI — the ENV object ember-cli reads, the Content-Security-Policy directive map
+    the CSP plugin enforces, and the browserslist targets the build compiles against
+    — have one declarative, auditable home. Recording the exact contract of each module
+    keeps changes to the vendored UI reviewable, so a reviewer can see when a policy
+    directive, an endpoint list, or an environment branch moves.
   name: third-party-openbao-ui-config
   requirements:
   - codeRefs:
     - file:third_party/openbao/ui/config/environment.js
     id: r.app-endpoint-lists
     level: MUST
-    text: The returned ENV.APP must carry the polling endpoint list ['sys/health',
-      'sys/seal-status'], the namespace-root endpoint list ['sys/health', 'sys/seal-status',
-      'sys/internal/counters/config'], and DEFAULT_PAGE_SIZE 100 for the client-side
-      pagination default.
+    text: The returned ENV.APP must carry POLLING_URLS ['sys/health', 'sys/seal-status']
+      for the endpoints the UI polls, NAMESPACE_ROOT_URLS ['sys/health', 'sys/seal-status',
+      'sys/internal/counters/config'] for the endpoints that always resolve against
+      the root namespace, and DEFAULT_PAGE_SIZE 100 as the client-side pagination
+      default.
   - codeRefs:
     - file:third_party/openbao/ui/config/targets.js
     id: r.browser-targets
     level: MUST
-    text: targets.js must export a browsers list naming the last 1 Chrome, Firefox,
-      and Safari versions, which the build uses as its browserslist targets.
+    text: targets.js must export a browsers list of 'last 1 Chrome versions', 'last
+      1 Firefox versions', and 'last 1 Safari versions' as the browserslist targets
+      the build compiles the UI against.
   - codeRefs:
     - file:third_party/openbao/ui/config/content-security-policy.js
     id: r.csp-config
     level: MUST
     text: 'content-security-policy.js must export a function of the environment name
       that returns the ember-cli-content-security-policy config: delivery [''header'',
-      ''meta''], enabled for every environment except production, failTests true,
+      ''meta''], enabled whenever the environment is not production, failTests true,
       reportOnly false, and the directive map default-src ''none''; script-src, font-src,
-      connect-src, media-src ''self''; img-src ''self'' and data:; style-src ''unsafe-inline''
-      and ''self''; form-action ''none''.'
+      connect-src, media-src ''self''; img-src ''self'' plus data:; style-src ''unsafe-inline''
+      plus ''self''; form-action ''none''.'
   - codeRefs:
     - file:third_party/openbao/ui/config/environment.js
     id: r.environment-branches
     level: MUST
-    text: 'The function must branch on the environment name: in development it enables
-      APP.LOG_TRANSITIONS and enables ember-cli-mirage with the handler from process.env.MIRAGE_DEV_HANDLER
-      when that variable is defined; in test it sets locationType ''none'', rootElement
-      ''#ember-testing'', autoboot false, flashMessageDefaults.timeout 50, and mirage
-      disabled; in any non-production environment it lowers APP.DEFAULT_PAGE_SIZE
-      to 15.'
+    text: The function must branch on the environment name. In development it sets
+      ENV.APP.LOG_TRANSITIONS true and, only when process.env.MIRAGE_DEV_HANDLER is
+      defined, enables ember-cli-mirage with that handler. In test it sets locationType
+      'none', ENV.APP.rootElement '#ember-testing', ENV.APP.autoboot false, ENV.APP.LOG_ACTIVE_GENERATION
+      and ENV.APP.LOG_VIEW_LOOKUPS false, flashMessageDefaults.timeout 50, and ember-cli-mirage
+      enabled false. In every environment except production it lowers ENV.APP.DEFAULT_PAGE_SIZE
+      to 15.
   - codeRefs:
     - file:third_party/openbao/ui/config/environment.js
     id: r.environment-exports-env-function
     level: MUST
     text: environment.js must export a function that takes the Ember environment name
-      (development, test, or production) and returns the ENV object, populated with
-      modulePrefix 'vault', rootURL '/ui/', serviceWorkerScope '/v1/sys/storage/raft/snapshot',
-      locationType 'history', and the EmberENV flags that disable Date and String
-      prototype extension.
+      (development, test, or production) and returns the ENV object, setting modulePrefix
+      'vault', the environment name back on ENV.environment, rootURL '/ui/', serviceWorkerScope
+      '/v1/sys/storage/raft/snapshot', locationType 'history', and EmberENV.EXTEND_PROTOTYPES
+      with Date false and String false so neither prototype is extended.
+  - codeRefs:
+    - file:third_party/openbao/ui/config/environment.js
+    id: r.flash-message-defaults
+    level: MUST
+    text: The returned ENV must set flashMessageDefaults to timeout 7000 and sticky
+      false as the baseline notification behavior, which the test branch then overrides
+      to a 50 ms timeout.
   - codeRefs:
     - file:third_party/openbao/ui/config/environment.js
     id: r.welcome-message-env
     level: MUST
-    text: The returned ENV must set welcomeMessage from the UI_AUTH_WELCOME environment
-      variable, so the login welcome text is configured outside the build.
+    text: The returned ENV must set welcomeMessage from process.env.UI_AUTH_WELCOME
+      so the login welcome text comes from the deployment environment and not from
+      the build.
   upstream: self
 - code:
   - third_party/openbao/ui/lib/core/icon-mappings.js
