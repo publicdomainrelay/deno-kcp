@@ -5772,7 +5772,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 
 ### third-party-openbao-ui-lib-pki-addon-components
 
-- intent: "" -> "The context exists so the PKI UI behaviour is specified rather than re-derived from source each time. It records what each component exposes to its template and parent route, and what each action must do: which model fields a constructor expands into form fields, when a save path validates and persists, when a capability probe gates a request, and how TTL, key bits, key usage and file upload inputs are normalized before they reach the model. Anyone editing the vendored OpenBao UI, or building against it, uses this context to know the component contracts without reading all fifteen files."
+- intent: "" -> "The context exists so PKI UI behaviour is specified rather than re-derived from source each time. It records what each component exposes to its template and parent route, and what each action must do: which model fields a constructor expands into form fields, when a save path validates and persists, when a capability probe gates a request, and how TTL, key bits, key usage and file upload inputs are normalized before they reach the model. Anyone editing the vendored OpenBao UI, or building against it, uses this context to know the component contracts without reading all fifteen files."
 - added `r.certificate-info-row-fields` (MUST): "ParsedCertificateInfoRowsComponent.possibleFields derives display rows from parsedParameterKeys with common_name removed, attaching labels for other_sans, alt_names, uri_sans, ip_sans, permitted_dns_domains, exclude_cn_from_sans, use_pss, ttl and ou, and attaching the date format 'MMM d yyyy HH:mm:ss a zzzz' to not_valid_after and not_valid_before, so the certificate details view renders labeled rows."
 - added `r.csr-cancel` (MUST): "PkiGenerateCsrComponent.cancel unloads the model record and calls the parent-supplied onCancel, so abandoning the CSR form leaves no dirty record behind."
 - added `r.csr-capability-probe` (MUST): "PkiGenerateCsrComponent.getCapability awaits model.generateIssuerCsrPath and returns true only when the resolved capabilities object has canCreate === true, returning false when the lookup rejects, so an unreachable or forbidden issuer path silently disables the issuer-signed path."
@@ -6340,9 +6340,10 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-pki-addon-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-components-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-lib-pki-addon-components-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-pki-addon-components-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-components-page-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-controllers-certificates-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-controllers-issuers-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-lib-pki-addon-controllers-keys-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
