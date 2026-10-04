@@ -10,4 +10,5 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 ## Resolved code references
 
 - `file:third_party/openbao/website/src/components/Accordion/index.tsx` file index.tsx (third_party/openbao/website/src/components/Accordion/index.tsx)
+- `function:feb8aca6bea6a526d34a13feff172474` function Accordion (third_party/openbao/website/src/components/Accordion/index.tsx)
 <!-- SPECD_MANAGED_END -->

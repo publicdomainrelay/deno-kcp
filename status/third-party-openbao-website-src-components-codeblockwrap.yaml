@@ -1,15 +1,34 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: CodeBlockWrap'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/website/src/components/CodeBlockWrap/index.tsx
+  fingerprint: 001876fbdc7fd8cf14150f28cd582ccbdc6e2b60066e8f386492571065a86190
+  interfaces:
+  - codegraphId: function:4e60839343b501b3d3be56b3e2a5ce57
+    file: third_party/openbao/website/src/components/CodeBlockWrap/index.tsx
+    kind: function
+    line: 12
+    name: CodeBlockWrap
+    signature: |-
+      ({
+        children,
+        language,
+        title,
+        showLineNumbers
+      }: CodeBlockWrapProps)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 6f0b8d47d2b82243a6d0a3594d8a638aa41eed4fffa5e5299ed98d0c5a61c3ee
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 001876fbdc7fd8cf14150f28cd582ccbdc6e2b60066e8f386492571065a86190

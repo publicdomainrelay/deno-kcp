@@ -9,5 +9,6 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/website/src/components/FAQSection/index.tsx` file index.tsx (third_party/openbao/website/src/components/FAQSection/index.tsx)
+- `function:dff894449b88df0365c85f44341056a1` function FAQSection (third_party/openbao/website/src/components/FAQSection/index.tsx)
 <!-- SPECD_MANAGED_END -->
