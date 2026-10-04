@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to describe the delete behavior of the OIDC scope details page. The controller is the UI action layer for removing an OIDC scope from the cluster access section: it is the only place that couples the scope model's destroyRecord to user feedback and to navigation back to the scope list, and it owns the rollback path that keeps the UI consistent when the server refuses the delete.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

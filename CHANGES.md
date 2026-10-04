@@ -4427,6 +4427,17 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.delete-rolls-back-on-failure` (MUST): "When destroyRecord rejects, the action must call rollbackAttributes() on the model so the provider record is not left in a deleted or dirty local state, and it must not transition away from the details route."
 - added `r.inject-router-and-flash-services` (MUST): "OidcProviderDetailsController must declare router and flashMessages as injected services, so the delete action can transition routes and report messages without direct container lookups."
 
+### third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-scopes-scope
+
+- intent: "" -> "This context exists to describe the delete behavior of the OIDC scope details page. The controller is the UI action layer for removing an OIDC scope from the cluster access section: it is the only place that couples the scope model's destroyRecord to user feedback and to navigation back to the scope list, and it owns the rollback path that keeps the UI consistent when the server refuses the delete."
+- added `r.class-extends-controller` (MUST): "OidcScopeDetailsController must extend Ember's Controller base class and be the default export of its module."
+- added `r.delete-destroys-record` (MUST): "The delete action must be an async action that awaits this.model.destroyRecord() before doing anything else, so a scope is only reported as deleted after the server confirms it."
+- added `r.delete-error-message` (MUST): "The failure path must derive the danger flash message from the caught error: join error.errors with '. ' when error.errors is present, otherwise use error.message, and pass the result to flashMessages.danger."
+- added `r.delete-rollback-on-error` (MUST): "When destroyRecord rejects, the action must call this.model.rollbackAttributes() so the record returns to its persisted state, and must not transition away from the route."
+- added `r.delete-success-feedback` (MUST): "On a successful destroy, the action must show a success flash message with the exact text 'Scope deleted successfully' and then transition to the route vault.cluster.access.oidc.scopes."
+- added `r.injected-services` (MUST): "The controller must inject the router and flashMessages services so that delete can navigate and report outcomes."
+- added `r.transition-via-safe-helper` (SHOULD): "The post-delete navigation should go through the transitionToSafe helper with the router service and the target route name, rather than calling router.transitionTo directly, so aborted transitions are handled centrally."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4783,7 +4794,8 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-providers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-providers-provider-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-providers-provider-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-scopes-scope-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-scopes-scope-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-policies-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

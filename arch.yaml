@@ -61836,10 +61836,75 @@ system_contexts:
 - code:
   - third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/scopes/scope/details.js
   codeRefIndex:
+  - class:ceedea0da2474d9eb16e36ffbddf3019 OidcScopeDetailsController@third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/scopes/scope/details.js:11
   - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/scopes/scope/details.js
     details.js@third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/scopes/scope/details.js
   id: sc.third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-scopes-scope
+  intent: 'This context exists to describe the delete behavior of the OIDC scope details
+    page. The controller is the UI action layer for removing an OIDC scope from the
+    cluster access section: it is the only place that couples the scope model''s destroyRecord
+    to user feedback and to navigation back to the scope list, and it owns the rollback
+    path that keeps the UI consistent when the server refuses the delete.'
+  interfaces:
+  - file: third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/scopes/scope/details.js
+    kind: class
+    name: OidcScopeDetailsController
+    signature: class OidcScopeDetailsController extends Controller
   name: third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-scopes-scope
+  requirements:
+  - codeRefs:
+    - class:ceedea0da2474d9eb16e36ffbddf3019
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/scopes/scope/details.js
+    id: r.class-extends-controller
+    level: MUST
+    text: OidcScopeDetailsController must extend Ember's Controller base class and
+      be the default export of its module.
+  - codeRefs:
+    - class:ceedea0da2474d9eb16e36ffbddf3019
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/scopes/scope/details.js
+    id: r.delete-destroys-record
+    level: MUST
+    text: The delete action must be an async action that awaits this.model.destroyRecord()
+      before doing anything else, so a scope is only reported as deleted after the
+      server confirms it.
+  - codeRefs:
+    - class:ceedea0da2474d9eb16e36ffbddf3019
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/scopes/scope/details.js
+    id: r.delete-error-message
+    level: MUST
+    text: 'The failure path must derive the danger flash message from the caught error:
+      join error.errors with ''. '' when error.errors is present, otherwise use error.message,
+      and pass the result to flashMessages.danger.'
+  - codeRefs:
+    - class:ceedea0da2474d9eb16e36ffbddf3019
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/scopes/scope/details.js
+    id: r.delete-rollback-on-error
+    level: MUST
+    text: When destroyRecord rejects, the action must call this.model.rollbackAttributes()
+      so the record returns to its persisted state, and must not transition away from
+      the route.
+  - codeRefs:
+    - class:ceedea0da2474d9eb16e36ffbddf3019
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/scopes/scope/details.js
+    id: r.delete-success-feedback
+    level: MUST
+    text: On a successful destroy, the action must show a success flash message with
+      the exact text 'Scope deleted successfully' and then transition to the route
+      vault.cluster.access.oidc.scopes.
+  - codeRefs:
+    - class:ceedea0da2474d9eb16e36ffbddf3019
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/scopes/scope/details.js
+    id: r.injected-services
+    level: MUST
+    text: The controller must inject the router and flashMessages services so that
+      delete can navigate and report outcomes.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/scopes/scope/details.js
+    id: r.transition-via-safe-helper
+    level: SHOULD
+    text: The post-delete navigation should go through the transitionToSafe helper
+      with the router service and the target route name, rather than calling router.transitionTo
+      directly, so aborted transitions are handled centrally.
   upstream: self
 - code:
   - third_party/openbao/ui/app/controllers/vault/cluster/policies/index.js
