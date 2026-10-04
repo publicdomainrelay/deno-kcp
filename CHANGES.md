@@ -5067,6 +5067,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.details-passthrough-route` (MUST): "OidcProviderDetailsRoute must remain an empty Route subclass that adds no model or setup hook, so the details tab renders from the parent provider route's model without its own data fetch."
 - added `r.edit-passthrough-route` (MUST): "OidcProviderEditRoute must remain an empty Route subclass that adds no model or setup hook, so the edit tab renders from the parent provider route's model and leaves saving to the provider controller and adapter."
 
+### third-party-openbao-ui-app-routes-vault-cluster-access-oidc-scopes
+
+- intent: "" -> "The context exists to pin down the routing surface for OIDC scope management in the OpenBao web UI: which route classes exist for the list, create, and detail screens, how each obtains its Ember Data model from the injected store, and what parameters the detail route receives. It gives a specification of the observed router hooks so that changes to the OIDC scope screens keep the same store-backed model contract, and so anyone porting or reimplementing these screens knows that the create route hands out a client-side new `oidc/scope` record rather than a fetched one."
+- added `r.create-route-new-record` (MUST): "OidcScopesCreateRoute.model must return a new, unsaved oidc/scope record created through the injected store service (store.createRecord('oidc/scope')), so the create screen edits a client-side record instead of a server-fetched one."
+- added `r.default-export-route-class` (MUST): "Each of the three files must default-export a single class extending the Ember Route base class (OidcScopesCreateRoute, OidcScopesRoute, OidcScopeRoute respectively) so the router can resolve them as the create, index, and detail routes of the OIDC scopes resource."
+- added `r.index-route-model-hook` (MUST): "OidcScopesRoute must override the model hook with no parameters and supply the model for the OIDC scopes index screen from the injected store service."
+- added `r.scope-route-name-param` (MUST): "OidcScopeRoute.model must accept a destructured { name } parameter, taking the scope name from the route's dynamic segment, and use it to resolve the single scope model for the detail screen through the injected store service."
+- added `r.store-service-injection` (MUST): "Each of the three scope route classes must declare the store service as an injected service property, so the model hooks resolve records against the application's Ember Data store rather than any other data source."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5490,6 +5499,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-routes-vault-cluster-access-oidc-providers-provider-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-oidc-scopes-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-oidc-scopes-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-ui-app-routes-vault-cluster-access-oidc-scopes-scope-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-routes-vault-cluster-access-oidc-scopes-scope-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
