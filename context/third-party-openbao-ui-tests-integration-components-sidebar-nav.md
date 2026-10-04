@@ -9,5 +9,8 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/ui/tests/integration/components/sidebar/nav/access-test.js` file access-test.js (third_party/openbao/ui/tests/integration/components/sidebar/nav/access-test.js)
+- `file:third_party/openbao/ui/tests/integration/components/sidebar/nav/cluster-test.js` file cluster-test.js (third_party/openbao/ui/tests/integration/components/sidebar/nav/cluster-test.js)
+- `file:third_party/openbao/ui/tests/integration/components/sidebar/nav/policies-test.js` file policies-test.js (third_party/openbao/ui/tests/integration/components/sidebar/nav/policies-test.js)
+- `file:third_party/openbao/ui/tests/integration/components/sidebar/nav/tools-test.js` file tools-test.js (third_party/openbao/ui/tests/integration/components/sidebar/nav/tools-test.js)
 <!-- SPECD_MANAGED_END -->
