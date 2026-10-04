@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists because deno-kcp vendors OpenBao and depends on its metrics plumbing: anything in the repo that emits TTL, lease-expiry, or cluster-labelled telemetry goes through this package. The spec records the exported surface and the behaviour behind it — bucket boundary lookup, gauge collection lifecycle, response formatting, and label wrapping — so the vendored copy can be read, patched or upgraded without breaking the callers that construct cluster sinks, gauge processes and metrics helpers.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
