@@ -9,5 +9,7 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/ui/tests/pages/secrets/backend/ssh/edit-role.js` file edit-role.js (third_party/openbao/ui/tests/pages/secrets/backend/ssh/edit-role.js)
+- `file:third_party/openbao/ui/tests/pages/secrets/backend/ssh/generate-otp.js` file generate-otp.js (third_party/openbao/ui/tests/pages/secrets/backend/ssh/generate-otp.js)
+- `file:third_party/openbao/ui/tests/pages/secrets/backend/ssh/show.js` file show.js (third_party/openbao/ui/tests/pages/secrets/backend/ssh/show.js)
 <!-- SPECD_MANAGED_END -->
