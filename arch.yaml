@@ -1481,7 +1481,190 @@ system_contexts:
   - internal/denorun/denorun.go
   - internal/denorun/denorun_test.go
   id: sc.internal-denorun
+  intent: This context exists to hold the reconciliation logic for a single DenoRun
+    as an isolated, side-effect-free decider. The provider observes the cluster and
+    the workload, builds an Observed value, and asks the Reconciler what the next
+    state should be; the Reconciler never talks to the API server itself. That split
+    lets the run lifecycle rules, retry and backoff handling, deadline enforcement,
+    TTL cleanup, and finalizer removal be tested as plain data-in data-out cases while
+    the provider keeps the write path and the guards against stale cached objects.
+  interfaces:
+  - file: internal/denorun/denorun.go
+    kind: function
+    name: New
+    signature: func New(opts Options) *Reconciler
+  - file: internal/denorun/denorun.go
+    kind: struct
+    name: Observed
+    signature: type Observed struct { Run v1alpha1.DenoRun; Execution *RunObservation;
+      Now time.Time }
+  - file: internal/denorun/denorun.go
+    kind: type_alias
+    name: Op
+    signature: type Op string
+  - file: internal/denorun/denorun.go
+    kind: struct
+    name: Options
+    signature: type Options struct { Now func() time.Time; DefaultBackoff int32 }
+  - file: internal/denorun/denorun.go
+    kind: struct
+    name: Reconciler
+    signature: type Reconciler struct { opts Options }
+  - file: internal/denorun/denorun.go
+    kind: method
+    name: Reconciler.Reconcile
+    signature: func (r *Reconciler) Reconcile(ctx context.Context, o Observed) (Result,
+      error)
+  - file: internal/denorun/denorun.go
+    kind: struct
+    name: Result
+    signature: type Result struct { Phase v1alpha1.DenoRunPhase; RunID string; RunIDCleared
+      bool; StartTime *metav1.Time; CompletionTime *metav1.Time; ExitCode *int32;
+      Message string; Outputs map[string]string; Retries int32; Conditions []metav1.Condition;
+      Ops []Op; RequeueAfter time.Duration; RemoveFinalizer bool; Delete bool }
+  - file: internal/denorun/denorun.go
+    kind: struct
+    name: RunObservation
+    signature: type RunObservation struct { RunID string; State RunState; ExitCode
+      *int32; Message string; Outputs map[string]string }
+  - file: internal/denorun/denorun.go
+    kind: type_alias
+    name: RunState
+    signature: type RunState string
   name: internal-denorun
+  requirements:
+  - codeRefs:
+    - method:f155b5d02f0b9e87bf309fef18faa708
+    id: r.deadline-exceeded-fails
+    level: MUST
+    text: When ActiveDeadlineSeconds has elapsed since the run's start time the decider
+      stops a running execution, fails the run, clears RunID with RunIDCleared set,
+      stamps the completion time, and sets the DeadlineExceeded failed and complete
+      conditions.
+  - codeRefs:
+    - method:f155b5d02f0b9e87bf309fef18faa708
+    id: r.deletion-teardown
+    level: MUST
+    text: When the run carries a deletion timestamp the decider stops a still-running
+      execution, emits the remove-finalizer Op, sets RemoveFinalizer, and requeues,
+      taking precedence over every other branch.
+  - codeRefs:
+    - method:f155b5d02f0b9e87bf309fef18faa708
+    - struct:ee4d89fa2c7dd0cff8185caf5882f1e5
+    id: r.failed-retries-or-fails
+    level: MUST
+    text: 'A failed observation clears the run id, increments the retry count, records
+      the exit code and message, and compares retries against the run''s backoff limit
+      (falling back to Options.DefaultBackoff): past the limit the phase fails with
+      BackoffExceeded conditions, otherwise the phase returns to pending with a Retrying
+      condition.'
+  - codeRefs:
+    - function:ebb0b90e032475ce8ac596f8c699f18d
+    id: r.new-defaults-clock
+    level: MUST
+    text: New returns a Reconciler built from Options, substituting time.Now when
+      Options.Now is nil.
+  - codeRefs:
+    - method:f155b5d02f0b9e87bf309fef18faa708
+    id: r.no-execution-starts-run
+    level: MUST
+    text: 'With no execution observation the decider starts the run: it sets the start
+      time if unset, moves the phase to running, emits the start-run Op, and sets
+      a Running/complete-false condition.'
+  - codeRefs:
+    - struct:46375556082738a3e31036edf9eb66d4
+    id: r.observed-shape
+    level: MUST
+    text: Observed carries the DenoRun under reconciliation, an optional pointer to
+      a RunObservation, and the Now clock reading the decision is made against.
+  - codeRefs:
+    - type_alias:30190d31491ebfeaec53888338d8ddf7
+    id: r.op-values
+    level: MUST
+    text: Op is a string type whose values are "start-run", "stop-run", "delete",
+      and "remove-finalizer", naming the side effects the provider must perform.
+  - codeRefs:
+    - struct:ee4d89fa2c7dd0cff8185caf5882f1e5
+    id: r.options-shape
+    level: MUST
+    text: Options supplies the Now clock function and a DefaultBackoff retry limit.
+  - codeRefs:
+    - method:f155b5d02f0b9e87bf309fef18faa708
+    id: r.reconcile-carries-status
+    level: MUST
+    text: Reconcile seeds the Result from the run's existing status, copying phase,
+      run id, timestamps, exit code, message, outputs, retries, and a copy of the
+      conditions.
+  - codeRefs:
+    - method:f155b5d02f0b9e87bf309fef18faa708
+    id: r.reconcile-defaults-now
+    level: MUST
+    text: Reconcile fills in a zero Now from the Reconciler's clock and returns the
+      context error if the context is already cancelled.
+  - codeRefs:
+    - method:f155b5d02f0b9e87bf309fef18faa708
+    id: r.reconcile-requires-run-name
+    level: MUST
+    text: Reconcile returns an error and an empty Result when the observed DenoRun
+      has no name.
+  - codeRefs:
+    - struct:8cfd6dfc94f9f9f64a46b94dc7cac4c6
+    id: r.reconciler-holds-options
+    level: MUST
+    text: Reconciler is a struct holding the configured Options and exposes no other
+      state.
+  - codeRefs:
+    - struct:729b6f20e41c65ca009aeef5ce0be147
+    id: r.result-carries-next-status
+    level: MUST
+    text: 'Result carries the full next status the provider should write: Phase, RunID,
+      RunIDCleared, StartTime, CompletionTime, ExitCode, Message, Outputs, Retries,
+      Conditions, Ops, RequeueAfter, RemoveFinalizer, and Delete.'
+  - codeRefs:
+    - struct:729b6f20e41c65ca009aeef5ce0be147
+    id: r.run-id-cleared-flag
+    level: MUST
+    text: Result.RunIDCleared distinguishes an id the decider never saw from one it
+      cleared on purpose, so the provider does not write back the id of the workload
+      it just observed and re-observe a corpse on the next pass.
+  - codeRefs:
+    - struct:871d7b88332e893f59d62b5249a55bca
+    id: r.run-observation-shape
+    level: MUST
+    text: RunObservation carries RunID, State, an optional ExitCode, Message, and
+      an Outputs map, and describes what the provider observed for one workload execution.
+  - codeRefs:
+    - type_alias:bd23d69ec74e9fe3e50fcdbd3c0331ba
+    id: r.run-state-values
+    level: MUST
+    text: RunState is a string type whose only values are "running", "succeeded",
+      and "failed".
+  - codeRefs:
+    - method:f155b5d02f0b9e87bf309fef18faa708
+    id: r.running-reports-id
+    level: MUST
+    text: A running observation keeps the phase running, adopts the observed RunID,
+      and requeues.
+  - codeRefs:
+    - method:f155b5d02f0b9e87bf309fef18faa708
+    id: r.succeeded-completes
+    level: MUST
+    text: A succeeded observation sets the phase to succeeded, adopts the run id,
+      exit code, and outputs, stamps the completion time, and sets the Complete/true
+      condition.
+  - codeRefs:
+    - method:f155b5d02f0b9e87bf309fef18faa708
+    id: r.terminal-ttl-delete
+    level: MUST
+    text: 'A run already in a terminal phase is left finished: with TTLSecondsAfterFinished
+      and a completion time it deletes once the TTL has elapsed, otherwise it requeues
+      for the remainder of the TTL.'
+  - codeRefs:
+    - method:f155b5d02f0b9e87bf309fef18faa708
+    id: r.unknown-state-errors
+    level: MUST
+    text: An execution observation whose state is none of running, succeeded, or failed
+      returns an error.
   upstream: self
 - code:
   - internal/livegate/livegate.go
