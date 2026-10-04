@@ -1,0 +1,186 @@
+conditions:
+- message: 'undeclared: ConfigEntry, KeyEntry, NewRegistry, ParseRef, Registry, Registry.CleanupNamespace,
+    Registry.DeleteConfig, Registry.DeleteKey, Registry.GetClient, Registry.GetExternalKey,
+    Registry.InvalidateConfig, Registry.ListConfigs, Registry.ListKeys, Registry.ModifyConfig,
+    Registry.ModifyKey, Registry.ReadConfig, Registry.ReadKey, Registry.ReadRedactedConfig,
+    Registry.ReadRedactedKey, Registry.Stop, nilCheckingKey.Decrypt, nilCheckingKey.Encrypt,
+    nilCheckingKey.ExportPublic, nilCheckingKey.Sign, nilCheckingKey.Verify'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/vault/external_keys/registry.go
+  - third_party/openbao/internal/vault/external_keys/registry_test.go
+  fingerprint: 99d103742b25dae8090bcd4188cc6396a6a4ee3145fab67ee4d1bf918dfad60f
+  interfaces:
+  - codegraphId: struct:a71c53ad736f80e187bda4dd50aae869
+    file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: struct
+    line: 38
+    name: ConfigEntry
+  - codegraphId: struct:9794ea1f3c51ecee54f93b41bb342df2
+    file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: struct
+    line: 44
+    name: KeyEntry
+  - codegraphId: struct:dfc93b108b0904fbfb9ecaedc56487be
+    file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: struct
+    line: 56
+    name: Registry
+  - codegraphId: function:607eaa469f9a50f577b940d4dcaf39e0
+    file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: function
+    line: 70
+    name: NewRegistry
+    signature: (plugins *kmsplugin.Catalog, logger log.Logger) *Registry
+  - codegraphId: method:c561f739d1971215eb63d39a5c0f3531
+    file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    line: 139
+    name: Registry.ListConfigs
+    signature: (ctx context.Context, s logical.Storage, after string, limit int) ([]string,
+      error)
+  - codegraphId: method:1ecc6f17039bf8adb052ffeacab1aff7
+    file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    line: 144
+    name: Registry.ReadConfig
+    signature: (ctx context.Context, s logical.Storage, name string) (*ConfigEntry,
+      error)
+  - codegraphId: method:99221a35bab3f4aa567da370a5bd295a
+    file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    line: 163
+    name: Registry.ReadRedactedConfig
+    signature: (ctx context.Context, s logical.Storage, name string) (*ConfigEntry,
+      error)
+  - codegraphId: method:4dbf59f10060e05ed0a672864d2fe5f9
+    file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    line: 185
+    name: Registry.ModifyConfig
+    signature: (ctx context.Context, s logical.Storage, name string, verify bool,
+      f func(ce *ConfigEntry, exists bool) error) error
+  - codegraphId: method:4e04d2536759fd80b03fbfb091363c2d
+    file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    line: 272
+    name: Registry.DeleteConfig
+    signature: (ctx context.Context, s logical.Storage, name string) error
+  - codegraphId: method:32c035dd749c921d07dc6b7664b27e0f
+    file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    line: 317
+    name: Registry.InvalidateConfig
+    signature: (ctx context.Context, name string) error
+  - codegraphId: method:1d4baa27d491fa1fd71596fe5578918e
+    file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    line: 338
+    name: Registry.ListKeys
+    signature: (ctx context.Context, s logical.Storage, config string, after string,
+      limit int) ([]string, error)
+  - codegraphId: method:ff1e24e4725f124c08dbe1c2f9ff03eb
+    file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    line: 343
+    name: Registry.ReadKey
+    signature: (ctx context.Context, s logical.Storage, configName, keyName string)
+      (*KeyEntry, error)
+  - codegraphId: method:eee38b27fb79ebc439d0e715243d5d99
+    file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    line: 362
+    name: Registry.ReadRedactedKey
+    signature: (ctx context.Context, s logical.Storage, configName, keyName string)
+      (*KeyEntry, error)
+  - codegraphId: method:80e9b0daf4e715a4ab470cc6224c799a
+    file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    line: 389
+    name: Registry.ModifyKey
+    signature: (ctx context.Context, s logical.Storage, configName, keyName string,
+      verify bool, f func(ke *KeyEntry, exists bool) error) error
+  - codegraphId: method:f3e992f489011fce6208f12ba5544f07
+    file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    line: 468
+    name: Registry.DeleteKey
+    signature: (ctx context.Context, s logical.Storage, configName, keyName string)
+      error
+  - codegraphId: method:240bfc933b6b31053729e9655c13f86e
+    file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    line: 477
+    name: Registry.GetExternalKey
+    signature: (ctx context.Context, s logical.Storage, ns *namespace.Namespace, mount,
+      ref string) (kms.Key, error)
+  - codegraphId: function:526cfc52f6ebda162b4820ec9fcbc622
+    file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: function
+    line: 527
+    name: ParseRef
+    signature: (input string) (string, string, error)
+  - codegraphId: method:5ddc2f9a098beabfa68ff049e2d74c45
+    file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    line: 544
+    name: Registry.GetClient
+    signature: (ctx context.Context, s logical.Storage, ns *namespace.Namespace, name
+      string) (kms.KMS, error)
+  - codegraphId: method:b1fdf758ac6f2e25b7de9858b7e9c0b7
+    file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    line: 586
+    name: Registry.CleanupNamespace
+    signature: (ctx context.Context, ns *namespace.Namespace)
+  - codegraphId: method:8240917e9e440e7b87f2e08b4b7c401c
+    file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    line: 610
+    name: Registry.Stop
+    signature: (ctx context.Context)
+  - codegraphId: method:a2435bcb054a88973fb08ff5826ac2ba
+    file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    line: 637
+    name: nilCheckingKey.Encrypt
+    signature: (ctx context.Context, opts *kms.CipherOptions) ([]byte, error)
+  - codegraphId: method:1fd63eab53c214ea6b6053a52c1ef73d
+    file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    line: 647
+    name: nilCheckingKey.Decrypt
+    signature: (ctx context.Context, opts *kms.CipherOptions) ([]byte, error)
+  - codegraphId: method:4ec4cb8f3875e08dbafddb73fbcd6781
+    file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    line: 657
+    name: nilCheckingKey.Sign
+    signature: (ctx context.Context, opts *kms.SignOptions) ([]byte, error)
+  - codegraphId: method:63a4261ba7c508894a6f3a6832bcf244
+    file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    line: 669
+    name: nilCheckingKey.Verify
+    signature: (ctx context.Context, opts *kms.VerifyOptions) error
+  - codegraphId: method:e8ef5a5c70ef4c4e3ff8ec6422ee997f
+    file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    line: 683
+    name: nilCheckingKey.ExportPublic
+    signature: (ctx context.Context) (crypto.PublicKey, error)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: a7fa1f8424c7dcee774d23d67a4e8ab989d611088e364be77062ce81beec87d6
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 99d103742b25dae8090bcd4188cc6396a6a4ee3145fab67ee4d1bf918dfad60f

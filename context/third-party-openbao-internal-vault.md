@@ -57,5 +57,5 @@ upstream: self
 - `file:third_party/openbao/internal/vault/identity_store_aliases_test.go` file identity_store_aliases_test.go (third_party/openbao/internal/vault/identity_store_aliases_test.go)
 - `file:third_party/openbao/internal/vault/identity_store_entities_test.go` file identity_store_entities_test.go (third_party/openbao/internal/vault/identity_store_entities_test.go)
 
-_83 more reference(s) indexed but not listed here to stay inside the 1500-token budget._
+_789 more reference(s) indexed but not listed here to stay inside the 1500-token budget._
 <!-- SPECD_MANAGED_END -->
