@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so a reader or agent can work on the shared-config layer of the OpenBao server without reading fourteen files. It states the parsing contract for every shared config stanza (shared options, seals, listeners, user lockouts, telemetry, response headers), the validation and lint contract that reports unused keys with source positions, and the merge and sanitize contract used when several config files are combined and when parsed config is logged. Each requirement names the exported entry point that carries it, so a change to a parser or validator can be checked against the behaviour the package promises.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
