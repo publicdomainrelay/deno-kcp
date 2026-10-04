@@ -3926,6 +3926,18 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.role-query-record` (MUST): "KubernetesRoleAdapter.queryRecord GETs the named role URL for the queried backend and returns the response data with backend and name written onto it, so the record is addressable after load."
 - added `r.role-url-shape` (MUST): "KubernetesRoleAdapter extends NamedPathAdapter and builds role URLs as the adapter buildURL plus the encoded backend plus '/roles', appending the role name only when a name is given; urlForQuery resolves through that helper with the backend carried by the query object, and urlForUpdateRecord and urlForDeleteRecord resolve through it with the backend carried by the snapshot."
 
+### third-party-openbao-ui-app-adapters-oidc
+
+- intent: "" -> "These files exist so the OpenBao UI can talk to the server's OIDC endpoints through Ember Data without duplicating request code: NamedPathAdapter supplies generic named-resource persistence, and each OIDC adapter supplies only the endpoint path for its model type. The context documents that contract so the path strings and the extra key-rotation operation stay stable as the adapters are vendored or adapted."
+- added `r.adapters-extend-named-path` (MUST): "Each OIDC adapter class is a default export that extends NamedPathAdapter from third_party/openbao/ui/app/adapters/named-path.js, so persistence behavior comes from the shared base and the adapter itself only narrows the path."
+- added `r.assignment-path` (MUST): "OidcAssignmentAdapter.pathForType takes no arguments and returns the API path for the OIDC assignment resource, which the base adapter appends when building request URLs."
+- added `r.client-path` (MUST): "OidcClientAdapter.pathForType takes no arguments and returns the literal string 'identity/oidc/client', fixing the endpoint the client model is persisted against."
+- added `r.key-path` (MUST): "OidcKeyAdapter.pathForType takes no arguments and returns the API path for the OIDC key resource, which the base adapter uses as the collection path for key records."
+- added `r.key-rotate` (MUST): "OidcKeyAdapter.rotate is the only operation beyond the inherited CRUD in this context and accepts two arguments, the key name and verification_ttl, so rotation is addressed to a named key with a caller-supplied verification TTL."
+- added `r.no-extra-members` (SHOULD): "The assignment, client, provider and scope adapters stay free of extra methods or state, so all persistence behavior remains owned by NamedPathAdapter and only the key adapter adds an operation."
+- added `r.provider-path` (MUST): "OidcProviderAdapter.pathForType takes no arguments and returns the literal string 'identity/oidc/provider', fixing the endpoint the provider model is persisted against."
+- added `r.scope-path` (MUST): "OidcScopeAdapter.pathForType takes no arguments and returns the literal string 'identity/oidc/scope', fixing the endpoint the scope model is persisted against."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4220,6 +4232,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-adapters-keymgmt-c2s-6c1bbe4c3ba9-89cee50ec5ae-a3 | CodeToSpec | Failed |  | 0 | - |
 | third-party-openbao-ui-app-adapters-kubernetes-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-adapters-kubernetes-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-adapters-oidc-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-adapters-oidc-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-adapters-pki-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

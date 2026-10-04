@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+These files exist so the OpenBao UI can talk to the server's OIDC endpoints through Ember Data without duplicating request code: NamedPathAdapter supplies generic named-resource persistence, and each OIDC adapter supplies only the endpoint path for its model type. The context documents that contract so the path strings and the extra key-rotation operation stay stable as the adapters are vendored or adapted.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

@@ -10,5 +10,21 @@ spec:
   systemContext: third-party-openbao-ui-app-adapters-oidc
   toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
 status:
-  message: the agent is summarizing third-party-openbao-ui-app-adapters-oidc
-  phase: Running
+  agentLog: 'This context covers five Ember Data adapters under third_party/openbao/ui/app/adapters/oidc/
+    that bind OpenBao''s OIDC identity API to UI models: assignment.js, client.js,
+    key.js, provider.js and scope.js. Every adapter is a default-exported class extending
+    NamedPathAdapter from third_party/openbao/ui/app/adapters/named-path.js, and each
+    overrides pathForType() to name the API path it serves. Four of the five (assignment,
+    client, provider, scope) contain only that single override; OidcKeyAdapter adds
+    a second method, rotate(name, verification_ttl). The adapters carry no persistence
+    logic of their own — they inherit CRUD from NamedPathAdapter and contribute only
+    the path segment, which makes them the adapter layer for the OpenBao OIDC provider,
+    client, scope, assignment and key resources.'
+  message: wrote 8 requirement(s) and 5 interface(s) for third-party-openbao-ui-app-adapters-oidc;
+    interface OidcAssignmentAdapter.pathForType is not in the observed facts; dropped;
+    interface OidcClientAdapter.pathForType is not in the observed facts; dropped;
+    interface OidcKeyAdapter.pathForType is not in the observed facts; dropped; interface
+    OidcKeyAdapter.rotate is not in the observed facts; dropped; interface OidcProviderAdapter.pathForType
+    is not in the observed facts; dropped; interface OidcScopeAdapter.pathForType
+    is not in the observed facts; dropped
+  phase: Succeeded

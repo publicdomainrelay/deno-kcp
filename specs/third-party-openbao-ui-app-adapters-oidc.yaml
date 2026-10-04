@@ -1,5 +1,10 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
+- class:5ef1181c63a826f813a4a8b753427cdb OidcClientAdapter@third_party/openbao/ui/app/adapters/oidc/client.js:8
+- class:85cac5f7c118d637075290fda37b8c36 OidcAssignmentAdapter@third_party/openbao/ui/app/adapters/oidc/assignment.js:8
+- class:e377a95fe0fed39237cb6c007b056b5f OidcScopeAdapter@third_party/openbao/ui/app/adapters/oidc/scope.js:8
+- class:e7633255c90f93788449a8284322c888 OidcProviderAdapter@third_party/openbao/ui/app/adapters/oidc/provider.js:8
+- class:fac811cefc7294c3c17c59cf40355943 OidcKeyAdapter@third_party/openbao/ui/app/adapters/oidc/key.js:8
 - file:third_party/openbao/ui/app/adapters/oidc/assignment.js assignment.js@third_party/openbao/ui/app/adapters/oidc/assignment.js
 - file:third_party/openbao/ui/app/adapters/oidc/client.js client.js@third_party/openbao/ui/app/adapters/oidc/client.js
 - file:third_party/openbao/ui/app/adapters/oidc/key.js key.js@third_party/openbao/ui/app/adapters/oidc/key.js
@@ -10,5 +15,102 @@ metadata:
   name: third-party-openbao-ui-app-adapters-oidc
   namespace: default
 spec:
+  intent: 'These files exist so the OpenBao UI can talk to the server''s OIDC endpoints
+    through Ember Data without duplicating request code: NamedPathAdapter supplies
+    generic named-resource persistence, and each OIDC adapter supplies only the endpoint
+    path for its model type. The context documents that contract so the path strings
+    and the extra key-rotation operation stay stable as the adapters are vendored
+    or adapted.'
+  interfaces:
+  - file: third_party/openbao/ui/app/adapters/oidc/assignment.js
+    kind: class
+    name: OidcAssignmentAdapter
+    signature: class OidcAssignmentAdapter extends NamedPathAdapter
+  - file: third_party/openbao/ui/app/adapters/oidc/client.js
+    kind: class
+    name: OidcClientAdapter
+    signature: class OidcClientAdapter extends NamedPathAdapter
+  - file: third_party/openbao/ui/app/adapters/oidc/key.js
+    kind: class
+    name: OidcKeyAdapter
+    signature: class OidcKeyAdapter extends NamedPathAdapter
+  - file: third_party/openbao/ui/app/adapters/oidc/provider.js
+    kind: class
+    name: OidcProviderAdapter
+    signature: class OidcProviderAdapter extends NamedPathAdapter
+  - file: third_party/openbao/ui/app/adapters/oidc/scope.js
+    kind: class
+    name: OidcScopeAdapter
+    signature: class OidcScopeAdapter extends NamedPathAdapter
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - class:5ef1181c63a826f813a4a8b753427cdb
+    - class:85cac5f7c118d637075290fda37b8c36
+    - class:e377a95fe0fed39237cb6c007b056b5f
+    - class:e7633255c90f93788449a8284322c888
+    - class:fac811cefc7294c3c17c59cf40355943
+    id: r.adapters-extend-named-path
+    level: MUST
+    text: Each OIDC adapter class is a default export that extends NamedPathAdapter
+      from third_party/openbao/ui/app/adapters/named-path.js, so persistence behavior
+      comes from the shared base and the adapter itself only narrows the path.
+  - codeRefs:
+    - class:85cac5f7c118d637075290fda37b8c36
+    - file:third_party/openbao/ui/app/adapters/oidc/assignment.js
+    id: r.assignment-path
+    level: MUST
+    text: OidcAssignmentAdapter.pathForType takes no arguments and returns the API
+      path for the OIDC assignment resource, which the base adapter appends when building
+      request URLs.
+  - codeRefs:
+    - class:5ef1181c63a826f813a4a8b753427cdb
+    - file:third_party/openbao/ui/app/adapters/oidc/client.js
+    id: r.client-path
+    level: MUST
+    text: OidcClientAdapter.pathForType takes no arguments and returns the literal
+      string 'identity/oidc/client', fixing the endpoint the client model is persisted
+      against.
+  - codeRefs:
+    - class:fac811cefc7294c3c17c59cf40355943
+    - file:third_party/openbao/ui/app/adapters/oidc/key.js
+    id: r.key-path
+    level: MUST
+    text: OidcKeyAdapter.pathForType takes no arguments and returns the API path for
+      the OIDC key resource, which the base adapter uses as the collection path for
+      key records.
+  - codeRefs:
+    - class:fac811cefc7294c3c17c59cf40355943
+    - file:third_party/openbao/ui/app/adapters/oidc/key.js
+    id: r.key-rotate
+    level: MUST
+    text: OidcKeyAdapter.rotate is the only operation beyond the inherited CRUD in
+      this context and accepts two arguments, the key name and verification_ttl, so
+      rotation is addressed to a named key with a caller-supplied verification TTL.
+  - codeRefs:
+    - class:5ef1181c63a826f813a4a8b753427cdb
+    - class:85cac5f7c118d637075290fda37b8c36
+    - class:e377a95fe0fed39237cb6c007b056b5f
+    - class:e7633255c90f93788449a8284322c888
+    id: r.no-extra-members
+    level: SHOULD
+    text: The assignment, client, provider and scope adapters stay free of extra methods
+      or state, so all persistence behavior remains owned by NamedPathAdapter and
+      only the key adapter adds an operation.
+  - codeRefs:
+    - class:e7633255c90f93788449a8284322c888
+    - file:third_party/openbao/ui/app/adapters/oidc/provider.js
+    id: r.provider-path
+    level: MUST
+    text: OidcProviderAdapter.pathForType takes no arguments and returns the literal
+      string 'identity/oidc/provider', fixing the endpoint the provider model is persisted
+      against.
+  - codeRefs:
+    - class:e377a95fe0fed39237cb6c007b056b5f
+    - file:third_party/openbao/ui/app/adapters/oidc/scope.js
+    id: r.scope-path
+    level: MUST
+    text: OidcScopeAdapter.pathForType takes no arguments and returns the literal
+      string 'identity/oidc/scope', fixing the endpoint the scope model is persisted
+      against.
   upstream: self
