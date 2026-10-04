@@ -112,5 +112,94 @@ spec:
   systemContext: deploy-examples-atproto-market
   toSpecHash: 957db736fd813b5203a0f7e106bec00d9911566c77c41fed0b8c84626368c7d8
 status:
-  message: the agent is realizing deploy-examples-atproto-market
-  phase: Running
+  acceptance:
+  - durationSeconds: 411.547115946
+    exitCode: 1
+    name: market-live-acceptance
+    outputTail: |-
+      ...rial=24:C9:13:DA:85:27:EE:F4:EB:17:07:AE:FF:BD:1A:34:FC:B6:48:D6
+
+      health, https because every service pod sets SERVICE_TLS true:
+        plc     curl -k https://127.0.0.1:2587/health
+        relay   curl -k https://127.0.0.1:2584/xrpc/_health
+        pds     curl -k https://127.0.0.1:2583/xrpc/_health
+        bob pds curl -k https://127.0.0.1:2585/xrpc/_health
+        bidder  curl -k https://127.0.0.1:2586/oauth-client-metadata.json
+
+      create alice:
+        curl -k -sS -X POST https://127.0.0.1:2583/xrpc/com.atproto.server.createAccount \
+          -H 'content-type: application/json' \
+          -d '{"handle":"alice","password":"hunter2"}'
+
+      == checks ==
+      waiting 10s, then reading the long-running pods again
+
+      results:
+        check                                result evidence
+        apply.sh                             PASS exit=0 attempts=1 0
+        denopod root:global/plc              PASS phase=Running ready=true
+        denopod root:relay/relay             PASS phase=Running ready=true
+        denopod root:alice/pds               PASS phase=Running ready=true
+        denopod root:bob/pds                 PASS phase=Running ready=true
+        denopod root:bob/bidder              PASS phase=Running ready=true
+        denopod root:alice/verifier          FAIL phase=Failed
+        bob pds on its name                  PASS ready=true probe=kcpdns pds.default.bob.svc.kcp.local /xrpc/_health
+        bob pds on the host                  PASS GET https://127.0.0.1:2585/xrpc/_health -> 200
+        bidder on its name                   PASS ready=true probe=kcpdns bidder.default.bob.svc.kcp.local /oauth-client-metadata.json
+        bidder on the host                   PASS GET http://127.0.0.1:2586/oauth-client-metadata.json -> 200
+        still up root:global/plc             PASS phase=Running ready=true after 10s
+        still up root:relay/relay            PASS phase=Running ready=true after 10s
+        still up root:alice/pds              PASS phase=Running ready=true after 10s
+        still up root:bob/pds                PASS phase=Running ready=true after 10s
+        still up root:bob/bidder             PASS phase=Running ready=true after 10s
+
+      provider log, tail of /home/johnandersen777/specd-accept-tmp/tmp.UI6s56w1ie/provider.log:
+      time=2026-10-04T15:28:06.205-07:00 level=INFO msg="watch: waiting for APIExport virtual workspace endpoints" denoruntime=0 policyworkflowruns=0
+
+      status of the pods that are not Running and ready:
+      root:alice verifier:
+        {"completionTime":"2026-10-04T22:34:27Z","conditions":[{"lastTransitionTime":"2026-10-04T22:34:27Z","message":"the pod reached a terminal phase","observedGeneration":1,"reason":"Terminal","status":"False","type":"Ready"},{"lastTransitionTime":"2026-10-04T22:32:55Z","message":"the deno process failed and the restart policy is Never","observedGeneration":1,"reason":"ProcessFailed","status":"False","type":"Complete"}],"exitCode":1,"message":"the deno process exited with code 1","outputs":{"accessJwt":"eyJ0eXAiOiJhdCtqd3QiLCJhbGciOiJFUzI1NksiLCJraWQiOiJkaWQ6a2V5OnpRM3NoV2JWcHZnelphVUpGR2VOZHZZYWJnZTFvOThXWUJ2ZU1OTXRrQzd5TkFqWVAjYXRwcm90byJ9.eyJpc3MiOiJkaWQ6a2V5OnpRM3NoV2JWcHZnelphVUpGR2VOZHZZYWJnZTFvOThXWUJ2ZU1OTXRrQzd5TkFqWVAiLCJzdWIiOiJkaWQ6cGxjOmQ0enI3enVpd3Vvamx6c2ptNWloaHZrdyIsImhhbmRsZSI6ImFsaWNlLW11dWVjcmduIiwiYXVkIjoiZGlkOmtleTp6UTNzaFdiVnB2Z3paYVVKRkdlTmR2WWFiZ2Uxbzk4V1lCdmVNTk10a0M3eU5BallQIiwiaWF0IjoxNzkxMTUzMTc1LCJleHAiOjE3OTExNTQwNzUsImp0aSI6InVPM0RTUlQtUUFkZENmNlR4dzVfZ0EifQ.DW5Rbu8vDHd9UmYofYqcXXj0H_kHQtmf58UHRtiKMJoaEvP1-UflYJGNFyJdlk4A6RRbeWoHVWeDNYboZzt3GQ","createAccountStatus":"200","did":"did:plc:d4zr7zuiwuojlzsjm5ihhvkw","firstWriteStatus":"200","gotAccessJwt":"yes","handle":"alice-muuecrgn","plcAlsoKnownAs":"[\"at://alice-muuecrgn\"]","plcService":"[{\"id\":\"#atproto_pds\",\"type\":\"AtprotoPersonalDataServer\",\"serviceEndpoint\":\"https://pds.default.alice.svc.kcp.local\"}]","plcStatus":"200","relayFrames":"3","relaySawCommit":"timeout","secondWriteStatus":"200","verdict":"fail"},"phase":"Failed","ready":false,"restarts":0,"runID":"pod-20261004T223255.538264722-6","startTime":"2026-10-04T22:32:55Z"}
+
+      accept: fail
+    passed: false
+  agentLog: "accept.sh bidder host check changed `https://` → `http://127.0.0.1:2586`,
+    comment now states why schemes differ (PDS appends TLS leaf flags, bidder declares
+    none, parser rejects unknown flags). `70-bidder.yaml` already matched spec — no
+    TLS leaf written, no TLS flags appended, `SERVICE_TLS: \"true\"` kept.\n\n`bash
+    -n` OK. `go test ./...` exit zero.\n\nFiles: `deploy/examples/atproto/market/accept.sh`.\n\n⚠
+    claude.ai connectors are disabled because ANTHROPIC_API_KEY or another auth source
+    is set and takes precedence over your claude.ai login · Unset it to load your
+    organization's connectors\n[claude-code:unrecognized_model] {\"model\":\"deepseek-v4-flash\",\"query_source\":\"sdk\"}\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/api/v1alpha1\t(cached)\n?   \tgithub.com/johnandersen777/deno-kcp/cmd/deno-kcp-provider\t[no
+    test files]\nok  \tgithub.com/johnandersen777/deno-kcp/internal/denojob\t(cached)\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/internal/denopod\t(cached)\nok  \tgithub.com/johnandersen777/deno-kcp/internal/denorun\t(cached)\n?
+    \  \tgithub.com/johnandersen777/deno-kcp/internal/livegate\t[no test files]\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/internal/policyengine\t(cached)\nok  \tgithub.com/johnandersen777/deno-kcp/internal/policyworkflowpod\t(cached)\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/internal/policyworkflowrun\t(cached)\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/internal/provider\t0.044s\nok  \tgithub.com/johnandersen777/deno-kcp/internal/trigger\t(cached)\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/test/integration\t(cached)"
+  branch: spec/deploy-examples-atproto-market/957db736
+  commit: e33a5585dc1ac9d3bf63bc1ebdcf5dbb45369989
+  filesTouched:
+  - deploy/examples/atproto/market/accept.sh
+  message: 'realized deploy-examples-atproto-market on spec/deploy-examples-atproto-market/957db736:
+    1 file(s) touched, verify exit 0'
+  phase: Succeeded
+  progress:
+  - at: "2026-10-04T22:27:31Z"
+    files:
+    - deploy/examples/atproto/market/70-bidder.yaml
+    tool: Read
+  - at: "2026-10-04T22:27:31Z"
+    files:
+    - deploy/examples/atproto/market/accept.sh
+    tool: Read
+  - at: "2026-10-04T22:27:34Z"
+    files:
+    - deploy/examples/atproto/market/accept.sh
+    tool: Edit
+  - at: "2026-10-04T22:27:48Z"
+    note: turn
+  - at: "2026-10-04T22:27:48Z"
+    note: turn
+    turn: 1
