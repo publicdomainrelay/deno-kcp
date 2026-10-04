@@ -71456,7 +71456,30 @@ system_contexts:
   codeRefIndex:
   - file:third_party/openbao/ui/lib/core/app/components/confirm/message.js message.js@third_party/openbao/ui/lib/core/app/components/confirm/message.js
   id: sc.third-party-openbao-ui-lib-core-app-components-confirm
+  intent: This context exists so the confirm/message component is resolvable from
+    the host application's app tree without duplicating its source. Ember resolves
+    application-realm components from app/components, while reusable code lives in
+    the addon realm under lib/core/addon; this file bridges the two by re-exporting
+    the addon module as the app-tree default. It is a generated-style passthrough,
+    so any consumer importing the component at the app path gets the same module instance
+    as a consumer importing the addon path.
   name: third-party-openbao-ui-lib-core-app-components-confirm
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/app/components/confirm/message.js
+    id: r.license-header
+    level: MUST
+    text: 'The file must keep the HashiCorp copyright notice and the SPDX-License-Identifier:
+      MPL-2.0 header at the top of the module, since this tree is vendored third-party
+      OpenBao source.'
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/app/components/confirm/message.js
+    id: r.re-export-addon-default
+    level: MUST
+    text: The app-tree module must re-export the default binding of the addon module
+      core/components/confirm/message as its own default export, and must define no
+      local component state, template or behavior of its own, so that the app-namespace
+      import and the addon-namespace import resolve to the same implementation.
   upstream: self
 - code:
   - third_party/openbao/ui/lib/core/app/components/linkable-item/content.js

@@ -5450,6 +5450,12 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.largest-unit-selection` (MUST): "largestUnitFromSeconds MUST return the largest unit that divides the seconds value with no remainder, checked in the order day, hour, minute, using the secondsMap factors; it MUST return 's' when the value is 0 and MUST also return 's' when none of day, hour or minute divides it evenly. This rule is what lets the TTL picker initialise and the info table row display a duration as '2d' rather than '48h' or '2880m'."
 - added `r.utils-module-layout` (SHOULD): "The core addon utilities MUST stay split into the single-purpose modules listed here, one concern per file, so that common-prefix detection, URL parsing and timestamp helpers remain independently importable from third_party/openbao/ui/lib/core/addon/utils/ alongside the base64, date-format, duration and search-select helpers, and each MUST be exported as an ES module function or const rather than attached to a global."
 
+### third-party-openbao-ui-lib-core-app-components-confirm
+
+- intent: "" -> "This context exists so the confirm/message component is resolvable from the host application's app tree without duplicating its source. Ember resolves application-realm components from app/components, while reusable code lives in the addon realm under lib/core/addon; this file bridges the two by re-exporting the addon module as the app-tree default. It is a generated-style passthrough, so any consumer importing the component at the app path gets the same module instance as a consumer importing the addon path."
+- added `r.license-header` (MUST): "The file must keep the HashiCorp copyright notice and the SPDX-License-Identifier: MPL-2.0 header at the top of the module, since this tree is vendored third-party OpenBao source."
+- added `r.re-export-addon-default` (MUST): "The app-tree module must re-export the default binding of the addon module core/components/confirm/message as its own default export, and must define no local component state, template or behavior of its own, so that the app-namespace import and the addon-namespace import resolve to the same implementation."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5918,5 +5924,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-core-addon-modifiers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-core-addon-utils-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-core-app-components-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-ui-lib-core-app-components-confirm-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-core-app-components-confirm-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-core-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
