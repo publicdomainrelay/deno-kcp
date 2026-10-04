@@ -27521,8 +27521,220 @@ system_contexts:
   codeRefIndex:
   - file:third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go
     corehelpers.go@third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go
+  - function:6f3ac40e6015b3efda87bd98a688bc6b NewNoopAudit@third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go:215
+  - function:87f908320549ad2cf551ec8b841611ec MakeTestPluginDir@third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go:52
+  - function:a78f5a8b04b501ed6823504d0e41434e TestNoopAudit@third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go:207
+  - function:a7af5a35ef73c584f7386d5b2111fe93 NewMockBuiltinRegistry@third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go:84
+  - function:ad01aa0aa5c7dd23a5c34dcbf6f038cc NewTestLogger@third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go:398
+  - function:d74819a0358c146aa8b178bfc4879cf3 RetryUntil@third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go:37
+  - function:fd6365490e2afe932fd9c9f35a61048d NoopAuditFactory@third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go:241
+  - method:2f7ca4f7d59c07a712e6f331d56060d1 mockBuiltinRegistry.Get@third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go:115
+  - method:3575e75f13d86014e0f3763c2d67c471 mockBuiltinRegistry.DeprecationStatus@third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go:199
+  - method:4011b2efd7910c31c45fc08332e8ec22 NoopAudit.Invalidate@third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go:370
+  - method:51edb5d398b2743449216770c626f9c3 NoopAudit.Reload@third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go:366
+  - method:7a3afe098d2edae4806b9ed783ceae76 NoopAudit.LogResponse@third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go:299
+  - method:92a306c9b22109615f996520c13b058e NoopAudit.GetHash@third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go:358
+  - method:a10fb2503f2f33c56fa43d2795ea12fb NoopAudit.GetDecodedRecord@third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go:376
+  - method:a4569966a95fe52f50bb9ea91dbb5a51 NoopAudit.Salt@third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go:338
+  - method:ab4c9611de35402d6186004bc08592e8 NoopAudit.LogTestMessage@third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go:325
+  - method:d3d57385d0604edf55e00655f4c3df73 mockBuiltinRegistry.Contains@third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go:195
+  - method:f3d5234680a8fe98b94879211559b17f TestLogger.StopLogging@third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go:440
+  - method:fa0a9fdb1c3a00dd4f0b3618801c6f66 mockBuiltinRegistry.Keys@third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go:164
+  - method:fe0fb30be1ca3ade453f16c7f7531590 NoopAudit.LogRequest@third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go:278
+  - struct:522feb9376e72ceda23bdacfde1c0150 NoopAudit@third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go:254
+  - struct:f647f9b362f66fe86446fdefd5c2fbde TestLogger@third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go:391
   id: sc.third-party-openbao-internal-helper-testhelpers-corehelpers
+  intent: The package exists so tests elsewhere in OpenBao can stand up auditing,
+    plugin-registry lookups, plugin directories and log capture without the real subsystems.
+    It centralizes the fakes so they behave consistently across packages and so tests
+    can assert on what an audit backend received or what a backend logged. Consumers
+    depend on the fixed builtin names and plugin types the mock registry exposes,
+    on the audit factory handing back the slice of records it was given, and on cleanup
+    functions that remove the temporary directories they created.
+  interfaces:
+  - file: third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go
+    kind: function
+    name: MakeTestPluginDir
+    signature: func MakeTestPluginDir(t testing.T) (string, func(t testing.T))
+  - file: third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go
+    kind: function
+    name: NewMockBuiltinRegistry
+    signature: func NewMockBuiltinRegistry() *mockBuiltinRegistry
+  - file: third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go
+    kind: function
+    name: NewNoopAudit
+    signature: func NewNoopAudit(config map[string]string) (*NoopAudit, error)
+  - file: third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go
+    kind: function
+    name: NewTestLogger
+    signature: func NewTestLogger(t testing.T) *TestLogger
+  - file: third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go
+    kind: struct
+    name: NoopAudit
+    signature: type NoopAudit struct
+  - file: third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go
+    kind: method
+    name: NoopAudit.GetDecodedRecord
+    signature: func (a *NoopAudit) GetDecodedRecord(index int) (map[string]any, error)
+  - file: third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go
+    kind: method
+    name: NoopAudit.GetHash
+    signature: func (a *NoopAudit) GetHash(ctx context.Context, data string) (string,
+      error)
+  - file: third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go
+    kind: method
+    name: NoopAudit.Invalidate
+    signature: func (a *NoopAudit) Invalidate(ctx context.Context)
+  - file: third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go
+    kind: method
+    name: NoopAudit.LogRequest
+    signature: func (a *NoopAudit) LogRequest(ctx context.Context, in *logical.LogInput)
+      error
+  - file: third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go
+    kind: method
+    name: NoopAudit.LogResponse
+    signature: func (a *NoopAudit) LogResponse(ctx context.Context, in *logical.LogInput)
+      error
+  - file: third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go
+    kind: method
+    name: NoopAudit.LogTestMessage
+    signature: func (a *NoopAudit) LogTestMessage(ctx context.Context, in *logical.LogInput,
+      config map[string]string) error
+  - file: third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go
+    kind: method
+    name: NoopAudit.Reload
+    signature: func (a *NoopAudit) Reload(ctx context.Context) error
+  - file: third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go
+    kind: method
+    name: NoopAudit.Salt
+    signature: func (a *NoopAudit) Salt(ctx context.Context) (*salt.Salt, error)
+  - file: third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go
+    kind: function
+    name: NoopAuditFactory
+    signature: func NoopAuditFactory(records **[][]byte) audit.Factory
+  - file: third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go
+    kind: function
+    name: RetryUntil
+    signature: func RetryUntil(t testing.T, timeout time.Duration, f func() error)
+  - file: third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go
+    kind: struct
+    name: TestLogger
+    signature: type TestLogger struct
+  - file: third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go
+    kind: method
+    name: TestLogger.StopLogging
+    signature: func (l *TestLogger) StopLogging()
+  - file: third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go
+    kind: function
+    name: TestNoopAudit
+    signature: func TestNoopAudit(t testing.T, config map[string]string) *NoopAudit
+  - file: third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go
+    kind: method
+    name: mockBuiltinRegistry.Contains
+    signature: func (r *mockBuiltinRegistry) Contains(name string, pluginType consts.PluginType)
+      bool
+  - file: third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go
+    kind: method
+    name: mockBuiltinRegistry.DeprecationStatus
+    signature: func (r *mockBuiltinRegistry) DeprecationStatus(name string, pluginType
+      consts.PluginType) (consts.DeprecationStatus, bool)
+  - file: third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go
+    kind: method
+    name: mockBuiltinRegistry.Get
+    signature: func (r *mockBuiltinRegistry) Get(name string, pluginType consts.PluginType)
+      (func() (any, error), bool)
+  - file: third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go
+    kind: method
+    name: mockBuiltinRegistry.Keys
+    signature: func (r *mockBuiltinRegistry) Keys(pluginType consts.PluginType) []string
   name: third-party-openbao-internal-helper-testhelpers-corehelpers
+  requirements:
+  - codeRefs:
+    - method:2f7ca4f7d59c07a712e6f331d56060d1
+    - method:3575e75f13d86014e0f3763c2d67c471
+    - method:d3d57385d0604edf55e00655f4c3df73
+    - method:fa0a9fdb1c3a00dd4f0b3618801c6f66
+    id: r.mock-registry-lookup-semantics
+    level: MUST
+    text: 'mockBuiltinRegistry answers lookups only from its seeded map: Get returns
+      the backend constructor for the name and plugin type with a found flag, Contains
+      reports whether the name and type are present, Keys lists the names registered
+      for one plugin type, and DeprecationStatus returns the recorded status for the
+      name and type with a found flag.'
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go
+    - function:a7af5a35ef73c584f7386d5b2111fe93
+    id: r.mock-registry-seeded-builtins
+    level: MUST
+    text: NewMockBuiltinRegistry returns a registry whose fixed contents are the database
+      plugins mysql-database-plugin and postgresql-database-plugin, the credential
+      plugins approle, pending-removal-test-plugin and cert, and the secret plugin
+      kv; pending-removal-test-plugin carries the PendingRemoval deprecation status
+      and the others carry none.
+  - codeRefs:
+    - function:6f3ac40e6015b3efda87bd98a688bc6b
+    - function:a78f5a8b04b501ed6823504d0e41434e
+    - function:fd6365490e2afe932fd9c9f35a61048d
+    - struct:522feb9376e72ceda23bdacfde1c0150
+    id: r.noop-audit-construction
+    level: MUST
+    text: NewNoopAudit builds a NoopAudit from a config map, creating its salt configuration,
+      and TestNoopAudit is the variant that fails the test instead of returning an
+      error; NoopAuditFactory returns an audit.Factory whose backends append every
+      logged record to the caller-supplied slice pointer.
+  - codeRefs:
+    - method:a10fb2503f2f33c56fa43d2795ea12fb
+    - struct:522feb9376e72ceda23bdacfde1c0150
+    id: r.noop-audit-decoded-record
+    level: MUST
+    text: NoopAudit.GetDecodedRecord returns the recorded entry at the given index
+      decoded into a map, so tests can assert on what the backend received.
+  - codeRefs:
+    - method:7a3afe098d2edae4806b9ed783ceae76
+    - method:ab4c9611de35402d6186004bc08592e8
+    - method:fe0fb30be1ca3ade453f16c7f7531590
+    id: r.noop-audit-log-methods
+    level: MUST
+    text: 'NoopAudit implements the audit backend logging surface: LogRequest, LogResponse
+      and LogTestMessage accept a context and logical.LogInput (LogTestMessage also
+      taking a config map) and record the entry rather than persisting it.'
+  - codeRefs:
+    - method:4011b2efd7910c31c45fc08332e8ec22
+    - method:51edb5d398b2743449216770c626f9c3
+    - method:92a306c9b22109615f996520c13b058e
+    - method:a4569966a95fe52f50bb9ea91dbb5a51
+    id: r.noop-audit-salt-hash-lifecycle
+    level: MUST
+    text: NoopAudit returns a usable salt.Salt from Salt, a hash string from GetHash
+      for the given data, a nil error from Reload, and Invalidate discards the current
+      salt state without returning a value.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go
+    - function:87f908320549ad2cf551ec8b841611ec
+    id: r.plugin-dir-temp-and-cleanup
+    level: MUST
+    text: MakeTestPluginDir creates a temporary directory with os.MkdirTemp, resolves
+      symlinks in the resulting path, and returns that path together with a cleanup
+      closure that removes the whole directory; when the passed testing.T is nil the
+      helper skips t.Helper and panics on any error instead of calling t.Fatal.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/testhelpers/corehelpers/corehelpers.go
+    - function:d74819a0358c146aa8b178bfc4879cf3
+    id: r.retry-until-polls-until-success
+    level: MUST
+    text: RetryUntil calls the supplied function repeatedly with 100 millisecond sleeps
+      between attempts, returns as soon as the function returns a nil error, and calls
+      t.Fatalf with the last error when the deadline computed from the timeout passes
+      without success.
+  - codeRefs:
+    - function:ad01aa0aa5c7dd23a5c34dcbf6f038cc
+    - method:f3d5234680a8fe98b94879211559b17f
+    - struct:f647f9b362f66fe86446fdefd5c2fbde
+    id: r.test-logger-capture-and-stop
+    level: MUST
+    text: NewTestLogger returns a TestLogger that routes log output into an in-memory
+      buffer for the duration of the test, and StopLogging tears that capture down
+      and restores the previous logger.
   upstream: self
 - code:
   - third_party/openbao/internal/helper/testhelpers/ldap/ldaphelper.go

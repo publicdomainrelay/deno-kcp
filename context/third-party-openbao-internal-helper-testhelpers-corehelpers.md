@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The package exists so tests elsewhere in OpenBao can stand up auditing, plugin-registry lookups, plugin directories and log capture without the real subsystems. It centralizes the fakes so they behave consistently across packages and so tests can assert on what an audit backend received or what a backend logged. Consumers depend on the fixed builtin names and plugin types the mock registry exposes, on the audit factory handing back the slice of records it was given, and on cleanup functions that remove the temporary directories they created.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
