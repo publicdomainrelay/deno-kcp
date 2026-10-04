@@ -3108,5 +3108,110 @@ system_contexts:
   - .tools/open-architecture/arch.yaml
   - .tools/open-architecture/validate.py
   id: sc.tools-open-architecture
+  intent: 'This context exists so the deno-kcp architecture is described as data rather
+    than prose, and so that description can be checked. arch.yaml carries the architecture
+    facts other documents and reviewers read (which upstreams run, which system contexts
+    exist, which reconciler reads and writes which fields, which crossings lack a
+    gate). validate.py exists to keep that data honest: it fails the build when an
+    id is unresolved, a path or symbol does not exist in the repo, a system context
+    tree has a cycle, a kind''s phases or conditions disagree with its Go source,
+    or a spec field is neither read by a reconciler nor declared unread.'
   name: tools-open-architecture
+  requirements:
+  - codeRefs:
+    - file:.tools/open-architecture/arch.yaml
+    id: r.arch-document-is-open-architecture
+    level: MUST
+    text: arch.yaml must declare $schema arch.schema.json, apiVersion open-architecture.dffml.github.io/v0alpha1,
+      kind OpenArchitecture, and metadata naming the repo, root id and axes prefixes.
+  - codeRefs:
+    - file:.tools/open-architecture/validate.py
+    id: r.boundary-tree-one-root
+    level: MUST
+    text: The execution-context boundary tree must have exactly one root, every context
+      must carry enforced_by, and an instance carrying an object must sit in a namespace
+      context whose workspace is listed by an ancestor.
+  - codeRefs:
+    - file:.tools/open-architecture/validate.py
+    id: r.crossings-and-risks-accounted
+    level: MUST
+    text: A crossing's from and to must both be execution contexts in the boundary
+      tree, and a crossing whose auth is none or whose gate is empty must be named
+      by at least one risk.
+  - codeRefs:
+    - file:.tools/open-architecture/validate.py
+    id: r.duplicate-yaml-keys-error
+    level: MUST
+    text: Loading arch.yaml must report a duplicate mapping key at its line number
+      rather than silently taking the last value.
+  - codeRefs:
+    - file:.tools/open-architecture/validate.py
+    id: r.ids-are-prefixed-refs
+    level: MUST
+    text: Every id must match the prefixed ref form, one of up, orch, type, cred,
+      ov, sc, tb, x, r, rec or flow, followed by a dotted name; an id defined twice
+      is an error and must be a ref instead.
+  - codeRefs:
+    - file:.tools/open-architecture/validate.py
+    id: r.orphans-warned
+    level: SHOULD
+    text: An id that nothing references and that metadata.roots does not list should
+      be reported as an orphan warning, while roots that are referenced elsewhere
+      or not unreferenced entry points are errors.
+  - codeRefs:
+    - file:.tools/open-architecture/validate.py
+    id: r.outline-mode
+    level: MAY
+    text: validate.py may print the document's shape, ids, kinds and refs without
+      values, optionally limited to one subtree, instead of validating.
+  - codeRefs:
+    - file:.tools/open-architecture/validate.py
+    id: r.paths-and-symbols-exist
+    level: MUST
+    text: Every path-valued key must name a file that exists under the repo, and a
+      path:Symbol value must name a symbol found in that file; orchestrator path keys
+      and upstream executes entries are checked the same way.
+  - codeRefs:
+    - file:.tools/open-architecture/validate.py
+    id: r.reconcile-wiring-closed
+    level: MUST
+    text: Each kind must have exactly one reconcile pass that writes its status; every
+      read must name the spec or status of a kind and a field that kind declares;
+      every wake named by a read must exist, and every declared wake must be used
+      by some read.
+  - codeRefs:
+    - file:.tools/open-architecture/validate.py
+    id: r.schema-check-first
+    level: MUST
+    text: validate.py must check the schema document itself before validating arch.yaml
+      against it, and must report a schema node that carries a type without a description.
+  - codeRefs:
+    - file:.tools/open-architecture/validate.py
+    id: r.spec-fields-read-or-unread
+    level: MUST
+    text: Every spec field of a kind must either be read by a reconciler or listed
+      as unread, and a field listed unread must not also be read or fall outside the
+      kind's spec fields.
+  - codeRefs:
+    - file:.tools/open-architecture/validate.py
+    id: r.system-context-tree-checks
+    level: MUST
+    text: Each system context must carry upstream, overlay and orchestrator, must
+      not name itself as its own upstream or overlay, and the upstream/overlay/depends_on/introduces
+      graph must be free of cycles.
+  - codeRefs:
+    - file:.tools/open-architecture/validate.py
+    id: r.validate-exits-nonzero-on-error
+    level: MUST
+    text: validate.py must exit 1 when any error is reported and exit 0 otherwise;
+      warnings must never change the exit code.
+  - codeRefs:
+    - file:.tools/open-architecture/arch.yaml
+    - file:.tools/open-architecture/validate.py
+    id: r.values-match-go-source
+    level: MUST
+    text: A kind's short name, plural resource, phases and conditions must agree with
+      its APIResourceSchema manifest and Go type file, its status_facts keys must
+      equal its status list, and each decides value must be a phase, a condition,
+      self or none.
   upstream: self
