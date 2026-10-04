@@ -9,5 +9,6 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/ui/tests/integration/components/kubernetes/page/role/create-and-edit-test.js` file create-and-edit-test.js (third_party/openbao/ui/tests/integration/components/kubernetes/page/role/create-and-edit-test.js)
+- `file:third_party/openbao/ui/tests/integration/components/kubernetes/page/role/details-test.js` file details-test.js (third_party/openbao/ui/tests/integration/components/kubernetes/page/role/details-test.js)
 <!-- SPECD_MANAGED_END -->

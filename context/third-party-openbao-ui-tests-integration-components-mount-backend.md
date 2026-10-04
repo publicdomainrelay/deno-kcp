@@ -9,5 +9,5 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/ui/tests/integration/components/mount-backend/type-form-test.js` file type-form-test.js (third_party/openbao/ui/tests/integration/components/mount-backend/type-form-test.js)
 <!-- SPECD_MANAGED_END -->
