@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so OpenBao can mount a plugin as a builtin logical backend without paying plugin startup cost until the mount is first used. It resolves a plugin by name, type and version from the backend config, validates at load time that the lazily started plugin still matches the type and special paths observed in metadata mode, and survives plugin crashes by relaunching and retrying the failed method exactly once.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

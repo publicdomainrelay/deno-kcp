@@ -908,6 +908,21 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.provides-tls-config-to-plugin` (MUST): "main must read the TLS configuration with apiClientMeta.GetTLSConfig() and set it as ServeOpts.TLSProviderFunc through api.VaultPluginTLSProvider, so the plugin keeps backwards compatibility with Vault versions that do not support plugin AutoMTLS."
 - added `r.serves-transit-factory-as-plugin` (MUST): "main must start the transit backend through plugin.ServeMultiplex, passing transit.Factory as BackendFactoryFunc, so the transit logical backend is served as a multiplexed plugin process."
 
+### third-party-openbao-internal-builtin-plugin
+
+- intent: "" -> "This context exists so OpenBao can mount a plugin as a builtin logical backend without paying plugin startup cost until the mount is first used. It resolves a plugin by name, type and version from the backend config, validates at load time that the lazily started plugin still matches the type and special paths observed in metadata mode, and survives plugin crashes by relaunching and retrying the failed method exactly once."
+- added `r.initialize-deferred` (MUST): "PluginBackend.Initialize must be a no-op returning nil, because the real backend Initialize is called explicitly by startBackend with the request storage after the plugin process starts."
+- added `r.lazy-load-on-request` (MUST): "HandleRequest and HandleExistenceCheck must route through lazyLoadBackend, which starts the plugin under the write lock only when loaded is false, re-checking loaded after the lock upgrade so concurrent first requests start the plugin once."
+- added `r.metadata-mode-probe` (MUST): "Backend must start the plugin with bplugin.NewBackendWithVersion in metadata mode (isMetadataMode true), read its SpecialPaths, Type and, when it implements logical.PluginVersioner, its PluginVersion().Version, then Cleanup the probe process and install a placeholder framework.Backend carrying those paths, type and running version so the plugin is not yet loaded."
+- added `r.mismatch-guard` (MUST): "While the backend has not yet been loaded, startBackend must refuse a plugin whose Type differs from the metadata probe (ErrMismatchType) or whose SpecialPaths are not reflect.DeepEqual to the probe (ErrMismatchPaths), cleaning up the new process, logging a warning with the plugin name and error, and returning the sentinel error."
+- added `r.plugin-name-required` (MUST): "Factory must reject a config that has no "plugin_name" key, returning the error "plugin_name not provided" before attempting to start any backend."
+- added `r.plugin-type-parsed` (MUST): "Both Factory/Backend and startBackend must parse conf.Config["plugin_type"] with consts.ParsePluginType and return that error unchanged when the type string is invalid."
+- added `r.plugin-version-delegation` (MUST): "PluginVersion must return the wrapped backend's PluginVersion when it implements logical.PluginVersioner, and logical.EmptyPluginVersion otherwise; PluginBackend must satisfy logical.PluginVersioner via a compile-time assertion."
+- added `r.read-locked-accessors` (MUST): "SpecialPaths, System, Logger, Cleanup, InvalidateKey, Setup and Type must each take the PluginBackend read lock for the duration of the delegated call so the wrapped backend pointer can be swapped under lock without races."
+- added `r.reload-on-shutdown` (MUST): "When a wrapped call fails with rpc.ErrShutdown or bplugin.ErrPluginShutdown, lazyLoadBackend must restart the plugin once, guarded by comparing the captured canary against the current UUID canary so only the first observer reloads, then retry the method wrapper exactly once."
+- added `r.setup-delegates` (SHOULD): "Setup must delegate to the currently wrapped backend under the read lock, so a plugin that is already loaded receives the backend config directly."
+- added `r.v5-then-v1-fallback` (MUST): "Factory must first call v5.Backend and, on success, Setup and return it; when the v5 backend fails it must fall back to Backend, accumulate both errors in a multierror, and if the fallback also fails return an error of the form "invalid backend version: <multierror>"."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -936,5 +951,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-builtin-logical-totp-cmd-totp-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-transit-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-transit-cmd-transit-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-builtin-plugin-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-builtin-plugin-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-internal-builtin-plugin-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-internal-builtin-plugin-v5-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |

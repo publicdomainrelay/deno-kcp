@@ -10,5 +10,18 @@ spec:
   systemContext: third-party-openbao-internal-builtin-plugin
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-builtin-plugin
+  agentLog: 'third_party/openbao/internal/builtin/plugin/backend.go implements the
+    builtin plugin logical backend: a version-agnostic Factory that tries the v5 plugin
+    backend first and falls back to the v1 PluginBackend, plus a PluginBackend wrapper
+    that probes the plugin in metadata mode to learn its type, special paths and version,
+    then lazy-loads the real plugin process on first request and transparently restarts
+    it after a plugin shutdown. Every read of the wrapped backend takes a read lock,
+    so the wrapper can swap the underlying plugin while requests are in flight. Tests
+    backend_test.go and backend_lazyLoad_test.go exercise the metadata probe and the
+    lazy-load/reload path.'
+  message: wrote 11 requirement(s) and 14 interface(s) for third-party-openbao-internal-builtin-plugin
+  phase: Succeeded
+superseded:
+- message: the agent is summarizing third-party-openbao-internal-builtin-plugin
+  name: third-party-openbao-internal-builtin-plugin-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2
   phase: Running
