@@ -1,0 +1,894 @@
+conditions:
+- message: 'undeclared: Assignment, CaseSensitivity, ChangedAliasIndex, Client, ClientType,
+    ClientType.String, Discovery, GrantType, IdentityStore, IdentityStore.AddNamespaceView,
+    IdentityStore.CountEntities, IdentityStore.CountEntitiesByMountAccessor, IdentityStore.CountEntitiesByNamespace,
+    IdentityStore.CreateOrFetchEntity, IdentityStore.DeleteAliasesInEntityInTxn, IdentityStore.DisableLowerCasedNames,
+    IdentityStore.EntityByAliasFactors, IdentityStore.EntityPacker, IdentityStore.GetKeysCacheControlHeader,
+    IdentityStore.GroupPacker, IdentityStore.GroupPoliciesByEntityID, IdentityStore.GroupsByEntityID,
+    IdentityStore.Invalidate, IdentityStore.LoadEntities, IdentityStore.LoadGroups,
+    IdentityStore.LoadOIDCClients, IdentityStore.LocalAliasPacker, IdentityStore.Logger,
+    IdentityStore.MemDBAliasByFactors, IdentityStore.MemDBAliasByFactorsInTxn, IdentityStore.MemDBAliasByID,
+    IdentityStore.MemDBAliasByIDInTxn, IdentityStore.MemDBAliases, IdentityStore.MemDBDeleteAliasByIDInTxn,
+    IdentityStore.MemDBDeleteEntityByID, IdentityStore.MemDBDeleteEntityByIDInTxn,
+    IdentityStore.MemDBDeleteGroupByIDInTxn, IdentityStore.MemDBEntitiesByBucketKeyInTxn,
+    IdentityStore.MemDBEntityByAliasID, IdentityStore.MemDBEntityByAliasIDInTxn, IdentityStore.MemDBEntityByID,
+    IdentityStore.MemDBEntityByIDInTxn, IdentityStore.MemDBEntityByMergedEntityID,
+    IdentityStore.MemDBEntityByName, IdentityStore.MemDBEntityByNameInTxn, IdentityStore.MemDBGroupByAliasID,
+    IdentityStore.MemDBGroupByAliasIDInTxn, IdentityStore.MemDBGroupByID, IdentityStore.MemDBGroupByIDInTxn,
+    IdentityStore.MemDBGroupByName, IdentityStore.MemDBGroupByNameInTxn, IdentityStore.MemDBGroupsByBucketKeyInTxn,
+    IdentityStore.MemDBGroupsByMemberEntityID, IdentityStore.MemDBGroupsByMemberEntityIDInTxn,
+    IdentityStore.MemDBGroupsByParentGroupID, IdentityStore.MemDBGroupsByParentGroupIDInTxn,
+    IdentityStore.MemDBLocalAliasesByBucketKeyInTxn, IdentityStore.MemDBUpsertAliasInTxn,
+    IdentityStore.MemDBUpsertEntityInTxn, IdentityStore.MemDBUpsertGroupInTxn, IdentityStore.MemberGroupIDsByID,
+    IdentityStore.OidcPeriodicFunc, IdentityStore.PathOIDCAssignmentExistenceCheck,
+    IdentityStore.PathOIDCClientExistenceCheck, IdentityStore.PathOIDCKeyExistenceCheck,
+    IdentityStore.PathOIDCProviderExistenceCheck, IdentityStore.PathOIDCRoleExistenceCheck,
+    IdentityStore.PathOIDCScopeExistenceCheck, IdentityStore.RefreshExternalGroupMembershipsByEntityID,
+    IdentityStore.RemoveNamespaceView, IdentityStore.ResetDB, IdentityStore.SanitizeAlias,
+    IdentityStore.SanitizeAndUpsertGroup, IdentityStore.SanitizeEntity, IdentityStore.StoreOIDCDefaultResources,
+    IdentityStore.Txn, IdentityStore.UpsertEntity, IdentityStore.UpsertEntityInTxn,
+    IdentityStore.UpsertGroup, IdentityStore.UpsertGroupInTxn, IdentityStore.View,
+    IdentityStoreConfig, IsTargetNamespacedKey, LocalNode, LocalNode.HAState, LocalNode.ReplicationState,
+    LoggerAdder, LoggerAdder.AddLogger, LoggerAdder.UnsafeCrossNamespaceIdentity,
+    LowercaseIdentityIDs, MFABackend, MFABackend.CleanupNamespace, MFABackend.DeleteMFAConfigByMethodID,
+    MFABackend.DeleteMFALoginEnforcementConfigByNameAndNamespace, MFABackend.HandleMFAGenerateTOTP,
+    MFABackend.Lock, MFABackend.MemDBMFAConfigByID, MFABackend.MemDBMFAConfigByName,
+    MFABackend.MemDBMFALoginEnforcementConfigByNameAndNamespace, MFABackend.MemDBUpsertMFAConfig,
+    MFABackend.MemDBUpsertMFALoginEnforcementConfig, MFABackend.MfaLoginEnforcementList,
+    MFABackend.MfaMethodList, MFABackend.PutMFAConfigByID, MFABackend.PutMFALoginEnforcementConfig,
+    MFABackend.ReadMFAConfigByMethodID, MFABackend.ReadMFALoginEnforcementConfigByNameAndNamespace,
+    MFABackend.Unlock, MFABackend.ValidateAuthEntriesForAccessorOrType, NamedKey,
+    NamedKey.GenerateAndSetKey, NamedKey.GenerateAndSetNextKey, Namespacer, Namespacer.ListNamespaces,
+    Namespacer.NamespaceByID, NewIdentityStore, NewOIDCCache, ProviderDiscovery, Role,
+    Scope, TOTPPersister, TOTPPersister.PersistTOTPKey, TokenStorer, TokenStorer.CreateToken,
+    TokenStorer.LookupToken, oidcCache.Delete, oidcCache.Flush, oidcCache.Get, oidcCache.Items,
+    oidcCache.Set, userError.Error, userError.Is, userError.Unwrap'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/vault/identity/lookup.go
+  - third_party/openbao/internal/vault/identity/mfa.go
+  - third_party/openbao/internal/vault/identity/store.go
+  - third_party/openbao/internal/vault/identity/store_aliases.go
+  - third_party/openbao/internal/vault/identity/store_entities.go
+  - third_party/openbao/internal/vault/identity/store_group_aliases.go
+  - third_party/openbao/internal/vault/identity/store_groups.go
+  - third_party/openbao/internal/vault/identity/store_oidc.go
+  - third_party/openbao/internal/vault/identity/store_oidc_provider.go
+  - third_party/openbao/internal/vault/identity/store_schema.go
+  - third_party/openbao/internal/vault/identity/store_structs.go
+  - third_party/openbao/internal/vault/identity/store_upgrade.go
+  - third_party/openbao/internal/vault/identity/store_util.go
+  fingerprint: d6c327566841293c2d17f3a8c7167d1286ad403faf4395aeceb123727971caca
+  interfaces:
+  - codegraphId: interface:63a95dd01b6529284ad740a4b8b7dc0a
+    file: third_party/openbao/internal/vault/identity/mfa.go
+    kind: interface
+    line: 132
+    name: MFABackend
+  - codegraphId: method:5f55d37a4a2cfec14bab5d168d696daf
+    file: third_party/openbao/internal/vault/identity/mfa.go
+    kind: method
+    line: 133
+    name: MFABackend.Lock
+    signature: ()
+  - codegraphId: method:e10742f28a2f3b67990a1b67f84723a9
+    file: third_party/openbao/internal/vault/identity/mfa.go
+    kind: method
+    line: 134
+    name: MFABackend.Unlock
+    signature: ()
+  - codegraphId: method:818ce45a701337d73ac783726ae468a4
+    file: third_party/openbao/internal/vault/identity/mfa.go
+    kind: method
+    line: 135
+    name: MFABackend.HandleMFAGenerateTOTP
+    signature: (context.Context, *mfa.Config, string) (*logical.Response, error)
+  - codegraphId: method:520672168d352beb5c34ae909bc266fa
+    file: third_party/openbao/internal/vault/identity/mfa.go
+    kind: method
+    line: 136
+    name: MFABackend.ValidateAuthEntriesForAccessorOrType
+    signature: (context.Context, *namespace.Namespace, func(entry *routing.MountEntry)
+      bool) (bool, error)
+  - codegraphId: method:0e1bdf77b25885fbec153395a9bef2ff
+    file: third_party/openbao/internal/vault/identity/mfa.go
+    kind: method
+    line: 137
+    name: MFABackend.CleanupNamespace
+    signature: (context.Context, *namespace.Namespace, bool) error
+  - codegraphId: method:ed0eff90be58f5ae3f50d5444d13ac63
+    file: third_party/openbao/internal/vault/identity/mfa.go
+    kind: method
+    line: 140
+    name: MFABackend.PutMFAConfigByID
+    signature: (context.Context, *mfa.Config) error
+  - codegraphId: method:dedb4298b231708791594a9b373a8d0b
+    file: third_party/openbao/internal/vault/identity/mfa.go
+    kind: method
+    line: 141
+    name: MFABackend.ReadMFAConfigByMethodID
+    signature: (string) (map[string]any, error)
+  - codegraphId: method:8718b84f980c0502caaa5e63751d9b80
+    file: third_party/openbao/internal/vault/identity/mfa.go
+    kind: method
+    line: 142
+    name: MFABackend.DeleteMFAConfigByMethodID
+    signature: (context.Context, string, string, string) error
+  - codegraphId: method:54598c8d6c5e832a3d92d9644c395785
+    file: third_party/openbao/internal/vault/identity/mfa.go
+    kind: method
+    line: 143
+    name: MFABackend.MfaMethodList
+    signature: (context.Context, string) (map[string]any, error)
+  - codegraphId: method:179eb06308243620e986a3ddba7dc4c6
+    file: third_party/openbao/internal/vault/identity/mfa.go
+    kind: method
+    line: 146
+    name: MFABackend.PutMFALoginEnforcementConfig
+    signature: (context.Context, *mfa.MFAEnforcementConfig, *namespace.Namespace)
+      error
+  - codegraphId: method:317104efa732c9a90c88e811cd54e125
+    file: third_party/openbao/internal/vault/identity/mfa.go
+    kind: method
+    line: 147
+    name: MFABackend.ReadMFALoginEnforcementConfigByNameAndNamespace
+    signature: (string, *namespace.Namespace) (map[string]any, error)
+  - codegraphId: method:1e5d1ca2caa6c30a4c050926d116835f
+    file: third_party/openbao/internal/vault/identity/mfa.go
+    kind: method
+    line: 148
+    name: MFABackend.DeleteMFALoginEnforcementConfigByNameAndNamespace
+    signature: (context.Context, string, *namespace.Namespace) error
+  - codegraphId: method:3bd8b58b77eac5b01a5c714101e7a58c
+    file: third_party/openbao/internal/vault/identity/mfa.go
+    kind: method
+    line: 149
+    name: MFABackend.MfaLoginEnforcementList
+    signature: (context.Context) (map[string]any, error)
+  - codegraphId: method:840b9aa6d95dfb6e7d4ba8171d2928f5
+    file: third_party/openbao/internal/vault/identity/mfa.go
+    kind: method
+    line: 152
+    name: MFABackend.MemDBUpsertMFAConfig
+    signature: (context.Context, *mfa.Config) error
+  - codegraphId: method:8f9c900404cb20e3bf9d4c898181f4f0
+    file: third_party/openbao/internal/vault/identity/mfa.go
+    kind: method
+    line: 153
+    name: MFABackend.MemDBMFAConfigByID
+    signature: (string) (*mfa.Config, error)
+  - codegraphId: method:9dc6f99fe36eaae9cbe35c0811f70e93
+    file: third_party/openbao/internal/vault/identity/mfa.go
+    kind: method
+    line: 154
+    name: MFABackend.MemDBMFAConfigByName
+    signature: (context.Context, string) (*mfa.Config, error)
+  - codegraphId: method:4fecf670e8db3debcea0950165b2bba0
+    file: third_party/openbao/internal/vault/identity/mfa.go
+    kind: method
+    line: 155
+    name: MFABackend.MemDBMFALoginEnforcementConfigByNameAndNamespace
+    signature: (string, string) (*mfa.MFAEnforcementConfig, error)
+  - codegraphId: method:7e12dccae08f917abe268d5116de4e07
+    file: third_party/openbao/internal/vault/identity/mfa.go
+    kind: method
+    line: 156
+    name: MFABackend.MemDBUpsertMFALoginEnforcementConfig
+    signature: (context.Context, *mfa.MFAEnforcementConfig) error
+  - codegraphId: method:75043e5898a811b6c7b51d8e45397e98
+    file: third_party/openbao/internal/vault/identity/store.go
+    kind: method
+    line: 41
+    name: IdentityStore.ResetDB
+    signature: (ctx context.Context) error
+  - codegraphId: interface:09cc5be174c8f1018c819ded7cd0c9e3
+    file: third_party/openbao/internal/vault/identity/store.go
+    kind: interface
+    line: 60
+    name: LoggerAdder
+  - codegraphId: method:7dfa4a74f9d9502de24b3b7688860806
+    file: third_party/openbao/internal/vault/identity/store.go
+    kind: method
+    line: 61
+    name: LoggerAdder.AddLogger
+    signature: (log.Logger)
+  - codegraphId: method:f5a04adc2239a6f00910e072a58a7923
+    file: third_party/openbao/internal/vault/identity/store.go
+    kind: method
+    line: 62
+    name: LoggerAdder.UnsafeCrossNamespaceIdentity
+    signature: () bool
+  - codegraphId: struct:0ede9debc97cbb6c04dd0d3907f50c49
+    file: third_party/openbao/internal/vault/identity/store.go
+    kind: struct
+    line: 65
+    name: IdentityStoreConfig
+  - codegraphId: function:fbb51151baa31d84118521a4b6739fc8
+    file: third_party/openbao/internal/vault/identity/store.go
+    kind: function
+    line: 78
+    name: NewIdentityStore
+    signature: (ctx context.Context, identityStoreConfig *IdentityStoreConfig, config
+      *logical.BackendConfig, logger log.Logger) (*IdentityStore, error)
+  - codegraphId: method:358b35cd59930abb7b0d0c205899058e
+    file: third_party/openbao/internal/vault/identity/store.go
+    kind: method
+    line: 128
+    name: IdentityStore.AddNamespaceView
+    signature: (la LoggerAdder, ns *namespace.Namespace, view logical.Storage) error
+  - codegraphId: method:2e1769494250abb917955e29ba861ba2
+    file: third_party/openbao/internal/vault/identity/store.go
+    kind: method
+    line: 172
+    name: IdentityStore.RemoveNamespaceView
+    signature: (ns *namespace.Namespace) error
+  - codegraphId: method:bba61404e4a1fb0031fe8893b771108f
+    file: third_party/openbao/internal/vault/identity/store.go
+    kind: method
+    line: 234
+    name: IdentityStore.View
+    signature: (ctx context.Context) logical.Storage
+  - codegraphId: method:50d1fe9b806aa50f51ef1526d59691e3
+    file: third_party/openbao/internal/vault/identity/store.go
+    kind: method
+    line: 244
+    name: IdentityStore.EntityPacker
+    signature: (ctx context.Context) *storagepacker.StoragePacker
+  - codegraphId: method:fa4cc35fc8de4f8bd9cf702de5c4337d
+    file: third_party/openbao/internal/vault/identity/store.go
+    kind: method
+    line: 254
+    name: IdentityStore.LocalAliasPacker
+    signature: (ctx context.Context) *storagepacker.StoragePacker
+  - codegraphId: method:6b53248416cf502f0da609b431960c62
+    file: third_party/openbao/internal/vault/identity/store.go
+    kind: method
+    line: 264
+    name: IdentityStore.GroupPacker
+    signature: (ctx context.Context) *storagepacker.StoragePacker
+  - codegraphId: method:cf432b723fdc3483f380967684c148a2
+    file: third_party/openbao/internal/vault/identity/store.go
+    kind: method
+    line: 841
+    name: IdentityStore.Invalidate
+    signature: (ctx context.Context, key string)
+  - codegraphId: method:88bc3aeb162242d2ddae04b2213bef4e
+    file: third_party/openbao/internal/vault/identity/store.go
+    kind: method
+    line: 1370
+    name: IdentityStore.EntityByAliasFactors
+    signature: (ctx context.Context, mountAccessor, aliasName string, clone bool)
+      (*identity.Entity, error)
+  - codegraphId: method:beff5b008d06ce0e2c8830afe300e45d
+    file: third_party/openbao/internal/vault/identity/store.go
+    kind: method
+    line: 1419
+    name: IdentityStore.CreateOrFetchEntity
+    signature: (ctx context.Context, alias *logical.Alias) (*identity.Entity, bool,
+      error)
+  - codegraphId: method:90e27c76662bd923b4f672afe90c9995
+    file: third_party/openbao/internal/vault/identity/store.go
+    kind: method
+    line: 1543
+    name: IdentityStore.Txn
+    signature: (ctx context.Context, write bool) *memdb.Txn
+  - codegraphId: function:9a1e70541a717e1949d53fe2f0ac3aac
+    file: third_party/openbao/internal/vault/identity/store.go
+    kind: function
+    line: 1551
+    name: ChangedAliasIndex
+    signature: (entity *identity.Entity, alias *logical.Alias) int
+  - codegraphId: method:46134ecc343959c97e5702df31730108
+    file: third_party/openbao/internal/vault/identity/store_entities.go
+    kind: method
+    line: 854
+    name: userError.Error
+    signature: () string
+  - codegraphId: method:0ebd56effc14bcb2474fa49f4f48be90
+    file: third_party/openbao/internal/vault/identity/store_entities.go
+    kind: method
+    line: 858
+    name: userError.Unwrap
+    signature: () error
+  - codegraphId: method:da642fabad8c9379b5e740750ae3d05c
+    file: third_party/openbao/internal/vault/identity/store_entities.go
+    kind: method
+    line: 862
+    name: userError.Is
+    signature: (err error) bool
+  - codegraphId: struct:327887a6af149bab86c832aa4943218c
+    file: third_party/openbao/internal/vault/identity/store_oidc.go
+    kind: struct
+    line: 57
+    name: NamedKey
+  - codegraphId: struct:ca6493dd21b57fff3b5c0db23dd3dd74
+    file: third_party/openbao/internal/vault/identity/store_oidc.go
+    kind: struct
+    line: 69
+    name: Role
+  - codegraphId: struct:153085ef3d1c55fe2908a954842e062c
+    file: third_party/openbao/internal/vault/identity/store_oidc.go
+    kind: struct
+    line: 108
+    name: Discovery
+  - codegraphId: method:3be4241024aefbf2af6d1021e84ab8a3
+    file: third_party/openbao/internal/vault/identity/store_oidc.go
+    kind: method
+    line: 904
+    name: IdentityStore.PathOIDCKeyExistenceCheck
+    signature: (ctx context.Context, req *logical.Request, d *framework.FieldData)
+      (bool, error)
+  - codegraphId: method:13efc92be0a1ccdf2b70f2c6ef0895e1
+    file: third_party/openbao/internal/vault/identity/store_oidc.go
+    kind: method
+    line: 1148
+    name: NamedKey.GenerateAndSetKey
+    signature: (ctx context.Context, logger hclog.Logger, s logical.Storage) error
+  - codegraphId: method:131e56190aca454a5788dfddbc2d18fe
+    file: third_party/openbao/internal/vault/identity/store_oidc.go
+    kind: method
+    line: 1166
+    name: NamedKey.GenerateAndSetNextKey
+    signature: (ctx context.Context, logger hclog.Logger, s logical.Storage) error
+  - codegraphId: method:91b46d7b74eb8ff055d57263a296ce2e
+    file: third_party/openbao/internal/vault/identity/store_oidc.go
+    kind: method
+    line: 1205
+    name: IdentityStore.PathOIDCRoleExistenceCheck
+    signature: (ctx context.Context, req *logical.Request, d *framework.FieldData)
+      (bool, error)
+  - codegraphId: method:9316f225d37c42370876acabbc3231c8
+    file: third_party/openbao/internal/vault/identity/store_oidc.go
+    kind: method
+    line: 1456
+    name: IdentityStore.GetKeysCacheControlHeader
+    signature: (ns *namespace.Namespace) (string, error)
+  - codegraphId: method:48c24b8efa35d44c39c361dc6421f6c0
+    file: third_party/openbao/internal/vault/identity/store_oidc.go
+    kind: method
+    line: 2026
+    name: IdentityStore.OidcPeriodicFunc
+    signature: (ctx context.Context)
+  - codegraphId: function:25eef2407a8fbe0908712bfa26a12b59
+    file: third_party/openbao/internal/vault/identity/store_oidc.go
+    kind: function
+    line: 2118
+    name: NewOIDCCache
+    signature: (defaultExpiration, cleanupInterval time.Duration) *oidcCache
+  - codegraphId: method:961d5b7f9ab61e072343e603a88a16d4
+    file: third_party/openbao/internal/vault/identity/store_oidc.go
+    kind: method
+    line: 2128
+    name: oidcCache.Get
+    signature: (ns *namespace.Namespace, key string) (any, bool, error)
+  - codegraphId: method:d95ba02b14e5d0b20905b483a9fc52b2
+    file: third_party/openbao/internal/vault/identity/store_oidc.go
+    kind: method
+    line: 2136
+    name: oidcCache.Set
+    signature: (ns *namespace.Namespace, key string, obj any) error
+  - codegraphId: method:c9fd534d50a1803195c35821494e554a
+    file: third_party/openbao/internal/vault/identity/store_oidc.go
+    kind: method
+    line: 2145
+    name: oidcCache.Delete
+    signature: (ns *namespace.Namespace, key string) error
+  - codegraphId: method:531f6c4a017218beb87b755e15aa45ca
+    file: third_party/openbao/internal/vault/identity/store_oidc.go
+    kind: method
+    line: 2154
+    name: oidcCache.Flush
+    signature: (ns *namespace.Namespace) error
+  - codegraphId: method:e2278846b946ba5614e8122d9cbb3322
+    file: third_party/openbao/internal/vault/identity/store_oidc.go
+    kind: method
+    line: 2169
+    name: oidcCache.Items
+    signature: () map[string]zcache.Item[any]
+  - codegraphId: function:5e198781c89dfa398d767fa65f225c67
+    file: third_party/openbao/internal/vault/identity/store_oidc.go
+    kind: function
+    line: 2175
+    name: IsTargetNamespacedKey
+    signature: (nskey string, nsTarget string) bool
+  - codegraphId: struct:f26ec481b1e8e7502e7222f4fb4c3f48
+    file: third_party/openbao/internal/vault/identity/store_oidc_provider.go
+    kind: struct
+    line: 90
+    name: Assignment
+  - codegraphId: struct:6b0565d78a24361dce0c6bedf29a7001
+    file: third_party/openbao/internal/vault/identity/store_oidc_provider.go
+    kind: struct
+    line: 95
+    name: Scope
+  - codegraphId: type_alias:a397b9305ae1a96b1ed4ee7a6c14d922
+    file: third_party/openbao/internal/vault/identity/store_oidc_provider.go
+    kind: type_alias
+    line: 100
+    name: GrantType
+  - codegraphId: struct:0334682d7f0bd45685f6c452ce3fbe79
+    file: third_party/openbao/internal/vault/identity/store_oidc_provider.go
+    kind: struct
+    line: 118
+    name: Client
+  - codegraphId: type_alias:639f1c79a74313b0479f15aaa1f00965
+    file: third_party/openbao/internal/vault/identity/store_oidc_provider.go
+    kind: type_alias
+    line: 159
+    name: ClientType
+  - codegraphId: method:6f82ee8b2ff7dc043be416faf54e236c
+    file: third_party/openbao/internal/vault/identity/store_oidc_provider.go
+    kind: method
+    line: 166
+    name: ClientType.String
+    signature: () string
+  - codegraphId: struct:c9120a756847a1eeabb4e07bee9baa66
+    file: third_party/openbao/internal/vault/identity/store_oidc_provider.go
+    kind: struct
+    line: 200
+    name: ProviderDiscovery
+  - codegraphId: method:665b1259379675b9a6c6c20f4c6e1f91
+    file: third_party/openbao/internal/vault/identity/store_oidc_provider.go
+    kind: method
+    line: 944
+    name: IdentityStore.PathOIDCAssignmentExistenceCheck
+    signature: (ctx context.Context, req *logical.Request, d *framework.FieldData)
+      (bool, error)
+  - codegraphId: method:cac1ae7eae7c80160ef0f98e1335da16
+    file: third_party/openbao/internal/vault/identity/store_oidc_provider.go
+    kind: method
+    line: 1103
+    name: IdentityStore.PathOIDCScopeExistenceCheck
+    signature: (ctx context.Context, req *logical.Request, d *framework.FieldData)
+      (bool, error)
+  - codegraphId: method:63cb03a74c1795132d4a233975b01c6e
+    file: third_party/openbao/internal/vault/identity/store_oidc_provider.go
+    kind: method
+    line: 1356
+    name: IdentityStore.PathOIDCClientExistenceCheck
+    signature: (ctx context.Context, req *logical.Request, d *framework.FieldData)
+      (bool, error)
+  - codegraphId: method:fff8ec6f4207753a31104db8ed759d8d
+    file: third_party/openbao/internal/vault/identity/store_oidc_provider.go
+    kind: method
+    line: 1604
+    name: IdentityStore.PathOIDCProviderExistenceCheck
+    signature: (ctx context.Context, req *logical.Request, d *framework.FieldData)
+      (bool, error)
+  - codegraphId: method:e0c97f4025bcbd4f1d979fff4069f109
+    file: third_party/openbao/internal/vault/identity/store_oidc_provider.go
+    kind: method
+    line: 2668
+    name: IdentityStore.StoreOIDCDefaultResources
+    signature: (ctx context.Context, view logical.Storage) error
+  - codegraphId: method:064df75847df7716da78d8ff1c0d070e
+    file: third_party/openbao/internal/vault/identity/store_oidc_provider.go
+    kind: method
+    line: 2775
+    name: IdentityStore.LoadOIDCClients
+    signature: (ctx context.Context) error
+  - codegraphId: function:a0682dc3ca805b467ae2b0927d07169d
+    file: third_party/openbao/internal/vault/identity/store_oidc_provider.go
+    kind: function
+    line: 3202
+    name: LowercaseIdentityIDs
+    signature: (identities []string) []string
+  - codegraphId: struct:b1343ebec8d3210f1277a2380f6a6bbe
+    file: third_party/openbao/internal/vault/identity/store_structs.go
+    kind: struct
+    line: 67
+    name: IdentityStore
+  - codegraphId: struct:25c4a7c8828bf08b24f1410429d70485
+    file: third_party/openbao/internal/vault/identity/store_structs.go
+    kind: struct
+    line: 114
+    name: CaseSensitivity
+  - codegraphId: interface:dc053fc95cbbf99260aeb61705cbc006
+    file: third_party/openbao/internal/vault/identity/store_structs.go
+    kind: interface
+    line: 118
+    name: LocalNode
+  - codegraphId: method:ae70f489bacab7a547e3b586faebc83c
+    file: third_party/openbao/internal/vault/identity/store_structs.go
+    kind: method
+    line: 119
+    name: LocalNode.ReplicationState
+    signature: () consts.ReplicationState
+  - codegraphId: method:07b707cb5d0153f032cb238889d289d1
+    file: third_party/openbao/internal/vault/identity/store_structs.go
+    kind: method
+    line: 120
+    name: LocalNode.HAState
+    signature: () consts.HAState
+  - codegraphId: interface:40c34ef251254636285fb26d3e668695
+    file: third_party/openbao/internal/vault/identity/store_structs.go
+    kind: interface
+    line: 123
+    name: Namespacer
+  - codegraphId: method:b8976554cd06e25198f52604f2651cfb
+    file: third_party/openbao/internal/vault/identity/store_structs.go
+    kind: method
+    line: 124
+    name: Namespacer.NamespaceByID
+    signature: (context.Context, string) (*namespace.Namespace, error)
+  - codegraphId: method:98ca556762f6eb64061f1334d9543fa7
+    file: third_party/openbao/internal/vault/identity/store_structs.go
+    kind: method
+    line: 125
+    name: Namespacer.ListNamespaces
+    signature: (context.Context) ([]*namespace.Namespace, error)
+  - codegraphId: interface:6ee494f9715a75f9c94fa1951d1977eb
+    file: third_party/openbao/internal/vault/identity/store_structs.go
+    kind: interface
+    line: 128
+    name: TOTPPersister
+  - codegraphId: method:c6b996ef8901157b973afd41eee58ae9
+    file: third_party/openbao/internal/vault/identity/store_structs.go
+    kind: method
+    line: 129
+    name: TOTPPersister.PersistTOTPKey
+    signature: (ctx context.Context, configID string, entityID string, key string)
+      error
+  - codegraphId: interface:c43b10edf46f93df414f23fb18c0371f
+    file: third_party/openbao/internal/vault/identity/store_structs.go
+    kind: interface
+    line: 132
+    name: TokenStorer
+  - codegraphId: method:1eb3f11fafe2cb2d956b38a53983b0a1
+    file: third_party/openbao/internal/vault/identity/store_structs.go
+    kind: method
+    line: 133
+    name: TokenStorer.LookupToken
+    signature: (context.Context, string) (*logical.TokenEntry, error)
+  - codegraphId: method:6f5a3c26e33f76fa2290cbbc97b77654
+    file: third_party/openbao/internal/vault/identity/store_structs.go
+    kind: method
+    line: 134
+    name: TokenStorer.CreateToken
+    signature: (context.Context, *logical.TokenEntry, bool) error
+  - codegraphId: method:334dffd43a818fe841b839be92297131
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 44
+    name: IdentityStore.DisableLowerCasedNames
+    signature: (b bool)
+  - codegraphId: method:580532707f8d60689d0aa586d4cad04b
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 48
+    name: IdentityStore.LoadGroups
+    signature: (ctx context.Context, ns *namespace.Namespace, readOnly bool) error
+  - codegraphId: method:6481e5ccab2066e1ba3d9a465c947fc4
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 129
+    name: IdentityStore.LoadEntities
+    signature: (ctx context.Context, ns *namespace.Namespace, readOnly bool) error
+  - codegraphId: method:ee9ea1f236c461c5b95805ed2ad074af
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 311
+    name: IdentityStore.Logger
+    signature: () hclog.Logger
+  - codegraphId: method:8628069f25702724a5a7a4b50dd209f2
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 340
+    name: IdentityStore.UpsertEntityInTxn
+    signature: (ctx context.Context, txn *memdb.Txn, entity *identity.Entity, previousEntity
+      *identity.Entity, persist bool) error
+  - codegraphId: method:99833b68aa34c300262e6cd606e7d38b
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 615
+    name: IdentityStore.UpsertEntity
+    signature: (ctx context.Context, entity *identity.Entity, previousEntity *identity.Entity,
+      persist bool) error
+  - codegraphId: method:4d14129885b104ee521e2c2ff17ad0c9
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 636
+    name: IdentityStore.MemDBUpsertAliasInTxn
+    signature: (txn *memdb.Txn, alias *identity.Alias, groupAlias bool) error
+  - codegraphId: method:39393f95fb281afbf1cee4ebd5a5bab6
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 673
+    name: IdentityStore.MemDBAliasByIDInTxn
+    signature: (txn *memdb.Txn, aliasID string, clone bool, groupAlias bool) (*identity.Alias,
+      error)
+  - codegraphId: method:764a73d1288d001707d23f9ef2a05002
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 708
+    name: IdentityStore.MemDBAliasByID
+    signature: (ctx context.Context, aliasID string, clone bool, groupAlias bool)
+      (*identity.Alias, error)
+  - codegraphId: method:54ba4c2c57631f5317b1a0a149a8faed
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 722
+    name: IdentityStore.MemDBAliasByFactors
+    signature: (ctx context.Context, mountAccessor, aliasName string, clone bool,
+      groupAlias bool) (*identity.Alias, error)
+  - codegraphId: method:05cc0a50ea8cdc8f61618648dc063c8c
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 740
+    name: IdentityStore.MemDBAliasByFactorsInTxn
+    signature: (txn *memdb.Txn, mountAccessor, aliasName string, clone bool, groupAlias
+      bool) (*identity.Alias, error)
+  - codegraphId: method:45e1f75dd3da4df336ac85be3292ffcf
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 779
+    name: IdentityStore.MemDBDeleteAliasByIDInTxn
+    signature: (txn *memdb.Txn, aliasID string, groupAlias bool) error
+  - codegraphId: method:c59c4a3c0ea1523cd93342b4ee19ea44
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 810
+    name: IdentityStore.MemDBAliases
+    signature: (ctx context.Context, ws memdb.WatchSet, groupAlias bool) (memdb.ResultIterator,
+      error)
+  - codegraphId: method:ee248d871fe76799058b8908404b6a2f
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 832
+    name: IdentityStore.MemDBUpsertEntityInTxn
+    signature: (txn *memdb.Txn, entity *identity.Entity) error
+  - codegraphId: method:605867f4b469fb654d55a15b47eb4d92
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 864
+    name: IdentityStore.MemDBEntityByIDInTxn
+    signature: (txn *memdb.Txn, entityID string, clone bool) (*identity.Entity, error)
+  - codegraphId: method:d0be938c0b20ed86d90edc1f537f22a5
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 894
+    name: IdentityStore.MemDBEntityByID
+    signature: (ctx context.Context, entityID string, clone bool) (*identity.Entity,
+      error)
+  - codegraphId: method:f6333f77c2de189d5203a13ff75c7b6d
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 908
+    name: IdentityStore.MemDBEntityByName
+    signature: (ctx context.Context, entityName string, clone bool) (*identity.Entity,
+      error)
+  - codegraphId: method:b9f7ff3d908a6bae2a7671cf9f29a08a
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 922
+    name: IdentityStore.MemDBEntityByNameInTxn
+    signature: (ctx context.Context, txn *memdb.Txn, entityName string, clone bool)
+      (*identity.Entity, error)
+  - codegraphId: method:f82048ee07d9401969d6d31a6cdc2e3d
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 953
+    name: IdentityStore.MemDBLocalAliasesByBucketKeyInTxn
+    signature: (txn *memdb.Txn, bucketKey string) ([]*identity.Alias, error)
+  - codegraphId: method:ef9dbf1c0811044044ec43f38d700e5e
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 978
+    name: IdentityStore.MemDBEntitiesByBucketKeyInTxn
+    signature: (txn *memdb.Txn, bucketKey string) ([]*identity.Entity, error)
+  - codegraphId: method:30fad06ab5f4779e8b78589082edd439
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 1004
+    name: IdentityStore.MemDBEntityByMergedEntityID
+    signature: (ctx context.Context, mergedEntityID string, clone bool) (*identity.Entity,
+      error)
+  - codegraphId: method:0aa05a8f81fdf9d8fe0782e356f94a64
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 1036
+    name: IdentityStore.MemDBEntityByAliasIDInTxn
+    signature: (txn *memdb.Txn, aliasID string, clone bool) (*identity.Entity, error)
+  - codegraphId: method:0738bffcf8e33837658dca7ae39c1eb0
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 1057
+    name: IdentityStore.MemDBEntityByAliasID
+    signature: (ctx context.Context, aliasID string, clone bool) (*identity.Entity,
+      error)
+  - codegraphId: method:0e19a5ac8051c394c89093819228b606
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 1071
+    name: IdentityStore.MemDBDeleteEntityByID
+    signature: (ctx context.Context, entityID string) error
+  - codegraphId: method:0cf022ee549eea43a0fb802944d4e1cb
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 1093
+    name: IdentityStore.MemDBDeleteEntityByIDInTxn
+    signature: (txn *memdb.Txn, entityID string) error
+  - codegraphId: method:ad833aa8670ac9ce3394b4927b392a4e
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 1119
+    name: IdentityStore.SanitizeAlias
+    signature: (ctx context.Context, alias *identity.Alias) error
+  - codegraphId: method:4ab931c63f0f41717b92385076035ffb
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 1180
+    name: IdentityStore.SanitizeEntity
+    signature: (ctx context.Context, entity *identity.Entity) error
+  - codegraphId: method:c9042761b81ca3a5cb215ea684d91024
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 1245
+    name: IdentityStore.SanitizeAndUpsertGroup
+    signature: (ctx context.Context, group *identity.Group, previousGroup *identity.Group,
+      memberGroupIDs []string) error
+  - codegraphId: method:2397801a430831cf40592f799c125b6c
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 1478
+    name: IdentityStore.DeleteAliasesInEntityInTxn
+    signature: (txn *memdb.Txn, entity *identity.Entity, aliases []*identity.Alias)
+      error
+  - codegraphId: method:5ae392ae4f65bc8e66658be0f3289f76
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 1553
+    name: IdentityStore.MemDBGroupByNameInTxn
+    signature: (ctx context.Context, txn *memdb.Txn, groupName string, clone bool)
+      (*identity.Group, error)
+  - codegraphId: method:307d0ff00172eb9b7eee3093faf7ea31
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 1588
+    name: IdentityStore.MemDBGroupByName
+    signature: (ctx context.Context, groupName string, clone bool) (*identity.Group,
+      error)
+  - codegraphId: method:fd1ef21e82bb86a813f9d64387c162c8
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 1602
+    name: IdentityStore.UpsertGroup
+    signature: (ctx context.Context, group *identity.Group, persist bool) error
+  - codegraphId: method:d3dfec55a94d5511c7ac47289b84f052
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 1622
+    name: IdentityStore.UpsertGroupInTxn
+    signature: (ctx context.Context, txn *memdb.Txn, group *identity.Group, persist
+      bool) error
+  - codegraphId: method:40907425f90cd33349b5d501a88f1792
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 1693
+    name: IdentityStore.MemDBUpsertGroupInTxn
+    signature: (txn *memdb.Txn, group *identity.Group) error
+  - codegraphId: method:702b987cbc8cdb0b3eec38de2190888e
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 1725
+    name: IdentityStore.MemDBDeleteGroupByIDInTxn
+    signature: (txn *memdb.Txn, groupID string) error
+  - codegraphId: method:18df5f139c9f29e5ef4eb2606f2d4306
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 1751
+    name: IdentityStore.MemDBGroupByIDInTxn
+    signature: (txn *memdb.Txn, groupID string, clone bool) (*identity.Group, error)
+  - codegraphId: method:dd3f4ca3f09e4ac21cbfa0db22ac3008
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 1781
+    name: IdentityStore.MemDBGroupByID
+    signature: (ctx context.Context, groupID string, clone bool) (*identity.Group,
+      error)
+  - codegraphId: method:ec8211c3ffc6d6a8545c9c6a34eb8288
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 1795
+    name: IdentityStore.MemDBGroupsByParentGroupIDInTxn
+    signature: (txn *memdb.Txn, memberGroupID string, clone bool) ([]*identity.Group,
+      error)
+  - codegraphId: method:873827fe07a2a7d1f5dba14fd9751a26
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 1820
+    name: IdentityStore.MemDBGroupsByParentGroupID
+    signature: (ctx context.Context, memberGroupID string, clone bool) ([]*identity.Group,
+      error)
+  - codegraphId: method:12ae58ebb7ecdfbbed3d0f3dd183ba60
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 1834
+    name: IdentityStore.MemDBGroupsByMemberEntityID
+    signature: (ctx context.Context, entityID string, clone bool, externalOnly bool)
+      ([]*identity.Group, error)
+  - codegraphId: method:a557162e64e736c44bd3c48544383469
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 1845
+    name: IdentityStore.MemDBGroupsByMemberEntityIDInTxn
+    signature: (txn *memdb.Txn, entityID string, clone bool, externalOnly bool) ([]*identity.Group,
+      error)
+  - codegraphId: method:9e70a731e026a7b1ca22a3c414f90401
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 1873
+    name: IdentityStore.GroupPoliciesByEntityID
+    signature: (ctx context.Context, entityID string) (map[string][]string, error)
+  - codegraphId: method:bfbfa7dfb0ddc89c3af9b2ac084efdaf
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 1895
+    name: IdentityStore.GroupsByEntityID
+    signature: (ctx context.Context, entityID string) ([]*identity.Group, []*identity.Group,
+      error)
+  - codegraphId: method:549293f5cfdea45470586a0d5b0804f8
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 2040
+    name: IdentityStore.MemberGroupIDsByID
+    signature: (ctx context.Context, groupID string) ([]string, error)
+  - codegraphId: method:8be38da73603a4cb468469039b0f023f
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 2091
+    name: IdentityStore.MemDBGroupsByBucketKeyInTxn
+    signature: (txn *memdb.Txn, bucketKey string) ([]*identity.Group, error)
+  - codegraphId: method:1a096884d509a69e493e04de281b6e8a
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 2113
+    name: IdentityStore.MemDBGroupByAliasIDInTxn
+    signature: (txn *memdb.Txn, aliasID string, clone bool) (*identity.Group, error)
+  - codegraphId: method:77541fd02392d27a69b566933107c049
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 2134
+    name: IdentityStore.MemDBGroupByAliasID
+    signature: (ctx context.Context, aliasID string, clone bool) (*identity.Group,
+      error)
+  - codegraphId: method:9d180dbe9396d017207157a1f17d914c
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 2148
+    name: IdentityStore.RefreshExternalGroupMembershipsByEntityID
+    signature: (ctx context.Context, entityID string, groupAliases []*logical.Alias,
+      mountAccessor string) ([]*logical.Alias, error)
+  - codegraphId: method:4a17ae36ae45b2f6ef9efa446f406196
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 2378
+    name: IdentityStore.CountEntities
+    signature: (ctx context.Context) (int, error)
+  - codegraphId: method:6fdd3bf13cbba07d6af8cd29fd2e0256
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 2421
+    name: IdentityStore.CountEntitiesByNamespace
+    signature: (ctx context.Context) (map[string]int, error)
+  - codegraphId: method:5adcbd272bf40772ea76adc2d80c70a6
+    file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    line: 2474
+    name: IdentityStore.CountEntitiesByMountAccessor
+    signature: (ctx context.Context) (map[string]int, error)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: e60300aaa2098ddb67d4675c1fa016b854c28464cc16ddc376d35e2061567769
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: d6c327566841293c2d17f3a8c7167d1286ad403faf4395aeceb123727971caca
