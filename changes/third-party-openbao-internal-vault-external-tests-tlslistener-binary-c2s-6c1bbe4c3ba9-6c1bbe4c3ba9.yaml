@@ -10,5 +10,23 @@ spec:
   systemContext: third-party-openbao-internal-vault-external-tests-tlslistener-binary
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-vault-external-tests-tlslistener-binary
-  phase: Running
+  agentLog: 'This context is one Go test file, third_party/openbao/internal/vault/external_tests/tlslistener_binary/tls_test.go,
+    in package tlslistener_binary inside the vendored OpenBao tree. It holds external,
+    Docker-backed acceptance tests for OpenBao''s ACME TLS listeners: each test starts
+    an OpenBao container cluster from a locally built binary, configures the built-in
+    PKI plugin to act as its own ACME certificate authority, and then runs a second
+    throwaway Alpine container to curl the TLS endpoint and confirm certificate acquisition.
+    Four scenarios are covered: self-hosted ACME on non-standard ports 8300/8400,
+    self-hosted ACME on privileged ports 80/443, ACME over DNS with ALPN challenge
+    and a deny-list check, and a non-privileged run that publishes container port
+    8443 as host 443 with a custom ALPN challenge port. Two helpers, entrypointPath
+    and setupPki, prepare the cluster, and validateTLS performs the containerized
+    curl assertion, with an expectFail flag for negative cases.'
+  message: wrote 10 requirement(s) and 0 interface(s) for third-party-openbao-internal-vault-external-tests-tlslistener-binary;
+    interface entrypointPath is not in the observed facts; dropped; interface TestTLSListener_SelfHostedNonStandard
+    is not in the observed facts; dropped; interface TestTLSListener_SelfHostedPrivileged
+    is not in the observed facts; dropped; interface TestTLSListener_ALPN is not in
+    the observed facts; dropped; interface TestTLSListener_NonPrivileged is not in
+    the observed facts; dropped; interface setupPki is not in the observed facts;
+    dropped; interface validateTLS is not in the observed facts; dropped
+  phase: Succeeded
