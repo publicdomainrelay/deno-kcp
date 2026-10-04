@@ -3385,6 +3385,24 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.split-encodes-parts` (MUST): "Split must return exactly `parts` byte slices, each of length `len(secret)+1`. The trailing byte of every slice holds that part's x coordinate, drawn once from a shuffled set of distinct x coordinates so no two parts share an x value; the leading `len(secret)` bytes hold the polynomial evaluation for the corresponding secret byte, using a separately generated random polynomial of degree `threshold-1` per byte."
 - added `r.split-validates-parameters` (MUST): "Split must reject the request with an error and return no parts when the part count is less than the threshold ("parts cannot be less than threshold"), when the part count exceeds 255 ("parts cannot exceed 255"), when the threshold is below 2 ("threshold must be at least 2"), when the threshold exceeds 255 ("threshold cannot exceed 255"), or when the secret is empty ("cannot split an empty secret"). No random coordinates are drawn and no output is allocated before these checks pass."
 
+### third-party-openbao-sdk-helper-stepwise-environments-docker
+
+- intent: "" -> "It exists so stepwise plugin test cases can run against a real Vault/OpenBao server in disposable Docker containers instead of an in-process instance, giving plugin authors a hermetic but realistic environment. The package implements the stepwise.Environment interface so the stepwise harness can call Setup, Client, MountPath, RootToken, Name and Teardown without knowing whether the backing provider is Docker, Minikube or another runtime. NewEnvironment is the entry point that binds a test-supplied plugin name and mount options to a DockerCluster, and DockerClusterOptions plus Runner supply the knobs and container-launching mechanism the cluster uses."
+- added `r.client-returns-authenticated-client` (MUST): "DockerCluster.Client must return an API client configured to talk to the created cluster and already carrying the cluster root token, so test code can make authenticated requests without separately supplying credentials."
+- added `r.cluster-options-surface` (MUST): "DockerClusterOptions must carry the configuration consumed by setupCA and setupDockerCluster, such that Initialize, Setup and NewEnvironment all read cluster behaviour and plugin registration settings from it rather than from ambient state."
+- added `r.environment-interface` (MUST): "DockerCluster must satisfy the stepwise.Environment contract by providing Setup, Client, Teardown, Name, MountPath and RootToken, so the stepwise harness can drive it through the provider-agnostic interface."
+- added `r.environment-name` (SHOULD): "DockerCluster.Name must return the environment provider name identifying this provider to the stepwise harness."
+- added `r.initialize-cluster` (MUST): "DockerCluster.Initialize must accept a context and perform the Docker cluster construction for the configured options, delegating the actual provisioning to setupDockerCluster and returning an error when provisioning fails."
+- added `r.mount-path-generation` (MUST): "DockerCluster.MountPath must return the cached mount path when one already exists, otherwise generate a UUID, join it to MountOptions.MountPathPrefix when that prefix is set (falling back to PluginName), and prepend the auth/ segment when MountOptions.PluginType is api.PluginTypeCredential, so credential plugins mount under auth while other plugins mount at the root."
+- added `r.new-environment-binding` (MUST): "NewEnvironment must build a DockerCluster from the test-supplied plugin name and *stepwise.MountOptions, storing the name as PluginName and the options as MountOptions so later Setup, Client and MountPath calls operate on that plugin."
+- added `r.node-api-client-tls` (MUST): "dockerClusterNode.NewAPIClient must build an HTTP client over the node TLS config with HTTP/2 configured, refuse redirects with an explicit error, disable retries, target https://127.0.0.1:<HostPort>, propagate any DefaultConfig error, and set the node cluster's root token on the returned client."
+- added `r.node-cleanup-kills-container` (MUST): "dockerClusterNode.Cleanup must kill the node's container with signal KILL under a 30 second context timeout and return the resulting Docker error, if any."
+- added `r.node-name` (SHOULD): "dockerClusterNode.Name must return an identifying name for the node so multi-node clusters can distinguish their members."
+- added `r.root-token-accessor` (MUST): "DockerCluster.RootToken must return the initial root token created when the cluster was set up, which callers use for requests and administrative tasks."
+- added `r.runner-start` (MUST): "Runner.Start must take a context and start the container described by the Runner configuration, returning the container InspectResponse on success or an error when the container cannot be started."
+- added `r.setup-provisions-cluster` (MUST): "DockerCluster.Setup must create the Vault cluster the test will use, and it is the step the harness calls before any Client request; Setup also triggers MountPath evaluation for the plugin under test."
+- added `r.teardown-removes-infrastructure` (MUST): "DockerCluster.Teardown must stop every cluster node, accumulate node cleanup errors with multierror instead of stopping at the first failure, and remove the Docker network tracked in networkID when one was created, returning the combined error or nil."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -3635,5 +3653,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-sdk-helper-roottoken-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-salt-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-shamir-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-sdk-helper-stepwise-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-sdk-helper-stepwise-environments-docker-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-helper-stepwise-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-sdk-helper-stepwise-environments-docker-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-sdk-helper-stepwise-environments-docker-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |

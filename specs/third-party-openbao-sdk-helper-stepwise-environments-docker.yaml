@@ -3,10 +3,215 @@ codeRefIndex:
 - file:third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go
   environment.go@third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go
 - file:third_party/openbao/sdk/helper/stepwise/environments/docker/runner.go runner.go@third_party/openbao/sdk/helper/stepwise/environments/docker/runner.go
+- function:699d45430ec9f904a07c3cf1fb1820e4 NewEnvironment@third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go:450
+- method:014442ecd4ea6b48a2999ed0bbfea921 Runner.Start@third_party/openbao/sdk/helper/stepwise/environments/docker/runner.go:29
+- method:12633cff7d5160896bbe771ae1d27fec DockerCluster.Initialize@third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go:157
+- method:67f521b7b07124f75384f84fe46cf048 dockerClusterNode.Cleanup@third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go:519
+- method:83195a152fbda49bb45472a1d8986b4a DockerCluster.Setup@third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go:818
+- method:8a2e245805b6d5f5c40ed2c5ca8c9429 DockerCluster.Client@third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go:138
+- method:8fbf76337dc27c365fdf1a56a2a217ae DockerCluster.MountPath@third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go:104
+- method:b2901421007bb75df8136ecac23b46bc DockerCluster.Teardown@third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go:79
+- method:bd24cfbfe36aef93ff910aa7c1ccbf22 dockerClusterNode.NewAPIClient@third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go:490
+- method:c717acd5f677a837547f1a723e4a83d2 DockerCluster.Name@third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go:133
+- method:eeaf92de25aaf8737e543638ffb2b17b dockerClusterNode.Name@third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go:153
+- method:f0317d5bfa4d1a8f7118fb30843bc695 DockerCluster.RootToken@third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go:128
+- struct:95710b48337c71fb2829ac7b958bb1cc DockerClusterOptions@third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go:641
+- struct:cc22610728fc8ad8bf379c743f498a7f Runner@third_party/openbao/sdk/helper/stepwise/environments/docker/runner.go:16
+- struct:cf0b804943aa85368e334cac79a14cba DockerCluster@third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go:41
 kind: SystemContext
 metadata:
   name: third-party-openbao-sdk-helper-stepwise-environments-docker
   namespace: default
 spec:
+  intent: It exists so stepwise plugin test cases can run against a real Vault/OpenBao
+    server in disposable Docker containers instead of an in-process instance, giving
+    plugin authors a hermetic but realistic environment. The package implements the
+    stepwise.Environment interface so the stepwise harness can call Setup, Client,
+    MountPath, RootToken, Name and Teardown without knowing whether the backing provider
+    is Docker, Minikube or another runtime. NewEnvironment is the entry point that
+    binds a test-supplied plugin name and mount options to a DockerCluster, and DockerClusterOptions
+    plus Runner supply the knobs and container-launching mechanism the cluster uses.
+  interfaces:
+  - file: third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go
+    kind: struct
+    name: DockerCluster
+    signature: type DockerCluster struct
+  - file: third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go
+    kind: method
+    name: DockerCluster.Client
+    signature: func (dc *DockerCluster) Client() (*api.Client, error)
+  - file: third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go
+    kind: method
+    name: DockerCluster.Initialize
+    signature: func (dc *DockerCluster) Initialize(ctx context.Context) error
+  - file: third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go
+    kind: method
+    name: DockerCluster.MountPath
+    signature: func (dc *DockerCluster) MountPath() string
+  - file: third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go
+    kind: method
+    name: DockerCluster.Name
+    signature: func (dc *DockerCluster) Name() string
+  - file: third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go
+    kind: method
+    name: DockerCluster.RootToken
+    signature: func (dc *DockerCluster) RootToken() string
+  - file: third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go
+    kind: method
+    name: DockerCluster.Setup
+    signature: func (dc *DockerCluster) Setup() error
+  - file: third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go
+    kind: method
+    name: DockerCluster.Teardown
+    signature: func (dc *DockerCluster) Teardown() error
+  - file: third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go
+    kind: struct
+    name: DockerClusterOptions
+    signature: type DockerClusterOptions struct
+  - file: third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go
+    kind: function
+    name: NewEnvironment
+    signature: func NewEnvironment(name string, options *stepwise.MountOptions) *DockerCluster
+  - file: third_party/openbao/sdk/helper/stepwise/environments/docker/runner.go
+    kind: struct
+    name: Runner
+    signature: type Runner struct
+  - file: third_party/openbao/sdk/helper/stepwise/environments/docker/runner.go
+    kind: method
+    name: Runner.Start
+    signature: func (r *Runner) Start(ctx context.Context) (*container.InspectResponse,
+      error)
+  - file: third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go
+    kind: method
+    name: dockerClusterNode.Cleanup
+    signature: func (n *dockerClusterNode) Cleanup() error
+  - file: third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go
+    kind: method
+    name: dockerClusterNode.Name
+    signature: func (n *dockerClusterNode) Name() string
+  - file: third_party/openbao/sdk/helper/stepwise/environments/docker/environment.go
+    kind: method
+    name: dockerClusterNode.NewAPIClient
+    signature: func (n *dockerClusterNode) NewAPIClient() (*api.Client, error)
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - method:8a2e245805b6d5f5c40ed2c5ca8c9429
+    - method:f0317d5bfa4d1a8f7118fb30843bc695
+    id: r.client-returns-authenticated-client
+    level: MUST
+    text: DockerCluster.Client must return an API client configured to talk to the
+      created cluster and already carrying the cluster root token, so test code can
+      make authenticated requests without separately supplying credentials.
+  - codeRefs:
+    - method:12633cff7d5160896bbe771ae1d27fec
+    - method:83195a152fbda49bb45472a1d8986b4a
+    - struct:95710b48337c71fb2829ac7b958bb1cc
+    id: r.cluster-options-surface
+    level: MUST
+    text: DockerClusterOptions must carry the configuration consumed by setupCA and
+      setupDockerCluster, such that Initialize, Setup and NewEnvironment all read
+      cluster behaviour and plugin registration settings from it rather than from
+      ambient state.
+  - codeRefs:
+    - method:83195a152fbda49bb45472a1d8986b4a
+    - method:8a2e245805b6d5f5c40ed2c5ca8c9429
+    - method:8fbf76337dc27c365fdf1a56a2a217ae
+    - method:b2901421007bb75df8136ecac23b46bc
+    - method:c717acd5f677a837547f1a723e4a83d2
+    - method:f0317d5bfa4d1a8f7118fb30843bc695
+    - struct:cf0b804943aa85368e334cac79a14cba
+    id: r.environment-interface
+    level: MUST
+    text: DockerCluster must satisfy the stepwise.Environment contract by providing
+      Setup, Client, Teardown, Name, MountPath and RootToken, so the stepwise harness
+      can drive it through the provider-agnostic interface.
+  - codeRefs:
+    - method:c717acd5f677a837547f1a723e4a83d2
+    - struct:cf0b804943aa85368e334cac79a14cba
+    id: r.environment-name
+    level: SHOULD
+    text: DockerCluster.Name must return the environment provider name identifying
+      this provider to the stepwise harness.
+  - codeRefs:
+    - method:12633cff7d5160896bbe771ae1d27fec
+    - struct:cf0b804943aa85368e334cac79a14cba
+    id: r.initialize-cluster
+    level: MUST
+    text: DockerCluster.Initialize must accept a context and perform the Docker cluster
+      construction for the configured options, delegating the actual provisioning
+      to setupDockerCluster and returning an error when provisioning fails.
+  - codeRefs:
+    - method:8fbf76337dc27c365fdf1a56a2a217ae
+    - struct:cf0b804943aa85368e334cac79a14cba
+    id: r.mount-path-generation
+    level: MUST
+    text: DockerCluster.MountPath must return the cached mount path when one already
+      exists, otherwise generate a UUID, join it to MountOptions.MountPathPrefix when
+      that prefix is set (falling back to PluginName), and prepend the auth/ segment
+      when MountOptions.PluginType is api.PluginTypeCredential, so credential plugins
+      mount under auth while other plugins mount at the root.
+  - codeRefs:
+    - function:699d45430ec9f904a07c3cf1fb1820e4
+    - struct:cf0b804943aa85368e334cac79a14cba
+    id: r.new-environment-binding
+    level: MUST
+    text: NewEnvironment must build a DockerCluster from the test-supplied plugin
+      name and *stepwise.MountOptions, storing the name as PluginName and the options
+      as MountOptions so later Setup, Client and MountPath calls operate on that plugin.
+  - codeRefs:
+    - method:bd24cfbfe36aef93ff910aa7c1ccbf22
+    - struct:cf0b804943aa85368e334cac79a14cba
+    id: r.node-api-client-tls
+    level: MUST
+    text: dockerClusterNode.NewAPIClient must build an HTTP client over the node TLS
+      config with HTTP/2 configured, refuse redirects with an explicit error, disable
+      retries, target https://127.0.0.1:<HostPort>, propagate any DefaultConfig error,
+      and set the node cluster's root token on the returned client.
+  - codeRefs:
+    - method:67f521b7b07124f75384f84fe46cf048
+    id: r.node-cleanup-kills-container
+    level: MUST
+    text: dockerClusterNode.Cleanup must kill the node's container with signal KILL
+      under a 30 second context timeout and return the resulting Docker error, if
+      any.
+  - codeRefs:
+    - method:eeaf92de25aaf8737e543638ffb2b17b
+    id: r.node-name
+    level: SHOULD
+    text: dockerClusterNode.Name must return an identifying name for the node so multi-node
+      clusters can distinguish their members.
+  - codeRefs:
+    - method:f0317d5bfa4d1a8f7118fb30843bc695
+    - struct:cf0b804943aa85368e334cac79a14cba
+    id: r.root-token-accessor
+    level: MUST
+    text: DockerCluster.RootToken must return the initial root token created when
+      the cluster was set up, which callers use for requests and administrative tasks.
+  - codeRefs:
+    - method:014442ecd4ea6b48a2999ed0bbfea921
+    - struct:cc22610728fc8ad8bf379c743f498a7f
+    id: r.runner-start
+    level: MUST
+    text: Runner.Start must take a context and start the container described by the
+      Runner configuration, returning the container InspectResponse on success or
+      an error when the container cannot be started.
+  - codeRefs:
+    - method:83195a152fbda49bb45472a1d8986b4a
+    - method:8fbf76337dc27c365fdf1a56a2a217ae
+    id: r.setup-provisions-cluster
+    level: MUST
+    text: DockerCluster.Setup must create the Vault cluster the test will use, and
+      it is the step the harness calls before any Client request; Setup also triggers
+      MountPath evaluation for the plugin under test.
+  - codeRefs:
+    - method:67f521b7b07124f75384f84fe46cf048
+    - method:b2901421007bb75df8136ecac23b46bc
+    - struct:cf0b804943aa85368e334cac79a14cba
+    id: r.teardown-removes-infrastructure
+    level: MUST
+    text: DockerCluster.Teardown must stop every cluster node, accumulate node cleanup
+      errors with multierror instead of stopping at the first failure, and remove
+      the Docker network tracked in networkID when one was created, returning the
+      combined error or nil.
   upstream: self

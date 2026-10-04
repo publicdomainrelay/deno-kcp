@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+It exists so stepwise plugin test cases can run against a real Vault/OpenBao server in disposable Docker containers instead of an in-process instance, giving plugin authors a hermetic but realistic environment. The package implements the stepwise.Environment interface so the stepwise harness can call Setup, Client, MountPath, RootToken, Name and Teardown without knowing whether the backing provider is Docker, Minikube or another runtime. NewEnvironment is the entry point that binds a test-supplied plugin name and mount options to a DockerCluster, and DockerClusterOptions plus Runner supply the knobs and container-launching mechanism the cluster uses.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
