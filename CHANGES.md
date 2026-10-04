@@ -1447,6 +1447,17 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.test-helpers` (MUST): "The package test utilities must build a testJob that delegates Execute to its ex function with its id and OnFailure to its onFail function, require both functions to be non-nil via newTestJob, and GetNumWorkers must read the underlying worker pool's numWorkers for assertions."
 - added `r.worker-count-cleanup` (MUST): "Decrementing a queue's worker count must delete the worker tracking entry once the queue no longer exists and the count has dropped below one, and re-adding a queue must preserve an existing non-zero worker count rather than resetting it."
 
+### third-party-openbao-internal-helper-flag-kv
+
+- intent: "" -> "This context exists so the specification records the key=value flag helper that OpenBao's command layer uses to let users pass repeatable key=value options on the CLI, pinning down exactly how a raw argument is parsed into the map and what happens on malformed input, so that a reimplementation or a port preserves the same parsing contract, the same error string, and the same lazy nil-map allocation."
+- added `r.flag-is-string-map` (MUST): "Flag is a map from string to string; it is used as the value type for a CLI flag so that each occurrence of the flag contributes one key and one value to the same map, and callers read the collected pairs straight out of that map."
+- added `r.satisfies-flag-value` (SHOULD): "Flag and its String and Set methods together satisfy the standard library flag.Value interface, so the type can be registered directly with a flag set; String supplies the interface's display form and Set supplies its parsing form."
+- added `r.set-allocates-nil-map` (MUST): "Flag.Set tolerates a nil receiver and allocates the underlying map on first use, so a Flag variable can be declared without initialization and still accept its first key=value argument."
+- added `r.set-rejects-missing-equals` (MUST): "Flag.Set returns an error that quotes the raw argument and reads "no '=' value in arg: %q" when the argument contains no '=' character, and in that case leaves the map unchanged."
+- added `r.set-splits-on-first-equals` (MUST): "Flag.Set parses one raw flag argument by cutting it at the first '=' character; the text before that separator becomes the key and the text after it, including any further '=' characters, becomes the value, and the pair is written into the map so a later argument with the same key overwrites the earlier value."
+- added `r.string-empty` (MUST): "Flag.String returns an empty string, because the collected key/value pairs are not rendered back into a flag string."
+- added `r.tested-behavior` (SHOULD): "The behavior of Flag.String and Flag.Set is covered by tests in flag_test.go, including the parse of well formed key=value arguments and the rejection of arguments with no '=' character."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -1520,5 +1531,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-helper-configutil-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-dhutil-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-fairshare-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-helper-flag-kv-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-helper-flag-kv-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-flag-slice-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-helper-forwarding-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Pending |  | 0 | - |

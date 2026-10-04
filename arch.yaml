@@ -20506,8 +20506,86 @@ system_contexts:
   codeRefIndex:
   - file:third_party/openbao/internal/helper/flag-kv/flag.go flag.go@third_party/openbao/internal/helper/flag-kv/flag.go
   - file:third_party/openbao/internal/helper/flag-kv/flag_test.go flag_test.go@third_party/openbao/internal/helper/flag-kv/flag_test.go
+  - method:892fa5b5c168c53de9e1dd9227f346e5 Flag.String@third_party/openbao/internal/helper/flag-kv/flag.go:15
+  - method:a1ac532bfe770bf08649ebb6c002c71f Flag.Set@third_party/openbao/internal/helper/flag-kv/flag.go:19
+  - type_alias:44a5f1a6527223ee7eba67cc11ec2e38 Flag@third_party/openbao/internal/helper/flag-kv/flag.go:13
   id: sc.third-party-openbao-internal-helper-flag-kv
+  intent: This context exists so the specification records the key=value flag helper
+    that OpenBao's command layer uses to let users pass repeatable key=value options
+    on the CLI, pinning down exactly how a raw argument is parsed into the map and
+    what happens on malformed input, so that a reimplementation or a port preserves
+    the same parsing contract, the same error string, and the same lazy nil-map allocation.
+  interfaces:
+  - file: third_party/openbao/internal/helper/flag-kv/flag.go
+    kind: type_alias
+    name: Flag
+    signature: type Flag map[string]string
+  - file: third_party/openbao/internal/helper/flag-kv/flag.go
+    kind: method
+    name: Flag.Set
+    signature: func (v *Flag) Set(raw string) error
+  - file: third_party/openbao/internal/helper/flag-kv/flag.go
+    kind: method
+    name: Flag.String
+    signature: func (v *Flag) String() string
   name: third-party-openbao-internal-helper-flag-kv
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/flag-kv/flag.go
+    - type_alias:44a5f1a6527223ee7eba67cc11ec2e38
+    id: r.flag-is-string-map
+    level: MUST
+    text: Flag is a map from string to string; it is used as the value type for a
+      CLI flag so that each occurrence of the flag contributes one key and one value
+      to the same map, and callers read the collected pairs straight out of that map.
+  - codeRefs:
+    - method:892fa5b5c168c53de9e1dd9227f346e5
+    - method:a1ac532bfe770bf08649ebb6c002c71f
+    - type_alias:44a5f1a6527223ee7eba67cc11ec2e38
+    id: r.satisfies-flag-value
+    level: SHOULD
+    text: Flag and its String and Set methods together satisfy the standard library
+      flag.Value interface, so the type can be registered directly with a flag set;
+      String supplies the interface's display form and Set supplies its parsing form.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/flag-kv/flag.go
+    - method:a1ac532bfe770bf08649ebb6c002c71f
+    id: r.set-allocates-nil-map
+    level: MUST
+    text: Flag.Set tolerates a nil receiver and allocates the underlying map on first
+      use, so a Flag variable can be declared without initialization and still accept
+      its first key=value argument.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/flag-kv/flag.go
+    - method:a1ac532bfe770bf08649ebb6c002c71f
+    id: r.set-rejects-missing-equals
+    level: MUST
+    text: 'Flag.Set returns an error that quotes the raw argument and reads "no ''=''
+      value in arg: %q" when the argument contains no ''='' character, and in that
+      case leaves the map unchanged.'
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/flag-kv/flag.go
+    - method:a1ac532bfe770bf08649ebb6c002c71f
+    id: r.set-splits-on-first-equals
+    level: MUST
+    text: Flag.Set parses one raw flag argument by cutting it at the first '=' character;
+      the text before that separator becomes the key and the text after it, including
+      any further '=' characters, becomes the value, and the pair is written into
+      the map so a later argument with the same key overwrites the earlier value.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/flag-kv/flag.go
+    - method:892fa5b5c168c53de9e1dd9227f346e5
+    id: r.string-empty
+    level: MUST
+    text: Flag.String returns an empty string, because the collected key/value pairs
+      are not rendered back into a flag string.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/flag-kv/flag_test.go
+    id: r.tested-behavior
+    level: SHOULD
+    text: The behavior of Flag.String and Flag.Set is covered by tests in flag_test.go,
+      including the parse of well formed key=value arguments and the rejection of
+      arguments with no '=' character.
   upstream: self
 - code:
   - third_party/openbao/internal/helper/flag-slice/flag.go

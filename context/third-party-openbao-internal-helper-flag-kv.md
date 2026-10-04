@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the specification records the key=value flag helper that OpenBao's command layer uses to let users pass repeatable key=value options on the CLI, pinning down exactly how a raw argument is parsed into the map and what happens on malformed input, so that a reimplementation or a port preserves the same parsing contract, the same error string, and the same lazy nil-map allocation.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
