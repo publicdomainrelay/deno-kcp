@@ -5617,6 +5617,17 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.no-additional-state` (SHOULD): "The controller should carry only the queryParams declaration and no actions, computed properties, or injected services, keeping the roles route's request state in the URL and out of memory."
 - added `r.query-params-declares-page-filter` (MUST): "KubernetesRolesController must declare a queryParams class property whose value is the array ['pageFilter'], so that the pageFilter query string parameter is bound to the controller and the roles route can read it from and write it to the URL."
 
+### third-party-openbao-ui-lib-kubernetes-addon-decorators
+
+- intent: "" -> "The context exists to specify the Kubernetes engine's configuration-fetch decorator for the OpenBao web UI. Routes that need the Kubernetes secrets engine config to be loaded before they render — configuration, configure, overview, and roles index — mix this decorator in rather than repeating the lookup. It exists so a single implementation owns the cache-first read of the 'kubernetes/config' record, the distinction between 'no config yet' (an expected 404 that should prompt the user) and a real failure (which is retained for display), and the safe degradation of the route when the backend is unreachable or unauthorized. The RRoute prototype check is part of its contract: applying it to a non-Route class must warn and be a no-op, never a runtime crash."
+- added `r.404-prompt-and-other-errors-retained` (MUST): "On query rejection the hook must branch on error.httpStatus: a 404 must set promptConfig to true to trigger the configuration call to action, while any other status must assign the error to configError; neither branch may rethrow, so a permission failure or transport error does not abort the route."
+- added `r.backend-from-secret-mount-path` (MUST): "beforeModel must call super.beforeModel with the forwarded arguments, then resolve the backend name from this.secretMountPath.get() and use that value as both the record id and the query parameter for the Kubernetes config lookup."
+- added `r.cache-first-record-read` (MUST): "beforeModel must first attempt this.store.peekRecord('kubernetes/config', backend); when a cached record is returned it must assign it to configModel and set promptConfig to false without issuing a network query."
+- added `r.decorator-factory-config` (SHOULD): "withConfig must remain a zero-argument factory that returns the decorator closure, so it can be applied in the class decorator position on Route subclasses without passing configuration."
+- added `r.decorator-state-defaults` (MUST): "The returned FetchConfig subclass must declare the fields configModel, configError and promptConfig, defaulting to null, null and false, so consumers can read them before beforeModel resolves."
+- added `r.query-on-cache-miss` (MUST): "When no cached record is present, beforeModel must call this.store.queryRecord('kubernetes/config', { backend }) and, on success, store the returned record in configModel and set promptConfig to false; the promise must be returned from beforeModel so the route transition waits on it."
+- added `r.route-only-application` (MUST): "The decorator must test the target with Object.prototype.isPrototypeOf.call(Route, SuperClass); if the target is not an Ember Route subclass it must log the message 'withConfig decorator must be used on an instance of ember Route class. Decorator not applied to returned class' via console.error and return the SuperClass unchanged, applying no behavior."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -6106,5 +6117,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-kubernetes-addon-components-page-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-kubernetes-addon-components-page-role-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-kubernetes-addon-controllers-roles-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-lib-kubernetes-addon-decorators-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-kubernetes-addon-decorators-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-kubernetes-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

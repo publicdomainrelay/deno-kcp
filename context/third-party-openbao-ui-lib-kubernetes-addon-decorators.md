@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists to specify the Kubernetes engine's configuration-fetch decorator for the OpenBao web UI. Routes that need the Kubernetes secrets engine config to be loaded before they render — configuration, configure, overview, and roles index — mix this decorator in rather than repeating the lookup. It exists so a single implementation owns the cache-first read of the 'kubernetes/config' record, the distinction between 'no config yet' (an expected 404 that should prompt the user) and a real failure (which is retained for display), and the safe degradation of the route when the backend is unreachable or unauthorized. The RRoute prototype check is part of its contract: applying it to a non-Route class must warn and be a no-op, never a runtime crash.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
