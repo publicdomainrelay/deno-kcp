@@ -10,5 +10,20 @@ spec:
   systemContext: deploy
   toCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
 status:
-  message: the agent is summarizing deploy
-  phase: Running
+  agentLog: 'The deploy directory holds the Kubernetes/kcp substrate for deno-kcp:
+    eight APIResourceSchema manifests that define the deno.computer CRD kinds (DenoPod,
+    DenoRun, DenoJob, RunTrigger, PolicyEngine, PolicyWorkflowPod, PolicyWorkflowRun,
+    OpenBao), two APIExport manifests (denoruntime, policyworkflowruns) that publish
+    those kinds from the root:deno-provider workspace, and two WorkspaceType manifests
+    (workflow, denoruntime) that extend universal and bind the exports by default.
+    Every schema is Namespaced, serves and stores v1alpha1, enables the status subresource,
+    and carries a status block with a phase and a free-form conditions array. The
+    kinds form one runtime chain: PolicyEngine and PolicyWorkflowPod provide the warm
+    engine, RunTrigger fires DenoJobs, DenoJobs spawn DenoRuns, DenoPod is the native
+    run-create path, PolicyWorkflowRun is the directly created run, and OpenBao describes
+    the per-namespace intermediate CA the workloads are issued from. Names come from
+    the schema names block and are cross-checked by .tools/open-architecture/validate.py
+    against the upstream Go constants.'
+  message: wrote 12 requirement(s) and 0 interface(s) for deploy; dropped 1 unresolved
+    code ref(s)
+  phase: Succeeded
