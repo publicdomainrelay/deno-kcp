@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The package exists to give database plugins in the OpenBao SDK shared, dependency-free helpers for three recurring chores: filling in query templates, turning a postgres URL into libpq-style connection parameters, and quoting SQL identifiers so untrusted names cannot break out of a statement. It is vendored third-party code inside deno-kcp, so the context documents what the package guarantees rather than proposing changes to it.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

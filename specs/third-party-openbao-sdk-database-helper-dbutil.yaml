@@ -3,10 +3,93 @@ codeRefIndex:
 - file:third_party/openbao/sdk/database/helper/dbutil/dbutil.go dbutil.go@third_party/openbao/sdk/database/helper/dbutil/dbutil.go
 - file:third_party/openbao/sdk/database/helper/dbutil/parseurl.go parseurl.go@third_party/openbao/sdk/database/helper/dbutil/parseurl.go
 - file:third_party/openbao/sdk/database/helper/dbutil/quoteidentifier.go quoteidentifier.go@third_party/openbao/sdk/database/helper/dbutil/quoteidentifier.go
+- function:226e54f4985dac8b16bce4aecd3fa887 QuoteIdentifier@third_party/openbao/sdk/database/helper/dbutil/quoteidentifier.go:39
+- function:4894743c645e48dfeae75571355de588 ParseURL@third_party/openbao/sdk/database/helper/dbutil/parseurl.go:55
+- function:68634ad58e9e60c66e8af6d0e4aefed1 Unimplemented@third_party/openbao/sdk/database/helper/dbutil/dbutil.go:30
+- function:eb56241dcc57671e9840d5dbe3210b83 QueryHelper@third_party/openbao/sdk/database/helper/dbutil/dbutil.go:21
 kind: SystemContext
 metadata:
   name: third-party-openbao-sdk-database-helper-dbutil
   namespace: default
 spec:
+  intent: 'The package exists to give database plugins in the OpenBao SDK shared,
+    dependency-free helpers for three recurring chores: filling in query templates,
+    turning a postgres URL into libpq-style connection parameters, and quoting SQL
+    identifiers so untrusted names cannot break out of a statement. It is vendored
+    third-party code inside deno-kcp, so the context documents what the package guarantees
+    rather than proposing changes to it.'
+  interfaces:
+  - file: third_party/openbao/sdk/database/helper/dbutil/parseurl.go
+    kind: function
+    name: ParseURL
+    signature: func ParseURL(url string) (string, error)
+  - file: third_party/openbao/sdk/database/helper/dbutil/dbutil.go
+    kind: function
+    name: QueryHelper
+    signature: func QueryHelper(tpl string, data map[string]string) string
+  - file: third_party/openbao/sdk/database/helper/dbutil/quoteidentifier.go
+    kind: function
+    name: QuoteIdentifier
+    signature: func QuoteIdentifier(name string) string
+  - file: third_party/openbao/sdk/database/helper/dbutil/dbutil.go
+    kind: function
+    name: Unimplemented
+    signature: func Unimplemented() error
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/sdk/database/helper/dbutil/parseurl.go
+    - function:4894743c645e48dfeae75571355de588
+    id: r.parseurl-emits-keyed-params
+    level: MUST
+    text: On success ParseURL must return a space-separated list of key='value' connection
+      parameters covering user, password, host, port, dbname, and every query parameter
+      of the URL; host and port are split only when the host parses as host:port,
+      the dbname is the path with its leading slash removed, and any parameter whose
+      value is empty must be omitted entirely.
+  - codeRefs:
+    - file:third_party/openbao/sdk/database/helper/dbutil/parseurl.go
+    - function:4894743c645e48dfeae75571355de588
+    id: r.parseurl-escapes-quotes-and-sorts
+    level: MUST
+    text: ParseURL must escape each value by replacing a single quote with a backslash-escaped
+      quote and a backslash with a doubled backslash before wrapping the value in
+      single quotes, and must sort the resulting key='value' pairs so identical URLs
+      always produce an identical output string.
+  - codeRefs:
+    - file:third_party/openbao/sdk/database/helper/dbutil/parseurl.go
+    - function:4894743c645e48dfeae75571355de588
+    id: r.parseurl-postgres-only
+    level: MUST
+    text: 'ParseURL must parse its input as a URL and reject any scheme other than
+      "postgres" or "postgresql" with an error of the form "invalid connection protocol:
+      <scheme>"; a URL that fails to parse must return that parse error and an empty
+      string.'
+  - codeRefs:
+    - file:third_party/openbao/sdk/database/helper/dbutil/dbutil.go
+    - function:eb56241dcc57671e9840d5dbe3210b83
+    id: r.queryhelper-substitutes-placeholders
+    level: MUST
+    text: QueryHelper must take a query template and a map of values, and for every
+      key in the map replace each occurrence of the placeholder {{key}} in the template
+      with that key's value, returning the fully substituted string; keys absent from
+      the map leave their placeholders untouched and substitution happens for all
+      occurrences, not just the first.
+  - codeRefs:
+    - file:third_party/openbao/sdk/database/helper/dbutil/quoteidentifier.go
+    - function:226e54f4985dac8b16bce4aecd3fa887
+    id: r.quoteidentifier-safe-quoting
+    level: MUST
+    text: QuoteIdentifier must return its input wrapped in double quotes with every
+      embedded double quote doubled, and must truncate the name at the first NUL byte
+      so a NUL cannot terminate the identifier early; a name with no embedded quote
+      or NUL is simply wrapped in double quotes.
+  - codeRefs:
+    - file:third_party/openbao/sdk/database/helper/dbutil/dbutil.go
+    - function:68634ad58e9e60c66e8af6d0e4aefed1
+    id: r.unimplemented-returns-grpc-status
+    level: MUST
+    text: Unimplemented must return a gRPC status error carrying the codes.Unimplemented
+      code and the message "Not yet implemented", so database plugin stubs can signal
+      an unimplemented operation without importing gRPC status machinery themselves.
   upstream: self

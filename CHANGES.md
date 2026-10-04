@@ -2949,6 +2949,16 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.secret-values-masks-password` (MUST): "SecretValues must return a map that masks the configured password under the key equal to the password itself with the value "[password]", so logging a producer never prints the credential."
 - added `r.set-credentials-unimplemented` (MUST): "SQLConnectionProducer.SetCredentials must be a stub that returns empty username and password together with dbutil.Unimplemented(), because the generic SQL producer does not manage static database users."
 
+### third-party-openbao-sdk-database-helper-dbutil
+
+- intent: "" -> "The package exists to give database plugins in the OpenBao SDK shared, dependency-free helpers for three recurring chores: filling in query templates, turning a postgres URL into libpq-style connection parameters, and quoting SQL identifiers so untrusted names cannot break out of a statement. It is vendored third-party code inside deno-kcp, so the context documents what the package guarantees rather than proposing changes to it."
+- added `r.parseurl-emits-keyed-params` (MUST): "On success ParseURL must return a space-separated list of key='value' connection parameters covering user, password, host, port, dbname, and every query parameter of the URL; host and port are split only when the host parses as host:port, the dbname is the path with its leading slash removed, and any parameter whose value is empty must be omitted entirely."
+- added `r.parseurl-escapes-quotes-and-sorts` (MUST): "ParseURL must escape each value by replacing a single quote with a backslash-escaped quote and a backslash with a doubled backslash before wrapping the value in single quotes, and must sort the resulting key='value' pairs so identical URLs always produce an identical output string."
+- added `r.parseurl-postgres-only` (MUST): "ParseURL must parse its input as a URL and reject any scheme other than "postgres" or "postgresql" with an error of the form "invalid connection protocol: <scheme>"; a URL that fails to parse must return that parse error and an empty string."
+- added `r.queryhelper-substitutes-placeholders` (MUST): "QueryHelper must take a query template and a map of values, and for every key in the map replace each occurrence of the placeholder {{key}} in the template with that key's value, returning the fully substituted string; keys absent from the map leave their placeholders untouched and substitution happens for all occurrences, not just the first."
+- added `r.quoteidentifier-safe-quoting` (MUST): "QuoteIdentifier must return its input wrapped in double quotes with every embedded double quote doubled, and must truncate the name at the first NUL byte so a NUL cannot terminate the identifier early; a name with no embedded quote or NUL is simply wrapped in double quotes."
+- added `r.unimplemented-returns-grpc-status` (MUST): "Unimplemented must return a gRPC status error carrying the codes.Unimplemented code and the message "Not yet implemented", so database plugin stubs can signal an unimplemented operation without importing gRPC status machinery themselves."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -3159,4 +3169,4 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-sdk-database-dbplugin-v5-testing-c2s-6c1bbe4c3ba9-3749680f0640 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-database-helper-connutil-c2s-6c1bbe4c3ba9-3749680f0640 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-database-helper-credsutil-c2s-6c1bbe4c3ba9-3749680f0640 | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-sdk-database-helper-dbutil-c2s-6c1bbe4c3ba9-3749680f0640 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-database-helper-dbutil-c2s-6c1bbe4c3ba9-3749680f0640 | CodeToSpec | Succeeded |  | 0 | - |
