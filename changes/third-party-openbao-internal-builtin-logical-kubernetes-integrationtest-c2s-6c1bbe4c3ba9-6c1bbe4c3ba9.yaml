@@ -10,5 +10,19 @@ spec:
   systemContext: third-party-openbao-internal-builtin-logical-kubernetes-integrationtest
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-builtin-logical-kubernetes-integrationtest
-  phase: Running
+  agentLog: 'This context is the Go integration-test package `integrationtest` under
+    `third_party/openbao/internal/builtin/logical/kubernetes/integrationtest`, which
+    exercises the OpenBao Kubernetes secrets-engine plugin against a real cluster.
+    Four files make it up: `integration_test.go` holds `TestMain`, the environment
+    wiring, and the mount/config/role-CRUD/viability tests; `helpers.go` holds the
+    shared verification helpers (Kubernetes client construction, creds-response checks,
+    Role/RoleBinding/ServiceAccount comparison, token TTL and audience decoding, map
+    and rule conversion); `creds_integration_test.go` holds the `creds/` endpoint
+    tests for TTL, audiences, service-account name, kubernetes role name, generated
+    role rules and namespace selection; and `wal_rollback_test.go` holds the WAL rollback
+    test that forces creds creation to fail with a broken JWT and then waits for the
+    backend to clean up the half-created Kubernetes objects. The package is opt-in:
+    nothing runs unless `INTEGRATION_TESTS` is set, and the rollback test is gated
+    again by `K8S_WAL_TEST`.'
+  message: wrote 17 requirement(s) and 0 interface(s) for third-party-openbao-internal-builtin-logical-kubernetes-integrationtest
+  phase: Succeeded
