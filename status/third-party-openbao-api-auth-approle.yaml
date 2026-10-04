@@ -1,0 +1,64 @@
+conditions:
+- message: 'undeclared: AppRoleAuth, AppRoleAuth.Login, LoginOption, NewAppRoleAuth,
+    SecretID, WithMountPath, WithWrappingToken'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/api/auth/approle/approle.go
+  - third_party/openbao/api/auth/approle/approle_test.go
+  fingerprint: 0f78bb3e819e8f0d381000efd590bc490d15fad3942337dd0fabafccf6fa1135
+  interfaces:
+  - codegraphId: struct:c3b9a9c281a7dab56060d3c1d0f103f3
+    file: third_party/openbao/api/auth/approle/approle.go
+    kind: struct
+    line: 17
+    name: AppRoleAuth
+  - codegraphId: struct:fdf7d8abfcfc08357b55b8a35bd83ff6
+    file: third_party/openbao/api/auth/approle/approle.go
+    kind: struct
+    line: 33
+    name: SecretID
+  - codegraphId: type_alias:de2ec0e4cb842660b1b1f573ff29926d
+    file: third_party/openbao/api/auth/approle/approle.go
+    kind: type_alias
+    line: 43
+    name: LoginOption
+  - codegraphId: function:0c0251b3ee8a686ab995281e430c7e47
+    file: third_party/openbao/api/auth/approle/approle.go
+    kind: function
+    line: 60
+    name: NewAppRoleAuth
+    signature: (roleID string, secretID *SecretID, opts ...LoginOption) (*AppRoleAuth,
+      error)
+  - codegraphId: method:4a1253c4affe90d74083c66b48949310
+    file: third_party/openbao/api/auth/approle/approle.go
+    kind: method
+    line: 106
+    name: AppRoleAuth.Login
+    signature: (ctx context.Context, client *api.Client) (*api.Secret, error)
+  - codegraphId: function:b150309c06eb8e362fc9a3720b1bbc68
+    file: third_party/openbao/api/auth/approle/approle.go
+    kind: function
+    line: 154
+    name: WithMountPath
+    signature: (mountPath string) LoginOption
+  - codegraphId: function:cf9e6e345dad7784ebf823bf8dc110b4
+    file: third_party/openbao/api/auth/approle/approle.go
+    kind: function
+    line: 161
+    name: WithWrappingToken
+    signature: () LoginOption
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 3b847f2b1a64fba92301dd020a4bd5f91c363f38ef82f74235597f31c4d0dede
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 0f78bb3e819e8f0d381000efd590bc490d15fad3942337dd0fabafccf6fa1135
