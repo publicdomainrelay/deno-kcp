@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists to verify that OpenBao can build, register, mount, use, reload and recover external plugins across all supported plugin protocol versions and plugin types, and that plugin-related audit records carry the metadata needed to identify an externally mounted plugin. It is the integration-level safety net for the plugin catalog, plugin multiplexing, plugin lifecycle on seal/unseal and reload, and the audit enrichment of plugin mounts, so that changes to those subsystems fail loudly in CI instead of at an operator's deployment.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

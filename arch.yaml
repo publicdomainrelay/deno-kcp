@@ -35632,7 +35632,134 @@ system_contexts:
     external_plugin_test.go@third_party/openbao/internal/vault/external_tests/plugin/external_plugin_test.go
   - file:third_party/openbao/internal/vault/external_tests/plugin/plugin_test.go plugin_test.go@third_party/openbao/internal/vault/external_tests/plugin/plugin_test.go
   id: sc.third-party-openbao-internal-vault-external-tests-plugin
+  intent: The context exists to verify that OpenBao can build, register, mount, use,
+    reload and recover external plugins across all supported plugin protocol versions
+    and plugin types, and that plugin-related audit records carry the metadata needed
+    to identify an externally mounted plugin. It is the integration-level safety net
+    for the plugin catalog, plugin multiplexing, plugin lifecycle on seal/unseal and
+    reload, and the audit enrichment of plugin mounts, so that changes to those subsystems
+    fail loudly in CI instead of at an operator's deployment.
   name: third-party-openbao-internal-vault-external-tests-plugin
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/plugin/external_plugin_test.go
+    id: r.audit-plugin-metadata
+    level: MUST
+    text: When a file audit backend is enabled, audit records for requests and responses
+      on an external auth or secret plugin mount must contain mount_class equal to
+      the plugin type string, mount_is_external_plugin as boolean true, and mount_running_sha256
+      as a string.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/plugin/plugin_test.go
+    id: r.auto-reload-on-rpc-error
+    level: MUST
+    text: A read of the mock plugin's errors/rpc path must return an error and must
+      reset the backend's in-memory internal value, proving automatic reload after
+      an RPC failure.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/plugin/external_plugin_test.go
+    id: r.continue-on-error
+    level: MUST
+    text: The external plugin continue-on-error test runs all four combinations of
+      failure kind (sha256 mismatch via catalog update, missing binary via file removal)
+      and plugin type (secret, auth), then seals and unseals, recompiles and re-registers
+      the plugin, and requires that the previously failed unmount or auth disable
+      now succeeds.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/plugin/external_plugin_test.go
+    id: r.database-plugin-postgres
+    level: MUST
+    text: The database plugin test mounts an external database secrets engine, prepares
+      a PostgreSQL 13.4-buster test container with a vault user, writes a connection
+      config bound to the plugin name, rotates the root credential, creates a role
+      from the templated creation statements, generates credentials, and requires
+      that a lease lookup succeeds before revocation and fails after it.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/plugin/external_plugin_test.go
+    id: r.database-reload-skipped
+    level: SHOULD
+    text: TestExternalPlugin_DatabaseReload skips with the message that reloading
+      database plugins is not yet supported, so database reload remains explicitly
+      unsupported until that skip is removed.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/plugin/plugin_test.go
+    id: r.missing-binary-and-catalog-removal
+    level: MUST
+    text: Removing the plugin binary from the cluster temp directory and unsealing
+      must make a later read of sys/mounts/mock-0/tune fail, and deleting the plugin
+      from the catalog, sealing and unsealing must leave the cluster active; when
+      the test re-adds the plugin and mounts it on the still-existing path, that mount
+      must fail.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/plugin/plugin_test.go
+    id: r.mock-plugin-entrypoints
+    level: MUST
+    text: The mock plugin entrypoints serve only when the SDK's plugin version environment
+      variable is set, require the CA cert variable to be non-empty, parse the ca-cert
+      flag, and dispatch to lplugin.Serve or lplugin.ServeMultiplex with a mock factory
+      for the logical or credential backend type; the V4 variants additionally return
+      early when AutoMTLS is enabled and install a TLSProviderFunc.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/plugin/external_plugin_test.go
+    id: r.multiplexed-shared-process
+    level: MUST
+    text: The auth-method and secrets-engine tests mount five instances of the same
+      plugin in parallel subtests and complete a full lifecycle on each (configuration,
+      credential or secret-id generation, login or read, renew and revoke or deregister),
+      which requires the mounts to share a single multiplexed plugin process.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/plugin/external_plugin_test.go
+    - file:third_party/openbao/internal/vault/external_tests/plugin/plugin_test.go
+    id: r.package-is-external-test-package
+    level: MUST
+    text: Both files declare package plugin_test so the tests exercise the internal
+      vault, http and builtin plugin packages only through their exported API.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/plugin/plugin_test.go
+    id: r.plugin-env-delivery
+    level: MUST
+    text: The env test mounts a plugin registered with FOO=BAR in its environment
+      and the mock plugin entrypoint fails unless os.Getenv("FOO") equals BAR, confirming
+      the plugin process receives the configured environment alongside the CA certificate
+      variable.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/plugin/plugin_test.go
+    id: r.plugin-version-matrix
+    level: MUST
+    text: Plugin behaviour is asserted for each protocol generation by the logicalVersionMap
+      and credentialVersionMap tables, whose keys v4, v5 and v5_multiplexed select
+      the mock plugin entrypoint (V4, plain Serve, or ServeMultiplex) that the test
+      registers for that generation.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/plugin/external_plugin_test.go
+    id: r.register-and-enable-both-plugin-types
+    level: MUST
+    text: The shared helpers register a compiled plugin in the catalog with its name,
+      type, command, sha256 and version, then enable it either as a secrets mount
+      (Sys().Mount) for consts.PluginTypeSecrets or as an auth method (Sys().EnableAuthWithOptions)
+      for consts.PluginTypeCredential, and fail the test on any error.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/plugin/external_plugin_test.go
+    id: r.reload-keeps-plugin-usable
+    level: MUST
+    text: After a credential or secret plugin is registered, configured and used,
+      calling ReloadPlugin on it must succeed and the same auth method or secret read
+      must still work, after which the plugin is deregistered.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/plugin/plugin_test.go
+    id: r.reload-resets-plugin-state
+    level: MUST
+    text: 'Reload is asserted both on the per-plugin endpoint and on the sys/plugins/reload/backend
+      endpoint: after writing an internal value of baz and issuing the reload (by
+      plugin name or by mounts list), a subsequent read must return a value other
+      than baz and the backend endpoint response must carry a non-nil reload_id.'
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/plugin/plugin_test.go
+    id: r.survive-seal-unseal
+    level: MUST
+    text: Tests for secret and auth plugins lazily load the mount, seal every core,
+      unseal with all barrier keys, assert the core is not sealed, and wait for active
+      so post-unseal plugin restoration is proven to complete.
   upstream: self
 - code:
   - third_party/openbao/internal/vault/external_tests/policy/acl_templating_test.go

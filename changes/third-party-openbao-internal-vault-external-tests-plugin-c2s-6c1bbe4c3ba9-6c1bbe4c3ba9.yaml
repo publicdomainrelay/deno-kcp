@@ -10,5 +10,23 @@ spec:
   systemContext: third-party-openbao-internal-vault-external-tests-plugin
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-vault-external-tests-plugin
+  agentLog: 'This context is the Go test package third_party/openbao/internal/vault/external_tests/plugin,
+    formed by two external (black-box) test files that exercise OpenBao''s external
+    plugin system end to end. plugin_test.go drives the system backend against mock
+    logical and credential plugin backends: it registers and mounts plugins, then
+    checks seal/unseal survival, missing binaries, type mismatch, catalog removal,
+    automatic reload after an RPC error, explicit reload through sys/plugins/reload/backend,
+    environment variable delivery, and audit-record metadata. The same file also holds
+    the mock plugin entrypoints (TestBackend_PluginMain*, TestBackend_PluginMainEnv)
+    that are compiled into plugin binaries and served through the SDK''s Serve and
+    ServeMultiplex paths for the v4, v5 and v5_multiplexed protocol generations. external_plugin_test.go
+    builds real in-repo plugin binaries through testhelpers and exercises secrets
+    engines, auth methods, database secrets engines and audit logging against them,
+    including rollback/reload race coverage and metadata assertions on the file audit
+    backend.'
+  message: wrote 15 requirement(s) and 0 interface(s) for third-party-openbao-internal-vault-external-tests-plugin
+  phase: Succeeded
+superseded:
+- message: the agent is summarizing third-party-openbao-internal-vault-external-tests-plugin
+  name: third-party-openbao-internal-vault-external-tests-plugin-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2
   phase: Running
