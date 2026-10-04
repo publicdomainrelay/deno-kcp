@@ -4385,6 +4385,14 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.router-service-injection` (MUST): "OidcClientController must inject the Ember router service via the @service decorator into a property named router, and must declare isEditRoute as a @tracked property, so route changes are observable by templates."
 - added `r.show-header-getter` (MUST): "OidcClientController must expose a showHeader getter that returns the boolean negation of isEditRoute, so the header is hidden whenever the current route is the edit route."
 
+### third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-clients-client
+
+- intent: "" -> "The context exists so the OIDC client details screen has a controller with a single destructive action: deleting the OIDC application being viewed. It is the UI-facing counterpart of the OIDC client read/delete path, kept separate from the list and creation screens so the details route can own deletion, user feedback, and post-delete navigation. Anyone changing how OIDC clients are deleted, how deletion errors are reported, or where the user lands after a delete must look here."
+- added `r.delete-action-destroys-and-navigates` (MUST): "The delete action is asynchronous and marked as an Ember action. It first destroys the current model record via destroyRecord; on success it shows the success flash message 'Application deleted successfully' and then transitions to the safe route 'vault.cluster.access.oidc.clients' using transitionToSafe with the injected router, so the user leaves the now-deleted client's page."
+- added `r.delete-action-recovers-from-failure` (MUST): "When destroying the record throws, the delete action rolls the model back with rollbackAttributes so the UI does not keep showing an optimistically deleted client, then reports the failure as a danger flash message. The message text is the model's error list joined with '. ' when the thrown error carries an errors collection, otherwise the thrown error's own message."
+- added `r.exports-details-controller` (MUST): "The details route controller is exported as the default export, named OidcClientDetailsController, and extends Ember's Controller so the OIDC client details route resolves it by the standard naming convention."
+- added `r.injects-router-and-flash-messages` (MUST): "The controller declares the router and flashMessages services as injected properties, so the delete action can navigate through the router and show success or danger banners without reaching for globals."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4733,8 +4741,8 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-controllers-vault-cluster-access-namespaces-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-assignments-assignment-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-clients-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-clients-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-clients-client-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-clients-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-clients-client-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

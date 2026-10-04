@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so the OIDC client details screen has a controller with a single destructive action: deleting the OIDC application being viewed. It is the UI-facing counterpart of the OIDC client read/delete path, kept separate from the list and creation screens so the details route can own deletion, user feedback, and post-delete navigation. Anyone changing how OIDC clients are deleted, how deletion errors are reported, or where the user lands after a delete must look here.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
