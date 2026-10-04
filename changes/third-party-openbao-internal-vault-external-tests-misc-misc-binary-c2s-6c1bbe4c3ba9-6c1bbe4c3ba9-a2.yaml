@@ -1,0 +1,38 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-internal-vault-external-tests-misc-misc-binary-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-internal-vault-external-tests-misc-misc-binary
+  toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+status:
+  agentLog: 'This context covers one Go test file, third_party/openbao/internal/vault/external_tests/misc/misc_binary/recovery_test.go,
+    in package misc. It holds TestRecovery_Docker, a Docker-backed acceptance test
+    that only runs when $BAO_BINARY names a real OpenBao binary. The test starts a
+    one-core Docker cluster from image quay.io/openbao/openbao:latest with node log
+    level TRACE, with cleanup deferred. It mounts a kv-v1 engine at secret/, writes
+    secret/foo with {"bar": 1.0}, lists secret/ and requires keys [foo], then records
+    the mount UUID for later raw access. A restart closure stops the node, starts
+    it with the original options, unseals all nodes and waits for an active node;
+    after the first restart the test requires at least one key under secret/. The
+    node is then stopped and restarted with Args ["-recovery"] and a StartProbe that
+    calls GenerateRecoveryOperationTokenStatusWithContext, since in recovery mode
+    almost no paths are reachable without a recovery token. The test generates a recovery
+    token with testcluster.GenerateRoot(cluster, testcluster.GenerateRecovery), requires
+    the second generate-root call to fail, sets the token on the client, lists sys/raw/logical/<secretMountUUID>
+    and requires keys [foo], then deletes sys/raw/logical/<secretMountUUID>/foo. A
+    final normal-mode restart must show zero keys under secret/, proving the raw deletion
+    persisted. A listSecrets closure returns nil for a nil response and otherwise
+    mapstructure-decodes the keys field into a []string. The file exports no reusable
+    interfaces.'
+  message: wrote 10 requirement(s) and 0 interface(s) for third-party-openbao-internal-vault-external-tests-misc-misc-binary
+  phase: Succeeded
+superseded:
+- message: wrote 10 requirement(s) and 0 interface(s) for third-party-openbao-internal-vault-external-tests-misc-misc-binary;
+    interface TestRecovery_Docker is not in the observed facts; dropped
+  name: third-party-openbao-internal-vault-external-tests-misc-misc-binary-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9
+  phase: Succeeded
