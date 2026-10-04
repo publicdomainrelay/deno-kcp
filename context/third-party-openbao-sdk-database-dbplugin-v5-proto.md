@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists because the deno-kcp repository vendors the OpenBao database plugin SDK, and the v5 proto package is the wire contract between a secrets engine and an out-of-process database plugin. It is generated code: protoc-gen-go and protoc-gen-go-grpc produced it from the database.proto schema, so nobody edits it by hand and it must stay byte-for-byte faithful to the upstream OpenBao release it was cut from. Its purpose is to let the rest of the repository speak the v5 plugin RPC without importing the SDK implementation, to keep the credential request and response shapes stable for any plugin binary built against v5, and to give both sides of the gRPC transport the client stubs, server interface, registration helper and unimplemented-server stub they need to interoperate.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
