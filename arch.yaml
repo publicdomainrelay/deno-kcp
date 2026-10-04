@@ -11612,8 +11612,86 @@ system_contexts:
   - file:third_party/openbao/internal/builtin/logical/pki/test_helpers.go test_helpers.go@third_party/openbao/internal/builtin/logical/pki/test_helpers.go
   - file:third_party/openbao/internal/builtin/logical/pki/translate_cert.go translate_cert.go@third_party/openbao/internal/builtin/logical/pki/translate_cert.go
   - file:third_party/openbao/internal/builtin/logical/pki/util.go util.go@third_party/openbao/internal/builtin/logical/pki/util.go
+  - method:26d9a2224967abb482e01b76d61d003a ACMEAuthorization.NetworkMarshal@third_party/openbao/internal/builtin/logical/pki/acme_authorizations.go:167
+  - method:372cf50f567b462758ca02b31e7dc63f ACMEIdentifier.MaybeParseWildcard@third_party/openbao/internal/builtin/logical/pki/acme_authorizations.go:27
+  - method:3f43cde4d41701e01ff320584f2b5f3a ACMEIdentifier.NetworkMarshal@third_party/openbao/internal/builtin/logical/pki/acme_authorizations.go:61
+  - type_alias:74a7b55bc0eb7b9b019d068cce979a5a ACMEIdentifierType@third_party/openbao/internal/builtin/logical/pki/acme_authorizations.go:12
   id: sc.third-party-openbao-internal-builtin-logical-pki
+  intent: 'This context exists so that ACME newOrder identifiers can be parsed, validated
+    and serialized in one place, with the wildcard rules of RFC 8555 Section 7.1.3
+    and RFC 6125 Section 6.4.3 enforced at parse time and the wire representation
+    kept consistent between orders, authorizations and challenges. It separates the
+    three concerns the ACME paths depend on: the identifier type vocabulary, the wildcard
+    parse/normalize step that callers such as parseOrderIdentifiers, validateIdentifiersAgainstRole
+    and generateAuthorization rely on, and the marshalling used to answer ACME clients.'
+  interfaces:
+  - file: third_party/openbao/internal/builtin/logical/pki/acme_authorizations.go
+    kind: method
+    name: ACMEAuthorization.NetworkMarshal
+    signature: func (aa *ACMEAuthorization) NetworkMarshal(acmeCtx *acmeContext) map[string]any
+  - file: third_party/openbao/internal/builtin/logical/pki/acme_authorizations.go
+    kind: method
+    name: ACMEIdentifier.MaybeParseWildcard
+    signature: func (ai *ACMEIdentifier) MaybeParseWildcard() (bool, string, error)
+  - file: third_party/openbao/internal/builtin/logical/pki/acme_authorizations.go
+    kind: method
+    name: ACMEIdentifier.NetworkMarshal
+    signature: func (ai *ACMEIdentifier) NetworkMarshal(useOriginalValue bool) map[string]any
+  - file: third_party/openbao/internal/builtin/logical/pki/acme_authorizations.go
+    kind: type_alias
+    name: ACMEIdentifierType
+    signature: type ACMEIdentifierType string
   name: third-party-openbao-internal-builtin-logical-pki
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/pki/acme_authorizations.go
+    - method:26d9a2224967abb482e01b76d61d003a
+    id: r.authorization-network-marshal
+    level: MUST
+    text: ACMEAuthorization.NetworkMarshal must emit the identifier through ACMEIdentifier.NetworkMarshal
+      with useOriginalValue false, together with the authorization status and wildcard
+      flag; it must include "expires" only when the expiry is non-empty, and include
+      "challenges" only when at least one challenge exists, marshalling each challenge
+      with the ACME context and the authorization's own Id.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/pki/acme_authorizations.go
+    - method:3f43cde4d41701e01ff320584f2b5f3a
+    id: r.identifier-network-marshal
+    level: MUST
+    text: ACMEIdentifier.NetworkMarshal must serialize to a map carrying exactly the
+      keys "type" and "value", where the value is OriginalValue when useOriginalValue
+      is true and the current Value otherwise, so callers can emit either the client-supplied
+      name or the parsed reduced name.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/pki/acme_authorizations.go
+    - type_alias:74a7b55bc0eb7b9b019d068cce979a5a
+    id: r.identifier-type-alias
+    level: MUST
+    text: An ACME identifier's type is represented by ACMEIdentifierType, a string
+      type alias, so identifier types compare as strings on the wire and in stored
+      order state.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/pki/cert_util.go
+    id: r.wildcard-detection
+    level: MUST
+    text: isWildcardDomain must report a name as a wildcard when the name contains
+      an asterisk anywhere, so glob-bearing names that are not valid wildcards are
+      still classified as wildcards and are rejected later by the wildcard validation
+      rather than being silently accepted as ordinary domains.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/pki/acme_authorizations.go
+    - method:372cf50f567b462758ca02b31e7dc63f
+    id: r.wildcard-parse
+    level: MUST
+    text: ACMEIdentifier.MaybeParseWildcard must treat an identifier as a wildcard
+      only when its Type is the dns identifier and its Value contains an asterisk;
+      in that case it sets IsWildcard and validates the wildcard. It must reject a
+      wildcard whose asterisk is not the entire left-most label, and reject one that
+      leaves no remaining domain labels, returning a non-nil error with an empty reduced
+      name for both. On success it must rewrite the identifier's Value to the reduced
+      name with the wildcard label removed and return that reduced name; when the
+      identifier is not a wildcard it must return false together with the unchanged
+      Value and no error.
   upstream: self
 - code:
   - third_party/openbao/internal/builtin/logical/pki/cmd/pki/main.go

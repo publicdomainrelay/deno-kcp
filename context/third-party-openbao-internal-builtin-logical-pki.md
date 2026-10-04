@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so that ACME newOrder identifiers can be parsed, validated and serialized in one place, with the wildcard rules of RFC 8555 Section 7.1.3 and RFC 6125 Section 6.4.3 enforced at parse time and the wire representation kept consistent between orders, authorizations and challenges. It separates the three concerns the ACME paths depend on: the identifier type vocabulary, the wildcard parse/normalize step that callers such as parseOrderIdentifiers, validateIdentifiersAgainstRole and generateAuthorization rely on, and the marshalling used to answer ACME clients.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

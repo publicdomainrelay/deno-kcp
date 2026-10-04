@@ -763,6 +763,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.serve-kv-backend-as-plugin` (MUST): "main must call plugin.Serve with a ServeOpts value whose BackendFactoryFunc is kv.Factory, so that the process serves the KV secrets backend over the plugin protocol."
 - added `r.tls-provider-from-parsed-flags` (MUST): "main must derive its TLS configuration from the parsed plugin flags and pass api.VaultPluginTLSProvider of that configuration as ServeOpts.TLSProviderFunc, so the plugin can establish its connection back to the server."
 
+### third-party-openbao-internal-builtin-logical-pki
+
+- intent: "" -> "This context exists so that ACME newOrder identifiers can be parsed, validated and serialized in one place, with the wildcard rules of RFC 8555 Section 7.1.3 and RFC 6125 Section 6.4.3 enforced at parse time and the wire representation kept consistent between orders, authorizations and challenges. It separates the three concerns the ACME paths depend on: the identifier type vocabulary, the wildcard parse/normalize step that callers such as parseOrderIdentifiers, validateIdentifiersAgainstRole and generateAuthorization rely on, and the marshalling used to answer ACME clients."
+- added `r.authorization-network-marshal` (MUST): "ACMEAuthorization.NetworkMarshal must emit the identifier through ACMEIdentifier.NetworkMarshal with useOriginalValue false, together with the authorization status and wildcard flag; it must include "expires" only when the expiry is non-empty, and include "challenges" only when at least one challenge exists, marshalling each challenge with the ACME context and the authorization's own Id."
+- added `r.identifier-network-marshal` (MUST): "ACMEIdentifier.NetworkMarshal must serialize to a map carrying exactly the keys "type" and "value", where the value is OriginalValue when useOriginalValue is true and the current Value otherwise, so callers can emit either the client-supplied name or the parsed reduced name."
+- added `r.identifier-type-alias` (MUST): "An ACME identifier's type is represented by ACMEIdentifierType, a string type alias, so identifier types compare as strings on the wire and in stored order state."
+- added `r.wildcard-detection` (MUST): "isWildcardDomain must report a name as a wildcard when the name contains an asterisk anywhere, so glob-bearing names that are not valid wildcards are still classified as wildcards and are rejected later by the wildcard validation rather than being silently accepted as ordinary domains."
+- added `r.wildcard-parse` (MUST): "ACMEIdentifier.MaybeParseWildcard must treat an identifier as a wildcard only when its Type is the dns identifier and its Value contains an asterisk; in that case it sets IsWildcard and validates the wildcard. It must reject a wildcard whose asterisk is not the entire left-most label, and reject one that leaves no remaining domain labels, returning a non-nil error with an empty reduced name for both. On success it must rewrite the identifier's Value to the reduced name with the wildcard label removed and return that reduced name; when the identifier is not a wildcard it must return false together with the unchanged Value and no error."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -776,5 +785,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-builtin-logical-kubernetes-integrationtest-vault-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-kv-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-kv-cmd-kv-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-builtin-logical-pki-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-builtin-logical-pki-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-pki-cmd-pki-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
