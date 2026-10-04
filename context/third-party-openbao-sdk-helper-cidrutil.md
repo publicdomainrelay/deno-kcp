@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so the host project can reuse OpenBao's reviewed CIDR-whitelisting logic instead of reimplementing address containment and canonical-form checks. It centralizes the policy decisions that matter for access control: an empty whitelist means allow, an unparseable remote address means deny, and a CIDR that is not in canonical form is rejected rather than silently widened. Recording these functions as a spec makes their exact error strings, boundary conditions, and subset semantics visible to callers elsewhere in the repository.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
