@@ -1,5 +1,7 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
+- class:88cba2da41a41350ecfad514d4118378 KeymgmtProviderSerializer@third_party/openbao/ui/app/serializers/keymgmt/provider.js:8
+- class:d2f1cce48f9d3fc208c3a35c8df4e55a KeymgmtKeySerializer@third_party/openbao/ui/app/serializers/keymgmt/key.js:8
 - file:third_party/openbao/ui/app/serializers/keymgmt/key.js key.js@third_party/openbao/ui/app/serializers/keymgmt/key.js
 - file:third_party/openbao/ui/app/serializers/keymgmt/provider.js provider.js@third_party/openbao/ui/app/serializers/keymgmt/provider.js
 kind: SystemContext
@@ -7,5 +9,72 @@ metadata:
   name: third-party-openbao-ui-app-serializers-keymgmt
   namespace: default
 spec:
+  intent: 'The context exists so the key-management Ember serializers can be described
+    and reasoned about as a unit: how raw keymgmt API payloads are normalized into
+    Ember Data records and how records are serialized back for create/update requests.
+    It matters because the key endpoint returns versions as a number-keyed object
+    and omits backend context, and because provider credentials live on the record
+    rather than in the serialized attributes, so both quirks must be handled outside
+    the default ApplicationSerializer behaviour that both classes extend.'
+  interfaces:
+  - file: third_party/openbao/ui/app/serializers/keymgmt/key.js
+    kind: class
+    name: KeymgmtKeySerializer
+    signature: class KeymgmtKeySerializer extends ApplicationSerializer
+  - file: third_party/openbao/ui/app/serializers/keymgmt/provider.js
+    kind: class
+    name: KeymgmtProviderSerializer
+    signature: class KeymgmtProviderSerializer extends ApplicationSerializer
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - class:d2f1cce48f9d3fc208c3a35c8df4e55a
+    - file:third_party/openbao/ui/app/serializers/keymgmt/key.js
+    id: r.key-list-normalization
+    level: MUST
+    text: When normalizeItems produces an array, each element must be reduced to id
+      and name both taken from the element's id, plus backend taken from the parent
+      payload's backend field, and a payload that is neither versioned nor an array
+      must be returned unchanged.
+  - codeRefs:
+    - class:d2f1cce48f9d3fc208c3a35c8df4e55a
+    - file:third_party/openbao/ui/app/serializers/keymgmt/key.js
+    id: r.key-version-timestamps
+    level: MUST
+    text: When versions are present, the normalized key must carry created taken from
+      the creation_time of the first version in key order and last_rotated taken from
+      the creation_time of the last version in key order, so the first version is
+      never also used as last_rotated.
+  - codeRefs:
+    - class:d2f1cce48f9d3fc208c3a35c8df4e55a
+    - file:third_party/openbao/ui/app/serializers/keymgmt/key.js
+    id: r.key-versions-object-to-array
+    level: MUST
+    text: KeymgmtKeySerializer.normalizeItems must convert a payload's versions object,
+      whose keys are version numbers, into an array of version objects where each
+      entry has id set to its key parsed as a base-10 integer and spreads that version's
+      own fields alongside it.
+  - codeRefs:
+    - class:88cba2da41a41350ecfad514d4118378
+    - file:third_party/openbao/ui/app/serializers/keymgmt/provider.js
+    id: r.provider-list-normalization
+    level: MUST
+    text: KeymgmtProviderSerializer.normalizeItems must, for an array payload, set
+      each provider's id to its name and its backend to the parent payload's backend,
+      and return non-array payloads from the superclass unchanged.
+  - codeRefs:
+    - class:88cba2da41a41350ecfad514d4118378
+    - file:third_party/openbao/ui/app/serializers/keymgmt/provider.js
+    id: r.provider-primary-key-name
+    level: MUST
+    text: KeymgmtProviderSerializer must use name as its primary key, so provider
+      records are identified by their name attribute rather than an id attribute.
+  - codeRefs:
+    - class:88cba2da41a41350ecfad514d4118378
+    - file:third_party/openbao/ui/app/serializers/keymgmt/provider.js
+    id: r.provider-serialize-credentials
+    level: MUST
+    text: KeymgmtProviderSerializer.serialize must call the superclass serialize with
+      the original arguments and merge the record's credentials attribute (snapshot.record.credentials)
+      into the resulting JSON alongside the serialized attributes.
   upstream: self

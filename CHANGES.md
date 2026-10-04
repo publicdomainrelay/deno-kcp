@@ -5230,6 +5230,16 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.group-serialize-external-fields` (MUST): "The group serializer overrides serialize so that the alias key is always deleted from the outgoing JSON, and when the serialized type is external the member_entity_ids and member_group_ids keys are deleted as well, because an external group carries neither."
 - added `r.serializer-inheritance-chain` (MUST): "Each concrete identity serializer must derive from the base identity serializer rather than the application serializer directly, so the list and single-record normalization rules of the base apply to entities, entity aliases, groups and group aliases alike."
 
+### third-party-openbao-ui-app-serializers-keymgmt
+
+- intent: "" -> "The context exists so the key-management Ember serializers can be described and reasoned about as a unit: how raw keymgmt API payloads are normalized into Ember Data records and how records are serialized back for create/update requests. It matters because the key endpoint returns versions as a number-keyed object and omits backend context, and because provider credentials live on the record rather than in the serialized attributes, so both quirks must be handled outside the default ApplicationSerializer behaviour that both classes extend."
+- added `r.key-list-normalization` (MUST): "When normalizeItems produces an array, each element must be reduced to id and name both taken from the element's id, plus backend taken from the parent payload's backend field, and a payload that is neither versioned nor an array must be returned unchanged."
+- added `r.key-version-timestamps` (MUST): "When versions are present, the normalized key must carry created taken from the creation_time of the first version in key order and last_rotated taken from the creation_time of the last version in key order, so the first version is never also used as last_rotated."
+- added `r.key-versions-object-to-array` (MUST): "KeymgmtKeySerializer.normalizeItems must convert a payload's versions object, whose keys are version numbers, into an array of version objects where each entry has id set to its key parsed as a base-10 integer and spreads that version's own fields alongside it."
+- added `r.provider-list-normalization` (MUST): "KeymgmtProviderSerializer.normalizeItems must, for an array payload, set each provider's id to its name and its backend to the parent payload's backend, and return non-array payloads from the superclass unchanged."
+- added `r.provider-primary-key-name` (MUST): "KeymgmtProviderSerializer must use name as its primary key, so provider records are identified by their name attribute rather than an id attribute."
+- added `r.provider-serialize-credentials` (MUST): "KeymgmtProviderSerializer.serialize must call the superclass serialize with the original arguments and merge the record's credentials attribute (snapshot.record.credentials) into the resulting JSON alongside the serialized attributes."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5669,5 +5679,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-serializers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-serializers-database-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-serializers-identity-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-serializers-keymgmt-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-serializers-keymgmt-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-serializers-keymgmt-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-serializers-kubernetes-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
