@@ -2,13 +2,391 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to hold the one test package that proves deno-kcp works against real infrastructure and against the checked-in examples. It separates what can be verified from the repository alone (offline_test.go, examples.go) from what needs a running kcp, kine, deno and policy-engine (live_test.go, fixture_test.go) from what additionally needs the pinned OpenBao (bao_test.go, openbao_live_test.go), so the cheap checks run everywhere and the expensive ones are gated behind explicit opt-in. The fixture layer exists so that every live test describes intent in terms of typed Kubernetes objects and named expectations rather than raw HTTP, and so the OpenBao version certificates are issued by is the one the repository pins, never whatever binary happens to be on PATH.
 
 _Write the prose above and the fields in the spec block. `codeRefs` and the resolved references below are maintained by the tool; an edit there is lost._
 
 ## spec
 
 ```yaml spec
+interfaces:
+- file: test/integration/openbao_live_test.go
+  kind: function
+  name: TestANamespaceWithoutAnOpenBaoObjectGetsNoCertificate
+  signature: func TestANamespaceWithoutAnOpenBaoObjectGetsNoCertificate(t *testing.T)
+- file: test/integration/offline_test.go
+  kind: function
+  name: TestAPIExportsNameDeclaredSchemas
+  signature: func TestAPIExportsNameDeclaredSchemas(t *testing.T)
+- file: test/integration/live_test.go
+  kind: function
+  name: TestDirectRunAndReadersOnRealKCP
+  signature: func TestDirectRunAndReadersOnRealKCP(t *testing.T)
+- file: test/integration/offline_test.go
+  kind: function
+  name: TestEveryExampleDecodesFromDisk
+  signature: func TestEveryExampleDecodesFromDisk(t *testing.T)
+- file: test/integration/live_test.go
+  kind: function
+  name: TestExampleChainOnRealKCP
+  signature: func TestExampleChainOnRealKCP(t *testing.T)
+- file: test/integration/offline_test.go
+  kind: function
+  name: TestExampleInventoryMatchesDisk
+  signature: func TestExampleInventoryMatchesDisk(t *testing.T)
+- file: test/integration/offline_test.go
+  kind: function
+  name: TestExamplesAreWiredToEachOther
+  signature: func TestExamplesAreWiredToEachOther(t *testing.T)
+- file: test/integration/offline_test.go
+  kind: function
+  name: TestExamplesFitTheInstalledSchemas
+  signature: func TestExamplesFitTheInstalledSchemas(t *testing.T)
+- file: test/integration/fixture_test.go
+  kind: function
+  name: TestMain
+  signature: func TestMain(m *testing.M)
+- file: test/integration/openbao_live_test.go
+  kind: function
+  name: TestOpenBaoAuthorityIssuesTheCertificateADenoPodServesWith
+  signature: func TestOpenBaoAuthorityIssuesTheCertificateADenoPodServesWith(t *testing.T)
+- file: test/integration/openbao_live_test.go
+  kind: function
+  name: TestOpenBaoOverTLSIssuesTheCertificateADenoPodServesWith
+  signature: func TestOpenBaoOverTLSIssuesTheCertificateADenoPodServesWith(t *testing.T)
+- file: test/integration/bao_test.go
+  kind: type
+  name: baoAnnouncement
+  signature: type baoAnnouncement struct
+- file: test/integration/bao_test.go
+  kind: type
+  name: baoServer
+  signature: type baoServer struct
+- file: test/integration/bao_test.go
+  kind: method
+  name: baoServer.caCert
+  signature: func (b baoServer) caCert() []byte
+- file: test/integration/bao_test.go
+  kind: function
+  name: baoembedBinary
+  signature: func baoembedBinary(t *testing.T) string
+- file: test/integration/fixture_test.go
+  kind: function
+  name: baseHost
+  signature: func baseHost(host string) string
+- file: test/integration/fixture_test.go
+  kind: function
+  name: bundledActionsDir
+  signature: func bundledActionsDir(engineDir string) string
+- file: test/integration/fixture_test.go
+  kind: function
+  name: caData
+  signature: func caData(t *testing.T, data []byte, file string) []byte
+- file: test/integration/fixture_test.go
+  kind: function
+  name: decodeDocs
+  signature: func decodeDocs(t *testing.T, body []byte) []map[string]any
+- file: test/integration/examples.go
+  kind: function
+  name: decodeExample
+  signature: func decodeExample(body []byte, kind string) (exampleObject, error)
+- file: test/integration/bao_test.go
+  kind: function
+  name: embeddedReadyLine
+  signature: func embeddedReadyLine(t *testing.T, logPath string) string
+- file: test/integration/fixture_test.go
+  kind: function
+  name: envOr
+  signature: func envOr(key, fallback string) string
+- file: test/integration/examples.go
+  kind: type
+  name: example
+  signature: "type example struct {\n\tFile     string\n\tKind     string\n\tResource
+    string\n\tSchema   string\n}"
+- file: test/integration/examples.go
+  kind: function
+  name: exampleByName
+  signature: func exampleByName(file string) (example, bool)
+- file: test/integration/examples.go
+  kind: function
+  name: exampleFiles
+  signature: func exampleFiles() []example
+- file: test/integration/examples.go
+  kind: function
+  name: exampleFilesOnDisk
+  signature: func exampleFilesOnDisk() ([]string, error)
+- file: test/integration/examples.go
+  kind: interface
+  name: exampleObject
+  signature: "type exampleObject interface {\n\tmetav1.Object\n\truntime.Object\n}"
+- file: test/integration/fixture_test.go
+  kind: function
+  name: freePort
+  signature: func freePort(t *testing.T) int
+- file: test/integration/fixture_test.go
+  kind: function
+  name: httpOK
+  signature: func httpOK(url string) bool
+- file: test/integration/fixture_test.go
+  kind: function
+  name: killSpawned
+  signature: func killSpawned() int
+- file: test/integration/fixture_test.go
+  kind: method
+  name: liveCluster.apply
+  signature: func (c *liveCluster) apply(file string) exampleObject
+- file: test/integration/fixture_test.go
+  kind: method
+  name: liveCluster.applyDeployFile
+  signature: func (c *liveCluster) applyDeployFile(logicalCluster, name string)
+- file: test/integration/fixture_test.go
+  kind: method
+  name: liveCluster.bootstrap
+  signature: func (c *liveCluster) bootstrap()
+- file: test/integration/fixture_test.go
+  kind: method
+  name: liveCluster.client
+  signature: func (c *liveCluster) client(logicalCluster string) dynamic.Interface
+- file: test/integration/fixture_test.go
+  kind: method
+  name: liveCluster.conditionTrue
+  signature: func (c *liveCluster) conditionTrue(logicalCluster string, gvr schema.GroupVersionResource,
+    namespace, name, condition string) bool
+- file: test/integration/fixture_test.go
+  kind: method
+  name: liveCluster.create
+  signature: func (c *liveCluster) create(e example, obj exampleObject)
+- file: test/integration/fixture_test.go
+  kind: method
+  name: liveCluster.createDoc
+  signature: func (c *liveCluster) createDoc(logicalCluster string, doc map[string]any)
+- file: test/integration/fixture_test.go
+  kind: method
+  name: liveCluster.createDocs
+  signature: func (c *liveCluster) createDocs(logicalCluster string, body []byte)
+- file: test/integration/fixture_test.go
+  kind: method
+  name: liveCluster.createExampleDoc
+  signature: func (c *liveCluster) createExampleDoc(logicalCluster string, e example,
+    doc map[string]any)
+- file: test/integration/fixture_test.go
+  kind: method
+  name: liveCluster.engine
+  signature: func (c *liveCluster) engine(name string) *v1alpha1.PolicyEngine
+- file: test/integration/fixture_test.go
+  kind: method
+  name: liveCluster.expect
+  signature: func (c *liveCluster) expect(what string, timeout time.Duration, ok func()
+    bool)
+- file: test/integration/fixture_test.go
+  kind: method
+  name: liveCluster.get
+  signature: func (c *liveCluster) get(logicalCluster string, gvr schema.GroupVersionResource,
+    namespace, name string) *unstructured.Unstructured
+- file: test/integration/fixture_test.go
+  kind: method
+  name: liveCluster.job
+  signature: func (c *liveCluster) job(name string) *v1alpha1.DenoJob
+- file: test/integration/fixture_test.go
+  kind: method
+  name: liveCluster.load
+  signature: func (c *liveCluster) load(file string) (example, exampleObject)
+- file: test/integration/fixture_test.go
+  kind: method
+  name: liveCluster.openBao
+  signature: func (c *liveCluster) openBao(name string) *v1alpha1.OpenBao
+- file: test/integration/fixture_test.go
+  kind: method
+  name: liveCluster.pod
+  signature: func (c *liveCluster) pod(name string) *v1alpha1.DenoPod
+- file: test/integration/fixture_test.go
+  kind: method
+  name: liveCluster.ref
+  signature: func (c *liveCluster) ref(name string) provider.Ref
+- file: test/integration/fixture_test.go
+  kind: method
+  name: liveCluster.run
+  signature: func (c *liveCluster) run(name string) *v1alpha1.DenoRun
+- file: test/integration/fixture_test.go
+  kind: method
+  name: liveCluster.startProvider
+  signature: func (c *liveCluster) startProvider(t *testing.T, engineDir, actionsDir
+    string)
+- file: test/integration/fixture_test.go
+  kind: method
+  name: liveCluster.trigger
+  signature: func (c *liveCluster) trigger(name string) *v1alpha1.RunTrigger
+- file: test/integration/fixture_test.go
+  kind: method
+  name: liveCluster.workflowPod
+  signature: func (c *liveCluster) workflowPod(name string) *v1alpha1.PolicyWorkflowPod
+- file: test/integration/fixture_test.go
+  kind: method
+  name: liveCluster.workflowRuns
+  signature: func (c *liveCluster) workflowRuns() []v1alpha1.PolicyWorkflowRun
+- file: test/integration/fixture_test.go
+  kind: method
+  name: liveCluster.workspacePhase
+  signature: func (c *liveCluster) workspacePhase(logicalCluster, name string) string
+- file: test/integration/examples.go
+  kind: function
+  name: loadExample
+  signature: func loadExample(file string) (exampleObject, error)
+- file: test/integration/examples.go
+  kind: function
+  name: loadExampleFile
+  signature: func loadExampleFile(file string) ([]byte, error)
+- file: test/integration/examples.go
+  kind: function
+  name: localExamples
+  signature: func localExamples() string
+- file: test/integration/fixture_test.go
+  kind: function
+  name: policyEngineDir
+  signature: func policyEngineDir(t *testing.T) string
+- file: test/integration/fixture_test.go
+  kind: method
+  name: process.kill
+  signature: func (p *process) kill()
+- file: test/integration/examples.go
+  kind: function
+  name: repoRoot
+  signature: func repoRoot() string
+- file: test/integration/fixture_test.go
+  kind: function
+  name: requireBinary
+  signature: func requireBinary(t *testing.T, name string)
+- file: test/integration/fixture_test.go
+  kind: function
+  name: requireDir
+  signature: func requireDir(t *testing.T, what, dir, env string)
+- file: test/integration/fixture_test.go
+  kind: function
+  name: requireLive
+  signature: func requireLive(t *testing.T)
+- file: test/integration/bao_test.go
+  kind: function
+  name: startBao
+  signature: func startBao(t *testing.T, secure bool) baoServer
+- file: test/integration/fixture_test.go
+  kind: function
+  name: startCluster
+  signature: func startCluster(t *testing.T, options ...func(*liveCluster)) *liveCluster
+- file: test/integration/bao_test.go
+  kind: function
+  name: startEmbeddedBao
+  signature: func startEmbeddedBao(t *testing.T) baoServer
+- file: test/integration/bao_test.go
+  kind: function
+  name: startEmbeddedBaoTLS
+  signature: func startEmbeddedBaoTLS(t *testing.T) baoServer
+- file: test/integration/fixture_test.go
+  kind: function
+  name: startProcess
+  signature: func startProcess(t *testing.T, logPath, bin string, args ...string)
+    *exec.Cmd
+- file: test/integration/fixture_test.go
+  kind: function
+  name: tail
+  signature: func tail(path string, lines int) string
+- file: test/integration/fixture_test.go
+  kind: function
+  name: tcpOpen
+  signature: func tcpOpen(addr string) bool
+- file: test/integration/fixture_test.go
+  kind: function
+  name: withOpenBao
+  signature: func withOpenBao(vault baoServer) func(*liveCluster)
+requirements:
+- codeRefs:
+  - file:test/integration/fixture_test.go
+  id: r.deno-binaries-are-located-by-name-or-env
+  level: SHOULD
+  text: Required binaries are looked up by name and may be overridden through the
+    environment (requireBinary, envOr); the policy-engine and bundled-actions directories
+    honour POLICY_ENGINE_DIR and BUNDLED_ACTIONS_DIR.
+- codeRefs:
+  - file:test/integration/bao_test.go
+  id: r.embedded-bao-runs-in-development-mode
+  level: MUST
+  text: startEmbeddedBao runs the pinned server in development mode so the hierarchy
+    under test is namespace and PKI behaviour, not storage or seal behaviour; startEmbeddedBaoTLS
+    also returns the generated CA so a client can verify it.
+- codeRefs:
+  - file:test/integration/examples.go
+  - file:test/integration/offline_test.go
+  id: r.every-example-decodes
+  level: MUST
+  text: Every example file loads from disk and decodes into its declared kind through
+    decodeExample without error.
+- codeRefs:
+  - file:test/integration/examples.go
+  - file:test/integration/offline_test.go
+  id: r.example-inventory-matches-disk
+  level: MUST
+  text: The declared example inventory must agree with the example files actually
+    present on disk.
+- codeRefs:
+  - file:test/integration/offline_test.go
+  id: r.examples-fit-installed-schemas
+  level: MUST
+  text: Each example must validate against the schema installed for its kind, and
+    APIExports must name the schemas they declare.
+- codeRefs:
+  - file:test/integration/fixture_test.go
+  id: r.live-cluster-fixture-bootstraps-workspaces
+  level: MUST
+  text: startCluster bootstraps the tenancy and provider workspaces (runtime, deno-provider)
+    before a live test applies any example.
+- codeRefs:
+  - file:test/integration/fixture_test.go
+  id: r.live-expectations-are-polled-with-timeouts
+  level: MUST
+  text: Live tests wait on cluster state through liveCluster.expect with an explicit
+    timeout rather than sleeping a fixed duration.
+- codeRefs:
+  - file:test/integration/fixture_test.go
+  - file:test/integration/live_test.go
+  id: r.live-suite-requires-explicit-opt-in
+  level: MUST
+  text: Live tests call requireLive first and skip with 'set DENO_KCP_REQUIRE_LIVE=1
+    and provide kcp, kine, deno and a sibling policy-engine checkout' unless the environment
+    opts in.
+- codeRefs:
+  - file:test/integration/live_test.go
+  id: r.live-tests-drive-the-example-chain
+  level: SHOULD
+  text: The live suite drives the published example chain end to end, and separately
+    a direct run with its readers, against a real kcp.
+- codeRefs:
+  - file:test/integration/bao_test.go
+  - file:test/integration/openbao_live_test.go
+  id: r.namespace-certificate-hierarchy-is-covered
+  level: MUST
+  text: Tests must cover that a Kubernetes namespace gets its own OpenBao namespace
+    whose intermediate is signed by the root, that a workload's certificate verifies
+    against the root alone, that the same holds over TLS, and that a namespace with
+    no OpenBao object gets no certificate.
+- codeRefs:
+  - file:test/integration/examples.go
+  - file:test/integration/offline_test.go
+  id: r.offline-suite-needs-no-cluster
+  level: MUST
+  text: The example-decoding, inventory, wiring, schema-fit and APIExport-name checks
+    in offline_test.go run with no kcp, kine, deno or policy-engine present.
+- codeRefs:
+  - file:test/integration/bao_test.go
+  id: r.openbao-under-test-is-the-pinned-checkout
+  level: MUST
+  text: The OpenBao server under test is built from the third_party/openbao checkout
+    the repository pins, not taken from PATH, and the build happens once per test
+    binary.
+- codeRefs:
+  - file:test/integration/fixture_test.go
+  id: r.spawned-processes-are-reaped
+  level: MUST
+  text: TestMain reaps every child process the fixture spawned (killSpawned, process.kill)
+    so a failing live run does not leave kcp, kine or bao behind.
 upstream: self
 ```
 

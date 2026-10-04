@@ -10,5 +10,27 @@ spec:
   systemContext: test-integration
   toCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
 status:
-  message: the agent is summarizing test-integration
-  phase: Running
+  agentLog: 'The integration test suite lives in package `integration` under test/integration
+    and is split into three layers. examples.go is the offline inventory layer: it
+    declares the `example` record (File, Kind, Resource, Schema), the `exampleObject`
+    interface (metav1.Object plus runtime.Object), and the helpers that locate the
+    repo root, list the example YAML files on disk, load their bytes, and decode them
+    into typed objects (exampleFiles, exampleByName, localExamples, repoRoot, loadExampleFile,
+    decodeExample, loadExample, exampleFilesOnDisk). fixture_test.go is the live-cluster
+    layer: it spawns and reaps child processes (process.kill, killSpawned, startProcess,
+    TestMain), gates live runs (requireLive, requireBinary, envOr, freePort, tcpOpen,
+    httpOK), and builds a `liveCluster` that bootstraps the tenancy and provider workspaces,
+    applies example documents, and exposes typed accessors (client, createDoc, createExampleDoc,
+    createDocs, applyDeployFile, expect, get, workspacePhase, conditionTrue, bootstrap,
+    startProvider, ref, engine, workflowPod, pod, job, run, openBao, trigger, workflowRuns,
+    load, create, apply). bao_test.go and openbao_live_test.go cover the OpenBao PKI
+    path: `baoServer` (address, token, CA) is produced by building the pinned third_party/openbao
+    checkout (baoembedBinary, startEmbeddedBao, startEmbeddedBaoTLS, startBao, embeddedReadyLine)
+    and attached to a cluster with withOpenBao. offline_test.go runs with no cluster
+    at all and checks that every example decodes, that the inventory matches disk,
+    that the examples are wired to each other, that they fit the installed schemas,
+    and that the API exports name their declared schemas. live_test.go is the only
+    place a real kcp is required, driving the example chain and a direct run plus
+    its readers end to end.'
+  message: wrote 13 requirement(s) and 70 interface(s) for test-integration
+  phase: Succeeded
