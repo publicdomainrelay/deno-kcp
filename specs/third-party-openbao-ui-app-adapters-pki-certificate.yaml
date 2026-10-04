@@ -1,5 +1,8 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
+- class:0a74eb3a2bcc8883c6e4a6928c1f544c PkiCertificateGenerateAdapter@third_party/openbao/ui/app/adapters/pki/certificate/generate.js:9
+- class:2bfaf79806670863ee4b74a049a1cd30 PkiCertificateBaseAdapter@third_party/openbao/ui/app/adapters/pki/certificate/base.js:9
+- class:bc59b85eeb3a0cdd2b321f852a6a10f0 PkiCertificateSignAdapter@third_party/openbao/ui/app/adapters/pki/certificate/sign.js:9
 - file:third_party/openbao/ui/app/adapters/pki/certificate/base.js base.js@third_party/openbao/ui/app/adapters/pki/certificate/base.js
 - file:third_party/openbao/ui/app/adapters/pki/certificate/generate.js generate.js@third_party/openbao/ui/app/adapters/pki/certificate/generate.js
 - file:third_party/openbao/ui/app/adapters/pki/certificate/sign.js sign.js@third_party/openbao/ui/app/adapters/pki/certificate/sign.js
@@ -8,5 +11,101 @@ metadata:
   name: third-party-openbao-ui-app-adapters-pki-certificate
   namespace: default
 spec:
+  intent: 'This context exists so the PKI certificate adapters have a written contract:
+    a shared base adapter that owns URL construction, listing/reading by query, and
+    revocation, plus two thin create-time subclasses that differ only in which role
+    endpoint, issue or sign, a new certificate record is posted to. It records that
+    no other update path exists for a certificate and that a create URL is only formed
+    when both `role` and `backend` are present.'
+  interfaces:
+  - file: third_party/openbao/ui/app/adapters/pki/certificate/base.js
+    kind: class
+    name: PkiCertificateBaseAdapter
+    signature: class PkiCertificateBaseAdapter extends ApplicationAdapter { namespace;
+      getURL(backend, id); fetchByQuery(query); query(store, type, query); queryRecord(store,
+      type, query); updateRecord(store, type, snapshot) }
+  - file: third_party/openbao/ui/app/adapters/pki/certificate/generate.js
+    kind: class
+    name: PkiCertificateGenerateAdapter
+    signature: class PkiCertificateGenerateAdapter extends PkiCertificateBaseAdapter
+      { urlForCreateRecord(modelName, snapshot) }
+  - file: third_party/openbao/ui/app/adapters/pki/certificate/sign.js
+    kind: class
+    name: PkiCertificateSignAdapter
+    signature: class PkiCertificateSignAdapter extends PkiCertificateBaseAdapter {
+      urlForCreateRecord(modelName, snapshot) }
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - class:2bfaf79806670863ee4b74a049a1cd30
+    - file:third_party/openbao/ui/app/adapters/pki/certificate/base.js
+    id: r.base-namespace-v1
+    level: MUST
+    text: The base certificate adapter declares `namespace = 'v1'`, so every request
+      it builds is prefixed with the v1 API namespace.
+  - codeRefs:
+    - class:2bfaf79806670863ee4b74a049a1cd30
+    - file:third_party/openbao/ui/app/adapters/pki/certificate/base.js
+    id: r.fetch-by-query-annotates-response
+    level: MUST
+    text: '`fetchByQuery(query)` issues a GET against `getURL(backend, id)`, sending
+      `{ list: true }` as data when no id is present and `{}` when one is, then sets
+      `resp.data.backend` to the query''s backend and, when an id was given, sets
+      `resp.data.id` and `resp.data.serial_number` to that id before returning the
+      response.'
+  - codeRefs:
+    - class:0a74eb3a2bcc8883c6e4a6928c1f544c
+    - file:third_party/openbao/ui/app/adapters/pki/certificate/generate.js
+    id: r.generate-url-for-create-record
+    level: MUST
+    text: '`PkiCertificateGenerateAdapter.urlForCreateRecord(modelName, snapshot)`
+      reads `role` and `backend` from `snapshot.record`, throws `Error(''URL for create
+      record is missing required attributes'')` when either is absent, and otherwise
+      returns `${this.buildURL()}/${encodePath(backend)}/issue/${encodePath(role)}`.'
+  - codeRefs:
+    - class:2bfaf79806670863ee4b74a049a1cd30
+    - file:third_party/openbao/ui/app/adapters/pki/certificate/base.js
+    id: r.get-url-shape
+    level: MUST
+    text: '`getURL(backend, id)` builds `${buildURL()}/${encodePath(backend)}` and
+      appends `/cert/${id}` when an id is given, or `/certs` when it is not, so a
+      list request and a single-certificate read differ only in that suffix and the
+      backend path segment is always path-encoded.'
+  - codeRefs:
+    - class:2bfaf79806670863ee4b74a049a1cd30
+    - file:third_party/openbao/ui/app/adapters/pki/certificate/base.js
+    id: r.query-delegates-to-fetch-by-query
+    level: MUST
+    text: Both `query(store, type, query)` and `queryRecord(store, type, query)` ignore
+      the store and type and return `fetchByQuery(query)`, so listing and single-record
+      loading share one code path.
+  - codeRefs:
+    - class:bc59b85eeb3a0cdd2b321f852a6a10f0
+    - file:third_party/openbao/ui/app/adapters/pki/certificate/sign.js
+    id: r.sign-url-for-create-record
+    level: MUST
+    text: '`PkiCertificateSignAdapter.urlForCreateRecord(modelName, snapshot)` reads
+      `role` and `backend` from `snapshot.record`, throws `Error(''URL for create
+      record is missing required attributes'')` when either is absent, and otherwise
+      returns `${this.buildURL()}/${encodePath(backend)}/sign/${encodePath(role)}`.'
+  - codeRefs:
+    - class:0a74eb3a2bcc8883c6e4a6928c1f544c
+    - class:2bfaf79806670863ee4b74a049a1cd30
+    - class:bc59b85eeb3a0cdd2b321f852a6a10f0
+    id: r.subclasses-extend-base
+    level: MUST
+    text: '`PkiCertificateGenerateAdapter` and `PkiCertificateSignAdapter` each extend
+      `PkiCertificateBaseAdapter` and override only `urlForCreateRecord`, inheriting
+      the v1 namespace, the query/queryRecord read path and the revoke-based `updateRecord`
+      from the base.'
+  - codeRefs:
+    - class:2bfaf79806670863ee4b74a049a1cd30
+    - file:third_party/openbao/ui/app/adapters/pki/certificate/base.js
+    id: r.update-record-revokes
+    level: MUST
+    text: '`updateRecord(store, type, snapshot)` POSTs to `${buildURL()}/${encodePath(backend)}/revoke`
+      with data `{ serial_number: serialNumber }` when the record has a serial number,
+      else `{ certificate }`; revocation is the only way a certificate record is updated
+      because revoking sets the revocationTime property. The resolved value is `{
+      data: { ...serialize(snapshot), ...response.data } }`.'
   upstream: self

@@ -10,5 +10,32 @@ spec:
   systemContext: third-party-openbao-ui-app-adapters-pki-certificate
   toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
 status:
-  message: the agent is summarizing third-party-openbao-ui-app-adapters-pki-certificate
+  agentLog: 'This context holds the three Ember Data adapters that the OpenBao UI
+    uses to talk to a PKI secrets engine. All three live under third_party/openbao/ui/app/adapters/pki/certificate/.
+    `PkiCertificateBaseAdapter` extends the application adapter, sets `namespace =
+    ''v1''`, and implements the shared transport: `getURL(backend, id)` builds an
+    encoded backend path that ends in `/cert/<id>` for a single certificate or `/certs`
+    for the list, `fetchByQuery(query)` issues a GET (with `{ list: true }` when no
+    id is given) and annotates the response with `backend`, plus `id` and `serial_number`
+    when an id was supplied, `query` and `queryRecord` both delegate to `fetchByQuery`,
+    and `updateRecord` performs the only available mutation, a POST to the backend''s
+    `/revoke` endpoint carrying either `serial_number` or `certificate` and merging
+    the serialized snapshot with the response data. `PkiCertificateGenerateAdapter`
+    and `PkiCertificateSignAdapter` each extend that base and override only `urlForCreateRecord`,
+    throwing `''URL for create record is missing required attributes''` when `role`
+    or `backend` is absent and otherwise returning the encoded `/issue/<role>` and
+    `/sign/<role>` endpoints respectively.'
+  message: wrote 8 requirement(s) and 3 interface(s) for third-party-openbao-ui-app-adapters-pki-certificate;
+    interface PkiCertificateBaseAdapter.getURL is not in the observed facts; dropped;
+    interface PkiCertificateBaseAdapter.fetchByQuery is not in the observed facts;
+    dropped; interface PkiCertificateBaseAdapter.query is not in the observed facts;
+    dropped; interface PkiCertificateBaseAdapter.queryRecord is not in the observed
+    facts; dropped; interface PkiCertificateBaseAdapter.updateRecord is not in the
+    observed facts; dropped; interface PkiCertificateGenerateAdapter.urlForCreateRecord
+    is not in the observed facts; dropped; interface PkiCertificateSignAdapter.urlForCreateRecord
+    is not in the observed facts; dropped
+  phase: Succeeded
+superseded:
+- message: the agent is summarizing third-party-openbao-ui-app-adapters-pki-certificate
+  name: third-party-openbao-ui-app-adapters-pki-certificate-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2
   phase: Running

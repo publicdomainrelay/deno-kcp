@@ -3938,6 +3938,18 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.provider-path` (MUST): "OidcProviderAdapter.pathForType takes no arguments and returns the literal string 'identity/oidc/provider', fixing the endpoint the provider model is persisted against."
 - added `r.scope-path` (MUST): "OidcScopeAdapter.pathForType takes no arguments and returns the literal string 'identity/oidc/scope', fixing the endpoint the scope model is persisted against."
 
+### third-party-openbao-ui-app-adapters-pki-certificate
+
+- intent: "" -> "This context exists so the PKI certificate adapters have a written contract: a shared base adapter that owns URL construction, listing/reading by query, and revocation, plus two thin create-time subclasses that differ only in which role endpoint, issue or sign, a new certificate record is posted to. It records that no other update path exists for a certificate and that a create URL is only formed when both `role` and `backend` are present."
+- added `r.base-namespace-v1` (MUST): "The base certificate adapter declares `namespace = 'v1'`, so every request it builds is prefixed with the v1 API namespace."
+- added `r.fetch-by-query-annotates-response` (MUST): "`fetchByQuery(query)` issues a GET against `getURL(backend, id)`, sending `{ list: true }` as data when no id is present and `{}` when one is, then sets `resp.data.backend` to the query's backend and, when an id was given, sets `resp.data.id` and `resp.data.serial_number` to that id before returning the response."
+- added `r.generate-url-for-create-record` (MUST): "`PkiCertificateGenerateAdapter.urlForCreateRecord(modelName, snapshot)` reads `role` and `backend` from `snapshot.record`, throws `Error('URL for create record is missing required attributes')` when either is absent, and otherwise returns `${this.buildURL()}/${encodePath(backend)}/issue/${encodePath(role)}`."
+- added `r.get-url-shape` (MUST): "`getURL(backend, id)` builds `${buildURL()}/${encodePath(backend)}` and appends `/cert/${id}` when an id is given, or `/certs` when it is not, so a list request and a single-certificate read differ only in that suffix and the backend path segment is always path-encoded."
+- added `r.query-delegates-to-fetch-by-query` (MUST): "Both `query(store, type, query)` and `queryRecord(store, type, query)` ignore the store and type and return `fetchByQuery(query)`, so listing and single-record loading share one code path."
+- added `r.sign-url-for-create-record` (MUST): "`PkiCertificateSignAdapter.urlForCreateRecord(modelName, snapshot)` reads `role` and `backend` from `snapshot.record`, throws `Error('URL for create record is missing required attributes')` when either is absent, and otherwise returns `${this.buildURL()}/${encodePath(backend)}/sign/${encodePath(role)}`."
+- added `r.subclasses-extend-base` (MUST): "`PkiCertificateGenerateAdapter` and `PkiCertificateSignAdapter` each extend `PkiCertificateBaseAdapter` and override only `urlForCreateRecord`, inheriting the v1 namespace, the query/queryRecord read path and the revoke-based `updateRecord` from the base."
+- added `r.update-record-revokes` (MUST): "`updateRecord(store, type, snapshot)` POSTs to `${buildURL()}/${encodePath(backend)}/revoke` with data `{ serial_number: serialNumber }` when the record has a serial number, else `{ certificate }`; revocation is the only way a certificate record is updated because revoking sets the revocationTime property. The resolved value is `{ data: { ...serialize(snapshot), ...response.data } }`."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4234,6 +4246,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-adapters-kubernetes-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-adapters-oidc-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-adapters-pki-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-ui-app-adapters-pki-certificate-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-adapters-pki-certificate-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-adapters-pki-certificate-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

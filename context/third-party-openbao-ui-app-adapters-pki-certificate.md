@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the PKI certificate adapters have a written contract: a shared base adapter that owns URL construction, listing/reading by query, and revocation, plus two thin create-time subclasses that differ only in which role endpoint, issue or sign, a new certificate record is posted to. It records that no other update path exists for a certificate and that a create URL is only formed when both `role` and `backend` are present.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
