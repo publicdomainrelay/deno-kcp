@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists to pin the upstream OpenBao UI's local build, formatting, linting, and test configuration as it is vendored into the deno-kcp repository, so that anyone touching the vendored UI knows which toolchain rules are in force and which files must be kept consistent with upstream HashiCorp sources. It documents that these files are configuration surfaces rather than product logic: formatting style, lint rule severities and ignore globs, the Ember app options and asset imports, the pnpm workspace globs and dependency overrides, and the Testem test page, browser arguments and backend proxy targets.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

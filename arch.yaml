@@ -56454,7 +56454,121 @@ system_contexts:
   - file:third_party/openbao/ui/testem.enos.js testem.enos.js@third_party/openbao/ui/testem.enos.js
   - file:third_party/openbao/ui/testem.js testem.js@third_party/openbao/ui/testem.js
   id: sc.third-party-openbao-ui
+  intent: 'The context exists to pin the upstream OpenBao UI''s local build, formatting,
+    linting, and test configuration as it is vendored into the deno-kcp repository,
+    so that anyone touching the vendored UI knows which toolchain rules are in force
+    and which files must be kept consistent with upstream HashiCorp sources. It documents
+    that these files are configuration surfaces rather than product logic: formatting
+    style, lint rule severities and ignore globs, the Ember app options and asset
+    imports, the pnpm workspace globs and dependency overrides, and the Testem test
+    page, browser arguments and backend proxy targets.'
   name: third-party-openbao-ui
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/ember-cli-build.js
+    id: r.ember-build-assets
+    level: SHOULD
+    text: The build imports jsonlint, CodeMirror lint and core CSS, text-encoder-lite,
+      jsondiffpatch and its HTML formatter styles, the Bulma radio-checkbox stylesheet,
+      and the structure-icons loading and run stylesheets into the application tree
+      before returning `app.toTree()`.
+  - codeRefs:
+    - file:third_party/openbao/ui/ember-cli-build.js
+    id: r.ember-build-options
+    level: MUST
+    text: '`ember-cli-build.js` builds an `EmberApp` whose options enable the service
+      worker with skip-waiting, compile SVG from the structure-icons and public source
+      directories under rootURL `/ui/`, exclude `images/` from fingerprinting, enable
+      source maps only outside production, run autoprefixer in test and production,
+      forbid eval in auto-import, strip test selectors in production, and silence
+      the Sass `import` and `global-builtin` deprecations.'
+  - codeRefs:
+    - file:third_party/openbao/ui/eslint.config.mjs
+    id: r.eslint-flat-config
+    level: MUST
+    text: ESLint uses a flat config that layers `js.configs.recommended`, the Ember
+      plugin recommended set, `eslint-plugin-prettier/recommended`, the compat flat
+      recommended set and `typescript-eslint`, parses with `@babel/eslint-parser`
+      under legacy decorators, and ignores build output, dependencies, coverage, `.eslintcache`
+      and `*.d.ts`.
+  - codeRefs:
+    - file:third_party/openbao/ui/eslint.config.mjs
+    id: r.eslint-per-directory-overlays
+    level: MUST
+    text: Separate config blocks apply Node globals and script source type to the
+      toolchain files themselves, Node and browser globals to `lib/**`, Ember test
+      globals to `tests/**`, module source type to `scripts/codemods/**`, and the
+      QUnit recommended set to `tests/**/*-test.{js,ts}` with `qunit/require-expect`
+      and `qunit/no-conditional-assertions` off.
+  - codeRefs:
+    - file:third_party/openbao/ui/eslint.config.mjs
+    id: r.eslint-rule-severities
+    level: MUST
+    text: '`no-console` and `prefer-const` (destructuring `all`) are errors, `ember/no-mixins`
+      is a warning, and the classic-class, actions-hash, tagless-components, component-lifecycle-hook,
+      deprecated-router-transition and runloop Ember rules are off because the app
+      has not been fully glimmerized.'
+  - codeRefs:
+    - file:third_party/openbao/ui/pnpm-lock.yaml
+    id: r.pnpm-lockfile
+    level: MUST
+    text: The lockfile is pnpm lockfileVersion 9.0 with `autoInstallPeers` enabled
+      and link exclusion off, and it pins overrides including transitive security
+      bumps for `cryptiles`, `https-proxy-agent`, `ini`, `kind-of`, `minimatch`, `prismjs`,
+      `qs`, `serialize-javascript`, `underscore`, `trim` and `xmlhttprequest-ssl`.
+  - codeRefs:
+    - file:third_party/openbao/ui/pnpm-workspace.yaml
+    id: r.pnpm-workspace
+    level: MUST
+    text: The pnpm workspace includes `packages/*`, `apps/*` and `lib/*` as package
+      globs and allows build scripts for `@parcel/watcher`, `@scarf/scarf`, `core-js`,
+      `ember-modal-dialog`, `fsevents` and `sinon`.
+  - codeRefs:
+    - file:third_party/openbao/ui/.prettierrc.js
+    id: r.prettier-formatting
+    level: MUST
+    text: Prettier runs with single quotes, ES5 trailing commas and a print width
+      of 110, and overrides that set singleQuote false and printWidth 125 for `*.hbs`
+      templates while forcing singleQuote true for `*.{js,ts}`.
+  - codeRefs:
+    - file:third_party/openbao/ui/.template-lintrc.js
+    id: r.template-lint-rules
+    level: MUST
+    text: ember-template-lint extends `recommended` plus `ember-template-lint-plugin-prettier:recommended`,
+      disables `no-action`, `require-input-label`, `no-array-prototype-extensions`
+      and `no-unsupported-role-attributes`, allows `supported-auth-backends` and `current-mount-path`
+      for `no-implicit-this`, and ignores `lib/story-md` and `tests/**`.
+  - codeRefs:
+    - file:third_party/openbao/ui/.template-lintrc.js
+    id: r.template-lint-test-override
+    level: SHOULD
+    text: For `**/*-test.js`, the config reads the rule names out of the installed
+      `ember-template-lint` recommended and stylistic config files and turns every
+      one of them off, including `prettier`, so the editor language server matches
+      the CLI's ignore behaviour; when the node_modules read fails the error is logged
+      and an empty override map is used.
+  - codeRefs:
+    - file:third_party/openbao/ui/testem.enos.js
+    - file:third_party/openbao/ui/testem.js
+    id: r.testem-ci-reporter
+    level: MUST
+    text: When the `CI` environment variable is set, both Testem configs switch the
+      reporter to xunit with intermediate output and write results to `test-results/qunit/results.xml`.
+  - codeRefs:
+    - file:third_party/openbao/ui/testem.js
+    id: r.testem-default
+    level: MUST
+    text: The default Testem config serves `tests/index.html?hidepassed`, quietens
+      TAP logs and reports only failed tests, watches nothing, launches headless Chrome
+      in CI with sandbox disabled only when `CI` is set, times out browser start after
+      120 seconds, and proxies `/v1` to `http://localhost:9200`.
+  - codeRefs:
+    - file:third_party/openbao/ui/testem.enos.js
+    id: r.testem-enos-proxy
+    level: MUST
+    text: The Enos Testem config behaves like the default one except that it reads
+      the `VAULT_ADDR` environment variable, logs it, and proxies `/v1` to that value
+      instead of a fixed localhost target.
   upstream: self
 - code:
   - third_party/openbao/ui/app/app.js
