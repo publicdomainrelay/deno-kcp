@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so that the secrets-backend route subtree of the OpenBao UI is described as a unit: which route modules exist, which of them export a class the graph can see, and what those classes do to the Ember store and controller. It gives the spec an anchor for the navigation and data-loading contract of secret engines (parameter extraction from the parent backend route, secret-v2 record lookup, controller priming for tabs) without restating the UI's controllers, templates, or adapters. It marks the boundary between routes that only exist to define a nested path and the two routes whose hook bodies are actually known.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

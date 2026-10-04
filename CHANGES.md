@@ -5122,6 +5122,18 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.backends-index-route-lists-engines` (MUST): "The secrets route in backends.js must inject the store service and, in its model hook, return store.query('secret-engine', {}) so the route's model is every mounted secrets engine record."
 - added `r.both-routes-default-export` (MUST): "Both files must extend Ember's Route and expose the result as the module's default export; they export no named bindings."
 
+### third-party-openbao-ui-app-routes-vault-cluster-secrets-backend
+
+- intent: "" -> "This context exists so that the secrets-backend route subtree of the OpenBao UI is described as a unit: which route modules exist, which of them export a class the graph can see, and what those classes do to the Ember store and controller. It gives the spec an anchor for the navigation and data-loading contract of secret engines (parameter extraction from the parent backend route, secret-v2 record lookup, controller priming for tabs) without restating the UI's controllers, templates, or adapters. It marks the boundary between routes that only exist to define a nested path and the two routes whose hook bodies are actually known."
+- added `r.backend-index-route` (MUST): "index.js defines the route entered when no operation segment follows the backend name, so a bare secrets-backend URL resolves to a route instead of falling through to the parent."
+- added `r.backend-param-extraction` (MUST): "The diff route's beforeModel hook reads the backend parameter from the vault.cluster.secrets.backend parent route via paramsFor and assigns it to this.backend, so the backend name is available to later hooks without re-parsing the URL."
+- added `r.diff-controller-priming` (MUST): "The diff route's setupController hook sets backend (for backendCrumb), id (for navigation on tabs), and model on the controller, so the diff template can render the backend breadcrumb and link between secret tabs."
+- added `r.diff-model-query` (MUST): "The diff route's model hook destructures id from its params and returns a store queryRecord for the secret-v2 type scoped to this.backend and that id, so the route loads the compared secret version through the secret-v2 model."
+- added `r.edit-metadata-subclass` (MUST): "EditMetadataRoute must remain a subclass of the Metadata route with no additional members, so the metadata edit screen inherits the metadata route's model and setup behavior unchanged."
+- added `r.metadata-show-hooks` (MUST): "The MetadataShow route declares store and noReadAccess properties and implements beforeModel, model(params), and setupController(controller, model), so secret metadata display is resolved before render and a missing read capability is represented rather than thrown."
+- added `r.operation-routes` (MUST): "The backend directory provides a route module per secret operation: list.js, show.js, create.js, edit.js, secret-edit.js, versions.js, credentials.js, sign.js, configuration.js, overview.js, metadata.js, edit-metadata.js, diff.js, and actions.js, so every secrets-backend screen reachable under the backend route has a matching route definition."
+- added `r.root-route-variants` (MUST): "Each operation route has a paired "-root" module (list-root.js, show-root.js, create-root.js, edit-root.js, credentials-root.js, sign-root.js, versions-root.js) that carries the parent route of the pair, so the backend segment can hold a resource route while the child renders the operation itself."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5552,7 +5564,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-routes-vault-cluster-policies-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-policy-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-policy-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-routes-vault-cluster-secrets-backend-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-routes-vault-cluster-secrets-backend-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-secrets-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-settings-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
