@@ -15,6 +15,27 @@ metadata:
   name: deploy-examples
   namespace: default
 spec:
+  arch:
+    form: list
+    id: tb.child-process
+    kind: node
+    node:
+      basis: example
+      code:
+      - deploy/examples/atproto/market/20-global-plc.yaml:Deno.execPath
+      - deploy/examples/atproto/market/20-global-plc.yaml:childEnv
+      - deploy/examples/atproto/market/30-relay-relay.yaml:Deno.execPath
+      - deploy/examples/atproto/market/30-relay-relay.yaml:childEnv
+      - deploy/examples/atproto/market/40-alice-pds.yaml:Deno.execPath
+      - deploy/examples/atproto/market/40-alice-pds.yaml:childEnv
+      enforced_by: []
+      id: tb.child-process
+      kind: process
+      principals: {}
+      runs_in: tb.host
+    parent: tb.workload
+    section: system_contexts
+    slot: children[0]
   intent: 'This context exists so the deploy/examples directory and the test-side
     registry that describes it are specified as one unit rather than as an untracked
     pile of YAML. The examples are the smoke-test fixtures for every custom resource

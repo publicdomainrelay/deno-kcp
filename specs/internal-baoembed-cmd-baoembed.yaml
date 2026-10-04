@@ -6,6 +6,35 @@ metadata:
   name: internal-baoembed-cmd-baoembed
   namespace: default
 spec:
+  arch:
+    code:
+    - file:internal/baoembed/cmd/baoembed/main.go
+    form: list
+    id: sc.openbao-embedded
+    kind: node
+    node:
+      code:
+        driver: internal/baoembed/cmd/baoembed/main.go:readyPrefix
+        tests:
+        - test/integration/bao_test.go
+        - test/integration/openbao_live_test.go
+      context: tb.openbao
+      id: sc.openbao-embedded
+      optional: true
+      orchestrator: orch.baoembed
+      overlay:
+      - ov.baopki
+      signs:
+      - sc.example.openbao
+      upstream: up.openbao
+      use: live_tests
+    orchestrator: orch.baoembed
+    overlay:
+    - ov.baopki
+    parent: sc.test.integration-cluster
+    section: system_contexts
+    slot: overlay[3]
+    upstream: up.openbao
   intent: 'This context exists to give the repository''s integration tests and developers
     a runnable OpenBao server without an external install. The `test/integration`
     helpers build this package (see `baoembedBinary`, which runs `go build -o bin
@@ -17,6 +46,9 @@ spec:
     the CA path when TLS is on) only after the embedded server accepts connections,
     and around accepting its configuration from flags with environment fallbacks so
     a test can drive it either way.'
+  orchestrator: orch.baoembed
+  overlay:
+  - ov.baopki
   repository: deno-kcp
   requirements:
   - codeRefs:
@@ -78,4 +110,4 @@ spec:
       because OpenBao refuses a certificate directory that does not exist; a failure
       writes `baoembed: making the certificate directory %s: %v` to stderr and exits
       with status 1.'
-  upstream: self
+  upstream: up.openbao

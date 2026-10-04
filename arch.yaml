@@ -920,7 +920,7 @@ system_contexts:
   - file:deploy/examples/policyengine.yaml policyengine.yaml@deploy/examples/policyengine.yaml
   - file:deploy/examples/policyworkflowpod.yaml policyworkflowpod.yaml@deploy/examples/policyworkflowpod.yaml
   - file:deploy/examples/runtrigger.yaml runtrigger.yaml@deploy/examples/runtrigger.yaml
-  id: sc.deploy-examples
+  id: tb.child-process
   intent: 'This context exists so the deploy/examples directory and the test-side
     registry that describes it are specified as one unit rather than as an untracked
     pile of YAML. The examples are the smoke-test fixtures for every custom resource
@@ -1082,7 +1082,7 @@ system_contexts:
   - file:deploy/examples/atproto/market/70-bidder.yaml 70-bidder.yaml@deploy/examples/atproto/market/70-bidder.yaml
   - file:deploy/examples/atproto/market/README.md README.md@deploy/examples/atproto/market/README.md
   - file:deploy/examples/atproto/market/apply.sh apply.sh@deploy/examples/atproto/market/apply.sh
-  id: sc.deploy-examples-atproto-market
+  id: tb.child-process
   intent: 'This context exists to pin down the deploy/examples/atproto/market example
     as an executable specification of what the kcp deno runtime must support: peer
     services that reach each other only by cluster-local name over TLS, with identity
@@ -1328,7 +1328,7 @@ system_contexts:
   - internal/baoembed/cmd/baoembed/main.go
   codeRefIndex:
   - file:internal/baoembed/cmd/baoembed/main.go main.go@internal/baoembed/cmd/baoembed/main.go
-  id: sc.internal-baoembed-cmd-baoembed
+  id: sc.openbao-embedded
   intent: 'This context exists to give the repository''s integration tests and developers
     a runnable OpenBao server without an external install. The `test/integration`
     helpers build this package (see `baoembedBinary`, which runs `go build -o bin
@@ -1341,6 +1341,9 @@ system_contexts:
     and around accepting its configuration from flags with environment fallbacks so
     a test can drive it either way.'
   name: internal-baoembed-cmd-baoembed
+  orchestrator: orch.baoembed
+  overlay:
+  - ov.baopki
   requirements:
   - codeRefs:
     - file:internal/baoembed/cmd/baoembed/main.go
@@ -1401,7 +1404,7 @@ system_contexts:
       because OpenBao refuses a certificate directory that does not exist; a failure
       writes `baoembed: making the certificate directory %s: %v` to stderr and exits
       with status 1.'
-  upstream: self
+  upstream: up.openbao
 - code:
   - internal/denojob/denojob.go
   - internal/denojob/denojob_test.go
@@ -1417,7 +1420,7 @@ system_contexts:
   - struct:f9b27eae82ab32e2cb4cf25ca02b0e65 Options@internal/denojob/denojob.go:79
   depends_on:
   - sc.api-v1alpha1
-  id: sc.internal-denojob
+  id: sc.kind.denojob
   intent: 'This context exists to fix the contract of the DenoJob decider: the inputs
     it reads (Observed plus Options) and the plan it emits (Result), separate from
     any Kubernetes client work. It is the place where job semantics — run creation,
@@ -1452,6 +1455,7 @@ system_contexts:
     kind: struct
     name: RunObservation
   name: internal-denojob
+  orchestrator: sc.deno-kcp-provider
   requirements:
   - codeRefs:
     - struct:0ba4feb0fbc5bf2cadab0956427bd073
@@ -1520,7 +1524,7 @@ system_contexts:
   - type_alias:a490e5e249e0847d63dd37e654172f27 Op@internal/denopod/denopod.go:48
   depends_on:
   - sc.api-v1alpha1
-  id: sc.internal-denopod
+  id: type.DenoRestartPolicy
   intent: This context exists so the DenoPod lifecycle can be specified and tested
     without a Kubernetes client or a live deno process. Reconcile is the single decision
     point that turns an observed pod plus its execution observation into a target
@@ -1723,7 +1727,7 @@ system_contexts:
   - type_alias:bd23d69ec74e9fe3e50fcdbd3c0331ba RunState@internal/denorun/denorun.go:18
   depends_on:
   - sc.api-v1alpha1
-  id: sc.internal-denorun
+  id: sc.kind.denorun
   intent: This context exists to hold the reconciliation logic for a single DenoRun
     as an isolated, side-effect-free decider. The provider observes the cluster and
     the workload, builds an Observed value, and asks the Reconciler what the next
@@ -1775,6 +1779,7 @@ system_contexts:
     name: RunState
     signature: type RunState string
   name: internal-denorun
+  orchestrator: sc.deno-kcp-provider
   requirements:
   - codeRefs:
     - method:f155b5d02f0b9e87bf309fef18faa708
@@ -2000,7 +2005,7 @@ system_contexts:
   - type_alias:c2475e9a59e50fceb012111299966c7a ExecutionState@internal/policyengine/policyengine.go:16
   depends_on:
   - sc.api-v1alpha1
-  id: sc.internal-policyengine
+  id: type.DenoRestartPolicy
   intent: This context exists to keep PolicyEngine lifecycle policy separate from
     the machinery that carries it out. The provider observes runs and probes, fills
     in an Observed value, and hands it to the policyengine Reconciler; the Reconciler

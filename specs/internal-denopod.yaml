@@ -14,6 +14,28 @@ metadata:
   name: internal-denopod
   namespace: default
 spec:
+  arch:
+    code:
+    - file:internal/denopod/denopod.go
+    form: map
+    id: type.DenoRestartPolicy
+    kind: node
+    node:
+      code:
+        default:
+        - internal/denopod/denopod.go:Reconcile
+        - internal/policyengine/policyengine.go:Reconcile
+        type: api/v1alpha1/types_shared.go
+      default: Always
+      enum:
+      - Always
+      - OnFailure
+      - Never
+      held_by:
+      - sc.kind.denopod.spec.restartPolicy
+      - sc.kind.policyengine.spec.restartPolicy
+    position: 2
+    section: types
   dependsOn:
   - sc.api-v1alpha1
   intent: This context exists so the DenoPod lifecycle can be specified and tested

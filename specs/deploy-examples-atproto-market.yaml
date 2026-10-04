@@ -20,6 +20,31 @@ metadata:
   name: deploy-examples-atproto-market
   namespace: default
 spec:
+  arch:
+    code:
+    - file:deploy/examples/atproto/market/20-global-plc.yaml
+    - file:deploy/examples/atproto/market/30-relay-relay.yaml
+    - file:deploy/examples/atproto/market/40-alice-pds.yaml
+    form: list
+    id: tb.child-process
+    kind: node
+    node:
+      basis: example
+      code:
+      - deploy/examples/atproto/market/20-global-plc.yaml:Deno.execPath
+      - deploy/examples/atproto/market/20-global-plc.yaml:childEnv
+      - deploy/examples/atproto/market/30-relay-relay.yaml:Deno.execPath
+      - deploy/examples/atproto/market/30-relay-relay.yaml:childEnv
+      - deploy/examples/atproto/market/40-alice-pds.yaml:Deno.execPath
+      - deploy/examples/atproto/market/40-alice-pds.yaml:childEnv
+      enforced_by: []
+      id: tb.child-process
+      kind: process
+      principals: {}
+      runs_in: tb.host
+    parent: tb.workload
+    section: system_contexts
+    slot: children[0]
   intent: 'This context exists to pin down the deploy/examples/atproto/market example
     as an executable specification of what the kcp deno runtime must support: peer
     services that reach each other only by cluster-local name over TLS, with identity

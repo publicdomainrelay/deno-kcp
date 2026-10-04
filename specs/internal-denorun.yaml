@@ -16,6 +16,128 @@ metadata:
   name: internal-denorun
   namespace: default
 spec:
+  arch:
+    code:
+    - file:internal/denorun/denorun.go
+    - file:internal/denorun/denorun_test.go
+    form: list
+    id: sc.kind.denorun
+    kind: node
+    node:
+      axis: one_shot
+      code:
+        logic: internal/denorun
+        registry: internal/provider/registry_run.go
+      context: tb.provider-workspace
+      id: sc.kind.denorun
+      orchestrator: sc.deno-kcp-provider
+      overlay: []
+      owned_by:
+      - sc.kind.denojob
+      upstream:
+        api:
+          export: denoruntime
+          group: deno.computer
+          kind: DenoRun
+          resource: denoruns
+          schema: v1alpha1-2.denoruns.deno.computer
+          scope: Namespaced
+          short: drun
+          version: v1alpha1
+        condition_facts:
+          Complete:
+            by: internal/denorun/denorun.go:Reconcile
+            false_reasons:
+            - Running
+            - Retrying
+            true_reasons:
+            - Complete
+            - DeadlineExceeded
+            - BackoffExceeded
+          Failed:
+            by: internal/denorun/denorun.go:Reconcile
+            true_reasons:
+            - DeadlineExceeded
+            - BackoffExceeded
+        conditions:
+        - Complete
+        - Failed
+        embeds: type.DenoPodTemplate
+        field_types:
+          conditions: type.conditions
+        finalizer:
+          code:
+          - api/v1alpha1/types_denorun.go:FinalizerDenoRun
+          - internal/provider/reconcile_run.go:newRunForJob
+          - internal/provider/registry_run.go:RemoveRunFinalizer
+          - internal/provider/registry_run.go:RemoveRunFinalizerKnown
+          name: denorun.deno.computer/run
+          set_by:
+          - manifest
+          - provider
+        manifest: deploy/denorun-apiresourceschema.yaml
+        phases:
+        - Pending
+        - Running
+        - Succeeded
+        - Failed
+        spec:
+        - backoff
+        - activeDeadlineSeconds
+        - ttlSecondsAfterFinished
+        status:
+        - phase
+        - runID
+        - startTime
+        - completionTime
+        - exitCode
+        - message
+        - outputs
+        - retries
+        - conditions
+        status_facts:
+          completionTime:
+            by: internal/denorun/denorun.go:Reconcile
+            decides: none
+            when: on_exit
+          conditions:
+            also: phase
+            by: internal/denorun/denorun.go:Reconcile
+            decides: Complete
+            when: on_every_pass
+          exitCode:
+            by: internal/denorun/denorun.go:Reconcile
+            decides: none
+            when: on_exit
+          message:
+            by: internal/denorun/denorun.go:Reconcile
+            decides: none
+            when: on_exit
+          outputs:
+            by: internal/denorun/denorun.go:Reconcile
+            decides: none
+            when: on_exit
+          phase:
+            by: internal/denorun/denorun.go:Reconcile
+            decides: self
+            when: on_start
+          retries:
+            by: internal/denorun/denorun.go:Reconcile
+            decides: none
+            when: on_restart
+          runID:
+            by: internal/denorun/denorun.go:Reconcile
+            decides: none
+            when: on_running
+          startTime:
+            by: internal/denorun/denorun.go:Reconcile
+            decides: none
+            when: on_start
+        types: api/v1alpha1/types_denorun.go
+    orchestrator: sc.deno-kcp-provider
+    parent: sc.deno-kcp
+    section: system_contexts
+    slot: overlay[7]
   dependsOn:
   - sc.api-v1alpha1
   intent: This context exists to hold the reconciliation logic for a single DenoRun
@@ -68,6 +190,7 @@ spec:
     kind: type_alias
     name: RunState
     signature: type RunState string
+  orchestrator: sc.deno-kcp-provider
   repository: deno-kcp
   requirements:
   - codeRefs:
