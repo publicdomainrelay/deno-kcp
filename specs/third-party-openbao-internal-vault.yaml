@@ -130,7 +130,7 @@ metadata:
   name: third-party-openbao-internal-vault
   namespace: default
 spec:
-  intent: This context exists so the vault core can emit an audit record for every
+  intent: The context exists so the vault core can emit an audit record for every
     request and response through one narrow interface, without the callers knowing
     which backend writes the record. The AuditLogger contract lets the HTTP handler
     and the rate-limit wrapper obtain an auditor from Core and log request and response
@@ -161,6 +161,21 @@ spec:
     kind: method
     name: basicAuditor.AuditRequest
     signature: func (b *basicAuditor) AuditRequest(ctx context.Context, input *logical.LogInput)
+      error
+  - file: third_party/openbao/internal/vault/audit.go
+    kind: method
+    name: basicAuditor.AuditResponse
+    signature: func (b *basicAuditor) AuditResponse(ctx context.Context, input *logical.LogInput)
+      error
+  - file: third_party/openbao/internal/vault/audit.go
+    kind: method
+    name: genericAuditor.AuditRequest
+    signature: func (g *genericAuditor) AuditRequest(ctx context.Context, input *logical.LogInput)
+      error
+  - file: third_party/openbao/internal/vault/audit.go
+    kind: method
+    name: genericAuditor.AuditResponse
+    signature: func (g *genericAuditor) AuditResponse(ctx context.Context, input *logical.LogInput)
       error
   repository: deno-kcp
   requirements:

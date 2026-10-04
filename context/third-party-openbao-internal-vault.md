@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-This context exists so the vault core can emit an audit record for every request and response through one narrow interface, without the callers knowing which backend writes the record. The AuditLogger contract lets the HTTP handler and the rate-limit wrapper obtain an auditor from Core and log request and response inputs through it, while the concrete basicAuditor owns the sealed check and the broker delegation. Splitting basicAuditor from genericAuditor lets the same interface serve both whole-core auditing and auditing bound to a mount type and namespace. The code is vendored third-party OpenBao source inside deno-kcp, so it is described as it is observed rather than as something this repository authors.
+The context exists so the vault core can emit an audit record for every request and response through one narrow interface, without the callers knowing which backend writes the record. The AuditLogger contract lets the HTTP handler and the rate-limit wrapper obtain an auditor from Core and log request and response inputs through it, while the concrete basicAuditor owns the sealed check and the broker delegation. Splitting basicAuditor from genericAuditor lets the same interface serve both whole-core auditing and auditing bound to a mount type and namespace. The code is vendored third-party OpenBao source inside deno-kcp, so it is described as it is observed rather than as something this repository authors.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
