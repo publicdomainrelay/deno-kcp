@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so that the OpenBao UI's application bootstrap layer can be described and validated as a unit: what the top-level Ember Application and Router subclasses must declare, and which app-directory modules must ship with them. It is a vendored third-party tree (third_party/openbao), so the specification pins the shape that the surrounding deno-kcp code expects to be present rather than the behaviour of any single feature.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

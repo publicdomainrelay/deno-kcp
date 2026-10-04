@@ -3801,6 +3801,14 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.testem-default` (MUST): "The default Testem config serves `tests/index.html?hidepassed`, quietens TAP logs and reports only failed tests, watches nothing, launches headless Chrome in CI with sandbox disabled only when `CI` is set, times out browser start after 120 seconds, and proxies `/v1` to `http://localhost:9200`."
 - added `r.testem-enos-proxy` (MUST): "The Enos Testem config behaves like the default one except that it reads the `VAULT_ADDR` environment variable, logs it, and proxies `/v1` to that value instead of a fixed localhost target."
 
+### third-party-openbao-ui-app
+
+- intent: "" -> "The context exists so that the OpenBao UI's application bootstrap layer can be described and validated as a unit: what the top-level Ember Application and Router subclasses must declare, and which app-directory modules must ship with them. It is a vendored third-party tree (third_party/openbao), so the specification pins the shape that the surrounding deno-kcp code expects to be present rather than the behaviour of any single feature."
+- added `r.application-class-declared` (MUST): "third_party/openbao/ui/app/app.js must export a default Application subclass (codegraph class App) that declares the modulePrefix, podModulePrefix, Resolver and engines members, so the Ember build resolves module namespaces, pods and engine addons from the application object."
+- added `r.breakpoints-module-present` (SHOULD): "The app directory must ship a breakpoints module at third_party/openbao/ui/app/breakpoints.js as part of the application's module set, giving the UI a single place for its responsive layout breakpoint definitions."
+- added `r.deprecation-workflow-module-present` (SHOULD): "The app directory must ship a deprecation-workflow module at third_party/openbao/ui/app/deprecation-workflow.js so Ember deprecation handling is configured in the build rather than scattered through feature code."
+- added `r.router-reads-config` (MUST): "third_party/openbao/ui/app/router.js must export a default Router subclass (codegraph class Router) that takes its location and rootURL from the application config, so the running UI honours the configured locationType and the base URL the app is served under."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4082,5 +4090,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-tools-semgrep-ci-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-tools-semgrep-ci-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-adapters-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-ui-app-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

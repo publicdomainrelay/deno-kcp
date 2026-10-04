@@ -1,5 +1,7 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
+- class:c383cad6c8632553049a8af1d9135740 App@third_party/openbao/ui/app/app.js:12
+- class:d33bfe614557366e3e83290a3916bb09 Router@third_party/openbao/ui/app/router.js:9
 - file:third_party/openbao/ui/app/app.js app.js@third_party/openbao/ui/app/app.js
 - file:third_party/openbao/ui/app/breakpoints.js breakpoints.js@third_party/openbao/ui/app/breakpoints.js
 - file:third_party/openbao/ui/app/deprecation-workflow.js deprecation-workflow.js@third_party/openbao/ui/app/deprecation-workflow.js
@@ -9,5 +11,53 @@ metadata:
   name: third-party-openbao-ui-app
   namespace: default
 spec:
+  intent: 'The context exists so that the OpenBao UI''s application bootstrap layer
+    can be described and validated as a unit: what the top-level Ember Application
+    and Router subclasses must declare, and which app-directory modules must ship
+    with them. It is a vendored third-party tree (third_party/openbao), so the specification
+    pins the shape that the surrounding deno-kcp code expects to be present rather
+    than the behaviour of any single feature.'
+  interfaces:
+  - file: third_party/openbao/ui/app/app.js
+    kind: class
+    name: App
+    signature: App()
+  - file: third_party/openbao/ui/app/router.js
+    kind: class
+    name: Router
+    signature: Router()
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - class:c383cad6c8632553049a8af1d9135740
+    - file:third_party/openbao/ui/app/app.js
+    id: r.application-class-declared
+    level: MUST
+    text: third_party/openbao/ui/app/app.js must export a default Application subclass
+      (codegraph class App) that declares the modulePrefix, podModulePrefix, Resolver
+      and engines members, so the Ember build resolves module namespaces, pods and
+      engine addons from the application object.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/breakpoints.js
+    id: r.breakpoints-module-present
+    level: SHOULD
+    text: The app directory must ship a breakpoints module at third_party/openbao/ui/app/breakpoints.js
+      as part of the application's module set, giving the UI a single place for its
+      responsive layout breakpoint definitions.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/deprecation-workflow.js
+    id: r.deprecation-workflow-module-present
+    level: SHOULD
+    text: The app directory must ship a deprecation-workflow module at third_party/openbao/ui/app/deprecation-workflow.js
+      so Ember deprecation handling is configured in the build rather than scattered
+      through feature code.
+  - codeRefs:
+    - class:d33bfe614557366e3e83290a3916bb09
+    - file:third_party/openbao/ui/app/router.js
+    id: r.router-reads-config
+    level: MUST
+    text: third_party/openbao/ui/app/router.js must export a default Router subclass
+      (codegraph class Router) that takes its location and rootURL from the application
+      config, so the running UI honours the configured locationType and the base URL
+      the app is served under.
   upstream: self
