@@ -10,5 +10,22 @@ spec:
   systemContext: third-party-openbao-ui-lib-pki-addon-routes-keys
   toCommit: e33a5585dc1ac9d3bf63bc1ebdcf5dbb45369989
 status:
-  message: the agent is summarizing third-party-openbao-ui-lib-pki-addon-routes-keys
-  phase: Running
+  agentLog: This context covers the four Ember route modules that back the PKI secrets-engine
+    'keys' section of the OpenBao web UI, vendored under third_party/openbao/ui/lib/pki/addon/routes/keys/.
+    PkiKeysIndexRoute lists keys, PkiKeysCreateRoute and PkiKeysImportRoute prepare
+    a new unsaved pki/key record for the generate and import forms, and PkiKeyRoute
+    loads a single key by id. Every route injects the secretMountPath and store services,
+    so the current secrets mount path is passed as the 'backend' query option on each
+    store call. The two form routes share the same body and differ only in the final
+    breadcrumb label; the index route is additionally wrapped in the withConfig decorator
+    and short-circuits a missing configuration into an empty key list, while the detail
+    route reads key_id from its own route params.
+  message: wrote 10 requirement(s) and 4 interface(s) for third-party-openbao-ui-lib-pki-addon-routes-keys;
+    interface PkiKeysCreateRoute.model is not in the observed facts; dropped; interface
+    PkiKeysCreateRoute.setupController is not in the observed facts; dropped; interface
+    PkiKeysImportRoute.model is not in the observed facts; dropped; interface PkiKeysImportRoute.setupController
+    is not in the observed facts; dropped; interface PkiKeysIndexRoute.model is not
+    in the observed facts; dropped; interface PkiKeysIndexRoute.setupController is
+    not in the observed facts; dropped; interface PkiKeyRoute.model is not in the
+    observed facts; dropped
+  phase: Succeeded
