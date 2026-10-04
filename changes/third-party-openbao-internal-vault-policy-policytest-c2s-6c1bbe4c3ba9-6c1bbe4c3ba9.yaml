@@ -10,5 +10,15 @@ spec:
   systemContext: third-party-openbao-internal-vault-policy-policytest
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-vault-policy-policytest
-  phase: Running
+  agentLog: The policytest package holds a shared Go test helper, TestLayeredACL,
+    in third_party/openbao/internal/vault/policy/policytest/acl.go. The helper takes
+    a testing.T, an already-constructed *policy.ACL and a *namespace.Namespace, so
+    any caller that can build an ACL can run the same expectation table against it.
+    It first asserts that a read on sys/mount/foo does not carry root privileges,
+    then walks a table of 26 operation/path cases, 11 expected allowed and 15 denied
+    and 5 expected root-privileged, all evaluated through acl.AllowOperation with
+    a namespace-scoped context and a fresh logical.Request per case; any mismatch
+    between observed Allowed or RootPrivs and the expected value fails the test with
+    a formatted fatal message.
+  message: wrote 6 requirement(s) and 1 interface(s) for third-party-openbao-internal-vault-policy-policytest
+  phase: Succeeded
