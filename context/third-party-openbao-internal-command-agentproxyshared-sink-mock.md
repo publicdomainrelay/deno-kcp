@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to specify a test double for the agent proxy sink abstraction. Callers that must not touch a real destination (file or network) can construct a mock sink through NewSink, hand it to code that expects sink.Sink, drive token writes through the interface, and then read back the last token with Token to assert what was written. It is pure test scaffolding: no persistence, no error paths, no external side effects.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

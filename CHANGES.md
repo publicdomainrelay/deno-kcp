@@ -1251,6 +1251,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.token-reads-stored-or-empty` (MUST): "inmemSink.Token must return the token most recently written by WriteToken, and must return the empty string when no token has ever been stored, never panicking on the unset case."
 - added `r.write-token-stores-and-registers` (MUST): "inmemSink.WriteToken must store the given token in the sink's atomic token value, and then, when a lease cache is present, call the cache's RegisterAutoAuthToken with that token and return the resulting error. When no lease cache is present the method must return nil."
 
+### third-party-openbao-internal-command-agentproxyshared-sink-mock
+
+- intent: "" -> "This context exists to specify a test double for the agent proxy sink abstraction. Callers that must not touch a real destination (file or network) can construct a mock sink through NewSink, hand it to code that expects sink.Sink, drive token writes through the interface, and then read back the last token with Token to assert what was written. It is pure test scaffolding: no persistence, no error paths, no external side effects."
+- added `r.construct-with-initial-token` (MUST): "NewSink must return a sink.Sink backed by a mockSink whose stored token is the token argument, so a caller can seed the sink with a starting value before any write occurs."
+- added `r.no-side-effects` (MAY): "The mock sink may keep all state in memory only, requiring no file, network, or other external destination, which is what lets tests use it without cleanup."
+- added `r.satisfies-sink-interface` (MUST): "The mockSink type must implement the sink.Sink interface so a value returned by NewSink can be used anywhere the sink package's Sink interface is accepted, including as the dynamic implementation behind WriteToken calls routed through that interface."
+- added `r.token-reads-stored-value` (MUST): "mockSink.Token must return the token currently held by the sink — the constructor argument until a write replaces it, the last written value afterwards — letting tests assert on captured writes."
+- added `r.write-token-replaces-value` (MUST): "mockSink.WriteToken must overwrite the sink's stored token with the supplied token and return nil, so every write succeeds and the newest token is what a later read observes."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -1308,6 +1317,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-command-agentproxyshared-sink-file-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agentproxyshared-sink-file-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agentproxyshared-sink-inmem-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-command-agentproxyshared-sink-mock-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-command-agentproxyshared-sink-mock-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agentproxyshared-winsvc-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-internal-command-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |

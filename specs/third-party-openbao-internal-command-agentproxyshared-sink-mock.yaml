@@ -2,10 +2,72 @@ apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
 - file:third_party/openbao/internal/command/agentproxyshared/sink/mock/mock_sink.go
   mock_sink.go@third_party/openbao/internal/command/agentproxyshared/sink/mock/mock_sink.go
+- function:11877249d28ac132fb67460ba056fd5c NewSink@third_party/openbao/internal/command/agentproxyshared/sink/mock/mock_sink.go:14
+- method:38f6c8938385fa7264817dd532303198 mockSink.WriteToken@third_party/openbao/internal/command/agentproxyshared/sink/mock/mock_sink.go:20
+- method:b795e07eb6f6a2517ff57f43e1d5d341 mockSink.Token@third_party/openbao/internal/command/agentproxyshared/sink/mock/mock_sink.go:25
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-command-agentproxyshared-sink-mock
   namespace: default
 spec:
+  intent: 'This context exists to specify a test double for the agent proxy sink abstraction.
+    Callers that must not touch a real destination (file or network) can construct
+    a mock sink through NewSink, hand it to code that expects sink.Sink, drive token
+    writes through the interface, and then read back the last token with Token to
+    assert what was written. It is pure test scaffolding: no persistence, no error
+    paths, no external side effects.'
+  interfaces:
+  - file: third_party/openbao/internal/command/agentproxyshared/sink/mock/mock_sink.go
+    kind: function
+    name: NewSink
+    signature: func NewSink(token string) sink.Sink
+  - file: third_party/openbao/internal/command/agentproxyshared/sink/mock/mock_sink.go
+    kind: method
+    name: mockSink.Token
+    signature: func (m *mockSink) Token() string
+  - file: third_party/openbao/internal/command/agentproxyshared/sink/mock/mock_sink.go
+    kind: method
+    name: mockSink.WriteToken
+    signature: func (m *mockSink) WriteToken(token string) error
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/sink/mock/mock_sink.go
+    - function:11877249d28ac132fb67460ba056fd5c
+    id: r.construct-with-initial-token
+    level: MUST
+    text: NewSink must return a sink.Sink backed by a mockSink whose stored token
+      is the token argument, so a caller can seed the sink with a starting value before
+      any write occurs.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/sink/mock/mock_sink.go
+    id: r.no-side-effects
+    level: MAY
+    text: The mock sink may keep all state in memory only, requiring no file, network,
+      or other external destination, which is what lets tests use it without cleanup.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/sink/mock/mock_sink.go
+    - function:11877249d28ac132fb67460ba056fd5c
+    id: r.satisfies-sink-interface
+    level: MUST
+    text: The mockSink type must implement the sink.Sink interface so a value returned
+      by NewSink can be used anywhere the sink package's Sink interface is accepted,
+      including as the dynamic implementation behind WriteToken calls routed through
+      that interface.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/sink/mock/mock_sink.go
+    - method:b795e07eb6f6a2517ff57f43e1d5d341
+    id: r.token-reads-stored-value
+    level: MUST
+    text: mockSink.Token must return the token currently held by the sink — the constructor
+      argument until a write replaces it, the last written value afterwards — letting
+      tests assert on captured writes.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/sink/mock/mock_sink.go
+    - method:38f6c8938385fa7264817dd532303198
+    id: r.write-token-replaces-value
+    level: MUST
+    text: mockSink.WriteToken must overwrite the sink's stored token with the supplied
+      token and return nil, so every write succeeds and the newest token is what a
+      later read observes.
   upstream: self
