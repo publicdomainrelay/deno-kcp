@@ -10,5 +10,20 @@ spec:
   systemContext: third-party-openbao-ui-app-adapters-clients
   toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
 status:
-  message: the agent is summarizing third-party-openbao-ui-app-adapters-clients
-  phase: Running
+  agentLog: 'This context covers the client-side Ember Data adapters that the OpenBao
+    UI uses to reach two read-only internal HTTP endpoints. third_party/openbao/ui/app/adapters/clients/activity.js
+    defines ActivityAdapter, which parses the caller''s month-range query into Unix
+    second timestamps in UTC and issues a GET to `${this.buildURL()}/internal/counters/activity`,
+    then normalizes the response by assigning an `id` from `request_id` or the literal
+    `''no-data''`. third_party/openbao/ui/app/adapters/clients/version-history.js
+    defines VersionHistoryAdapter, whose `findAll` issues a GET to `${this.buildURL()}/version-history`
+    with `list: true` and resolves the raw response. A third file, third_party/openbao/ui/app/adapters/clients/config.js,
+    belongs to the same directory but has no observed exports. Both adapter classes
+    extend ApplicationAdapter and rely on its inherited `ajax` and `buildURL` helpers,
+    so the endpoint host and auth come from the application adapter''s configuration
+    rather than from these files.'
+  message: wrote 6 requirement(s) and 2 interface(s) for third-party-openbao-ui-app-adapters-clients;
+    interface ActivityAdapter.formatQueryParams is not in the observed facts; dropped;
+    interface ActivityAdapter.queryRecord is not in the observed facts; dropped; interface
+    VersionHistoryAdapter.findAll is not in the observed facts; dropped
+  phase: Succeeded
