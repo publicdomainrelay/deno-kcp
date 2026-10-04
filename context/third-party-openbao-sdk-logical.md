@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so the deno-kcp repository can reason about and depend on the OpenBao plugin SDK surface without re-deriving it from source, and so changes to vendored SDK types can be checked against a written contract. It records the shape of the audit logging input, the opt-in marshalling hook that keeps sensitive values hashed in audit output, the shape of policy evaluation results, and the request, response, storage and version-service entrypoints that a backend implementation calls.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

@@ -52693,8 +52693,210 @@ system_contexts:
   - file:third_party/openbao/sdk/logical/translate_response.go translate_response.go@third_party/openbao/sdk/logical/translate_response.go
   - file:third_party/openbao/sdk/logical/version.pb.go version.pb.go@third_party/openbao/sdk/logical/version.pb.go
   - file:third_party/openbao/sdk/logical/version_grpc.pb.go version_grpc.pb.go@third_party/openbao/sdk/logical/version_grpc.pb.go
+  - function:007b7181739ee5c63b8c8756d1729504 ResolvePathResponse@third_party/openbao/sdk/logical/response.go:336
+  - function:070454e24d07637c9756953946c321c5 EndTxStorage@third_party/openbao/sdk/logical/logical_storage.go:139
+  - function:1079df995483f7f4a62a4af676e72245 RespondErrorCommon@third_party/openbao/sdk/logical/response_util.go:20
+  - function:14c094cc79df03c7fd15c5e15c3651e6 RegisterPluginVersionServer@third_party/openbao/sdk/logical/version_grpc.pb.go:87
+  - function:153b436fc35290e79e315bfe56ad20b7 WithTransaction@third_party/openbao/sdk/logical/logical_storage.go:104
+  - function:16636f8e822630be116d24c472a046ed RevokeRequest@third_party/openbao/sdk/logical/request.go:341
+  - function:1ea6b1ffb11c2a31a6f76812af91720a CollectKeysWithPrefixWithLogger@third_party/openbao/sdk/logical/storage.go:202
+  - function:23e0440e87ec246afa83bee815b80a42 NewStorageView@third_party/openbao/sdk/logical/storage_view.go:39
+  - function:256a03e8f7fc5a8f0fad5a366bf14312 ValidateInternalOperation@third_party/openbao/sdk/logical/request.go:460
+  - function:2611d49d31375446c259a92719627f5c CreateContextOriginalBody@third_party/openbao/sdk/logical/request.go:515
+  - function:2d4f48fe3d497037797850c8f852c0e4 RespondWithStatusCode@third_party/openbao/sdk/logical/response.go:176
+  - function:2e9d88503aced9a662697933b30d8020 RenewRequest@third_party/openbao/sdk/logical/request.go:321
+  - function:339c3913e674aa50c7029ecdf0d9b5ad IsRelativePath@third_party/openbao/sdk/logical/path.go:10
+  - function:3c243c5fe9c8b92f4e577ce0eb15b6c4 ValidateOperation@third_party/openbao/sdk/logical/request.go:436
+  - function:40fe145779f2d480cc481834add6a927 HelpResponse@third_party/openbao/sdk/logical/response.go:121
+  - function:4176533c14bd61122ae9b78d3fb72704 CollectKeysWithPrefix@third_party/openbao/sdk/logical/storage.go:198
+  - interface:f3cd1d1b0f99c77d78c64437a95f2847 OptMarshaler@third_party/openbao/sdk/logical/audit.go:20
   id: sc.third-party-openbao-sdk-logical
+  intent: The context exists so the deno-kcp repository can reason about and depend
+    on the OpenBao plugin SDK surface without re-deriving it from source, and so changes
+    to vendored SDK types can be checked against a written contract. It records the
+    shape of the audit logging input, the opt-in marshalling hook that keeps sensitive
+    values hashed in audit output, the shape of policy evaluation results, and the
+    request, response, storage and version-service entrypoints that a backend implementation
+    calls.
+  interfaces:
+  - file: third_party/openbao/sdk/logical/audit.go
+    kind: struct
+    name: LogInput
+    signature: type LogInput struct { Type string; Auth *Auth; Request *Request; Response
+      *Response; OuterErr error; NonHMACReqDataKeys []string; NonHMACRespDataKeys
+      []string }
+  - file: third_party/openbao/sdk/logical/audit.go
+    kind: struct
+    name: MarshalOptions
+    signature: type MarshalOptions struct { ValueHasher func(string) string }
+  - file: third_party/openbao/sdk/logical/audit.go
+    kind: interface
+    name: OptMarshaler
+    signature: type OptMarshaler interface { MarshalJSONWithOptions(options *MarshalOptions)
+      (data []byte, err error) }
+  - file: third_party/openbao/sdk/logical/audit.go
+    kind: method
+    name: OptMarshaler.MarshalJSONWithOptions
+    signature: func (options *MarshalOptions) (data []byte, err error)
+  - file: third_party/openbao/sdk/logical/auth.go
+    kind: struct
+    name: PolicyResults
+    signature: type PolicyResults struct { Allowed bool `json:"allowed"`; GrantingPolicies
+      []PolicyInfo `json:"granting_policies"`; ControlGroup *ControlGroup `json:"control_group"`
+      }
   name: third-party-openbao-sdk-logical
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/sdk/logical/audit.go
+    id: r.audit-log-input-shape
+    level: MUST
+    text: 'LogInput carries the audit record fields a backend needs to emit one entry:
+      an entry Type, the Auth and Request that produced it, the Response returned,
+      an OuterErr for failures outside the request handling, and the NonHMACReqDataKeys
+      and NonHMACRespDataKeys lists naming request and response data keys that must
+      be logged without HMAC hashing. Audit backends receive this struct for both
+      requests and responses.'
+  - codeRefs:
+    - file:third_party/openbao/sdk/logical/connection.go
+    - file:third_party/openbao/sdk/logical/identity.pb.go
+    - file:third_party/openbao/sdk/logical/logical.go
+    - file:third_party/openbao/sdk/logical/plugin.pb.go
+    - file:third_party/openbao/sdk/logical/secret.go
+    - file:third_party/openbao/sdk/logical/token.go
+    id: r.backend-plugin-contract
+    level: MUST
+    text: The package defines the backend contract a plugin implements and the token,
+      secret, connection, identity and plugin message types that flow through it,
+      so a backend registers paths, handles requests, and returns responses and leases
+      using this single package's types.
+  - codeRefs:
+    - file:third_party/openbao/sdk/logical/lease_test.go
+    - file:third_party/openbao/sdk/logical/logical_storage_test.go
+    - file:third_party/openbao/sdk/logical/path_test.go
+    - file:third_party/openbao/sdk/logical/request_test.go
+    - file:third_party/openbao/sdk/logical/response_util_test.go
+    - file:third_party/openbao/sdk/logical/storage_inmem.go
+    - file:third_party/openbao/sdk/logical/storage_inmem_test.go
+    - file:third_party/openbao/sdk/logical/storage_test.go
+    - file:third_party/openbao/sdk/logical/testing.go
+    - file:third_party/openbao/sdk/logical/token_test.go
+    id: r.in-memory-storage-for-tests
+    level: SHOULD
+    text: StorageInmem and the helpers in testing.go provide an in-memory Storage
+      implementation and backend test scaffolding, so backend tests exercise request
+      handling against storage without a real backend, and path, lease, token, storage
+      and response behaviour stay covered by the accompanying _test files in the same
+      package.
+  - codeRefs:
+    - file:third_party/openbao/sdk/logical/audit.go
+    id: r.marshal-options-value-hasher
+    level: MUST
+    text: MarshalOptions carries exactly one field, ValueHasher, a func(string) string.
+      Callers supply it so an OptMarshaler implementation can translate each sensitive
+      value through the same hashing scheme the audit pipeline uses; a nil or identity
+      hasher leaves values unchanged.
+  - codeRefs:
+    - file:third_party/openbao/sdk/logical/path.go
+    - file:third_party/openbao/sdk/logical/request.go
+    - function:256a03e8f7fc5a8f0fad5a366bf14312
+    - function:339c3913e674aa50c7029ecdf0d9b5ad
+    - function:3c243c5fe9c8b92f4e577ce0eb15b6c4
+    id: r.operation-and-path-validation
+    level: MUST
+    text: Request handling validates before dispatch. ValidateOperation rejects an
+      operation that is not one of the defined logical operation values, ValidateInternalOperation
+      additionally restricts which operations are permitted on internal paths, and
+      IsRelativePath decides whether a path is relative rather than rooted, so backends
+      can reject malformed routing before storage or secrets are touched.
+  - codeRefs:
+    - file:third_party/openbao/sdk/logical/audit.go
+    - interface:f3cd1d1b0f99c77d78c64437a95f2847
+    id: r.opt-marshaler-value-hashing
+    level: MUST
+    text: A type that must control its own JSON representation for audit output implements
+      OptMarshaler. MarshalJSONWithOptions receives a MarshalOptions whose ValueHasher
+      function is applied to sensitive string values before they are written, so the
+      marshalled bytes carry hashed values rather than plaintext; the implementation
+      returns the encoded bytes or the marshalling error.
+  - codeRefs:
+    - file:third_party/openbao/sdk/logical/auth.go
+    id: r.policy-results-shape
+    level: MUST
+    text: 'PolicyResults reports the outcome of policy evaluation for a request: Allowed
+      states whether the request passed, GrantingPolicies lists the PolicyInfo entries
+      that granted access, and ControlGroup names any control group the request was
+      gated behind. The fields marshal as allowed, granting_policies and control_group.'
+  - codeRefs:
+    - file:third_party/openbao/sdk/logical/storage.go
+    - function:1ea6b1ffb11c2a31a6f76812af91720a
+    - function:4176533c14bd61122ae9b78d3fb72704
+    id: r.prefix-key-listing
+    level: MUST
+    text: Storage listing walks a prefix and returns the keys beneath it. CollectKeysWithPrefix
+      does the walk with the package default logger and CollectKeysWithPrefixWithLogger
+      takes a caller-supplied logger, so a backend can list its own subtree without
+      reading unrelated storage.
+  - codeRefs:
+    - file:third_party/openbao/sdk/logical/lease.go
+    - file:third_party/openbao/sdk/logical/request.go
+    - function:16636f8e822630be116d24c472a046ed
+    - function:2611d49d31375446c259a92719627f5c
+    - function:2e9d88503aced9a662697933b30d8020
+    id: r.request-renew-and-revoke
+    level: MUST
+    text: 'Lease lifecycle requests are built from a request: RenewRequest produces
+      the request used to renew a lease, RevokeRequest produces the request used to
+      revoke one, and CreateContextOriginalBody attaches the original request body
+      to a context so later stages can read what the caller sent. These keep renewal
+      and revocation flowing through the same request type as normal operations.'
+  - codeRefs:
+    - file:third_party/openbao/sdk/logical/error.go
+    - file:third_party/openbao/sdk/logical/response.go
+    - file:third_party/openbao/sdk/logical/response_util.go
+    - file:third_party/openbao/sdk/logical/translate_response.go
+    - function:007b7181739ee5c63b8c8756d1729504
+    - function:1079df995483f7f4a62a4af676e72245
+    - function:2d4f48fe3d497037797850c8f852c0e4
+    - function:40fe145779f2d480cc481834add6a927
+    id: r.response-construction-and-errors
+    level: MUST
+    text: 'Backends build responses through the shared helpers: ResolvePathResponse
+      and RespondWithStatusCode produce a response with the chosen status, HelpResponse
+      builds the help output for a path, and RespondErrorCommon maps a returned error
+      onto the error response returned to the caller, including translation of logical
+      errors defined in error.go. Error translation goes through translate_response.go
+      so wire responses stay consistent.'
+  - codeRefs:
+    - file:third_party/openbao/sdk/logical/logical_storage.go
+    - file:third_party/openbao/sdk/logical/storage_transactions.go
+    - function:070454e24d07637c9756953946c321c5
+    - function:153b436fc35290e79e315bfe56ad20b7
+    id: r.storage-transactions
+    level: MUST
+    text: 'Logical storage supports transactions: WithTransaction runs a caller-supplied
+      function inside a transaction and passes the transactional storage view to it,
+      and EndTxStorage terminates the transaction, committing on a nil error argument
+      and rolling back otherwise. A backend that mutates several keys together uses
+      these so partial writes do not persist.'
+  - codeRefs:
+    - file:third_party/openbao/sdk/logical/storage_view.go
+    - file:third_party/openbao/sdk/logical/system_view.go
+    - function:23e0440e87ec246afa83bee815b80a42
+    id: r.storage-view-construction
+    level: MUST
+    text: NewStorageView builds a storage view that scopes a backend to its own prefix
+      of the underlying storage, so paths the backend writes are namespaced and it
+      cannot reach outside its mount without an explicit barrier view.
+  - codeRefs:
+    - file:third_party/openbao/sdk/logical/version.pb.go
+    - file:third_party/openbao/sdk/logical/version_grpc.pb.go
+    - function:14c094cc79df03c7fd15c5e15c3651e6
+    id: r.version-grpc-service
+    level: MUST
+    text: The generated version service registers a plugin version server against
+      a gRPC server through RegisterPluginVersionServer, with the message types and
+      service descriptor defined in the generated protobuf files, so the host can
+      query the version a plugin backend reports.
   upstream: self
 - code:
   - third_party/openbao/sdk/physical/cache.go
