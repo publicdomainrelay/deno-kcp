@@ -1,0 +1,40 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-ui-app-serializers-oidc-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-ui-app-serializers-oidc
+  toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
+status:
+  agentLog: 'This context covers the five Ember Data serializers that back the OpenBao
+    UI''s OIDC models under third_party/openbao/ui/app/serializers/oidc/: assignment,
+    client, key, provider, and scope. Each one is a small subclass of the shared ApplicationSerializer
+    in the parent directory and each declares primaryKey = ''name'', so records are
+    addressed by their name attribute instead of an id. Three of them — OidcAssignmentSerializer,
+    OidcKeySerializer, and OidcScopeSerializer — add nothing beyond that field and
+    inherit whatever payload handling the base class provides. The other two, OidcClientSerializer
+    and OidcProviderSerializer, override normalizeItems(payload) with identical bodies:
+    when the payload carries a data envelope whose data.keys is an array, they return
+    payload.data.keys mapped to one object per key in the form { name: key, ...payload.data.key_info[key]
+    }, which rehydrates each model with all of its attributes rather than just its
+    name; otherwise they hoist the members of payload.data onto the payload itself
+    with Object.assign and delete the now-empty data key; and when there is no data
+    envelope at all the payload is returned as received, so READ responses pass through
+    unchanged. The provider override exists so its list view can surface issuer metadata,
+    and the client override so LIST responses expose full client attributes.'
+  message: wrote 6 requirement(s) and 5 interface(s) for third-party-openbao-ui-app-serializers-oidc;
+    interface OidcClientSerializer.normalizeItems is not in the observed facts; dropped;
+    interface OidcProviderSerializer.normalizeItems is not in the observed facts;
+    dropped
+  phase: Succeeded
+superseded:
+- message: wrote 6 requirement(s) and 5 interface(s) for third-party-openbao-ui-app-serializers-oidc;
+    interface OidcClientSerializer.normalizeItems is not in the observed facts; dropped;
+    interface OidcProviderSerializer.normalizeItems is not in the observed facts;
+    dropped
+  name: third-party-openbao-ui-app-serializers-oidc-c2s-6c1bbe4c3ba9-89cee50ec5ae
+  phase: Succeeded

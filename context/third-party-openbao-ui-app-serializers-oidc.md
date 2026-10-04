@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-The context exists to pin down the payload-shaping contract of the OIDC serializers in the vendored OpenBao UI, which sits in this repository as third-party code. It matters because these classes are the single point where the raw OIDC LIST and READ responses from the server are turned into records the Ember models can consume: get primaryKey wrong and every record collides under an undefined key, and get normalizeItems wrong and list views render rows with names but no body. Recording the two normalization branches, the flattened keys/key_info shape, and the fact that only client and provider override it keeps later edits from silently changing what the OIDC list and detail screens receive.
+The context exists to pin down the payload-shaping contract of the OIDC serializers in the vendored OpenBao UI, which sits in this repository as third-party code. These classes are the single point where the raw OIDC LIST and READ responses from the server are turned into records the Ember models can consume: get primaryKey wrong and every record collides under an undefined key, and get normalizeItems wrong and list views render rows with names but no body. Recording the two normalization branches, the flattened keys/key_info shape, and the fact that only client and provider override it keeps later edits from silently changing what the OIDC list and detail screens receive.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
