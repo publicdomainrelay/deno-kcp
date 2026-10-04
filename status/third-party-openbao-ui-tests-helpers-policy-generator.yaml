@@ -1,15 +1,40 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: adminPolicy, readerPolicy, updatePolicy'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/ui/tests/helpers/policy-generator/pki.js
+  fingerprint: 37124baee1f83e01bbedc6742f79b0ca1c52c19c2765876f9eb7f5135bfa1472
+  interfaces:
+  - codegraphId: function:a1542dfb9edb3d08b5890d0682e27a50
+    file: third_party/openbao/ui/tests/helpers/policy-generator/pki.js
+    kind: function
+    line: 8
+    name: adminPolicy
+    signature: (mountPath)
+  - codegraphId: function:ff5cd00185f1de2314730aab7b75f5d7
+    file: third_party/openbao/ui/tests/helpers/policy-generator/pki.js
+    kind: function
+    line: 17
+    name: readerPolicy
+    signature: (mountPath, resource)
+  - codegraphId: function:572b073b0cdecb0bc1ca43f10282bfdc
+    file: third_party/openbao/ui/tests/helpers/policy-generator/pki.js
+    kind: function
+    line: 33
+    name: updatePolicy
+    signature: (mountPath, resource)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: df54a167c570829c5292dcb0fdf9da311a7d48d79ffc26e102ab0c2f31c1fccf
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 37124baee1f83e01bbedc6742f79b0ca1c52c19c2765876f9eb7f5135bfa1472
