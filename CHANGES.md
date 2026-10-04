@@ -3426,6 +3426,19 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.setup-provisions-cluster` (MUST): "DockerCluster.Setup must create the Vault cluster the test will use, and it is the step the harness calls before any Client request; Setup also triggers MountPath evaluation for the plugin under test."
 - added `r.teardown-removes-infrastructure` (MUST): "DockerCluster.Teardown must stop every cluster node, accumulate node cleanup errors with multierror instead of stopping at the first failure, and remove the Docker network tracked in networkID when one was created, returning the combined error or nil."
 
+### third-party-openbao-sdk-helper-structtomap
+
+- intent: "" -> "The structtomap package exists so code that must treat a struct as a generic key/value bag can convert one without writing per-type boilerplate. Reflection decides the keys, and the json struct tag decides the names, so a type's JSON representation and its map representation stay in agreement. This context documents the vendored OpenBao SDK helper as part of the deno-kcp tree: the contract Map offers to callers, the reflection rules it applies to fields, and the test cases that pin those rules down. Anyone reading the spec should be able to reimplement or audit Map without opening the file: which inputs produce empty maps, which fields are dropped, how embedding flattens, and how tag values map to keys."
+- added `r.embedded-fields-flattened` (MUST): "When a field is anonymous (embedded), structToMap recurses into it with structToMap(fieldVal) and merges the resulting entries into the outer result with maps.Copy, so embedded struct fields appear at the top level of the map rather than nested under a key. This applies to both value-embedded and pointer-embedded structs, since the recursive call dereferences the pointer."
+- added `r.field-values-stored-verbatim` (MUST): "Each included field's value is stored in the result through fieldVal.Interface() with no copying or conversion, so slice, map, and pointer fields share their backing data with the source struct and preserve their original dynamic types."
+- added `r.json-tag-selects-key` (MUST): "For each exported non-anonymous field, structToMap reads the json struct tag. An empty tag uses the Go field name as the key; the tag value "-" skips the field entirely; any other tag string is used verbatim as the key. The full tag string is taken as-is, so tag options after a comma are not stripped."
+- added `r.map-returns-string-keyed-map` (MUST): "Map accepts any value (any) and returns a map[string]any. It converts by calling structToMap on reflect.ValueOf(s). The result is a fresh map allocated by structToMap; the input value is never mutated."
+- added `r.non-struct-yields-empty-map` (MUST): "If the value's kind is not reflect.Struct after dereferencing, structToMap returns the already-allocated result map with no entries rather than an error or nil, so Map(123) yields an empty, non-nil map[string]any."
+- added `r.pointer-dereferenced-once` (MUST): "When the reflected value has kind reflect.Pointer, structToMap replaces it with val.Elem() before doing anything else, so a pointer to a struct maps the same as the struct itself. A nil pointer of struct type dereferences to an invalid value whose kind is not reflect.Struct, so it falls through to the non-struct case and returns an empty map."
+- added `r.test-fixtures-cover-map-behaviour` (SHOULD): "structtomap_test.go supplies the fixtures that exercise Map: Exported (Name, Age), unexported (unexported fields), ExportedEmbedded and ExportedPointerEmbedded (embedded struct plus an Admin field), and Complex (slice and map fields). TestMap runs them as a table of have/want pairs, including struct value, pointer to struct, non-struct, unexported-only, both embedding forms, nil pointer, slice and map fields, anonymous struct, and zero value."
+- added `r.unexported-fields-skipped` (MUST): "structToMap iterates fields by index and skips any field whose StructField.PkgPath is non-empty, that is, unexported fields never appear in the result regardless of their json tag. A struct with only unexported fields maps to an empty map."
+- added `r.zero-and-anonymous-structs-supported` (SHOULD): "TestMap pins the boundary cases: an empty struct still produces a map containing its exported fields at their zero values, and an anonymous struct literal with fields X and Y maps to keys "X" and "Y", so Map does not depend on a named type."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -3678,5 +3691,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-sdk-helper-shamir-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-stepwise-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-stepwise-environments-docker-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-sdk-helper-stepwise-environments-docker-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-sdk-helper-structtomap-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-helper-stepwise-environments-docker-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-sdk-helper-structtomap-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

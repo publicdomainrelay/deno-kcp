@@ -1,0 +1,30 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-sdk-helper-stepwise-environments-docker-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-sdk-helper-stepwise-environments-docker
+  toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
+status:
+  agentLog: The Docker stepwise environment provider inside the vendored OpenBao SDK,
+    made of two files under third_party/openbao/sdk/helper/stepwise/environments/docker.
+    environment.go defines DockerCluster, its per-node dockerClusterNode type, the
+    DockerClusterOptions configuration struct, NewEnvironment, and the internal setupCA
+    and setupDockerCluster helpers; runner.go defines Runner and its Start method.
+    DockerCluster implements the stepwise.Environment contract through Setup, Client,
+    Teardown, Name, MountPath and RootToken. It provisions a Vault/OpenBao cluster
+    in Docker containers, generates a CA plus per-node TLS material and API clients,
+    mounts the plugin under test at a UUID-suffixed mount path (under auth/ for credential
+    plugins), and tears the containers and Docker network down again when the test
+    finishes.
+  message: wrote 14 requirement(s) and 15 interface(s) for third-party-openbao-sdk-helper-stepwise-environments-docker;
+    the spec already said this
+  phase: Succeeded
+superseded:
+- message: wrote 14 requirement(s) and 15 interface(s) for third-party-openbao-sdk-helper-stepwise-environments-docker
+  name: third-party-openbao-sdk-helper-stepwise-environments-docker-c2s-6c1bbe4c3ba9-89cee50ec5ae
+  phase: Succeeded

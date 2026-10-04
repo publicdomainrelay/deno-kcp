@@ -2,10 +2,100 @@ apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
 - file:third_party/openbao/sdk/helper/structtomap/structtomap.go structtomap.go@third_party/openbao/sdk/helper/structtomap/structtomap.go
 - file:third_party/openbao/sdk/helper/structtomap/structtomap_test.go structtomap_test.go@third_party/openbao/sdk/helper/structtomap/structtomap_test.go
+- function:fcf7d3a59ddd8233006c6d8b7ed36394 Map@third_party/openbao/sdk/helper/structtomap/structtomap.go:13
 kind: SystemContext
 metadata:
   name: third-party-openbao-sdk-helper-structtomap
   namespace: default
 spec:
+  intent: 'The structtomap package exists so code that must treat a struct as a generic
+    key/value bag can convert one without writing per-type boilerplate. Reflection
+    decides the keys, and the json struct tag decides the names, so a type''s JSON
+    representation and its map representation stay in agreement. This context documents
+    the vendored OpenBao SDK helper as part of the deno-kcp tree: the contract Map
+    offers to callers, the reflection rules it applies to fields, and the test cases
+    that pin those rules down. Anyone reading the spec should be able to reimplement
+    or audit Map without opening the file: which inputs produce empty maps, which
+    fields are dropped, how embedding flattens, and how tag values map to keys.'
+  interfaces:
+  - file: third_party/openbao/sdk/helper/structtomap/structtomap.go
+    kind: function
+    name: Map
+    signature: func Map(s any) map[string]any
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/structtomap/structtomap.go
+    id: r.embedded-fields-flattened
+    level: MUST
+    text: When a field is anonymous (embedded), structToMap recurses into it with
+      structToMap(fieldVal) and merges the resulting entries into the outer result
+      with maps.Copy, so embedded struct fields appear at the top level of the map
+      rather than nested under a key. This applies to both value-embedded and pointer-embedded
+      structs, since the recursive call dereferences the pointer.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/structtomap/structtomap.go
+    id: r.field-values-stored-verbatim
+    level: MUST
+    text: Each included field's value is stored in the result through fieldVal.Interface()
+      with no copying or conversion, so slice, map, and pointer fields share their
+      backing data with the source struct and preserve their original dynamic types.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/structtomap/structtomap.go
+    id: r.json-tag-selects-key
+    level: MUST
+    text: For each exported non-anonymous field, structToMap reads the json struct
+      tag. An empty tag uses the Go field name as the key; the tag value "-" skips
+      the field entirely; any other tag string is used verbatim as the key. The full
+      tag string is taken as-is, so tag options after a comma are not stripped.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/structtomap/structtomap.go
+    - function:fcf7d3a59ddd8233006c6d8b7ed36394
+    id: r.map-returns-string-keyed-map
+    level: MUST
+    text: Map accepts any value (any) and returns a map[string]any. It converts by
+      calling structToMap on reflect.ValueOf(s). The result is a fresh map allocated
+      by structToMap; the input value is never mutated.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/structtomap/structtomap.go
+    - function:fcf7d3a59ddd8233006c6d8b7ed36394
+    id: r.non-struct-yields-empty-map
+    level: MUST
+    text: If the value's kind is not reflect.Struct after dereferencing, structToMap
+      returns the already-allocated result map with no entries rather than an error
+      or nil, so Map(123) yields an empty, non-nil map[string]any.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/structtomap/structtomap.go
+    - function:fcf7d3a59ddd8233006c6d8b7ed36394
+    id: r.pointer-dereferenced-once
+    level: MUST
+    text: When the reflected value has kind reflect.Pointer, structToMap replaces
+      it with val.Elem() before doing anything else, so a pointer to a struct maps
+      the same as the struct itself. A nil pointer of struct type dereferences to
+      an invalid value whose kind is not reflect.Struct, so it falls through to the
+      non-struct case and returns an empty map.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/structtomap/structtomap_test.go
+    id: r.test-fixtures-cover-map-behaviour
+    level: SHOULD
+    text: 'structtomap_test.go supplies the fixtures that exercise Map: Exported (Name,
+      Age), unexported (unexported fields), ExportedEmbedded and ExportedPointerEmbedded
+      (embedded struct plus an Admin field), and Complex (slice and map fields). TestMap
+      runs them as a table of have/want pairs, including struct value, pointer to
+      struct, non-struct, unexported-only, both embedding forms, nil pointer, slice
+      and map fields, anonymous struct, and zero value.'
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/structtomap/structtomap.go
+    id: r.unexported-fields-skipped
+    level: MUST
+    text: structToMap iterates fields by index and skips any field whose StructField.PkgPath
+      is non-empty, that is, unexported fields never appear in the result regardless
+      of their json tag. A struct with only unexported fields maps to an empty map.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/structtomap/structtomap_test.go
+    id: r.zero-and-anonymous-structs-supported
+    level: SHOULD
+    text: 'TestMap pins the boundary cases: an empty struct still produces a map containing
+      its exported fields at their zero values, and an anonymous struct literal with
+      fields X and Y maps to keys "X" and "Y", so Map does not depend on a named type.'
   upstream: self
