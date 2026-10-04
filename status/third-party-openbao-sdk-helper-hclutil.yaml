@@ -1,0 +1,40 @@
+conditions:
+- message: 'undeclared: CheckHCLKeys, ParseConfig, WhenHCLKeyPresent'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/sdk/helper/hclutil/hcl.go
+  fingerprint: 6d53c3fe4b7e8631b35db989c5485008e2a564d7940a34260e95cd3144e58b37
+  interfaces:
+  - codegraphId: function:630fc7a2c6d7b7c77ac4f6c7b54f855c
+    file: third_party/openbao/sdk/helper/hclutil/hcl.go
+    kind: function
+    line: 17
+    name: WhenHCLKeyPresent
+    signature: (node ast.Node, key string, fn func(*ast.ObjectItem) error) error
+  - codegraphId: function:7331d1e1fd9fa4af3a0e6b8a4af38118
+    file: third_party/openbao/sdk/helper/hclutil/hcl.go
+    kind: function
+    line: 39
+    name: CheckHCLKeys
+    signature: (node ast.Node, valid []string) error
+  - codegraphId: function:6111decf716583b7ca8e7c49cdbe479b
+    file: third_party/openbao/sdk/helper/hclutil/hcl.go
+    kind: function
+    line: 77
+    name: ParseConfig
+    signature: (data []byte) (*ast.File, error)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: cd5fac47bfa59dc70d7c95603617bc54dc2d722d76ed6ecdceb0f4a838dd7b2c
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 6d53c3fe4b7e8631b35db989c5485008e2a564d7940a34260e95cd3144e58b37

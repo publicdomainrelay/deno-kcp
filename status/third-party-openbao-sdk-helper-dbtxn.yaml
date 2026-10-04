@@ -1,0 +1,50 @@
+conditions:
+- message: 'undeclared: ExecuteDBQuery, ExecuteDBQueryDirect, ExecuteTxQuery, ExecuteTxQueryDirect'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/sdk/helper/dbtxn/dbtxn.go
+  fingerprint: 731f93e68df279e9bab0cf1aac389d7c89a814f60fd7923b697501e6abb92d78
+  interfaces:
+  - codegraphId: function:f0e460014493f1673ed1e45d1c19f042
+    file: third_party/openbao/sdk/helper/dbtxn/dbtxn.go
+    kind: function
+    line: 18
+    name: ExecuteDBQuery
+    signature: (ctx context.Context, db *sql.DB, params map[string]string, query string)
+      error
+  - codegraphId: function:0a158cecb80a3a8c10637412fa09a53a
+    file: third_party/openbao/sdk/helper/dbtxn/dbtxn.go
+    kind: function
+    line: 36
+    name: ExecuteDBQueryDirect
+    signature: (ctx context.Context, db *sql.DB, params map[string]string, query string)
+      error
+  - codegraphId: function:3425084f5e86168aaebb7f5cfeb53f0e
+    file: third_party/openbao/sdk/helper/dbtxn/dbtxn.go
+    kind: function
+    line: 47
+    name: ExecuteTxQuery
+    signature: (ctx context.Context, tx *sql.Tx, params map[string]string, query string)
+      error
+  - codegraphId: function:77c9c70ae684912661590dc7bd08d0b7
+    file: third_party/openbao/sdk/helper/dbtxn/dbtxn.go
+    kind: function
+    line: 64
+    name: ExecuteTxQueryDirect
+    signature: (ctx context.Context, tx *sql.Tx, params map[string]string, query string)
+      error
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 42781a6eebc5351953b33a851e2fefcac5546416ebd8e2cf4aac701fdd14e57d
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 731f93e68df279e9bab0cf1aac389d7c89a814f60fd7923b697501e6abb92d78
