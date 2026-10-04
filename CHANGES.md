@@ -5085,6 +5085,34 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.route-paths-map-to-scope-subscreens` (SHOULD): "The two classes SHOULD remain placed under the scopes/scope directory so the router nests the details and edit screens beneath a single OIDC scope belonging to a vault cluster, matching the router map that resolves them."
 - added `r.routes-exported-as-default` (MUST): "Each route module MUST expose its class as the module's default export, because the Ember resolver locates route classes by file path and default export rather than by named import; OidcScopeDetailsRoute is the default export of details.js and OidcScopeEditRoute is the default export of edit.js."
 
+### third-party-openbao-ui-app-routes-vault-cluster-policies
+
+- intent: "" -> "The context exists so the policy list and policy create routes of the OpenBao UI can be described and reasoned about as one unit: both routes derive their behavior from a single `policyType()` lookup on the `vault.cluster.policies` params, both treat only the `acl` type as a first-class supported type, and both share controller-facing setup and reset semantics. Documenting them together keeps the type dispatch, pagination, transition guards, and cleanup contract visible as a whole rather than split across two files."
+- added `r.create-acl-only-record` (MUST): "The create route's model hook must create a new `policy/<policyType>` store record only when the policy type is `acl`; for any other type it must instead transition to `vault.cluster.policies` with that policy type."
+- added `r.create-cleanup-on-exit` (MUST): "The create route's `resetController` must invoke the controller's optional `cleanupModel` method when the route is exiting, after delegating to the superclass implementation."
+- added `r.create-controller-policy-type` (MUST): "The create route's `setupController` must call the superclass implementation and then set `policyType` on the controller to the resolved policy type."
+- added `r.create-dirty-transition-guard` (MUST): "The create route's `willTransition` action must allow the transition when there is no current model or the model has no dirty attributes, and when the model has dirty attributes must show a confirmation reading 'You have unsaved changes. Navigating away will discard these changes. Are you sure you want to discard your changes?', returning true on confirmation and aborting the transition with `transition.abort()` otherwise."
+- added `r.index-404-tolerance` (MUST): "A 404 from the store query must resolve to an empty array when the policy type is not `acl`, and must otherwise be rethrown, because ACL policies can never be empty while other policy types may legitimately return 404."
+- added `r.index-empty-model-for-non-acl` (MUST): "The index route must return an empty model when the policy type is not `acl`, using `shouldReturnEmptyModel(policyType)` which is true for every type other than `acl`, and skip the store query entirely in that case."
+- added `r.index-lazy-paginated-query` (MUST): "For ACL policies the index route must load records with `store.lazyPaginatedQuery('policy/<type>')`, passing `page`, `pageFilter`, and `responsePath: 'data.keys'` from the route params."
+- added `r.index-refresh-on-paging-params` (MUST): "The index route must declare `page` and `pageFilter` query params with `refreshModel: true`, so changing either param re-runs the model hook and re-queries the store."
+- added `r.index-reload-action` (MUST): "The index route's `reload` action must clear all store datasets and then call `refresh()` so the list is rebuilt against fresh server data."
+- added `r.index-reset-controller-on-exit` (MUST): "The index route's `resetController` must clear `pageFilter` to null and `filter` to the empty string when the route is exiting, after delegating to the superclass implementation."
+- added `r.index-setup-controller-properties` (MUST): "The index route's `setupController` must set `model`, `filter` (from `pageFilter`, defaulting to empty string), `page` (from `model.meta.currentPage`, defaulting to 1), and `policyType`; when the model is falsy it must instead set `model` to null together with `policyType`."
+- added `r.index-transition-dataset-reset` (MUST): "The index route's `willTransition` action must scroll the window to the top and, when the transition target is not this route, call `store.clearAllDatasets()`; it must return true so the transition proceeds."
+- added `r.policy-type-from-route-params` (MUST): "Both route modules must resolve the active policy type by reading the `type` parameter of the `vault.cluster.policies` route via `paramsFor('vault.cluster.policies').type`, so that the list and create routes agree on which policy family is being viewed."
+
+### third-party-openbao-ui-app-routes-vault-cluster-policy
+
+- intent: "" -> "The context exists so the generated specification records the observable navigation, data-loading, and unsaved-change behavior of the OpenBao policy UI routes without depending on the surrounding Ember application code. It describes what the routes must do: which transitions they force, which Ember Data records they fetch, what they set on the controller, and when they protect the user from losing dirty form state."
+- added `r.policy-edit-guards-dirty-transition` (MUST): "The policy edit route must extend the show route and, in its willTransition action, abort the pending transition and return false when the current model has dirty attributes and the user declines the unsaved-changes confirmation; it must allow the transition when there is no model, the model is clean, or the user confirms."
+- added `r.policy-index-redirects-to-acl-list` (MUST): "The policy index route must redirect on beforeModel to the vault.cluster.policies route passing 'acl' as the model, so that visiting the bare policy path always lands on the ACL policy list."
+- added `r.policy-show-cleanup-on-exit` (MUST): "When the show route is exited, resetController must call cleanupModel on the controller if that method is present, so policy state is released on navigation away."
+- added `r.policy-show-derives-type-from-parent-params` (MUST): "The policy show route must derive the active policy type by reading the type param of the parent vault.cluster.policy route, and use that value for all type-dependent behavior and record lookup."
+- added `r.policy-show-loads-policy-and-capabilities` (MUST): "The show route model hook must return a hash that resolves two records concurrently: the policy record addressed as policy/<type> with the policy_name param as id, and the capabilities record addressed as sys/policies/<type>/<policy_name>."
+- added `r.policy-show-populates-controller` (MUST): "The show route setupController hook must set the controller's model to the resolved policy record, capabilities to the resolved capabilities record, and policyType to the derived policy type."
+- added `r.policy-show-redirects-root-acl` (MUST): "When the derived policy type is 'acl' and the policy_name param is 'root', the show route must not render the detail view and must transition instead to the vault.cluster.policies route with 'acl'."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5511,6 +5539,8 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-routes-vault-cluster-access-oidc-scopes-scope-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-oidc-scopes-scope-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-routes-vault-cluster-policies-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-ui-app-routes-vault-cluster-policy-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-routes-vault-cluster-policies-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-routes-vault-cluster-policies-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-routes-vault-cluster-policy-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-routes-vault-cluster-policy-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
