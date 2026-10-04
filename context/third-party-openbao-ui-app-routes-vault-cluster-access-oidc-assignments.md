@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so that the OIDC assignment screens have routable, store-backed data: a list view, a create view seeded with an empty record, and a detail view keyed by assignment name. Splitting the three entry points keeps the list, create, and edit navigation paths independent while sharing the same Ember Data model type and store service.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

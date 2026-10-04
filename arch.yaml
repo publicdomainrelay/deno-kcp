@@ -66734,6 +66734,9 @@ system_contexts:
   - third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/create.js
   - third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/index.js
   codeRefIndex:
+  - class:3a7c98f0a960cf6cc48f7f73a911801a OidcAssignmentsRoute@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/index.js:9
+  - class:777b186517ed0b6920126257661d030d OidcAssignmentRoute@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/assignment.js:9
+  - class:98ee8460e12232222fe272cf52448086 OidcAssignmentsCreateRoute@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/create.js:9
   - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/assignment.js
     assignment.js@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/assignment.js
   - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/create.js
@@ -66741,7 +66744,54 @@ system_contexts:
   - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/index.js
     index.js@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/index.js
   id: sc.third-party-openbao-ui-app-routes-vault-cluster-access-oidc-assignments
+  intent: 'The context exists so that the OIDC assignment screens have routable, store-backed
+    data: a list view, a create view seeded with an empty record, and a detail view
+    keyed by assignment name. Splitting the three entry points keeps the list, create,
+    and edit navigation paths independent while sharing the same Ember Data model
+    type and store service.'
   name: third-party-openbao-ui-app-routes-vault-cluster-access-oidc-assignments
+  requirements:
+  - codeRefs:
+    - class:777b186517ed0b6920126257661d030d
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/assignment.js
+    id: r.assignment-detail-lookup-by-name
+    level: MUST
+    text: The assignment detail route must resolve its model by calling `this.store.findRecord('oidc/assignment',
+      name)` with the dynamic `name` route parameter, so the loaded record is keyed
+      by the assignment name from the URL segment.
+  - codeRefs:
+    - class:98ee8460e12232222fe272cf52448086
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/create.js
+    id: r.assignments-create-unsaved-record
+    level: MUST
+    text: The assignment creation route must return a new unsaved record from `this.store.createRecord('oidc/assignment')`,
+      so the create view edits a local record that is not persisted until saved.
+  - codeRefs:
+    - class:3a7c98f0a960cf6cc48f7f73a911801a
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/index.js
+    id: r.assignments-list-query-tolerates-404
+    level: MUST
+    text: The assignments list route must load its model with `this.store.query('oidc/assignment',
+      {})` and, when the request rejects with `err.httpStatus === 404`, must resolve
+      to an empty array instead; any other rejection must be rethrown so it surfaces
+      as a route error.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/assignment.js
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/create.js
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/index.js
+    id: r.single-model-type
+    level: MUST
+    text: All three routes must address the same Ember Data model type, the string
+      `'oidc/assignment'`, for the detail, list, and create cases.
+  - codeRefs:
+    - class:3a7c98f0a960cf6cc48f7f73a911801a
+    - class:777b186517ed0b6920126257661d030d
+    - class:98ee8460e12232222fe272cf52448086
+    id: r.store-service-injection
+    level: MUST
+    text: Each of the three routes must inject the Ember Data store as `this.store`
+      and use only that service for record lookup, query, and creation, keeping the
+      routes free of direct backend calls.
   upstream: self
 - code:
   - third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/assignment/details.js

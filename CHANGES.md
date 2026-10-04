@@ -4988,6 +4988,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.swallow-query-error` (MUST): "When the oidc/client query rejects, the hook must catch the error and swallow it without rethrowing or transitioning, so the 404 the adapter raises for an empty client collection leaves the user on the index route that shows the first-time configuration call to action."
 - added `r.transition-to-clients-on-success` (MUST): "When the oidc/client query resolves, the hook must call router.transitionTo with the route name vault.cluster.access.oidc.clients, sending the user to the client list instead of the OIDC index page."
 
+### third-party-openbao-ui-app-routes-vault-cluster-access-oidc-assignments
+
+- intent: "" -> "The context exists so that the OIDC assignment screens have routable, store-backed data: a list view, a create view seeded with an empty record, and a detail view keyed by assignment name. Splitting the three entry points keeps the list, create, and edit navigation paths independent while sharing the same Ember Data model type and store service."
+- added `r.assignment-detail-lookup-by-name` (MUST): "The assignment detail route must resolve its model by calling `this.store.findRecord('oidc/assignment', name)` with the dynamic `name` route parameter, so the loaded record is keyed by the assignment name from the URL segment."
+- added `r.assignments-create-unsaved-record` (MUST): "The assignment creation route must return a new unsaved record from `this.store.createRecord('oidc/assignment')`, so the create view edits a local record that is not persisted until saved."
+- added `r.assignments-list-query-tolerates-404` (MUST): "The assignments list route must load its model with `this.store.query('oidc/assignment', {})` and, when the request rejects with `err.httpStatus === 404`, must resolve to an empty array instead; any other rejection must be rethrown so it surfaces as a route error."
+- added `r.single-model-type` (MUST): "All three routes must address the same Ember Data model type, the string `'oidc/assignment'`, for the detail, list, and create cases."
+- added `r.store-service-injection` (MUST): "Each of the three routes must inject the Ember Data store as `this.store` and use only that service for record lookup, query, and creation, keeping the routes free of direct backend calls."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5397,7 +5406,9 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-routes-vault-cluster-access-mfa-methods-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-mfa-methods-method-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-namespaces-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-routes-vault-cluster-access-oidc-assignments-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-routes-vault-cluster-access-oidc-assignments-assignment-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-routes-vault-cluster-access-oidc-assignments-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-routes-vault-cluster-access-oidc-assignments-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-oidc-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
