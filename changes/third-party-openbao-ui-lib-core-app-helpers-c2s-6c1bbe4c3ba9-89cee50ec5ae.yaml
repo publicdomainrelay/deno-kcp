@@ -10,5 +10,42 @@ spec:
   systemContext: third-party-openbao-ui-lib-core-app-helpers
   toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
 status:
-  message: the agent is summarizing third-party-openbao-ui-lib-core-app-helpers
-  phase: Running
+  agentLog: '...irteen files under third_party/openbao/ui/lib/core/app/helpers that
+    exist only to re-export bindings from the matching core/helpers modules (the addon
+    implementations live in third_party/openbao/ui/lib/core/addon/helpers). Each file
+    is a one-line shim such as `export { default, formatNumber } from ''core/helpers/format-number'';`,
+    and some export additional named symbols (changelogUrlFor, clusterStates with
+    CLUSTER_STATES, formatNumber, isActiveRoute, messageTypes with MESSAGE_TYPES,
+    setFlashMessage). The underlying helpers are Ember `helper()` / `Helper` wrappers:
+    changelog-url-for builds a GitHub CHANGELOG anchor for a version; cluster-states
+    maps replication and cluster state names to a glyph/isOk/isSyncing display record
+    with a null-ish default; date-format wraps date-fns format/parseISO, handling
+    ISO strings, 10-digit epoch seconds, pre-formatted values and an optional local
+    timezone suffix; format-duration converts a seconds count into a date-fns human
+    duration string with a nullable zero mode; format-number applies Intl.NumberFormat
+    to numbers only; img-path rewrites a leading `~/` to the app rootURL images directory;
+    is-active-route is a class helper that compares the current route or URL against
+    a name, an array of names, or a route plus model using exact or prefix comparison
+    and discards query params; loose-equal is a loose `==` comparison with an explicit
+    0-versus-empty-string exclusion; message-types maps type names to Bulma class
+    and glyph metadata and asserts on unknown types; options-for-backend holds per-backend
+    display tables (aws, ssh, database, keymgmt, transform, transit, plus a PKI engine
+    variant and a default display record) and resolves the tab by name or modelPrefix;
+    path-or-array returns an array unchanged or reads a path off a target object;
+    sanitized-html runs DOMPurify sanitize before htmlSafe, falling back to the raw
+    string; set-flash-message returns a closure that calls the flash-messages service
+    with the given type defaulting to success.'
+  message: wrote 14 requirement(s) and 0 interface(s) for third-party-openbao-ui-lib-core-app-helpers;
+    interface changelogUrlFor is not in the observed facts; dropped; interface CLUSTER_STATES
+    is not in the observed facts; dropped; interface clusterStates is not in the observed
+    facts; dropped; interface dateFormat is not in the observed facts; dropped; interface
+    duration is not in the observed facts; dropped; interface formatNumber is not
+    in the observed facts; dropped; interface default is not in the observed facts;
+    dropped; interface IsActiveRoute is not in the observed facts; dropped; interface
+    looseEqual is not in the observed facts; dropped; interface MESSAGE_TYPES is not
+    in the observed facts; dropped; interface messageTypes is not in the observed
+    facts; dropped; interface optionsForBackend is not in the observed facts; dropped;
+    interface pathOrArray is not in the observed facts; dropped; interface default
+    is not in the observed facts; dropped; interface setFlashMessage is not in the
+    observed facts; dropped
+  phase: Succeeded
