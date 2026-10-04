@@ -9,5 +9,7 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/ui/app/serializers/database/connection.js` file connection.js (third_party/openbao/ui/app/serializers/database/connection.js)
+- `file:third_party/openbao/ui/app/serializers/database/credential.js` file credential.js (third_party/openbao/ui/app/serializers/database/credential.js)
+- `file:third_party/openbao/ui/app/serializers/database/role.js` file role.js (third_party/openbao/ui/app/serializers/database/role.js)
 <!-- SPECD_MANAGED_END -->
