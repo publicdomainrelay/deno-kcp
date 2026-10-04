@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists to describe the reusable presentation helpers of the OpenBao core UI addon: the exact exported names, argument shapes, and observable behavior of each helper, so that the addon helper surface can be identified, re-exported by the host app, and depended on without reading each file. It covers the boundary between the addon helper implementations and their app-level re-exports, and records the fallback and validation behavior callers rely on.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

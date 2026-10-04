@@ -70798,6 +70798,7 @@ system_contexts:
   - third_party/openbao/ui/lib/core/addon/helpers/sanitized-html.js
   - third_party/openbao/ui/lib/core/addon/helpers/set-flash-message.js
   codeRefIndex:
+  - class:4bff5cd02be347727edd6747197d3e86 IsActiveRoute@third_party/openbao/ui/lib/core/addon/helpers/is-active-route.js:14
   - file:third_party/openbao/ui/lib/core/addon/helpers/changelog-url-for.js changelog-url-for.js@third_party/openbao/ui/lib/core/addon/helpers/changelog-url-for.js
   - file:third_party/openbao/ui/lib/core/addon/helpers/cluster-states.js cluster-states.js@third_party/openbao/ui/lib/core/addon/helpers/cluster-states.js
   - file:third_party/openbao/ui/lib/core/addon/helpers/date-format.js date-format.js@third_party/openbao/ui/lib/core/addon/helpers/date-format.js
@@ -70811,8 +70812,205 @@ system_contexts:
   - file:third_party/openbao/ui/lib/core/addon/helpers/path-or-array.js path-or-array.js@third_party/openbao/ui/lib/core/addon/helpers/path-or-array.js
   - file:third_party/openbao/ui/lib/core/addon/helpers/sanitized-html.js sanitized-html.js@third_party/openbao/ui/lib/core/addon/helpers/sanitized-html.js
   - file:third_party/openbao/ui/lib/core/addon/helpers/set-flash-message.js set-flash-message.js@third_party/openbao/ui/lib/core/addon/helpers/set-flash-message.js
+  - function:0ed54928e98165f5569f8e7e4a8d8618 duration@third_party/openbao/ui/lib/core/addon/helpers/format-duration.js:9
+  - function:0f9b4daae660a050d6b1a616e93378e2 messageTypes@third_party/openbao/ui/lib/core/addon/helpers/message-types.js:47
+  - function:1924a9d402d2cc3d364954ac0465403c optionsForBackend@third_party/openbao/ui/lib/core/addon/helpers/options-for-backend.js:185
+  - function:1b71250777393773f2ec218358bfb1db formatNumber@third_party/openbao/ui/lib/core/addon/helpers/format-number.js:8
+  - function:4deead1127cee08c792d0b9ec06040d0 pathOrArray@third_party/openbao/ui/lib/core/addon/helpers/path-or-array.js:8
+  - function:70a491b84c425d3aa87653f09de5e8d5 clusterStates@third_party/openbao/ui/lib/core/addon/helpers/cluster-states.js:60
+  - function:7a06da860510d2f271f3b8104f598ca4 looseEqual@third_party/openbao/ui/lib/core/addon/helpers/loose-equal.js:14
+  - function:7c9260af25454db05188b125e74bbfbe sanitizedHtml@third_party/openbao/ui/lib/core/addon/helpers/sanitized-html.js:6
+  - function:93e58c824f45eccca4d22f3e015095f8 changelogUrlFor@third_party/openbao/ui/lib/core/addon/helpers/changelog-url-for.js:21
+  - function:f86a6ffae739daf89bbe53ae1ec4115d dateFormat@third_party/openbao/ui/lib/core/addon/helpers/date-format.js:9
   id: sc.third-party-openbao-ui-lib-core-addon-helpers
+  intent: 'The context exists to describe the reusable presentation helpers of the
+    OpenBao core UI addon: the exact exported names, argument shapes, and observable
+    behavior of each helper, so that the addon helper surface can be identified, re-exported
+    by the host app, and depended on without reading each file. It covers the boundary
+    between the addon helper implementations and their app-level re-exports, and records
+    the fallback and validation behavior callers rely on.'
+  interfaces:
+  - file: third_party/openbao/ui/lib/core/addon/helpers/is-active-route.js
+    kind: class
+    name: IsActiveRoute
+    signature: class IsActiveRoute
+  - file: third_party/openbao/ui/lib/core/addon/helpers/changelog-url-for.js
+    kind: function
+    name: changelogUrlFor
+    signature: changelogUrlFor([version])
+  - file: third_party/openbao/ui/lib/core/addon/helpers/cluster-states.js
+    kind: function
+    name: clusterStates
+    signature: clusterStates([state])
+  - file: third_party/openbao/ui/lib/core/addon/helpers/date-format.js
+    kind: function
+    name: dateFormat
+    signature: dateFormat([date, style], { isFormatted = false, withTimeZone = false
+      })
+  - file: third_party/openbao/ui/lib/core/addon/helpers/format-duration.js
+    kind: function
+    name: duration
+    signature: duration([time], { nullable = false })
+  - file: third_party/openbao/ui/lib/core/addon/helpers/format-number.js
+    kind: function
+    name: formatNumber
+    signature: formatNumber([value])
+  - file: third_party/openbao/ui/lib/core/addon/helpers/loose-equal.js
+    kind: function
+    name: looseEqual
+    signature: looseEqual([a, b])
+  - file: third_party/openbao/ui/lib/core/addon/helpers/message-types.js
+    kind: function
+    name: messageTypes
+    signature: messageTypes([type])
+  - file: third_party/openbao/ui/lib/core/addon/helpers/options-for-backend.js
+    kind: function
+    name: optionsForBackend
+    signature: optionsForBackend(backend, tab, isEngine)
+  - file: third_party/openbao/ui/lib/core/addon/helpers/path-or-array.js
+    kind: function
+    name: pathOrArray
+    signature: pathOrArray([maybeArray, target])
+  - file: third_party/openbao/ui/lib/core/addon/helpers/sanitized-html.js
+    kind: function
+    name: sanitizedHtml
+    signature: sanitizedHtml([htmlString])
   name: third-party-openbao-ui-lib-core-addon-helpers
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/addon/helpers/changelog-url-for.js
+    - file:third_party/openbao/ui/lib/core/addon/helpers/cluster-states.js
+    id: r.app-helper-reexport
+    level: SHOULD
+    text: Each addon helper must have a matching re-export file under lib/core/app/helpers
+      that re-exports the addon implementation, which is how changelog-url-for and
+      cluster-states are surfaced to the host app; new helpers in this context should
+      follow the same two-file addon-plus-app-reexport pattern.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/addon/helpers/changelog-url-for.js
+    - function:93e58c824f45eccca4d22f3e015095f8
+    id: r.changelog-url
+    level: MUST
+    text: changelogUrlFor takes a one-element array destructured as version and returns
+      the OpenBao CHANGELOG GitHub anchor base URL 'https://www.github.com/openbao/openbao/blob/main/CHANGELOG.md#';
+      when version is absent it returns that base URL unchanged, and when a version
+      is given it strips any '+suffix' after splitting on '+', removes the periods,
+      and appends the resulting version number only when that number compares greater
+      than or equal to 143, otherwise it still returns the base URL. It must also
+      return the base URL if the version manipulation throws, logging the error and
+      the version to the console.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/addon/helpers/cluster-states.js
+    - function:70a491b84c425d3aa87653f09de5e8d5
+    id: r.cluster-state-display
+    level: MUST
+    text: 'clusterStates takes a one-element array destructured as state and looks
+      the state up in the CLUSTER_STATES table, returning the matching entry; when
+      the state is not present in the table it returns the default display object
+      { glyph: '''', isOk: null, isSyncing: null } so callers always get a renderable
+      object.'
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/addon/helpers/date-format.js
+    - function:f86a6ffae739daf89bbe53ae1ec4115d
+    id: r.date-format
+    level: MUST
+    text: dateFormat takes a two-element array destructured as date and style plus
+      options isFormatted and withTimeZone, both defaulting to false. When isFormatted
+      is true it formats new Date(date) with style directly and returns that; otherwise
+      it parses a string date with parseISO, returns undefined for a falsy date, treats
+      a numeric value whose string length is 10 as epoch seconds by multiplying by
+      1000 into a Date, and formats the result with style. It appends the browser-locale
+      short timezone name (read from toLocaleTimeString with timeZoneName 'short')
+      only when withTimeZone is true, and falls back to an empty timezone string if
+      reading the locale timezone throws.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/addon/helpers/format-duration.js
+    - function:0ed54928e98165f5569f8e7e4a8d8618
+    id: r.format-duration
+    level: MUST
+    text: duration takes a one-element array destructured as time plus an option nullable
+      defaulting to false, and interprets time as a count of seconds. When nullable
+      is true and time is the string '0' or the number 0 it returns null instead of
+      a zero-valued duration. It parses time with parseInt base 10, returns the original
+      input unchanged when the parse yields NaN, and otherwise converts the seconds
+      to milliseconds and renders them with formatDuration over intervalToDuration
+      from 0.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/addon/helpers/format-number.js
+    - function:1b71250777393773f2ec218358bfb1db
+    id: r.format-number
+    level: MUST
+    text: formatNumber takes a one-element array destructured as value; when value
+      is not a number it returns the value unchanged, and when it is a number it returns
+      the value formatted through Intl.NumberFormat so the digits follow the current
+      locale's grouping conventions.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/addon/helpers/img-path.js
+    id: r.img-path-helper
+    level: MUST
+    text: The img-path helper must be exported from the addon helpers directory so
+      templates resolve image asset paths through the helper instead of hard-coding
+      asset URLs.
+  - codeRefs:
+    - class:4bff5cd02be347727edd6747197d3e86
+    - file:third_party/openbao/ui/lib/core/addon/helpers/is-active-route.js
+    id: r.is-active-route-class
+    level: MUST
+    text: The is-active-route helper is implemented as the exported class IsActiveRoute
+      rather than a plain function, so that it can hold route-aware state and be instantiated
+      by the Ember helper machinery; the class must remain the exported helper form
+      for this file.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/addon/helpers/loose-equal.js
+    - function:7a06da860510d2f271f3b8104f598ca4
+    id: r.loose-equal
+    level: MUST
+    text: looseEqual takes a two-element array destructured as a and b and returns
+      the result of comparing the two values loosely, so templates can test equality
+      between values of differing types without strict-identity failures.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/addon/helpers/message-types.js
+    - function:0f9b4daae660a050d6b1a616e93378e2
+    id: r.message-types
+    level: MUST
+    text: messageTypes takes a one-element array destructured as type and returns
+      the MESSAGE_TYPES entry for that type; when the type is not a key of MESSAGE_TYPES
+      it must raise an assertion that the type is not a valid message type, so components
+      such as alert-banner and alert-inline fail loudly on an unknown alert type instead
+      of rendering undefined.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/addon/helpers/options-for-backend.js
+    - function:1924a9d402d2cc3d364954ac0465403c
+    id: r.options-for-backend
+    level: MUST
+    text: optionsForBackend takes three positional arguments, backend, tab and isEngine,
+      and returns the option set for that backend scoped to the selected tab and to
+      whether the backend is an engine, giving templates a single call that resolves
+      the backend's available UI options.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/addon/helpers/path-or-array.js
+    - function:4deead1127cee08c792d0b9ec06040d0
+    id: r.path-or-array
+    level: MUST
+    text: pathOrArray takes a two-element array destructured as maybeArray and target
+      and returns the path derived from target, treating an array argument as a multi-segment
+      path so templates can pass either a single path or an array of path parts to
+      the same helper.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/addon/helpers/sanitized-html.js
+    - function:7c9260af25454db05188b125e74bbfbe
+    id: r.sanitized-html
+    level: MUST
+    text: sanitizedHtml takes a one-element array destructured as htmlString and returns
+      sanitized markup for rendering, so templates can emit server-supplied HTML without
+      trusting it verbatim.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/addon/helpers/set-flash-message.js
+    id: r.set-flash-message-helper
+    level: MUST
+    text: The set-flash-message helper must be exported from the addon helpers directory
+      so templates can push a flash message through the helper rather than reaching
+      into the flash service directly.
   upstream: self
 - code:
   - third_party/openbao/ui/lib/core/addon/modifiers/code-mirror.js
