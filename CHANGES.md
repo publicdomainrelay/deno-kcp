@@ -4166,6 +4166,16 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.exports-cluster-nav-component` (MUST): "The file third_party/openbao/ui/app/components/sidebar/nav/cluster.js must export exactly one default class, SidebarNavClusterComponent, which extends the Component base class imported from @glimmer/component."
 - added `r.injects-four-services` (MUST): "SidebarNavClusterComponent must declare four Ember service injections using the @service decorator: currentCluster, version, auth, and namespace. version, auth, and namespace are declared but not read anywhere in the class body."
 
+### third-party-openbao-ui-app-components-splash-page
+
+- intent: "" -> "This context documents the vendored splash-page component trio in the OpenBao UI that this repository carries as third-party source. It exists so the leaf components can be reasoned about, replaced or re-synced from upstream without rereading the files: the contract here is deliberately minimal, and the value of the spec is in pinning down that minimality (tagless, default-export-only, no injected state, MPL-2.0 header) so that any divergence introduced later is detectable as a real change rather than mistaken for the components' normal form. It also marks the boundary: splash-page.js, which does hold services and a getter, is not part of this context and must not be described from here."
+- added `r.default-export-only` (MUST): "Each module must expose exactly one default export and no named exports, so consumers resolve the component through the module's default binding and the Ember resolver can locate it by file path alone."
+- added `r.import-source` (MUST): "Each module must obtain its Component base by importing the default binding from '@ember/component', matching the classic (non-Ember-Octane) component style used by the surrounding vendored OpenBao UI."
+- added `r.license-header` (MUST): "Each vendored file must retain the HashiCorp, Inc. copyright notice and the SPDX-License-Identifier: MPL-2.0 comment at the top of the file, since the contents are copied third-party source rather than code authored in this repository."
+- added `r.no-injected-state` (MUST): "These leaf components must not declare service injections, computed getters, arguments, lifecycle hooks or internal state; any state the splash page needs is held by the parent splash-page.js component and passed down, keeping the leaves stateless."
+- added `r.tagless-components` (MUST): "Each of the three modules must default-export an Ember component created with Component.extend and must set tagName to the empty string, so the component renders its template without emitting a wrapping DOM element."
+- added `r.upstream-parity` (SHOULD): "The three files should stay identical to one another except for their file name, so that a future re-sync from upstream OpenBao can be applied as a whole and any asymmetry between header, content and footer is visible as an intentional local change."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4491,4 +4501,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-components-sidebar-nav-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-components-sidebar-nav-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-components-splash-page-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-components-splash-page-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
