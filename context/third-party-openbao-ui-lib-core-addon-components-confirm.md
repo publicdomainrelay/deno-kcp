@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to pin down the public contract of the `confirm/message` component so that callers and the parent `Confirm` component can rely on a stable attribute surface: which attributes are required, which have defaults, how visibility is computed, and what happens on confirm. It also records that the component is a legacy Ember component with default no-op callbacks and no wrapping DOM element, which matters to anyone replacing or reimplementing it.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

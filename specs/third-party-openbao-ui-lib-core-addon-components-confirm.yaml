@@ -6,5 +6,62 @@ metadata:
   name: third-party-openbao-ui-lib-core-addon-components-confirm
   namespace: default
 spec:
+  intent: 'This context exists to pin down the public contract of the `confirm/message`
+    component so that callers and the parent `Confirm` component can rely on a stable
+    attribute surface: which attributes are required, which have defaults, how visibility
+    is computed, and what happens on confirm. It also records that the component is
+    a legacy Ember component with default no-op callbacks and no wrapping DOM element,
+    which matters to anyone replacing or reimplementing it.'
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/addon/components/confirm/message.js
+    id: r.attribute-surface
+    level: MUST
+    text: The component must accept the attributes `id`, `onConfirm`, `triggerText`,
+      `title`, `message`, `confirmButtonText` and `cancelButtonText`; `id` and `onConfirm`
+      default to null and are supplied by the caller, and the rest are optional with
+      built-in defaults.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/addon/components/confirm/message.js
+    id: r.callback-defaults
+    level: MUST
+    text: The callbacks `onCancel`, `onConfirm` and `resetTrigger` must each default
+      to an empty no-op function so rendering the component never throws when the
+      parent supplies nothing.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/addon/components/confirm/message.js
+    id: r.confirm-flow
+    level: MUST
+    text: The `actions.onConfirm` handler must call the caller-supplied `onConfirm`
+      callback and then call `resetTrigger`, so that confirming runs the action and
+      closes the confirmation message.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/addon/components/confirm/message.js
+    id: r.default-text-values
+    level: MUST
+    text: 'When a text attribute is not supplied the component must fall back to these
+      exact defaults: `triggerText` is ''Delete'', `title` is ''Delete this?'', `message`
+      is ''You will not be able to recover it later.'', `confirmButtonText` is ''Delete'',
+      and `cancelButtonText` is ''Cancel''.'
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/addon/components/confirm/message.js
+    id: r.render-without-wrapper
+    level: SHOULD
+    text: 'The component should render with `tagName: ''''` and the `../../templates/components/confirm/message`
+      layout, so it adds no wrapping DOM element of its own.'
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/addon/components/confirm/message.js
+    id: r.usage-constraint
+    level: MUST
+    text: The component must only be used as a child of a `Confirm` component, which
+      is what supplies `renderedTrigger` and the `resetTrigger` action that drive
+      visibility and dismissal.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/addon/components/confirm/message.js
+    id: r.visibility-binding
+    level: MUST
+    text: The `showConfirm` computed property must depend on both `id` and `renderedTrigger`
+      and must evaluate to true only when `renderedTrigger` is strictly equal to `id`,
+      so a single parent `Confirm` can bind one message to one trigger.
   upstream: self

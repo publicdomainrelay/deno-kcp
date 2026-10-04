@@ -5348,6 +5348,17 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.null-means-no-match` (SHOULD): "A null value in either mapping table must be read as an explicit absence of a Flight counterpart, not as a missing entry, so callers that look up an icon can tell a known unmatched icon apart from an unknown name."
 - added `r.structure-icon-map` (MUST): "icon-mappings.js must export structureIconMap covering the complete Structure icon set, keyed by Structure icon name with the Flight counterpart as value, and null where no direct correlation to a Flight icon exists."
 
+### third-party-openbao-ui-lib-core-addon-components-confirm
+
+- intent: "" -> "This context exists to pin down the public contract of the `confirm/message` component so that callers and the parent `Confirm` component can rely on a stable attribute surface: which attributes are required, which have defaults, how visibility is computed, and what happens on confirm. It also records that the component is a legacy Ember component with default no-op callbacks and no wrapping DOM element, which matters to anyone replacing or reimplementing it."
+- added `r.attribute-surface` (MUST): "The component must accept the attributes `id`, `onConfirm`, `triggerText`, `title`, `message`, `confirmButtonText` and `cancelButtonText`; `id` and `onConfirm` default to null and are supplied by the caller, and the rest are optional with built-in defaults."
+- added `r.callback-defaults` (MUST): "The callbacks `onCancel`, `onConfirm` and `resetTrigger` must each default to an empty no-op function so rendering the component never throws when the parent supplies nothing."
+- added `r.confirm-flow` (MUST): "The `actions.onConfirm` handler must call the caller-supplied `onConfirm` callback and then call `resetTrigger`, so that confirming runs the action and closes the confirmation message."
+- added `r.default-text-values` (MUST): "When a text attribute is not supplied the component must fall back to these exact defaults: `triggerText` is 'Delete', `title` is 'Delete this?', `message` is 'You will not be able to recover it later.', `confirmButtonText` is 'Delete', and `cancelButtonText` is 'Cancel'."
+- added `r.render-without-wrapper` (SHOULD): "The component should render with `tagName: ''` and the `../../templates/components/confirm/message` layout, so it adds no wrapping DOM element of its own."
+- added `r.usage-constraint` (MUST): "The component must only be used as a child of a `Confirm` component, which is what supplies `renderedTrigger` and the `resetTrigger` action that drive visibility and dismissal."
+- added `r.visibility-binding` (MUST): "The `showConfirm` computed property must depend on both `id` and `renderedTrigger` and must evaluate to true only when `renderedTrigger` is strictly equal to `id`, so a single parent `Confirm` can bind one message to one trigger."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
