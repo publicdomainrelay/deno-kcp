@@ -1,0 +1,29 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-sdk-helper-kdf-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-sdk-helper-kdf
+  toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
+status:
+  agentLog: 'The kdf package under third_party/openbao/sdk/helper/kdf holds the vendored
+    OpenBao SDK key-derivation helper. It defines PRF, a function type mapping a key
+    and an input block to key material, and two functions built on it: CounterMode,
+    a NIST SP 800-108 style counter-mode KDF that expands a key plus context into
+    an arbitrary number of bits by iterating a big-endian uint32 counter in the first
+    four bytes of each PRF input block and repeating the requested bit count in the
+    last four, and HMACSHA256PRF, a PRF implemented with HMAC-SHA256. All logic lives
+    in kdf.go; kdf_test.go pins CounterMode against a Python-generated 256-bit vector
+    and checks output length and key non-containment, and pins HMACSHA256PRF against
+    a Python-generated digest.'
+  message: wrote 9 requirement(s) and 3 interface(s) for third-party-openbao-sdk-helper-kdf;
+    the spec already said this
+  phase: Succeeded
+superseded:
+- message: wrote 9 requirement(s) and 3 interface(s) for third-party-openbao-sdk-helper-kdf
+  name: third-party-openbao-sdk-helper-kdf-c2s-6c1bbe4c3ba9-89cee50ec5ae
+  phase: Succeeded
