@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so the database secrets engine can be described and regenerated as one unit: it is the part of the vendored OpenBao tree responsible for configuring database connections, issuing dynamic and static credentials through database plugins, rotating root and static credentials, and revoking leases. It also carries the plugin-version abstraction that lets a single backend speak to both the legacy v4 database plugin interface and the v5 request/response interface, plus the mock plugins the test suite relies on.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

@@ -624,6 +624,33 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.run-returns-nil-on-success` (MUST): "Run must return nil when construction and serving complete without error."
 - added `r.run-serves-dbplugin` (MUST): "Run must assert the constructed backend to dbplugin.Database and pass it to dbplugin.Serve so the plugin exposes the database plugin interface over RPC."
 
+### third-party-openbao-internal-builtin-logical-database
+
+- intent: "" -> "The context exists so the database secrets engine can be described and regenerated as one unit: it is the part of the vendored OpenBao tree responsible for configuring database connections, issuing dynamic and static credentials through database plugins, rotating root and static credentials, and revoking leases. It also carries the plugin-version abstraction that lets a single backend speak to both the legacy v4 database plugin interface and the v5 request/response interface, plus the mock plugins the test suite relies on."
+- added `r.backend-constructor` (MUST): "Backend builds a *databaseBackend from a BackendConfig, registering the connection, role, static-role, credential, rotate-credentials and root-rotation paths and their help and field schemas."
+- added `r.client-cert-generator` (SHOULD): "ClientCertificateGenerator produces the client certificate material a database plugin can present when the connection authenticates with TLS client certificates."
+- added `r.close-on-shutdown` (MUST): "CloseIfShutdown closes a plugin instance when the returned error marks the backend as shutting down, so shutdown races do not surface as user-visible errors."
+- added `r.connection-cache` (MUST): "databaseBackend.GetConnection returns a cached dbPluginInstance for a named connection, fetching and decoding the stored config first, while GetConnectionWithConfig builds the instance from a supplied config without a storage read."
+- added `r.connection-eviction` (MUST): "ClearConnection and ClearConnectionId remove and close a cached plugin instance by name or by name plus id so a reconfigured connection is rebuilt on next use."
+- added `r.creds-create-path` (MUST): "The credential creation path checks the requested credential type against the connection's supported types before calling the plugin, returning a lease with the generated username and password."
+- added `r.database-config-fields` (MUST): "DatabaseConfig stores plugin_name, plugin_version, connection_details, allowed_roles, root_credentials_rotate_statements and password_policy, so connection details and the permitted roles are persisted per named connection."
+- added `r.database-config-read` (MUST): "databaseBackend.DatabaseConfig reads the storage key config/<name>, errors when the entry is absent or unreadable, and decodes the entry JSON into a DatabaseConfig."
+- added `r.factory-setup` (MUST): "Factory constructs the database backend from the logical BackendConfig and runs Setup on it, returning the logical.Backend or the setup error."
+- added `r.lease-rollback` (MUST): "The lease rollback handler revokes the database user named in the lease internal data and removes the corresponding role or static-account state, tolerating leases whose credential was already deleted."
+- added `r.mock-v4-plugin` (MUST): "MockDatabaseV4 implements the v4 database plugin surface for tests: Init and Initialize absorb the config and report the saved config, CreateUser, RenewUser, RevokeUser, SetCredentials, GenerateCredentials and RotateRootCredentials drive the legacy statements, and Type and Close identify and shut down the plugin. NewV4 constructs it as an any and RunV4 serves it over the plugin RPC layer with the given API TLS config."
+- added `r.mock-v5-plugin` (MUST): "MockDatabaseV5 implements the v5 database plugin surface for tests: Initialize, NewUser, UpdateUser and DeleteUser consume and return the v5 request and response types, and Type and Close identify and shut down the plugin. New constructs it as an any, RunV5 serves it over the plugin RPC layer, and RunV6Multiplexed serves it over the multiplexed RPC layer."
+- added `r.new-user-password-return` (MUST): "databaseVersionWrapper.NewUser returns the v5 response together with the generated password so the caller can hand the credential to the client without a second plugin call."
+- added `r.plugin-instance-close-idempotent` (MUST): "dbPluginInstance.Close takes the instance lock, returns nil if the instance is already marked closed, otherwise marks it closed and calls Close on the wrapped database plugin exactly once."
+- added `r.role-lookups` (MUST): "databaseBackend.Role and databaseBackend.StaticRole read a role entry and a static-role entry by name from storage and return the decoded roleEntry, keeping the two role kinds on separate storage prefixes."
+- added `r.rotate-root-path` (MUST): "The rotate-root path rotates the connection's root credentials through the plugin and persists the returned connection config, refusing when the connection has no rotation support."
+- added `r.static-account-schedule` (MUST): "staticAccount.NextRotationTime derives the next rotation instant and staticAccount.CredentialTTL derives the credential lifetime, so static credential rotation is scheduled from the stored rotation period and the credential's own TTL."
+- added `r.static-role-custom-statements` (MUST): "The static-role path stores and applies custom rotation and revocation statements for a static account, alongside the generation and registration statements read from the connection config."
+- added `r.supports-credential-type` (MUST): "DatabaseConfig.SupportsCredentialType reads the supported credential types from ConnectionDetails, defaults to supporting only CredentialTypePassword when the plugin did not report any types, and otherwise matches the requested type against the reported list."
+- added `r.update-user-root-flag` (MUST): "databaseVersionWrapper.UpdateUser accepts an isRootUser flag and returns the save-config map from the plugin, so root credential rotation and per-user password change share one code path."
+- added `r.version-coverage-tests` (SHOULD): "The test files exercise both plugin generations through the shared mocks, covering connection configuration, role and static-role handling, credential creation, rotation, rollback and large-scale versioning behavior."
+- added `r.version-wrapper-lifecycle` (MUST): "databaseVersionWrapper reports Type, Close and PluginVersion for the wrapped plugin so the backend can label, shut down and gate features by plugin version without knowing which plugin generation it holds."
+- added `r.version-wrapper-v5-api` (MUST): "databaseVersionWrapper exposes Initialize, NewUser, UpdateUser and DeleteUser in the v5 request/response shapes, translating each request to the underlying plugin version and returning the plugin's v5 response."
+
 ### third-party-openbao-internal-builtin-logical-database-dbplugin
 
 - intent: "" -> "This context exists to verify the gRPC-backed database plugin client/server plumbing exposed by the dbplugin package. It pins the observable contract of a database plugin as seen through PluginFactoryVersion: Init must accept a single-entry configuration map, CreateUser must reject a duplicate display name and return the display name as the username, RenewUser must fail for unknown users and succeed for known ones, and RevokeUser must remove the user so that a later CreateUser with the same name succeeds. It also documents the out-of-process helper pattern in which one test function doubles as the plugin binary main when the go-plugin client execs it."
@@ -638,10 +665,24 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.renew-user-contract` (MUST): "RenewUser must return an error when the username is empty, the expiration is zero, or the username is absent from the users map, and must return nil for a user that exists."
 - added `r.revoke-user-contract` (MUST): "RevokeUser must return an error when the username is empty or unknown, and must delete the username from the users map on success so that a subsequent CreateUser with the same display name succeeds."
 
+### third-party-openbao-internal-builtin-logical-kubernetes
+
+- intent: "" -> "This context exists so the vendored OpenBao Kubernetes secrets engine is described as it actually stands in the tree, rather than as an unexamined third-party directory. The spec pins the engine's single exported constructor, the namespace-selection helper that drives credential scoping, and the file-level responsibilities that the path handlers, client, WAL, and tests divide between them."
+- added `r.check-path` (SHOULD): "The backend exposes a check path that lets a caller verify a role and requested namespace against the configured cluster without issuing a credential."
+- added `r.config-connection` (MUST): "The configuration path persists the Kubernetes API connection settings supplied by the operator, and the client builds the API client used for all Kubernetes calls from that stored configuration."
+- added `r.creds-namespace-authorization` (MUST): "A namespace is authorized for credential issuance when the role lists it explicitly or lists "*", and otherwise, when the role carries a namespace label selector, the namespace's labels are fetched through the Kubernetes client and matched against the compiled label selector; an empty selector with no matching namespace entry denies the request."
+- added `r.creds-namespace-defaulting` (MUST): "Credential issuance validates the requested Kubernetes namespace: when the request omits kubernetes_namespace and the role has a single namespace, that namespace is assigned to the request and accepted; when it is omitted and the role does not, issuance fails with an error stating that 'kubernetes_namespace' is required unless the OpenBao role has a single namespace specified."
+- added `r.engine-tests` (SHOULD): "The engine's backend construction, Kubernetes client, configuration path, credential path, and role path each carry tests that exercise their behavior in the package."
+- added `r.factory-builds-backend` (MUST): "Factory constructs the Kubernetes logical backend, calls Setup with the supplied logical.BackendConfig, and returns the backend or the setup error, so the engine can be mounted as a secrets engine."
+- added `r.role-storage` (MUST): "Roles are written to and read back from logical storage by name, and the stored entry round-trips the role's Kubernetes namespaces and namespace label selector that namespace authorization depends on."
+- added `r.service-account-credentials` (MUST): "Issued credentials are produced by creating Kubernetes service account objects and their associated secrets or tokens against the configured cluster."
+- added `r.single-namespace-detection` (MUST): "roleEntry.HasSingleK8sNamespace reports true only when the role's namespace label selector is empty and exactly one namespace is configured, and that namespace is neither empty nor the wildcard "*"."
+- added `r.wal-rollback` (MUST): "Credential creation records a write-ahead log entry that carries the information needed to roll the created Kubernetes objects back, so interrupted issuance can be cleaned up on recovery."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
 | --- | --- | --- | --- | --- | --- |
-| third-party-openbao-internal-builtin-logical-database-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-builtin-logical-database-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-database-dbplugin-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-builtin-logical-kubernetes-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-builtin-logical-kubernetes-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |

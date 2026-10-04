@@ -17,10 +17,107 @@ codeRefIndex:
 - file:third_party/openbao/internal/builtin/logical/kubernetes/path_roles_test.go
   path_roles_test.go@third_party/openbao/internal/builtin/logical/kubernetes/path_roles_test.go
 - file:third_party/openbao/internal/builtin/logical/kubernetes/wal.go wal.go@third_party/openbao/internal/builtin/logical/kubernetes/wal.go
+- function:04661f0f2644d956bb6f4e77fb890a0e Factory@third_party/openbao/internal/builtin/logical/kubernetes/backend.go:61
+- method:ee01baed1d01f2b3529fd85850c64bf8 roleEntry.HasSingleK8sNamespace@third_party/openbao/internal/builtin/logical/kubernetes/path_roles.go:43
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-builtin-logical-kubernetes
   namespace: default
 spec:
+  intent: This context exists so the vendored OpenBao Kubernetes secrets engine is
+    described as it actually stands in the tree, rather than as an unexamined third-party
+    directory. The spec pins the engine's single exported constructor, the namespace-selection
+    helper that drives credential scoping, and the file-level responsibilities that
+    the path handlers, client, WAL, and tests divide between them.
+  interfaces:
+  - file: third_party/openbao/internal/builtin/logical/kubernetes/backend.go
+    kind: function
+    name: Factory
+    signature: func Factory(ctx context.Context, conf *logical.BackendConfig) (logical.Backend,
+      error)
+  - file: third_party/openbao/internal/builtin/logical/kubernetes/path_roles.go
+    kind: method
+    name: roleEntry.HasSingleK8sNamespace
+    signature: func (r *roleEntry) HasSingleK8sNamespace() bool
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/path_check.go
+    id: r.check-path
+    level: SHOULD
+    text: The backend exposes a check path that lets a caller verify a role and requested
+      namespace against the configured cluster without issuing a credential.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/client.go
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/path_config.go
+    id: r.config-connection
+    level: MUST
+    text: The configuration path persists the Kubernetes API connection settings supplied
+      by the operator, and the client builds the API client used for all Kubernetes
+      calls from that stored configuration.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/path_creds.go
+    id: r.creds-namespace-authorization
+    level: MUST
+    text: A namespace is authorized for credential issuance when the role lists it
+      explicitly or lists "*", and otherwise, when the role carries a namespace label
+      selector, the namespace's labels are fetched through the Kubernetes client and
+      matched against the compiled label selector; an empty selector with no matching
+      namespace entry denies the request.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/path_creds.go
+    id: r.creds-namespace-defaulting
+    level: MUST
+    text: 'Credential issuance validates the requested Kubernetes namespace: when
+      the request omits kubernetes_namespace and the role has a single namespace,
+      that namespace is assigned to the request and accepted; when it is omitted and
+      the role does not, issuance fails with an error stating that ''kubernetes_namespace''
+      is required unless the OpenBao role has a single namespace specified.'
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/backend_test.go
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/client_test.go
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/path_config_test.go
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/path_creds_test.go
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/path_roles_test.go
+    id: r.engine-tests
+    level: SHOULD
+    text: The engine's backend construction, Kubernetes client, configuration path,
+      credential path, and role path each carry tests that exercise their behavior
+      in the package.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/backend.go
+    - function:04661f0f2644d956bb6f4e77fb890a0e
+    id: r.factory-builds-backend
+    level: MUST
+    text: Factory constructs the Kubernetes logical backend, calls Setup with the
+      supplied logical.BackendConfig, and returns the backend or the setup error,
+      so the engine can be mounted as a secrets engine.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/path_roles.go
+    id: r.role-storage
+    level: MUST
+    text: Roles are written to and read back from logical storage by name, and the
+      stored entry round-trips the role's Kubernetes namespaces and namespace label
+      selector that namespace authorization depends on.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/kube_service_account.go
+    id: r.service-account-credentials
+    level: MUST
+    text: Issued credentials are produced by creating Kubernetes service account objects
+      and their associated secrets or tokens against the configured cluster.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/path_roles.go
+    - method:ee01baed1d01f2b3529fd85850c64bf8
+    id: r.single-namespace-detection
+    level: MUST
+    text: roleEntry.HasSingleK8sNamespace reports true only when the role's namespace
+      label selector is empty and exactly one namespace is configured, and that namespace
+      is neither empty nor the wildcard "*".
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/wal.go
+    id: r.wal-rollback
+    level: MUST
+    text: Credential creation records a write-ahead log entry that carries the information
+      needed to roll the created Kubernetes objects back, so interrupted issuance
+      can be cleaned up on recovery.
   upstream: self
