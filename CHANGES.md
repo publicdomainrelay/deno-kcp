@@ -1784,6 +1784,13 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.rollback-fails` (MUST): "Tx.Rollback returns the unimplemented error and performs no cleanup, because a Tx is never obtained from Begin in the first place."
 - added `r.single-shared-error-value` (MUST): "Every operation that is not implemented returns one shared package-level error value created as errors.New("unimplemented"), so callers can compare against a single error identity rather than per-call errors."
 
+### third-party-openbao-internal-helper-systemd
+
+- intent: "" -> "This context exists because the OpenBao server, agent, and proxy commands need to tell systemd that the process has finished starting up, and the vendored helper provides that capability in-tree. Keeping the sd_notify logic in its own package means the command layer only needs to call Notify with a state string such as "READY=1", and the helper decides from NOTIFY_SOCKET whether a systemd supervisor is actually present. It is a third-party vendored component inside this repository, so its behavior must keep matching upstream."
+- added `r.notify-absent-socket-is-noop` (MUST): "Notify must read the NOTIFY_SOCKET environment variable, and when that variable is empty it must return (false, nil) without dialing any socket, so a process running outside systemd sees no error."
+- added `r.notify-reports-success-and-error` (MUST): "Notify must return (true, nil) after the state string is written successfully, and must return (false, err) carrying the underlying error when either the unixgram dial or the write fails."
+- added `r.notify-writes-datagram-to-socket` (MUST): "When NOTIFY_SOCKET is set, Notify must dial it as a unixgram UnixAddr and write the given state string as the datagram body, closing the connection afterwards."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -1887,5 +1894,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-helper-storagepacker-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-storagepacker-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-stubbolt-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-helper-systemd-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-helper-systemd-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-template-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |

@@ -10,5 +10,13 @@ spec:
   systemContext: third-party-openbao-internal-helper-systemd
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-helper-systemd
-  phase: Running
+  agentLog: third_party/openbao/internal/helper/systemd/notify.go is a small Go helper
+    that implements the systemd sd_notify protocol. Its single exported function,
+    Notify, reads the NOTIFY_SOCKET environment variable, and when that variable is
+    empty it returns (false, nil) so callers can run outside systemd without error.
+    When the variable is set, Notify builds a net.UnixAddr with Net "unixgram", dials
+    the socket with net.DialUnix, and writes the caller-supplied state string as the
+    datagram payload, closing the connection when done. It reports (true, nil) on
+    a successful write, and propagates any dial or write failure as (false, err).
+  message: wrote 3 requirement(s) and 1 interface(s) for third-party-openbao-internal-helper-systemd
+  phase: Succeeded
