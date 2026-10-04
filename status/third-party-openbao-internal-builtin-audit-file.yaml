@@ -1,0 +1,78 @@
+conditions:
+- message: 'undeclared: Backend, Backend.GetHash, Backend.Invalidate, Backend.LogRequest,
+    Backend.LogResponse, Backend.LogTestMessage, Backend.Reload, Backend.Salt, Factory'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/builtin/audit/file/backend.go
+  - third_party/openbao/internal/builtin/audit/file/backend_test.go
+  fingerprint: 3c84b01a63a0ebde6f18d262ef0d56c88bbeb3b8d298824580abd98d0c1740cf
+  interfaces:
+  - codegraphId: function:3085f49aa218cfa27d80e9c0431694b3
+    file: third_party/openbao/internal/builtin/audit/file/backend.go
+    kind: function
+    line: 24
+    name: Factory
+    signature: (ctx context.Context, conf *audit.BackendConfig) (audit.Backend, error)
+  - codegraphId: struct:42847894a256e32dfab52f2167e89a54
+    file: third_party/openbao/internal/builtin/audit/file/backend.go
+    kind: struct
+    line: 158
+    name: Backend
+  - codegraphId: method:30d039106baf5b0a2b030a69c7c29738
+    file: third_party/openbao/internal/builtin/audit/file/backend.go
+    kind: method
+    line: 176
+    name: Backend.Salt
+    signature: (ctx context.Context) (*salt.Salt, error)
+  - codegraphId: method:ff1ccf33ac4896d41b106ed0196442c9
+    file: third_party/openbao/internal/builtin/audit/file/backend.go
+    kind: method
+    line: 198
+    name: Backend.GetHash
+    signature: (ctx context.Context, data string) (string, error)
+  - codegraphId: method:98bc68d8572bdd0a3f936e204dc1e9c1
+    file: third_party/openbao/internal/builtin/audit/file/backend.go
+    kind: method
+    line: 207
+    name: Backend.LogRequest
+    signature: (ctx context.Context, in *logical.LogInput) error
+  - codegraphId: method:50b06add913bdcb63f4528e9cc84aedf
+    file: third_party/openbao/internal/builtin/audit/file/backend.go
+    kind: method
+    line: 266
+    name: Backend.LogResponse
+    signature: (ctx context.Context, in *logical.LogInput) error
+  - codegraphId: method:733a08994d5c610fb8b4dfb7ded80a9d
+    file: third_party/openbao/internal/builtin/audit/file/backend.go
+    kind: method
+    line: 284
+    name: Backend.LogTestMessage
+    signature: (ctx context.Context, in *logical.LogInput, config map[string]string)
+      error
+  - codegraphId: method:56c35816515d1fa3d4063f64ffbf2452
+    file: third_party/openbao/internal/builtin/audit/file/backend.go
+    kind: method
+    line: 333
+    name: Backend.Reload
+    signature: (_ context.Context) error
+  - codegraphId: method:438657ef874a844cf73f07789ad57d46
+    file: third_party/openbao/internal/builtin/audit/file/backend.go
+    kind: method
+    line: 357
+    name: Backend.Invalidate
+    signature: (_ context.Context)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 2f0894f0b12c4b8d41eb928bb880a41008ebf279ffcbf8fa81c670d48bb5f81a
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 3c84b01a63a0ebde6f18d262ef0d56c88bbeb3b8d298824580abd98d0c1740cf

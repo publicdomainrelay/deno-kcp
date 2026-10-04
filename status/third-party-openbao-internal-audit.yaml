@@ -1,0 +1,321 @@
+conditions:
+- message: 'undeclared: AuditAuth, AuditFormatWriter, AuditFormatWriter.Salt, AuditFormatWriter.WriteRequest,
+    AuditFormatWriter.WriteResponse, AuditFormatter, AuditFormatter.FormatRequest,
+    AuditFormatter.FormatResponse, AuditNamespace, AuditPolicyResults, AuditRequest,
+    AuditRequestEntry, AuditResponse, AuditResponseEntry, AuditResponseWrapInfo, AuditSecret,
+    Backend, Backend.GetHash, Backend.Invalidate, Backend.LogRequest, Backend.LogResponse,
+    Backend.LogTestMessage, Backend.Reload, BackendConfig, Factory, Formatter, Formatter.FormatRequest,
+    Formatter.FormatResponse, FormatterConfig, HashAuth, HashCallback, HashRequest,
+    HashResponse, HashString, HashStructure, HashWrapInfo, JSONFormatWriter, JSONFormatWriter.Salt,
+    JSONFormatWriter.WriteRequest, JSONFormatWriter.WriteResponse, NewTemporaryFormatter,
+    PolicyInfo, hashWalker.Enter, hashWalker.Exit, hashWalker.Map, hashWalker.MapElem,
+    hashWalker.Primitive, hashWalker.Slice, hashWalker.SliceElem'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/audit/audit.go
+  - third_party/openbao/internal/audit/format.go
+  - third_party/openbao/internal/audit/format_json.go
+  - third_party/openbao/internal/audit/format_json_test.go
+  - third_party/openbao/internal/audit/format_test.go
+  - third_party/openbao/internal/audit/formatter.go
+  - third_party/openbao/internal/audit/hashstructure.go
+  - third_party/openbao/internal/audit/hashstructure_test.go
+  fingerprint: 126cd1b79cef1b2891e14f03d4089dfd167805f45ed84aeb30258e82a0121ad6
+  interfaces:
+  - codegraphId: interface:23c825ce647c9812d840833aa38a0658
+    file: third_party/openbao/internal/audit/audit.go
+    kind: interface
+    line: 17
+    name: Backend
+  - codegraphId: method:b718fbf8320836492f2a4f6cb31f7c8c
+    file: third_party/openbao/internal/audit/audit.go
+    kind: method
+    line: 22
+    name: Backend.LogRequest
+    signature: (context.Context, *logical.LogInput) error
+  - codegraphId: method:5a403e47e6e79c05be32ee9bbf861a5d
+    file: third_party/openbao/internal/audit/audit.go
+    kind: method
+    line: 28
+    name: Backend.LogResponse
+    signature: (context.Context, *logical.LogInput) error
+  - codegraphId: method:8118533452ddf75b7d46a9f9103c7e94
+    file: third_party/openbao/internal/audit/audit.go
+    kind: method
+    line: 34
+    name: Backend.LogTestMessage
+    signature: (context.Context, *logical.LogInput, map[string]string) error
+  - codegraphId: method:ee41c765c3eb45cc649b844606c7defe
+    file: third_party/openbao/internal/audit/audit.go
+    kind: method
+    line: 39
+    name: Backend.GetHash
+    signature: (context.Context, string) (string, error)
+  - codegraphId: method:8e5ddb8540b43e121955facc7a6913fd
+    file: third_party/openbao/internal/audit/audit.go
+    kind: method
+    line: 42
+    name: Backend.Reload
+    signature: (context.Context) error
+  - codegraphId: method:32dd1ae3ae6fd8f479c03186d25c7919
+    file: third_party/openbao/internal/audit/audit.go
+    kind: method
+    line: 45
+    name: Backend.Invalidate
+    signature: (context.Context)
+  - codegraphId: struct:16c537701052343971118579ab743897
+    file: third_party/openbao/internal/audit/audit.go
+    kind: struct
+    line: 50
+    name: BackendConfig
+  - codegraphId: type_alias:0f34199f8fcc6c5aa90e45d5708386ae
+    file: third_party/openbao/internal/audit/audit.go
+    kind: type_alias
+    line: 62
+    name: Factory
+  - codegraphId: interface:e63f743f08baad296a54e41616c836bb
+    file: third_party/openbao/internal/audit/format.go
+    kind: interface
+    line: 24
+    name: AuditFormatWriter
+  - codegraphId: method:ef509901b843a16f09883ee11736ad03
+    file: third_party/openbao/internal/audit/format.go
+    kind: method
+    line: 26
+    name: AuditFormatWriter.WriteRequest
+    signature: (io.Writer, *AuditRequestEntry) error
+  - codegraphId: method:37cbf8689e8eb68c8c3115d5dae9742d
+    file: third_party/openbao/internal/audit/format.go
+    kind: method
+    line: 28
+    name: AuditFormatWriter.WriteResponse
+    signature: (io.Writer, *AuditResponseEntry) error
+  - codegraphId: method:785bdb8bbf0a7bb1a7ae47b60cb9e494
+    file: third_party/openbao/internal/audit/format.go
+    kind: method
+    line: 30
+    name: AuditFormatWriter.Salt
+    signature: (context.Context) (*salt.Salt, error)
+  - codegraphId: struct:82ece37eb53f7398ea9f5ca74cb7d0c1
+    file: third_party/openbao/internal/audit/format.go
+    kind: struct
+    line: 35
+    name: AuditFormatter
+  - codegraphId: method:c4cba218c2b876bee3e4432e07448e32
+    file: third_party/openbao/internal/audit/format.go
+    kind: method
+    line: 41
+    name: AuditFormatter.FormatRequest
+    signature: (ctx context.Context, w io.Writer, config FormatterConfig, in *logical.LogInput)
+      error
+  - codegraphId: method:dc5c23a8d5b62c4427df8d3a4bc4019b
+    file: third_party/openbao/internal/audit/format.go
+    kind: method
+    line: 175
+    name: AuditFormatter.FormatResponse
+    signature: (ctx context.Context, w io.Writer, config FormatterConfig, in *logical.LogInput)
+      error
+  - codegraphId: struct:78233e32820c7bb1b4062d3295a7a923
+    file: third_party/openbao/internal/audit/format.go
+    kind: struct
+    line: 396
+    name: AuditRequestEntry
+  - codegraphId: struct:1aea965b64c60bd43a12ccb264151fb3
+    file: third_party/openbao/internal/audit/format.go
+    kind: struct
+    line: 406
+    name: AuditResponseEntry
+  - codegraphId: struct:d2ee418aaa49678f28a459d8a2544a05
+    file: third_party/openbao/internal/audit/format.go
+    kind: struct
+    line: 416
+    name: AuditRequest
+  - codegraphId: struct:8182c0f1d05df2008bcee20ad198315e
+    file: third_party/openbao/internal/audit/format.go
+    kind: struct
+    line: 441
+    name: AuditResponse
+  - codegraphId: struct:ade4e2ad7999b79355b5f4f059901285
+    file: third_party/openbao/internal/audit/format.go
+    kind: struct
+    line: 458
+    name: AuditAuth
+  - codegraphId: struct:7a2a5f7c2bb3f70828ef9dc2c367fec7
+    file: third_party/openbao/internal/audit/format.go
+    kind: struct
+    line: 478
+    name: AuditPolicyResults
+  - codegraphId: struct:97e85b8e7a5d32eee71944cd29cb1ba3
+    file: third_party/openbao/internal/audit/format.go
+    kind: struct
+    line: 483
+    name: PolicyInfo
+  - codegraphId: struct:c8a410a78426ad89eebfd1caeeb5ad89
+    file: third_party/openbao/internal/audit/format.go
+    kind: struct
+    line: 490
+    name: AuditSecret
+  - codegraphId: struct:bdba964b80c03078d5ba8476cf29a72b
+    file: third_party/openbao/internal/audit/format.go
+    kind: struct
+    line: 494
+    name: AuditResponseWrapInfo
+  - codegraphId: struct:741695d429d289a7aa4dcccfc349269d
+    file: third_party/openbao/internal/audit/format.go
+    kind: struct
+    line: 503
+    name: AuditNamespace
+  - codegraphId: function:60d1929ca7075c2de1f0b57733c0abcc
+    file: third_party/openbao/internal/audit/format.go
+    kind: function
+    line: 553
+    name: NewTemporaryFormatter
+    signature: (format, prefix string) *AuditFormatter
+  - codegraphId: struct:5134606d51df693c8140708e7e4cedc1
+    file: third_party/openbao/internal/audit/format_json.go
+    kind: struct
+    line: 17
+    name: JSONFormatWriter
+  - codegraphId: method:0822276a47ec0f91db5c37e2d09a9f9a
+    file: third_party/openbao/internal/audit/format_json.go
+    kind: method
+    line: 22
+    name: JSONFormatWriter.WriteRequest
+    signature: (w io.Writer, req *AuditRequestEntry) error
+  - codegraphId: method:6143d753818759479d079b783f08f044
+    file: third_party/openbao/internal/audit/format_json.go
+    kind: method
+    line: 38
+    name: JSONFormatWriter.WriteResponse
+    signature: (w io.Writer, resp *AuditResponseEntry) error
+  - codegraphId: method:c056772154a009aadf08b07400cd96a0
+    file: third_party/openbao/internal/audit/format_json.go
+    kind: method
+    line: 54
+    name: JSONFormatWriter.Salt
+    signature: (ctx context.Context) (*salt.Salt, error)
+  - codegraphId: interface:6a5eec8047829c0c5bc34eb14f08bfb9
+    file: third_party/openbao/internal/audit/formatter.go
+    kind: interface
+    line: 18
+    name: Formatter
+  - codegraphId: method:a7dbd6949fcb390c2f1f31eb5abdda07
+    file: third_party/openbao/internal/audit/formatter.go
+    kind: method
+    line: 19
+    name: Formatter.FormatRequest
+    signature: (context.Context, io.Writer, FormatterConfig, *logical.LogInput) error
+  - codegraphId: method:ba986a0a56bca6e430b0b9238ea5332d
+    file: third_party/openbao/internal/audit/formatter.go
+    kind: method
+    line: 20
+    name: Formatter.FormatResponse
+    signature: (context.Context, io.Writer, FormatterConfig, *logical.LogInput) error
+  - codegraphId: struct:e023e8c8a23899a4280df6dc4c02ea13
+    file: third_party/openbao/internal/audit/formatter.go
+    kind: struct
+    line: 23
+    name: FormatterConfig
+  - codegraphId: function:65f63968a54e3a6a036c304235793f90
+    file: third_party/openbao/internal/audit/hashstructure.go
+    kind: function
+    line: 22
+    name: HashString
+    signature: (salter *salt.Salt, data string) string
+  - codegraphId: function:ee7174e5166f767948eada2027879352
+    file: third_party/openbao/internal/audit/hashstructure.go
+    kind: function
+    line: 27
+    name: HashAuth
+    signature: (salter *salt.Salt, in *logical.Auth, HMACAccessor bool) (*logical.Auth,
+      error)
+  - codegraphId: function:376b505131db62fa9bbb477cf7acd5c1
+    file: third_party/openbao/internal/audit/hashstructure.go
+    kind: function
+    line: 45
+    name: HashRequest
+    signature: (salter *salt.Salt, in *logical.Request, HMACAccessor bool, nonHMACDataKeys
+      []string) (*logical.Request, error)
+  - codegraphId: function:d6efa5e0eac024519ba054edb053d5aa
+    file: third_party/openbao/internal/audit/hashstructure.go
+    kind: function
+    line: 94
+    name: HashResponse
+    signature: "(\n\tsalter *salt.Salt,\n\tin *logical.Response,\n\tHMACAccessor bool,\n\tnonHMACDataKeys
+      []string,\n\telideListResponseData bool,\n) (*logical.Response, error)"
+  - codegraphId: function:42ef4700f6e217b28c6d1edd344ae593
+    file: third_party/openbao/internal/audit/hashstructure.go
+    kind: function
+    line: 177
+    name: HashWrapInfo
+    signature: (salter *salt.Salt, in *wrapping.ResponseWrapInfo, HMACAccessor bool)
+      (*wrapping.ResponseWrapInfo, error)
+  - codegraphId: function:4ccd60a576f8ea73994d61927166709d
+    file: third_party/openbao/internal/audit/hashstructure.go
+    kind: function
+    line: 204
+    name: HashStructure
+    signature: (data any, cb HashCallback, ignoredKeys []string, elideListResponseData
+      bool) error
+  - codegraphId: type_alias:62ff219e7aec2fa896d05b5d6b22cabd
+    file: third_party/openbao/internal/audit/hashstructure.go
+    kind: type_alias
+    line: 214
+    name: HashCallback
+  - codegraphId: method:0d02854465c1cb0437d918f06da7a813
+    file: third_party/openbao/internal/audit/hashstructure.go
+    kind: method
+    line: 254
+    name: hashWalker.Enter
+    signature: (loc reflectwalk.Location) error
+  - codegraphId: method:9de2b6bd047b7f0dbf282e413f5e955f
+    file: third_party/openbao/internal/audit/hashstructure.go
+    kind: method
+    line: 266
+    name: hashWalker.Exit
+    signature: (loc reflectwalk.Location) error
+  - codegraphId: method:75bc2961eee3ea15ed6f5f7df9e8b494
+    file: third_party/openbao/internal/audit/hashstructure.go
+    kind: method
+    line: 284
+    name: hashWalker.Map
+    signature: (m reflect.Value) error
+  - codegraphId: method:58e85ff15e1cefa152f5d6a6be9ae0bc
+    file: third_party/openbao/internal/audit/hashstructure.go
+    kind: method
+    line: 289
+    name: hashWalker.MapElem
+    signature: (m, k, v reflect.Value) error
+  - codegraphId: method:61705e5d4da223dc06bff50079bece16
+    file: third_party/openbao/internal/audit/hashstructure.go
+    kind: method
+    line: 299
+    name: hashWalker.Slice
+    signature: (s reflect.Value) error
+  - codegraphId: method:f06df9356da06ee81af806f2c3c58309
+    file: third_party/openbao/internal/audit/hashstructure.go
+    kind: method
+    line: 304
+    name: hashWalker.SliceElem
+    signature: (i int, elem reflect.Value) error
+  - codegraphId: method:442a99c51a0c6063a23f51a22761ead5
+    file: third_party/openbao/internal/audit/hashstructure.go
+    kind: method
+    line: 311
+    name: hashWalker.Primitive
+    signature: (v reflect.Value) error
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: d361f90b21a1c915dd36148e54b8556cebcf38d4c9d11afc45fb578453ad69f7
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 126cd1b79cef1b2891e14f03d4089dfd167805f45ed84aeb30258e82a0121ad6

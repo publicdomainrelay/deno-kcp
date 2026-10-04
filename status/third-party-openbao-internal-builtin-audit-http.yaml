@@ -1,0 +1,86 @@
+conditions:
+- message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+  reason: InterfacesObserved
+  status: "True"
+  type: CodeSynced
+- message: no synced fingerprint has been recorded yet
+  reason: NotSyncedYet
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/builtin/audit/http/backend.go
+  - third_party/openbao/internal/builtin/audit/http/backend_test.go
+  - third_party/openbao/internal/builtin/audit/http/testing.go
+  fingerprint: 6822ea607c3b5b3cfaf3a7d0b8a3b7a9ba3872abfb771152529dc0c7c3bf1516
+  interfaces:
+  - codegraphId: struct:20dd53850adf10614f22517a31ba4402
+    file: third_party/openbao/internal/builtin/audit/http/backend.go
+    kind: struct
+    line: 28
+    name: Backend
+  - codegraphId: function:5420893024c784962ca66998e515722e
+    file: third_party/openbao/internal/builtin/audit/http/backend.go
+    kind: function
+    line: 46
+    name: Factory
+    signature: (ctx context.Context, conf *audit.BackendConfig) (audit.Backend, error)
+  - codegraphId: method:c3d47d9cb7259ae83b32e711619ec500
+    file: third_party/openbao/internal/builtin/audit/http/backend.go
+    kind: method
+    line: 163
+    name: Backend.Salt
+    signature: (ctx context.Context) (*salt.Salt, error)
+  - codegraphId: method:179a3b9c0e58491f354ec4cfc318766a
+    file: third_party/openbao/internal/builtin/audit/http/backend.go
+    kind: method
+    line: 185
+    name: Backend.GetHash
+    signature: (ctx context.Context, data string) (string, error)
+  - codegraphId: method:b689c9fd3423d00931d4c50b44ed37c6
+    file: third_party/openbao/internal/builtin/audit/http/backend.go
+    kind: method
+    line: 194
+    name: Backend.LogRequest
+    signature: (ctx context.Context, in *logical.LogInput) error
+  - codegraphId: method:61b0c443f53626e8f698e0c2cfaf732f
+    file: third_party/openbao/internal/builtin/audit/http/backend.go
+    kind: method
+    line: 240
+    name: Backend.LogResponse
+    signature: (ctx context.Context, in *logical.LogInput) error
+  - codegraphId: method:26a4cfe9cc2bf8924db4c407efff660a
+    file: third_party/openbao/internal/builtin/audit/http/backend.go
+    kind: method
+    line: 250
+    name: Backend.LogTestMessage
+    signature: (ctx context.Context, in *logical.LogInput, config map[string]string)
+      error
+  - codegraphId: method:1f5a6642d322c7e19b8ec0833dded31d
+    file: third_party/openbao/internal/builtin/audit/http/backend.go
+    kind: method
+    line: 282
+    name: Backend.Reload
+    signature: (_ context.Context) error
+  - codegraphId: method:d517f9951df6496b0847557b06b079ff
+    file: third_party/openbao/internal/builtin/audit/http/backend.go
+    kind: method
+    line: 296
+    name: Backend.Invalidate
+    signature: (_ context.Context)
+  - codegraphId: function:78289ad6a1c57b0dfc04ef875683bdec
+    file: third_party/openbao/internal/builtin/audit/http/testing.go
+    kind: function
+    line: 13
+    name: GetTestAuditHandler
+    signature: (t *testing.T, lock *sync.Mutex, logs *[]map[string]any, path string,
+      requiredHeaders http.Header, badRequests *int) http.HandlerFunc
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: bfd2cf14661f3c777f5b4ac97e8e44dc52a88e2c7f93183edf67e58210c637cb
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 6822ea607c3b5b3cfaf3a7d0b8a3b7a9ba3872abfb771152529dc0c7c3bf1516
