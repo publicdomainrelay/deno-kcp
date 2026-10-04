@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-This context exists so the linkable-item content and menu components are reachable through the app-level component path in the OpenBao UI app. It is a thin aliasing layer between the app/components directory and the core/components implementation, letting the Ember resolver look up linkable-item pieces without duplicating implementation, and it keeps the vendored third_party tree layout consistent with the upstream OpenBao UI source.
+This context exists as a thin aliasing layer between the app-level components directory and the core/components implementation of the linkable-item content and menu components in the vendored OpenBao UI app. It lets the Ember resolver resolve linkable-item pieces through the app/components path without duplicating any implementation, and it keeps the third_party tree layout consistent with the upstream OpenBao UI source it was vendored from.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

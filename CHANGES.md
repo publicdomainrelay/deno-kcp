@@ -5475,11 +5475,11 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 
 ### third-party-openbao-ui-lib-core-app-components-linkable-item
 
-- intent: "" -> "This context exists so the linkable-item content and menu components are reachable through the app-level component path in the OpenBao UI app. It is a thin aliasing layer between the app/components directory and the core/components implementation, letting the Ember resolver look up linkable-item pieces without duplicating implementation, and it keeps the vendored third_party tree layout consistent with the upstream OpenBao UI source."
-- added `r.content-reexports-core-default` (MUST): "The file must re-export, as its default export, the default export of the module 'core/components/linkable-item/content', and must define no other exports or logic of its own."
+- intent: "" -> "This context exists as a thin aliasing layer between the app-level components directory and the core/components implementation of the linkable-item content and menu components in the vendored OpenBao UI app. It lets the Ember resolver resolve linkable-item pieces through the app/components path without duplicating any implementation, and it keeps the third_party tree layout consistent with the upstream OpenBao UI source it was vendored from."
+- added `r.content-reexports-core-default` (MUST): "content.js must re-export, as its default export, the default export of the module 'core/components/linkable-item/content', and must define no other exports or logic of its own, so that a consumer importing the app-level content component receives exactly the core component."
 - added `r.license-header-retained` (MUST): "Both files must keep the HashiCorp copyright notice and the SPDX-License-Identifier: MPL-2.0 header comment at the top of the file."
-- added `r.menu-reexports-core-default` (MUST): "The file must re-export, as its default export, the default export of the module 'core/components/linkable-item/menu', and must define no other exports or logic of its own."
-- added `r.module-path-fidelity` (MUST): "Each re-export must keep pointing at the core/components/linkable-item path, so that consumers importing from the app/components path resolve the same component the core path provides."
+- added `r.menu-reexports-core-default` (MUST): "menu.js must re-export, as its default export, the default export of the module 'core/components/linkable-item/menu', and must define no other exports or logic of its own, so that a consumer importing the app-level menu component receives exactly the core component."
+- added `r.module-path-fidelity` (MUST): "Each re-export must keep pointing at the core/components/linkable-item path, so that consumers importing from the app/components path resolve the same component the core path provides and the shim never diverges from the core implementation."
 
 ## Realization
 
@@ -5949,7 +5949,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-core-addon-modifiers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-core-addon-utils-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-core-app-components-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-lib-core-app-components-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-core-app-components-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-core-app-components-confirm-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-core-app-components-linkable-item-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-core-app-components-linkable-item-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
