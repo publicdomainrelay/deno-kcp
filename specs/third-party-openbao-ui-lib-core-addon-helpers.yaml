@@ -88,10 +88,10 @@ spec:
     - file:third_party/openbao/ui/lib/core/addon/helpers/cluster-states.js
     id: r.app-helper-reexport
     level: SHOULD
-    text: Each addon helper must have a matching re-export file under lib/core/app/helpers
+    text: Each addon helper should have a matching re-export file under lib/core/app/helpers
       that re-exports the addon implementation, which is how changelog-url-for and
-      cluster-states are surfaced to the host app; new helpers in this context should
-      follow the same two-file addon-plus-app-reexport pattern.
+      cluster-states are surfaced to the host app; new helpers in this context follow
+      the same two-file addon-plus-app-reexport pattern.
   - codeRefs:
     - file:third_party/openbao/ui/lib/core/addon/helpers/changelog-url-for.js
     - function:93e58c824f45eccca4d22f3e015095f8
@@ -100,8 +100,8 @@ spec:
     text: changelogUrlFor takes a one-element array destructured as version and returns
       the OpenBao CHANGELOG GitHub anchor base URL 'https://www.github.com/openbao/openbao/blob/main/CHANGELOG.md#';
       when version is absent it returns that base URL unchanged, and when a version
-      is given it strips any '+suffix' after splitting on '+', removes the periods,
-      and appends the resulting version number only when that number compares greater
+      is given it strips any '+suffix' by splitting on '+', removes the periods, and
+      appends the resulting version number only when that number compares greater
       than or equal to 143, otherwise it still returns the base URL. It must also
       return the base URL if the version manipulation throws, logging the error and
       the version to the console.
@@ -114,7 +114,7 @@ spec:
       the state up in the CLUSTER_STATES table, returning the matching entry; when
       the state is not present in the table it returns the default display object
       { glyph: '''', isOk: null, isSyncing: null } so callers always get a renderable
-      object.'
+      object instead of undefined.'
   - codeRefs:
     - file:third_party/openbao/ui/lib/core/addon/helpers/date-format.js
     - function:f86a6ffae739daf89bbe53ae1ec4115d
@@ -122,11 +122,11 @@ spec:
     level: MUST
     text: dateFormat takes a two-element array destructured as date and style plus
       options isFormatted and withTimeZone, both defaulting to false. When isFormatted
-      is true it formats new Date(date) with style directly and returns that; otherwise
+      is true it formats new Date(date) with style and returns that directly; otherwise
       it parses a string date with parseISO, returns undefined for a falsy date, treats
       a numeric value whose string length is 10 as epoch seconds by multiplying by
       1000 into a Date, and formats the result with style. It appends the browser-locale
-      short timezone name (read from toLocaleTimeString with timeZoneName 'short')
+      short timezone name, read from toLocaleTimeString with timeZoneName 'short',
       only when withTimeZone is true, and falls back to an empty timezone string if
       reading the locale timezone throws.
   - codeRefs:
@@ -154,8 +154,8 @@ spec:
     - file:third_party/openbao/ui/lib/core/addon/helpers/img-path.js
     id: r.img-path-helper
     level: MUST
-    text: The img-path helper must be exported from the addon helpers directory so
-      templates resolve image asset paths through the helper instead of hard-coding
+    text: The img-path helper must stay exported from the addon helpers directory
+      so templates resolve image asset paths through the helper instead of hard-coding
       asset URLs.
   - codeRefs:
     - class:4bff5cd02be347727edd6747197d3e86
@@ -163,7 +163,7 @@ spec:
     id: r.is-active-route-class
     level: MUST
     text: The is-active-route helper is implemented as the exported class IsActiveRoute
-      rather than a plain function, so that it can hold route-aware state and be instantiated
+      rather than a plain function, so it can hold route-aware state and be instantiated
       by the Ember helper machinery; the class must remain the exported helper form
       for this file.
   - codeRefs:
@@ -181,9 +181,8 @@ spec:
     level: MUST
     text: messageTypes takes a one-element array destructured as type and returns
       the MESSAGE_TYPES entry for that type; when the type is not a key of MESSAGE_TYPES
-      it must raise an assertion that the type is not a valid message type, so components
-      such as alert-banner and alert-inline fail loudly on an unknown alert type instead
-      of rendering undefined.
+      it must assert 'type is not a valid message type.' so components such as alert-banner
+      and alert-inline fail loudly on an unknown alert type instead of rendering undefined.
   - codeRefs:
     - file:third_party/openbao/ui/lib/core/addon/helpers/options-for-backend.js
     - function:1924a9d402d2cc3d364954ac0465403c
@@ -214,7 +213,7 @@ spec:
     - file:third_party/openbao/ui/lib/core/addon/helpers/set-flash-message.js
     id: r.set-flash-message-helper
     level: MUST
-    text: The set-flash-message helper must be exported from the addon helpers directory
-      so templates can push a flash message through the helper rather than reaching
-      into the flash service directly.
+    text: The set-flash-message helper must stay exported from the addon helpers directory
+      so templates push a flash message through the helper rather than reaching into
+      the flash service directly.
   upstream: self
