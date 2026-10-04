@@ -10,9 +10,55 @@ spec:
   systemContext: third-party-openbao-ui-app-adapters-keymgmt
   toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
 status:
-  message: the agent is summarizing third-party-openbao-ui-app-adapters-keymgmt
-  phase: Running
+  agentLog: 'This context covers the Ember Data adapters under third_party/openbao/ui/app/adapters/keymgmt/,
+    which connect the OpenBao web UI to the key-management secrets engine. key.js
+    exports KeymgmtKeyAdapter, which extends ApplicationAdapter, sets namespace ''v1'',
+    and maps the literal path segment ''key'' to URLs of the form <namespace>/<backend>/key.
+    buildURL rewrites that segment using snapshot.attr(''backend'') or query.backend;
+    the url() helper appends an encoded key id plus optional ''/rotate'' or ''/kms''
+    suffixes. createRecord issues a POST carrying only the type attribute and then,
+    when deletionAllowed is set, a follow-up PUT restricted to deletion_allowed and
+    min_enabled_version, throwing ''Key <name> was created, not all settings were
+    saved'' style error text if the second call fails. updateRecord PUTs the same
+    restricted attribute set. distribute PUTs to <backend>/kms/<kms>/key/<key>; getProvider
+    GETs the key''s kms list and returns the first entry, null on HTTP 404, or { permissionsError:
+    true } on HTTP 403; getDistribution GETs one distribution and splits its purpose
+    string into purposeArray. queryRecord fetches one key and, unless recordOnly is
+    true, attaches provider and distribution data. query builds either a provider-scoped
+    URL through the keymgmt/provider adapter or the backend-level list URL and tags
+    the response with backend. rotateKey PUTs the rotate URL then reloads the store
+    record, and removeFromProvider DELETEs the distribution and nulls model.provider.
+    provider.js exports a second KeymgmtKeyAdapter for the ''kms'' path, which replaces
+    ''kms'' with the backend segment, builds a keys URL from a query, creates providers
+    with PUT instead of POST, decorates findRecord responses with the name, and expands
+    list queries by fetching each listed key through a mocked snapshot that only answers
+    the ''backend'' attribute.'
+  message: wrote 14 requirement(s) and 1 interface(s) for third-party-openbao-ui-app-adapters-keymgmt;
+    interface KeymgmtKeyAdapter.pathForType is not in the observed facts; dropped;
+    interface KeymgmtKeyAdapter.buildURL is not in the observed facts; dropped; interface
+    KeymgmtKeyAdapter.url is not in the observed facts; dropped; interface KeymgmtKeyAdapter.createRecord
+    is not in the observed facts; dropped; interface KeymgmtKeyAdapter.updateRecord
+    is not in the observed facts; dropped; interface KeymgmtKeyAdapter.distribute
+    is not in the observed facts; dropped; interface KeymgmtKeyAdapter.getProvider
+    is not in the observed facts; dropped; interface KeymgmtKeyAdapter.getDistribution
+    is not in the observed facts; dropped; interface KeymgmtKeyAdapter.queryRecord
+    is not in the observed facts; dropped; interface KeymgmtKeyAdapter.query is not
+    in the observed facts; dropped; interface KeymgmtKeyAdapter.rotateKey is not in
+    the observed facts; dropped; interface KeymgmtKeyAdapter.removeFromProvider is
+    not in the observed facts; dropped; interface KeymgmtKeyAdapter.pathForType is
+    not in the observed facts; dropped; interface KeymgmtKeyAdapter.buildURL is not
+    in the observed facts; dropped; interface KeymgmtKeyAdapter.buildKeysURL is not
+    in the observed facts; dropped; interface KeymgmtKeyAdapter.createRecord is not
+    in the observed facts; dropped; interface KeymgmtKeyAdapter.findRecord is not
+    in the observed facts; dropped; interface KeymgmtKeyAdapter.query is not in the
+    observed facts; dropped; interface KeymgmtKeyAdapter.queryRecord is not in the
+    observed facts; dropped; interface KeymgmtKeyAdapter._mockSnapshot is not in the
+    observed facts; dropped
+  phase: Succeeded
 superseded:
+- message: the agent is summarizing third-party-openbao-ui-app-adapters-keymgmt
+  name: third-party-openbao-ui-app-adapters-keymgmt-c2s-6c1bbe4c3ba9-89cee50ec5ae-a3
+  phase: Running
 - message: |-
     ...he snapshot and sends a PUT (not POST) to the update-record URL built with the provider's name, resolving with the serialized data so the caller receives the record it sent.",
           "codeRefs": ["file:third_party/openbao/ui/app/adapters/keymgmt/provider.js"]

@@ -3895,6 +3895,24 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.query-issues-get` (MUST): "The identity base adapter MUST override query to issue a GET request to buildURL with a null id for the queried model name, rather than letting Ember Data perform the default query request."
 - added `r.query-list-true` (MUST): "The identity base adapter MUST override urlForQuery to append '?list=true' to the superclass URL, so identity queries hit the LIST variant of the endpoint."
 
+### third-party-openbao-ui-app-adapters-keymgmt
+
+- intent: "" -> "This context documents the two client-side adapter modules that let the OpenBao UI speak to the key-management secrets engine over HTTP. It exists so the request shapes, URL construction, allowed attribute sets, and error/empty-state handling of the keymgmt key and provider adapters are stated explicitly and can be validated against the code, rather than inferred from the Ember model layer or the Go HTTP handlers on the server side."
+- added `r.distribution-purpose-array` (MUST): "KeymgmtKeyAdapter.getDistribution GETs '<backend>/kms/<kms>/key/<key>' and returns the response data with the comma-separated 'purpose' field split into a purposeArray."
+- added `r.key-build-url-backend` (MUST): "KeymgmtKeyAdapter.buildURL delegates to the ApplicationAdapter implementation and then replaces the 'key' segment with '<backend>/key', taking the backend from snapshot.attr('backend') when a snapshot is present and from query.backend otherwise."
+- added `r.key-create-then-update` (MUST): "KeymgmtKeyAdapter.createRecord POSTs only the 'type' attribute to the key URL, then, only when snapshot.attr('deletionAllowed') is truthy, PUTs the update payload; if that update fails it throws an error stating the key was created but not all settings were saved. It resolves with the serialized data plus id (the name) and backend."
+- added `r.key-path-for-type` (MUST): "KeymgmtKeyAdapter.pathForType returns the literal 'key' and leaves the backend name out, because buildURL is responsible for prepending it."
+- added `r.key-query-scope` (MUST): "KeymgmtKeyAdapter.query issues a list: true GET against the provider-scoped keys URL from the keymgmt/provider adapter when query.provider is set, otherwise against the backend-level key URL, and sets res.backend before resolving."
+- added `r.key-update-attribute-allowlist` (MUST): "KeymgmtKeyAdapter.updateRecord PUTs to the key URL a payload containing only the 'deletion_allowed' and 'min_enabled_version' keys picked out of the serialized snapshot, so other attributes are never sent on update."
+- added `r.key-url-variants` (MUST): "KeymgmtKeyAdapter.url builds '<namespace>/<backend>/key' and, when an id is given, appends the path-encoded id; it appends '/rotate' when type is 'ROTATE' and '/kms' when type is 'PROVIDERS', and otherwise returns the plain id URL."
+- added `r.namespace-v1` (MUST): "Both keymgmt adapters declare the API namespace 'v1', so every generated request URL is prefixed with that version segment."
+- added `r.provider-adapter-paths` (MUST): "The keymgmt/provider adapter maps pathForType to 'kms', rewrites the 'kms' segment to '<backend>/kms' in buildURL from the snapshot or query, and exposes buildKeysURL which appends '/<provider>/key' to a query-scoped provider URL."
+- added `r.provider-find-and-list` (MUST): "The keymgmt/provider adapter decorates findRecord responses by copying the lookup name into resp.data, and its query fetches every named key in the listing through findRecord using a mocked snapshot that answers only the 'backend' attribute, replacing data.keys with the full records and setting resp.backend."
+- added `r.provider-lookup-status` (MUST): "KeymgmtKeyAdapter.getProvider GETs the key's 'kms' listing with list: true and returns the first name in data.keys, or null when the list is empty; it maps an HTTP 404 to null (not yet distributed) and an HTTP 403 to { permissionsError: true }, rethrowing any other error."
+- added `r.provider-write-verbs` (MUST): "The keymgmt/provider adapter creates providers with a PUT rather than a POST, sending the serialized snapshot to the updateRecord URL, and returns the serialized data as the resolved value."
+- added `r.query-record-enrichment` (MUST): "KeymgmtKeyAdapter.queryRecord GETs the single key, stamps id and backend onto its data, and unless query.recordOnly is true also attaches provider (when found without a permissions error) and distribution to the returned object."
+- added `r.rotate-and-remove` (MUST): "KeymgmtKeyAdapter.rotateKey PUTs the rotate URL and then reloads the keymgmt/key record from the store; removeFromProvider DELETEs '<backend>/kms/<provider>/key/<name>' and, on success, clears model.provider."
+
 ### third-party-openbao-ui-app-adapters-kubernetes
 
 - intent: "" -> "This context exists to specify the browser-side Kubernetes secrets engine integration of the bundled OpenBao UI: the read and write paths the UI uses against a Kubernetes mount, so the config singleton and the per-mount roles plus credential generation stay addressable and serializable. It records which HTTP verbs and URL shapes the adapters emit, how the backend mount path travels through query, snapshot and response objects, and which fields the models expect back, so the UI layer keeps working unchanged against the Kubernetes secrets engine API."
@@ -4198,7 +4216,8 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-adapters-identity-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-adapters-identity-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-adapters-keymgmt-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Failed |  | 0 | - |
-| third-party-openbao-ui-app-adapters-keymgmt-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-adapters-keymgmt-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-adapters-keymgmt-c2s-6c1bbe4c3ba9-89cee50ec5ae-a3 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-adapters-kubernetes-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-adapters-kubernetes-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

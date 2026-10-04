@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context documents the two client-side adapter modules that let the OpenBao UI speak to the key-management secrets engine over HTTP. It exists so the request shapes, URL construction, allowed attribute sets, and error/empty-state handling of the keymgmt key and provider adapters are stated explicitly and can be validated against the code, rather than inferred from the Ember model layer or the Go HTTP handlers on the server side.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

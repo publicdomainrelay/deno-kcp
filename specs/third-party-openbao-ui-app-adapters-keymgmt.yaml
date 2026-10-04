@@ -1,5 +1,6 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
+- class:86750a0003380b8bbb6f7552f83a6809 KeymgmtKeyAdapter@third_party/openbao/ui/app/adapters/keymgmt/key.js:20
 - file:third_party/openbao/ui/app/adapters/keymgmt/key.js key.js@third_party/openbao/ui/app/adapters/keymgmt/key.js
 - file:third_party/openbao/ui/app/adapters/keymgmt/provider.js provider.js@third_party/openbao/ui/app/adapters/keymgmt/provider.js
 kind: SystemContext
@@ -7,5 +8,120 @@ metadata:
   name: third-party-openbao-ui-app-adapters-keymgmt
   namespace: default
 spec:
+  intent: This context documents the two client-side adapter modules that let the
+    OpenBao UI speak to the key-management secrets engine over HTTP. It exists so
+    the request shapes, URL construction, allowed attribute sets, and error/empty-state
+    handling of the keymgmt key and provider adapters are stated explicitly and can
+    be validated against the code, rather than inferred from the Ember model layer
+    or the Go HTTP handlers on the server side.
+  interfaces:
+  - file: third_party/openbao/ui/app/adapters/keymgmt/key.js
+    kind: class
+    name: KeymgmtKeyAdapter
+    signature: class KeymgmtKeyAdapter extends ApplicationAdapter
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - class:86750a0003380b8bbb6f7552f83a6809
+    id: r.distribution-purpose-array
+    level: MUST
+    text: KeymgmtKeyAdapter.getDistribution GETs '<backend>/kms/<kms>/key/<key>' and
+      returns the response data with the comma-separated 'purpose' field split into
+      a purposeArray.
+  - codeRefs:
+    - class:86750a0003380b8bbb6f7552f83a6809
+    id: r.key-build-url-backend
+    level: MUST
+    text: KeymgmtKeyAdapter.buildURL delegates to the ApplicationAdapter implementation
+      and then replaces the 'key' segment with '<backend>/key', taking the backend
+      from snapshot.attr('backend') when a snapshot is present and from query.backend
+      otherwise.
+  - codeRefs:
+    - class:86750a0003380b8bbb6f7552f83a6809
+    id: r.key-create-then-update
+    level: MUST
+    text: KeymgmtKeyAdapter.createRecord POSTs only the 'type' attribute to the key
+      URL, then, only when snapshot.attr('deletionAllowed') is truthy, PUTs the update
+      payload; if that update fails it throws an error stating the key was created
+      but not all settings were saved. It resolves with the serialized data plus id
+      (the name) and backend.
+  - codeRefs:
+    - class:86750a0003380b8bbb6f7552f83a6809
+    id: r.key-path-for-type
+    level: MUST
+    text: KeymgmtKeyAdapter.pathForType returns the literal 'key' and leaves the backend
+      name out, because buildURL is responsible for prepending it.
+  - codeRefs:
+    - class:86750a0003380b8bbb6f7552f83a6809
+    id: r.key-query-scope
+    level: MUST
+    text: 'KeymgmtKeyAdapter.query issues a list: true GET against the provider-scoped
+      keys URL from the keymgmt/provider adapter when query.provider is set, otherwise
+      against the backend-level key URL, and sets res.backend before resolving.'
+  - codeRefs:
+    - class:86750a0003380b8bbb6f7552f83a6809
+    id: r.key-update-attribute-allowlist
+    level: MUST
+    text: KeymgmtKeyAdapter.updateRecord PUTs to the key URL a payload containing
+      only the 'deletion_allowed' and 'min_enabled_version' keys picked out of the
+      serialized snapshot, so other attributes are never sent on update.
+  - codeRefs:
+    - class:86750a0003380b8bbb6f7552f83a6809
+    id: r.key-url-variants
+    level: MUST
+    text: KeymgmtKeyAdapter.url builds '<namespace>/<backend>/key' and, when an id
+      is given, appends the path-encoded id; it appends '/rotate' when type is 'ROTATE'
+      and '/kms' when type is 'PROVIDERS', and otherwise returns the plain id URL.
+  - codeRefs:
+    - class:86750a0003380b8bbb6f7552f83a6809
+    - file:third_party/openbao/ui/app/adapters/keymgmt/key.js
+    - file:third_party/openbao/ui/app/adapters/keymgmt/provider.js
+    id: r.namespace-v1
+    level: MUST
+    text: Both keymgmt adapters declare the API namespace 'v1', so every generated
+      request URL is prefixed with that version segment.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/adapters/keymgmt/provider.js
+    id: r.provider-adapter-paths
+    level: MUST
+    text: The keymgmt/provider adapter maps pathForType to 'kms', rewrites the 'kms'
+      segment to '<backend>/kms' in buildURL from the snapshot or query, and exposes
+      buildKeysURL which appends '/<provider>/key' to a query-scoped provider URL.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/adapters/keymgmt/provider.js
+    id: r.provider-find-and-list
+    level: MUST
+    text: The keymgmt/provider adapter decorates findRecord responses by copying the
+      lookup name into resp.data, and its query fetches every named key in the listing
+      through findRecord using a mocked snapshot that answers only the 'backend' attribute,
+      replacing data.keys with the full records and setting resp.backend.
+  - codeRefs:
+    - class:86750a0003380b8bbb6f7552f83a6809
+    id: r.provider-lookup-status
+    level: MUST
+    text: 'KeymgmtKeyAdapter.getProvider GETs the key''s ''kms'' listing with list:
+      true and returns the first name in data.keys, or null when the list is empty;
+      it maps an HTTP 404 to null (not yet distributed) and an HTTP 403 to { permissionsError:
+      true }, rethrowing any other error.'
+  - codeRefs:
+    - file:third_party/openbao/ui/app/adapters/keymgmt/provider.js
+    id: r.provider-write-verbs
+    level: MUST
+    text: The keymgmt/provider adapter creates providers with a PUT rather than a
+      POST, sending the serialized snapshot to the updateRecord URL, and returns the
+      serialized data as the resolved value.
+  - codeRefs:
+    - class:86750a0003380b8bbb6f7552f83a6809
+    id: r.query-record-enrichment
+    level: MUST
+    text: KeymgmtKeyAdapter.queryRecord GETs the single key, stamps id and backend
+      onto its data, and unless query.recordOnly is true also attaches provider (when
+      found without a permissions error) and distribution to the returned object.
+  - codeRefs:
+    - class:86750a0003380b8bbb6f7552f83a6809
+    id: r.rotate-and-remove
+    level: MUST
+    text: KeymgmtKeyAdapter.rotateKey PUTs the rotate URL and then reloads the keymgmt/key
+      record from the store; removeFromProvider DELETEs '<backend>/kms/<provider>/key/<name>'
+      and, on success, clears model.provider.
   upstream: self
