@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so that the vault can enforce per-request quotas, chiefly rate limits, without the request path knowing how rules are stored or matched. It gives the rest of the vault one registry object, Manager, that owns the lifecycle of quota rules: creation and persistence, lookup by ID, name or request factors, matching of an incoming Request to the rule that governs it, evaluation of that rule into a Response, and cleanup when mounts, namespaces or backends go away. The Quota interface keeps the rule kinds pluggable, and the configuration surface (audit logging, response headers, exempt paths) lets operators tune the rate limit behavior at runtime.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

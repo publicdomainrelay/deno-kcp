@@ -2759,6 +2759,26 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.fresh-request-per-case` (MUST): "Each case must build its own logical.Request and namespace context, set the case operation and path on it, and call acl.AllowOperation with the root-privilege argument false, so no request state leaks between cases."
 - added `r.mismatch-fails` (MUST): "A case must fail the test when the observed Allowed value differs from the expected one, and separately when the observed RootPrivs value differs, reporting the case and both observed values in the fatal message."
 
+### third-party-openbao-internal-vault-quotas
+
+- intent: "" -> "This context exists so that the vault can enforce per-request quotas, chiefly rate limits, without the request path knowing how rules are stored or matched. It gives the rest of the vault one registry object, Manager, that owns the lifecycle of quota rules: creation and persistence, lookup by ID, name or request factors, matching of an incoming Request to the rule that governs it, evaluation of that rule into a Response, and cleanup when mounts, namespaces or backends go away. The Quota interface keeps the rule kinds pluggable, and the configuration surface (audit logging, response headers, exempt paths) lets operators tune the rate limit behavior at runtime."
+- added `r.access-quota-id` (MUST): "The Access interface exposes QuotaID so a request's resolved identity can be mapped to a quota rule; the concrete access value returns that identifier."
+- added `r.lease-action-string` (SHOULD): "LeaseAction.String renders a lease action as its text form: loaded, created, deleted or allow for known values, and "unknown" for any other value."
+- added `r.lease-information` (MAY): "QuotaLeaseInformation carries lease bookkeeping for a quota evaluation alongside the Response returned to the caller."
+- added `r.manager-construction` (MUST): "NewManager returns a Manager bound to a logger, a cluster metric sink and a deadlock-detection flag; DetectDeadlocks reports whether deadlock detection was requested at construction."
+- added `r.query-and-apply-quota` (MUST): "QueryQuota selects the quota rule that governs a Request, QueryResolveRoleQuotas reports whether role quotas must be resolved for the request, and ApplyQuota evaluates the governing rule and returns a Response describing the outcome."
+- added `r.quota-clone` (MUST): "Quota.Clone returns a copy of the calling rule so callers can mutate a rule without altering the stored instance; RateLimitQuota.Clone provides that copy for the rate limit rule type."
+- added `r.quota-crud` (MUST): "Manager persists, reads and removes quota rules: SetQuota stores a rule under its type, LoadQuota loads one by type and name, DeleteQuota removes one, and QuotaNames lists the rule names registered for a given type."
+- added `r.quota-interface-contract` (MUST): "Every quota rule satisfies the Quota interface: it can evaluate a request through allow, report its identifier and name, report whether it is inheritable, be initialized with a logger and metric sink, be closed on deletion, be cloned, and have its mount and namespace paths rewritten. RateLimitQuota is the concrete implementation of that interface."
+- added `r.quota-lookup-by-factor` (MUST): "Manager resolves a quota rule by identifier, by name, or by request factors (namespace path, mount path, path suffix and role), returning the matching rule or an error when no rule matches."
+- added `r.quota-storage-path` (MUST): "QuotaStoragePath derives the storage location of a quota rule from its type and name, and the manager reads and writes rule definitions at that path so persistence survives restart."
+- added `r.quota-type-string` (SHOULD): "Type.String renders a quota type as its text form so the type can be used as a key and in operator-facing output."
+- added `r.rate-limit-config-toggles` (MUST): "Manager holds the rate limit runtime configuration: setters and getters for audit logging and response headers, an exempt-path set whose membership RateLimitPathExempt answers, persisted configuration read by LoadConfig and exposed by Config."
+- added `r.rate-limit-construction` (MUST): "NewRateLimitQuota constructs a rate limit rule from a name, namespace path, mount path, path suffix, role, rate, interval, block duration and inheritable flag, returning the rule the manager will register."
+- added `r.request-factors` (MUST): "Request carries the namespace path, mount path, path suffix, role and client identity that quota matching consumes, so QueryQuota and ApplyQuota can decide which rule applies and whether the request is allowed."
+- added `r.setup-reset-invalidate` (SHOULD): "Setup loads the manager's quota and configuration state from vault storage, Reset clears that in-memory state, and Invalidate drops a single cached entry identified by key."
+- added `r.topology-change-hooks` (MUST): "When a mount is remounted, a namespace is deleted, or a backend is disabled, the manager rewrites the mount and namespace paths of affected quota rules or removes rules that no longer have a target."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -2951,5 +2971,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-vault-policy-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-policy-policytest-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-policy-policytest-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-vault-quotas-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-vault-quotas-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-routing-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
