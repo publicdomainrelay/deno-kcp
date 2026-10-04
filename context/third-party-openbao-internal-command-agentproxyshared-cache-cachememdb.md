@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The package exists so the agent proxy cache can store and look up cached responses in memory by several independent keys instead of a single map key. memdb supplies the multi-index lookup, prefix iteration and schema-level uniqueness, while the atomic pointer lets a `Flush` replace the whole database without racing in-flight readers. Serialization exists so an index can be persisted or transferred between the memory cache and the persistent bolt cache; the renewal context is deliberately excluded because a cancel func cannot be serialized. This context is a third-party vendored dependency inside deno-kcp, not code the repository authors.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
