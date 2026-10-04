@@ -10,5 +10,30 @@ spec:
   systemContext: third-party-openbao-internal-vault-external-tests-metrics
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-vault-external-tests-metrics
+  agentLog: This context is the external integration-test package for OpenBao core
+    metrics, held in the single file third_party/openbao/internal/vault/external_tests/metrics/core_metrics_int_test.go.
+    The file is package metrics and contains two integration tests plus two unexported
+    gauge helpers. TestMountTableMetrics boots a two-core in-memory test cluster with
+    a one-minute metric sink, waits for the first core to become active, reads the
+    sys/metrics endpoint through testhelpers.SysMetricsReq, and asserts that the nonlocal
+    logical mount table reports three entries before a kv version 2 mount and four
+    entries after it, while the reported core.mount_table.size stays non-zero. TestLeaderReElectionMetrics
+    boots the same cluster shape, fetches /v1/sys/metrics with the cluster root token,
+    unmarshals the body into testhelpers.SysMetricsJSON, asserts that the core.active
+    and core.unsealed gauges exist and equal 1, then steps the leader down, waits
+    for the second core to become active, and repeats the same assertions against
+    the new leader. gaugeSearchHelper walks the gauge list, keeps only series labelled
+    local=false and type=logical, requires the core.mount_table.num_entries gauge
+    to be present, checks its value for equality, and returns the core.mount_table.size
+    value; gaugeConditionCheck is a small equality comparator that returns an error
+    only for the eq comparator.
+  message: wrote 7 requirement(s) and 0 interface(s) for third-party-openbao-internal-vault-external-tests-metrics;
+    interface TestMountTableMetrics is not in the observed facts; dropped; interface
+    TestLeaderReElectionMetrics is not in the observed facts; dropped; interface gaugeSearchHelper
+    is not in the observed facts; dropped; interface gaugeConditionCheck is not in
+    the observed facts; dropped
+  phase: Succeeded
+superseded:
+- message: the agent is summarizing third-party-openbao-internal-vault-external-tests-metrics
+  name: third-party-openbao-internal-vault-external-tests-metrics-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2
   phase: Running

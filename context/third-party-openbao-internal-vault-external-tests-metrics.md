@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists to pin down the externally observable behaviour of OpenBao's core metrics endpoint as seen from outside the vault package: which mount-table gauges appear, what their labels and values are, how they move when a new mount is added, and that leader and unseal gauges follow a leadership change. It is a black-box acceptance layer that talks to a real two-core cluster over the HTTP API rather than to internal metric registries, so it guards the metric names, label names and endpoint shape that operators and monitoring depend on.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

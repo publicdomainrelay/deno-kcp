@@ -2376,6 +2376,17 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.kv-tests-use-real-cluster` (MUST): "Each test in the package must construct its backend through vault.NewTestCluster with a CoreConfig that registers the kv logical factory (logicalKv.VersionedKVFactory or logicalKv.Factory) and vaulthttp.Handler as the handler, start the cluster, wait for the core to become active with vault.TestWaitActive, and mount the versioned KV engine under the path "kv" with type "kv-v2" before exercising any endpoint."
 - added `r.kvv2-upgrade-path-clean-slate` (MUST): "For the upgrade regression, the test must mount kv-v2, seal the cores with cluster.EnsureCoresSealed, delete the policy/ and archive/ subtrees beneath the KVv2 base path using logical.ClearView over physical.NewView on core.UnderlyingRawStorage, then unseal with testhelpers.EnsureCoresUnsealed, wait ten seconds, and fail if the captured hclog output contains "cannot write to storage during setup"."
 
+### third-party-openbao-internal-vault-external-tests-metrics
+
+- intent: "" -> "The context exists to pin down the externally observable behaviour of OpenBao's core metrics endpoint as seen from outside the vault package: which mount-table gauges appear, what their labels and values are, how they move when a new mount is added, and that leader and unseal gauges follow a leadership change. It is a black-box acceptance layer that talks to a real two-core cluster over the HTTP API rather than to internal metric registries, so it guards the metric names, label names and endpoint shape that operators and monitoring depend on."
+- added `r.gauge-condition-check` (SHOULD): "gaugeConditionCheck compares two integers and returns an error only when the comparator is the string eq and the values differ; any other comparator value passes without error."
+- added `r.gauge-search-helper-labels` (MUST): "gaugeSearchHelper selects only gauges whose local label is the string false and whose type label is the string logical; it treats a missing core.mount_table.num_entries gauge as an error and returns the sentinel max-int value together with that error, and it returns the collected core.mount_table.size value on success."
+- added `r.kv-mount-increments-entry-gauge` (MUST): "After mounting a kv version 2 backend at path kv, the same nonlocal logical core.mount_table.num_entries gauge equals 4 and core.mount_table.size stays non-zero; the test documents that on a transactional storage backend the size gauge reports only the new table entry, not a running total."
+- added `r.leader-reelection-metrics-endpoint` (MUST): "The re-election test requests GET /v1/sys/metrics with the cluster root token in the auth header, reads and JSON-unmarshals the body into testhelpers.SysMetricsJSON, and fails when either the core.active or the core.unsealed gauge is absent or does not equal 1."
+- added `r.leader-stepdown-metrics-follow` (MUST): "After calling sys/step_down on the active core, the test waits for core 1 to report active and repeats the same sys/metrics assertions against that core, so the leader and unseal gauges must follow the leadership change."
+- added `r.mount-table-nonlocal-logical-gauges` (MUST): "Before any user mount is added, the test asserts that the core.mount_table.num_entries gauge carrying labels local=false and type=logical equals 3, covering the cubbyhole, identity and kv mounts, and that the matching core.mount_table.size gauge is non-zero."
+- added `r.mount-table-test-cluster-shape` (MUST): "The mount-table test starts a two-core test cluster named mycluster with MockBuiltinRegistry and a TestMetricSinkProvider sink on a one-minute interval, keeps standbys unsealed, waits for core 0 to report active before reading metrics, and cleans the cluster up on exit."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -2530,5 +2541,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-vault-external-tests-kms-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-kv-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-kv-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-vault-external-tests-metrics-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-vault-external-tests-metrics-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-internal-vault-external-tests-metrics-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-mfa-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
