@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the agent has a documented contract for the token-file auth method: which configuration key it consumes, how it behaves when the file is missing, empty, or unreadable, and which parts of the auth.AuthMethod interface it intentionally leaves inert. It is the code under third_party/openbao/internal/command/agentproxyshared/auth/token-file and the tests that pin its constructor and authenticate behavior.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

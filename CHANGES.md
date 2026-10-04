@@ -1119,6 +1119,16 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.shutdown-surface` (MUST): "jwtMethod must implement Shutdown with no arguments and no return value, completing the auth.AuthMethod surface the type offers to the agent."
 - added `r.watcher-startup` (MUST): "NewJWTAuthMethod must run the file watcher in its own goroutine before returning, initialise the credsFound, watch, stop, done and credSuccessGate channels and a sync.Once on the method, and log the path it will read the JWT from at info level."
 
+### third-party-openbao-internal-command-agentproxyshared-auth-token-file
+
+- intent: "" -> "This context exists so the agent has a documented contract for the token-file auth method: which configuration key it consumes, how it behaves when the file is missing, empty, or unreadable, and which parts of the auth.AuthMethod interface it intentionally leaves inert. It is the code under third_party/openbao/internal/command/agentproxyshared/auth/token-file and the tests that pin its constructor and authenticate behavior."
+- added `r.cached-token-fallback` (MUST): "When the file read fails or the file is empty and no token has been cached yet, Authenticate returns an error that names the condition and no credentials; when a cached token already exists in either case, it logs a warning and proceeds with the cached token instead of failing."
+- added `r.config-validation` (MUST): "The constructor rejects a nil AuthConfig with "empty config", a nil Config map with "empty config data", an absent token_file_path key with "missing 'token_file_path' value", a non-string value with "could not convert 'token_file_path' config value to string", and an empty string with "'token_file_path' value is empty"; on success it returns a tokenFileMethod carrying the configured logger and the file path."
+- added `r.mount-path` (MUST): "The method hard-codes its mount path to "auth/token" and Authenticate returns that path joined with "/lookup-self" as the request path, so every authentication is a self-lookup of the token in the file."
+- added `r.no-renewal` (MUST): "The method declares itself non-renewing: NewCreds returns a nil channel, and CredSuccess and Shutdown do nothing, so the agent's credential watcher has no channel to select on and no lifecycle work to perform."
+- added `r.test-coverage` (SHOULD): "The test file exercises the constructor with an empty config map, with an empty file path value, and the authenticate path, so the rejection and token-reading branches stay pinned."
+- added `r.token-read-and-cache` (MUST): "Authenticate reads the configured token file, trims surrounding whitespace, and when the read yields bytes stores the trimmed value in the method's cached token and returns it in the request body under the key "token" with a nil request path header and a nil error."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
