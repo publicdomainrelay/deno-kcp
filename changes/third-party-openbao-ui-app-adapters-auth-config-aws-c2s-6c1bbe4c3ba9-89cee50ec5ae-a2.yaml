@@ -1,0 +1,32 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-ui-app-adapters-auth-config-aws-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-ui-app-adapters-auth-config-aws
+  toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
+status:
+  agentLog: 'This context covers three Ember Data adapter modules in the vendored
+    OpenBao web UI that map AWS auth-method configuration models onto the OpenBao
+    HTTP API: third_party/openbao/ui/app/adapters/auth-config/aws/client.js, third_party/openbao/ui/app/adapters/auth-config/aws/identity-accesslist.js,
+    and third_party/openbao/ui/app/adapters/auth-config/aws/roletag-denylist.js. Each
+    file holds only the HashiCorp copyright and MPL-2.0 SPDX header, imports the shared
+    AuthConfig adapter from ../_base, and exports AuthConfig.extend() with no properties
+    and no method overrides. The three modules therefore add nothing of their own:
+    they exist so the Ember resolver finds a distinct adapter class per model name,
+    while all request behavior comes from the shared base adapter at third_party/openbao/ui/app/adapters/auth-config/_base.js,
+    which sets namespace /v1/auth, derives the trailing path segment from the model
+    type (rewriting identity-accesslist and roletag-denylist to tidy/<type>), builds
+    URLs of the form /v1/auth/<backendId>/config with an extra /<type> segment when
+    the model name includes aws, and overrides createRecord and updateRecord to resolve
+    with the owning backend id.'
+  message: wrote 5 requirement(s) and 0 interface(s) for third-party-openbao-ui-app-adapters-auth-config-aws
+  phase: Succeeded
+superseded:
+- message: wrote 5 requirement(s) and 0 interface(s) for third-party-openbao-ui-app-adapters-auth-config-aws
+  name: third-party-openbao-ui-app-adapters-auth-config-aws-c2s-6c1bbe4c3ba9-89cee50ec5ae
+  phase: Succeeded

@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists to capture the contract of the OpenBao UI's client adapters for activity-log and version-history data. These adapters are the only place where the UI turns a user's month selection into backend query parameters and where the response shape is given an Ember-compatible `id`. Recording them as a specification keeps the URL paths, the UTC month-boundary arithmetic, the unix-second conversion, and the response normalization stable, because the server-side counters endpoints and the Ember store both depend on exactly those values.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

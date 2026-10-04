@@ -57030,11 +57030,89 @@ system_contexts:
   - third_party/openbao/ui/app/adapters/clients/config.js
   - third_party/openbao/ui/app/adapters/clients/version-history.js
   codeRefIndex:
+  - class:28703c7716f3a70051305eeb6dcb96c8 ActivityAdapter@third_party/openbao/ui/app/adapters/clients/activity.js:9
+  - class:8c7e3e983f41cdb65cb1e6ff766773d7 VersionHistoryAdapter@third_party/openbao/ui/app/adapters/clients/version-history.js:8
   - file:third_party/openbao/ui/app/adapters/clients/activity.js activity.js@third_party/openbao/ui/app/adapters/clients/activity.js
   - file:third_party/openbao/ui/app/adapters/clients/config.js config.js@third_party/openbao/ui/app/adapters/clients/config.js
   - file:third_party/openbao/ui/app/adapters/clients/version-history.js version-history.js@third_party/openbao/ui/app/adapters/clients/version-history.js
   id: sc.third-party-openbao-ui-app-adapters-clients
+  intent: The context exists to capture the contract of the OpenBao UI's client adapters
+    for activity-log and version-history data. These adapters are the only place where
+    the UI turns a user's month selection into backend query parameters and where
+    the response shape is given an Ember-compatible `id`. Recording them as a specification
+    keeps the URL paths, the UTC month-boundary arithmetic, the unix-second conversion,
+    and the response normalization stable, because the server-side counters endpoints
+    and the Ember store both depend on exactly those values.
+  interfaces:
+  - file: third_party/openbao/ui/app/adapters/clients/activity.js
+    kind: class
+    name: ActivityAdapter
+    signature: class ActivityAdapter extends ApplicationAdapter
+  - file: third_party/openbao/ui/app/adapters/clients/version-history.js
+    kind: class
+    name: VersionHistoryAdapter
+    signature: class VersionHistoryAdapter extends ApplicationAdapter
   name: third-party-openbao-ui-app-adapters-clients
+  requirements:
+  - codeRefs:
+    - class:28703c7716f3a70051305eeb6dcb96c8
+    - file:third_party/openbao/ui/app/adapters/clients/activity.js
+    id: r.activity-query-params-utc-month-boundaries
+    level: MUST
+    text: ActivityAdapter.formatQueryParams must return an object with `start_time`
+      and `end_time` as Unix second timestamps computed in UTC. When the incoming
+      start_time or end_time already carries a `timestamp`, that value must be used
+      unchanged; otherwise start_time must be the first day of the selected month,
+      `Date.UTC(year, monthIdx, 1)`, and end_time must be the last day of the selected
+      month, `Date.UTC(year, monthIdx + 1, 0)`, where a day of 0 rolls back to the
+      final day of the previous month.
+  - codeRefs:
+    - class:28703c7716f3a70051305eeb6dcb96c8
+    - file:third_party/openbao/ui/app/adapters/clients/activity.js
+    id: r.activity-query-record-endpoint
+    level: MUST
+    text: ActivityAdapter.queryRecord must build the request URL as `this.buildURL()`
+      concatenated with `/internal/counters/activity`, send it as an HTTP GET through
+      `this.ajax` with the formatted time parameters as the request data, and only
+      send the request when formatQueryParams returns a truthy value.
+  - codeRefs:
+    - class:28703c7716f3a70051305eeb6dcb96c8
+    - file:third_party/openbao/ui/app/adapters/clients/activity.js
+    id: r.activity-response-id-normalization
+    level: MUST
+    text: 'ActivityAdapter.queryRecord must normalize the response before returning
+      it: treat a null or undefined response body as an empty object, then set `response.id`
+      to the value of `request_id` when present and to the literal string `''no-data''`
+      when it is not.'
+  - codeRefs:
+    - class:28703c7716f3a70051305eeb6dcb96c8
+    - class:8c7e3e983f41cdb65cb1e6ff766773d7
+    - file:third_party/openbao/ui/app/adapters/clients/activity.js
+    - file:third_party/openbao/ui/app/adapters/clients/version-history.js
+    id: r.adapters-extend-application-adapter
+    level: MUST
+    text: Both ActivityAdapter and VersionHistoryAdapter must extend ApplicationAdapter
+      and reach the backend only through the inherited `this.buildURL` and `this.ajax`
+      helpers, so that host resolution and request transport stay owned by the application
+      adapter.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/adapters/clients/activity.js
+    - file:third_party/openbao/ui/app/adapters/clients/config.js
+    - file:third_party/openbao/ui/app/adapters/clients/version-history.js
+    id: r.client-adapters-directory-layout
+    level: SHOULD
+    text: The client adapters for these endpoints should stay grouped under third_party/openbao/ui/app/adapters/clients,
+      one adapter per file, with the activity adapter in activity.js and the version-history
+      adapter in version-history.js; config.js belongs to the same directory.
+  - codeRefs:
+    - class:8c7e3e983f41cdb65cb1e6ff766773d7
+    - file:third_party/openbao/ui/app/adapters/clients/version-history.js
+    id: r.version-history-find-all-endpoint
+    level: MUST
+    text: 'VersionHistoryAdapter.findAll must issue an HTTP GET through `this.ajax`
+      to `this.buildURL()` concatenated with `/version-history`, pass the query data
+      `{ list: true }`, and resolve with the response body exactly as received, without
+      adding or renaming fields.'
   upstream: self
 - code:
   - third_party/openbao/ui/app/adapters/database/connection.js

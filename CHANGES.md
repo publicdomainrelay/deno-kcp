@@ -3848,6 +3848,16 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.license-header-preserved` (MUST): "Each of the three adapter files MUST keep the HashiCorp copyright and MPL-2.0 SPDX license header, since the files are vendored from the upstream OpenBao UI tree."
 - added `r.shared-auth-config-semantics-not-duplicated` (SHOULD): "The three AWS adapters SHOULD stay free of overrides, so that the inherited behavior — namespace /v1/auth, per-type path segment with identity-accesslist and roletag-denylist rewritten to tidy/<type>, URL /v1/auth/<backendId>/config plus the type segment for aws models, and createRecord/updateRecord returning the owning backend id — remains defined once in the base adapter for all AWS auth-config sub-resources."
 
+### third-party-openbao-ui-app-adapters-clients
+
+- intent: "" -> "The context exists to capture the contract of the OpenBao UI's client adapters for activity-log and version-history data. These adapters are the only place where the UI turns a user's month selection into backend query parameters and where the response shape is given an Ember-compatible `id`. Recording them as a specification keeps the URL paths, the UTC month-boundary arithmetic, the unix-second conversion, and the response normalization stable, because the server-side counters endpoints and the Ember store both depend on exactly those values."
+- added `r.activity-query-params-utc-month-boundaries` (MUST): "ActivityAdapter.formatQueryParams must return an object with `start_time` and `end_time` as Unix second timestamps computed in UTC. When the incoming start_time or end_time already carries a `timestamp`, that value must be used unchanged; otherwise start_time must be the first day of the selected month, `Date.UTC(year, monthIdx, 1)`, and end_time must be the last day of the selected month, `Date.UTC(year, monthIdx + 1, 0)`, where a day of 0 rolls back to the final day of the previous month."
+- added `r.activity-query-record-endpoint` (MUST): "ActivityAdapter.queryRecord must build the request URL as `this.buildURL()` concatenated with `/internal/counters/activity`, send it as an HTTP GET through `this.ajax` with the formatted time parameters as the request data, and only send the request when formatQueryParams returns a truthy value."
+- added `r.activity-response-id-normalization` (MUST): "ActivityAdapter.queryRecord must normalize the response before returning it: treat a null or undefined response body as an empty object, then set `response.id` to the value of `request_id` when present and to the literal string `'no-data'` when it is not."
+- added `r.adapters-extend-application-adapter` (MUST): "Both ActivityAdapter and VersionHistoryAdapter must extend ApplicationAdapter and reach the backend only through the inherited `this.buildURL` and `this.ajax` helpers, so that host resolution and request transport stay owned by the application adapter."
+- added `r.client-adapters-directory-layout` (SHOULD): "The client adapters for these endpoints should stay grouped under third_party/openbao/ui/app/adapters/clients, one adapter per file, with the activity adapter in activity.js and the version-history adapter in version-history.js; config.js belongs to the same directory."
+- added `r.version-history-find-all-endpoint` (MUST): "VersionHistoryAdapter.findAll must issue an HTTP GET through `this.ajax` to `this.buildURL()` concatenated with `/version-history`, pass the query data `{ list: true }`, and resolve with the response body exactly as received, without adding or renaming fields."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4129,10 +4139,11 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-tools-semgrep-ci-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-tools-semgrep-ci-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-adapters-auth-config-aws-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-adapters-auth-config-aws-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-adapters-auth-config-aws-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-adapters-auth-config-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-adapters-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-adapters-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-adapters-clients-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-adapters-database-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
