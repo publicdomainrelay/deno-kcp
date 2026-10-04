@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so callers of the OpenBao SDK can split a root token into an encoded blob and a separate one-time password, then reassemble it, without holding the raw token in the API response. It isolates the byte-level XOR, base64 and base62 mechanics behind three functions and keeps backwards compatibility with tokens produced by the earlier zero-otpLength scheme, which used UUID formatting instead of raw string output.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

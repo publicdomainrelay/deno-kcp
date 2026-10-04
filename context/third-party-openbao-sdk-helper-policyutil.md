@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to pin down the policy-name handling contract for the vendored OpenBao SDK helper: how raw policy input (nil, CSV string, or slice) becomes a canonical, deduplicated list, how root and default are treated, and how two policy lists are judged equivalent. It is the reference for any caller in deno-kcp that reads, stores, or diffs policy names and needs the same normalization rules the upstream SDK applies.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

@@ -2,10 +2,111 @@ apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
 - file:third_party/openbao/sdk/helper/policyutil/policyutil.go policyutil.go@third_party/openbao/sdk/helper/policyutil/policyutil.go
 - file:third_party/openbao/sdk/helper/policyutil/policyutil_test.go policyutil_test.go@third_party/openbao/sdk/helper/policyutil/policyutil_test.go
+- function:38c4740a14b1ae37b69d0d742456f60c SanitizePolicies@third_party/openbao/sdk/helper/policyutil/policyutil.go:51
+- function:765caaac54c0a91136b95db0ac0d222d EquivalentPolicies@third_party/openbao/sdk/helper/policyutil/policyutil.go:83
+- function:978afd9f8cd63f6ea1115b7782561314 ParsePolicies@third_party/openbao/sdk/helper/policyutil/policyutil.go:24
 kind: SystemContext
 metadata:
   name: third-party-openbao-sdk-helper-policyutil
   namespace: default
 spec:
+  intent: 'This context exists to pin down the policy-name handling contract for the
+    vendored OpenBao SDK helper: how raw policy input (nil, CSV string, or slice)
+    becomes a canonical, deduplicated list, how root and default are treated, and
+    how two policy lists are judged equivalent. It is the reference for any caller
+    in deno-kcp that reads, stores, or diffs policy names and needs the same normalization
+    rules the upstream SDK applies.'
+  interfaces:
+  - file: third_party/openbao/sdk/helper/policyutil/policyutil.go
+    kind: function
+    name: EquivalentPolicies
+    signature: func EquivalentPolicies(a, b []string) bool
+  - file: third_party/openbao/sdk/helper/policyutil/policyutil.go
+    kind: function
+    name: ParsePolicies
+    signature: func ParsePolicies(policiesRaw any) []string
+  - file: third_party/openbao/sdk/helper/policyutil/policyutil.go
+    kind: function
+    name: SanitizePolicies
+    signature: func SanitizePolicies(policies []string, addDefault bool) []string
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - function:38c4740a14b1ae37b69d0d742456f60c
+    - function:978afd9f8cd63f6ea1115b7782561314
+    id: r.comma-split-and-slice-passthrough
+    level: MUST
+    text: ParsePolicies must split a string input on "," into individual policy names,
+      and must pass a []string input through unchanged, then hand the result to SanitizePolicies
+      with addDefault false.
+  - codeRefs:
+    - function:38c4740a14b1ae37b69d0d742456f60c
+    id: r.deduplicate-result
+    level: MUST
+    text: SanitizePolicies must return strutil.RemoveDuplicates(policies, true) so
+      the result has no repeated names and no empty entries survive.
+  - codeRefs:
+    - function:38c4740a14b1ae37b69d0d742456f60c
+    - function:978afd9f8cd63f6ea1115b7782561314
+    id: r.default-added-only-when-asked
+    level: MUST
+    text: SanitizePolicies must append "default" only when addDefault is true and
+      the list is empty or lacks default, so ParsePolicies never injects default except
+      through its nil-input path.
+  - codeRefs:
+    - function:978afd9f8cd63f6ea1115b7782561314
+    id: r.empty-string-yields-empty-list
+    level: MUST
+    text: ParsePolicies must return an empty, non-nil []string{} when policiesRaw
+      is the empty string, so an explicitly empty policy field does not gain a default.
+  - codeRefs:
+    - function:765caaac54c0a91136b95db0ac0d222d
+    id: r.equivalence-ignores-default-and-order
+    level: MUST
+    text: For two non-nil lists, EquivalentPolicies must ignore entries equal to "default",
+      deduplicate the rest, sort both sides, and report true only when the sorted
+      sets are identical in length and content.
+  - codeRefs:
+    - function:38c4740a14b1ae37b69d0d742456f60c
+    id: r.lowercase-and-trim
+    level: MUST
+    text: SanitizePolicies must rewrite each entry in place as strings.ToLower(strings.TrimSpace(p)),
+      so case and surrounding spaces or tabs in the source list never reach the returned
+      list.
+  - codeRefs:
+    - function:765caaac54c0a91136b95db0ac0d222d
+    id: r.nil-default-equivalence
+    level: MUST
+    text: EquivalentPolicies must treat nil versus nil, nil versus []string{"default"},
+      and []string{"default"} versus nil as equivalent, and must return false for
+      any other pairing where exactly one side is nil.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/policyutil/policyutil.go
+    - function:978afd9f8cd63f6ea1115b7782561314
+    id: r.nil-input-yields-default
+    level: MUST
+    text: ParsePolicies must return exactly []string{"default"} when policiesRaw is
+      nil, before any sanitization runs.
+  - codeRefs:
+    - function:38c4740a14b1ae37b69d0d742456f60c
+    id: r.root-short-circuits
+    level: MUST
+    text: When any entry sanitizes to "root", SanitizePolicies must discard every
+      other policy and return a list containing only "root", marking default as found
+      so no default is appended.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/policyutil/policyutil_test.go
+    - function:765caaac54c0a91136b95db0ac0d222d
+    id: r.tests-cover-contract
+    level: SHOULD
+    text: 'policyutil_test.go should keep asserting the normalization contract: default
+      added when absent, default not duplicated when present, spaces and tabs tolerated,
+      and root collapsing the list to just root, using EquivalentPolicies as the comparison.'
+  - codeRefs:
+    - function:978afd9f8cd63f6ea1115b7782561314
+    id: r.unsupported-input-type-yields-empty
+    level: MUST
+    text: ParsePolicies must not panic on a value that is neither nil, string, nor
+      []string; the type switch leaves policies nil and sanitization returns an empty
+      result.
   upstream: self

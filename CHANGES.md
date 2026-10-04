@@ -3339,6 +3339,31 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.runner-util-contract` (MUST): "RunnerUtil is the host-side contract a caller must satisfy to launch plugins: NewPluginClient returns a PluginClient for a config and context, ResponseWrapData produces a wrapping.ResponseWrapInfo for a data map with a TTL and a JWT flag, MlockEnabled reports whether memory locking is on, and VaultVersion returns the host version string; LookRunnerUtil is the intersection of Looker and RunnerUtil, so a plugin host must supply both lookup and launch behaviour."
 - added `r.tls-transport` (SHOULD): "tls.go supplies the TLS helper used by the plugin transport so plugin RPCs are wrapped with the SDK's certificate handling rather than a bare connection."
 
+### third-party-openbao-sdk-helper-policyutil
+
+- intent: "" -> "This context exists to pin down the policy-name handling contract for the vendored OpenBao SDK helper: how raw policy input (nil, CSV string, or slice) becomes a canonical, deduplicated list, how root and default are treated, and how two policy lists are judged equivalent. It is the reference for any caller in deno-kcp that reads, stores, or diffs policy names and needs the same normalization rules the upstream SDK applies."
+- added `r.comma-split-and-slice-passthrough` (MUST): "ParsePolicies must split a string input on "," into individual policy names, and must pass a []string input through unchanged, then hand the result to SanitizePolicies with addDefault false."
+- added `r.deduplicate-result` (MUST): "SanitizePolicies must return strutil.RemoveDuplicates(policies, true) so the result has no repeated names and no empty entries survive."
+- added `r.default-added-only-when-asked` (MUST): "SanitizePolicies must append "default" only when addDefault is true and the list is empty or lacks default, so ParsePolicies never injects default except through its nil-input path."
+- added `r.empty-string-yields-empty-list` (MUST): "ParsePolicies must return an empty, non-nil []string{} when policiesRaw is the empty string, so an explicitly empty policy field does not gain a default."
+- added `r.equivalence-ignores-default-and-order` (MUST): "For two non-nil lists, EquivalentPolicies must ignore entries equal to "default", deduplicate the rest, sort both sides, and report true only when the sorted sets are identical in length and content."
+- added `r.lowercase-and-trim` (MUST): "SanitizePolicies must rewrite each entry in place as strings.ToLower(strings.TrimSpace(p)), so case and surrounding spaces or tabs in the source list never reach the returned list."
+- added `r.nil-default-equivalence` (MUST): "EquivalentPolicies must treat nil versus nil, nil versus []string{"default"}, and []string{"default"} versus nil as equivalent, and must return false for any other pairing where exactly one side is nil."
+- added `r.nil-input-yields-default` (MUST): "ParsePolicies must return exactly []string{"default"} when policiesRaw is nil, before any sanitization runs."
+- added `r.root-short-circuits` (MUST): "When any entry sanitizes to "root", SanitizePolicies must discard every other policy and return a list containing only "root", marking default as found so no default is appended."
+- added `r.tests-cover-contract` (SHOULD): "policyutil_test.go should keep asserting the normalization contract: default added when absent, default not duplicated when present, spaces and tabs tolerated, and root collapsing the list to just root, using EquivalentPolicies as the comparison."
+- added `r.unsupported-input-type-yields-empty` (MUST): "ParsePolicies must not panic on a value that is neither nil, string, nor []string; the type switch leaves policies nil and sanitization returns an empty result."
+
+### third-party-openbao-sdk-helper-roottoken
+
+- intent: "" -> "The context exists so callers of the OpenBao SDK can split a root token into an encoded blob and a separate one-time password, then reassemble it, without holding the raw token in the API response. It isolates the byte-level XOR, base64 and base62 mechanics behind three functions and keeps backwards compatibility with tokens produced by the earlier zero-otpLength scheme, which used UUID formatting instead of raw string output."
+- added `r.decode-legacy-zero-otp-length` (MUST): "When otpLength is 0, DecodeToken uses xor.XORBase64 on the encoded value and the otp for backwards compatibility, formats the resulting bytes as a UUID, and returns the UUID string with surrounding whitespace trimmed; failures in either step return wrapped errors."
+- added `r.decode-nonzero-otp-length` (MUST): "When otpLength is non-zero, DecodeToken decodes the encoded value with base64 RawStdEncoding, XORs the bytes with the otp, and returns the resulting bytes as a string, without UUID formatting."
+- added `r.encode-rejects-missing-input` (MUST): "EncodeToken returns an empty string and the error "no token provided" when the token argument has zero length, and returns an empty string and the error "no otp provided" when the token is present but the otp argument has zero length."
+- added `r.encode-xor-and-raw-base64` (MUST): "EncodeToken XORs the token bytes with the otp bytes and returns the result encoded with base64 RawStdEncoding; because the OTP must have the same length as the token, a length mismatch fails with the wrapped error "xor of root token failed"."
+- added `r.generate-otp-branch-on-length` (MUST): "GenerateOTP reads defaultBase64EncodedOTPLength (16) random bytes and returns them base64 StdEncoding-encoded when otpLength is 0, and returns a base62 random string of exactly otpLength characters otherwise; a short read or random-source failure returns an empty string and a wrapped error."
+- added `r.round-trip-consistency` (SHOULD): "A token encoded by EncodeToken with an OTP from GenerateOTP must decode back to the original token through DecodeToken with the matching otpLength, for both the zero and non-zero length paths."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -3585,5 +3610,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-sdk-helper-pathmanager-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-pathmanager-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-pluginutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-sdk-helper-policyutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-sdk-helper-roottoken-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-helper-policyutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-sdk-helper-roottoken-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-sdk-helper-salt-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Pending |  | 0 | - |

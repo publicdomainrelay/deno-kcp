@@ -5,10 +5,84 @@ codeRefIndex:
 - file:third_party/openbao/sdk/helper/roottoken/encode_test.go encode_test.go@third_party/openbao/sdk/helper/roottoken/encode_test.go
 - file:third_party/openbao/sdk/helper/roottoken/otp.go otp.go@third_party/openbao/sdk/helper/roottoken/otp.go
 - file:third_party/openbao/sdk/helper/roottoken/otp_test.go otp_test.go@third_party/openbao/sdk/helper/roottoken/otp_test.go
+- function:3518a32961e678d229a118dd1bcdc667 DecodeToken@third_party/openbao/sdk/helper/roottoken/decode.go:17
+- function:79af08be4993a48058794aa0eb6cb360 GenerateOTP@third_party/openbao/sdk/helper/roottoken/otp.go:20
+- function:9dc914afacd1073fb8322590bd01f546 EncodeToken@third_party/openbao/sdk/helper/roottoken/encode.go:16
 kind: SystemContext
 metadata:
   name: third-party-openbao-sdk-helper-roottoken
   namespace: default
 spec:
+  intent: The context exists so callers of the OpenBao SDK can split a root token
+    into an encoded blob and a separate one-time password, then reassemble it, without
+    holding the raw token in the API response. It isolates the byte-level XOR, base64
+    and base62 mechanics behind three functions and keeps backwards compatibility
+    with tokens produced by the earlier zero-otpLength scheme, which used UUID formatting
+    instead of raw string output.
+  interfaces:
+  - file: third_party/openbao/sdk/helper/roottoken/decode.go
+    kind: function
+    name: DecodeToken
+    signature: (encoded, otp string, otpLength int) (string, error)
+  - file: third_party/openbao/sdk/helper/roottoken/encode.go
+    kind: function
+    name: EncodeToken
+    signature: (token, otp string) (string, error)
+  - file: third_party/openbao/sdk/helper/roottoken/otp.go
+    kind: function
+    name: GenerateOTP
+    signature: (otpLength int) (string, error)
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/roottoken/decode.go
+    - function:3518a32961e678d229a118dd1bcdc667
+    id: r.decode-legacy-zero-otp-length
+    level: MUST
+    text: When otpLength is 0, DecodeToken uses xor.XORBase64 on the encoded value
+      and the otp for backwards compatibility, formats the resulting bytes as a UUID,
+      and returns the UUID string with surrounding whitespace trimmed; failures in
+      either step return wrapped errors.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/roottoken/decode.go
+    - function:3518a32961e678d229a118dd1bcdc667
+    id: r.decode-nonzero-otp-length
+    level: MUST
+    text: When otpLength is non-zero, DecodeToken decodes the encoded value with base64
+      RawStdEncoding, XORs the bytes with the otp, and returns the resulting bytes
+      as a string, without UUID formatting.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/roottoken/encode.go
+    - function:9dc914afacd1073fb8322590bd01f546
+    id: r.encode-rejects-missing-input
+    level: MUST
+    text: EncodeToken returns an empty string and the error "no token provided" when
+      the token argument has zero length, and returns an empty string and the error
+      "no otp provided" when the token is present but the otp argument has zero length.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/roottoken/encode.go
+    - function:9dc914afacd1073fb8322590bd01f546
+    id: r.encode-xor-and-raw-base64
+    level: MUST
+    text: EncodeToken XORs the token bytes with the otp bytes and returns the result
+      encoded with base64 RawStdEncoding; because the OTP must have the same length
+      as the token, a length mismatch fails with the wrapped error "xor of root token
+      failed".
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/roottoken/otp.go
+    - function:79af08be4993a48058794aa0eb6cb360
+    id: r.generate-otp-branch-on-length
+    level: MUST
+    text: GenerateOTP reads defaultBase64EncodedOTPLength (16) random bytes and returns
+      them base64 StdEncoding-encoded when otpLength is 0, and returns a base62 random
+      string of exactly otpLength characters otherwise; a short read or random-source
+      failure returns an empty string and a wrapped error.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/roottoken/encode_test.go
+    - file:third_party/openbao/sdk/helper/roottoken/otp_test.go
+    id: r.round-trip-consistency
+    level: SHOULD
+    text: A token encoded by EncodeToken with an OTP from GenerateOTP must decode
+      back to the original token through DecodeToken with the matching otpLength,
+      for both the zero and non-zero length paths.
   upstream: self
