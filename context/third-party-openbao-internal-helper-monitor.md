@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists because streaming server logs over the API needs a fan-out point that can be attached and detached from a live logger without changing the logger's own level, and that must not let a slow consumer stall the logging path. It is the mechanism behind the sys/monitor endpoint and the monitor CLI command: the caller constructs a Monitor with a buffer size and logger options, calls Start to obtain the message channel, reads from it, and calls Stop to detach. It also bounds how much is lost when the reader lags, by dropping overflow writes and reporting the dropped count rather than blocking.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
