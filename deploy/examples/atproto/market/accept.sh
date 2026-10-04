@@ -130,8 +130,16 @@ pod_phase() {
 pod_ready() {
   KC --server="$SERVER/clusters/root:$1" get denopod "$2" -o jsonpath='{.status.ready}' 2>/dev/null || true
 }
+# The status curl printed, and 000 exactly once when the fetch failed. curl
+# already prints 000 and exits non-zero on a failed transfer, so the fallback
+# only fills in an empty answer; it must not append a second 000 of its own.
+# -k because the leaf is signed by the workspace's OpenBao authority and names
+# the service, not 127.0.0.1: the check is that the TLS listener answers, not
+# that the host trusts the authority.
 http_code() {
-  curl -sS -o /dev/null -w '%{http_code}' --max-time 10 "$1" 2>/dev/null || echo 000
+  local code
+  code=$(curl -skS -o /dev/null -w '%{http_code}' --max-time 10 "$1" 2>/dev/null) || true
+  echo "${code:-000}"
 }
 
 RESULTS=()
@@ -171,7 +179,10 @@ fi
 # The provider proves the service answers on its own cluster-local name: the
 # readiness probe resolves the name through the shim and requests the path, and
 # ready=true is that probe's verdict. The host proves the same listener answers
-# from outside, where the name does not resolve.
+# from outside, where the name does not resolve. Every service pod sets
+# SERVICE_TLS true, so the listener the host reaches is the TLS one: the host
+# fetch is https, because an http fetch of a TLS listener is not a check of
+# anything.
 ready=$(pod_ready bob pds)
 if [ "$ready" = "true" ]; then
   check "bob pds on its name" PASS "ready=true probe=kcpdns pds.default.bob.svc.kcp.local /xrpc/_health"
@@ -179,11 +190,11 @@ else
   check "bob pds on its name" FAIL "ready=${ready:-missing} probe=kcpdns pds.default.bob.svc.kcp.local /xrpc/_health"
 fi
 
-code=$(http_code http://127.0.0.1:2585/xrpc/_health)
+code=$(http_code https://127.0.0.1:2585/xrpc/_health)
 if [ "$code" = "200" ]; then
-  check "bob pds on the host" PASS "GET http://127.0.0.1:2585/xrpc/_health -> $code"
+  check "bob pds on the host" PASS "GET https://127.0.0.1:2585/xrpc/_health -> $code"
 else
-  check "bob pds on the host" FAIL "GET http://127.0.0.1:2585/xrpc/_health -> $code"
+  check "bob pds on the host" FAIL "GET https://127.0.0.1:2585/xrpc/_health -> $code"
 fi
 
 ready=$(pod_ready bob bidder)
@@ -193,11 +204,11 @@ else
   check "bidder on its name" FAIL "ready=${ready:-missing} probe=kcpdns bidder.default.bob.svc.kcp.local /oauth-client-metadata.json"
 fi
 
-code=$(http_code http://127.0.0.1:2586/oauth-client-metadata.json)
+code=$(http_code https://127.0.0.1:2586/oauth-client-metadata.json)
 if [ "$code" = "200" ]; then
-  check "bidder on the host" PASS "GET http://127.0.0.1:2586/oauth-client-metadata.json -> $code"
+  check "bidder on the host" PASS "GET https://127.0.0.1:2586/oauth-client-metadata.json -> $code"
 else
-  check "bidder on the host" FAIL "GET http://127.0.0.1:2586/oauth-client-metadata.json -> $code"
+  check "bidder on the host" FAIL "GET https://127.0.0.1:2586/oauth-client-metadata.json -> $code"
 fi
 
 # A pod that dies after startup passes a single read. Reading the long-running
