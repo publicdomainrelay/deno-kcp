@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the auth-config-form component pair has a written specification: the shared base component (AuthConfigBase) that configures auth methods and the options specialization that tunes an existing auth method. The spec captures the save/redirect/flash contract and the AdapterError error-handling split, including the option-specific token_type exclusion and manual errorMessage assignment, so changes to either file can be checked against the documented behavior.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

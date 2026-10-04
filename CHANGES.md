@@ -3986,6 +3986,17 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.subclass-shared-policy-adapter` (MUST): "Each of the acl, egp, and rgp adapters must be produced by calling `extend()` on the shared policy adapter imported from `../policy`, so that all three inherit their request behavior from that single base adapter instead of redefining it."
 - added `r.upstream-license-header` (MUST): "Each adapter file must keep the HashiCorp copyright header and the `SPDX-License-Identifier: MPL-2.0` line at the top of the file, since these files are vendored upstream sources."
 
+### third-party-openbao-ui-app-components-auth-config-form
+
+- intent: "" -> "This context exists so the auth-config-form component pair has a written specification: the shared base component (AuthConfigBase) that configures auth methods and the options specialization that tunes an existing auth method. The spec captures the save/redirect/flash contract and the AdapterError error-handling split, including the option-specific token_type exclusion and manual errorMessage assignment, so changes to either file can be checked against the documented behavior."
+- added `r.base-component-shape` (MUST): "AuthConfigBase must be an Ember Component subclass with tagName set to the empty string, a model property defaulting to null, and injected flashMessages and router services."
+- added `r.base-save-model` (MUST): "AuthConfigBase.saveModel must be an ember-concurrency task wrapped in waitFor that yields this.model.save(); on error it must return silently when the error is an AdapterError and rethrow it otherwise; on success it must call transitionToSafe with the router and route 'vault.cluster.access.methods', then call flashMessages.success with 'The configuration was saved successfully.'."
+- added `r.options-extends-base` (MUST): "options.js must import AuthConfigBase from './config' and export a component created by extending it, injecting its own flashMessages and router services."
+- added `r.options-post-save-navigation` (MUST): "On a successful tune the options component must call transitionToSafe with the router and route 'vault.cluster.access.methods' and then call flashMessages.success with 'The configuration was saved successfully.', matching the base component's post-save behavior."
+- added `r.options-save-model-payload` (MUST): "The options component's saveModel task must build the payload by serializing this.model.config, then assign this.model.description onto it, and must delete the token_type key when this.model.methodType equals 'token' because token_type is not tuneable for the token auth method."
+- added `r.options-tune-and-error-message` (MUST): "The options saveModel task must call this.model.tune(data) with that payload; on an AdapterError it must return without rethrowing and must attempt to set this.model.errorMessage to err.errors[0] because model.save is not called and the model would otherwise never receive the error, wrapping that assignment so a failure is ignored; on any non-AdapterError it must rethrow."
+- added `r.positional-params` (MUST): "AuthConfigBase must declare the static positionalParams list as ['model'], so the model is passed positionally when the component is invoked."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4289,6 +4300,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-adapters-pki-config-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-adapters-policy-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-components-auth-config-form-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-components-auth-config-form-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-components-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
