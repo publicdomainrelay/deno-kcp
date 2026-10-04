@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This file exists as an external (black-box, HTTP-level) acceptance test of the response-header allow-list feature: it verifies that a plugin mount cannot leak arbitrary HTTP response headers to clients, and that an operator can opt a specific header back in through the mount's allowed_response_headers tuning, including with different letter casing. It is an upstream OpenBao test vendored under third_party/ in this repository, so it documents the observed behaviour of the vendored vault HTTP handler, not behaviour authored in this repo.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

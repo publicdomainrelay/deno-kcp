@@ -2548,6 +2548,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.test-cluster-options-existing` (SHOULD): "The existing-cluster test should run with performance standby disabled, standbys kept sealed, and standby reads disabled, and should name its logger after the test for readable output."
 - added `r.verify-peers-added` (MUST): "After joining, testhelpers.VerifyRaftPeers on the leader client must confirm core-0, core-1 and core-2 are all present as peers."
 
+### third-party-openbao-internal-vault-external-tests-response
+
+- intent: "" -> "This file exists as an external (black-box, HTTP-level) acceptance test of the response-header allow-list feature: it verifies that a plugin mount cannot leak arbitrary HTTP response headers to clients, and that an operator can opt a specific header back in through the mount's allowed_response_headers tuning, including with different letter casing. It is an upstream OpenBao test vendored under third_party/ in this repository, so it documents the observed behaviour of the vendored vault HTTP handler, not behaviour authored in this repo."
+- added `r.allowed-response-headers-tuning` (MUST): "After client.Sys().TuneMount("auth/headtest", api.MountConfigInput{AllowedResponseHeaders: []string{"WwW-AuthenTicate"}}), the www-authenticate header value Negotiate must appear on both the 200 response from auth/headtest/loginnoerror and the 401 response from auth/headtest/login, so the allowed-list comparison must ignore letter case."
+- added `r.credential-mount-header-emission` (MUST): "The test registers a credential backend named headtest whose login and loginnoerror read callbacks each return a logical.Response carrying Headers map[string][]string with key www-authenticate and value Negotiate; login additionally returns logical.CodedError(401, "authentication required") and loginnoerror returns an empty logical.Auth with a nil error. The backend is mounted through the API as auth type headtest on a test cluster built from vault.CoreConfig with that factory."
+- added `r.headers-stripped-when-not-allowed` (MUST): "When the mount has not been tuned, reading auth/headtest/loginnoerror must return HTTP status 200 with an empty www-authenticate header, and reading auth/headtest/login must return an error with HTTP status 401 and an empty www-authenticate header; the test fails if any of these headers is present."
+- added `r.raw-response-inspection` (SHOULD): "Header assertions must inspect the raw HTTP response through client.Logical().ReadRaw, which returns the status code and the header collection directly rather than the decoded logical response."
+- added `r.test-cluster-lifecycle` (MUST): "The test must run against a vault.NewTestCluster configured with HandlerFunc vaulthttp.Handler and DisableStandbyReads true, start it with cluster.Start(), wait for the active core with vault.TestWaitActive, and defer cluster.Cleanup() so the cluster is always torn down."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -2724,4 +2733,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-vault-external-tests-raft-raft-binary-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-raftha-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-response-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-internal-vault-external-tests-response-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-router-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
