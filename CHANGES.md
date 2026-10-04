@@ -6041,7 +6041,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 
 ### third-party-openbao-ui-lib-service-worker-authenticated-download
 
-- intent: "" -> "The context exists to record the contract of the service-worker-authenticated-download addon: an Ember CLI addon whose only runtime effect is to add the `Service-Worker-Allowed: /` header to every dev-server response so a service worker scoped at the root can handle authenticated downloads. It is documented here because the header, not the addon wiring, is the behavior other parts of the UI depend on, and because the addon's identity is sourced from its own package manifest rather than hard-coded."
+- intent: "" -> "The context records the contract of the service-worker-authenticated-download addon so the dev-server header behavior it provides can be relied on without re-reading the addon. The addon exists only to add `Service-Worker-Allowed: /` to every dev-server response; the Ember wiring around that header matters less than the header itself, because other parts of the UI depend on a root-scoped service worker being permitted to handle authenticated downloads. The addon's identity is deliberately read from its own package manifest rather than hard-coded, so the context documents that too."
 - added `r.addon-name-from-package` (MUST): "The exported addon object reports its `name` by requiring the sibling `package.json` and reading its `name` field, so the addon identity stays in sync with the package manifest instead of being hard-coded."
 - added `r.developing-addon-flag` (MUST): "`isDevelopingAddon()` returns `true`, so Ember CLI treats this addon as in-development and does not skip its hooks when the host app is built or served."
 - added `r.middleware-pass-through` (MUST): "The middleware sets the header before the response is written and then calls `next()`, so the request continues down the dev-server middleware chain and the header is present on responses produced by later handlers."
@@ -6600,4 +6600,4 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-pki-config-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-service-worker-authenticated-download-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-service-worker-authenticated-download-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-lib-service-worker-authenticated-download-service-worker-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-service-worker-authenticated-download-service-worker-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
