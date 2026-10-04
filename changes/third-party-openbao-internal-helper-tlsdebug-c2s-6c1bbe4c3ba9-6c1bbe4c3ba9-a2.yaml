@@ -1,7 +1,7 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 kind: SpecChange
 metadata:
-  name: third-party-openbao-internal-helper-tlsdebug-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9
+  name: third-party-openbao-internal-helper-tlsdebug-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2
   namespace: default
 spec:
   delta: {}
@@ -10,7 +10,10 @@ spec:
   systemContext: third-party-openbao-internal-helper-tlsdebug
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  agentLog: |-
+  message: the agent is summarizing third-party-openbao-internal-helper-tlsdebug
+  phase: Running
+superseded:
+- message: |-
     ...g file or touching the logger.",
           "codeRefs": [
             "file:third_party/openbao/internal/helper/tlsdebug/inject.go"
@@ -57,51 +60,5 @@ status:
         }
       ]
     }
-  message: |-
-    ...g file or touching the logger.",
-          "codeRefs": [
-            "file:third_party/openbao/internal/helper/tlsdebug/inject.go"
-          ]
-        },
-        {
-          "id": "r.inject-opens-key-log-file",
-          "level": "MUST",
-          "text": "The Inject variant in inject.go must obtain the key log file from the unexported openKeyLogFile helper, and on error must report it through logger.Error with the message \"could not open TLS key log file\" and the error attached as an \"error\" key.",
-          "codeRefs": [
-            "file:third_party/openbao/internal/helper/tlsdebug/inject.go"
-          ]
-        },
-        {
-          "id": "r.inject-sets-key-log-writer",
-          "level": "MUST",
-          "text": "After opening the file, Inject must log a warning through logger.Warn with the message \"injecting session key logger into TLS config\" and a \"log_file\" key holding the file name, assign that file to config.KeyLogWriter, and return the same config pointer it was given.",
-          "codeRefs": [
-            "file:third_party/openbao/internal/helper/tlsdebug/inject.go"
-          ]
-        },
-        {
-          "id": "r.inject-single-symbol-per-build",
-          "level": "MUST",
-          "text": "The two files must not both compile into one build: inject.go and dummy_inject.go supply the same Inject signature, so a build selects exactly one of them and callers always resolve a single Inject symbol.",
-          "codeRefs": [
-            "file:third_party/openbao/internal/helper/tlsdebug/inject.go",
-            "file:third_party/openbao/internal/helper/tlsdebug/dummy_inject.go"
-          ]
-        }
-      ],
-      "interfaces": [
-        {
-          "name": "Inject",
-          "kind": "function",
-          "signature": "func Inject(_ hclog.Logger, config *tls.Config) *tls.Config",
-          "file": "third_party/openbao/internal/helper/tlsdebug/dummy_inject.go"
-        },
-        {
-          "name": "Inject",
-          "kind": "function",
-          "signature": "func Inject(logger hclog.Logger, config *tls.Config) *tls.Config",
-          "file": "third_party/openbao/internal/helper/tlsdebug/inject.go"
-        }
-      ]
-    }
+  name: third-party-openbao-internal-helper-tlsdebug-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9
   phase: Failed
