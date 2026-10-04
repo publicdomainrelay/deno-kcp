@@ -1,0 +1,33 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-internal-helper-testhelpers-ldap-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-internal-helper-testhelpers-ldap
+  toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+status:
+  agentLog: 'third_party/openbao/internal/helper/testhelpers/ldap/ldaphelper.go is
+    a single-file OpenBao test helper that starts a throwaway LDAP server in Docker
+    so LDAP authentication and secrets-engine tests have a real directory to bind
+    against. PrepareTestContainer takes a *testing.T and an image version string,
+    launches the michelvocks/docker-test-openldap image on 389/tcp under container
+    name "ldap", fills an ldaputil.ConfigEntry with the planetexpress demo directory
+    defaults (UserDN and GroupDN ou=people,dc=planetexpress,dc=com, UserAttr cn, UserFilter
+    ({{.UserAttr}}={{.Username}}), BindDN cn=admin,dc=planetexpress,dc=com, BindPassword
+    GoodNewsEveryone, GroupAttr cn, RequestTimeout 60, MaximumPageSize 1000), then
+    runs a readiness probe inside the docker.StartService callback: it writes an ldap://host:port
+    URL into cfg.Url, builds an ldaputil.Client from ldaputil.NewLDAP() with an hclog
+    logger, dials with DialLDAP, closes the probe connection, and resolves the bind
+    DN for the user "Philip J. Fry" via GetUserBindDN. It returns the container Cleanup
+    function plus the populated ConfigEntry, and calls t.Fatalf with "could not start
+    local LDAP docker container: %s" on runner-creation or startup failure.'
+  message: wrote 6 requirement(s) and 1 interface(s) for third-party-openbao-internal-helper-testhelpers-ldap
+  phase: Succeeded
+superseded:
+- message: wrote 6 requirement(s) and 1 interface(s) for third-party-openbao-internal-helper-testhelpers-ldap
+  name: third-party-openbao-internal-helper-testhelpers-ldap-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9
+  phase: Succeeded

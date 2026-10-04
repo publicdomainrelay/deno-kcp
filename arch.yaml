@@ -27742,12 +27742,14 @@ system_contexts:
   - file:third_party/openbao/internal/helper/testhelpers/ldap/ldaphelper.go ldaphelper.go@third_party/openbao/internal/helper/testhelpers/ldap/ldaphelper.go
   - function:39dc4dc3575e0e09a7e68e2f222352c0 PrepareTestContainer@third_party/openbao/internal/helper/testhelpers/ldap/ldaphelper.go:16
   id: sc.third-party-openbao-internal-helper-testhelpers-ldap
-  intent: This context exists so test suites that exercise OpenBao's LDAP authentication
-    and secrets-engine paths have a real directory server to talk to without an external
-    fixture. The helper hides container lifecycle, port mapping, and readiness polling
-    behind one call, and hands back a ready-to-use ldaputil.ConfigEntry plus a cleanup
-    func so each test can bind, search, and tear down deterministically. It is a third-party
-    (openbao) internal helper vendored into this repository, not application code.
+  intent: The helper exists so every test that exercises OpenBao's LDAP auth method
+    or LDAP-backed secrets engine can obtain a working directory server without an
+    external fixture or manual container setup. One call hides image selection, port
+    mapping, and readiness polling behind a single function, and hands back both a
+    ready-to-use ldaputil.ConfigEntry and a cleanup func, so a test binds, searches,
+    and tears down deterministically. It is vendored third-party OpenBao internal
+    test code in this repository, not application logic, and is compiled only into
+    test binaries.
   interfaces:
   - file: third_party/openbao/internal/helper/testhelpers/ldap/ldaphelper.go
     kind: function
@@ -27761,51 +27763,59 @@ system_contexts:
     - function:39dc4dc3575e0e09a7e68e2f222352c0
     id: r.close-probe-connection
     level: SHOULD
-    text: The readiness callback should defer Close on the dialed LDAP connection
-      so the probe connection does not leak into the test's lifetime.
+    text: The readiness callback should defer conn.Close() immediately after a successful
+      DialLDAP, so the probe connection is released when the callback returns and
+      does not leak into the test's lifetime.
   - codeRefs:
     - file:third_party/openbao/internal/helper/testhelpers/ldap/ldaphelper.go
     - function:39dc4dc3575e0e09a7e68e2f222352c0
     id: r.default-config-entry
     level: MUST
-    text: 'PrepareTestContainer must populate the returned ldaputil.ConfigEntry with
-      the planetexpress defaults: UserDN and GroupDN ou=people,dc=planetexpress,dc=com,
+    text: 'PrepareTestContainer must allocate the returned ldaputil.ConfigEntry and
+      set the planetexpress defaults on it: UserDN and GroupDN ou=people,dc=planetexpress,dc=com,
       UserAttr cn, UserFilter ({{.UserAttr}}={{.Username}}), BindDN cn=admin,dc=planetexpress,dc=com,
       BindPassword GoodNewsEveryone, GroupAttr cn, RequestTimeout 60, MaximumPageSize
-      1000.'
+      1000; these values are what the container''s demo directory is seeded with,
+      so a test that overrides none of them binds successfully.'
   - codeRefs:
     - file:third_party/openbao/internal/helper/testhelpers/ldap/ldaphelper.go
     - function:39dc4dc3575e0e09a7e68e2f222352c0
     id: r.fatal-on-failure
     level: MUST
-    text: 'PrepareTestContainer must call t.Fatalf with the message "could not start
-      local LDAP docker container: %s" when the service runner cannot be created or
-      the service fails to start.'
+    text: 'PrepareTestContainer must call t.Fatalf with the format "could not start
+      local LDAP docker container: %s" when docker.NewServiceRunner returns an error
+      and when runner.StartService returns an error, so a missing or broken Docker
+      environment fails the test at the point of setup rather than surfacing as a
+      later nil-config panic.'
   - codeRefs:
     - file:third_party/openbao/internal/helper/testhelpers/ldap/ldaphelper.go
     - function:39dc4dc3575e0e09a7e68e2f222352c0
     id: r.readiness-probe
     level: MUST
-    text: Before returning, the service callback must set cfg.Url to ldap://<host>:<port>,
-      construct an ldaputil.Client with ldaputil.NewLDAP() and an hclog logger, dial
-      the server with DialLDAP, and resolve the bind DN for the user "Philip J. Fry"
-      via GetUserBindDN, returning an error if any step fails.
+    text: Before returning, the StartService callback must build connURL as ldap://<host>:<port>
+      and assign it to cfg.Url, construct an ldaputil.Client with LDAP set to ldaputil.NewLDAP()
+      and Logger set to hclog.New(nil), dial the server with client.DialLDAP(cfg),
+      and then resolve the bind DN for the user "Philip J. Fry" with client.GetUserBindDN(cfg,
+      conn, "Philip J. Fry"); a dial or lookup error is returned to the runner so
+      startup retries instead of the test proceeding against an unready server.
   - codeRefs:
     - file:third_party/openbao/internal/helper/testhelpers/ldap/ldaphelper.go
     - function:39dc4dc3575e0e09a7e68e2f222352c0
     id: r.return-cleanup-and-config
     level: MUST
-    text: PrepareTestContainer must return the container service's Cleanup function
-      together with the populated ConfigEntry so callers can release the container
-      after the test.
+    text: PrepareTestContainer must return svc.Cleanup together with the populated
+      cfg on success, so the caller can release the container when the test ends while
+      still using the same ConfigEntry it was probed with.
   - codeRefs:
     - file:third_party/openbao/internal/helper/testhelpers/ldap/ldaphelper.go
     - function:39dc4dc3575e0e09a7e68e2f222352c0
     id: r.start-ldap-container
     level: MUST
-    text: PrepareTestContainer must start a Docker service from image repository docker.mirror.hashicorp.services/michelvocks/docker-test-openldap,
-      using the caller-supplied version argument as ImageTag, container name "ldap",
-      and an exposed 389/tcp port.
+    text: PrepareTestContainer must start a Docker service through docker.NewServiceRunner
+      with ImageRepo docker.mirror.hashicorp.services/michelvocks/docker-test-openldap,
+      the caller-supplied version argument as ImageTag, ContainerName "ldap", and
+      Ports []string{"389/tcp"}, so the planetexpress directory server listens on
+      the exposed LDAP port.
   upstream: self
 - code:
   - third_party/openbao/internal/helper/testhelpers/logical/testing.go
