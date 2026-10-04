@@ -1571,6 +1571,19 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.unix-socket-listener` (MUST): "UnixSocketListener removes any pre-existing file at the given path, ignoring a not-exist result but failing on other removal errors, then listens on that unix path. When a UnixSocketsConfig is supplied it applies its User, Group and Mode to the socket file, accepting either numeric ids or names, and fails with a wrapped error if permissions cannot be set. The returned listener is an rmListener that deletes the socket file on Close."
 - added `r.zap-hcl-core` (MUST): "zapHclCore adapts an hclog.Logger to the zapcore.Core interface, implementing Enabled, With, Check, Write and Sync so the ACME client library's zap logging can be routed into OpenBao's hclog output."
 
+### third-party-openbao-internal-helper-locking
+
+- intent: "" -> "The context describes a vendored third-party helper whose only job is to make lock selection a type choice instead of a call-site change. Code that needs mutual exclusion or reader/writer exclusion declares a field of type `Mutex` or `RWMutex` from this package; configuration then decides whether that field is backed by `sync` or by `deadlock`, giving deadlock diagnostics in the detection build and plain, cheaper locks otherwise. The spec must record the two interface shapes exactly, the four concrete embedders, and the invariant that each concrete type satisfies the interface of its kind, plus the config-option name and the diagnostic prefix the comments state."
+- added `r.deadlock-detection-opt-in` (SHOULD): "Deadlock detection is opt-in through the configuration option the package comment spells `detact_deadlocks`; when that option is absent the caller takes the `SyncMutex`/`SyncRWMutex` types so no deadlock instrumentation cost is paid."
+- added `r.deadlock-mutex-embed` (MUST): "`DeadlockMutex` embeds `deadlock.Mutex` and nothing else, so it satisfies `Mutex` while adding periodic deadlock checking; when a deadlock candidate is found the output is prefixed with "POTENTIAL DEADLOCK" as described by github.com/sasha-s/go-deadlock."
+- added `r.deadlock-rwmutex-embed` (MUST): "`DeadlockRWMutex` embeds `deadlock.RWMutex`, making it the reader/writer variant of `DeadlockMutex` and giving it the full five-method `RWMutex` surface with deadlock checking."
+- added `r.interface-only-dependency` (SHOULD): "Consumers depend on the `Mutex` and `RWMutex` interfaces rather than on a concrete type, so swapping between the `Sync` and `Deadlock` implementations is a type choice at construction time and needs no change at the locking call sites. Observed callers include `GetTestAuditHandler` and `lockForLeaseID`."
+- added `r.mutex-interface-shape` (MUST): "The `Mutex` interface declares exactly two methods, `Lock()` and `Unlock()`, both taking no arguments and returning nothing, so any lock implementation selected here is usable wherever plain mutual exclusion is required."
+- added `r.package-isolation` (MUST): "The package depends only on the standard library `sync` package and `github.com/sasha-s/go-deadlock`; it holds the lock abstractions alone and must not import higher-level OpenBao packages, keeping it free of import cycles."
+- added `r.rwmutex-interface-shape` (MUST): "The `RWMutex` interface declares five methods: `Lock()`, `RLock()`, `RLocker()` returning a `sync.Locker`, `RUnlock()` and `Unlock()`, so callers get exclusive lock, shared read lock, a `sync.Locker` view of the read side, and the matching unlock operations."
+- added `r.sync-mutex-embed` (MUST): "`SyncMutex` embeds `sync.Mutex` and nothing else, providing the ordinary, non-instrumented `Mutex` implementation used when deadlock detection is not requested."
+- added `r.sync-rwmutex-embed` (MUST): "`SyncRWMutex` embeds `sync.RWMutex`, providing the ordinary, non-instrumented `RWMutex` implementation that supplies `RLock`, `RLocker`, `RUnlock` and the exclusive pair."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -1655,6 +1668,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-helper-identity-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-identity-mfa-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-kmsplugin-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-helper-kmsplugin-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-helper-kmsplugin-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-listenerutil-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-helper-locking-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-helper-locking-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |

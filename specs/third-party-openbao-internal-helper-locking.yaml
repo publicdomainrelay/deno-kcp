@@ -1,10 +1,169 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
 - file:third_party/openbao/internal/helper/locking/lock.go lock.go@third_party/openbao/internal/helper/locking/lock.go
+- interface:5d19158cc568ea82562c5bc88978e11c RWMutex@third_party/openbao/internal/helper/locking/lock.go:19
+- interface:83c2e3872c0d5d35498676df46dd32ba Mutex@third_party/openbao/internal/helper/locking/lock.go:13
+- method:08d4f85db83ecaec65cd8c980640fdea RWMutex.RUnlock@third_party/openbao/internal/helper/locking/lock.go:23
+- method:19fc738f9f0074a1a0ec17b31fc9117d RWMutex.RLocker@third_party/openbao/internal/helper/locking/lock.go:22
+- method:59471191921196c6f74a705dd9d630b9 Mutex.Lock@third_party/openbao/internal/helper/locking/lock.go:14
+- method:735db214e49fed176c56084f86db04dd RWMutex.RLock@third_party/openbao/internal/helper/locking/lock.go:21
+- method:7bebc3d80a4bae6a493b9d84a3606b4d RWMutex.Unlock@third_party/openbao/internal/helper/locking/lock.go:24
+- method:8392a44880752b483e540909b7c79bcc Mutex.Unlock@third_party/openbao/internal/helper/locking/lock.go:15
+- method:e0739e786f7be555bbc831558ea9c142 RWMutex.Lock@third_party/openbao/internal/helper/locking/lock.go:20
+- struct:15b01061949977f75c53314d977c5aa7 DeadlockMutex@third_party/openbao/internal/helper/locking/lock.go:32
+- struct:86d6466ce8a4d1b78915d6f3e74063c2 SyncRWMutex@third_party/openbao/internal/helper/locking/lock.go:47
+- struct:d0584ea5fd3fff17e913ecf1e630bb39 SyncMutex@third_party/openbao/internal/helper/locking/lock.go:42
+- struct:fb02fe212492738ae74325f5b9a6ef7e DeadlockRWMutex@third_party/openbao/internal/helper/locking/lock.go:37
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-helper-locking
   namespace: default
 spec:
+  intent: The context describes a vendored third-party helper whose only job is to
+    make lock selection a type choice instead of a call-site change. Code that needs
+    mutual exclusion or reader/writer exclusion declares a field of type `Mutex` or
+    `RWMutex` from this package; configuration then decides whether that field is
+    backed by `sync` or by `deadlock`, giving deadlock diagnostics in the detection
+    build and plain, cheaper locks otherwise. The spec must record the two interface
+    shapes exactly, the four concrete embedders, and the invariant that each concrete
+    type satisfies the interface of its kind, plus the config-option name and the
+    diagnostic prefix the comments state.
+  interfaces:
+  - file: third_party/openbao/internal/helper/locking/lock.go
+    kind: struct
+    name: DeadlockMutex
+    signature: type DeadlockMutex struct { deadlock.Mutex }
+  - file: third_party/openbao/internal/helper/locking/lock.go
+    kind: struct
+    name: DeadlockRWMutex
+    signature: type DeadlockRWMutex struct { deadlock.RWMutex }
+  - file: third_party/openbao/internal/helper/locking/lock.go
+    kind: interface
+    name: Mutex
+    signature: type Mutex interface { Lock(); Unlock() }
+  - file: third_party/openbao/internal/helper/locking/lock.go
+    kind: method
+    name: Mutex.Lock
+    signature: Lock()
+  - file: third_party/openbao/internal/helper/locking/lock.go
+    kind: method
+    name: Mutex.Unlock
+    signature: Unlock()
+  - file: third_party/openbao/internal/helper/locking/lock.go
+    kind: interface
+    name: RWMutex
+    signature: type RWMutex interface { Lock(); RLock(); RLocker() sync.Locker; RUnlock();
+      Unlock() }
+  - file: third_party/openbao/internal/helper/locking/lock.go
+    kind: method
+    name: RWMutex.Lock
+    signature: Lock()
+  - file: third_party/openbao/internal/helper/locking/lock.go
+    kind: method
+    name: RWMutex.RLock
+    signature: RLock()
+  - file: third_party/openbao/internal/helper/locking/lock.go
+    kind: method
+    name: RWMutex.RLocker
+    signature: RLocker() sync.Locker
+  - file: third_party/openbao/internal/helper/locking/lock.go
+    kind: method
+    name: RWMutex.RUnlock
+    signature: RUnlock()
+  - file: third_party/openbao/internal/helper/locking/lock.go
+    kind: method
+    name: RWMutex.Unlock
+    signature: Unlock()
+  - file: third_party/openbao/internal/helper/locking/lock.go
+    kind: struct
+    name: SyncMutex
+    signature: type SyncMutex struct { sync.Mutex }
+  - file: third_party/openbao/internal/helper/locking/lock.go
+    kind: struct
+    name: SyncRWMutex
+    signature: type SyncRWMutex struct { sync.RWMutex }
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - struct:15b01061949977f75c53314d977c5aa7
+    - struct:86d6466ce8a4d1b78915d6f3e74063c2
+    - struct:d0584ea5fd3fff17e913ecf1e630bb39
+    - struct:fb02fe212492738ae74325f5b9a6ef7e
+    id: r.deadlock-detection-opt-in
+    level: SHOULD
+    text: Deadlock detection is opt-in through the configuration option the package
+      comment spells `detact_deadlocks`; when that option is absent the caller takes
+      the `SyncMutex`/`SyncRWMutex` types so no deadlock instrumentation cost is paid.
+  - codeRefs:
+    - interface:83c2e3872c0d5d35498676df46dd32ba
+    - struct:15b01061949977f75c53314d977c5aa7
+    id: r.deadlock-mutex-embed
+    level: MUST
+    text: '`DeadlockMutex` embeds `deadlock.Mutex` and nothing else, so it satisfies
+      `Mutex` while adding periodic deadlock checking; when a deadlock candidate is
+      found the output is prefixed with "POTENTIAL DEADLOCK" as described by github.com/sasha-s/go-deadlock.'
+  - codeRefs:
+    - interface:5d19158cc568ea82562c5bc88978e11c
+    - struct:fb02fe212492738ae74325f5b9a6ef7e
+    id: r.deadlock-rwmutex-embed
+    level: MUST
+    text: '`DeadlockRWMutex` embeds `deadlock.RWMutex`, making it the reader/writer
+      variant of `DeadlockMutex` and giving it the full five-method `RWMutex` surface
+      with deadlock checking.'
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/locking/lock.go
+    - interface:5d19158cc568ea82562c5bc88978e11c
+    - interface:83c2e3872c0d5d35498676df46dd32ba
+    id: r.interface-only-dependency
+    level: SHOULD
+    text: Consumers depend on the `Mutex` and `RWMutex` interfaces rather than on
+      a concrete type, so swapping between the `Sync` and `Deadlock` implementations
+      is a type choice at construction time and needs no change at the locking call
+      sites. Observed callers include `GetTestAuditHandler` and `lockForLeaseID`.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/locking/lock.go
+    - interface:83c2e3872c0d5d35498676df46dd32ba
+    - method:59471191921196c6f74a705dd9d630b9
+    - method:8392a44880752b483e540909b7c79bcc
+    id: r.mutex-interface-shape
+    level: MUST
+    text: The `Mutex` interface declares exactly two methods, `Lock()` and `Unlock()`,
+      both taking no arguments and returning nothing, so any lock implementation selected
+      here is usable wherever plain mutual exclusion is required.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/locking/lock.go
+    id: r.package-isolation
+    level: MUST
+    text: The package depends only on the standard library `sync` package and `github.com/sasha-s/go-deadlock`;
+      it holds the lock abstractions alone and must not import higher-level OpenBao
+      packages, keeping it free of import cycles.
+  - codeRefs:
+    - interface:5d19158cc568ea82562c5bc88978e11c
+    - method:08d4f85db83ecaec65cd8c980640fdea
+    - method:19fc738f9f0074a1a0ec17b31fc9117d
+    - method:735db214e49fed176c56084f86db04dd
+    - method:7bebc3d80a4bae6a493b9d84a3606b4d
+    - method:e0739e786f7be555bbc831558ea9c142
+    id: r.rwmutex-interface-shape
+    level: MUST
+    text: 'The `RWMutex` interface declares five methods: `Lock()`, `RLock()`, `RLocker()`
+      returning a `sync.Locker`, `RUnlock()` and `Unlock()`, so callers get exclusive
+      lock, shared read lock, a `sync.Locker` view of the read side, and the matching
+      unlock operations.'
+  - codeRefs:
+    - interface:83c2e3872c0d5d35498676df46dd32ba
+    - struct:d0584ea5fd3fff17e913ecf1e630bb39
+    id: r.sync-mutex-embed
+    level: MUST
+    text: '`SyncMutex` embeds `sync.Mutex` and nothing else, providing the ordinary,
+      non-instrumented `Mutex` implementation used when deadlock detection is not
+      requested.'
+  - codeRefs:
+    - interface:5d19158cc568ea82562c5bc88978e11c
+    - struct:86d6466ce8a4d1b78915d6f3e74063c2
+    id: r.sync-rwmutex-embed
+    level: MUST
+    text: '`SyncRWMutex` embeds `sync.RWMutex`, providing the ordinary, non-instrumented
+      `RWMutex` implementation that supplies `RLock`, `RLocker`, `RUnlock` and the
+      exclusive pair.'
   upstream: self

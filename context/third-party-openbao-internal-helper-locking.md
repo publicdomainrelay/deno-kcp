@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context describes a vendored third-party helper whose only job is to make lock selection a type choice instead of a call-site change. Code that needs mutual exclusion or reader/writer exclusion declares a field of type `Mutex` or `RWMutex` from this package; configuration then decides whether that field is backed by `sync` or by `deadlock`, giving deadlock diagnostics in the detection build and plain, cheaper locks otherwise. The spec must record the two interface shapes exactly, the four concrete embedders, and the invariant that each concrete type satisfies the interface of its kind, plus the config-option name and the diagnostic prefix the comments state.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
