@@ -4361,6 +4361,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.injected-services` (MUST): "The controller declares router and flashMessages as injected Ember services before use, providing the routing and user-notification dependencies that deleteMethod consumes."
 - added `r.tab-query-param` (MUST): "The controller declares the query parameter list ['tab'] and initializes the tab property to 'config', so the selected tab is reflected in the URL and the page opens on the config tab when no tab parameter is given."
 
+### third-party-openbao-ui-app-controllers-vault-cluster-access-namespaces
+
+- intent: "" -> "This context documents the controller layer of the OpenBao UI namespace access screens: the actions the list and create routes expose to templates, the service dependencies they resolve, and the record teardown contract they share, so the namespaces route behavior is specified independent of the Ember runtime."
+- added `r.cleanup-model-teardown` (MUST): "Both namespace controllers MUST define cleanupModel, which returns without action when the model is absent or is saving, destroyed, or destroying; otherwise it unsets the controller's model and calls removeRecord(store, model) when the record exposes unloadRecord, so the singleton controller does not retain a stale record."
+- added `r.create-controller-on-save` (MUST): "The create controller's onSave action, when called with saveType equal to 'save', refetches namespaces by performing namespaceService.findNamespacesForUser and then transitions to the route vault.cluster.access.namespaces.index through transitionToSafe with the router service; other saveType values cause no transition."
+- added `r.create-controller-services` (MUST): "The namespaces create controller injects the namespace, store and router services so the save action can refresh picker data and route away from the create screen."
+- added `r.namespace-list-controller-state` (MUST): "The namespaces index controller aliases accessibleNamespaces to namespaceService.accessibleNamespaces and currentNamespace to namespaceService.path, so templates read live namespace service state rather than controller-owned copies, and it injects the namespace and store services."
+- added `r.refresh-namespace-list-action` (MUST): "The refreshNamespaceList action MUST refetch the namespaces available to the user by performing namespaceService.findNamespacesForUser and then send the reload action, so the namespace picker is repopulated before the route data reloads."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4705,8 +4714,9 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-enforcements-enforcement-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-methods-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-methods-method-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-methods-method-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-methods-method-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-namespaces-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-assignments-assignment-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

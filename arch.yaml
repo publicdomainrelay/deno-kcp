@@ -61390,7 +61390,53 @@ system_contexts:
   - file:third_party/openbao/ui/app/controllers/vault/cluster/access/namespaces/index.js
     index.js@third_party/openbao/ui/app/controllers/vault/cluster/access/namespaces/index.js
   id: sc.third-party-openbao-ui-app-controllers-vault-cluster-access-namespaces
+  intent: 'This context documents the controller layer of the OpenBao UI namespace
+    access screens: the actions the list and create routes expose to templates, the
+    service dependencies they resolve, and the record teardown contract they share,
+    so the namespaces route behavior is specified independent of the Ember runtime.'
   name: third-party-openbao-ui-app-controllers-vault-cluster-access-namespaces
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/namespaces/create.js
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/namespaces/index.js
+    id: r.cleanup-model-teardown
+    level: MUST
+    text: Both namespace controllers MUST define cleanupModel, which returns without
+      action when the model is absent or is saving, destroyed, or destroying; otherwise
+      it unsets the controller's model and calls removeRecord(store, model) when the
+      record exposes unloadRecord, so the singleton controller does not retain a stale
+      record.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/namespaces/create.js
+    id: r.create-controller-on-save
+    level: MUST
+    text: The create controller's onSave action, when called with saveType equal to
+      'save', refetches namespaces by performing namespaceService.findNamespacesForUser
+      and then transitions to the route vault.cluster.access.namespaces.index through
+      transitionToSafe with the router service; other saveType values cause no transition.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/namespaces/create.js
+    id: r.create-controller-services
+    level: MUST
+    text: The namespaces create controller injects the namespace, store and router
+      services so the save action can refresh picker data and route away from the
+      create screen.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/namespaces/index.js
+    id: r.namespace-list-controller-state
+    level: MUST
+    text: The namespaces index controller aliases accessibleNamespaces to namespaceService.accessibleNamespaces
+      and currentNamespace to namespaceService.path, so templates read live namespace
+      service state rather than controller-owned copies, and it injects the namespace
+      and store services.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/namespaces/index.js
+    id: r.refresh-namespace-list-action
+    level: MUST
+    text: The refreshNamespaceList action MUST refetch the namespaces available to
+      the user by performing namespaceService.findNamespacesForUser and then send
+      the reload action, so the namespace picker is repopulated before the route data
+      reloads.
   upstream: self
 - code:
   - third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/assignments/assignment/details.js

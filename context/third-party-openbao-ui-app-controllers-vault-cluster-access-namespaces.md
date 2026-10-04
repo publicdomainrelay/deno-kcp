@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context documents the controller layer of the OpenBao UI namespace access screens: the actions the list and create routes expose to templates, the service dependencies they resolve, and the record teardown contract they share, so the namespaces route behavior is specified independent of the Ember runtime.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
