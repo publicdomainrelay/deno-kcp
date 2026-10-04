@@ -1,15 +1,123 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: CancelLock, CancelLock.Lock, CancelLock.Unlock, CreateGenericLocks,
+    CreateLocks, KeyedCancelLock, KeyedCancelLock.Lock, KeyedCancelLock.Unlock, LockEntry,
+    LockForKey, LockIndexForKey, LockWithUnlock, LocksForKeys, NewCancelLock, NewKeyedCancelLock,
+    RLockWithUnlock'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/sdk/helper/locksutil/cancel.go
+  - third_party/openbao/sdk/helper/locksutil/cancel_test.go
+  - third_party/openbao/sdk/helper/locksutil/keyed.go
+  - third_party/openbao/sdk/helper/locksutil/keyed_test.go
+  - third_party/openbao/sdk/helper/locksutil/sharded.go
+  - third_party/openbao/sdk/helper/locksutil/sharded_test.go
+  fingerprint: 594b0fe6fe5812be645925f67f55590ac09d4ce7bb2ebc71974cc0eade80aafe
+  interfaces:
+  - codegraphId: struct:ac01aefe4a8d0d904127b99e79b38fb8
+    file: third_party/openbao/sdk/helper/locksutil/cancel.go
+    kind: struct
+    line: 12
+    name: CancelLock
+  - codegraphId: function:e4fcec4c3aa7e104f30b6b915c189231
+    file: third_party/openbao/sdk/helper/locksutil/cancel.go
+    kind: function
+    line: 17
+    name: NewCancelLock
+    signature: () CancelLock
+  - codegraphId: method:f562c65a1598af9503938c0ecce4ec11
+    file: third_party/openbao/sdk/helper/locksutil/cancel.go
+    kind: method
+    line: 25
+    name: CancelLock.Lock
+    signature: (ctx context.Context) error
+  - codegraphId: method:ebd4f3faebbbc50ee2f53630cca429f5
+    file: third_party/openbao/sdk/helper/locksutil/cancel.go
+    kind: method
+    line: 35
+    name: CancelLock.Unlock
+    signature: ()
+  - codegraphId: struct:bc9ac4573dc471abeaf8c36976ccefd7
+    file: third_party/openbao/sdk/helper/locksutil/keyed.go
+    kind: struct
+    line: 16
+    name: KeyedCancelLock
+  - codegraphId: function:f2bbb49ba03291c7ccef46ec3b0363d3
+    file: third_party/openbao/sdk/helper/locksutil/keyed.go
+    kind: function
+    line: 50
+    name: NewKeyedCancelLock
+    signature: () *KeyedCancelLock[K]
+  - codegraphId: method:f1832719c3d24f064eeb4ff7fd201278
+    file: third_party/openbao/sdk/helper/locksutil/keyed.go
+    kind: method
+    line: 58
+    name: KeyedCancelLock.Lock
+    signature: (ctx context.Context, key K) error
+  - codegraphId: method:0fb98fe3713f16fdbba9dc486b09543a
+    file: third_party/openbao/sdk/helper/locksutil/keyed.go
+    kind: method
+    line: 80
+    name: KeyedCancelLock.Unlock
+    signature: (key K)
+  - codegraphId: struct:992c54a456613c8879532a6d443346ac
+    file: third_party/openbao/sdk/helper/locksutil/sharded.go
+    kind: struct
+    line: 17
+    name: LockEntry
+  - codegraphId: function:77cd1ae34f3894f6161c196393ff4f0e
+    file: third_party/openbao/sdk/helper/locksutil/sharded.go
+    kind: function
+    line: 32
+    name: CreateLocks
+    signature: () []*LockEntry
+  - codegraphId: function:2da64336ba1d96cddb18545f63d42d46
+    file: third_party/openbao/sdk/helper/locksutil/sharded.go
+    kind: function
+    line: 43
+    name: CreateGenericLocks
+    signature: () []*L
+  - codegraphId: function:37c1880dccb89d208f980a32a82ec1ae
+    file: third_party/openbao/sdk/helper/locksutil/sharded.go
+    kind: function
+    line: 52
+    name: LockIndexForKey
+    signature: (key string) uint8
+  - codegraphId: function:04b51d8d5e7522a03b8667b38333e1aa
+    file: third_party/openbao/sdk/helper/locksutil/sharded.go
+    kind: function
+    line: 57
+    name: LockForKey
+    signature: (locks []*L, key string) *L
+  - codegraphId: function:29a6e4967dd754d295ccbaf39ee1a6b2
+    file: third_party/openbao/sdk/helper/locksutil/sharded.go
+    kind: function
+    line: 63
+    name: LocksForKeys
+    signature: (locks []*L, keys []string) []*L
+  - codegraphId: function:db362553e78d984bfe82c90f40de0d2e
+    file: third_party/openbao/sdk/helper/locksutil/sharded.go
+    kind: function
+    line: 81
+    name: LockWithUnlock
+    signature: (locks []*L, key string) func()
+  - codegraphId: function:6d314051beba0cf01e864991f5a26344
+    file: third_party/openbao/sdk/helper/locksutil/sharded.go
+    kind: function
+    line: 92
+    name: RLockWithUnlock
+    signature: (locks []*L, key string) func()
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: a305114e187bc0b62663feffe0abed3dc908d65dd09eddaae407a1895bbdcd1d
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 594b0fe6fe5812be645925f67f55590ac09d4ce7bb2ebc71974cc0eade80aafe
