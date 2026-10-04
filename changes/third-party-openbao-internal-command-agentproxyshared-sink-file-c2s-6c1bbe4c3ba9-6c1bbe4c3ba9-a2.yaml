@@ -1,0 +1,30 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-internal-command-agentproxyshared-sink-file-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-internal-command-agentproxyshared-sink-file
+  toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+status:
+  agentLog: This context is the file sink of the OpenBao agent proxy shared sink package,
+    in third_party/openbao/internal/command/agentproxyshared/sink/file. It holds one
+    constructor, NewFileSink, and the unexported fileSink type whose WriteToken method
+    writes a token to disk, plus two test files. NewFileSink builds the sink from
+    a sink.SinkConfig that carries a logger and a string-keyed Config map, validating
+    the logger, the mandatory path, and optional mode, uid and gid overrides, then
+    performs a write check by calling WriteToken with the empty string before returning
+    a sink implementing the sink.Sink interface declared elsewhere in the package.
+    WriteToken generates a UUID, opens a temporary file beside the target path, writes
+    the token, then either removes the temporary file for a write check or chowns
+    it and renames it over the target path so the token lands atomically.
+  message: wrote 8 requirement(s) and 2 interface(s) for third-party-openbao-internal-command-agentproxyshared-sink-file;
+    the spec already said this
+  phase: Succeeded
+superseded:
+- message: wrote 8 requirement(s) and 2 interface(s) for third-party-openbao-internal-command-agentproxyshared-sink-file
+  name: third-party-openbao-internal-command-agentproxyshared-sink-file-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9
+  phase: Succeeded
