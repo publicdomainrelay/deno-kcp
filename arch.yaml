@@ -14974,8 +14974,163 @@ system_contexts:
   codeRefIndex:
   - file:third_party/openbao/internal/command/agent/template/template.go template.go@third_party/openbao/internal/command/agent/template/template.go
   - file:third_party/openbao/internal/command/agent/template/template_test.go template_test.go@third_party/openbao/internal/command/agent/template/template_test.go
+  - function:a8686accea59bb747ec05fed62bd2585 NewServer@third_party/openbao/internal/command/agent/template/template.go:89
+  - method:990e84dbe81ed2f87ab34932c0f7bfb0 Server.Stop@third_party/openbao/internal/command/agent/template/template.go:289
+  - method:d9dd6f48d0065ecd94dcb0ceec98c148 Server.Run@third_party/openbao/internal/command/agent/template/template.go:108
+  - struct:264a18de453074c01711a78e413c9c08 ServerConfig@third_party/openbao/internal/command/agent/template/template.go:39
+  - struct:57207bdcd5ca90e05fed9af466416b7f Server@third_party/openbao/internal/command/agent/template/template.go:61
   id: sc.third-party-openbao-internal-command-agent-template
+  intent: 'This context exists to specify the template-rendering server that the OpenBao
+    agent uses to run the internal Consul Template runner: it accepts the agent''s
+    template configurations and an incoming Vault token channel, restarts the runner
+    when a new token arrives, retries with backoff on runner errors, and terminates
+    early once all templates are rendered when exit-after-auth is configured. The
+    spec records the construction, configuration surface and lifecycle guarantees
+    of that server so the behaviour can be preserved.'
+  interfaces:
+  - file: third_party/openbao/internal/command/agent/template/template.go
+    kind: function
+    name: NewServer
+    signature: (conf *ServerConfig) *Server
+  - file: third_party/openbao/internal/command/agent/template/template.go
+    kind: struct
+    name: Server
+    signature: type Server struct
+  - file: third_party/openbao/internal/command/agent/template/template.go
+    kind: method
+    name: Server.Run
+    signature: (ctx context.Context, incoming chan string, templates []*ctconfig.TemplateConfig)
+      error
+  - file: third_party/openbao/internal/command/agent/template/template.go
+    kind: method
+    name: Server.Stop
+    signature: ()
+  - file: third_party/openbao/internal/command/agent/template/template.go
+    kind: struct
+    name: ServerConfig
+    signature: type ServerConfig struct
   name: third-party-openbao-internal-command-agent-template
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agent/template/template.go
+    - method:d9dd6f48d0065ecd94dcb0ceec98c148
+    id: r.backoff-defaults
+    level: MUST
+    text: Server.Run must default minBackoff to 1s and maxBackoff to 5m when either
+      is not positive, and must return the error "min backoff is larger than max backoff"
+      when minBackoff exceeds maxBackoff.
+  - codeRefs:
+    - method:d9dd6f48d0065ecd94dcb0ceec98c148
+    - struct:264a18de453074c01711a78e413c9c08
+    id: r.backoff-policy
+    level: MUST
+    text: 'Server.Run must use an exponential backoff with multiplier 2 and randomization
+      factor 0.25 between minBackoff and maxBackoff, and must substitute a stop backoff
+      when AgentConfig.TemplateConfig.ExitOnRetryFailure is set so that a runner error
+      is returned as "template server: <err>" instead of retried.'
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agent/template/template.go
+    - struct:264a18de453074c01711a78e413c9c08
+    id: r.config-surface
+    level: MUST
+    text: ServerConfig must carry Logger, AgentConfig, ExitAfterAuth, Namespace, MaxBackoff,
+      MinBackoff, LogLevel and LogWriter, where LogLevel and LogWriter exist so the
+      internal runner's own logger matches the agent log level and writes to the same
+      io.Writer, because that runner's logger cannot be set externally.
+  - codeRefs:
+    - method:d9dd6f48d0065ecd94dcb0ceec98c148
+    id: r.context-cancel
+    level: MUST
+    text: When ctx.Done() fires, Server.Run must stop the runner and return nil.
+  - codeRefs:
+    - method:d9dd6f48d0065ecd94dcb0ceec98c148
+    id: r.error-retry
+    level: MUST
+    text: On a runner error, Server.Run must log the error with the computed backoff,
+      stop the runner immediately, and either return the wrapped error when the backoff
+      indicates stop or wait out the backoff (aborting on ctx.Done()) and start a
+      fresh runner.
+  - codeRefs:
+    - method:d9dd6f48d0065ecd94dcb0ceec98c148
+    id: r.exit-after-auth
+    level: MUST
+    text: On a render event Server.Run must reset the error backoff, ignore events
+      until the number of rendered events covers the whole lookupMap, and when every
+      event has a non-zero LastWouldRender and exitAfterAuth is set, stop the runner
+      and return nil.
+  - codeRefs:
+    - method:d9dd6f48d0065ecd94dcb0ceec98c148
+    - struct:57207bdcd5ca90e05fed9af466416b7f
+    id: r.lookup-map-from-runner
+    level: MUST
+    text: Server.Run must populate lookupMap by copying every template returned by
+      the runner's TemplateConfigMapping, keyed by the runner-generated template ID,
+      so render completion can be compared against the expected templates.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agent/template/template.go
+    - function:a8686accea59bb747ec05fed62bd2585
+    - struct:264a18de453074c01711a78e413c9c08
+    - struct:57207bdcd5ca90e05fed9af466416b7f
+    id: r.newserver-constructs-server
+    level: MUST
+    text: NewServer must return a non-nil Server whose DoneCh is a fresh channel,
+      whose stopped and runnerStarted flags are fresh atomic.Bool values, and which
+      copies MaxBackoff, MinBackoff, Logger, the ServerConfig pointer and ExitAfterAuth
+      from the supplied ServerConfig.
+  - codeRefs:
+    - method:d9dd6f48d0065ecd94dcb0ceec98c148
+    id: r.run-no-templates-waits
+    level: MUST
+    text: Server.Run must log "no templates found" and block on ctx.Done(), returning
+      nil, when the template slice is empty, without creating a runner.
+  - codeRefs:
+    - method:d9dd6f48d0065ecd94dcb0ceec98c148
+    id: r.run-rejects-nil-channel
+    level: MUST
+    text: 'Server.Run must return the error "template server: incoming channel is
+      nil" when the incoming token channel is nil, before any logging or runner work.'
+  - codeRefs:
+    - method:d9dd6f48d0065ecd94dcb0ceec98c148
+    - struct:264a18de453074c01711a78e413c9c08
+    id: r.runner-config-from-agent
+    level: MUST
+    text: 'Server.Run must build the runner configuration through ctmanager.NewConfig
+      from ManagerConfig holding AgentConfig, Namespace, LogLevel and LogWriter, return
+      "template server failed to runner generate config: <err>" on failure, and create
+      the runner with manager.NewRunner, returning "template server failed to create:
+      <err>" on failure.'
+  - codeRefs:
+    - struct:57207bdcd5ca90e05fed9af466416b7f
+    id: r.server-state
+    level: SHOULD
+    text: 'The Server struct should retain the fields observed in the code: config,
+      runner, runnerStarted, Templates, lookupMap, DoneCh, stopped, maxBackoff, minBackoff,
+      logger and exitAfterAuth, so runner lifecycle state stays inspectable across
+      Run invocations.'
+  - codeRefs:
+    - method:990e84dbe81ed2f87ab34932c0f7bfb0
+    - struct:57207bdcd5ca90e05fed9af466416b7f
+    id: r.stop-idempotent
+    level: MUST
+    text: Server.Stop must close DoneCh only on the first call, using a compare-and-swap
+      on the stopped flag so later calls are no-ops and the channel is never closed
+      twice.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agent/template/template_test.go
+    id: r.tests-cover-construction
+    level: SHOULD
+    text: The package tests should keep covering NewServer returning a non-nil server,
+      the run loop with one and with many templates, the HTTP-backed token source,
+      cache config handling and log level propagation, since those exercise the behaviours
+      above.
+  - codeRefs:
+    - method:d9dd6f48d0065ecd94dcb0ceec98c148
+    id: r.token-restart
+    level: MUST
+    text: On a received token different from the latest token, Server.Run must stop
+      the current runner and start a new runner whose Vault config carries the new
+      token and the agent templating user agent, except that when exitAfterAuth is
+      set and the runner has already started it must log and continue without restarting.
   upstream: self
 - code:
   - third_party/openbao/internal/command/agentproxyshared/helpers.go

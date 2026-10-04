@@ -1028,6 +1028,25 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.tls-branch` (MUST): "When there is no cache and the Vault address starts with "https" or a CA cert is configured, the SSL block must be rebuilt as enabled, with Verify set to the inverse of Vault.TLSSkipVerify and Cert, Key, CaCert, CaPath and ServerName taken from the agent's Vault client TLS settings."
 - added `r.vault-environment-isolation` (MUST): "The Vault section must always set RenewToken to false, Token to the empty string, and Address to the agent config's Vault address, so no token, renew behavior or address is picked up from the environment."
 
+### third-party-openbao-internal-command-agent-template
+
+- intent: "" -> "This context exists to specify the template-rendering server that the OpenBao agent uses to run the internal Consul Template runner: it accepts the agent's template configurations and an incoming Vault token channel, restarts the runner when a new token arrives, retries with backoff on runner errors, and terminates early once all templates are rendered when exit-after-auth is configured. The spec records the construction, configuration surface and lifecycle guarantees of that server so the behaviour can be preserved."
+- added `r.backoff-defaults` (MUST): "Server.Run must default minBackoff to 1s and maxBackoff to 5m when either is not positive, and must return the error "min backoff is larger than max backoff" when minBackoff exceeds maxBackoff."
+- added `r.backoff-policy` (MUST): "Server.Run must use an exponential backoff with multiplier 2 and randomization factor 0.25 between minBackoff and maxBackoff, and must substitute a stop backoff when AgentConfig.TemplateConfig.ExitOnRetryFailure is set so that a runner error is returned as "template server: <err>" instead of retried."
+- added `r.config-surface` (MUST): "ServerConfig must carry Logger, AgentConfig, ExitAfterAuth, Namespace, MaxBackoff, MinBackoff, LogLevel and LogWriter, where LogLevel and LogWriter exist so the internal runner's own logger matches the agent log level and writes to the same io.Writer, because that runner's logger cannot be set externally."
+- added `r.context-cancel` (MUST): "When ctx.Done() fires, Server.Run must stop the runner and return nil."
+- added `r.error-retry` (MUST): "On a runner error, Server.Run must log the error with the computed backoff, stop the runner immediately, and either return the wrapped error when the backoff indicates stop or wait out the backoff (aborting on ctx.Done()) and start a fresh runner."
+- added `r.exit-after-auth` (MUST): "On a render event Server.Run must reset the error backoff, ignore events until the number of rendered events covers the whole lookupMap, and when every event has a non-zero LastWouldRender and exitAfterAuth is set, stop the runner and return nil."
+- added `r.lookup-map-from-runner` (MUST): "Server.Run must populate lookupMap by copying every template returned by the runner's TemplateConfigMapping, keyed by the runner-generated template ID, so render completion can be compared against the expected templates."
+- added `r.newserver-constructs-server` (MUST): "NewServer must return a non-nil Server whose DoneCh is a fresh channel, whose stopped and runnerStarted flags are fresh atomic.Bool values, and which copies MaxBackoff, MinBackoff, Logger, the ServerConfig pointer and ExitAfterAuth from the supplied ServerConfig."
+- added `r.run-no-templates-waits` (MUST): "Server.Run must log "no templates found" and block on ctx.Done(), returning nil, when the template slice is empty, without creating a runner."
+- added `r.run-rejects-nil-channel` (MUST): "Server.Run must return the error "template server: incoming channel is nil" when the incoming token channel is nil, before any logging or runner work."
+- added `r.runner-config-from-agent` (MUST): "Server.Run must build the runner configuration through ctmanager.NewConfig from ManagerConfig holding AgentConfig, Namespace, LogLevel and LogWriter, return "template server failed to runner generate config: <err>" on failure, and create the runner with manager.NewRunner, returning "template server failed to create: <err>" on failure."
+- added `r.server-state` (SHOULD): "The Server struct should retain the fields observed in the code: config, runner, runnerStarted, Templates, lookupMap, DoneCh, stopped, maxBackoff, minBackoff, logger and exitAfterAuth, so runner lifecycle state stays inspectable across Run invocations."
+- added `r.stop-idempotent` (MUST): "Server.Stop must close DoneCh only on the first call, using a compare-and-swap on the stopped flag so later calls are no-ops and the channel is never closed twice."
+- added `r.tests-cover-construction` (SHOULD): "The package tests should keep covering NewServer returning a non-nil server, the run loop with one and with many templates, the HTTP-backed token source, cache config handling and log level propagation, since those exercise the behaviours above."
+- added `r.token-restart` (MUST): "On a received token different from the latest token, Server.Run must stop the current runner and start a new runner whose Vault config carries the new token and the agent templating user agent, except that when exitAfterAuth is set and the runner has already started it must log and continue without restarting."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -1066,6 +1085,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-command-agent-exec-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agent-exec-test-app-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agent-internal-ctmanager-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-command-agent-template-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-command-agent-template-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-internal-command-agent-template-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-internal-command-agentproxyshared-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-internal-command-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
