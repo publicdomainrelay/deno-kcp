@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so the OpenBao UI can read, edit and validate Kubernetes secrets-engine configuration and roles without hand-rolled form code. KubernetesConfigModel declares which backend fields the config screen exposes, and KubernetesRoleModel declares the role fields plus the generation-preference state machine that decides whether OpenBao generates a basic service account, an expanded role binding, or uses fully user-supplied role rules, and that computes the capability flags the UI uses to show or hide actions.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

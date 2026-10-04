@@ -4692,6 +4692,21 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.provider-tracked-state` (MUST): "KeymgmtProviderModel tracks a keys array and a credentials value, where credentials is never returned by the API and is set only while creating or editing a provider, and keys holds the provider key collection under the provider id prefix."
 - added `r.provider-type-presentation` (MUST): "KeymgmtProviderModel maps the provider type value to its presentation: icon resolves azurekeyvault, awskms and gcpckms to the matching service icon, and typeName resolves the same values to the human-readable service names Azure Key Vault, AWS Key Management Service and Google Cloud Key Management Service."
 
+### third-party-openbao-ui-app-models-kubernetes
+
+- intent: "" -> "The context exists so the OpenBao UI can read, edit and validate Kubernetes secrets-engine configuration and roles without hand-rolled form code. KubernetesConfigModel declares which backend fields the config screen exposes, and KubernetesRoleModel declares the role fields plus the generation-preference state machine that decides whether OpenBao generates a basic service account, an expanded role binding, or uses fully user-supplied role rules, and that computes the capability flags the UI uses to show or hide actions."
+- added `r.config-model-connection-fields` (MUST): "KubernetesConfigModel exposes the Kubernetes backend connection settings as bound string attributes: the dynamic backend path, the Kubernetes host URL, the service account JWT, and the Kubernetes CA certificate."
+- added `r.config-model-disable-local-ca-jwt` (MUST): "KubernetesConfigModel carries a disableLocalCaJwt attribute so the config form can turn off use of the local CA and service account JWT when talking to the Kubernetes API."
+- added `r.filtered-form-fields` (MUST): "KubernetesRoleModel.filteredFormFields returns the subset of form fields that belong to the currently selected generation preference, keeping the form aligned with the mode the user picked."
+- added `r.generation-preference-getter` (MUST): "KubernetesRoleModel.generationPreference returns the explicit pseudo-property value when the user has chosen one; otherwise it infers the preference from the existing role, returning 'basic' when serviceAccountName is set, 'expanded' when kubernetesRoleName is set, 'full' when generatedRoleRules is set, and null when none is set."
+- added `r.generation-preference-setter` (MUST): "KubernetesRoleModel.generationPreference, when assigned, nulls out the model properties that belong to the other modes so only one generation mode's inputs stay set, then stores the chosen preference: basic clears kubernetesRoleType, kubernetesRoleName, generatedRoleRules and nameTemplate; expanded clears serviceAccountName and generatedRoleRules; full clears serviceAccountName and kubernetesRoleName."
+- added `r.role-model-capability-flags` (MUST): "KubernetesRoleModel exposes capability flags canCreate, canDelete, canEdit, canRead and canList computed from the roles path, plus canGenerateCreds from the credentials path, so the UI shows only the actions the current token is permitted to perform."
+- added `r.role-model-capability-paths` (MUST): "KubernetesRoleModel derives the role path, credentials path and roles path from its backend so that capability checks and generate-credentials requests address the correct API endpoints for the role."
+- added `r.role-model-generation-fields` (MUST): "KubernetesRoleModel exposes the three alternative generation inputs as string attributes: the service account name (basic mode), the Kubernetes role name plus role type selectable as 'Role' or 'ClusterRole' (expanded mode), and the generated role rules (full mode)."
+- added `r.role-model-identity-fields` (MUST): "KubernetesRoleModel identifies a role by its backend path and role name, and the name attribute is presented with the label 'Role name' and sub-text describing it as the role's name in OpenBao."
+- added `r.role-model-scope-fields` (MUST): "KubernetesRoleModel exposes the allowed Kubernetes namespaces attribute, documented so that '*' allows all namespaces, together with the optional name template, extra annotations and extra labels attributes."
+- added `r.role-model-ttl-fields` (MUST): "KubernetesRoleModel exposes the token max TTL and token default TTL attributes with the 'ttl' edit type so the form renders TTL inputs for the leases issued to this role."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5076,6 +5091,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-models-database-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-models-identity-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-models-keymgmt-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-models-kubernetes-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-models-kubernetes-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-models-oidc-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-models-pki-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

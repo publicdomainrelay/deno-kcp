@@ -64374,10 +64374,123 @@ system_contexts:
   - third_party/openbao/ui/app/models/kubernetes/config.js
   - third_party/openbao/ui/app/models/kubernetes/role.js
   codeRefIndex:
+  - class:282a6a22ad22b2423f7af3f320e5ec45 KubernetesRoleModel@third_party/openbao/ui/app/models/kubernetes/role.js:28
+  - class:b832b4e691efebc11e0e5a20e3c638bd KubernetesConfigModel@third_party/openbao/ui/app/models/kubernetes/config.js:20
   - file:third_party/openbao/ui/app/models/kubernetes/config.js config.js@third_party/openbao/ui/app/models/kubernetes/config.js
   - file:third_party/openbao/ui/app/models/kubernetes/role.js role.js@third_party/openbao/ui/app/models/kubernetes/role.js
   id: sc.third-party-openbao-ui-app-models-kubernetes
+  intent: The context exists so the OpenBao UI can read, edit and validate Kubernetes
+    secrets-engine configuration and roles without hand-rolled form code. KubernetesConfigModel
+    declares which backend fields the config screen exposes, and KubernetesRoleModel
+    declares the role fields plus the generation-preference state machine that decides
+    whether OpenBao generates a basic service account, an expanded role binding, or
+    uses fully user-supplied role rules, and that computes the capability flags the
+    UI uses to show or hide actions.
+  interfaces:
+  - file: third_party/openbao/ui/app/models/kubernetes/config.js
+    kind: class
+    name: KubernetesConfigModel
+    signature: class KubernetesConfigModel extends Model
+  - file: third_party/openbao/ui/app/models/kubernetes/role.js
+    kind: class
+    name: KubernetesRoleModel
+    signature: class KubernetesRoleModel extends Model
   name: third-party-openbao-ui-app-models-kubernetes
+  requirements:
+  - codeRefs:
+    - class:b832b4e691efebc11e0e5a20e3c638bd
+    - file:third_party/openbao/ui/app/models/kubernetes/config.js
+    id: r.config-model-connection-fields
+    level: MUST
+    text: 'KubernetesConfigModel exposes the Kubernetes backend connection settings
+      as bound string attributes: the dynamic backend path, the Kubernetes host URL,
+      the service account JWT, and the Kubernetes CA certificate.'
+  - codeRefs:
+    - class:b832b4e691efebc11e0e5a20e3c638bd
+    - file:third_party/openbao/ui/app/models/kubernetes/config.js
+    id: r.config-model-disable-local-ca-jwt
+    level: MUST
+    text: KubernetesConfigModel carries a disableLocalCaJwt attribute so the config
+      form can turn off use of the local CA and service account JWT when talking to
+      the Kubernetes API.
+  - codeRefs:
+    - class:282a6a22ad22b2423f7af3f320e5ec45
+    - file:third_party/openbao/ui/app/models/kubernetes/role.js
+    id: r.filtered-form-fields
+    level: MUST
+    text: KubernetesRoleModel.filteredFormFields returns the subset of form fields
+      that belong to the currently selected generation preference, keeping the form
+      aligned with the mode the user picked.
+  - codeRefs:
+    - class:282a6a22ad22b2423f7af3f320e5ec45
+    - file:third_party/openbao/ui/app/models/kubernetes/role.js
+    id: r.generation-preference-getter
+    level: MUST
+    text: KubernetesRoleModel.generationPreference returns the explicit pseudo-property
+      value when the user has chosen one; otherwise it infers the preference from
+      the existing role, returning 'basic' when serviceAccountName is set, 'expanded'
+      when kubernetesRoleName is set, 'full' when generatedRoleRules is set, and null
+      when none is set.
+  - codeRefs:
+    - class:282a6a22ad22b2423f7af3f320e5ec45
+    - file:third_party/openbao/ui/app/models/kubernetes/role.js
+    id: r.generation-preference-setter
+    level: MUST
+    text: 'KubernetesRoleModel.generationPreference, when assigned, nulls out the
+      model properties that belong to the other modes so only one generation mode''s
+      inputs stay set, then stores the chosen preference: basic clears kubernetesRoleType,
+      kubernetesRoleName, generatedRoleRules and nameTemplate; expanded clears serviceAccountName
+      and generatedRoleRules; full clears serviceAccountName and kubernetesRoleName.'
+  - codeRefs:
+    - class:282a6a22ad22b2423f7af3f320e5ec45
+    - file:third_party/openbao/ui/app/models/kubernetes/role.js
+    id: r.role-model-capability-flags
+    level: MUST
+    text: KubernetesRoleModel exposes capability flags canCreate, canDelete, canEdit,
+      canRead and canList computed from the roles path, plus canGenerateCreds from
+      the credentials path, so the UI shows only the actions the current token is
+      permitted to perform.
+  - codeRefs:
+    - class:282a6a22ad22b2423f7af3f320e5ec45
+    - file:third_party/openbao/ui/app/models/kubernetes/role.js
+    id: r.role-model-capability-paths
+    level: MUST
+    text: KubernetesRoleModel derives the role path, credentials path and roles path
+      from its backend so that capability checks and generate-credentials requests
+      address the correct API endpoints for the role.
+  - codeRefs:
+    - class:282a6a22ad22b2423f7af3f320e5ec45
+    - file:third_party/openbao/ui/app/models/kubernetes/role.js
+    id: r.role-model-generation-fields
+    level: MUST
+    text: 'KubernetesRoleModel exposes the three alternative generation inputs as
+      string attributes: the service account name (basic mode), the Kubernetes role
+      name plus role type selectable as ''Role'' or ''ClusterRole'' (expanded mode),
+      and the generated role rules (full mode).'
+  - codeRefs:
+    - class:282a6a22ad22b2423f7af3f320e5ec45
+    - file:third_party/openbao/ui/app/models/kubernetes/role.js
+    id: r.role-model-identity-fields
+    level: MUST
+    text: KubernetesRoleModel identifies a role by its backend path and role name,
+      and the name attribute is presented with the label 'Role name' and sub-text
+      describing it as the role's name in OpenBao.
+  - codeRefs:
+    - class:282a6a22ad22b2423f7af3f320e5ec45
+    - file:third_party/openbao/ui/app/models/kubernetes/role.js
+    id: r.role-model-scope-fields
+    level: MUST
+    text: KubernetesRoleModel exposes the allowed Kubernetes namespaces attribute,
+      documented so that '*' allows all namespaces, together with the optional name
+      template, extra annotations and extra labels attributes.
+  - codeRefs:
+    - class:282a6a22ad22b2423f7af3f320e5ec45
+    - file:third_party/openbao/ui/app/models/kubernetes/role.js
+    id: r.role-model-ttl-fields
+    level: MUST
+    text: KubernetesRoleModel exposes the token max TTL and token default TTL attributes
+      with the 'ttl' edit type so the form renders TTL inputs for the leases issued
+      to this role.
   upstream: self
 - code:
   - third_party/openbao/ui/app/models/oidc/assignment.js
