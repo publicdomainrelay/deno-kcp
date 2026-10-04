@@ -5039,6 +5039,16 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.oidc-keys-list-reraise` (MUST): "The list query must rethrow every error that is not an httpStatus 404 rejection, so genuine failures are not swallowed."
 - added `r.store-service-injection` (MUST): "Each of the three route classes must inject the Ember Data store as the service named store, because every model hook resolves records through this.store."
 
+### third-party-openbao-ui-app-routes-vault-cluster-access-oidc-keys-key
+
+- intent: "" -> "This context exists to describe the per-key sub-routes of the OIDC keys section: the clients tab, which needs a real model hook to fetch only the clients allowed to use the key, and the details and edit tabs, which are declared only so Ember's router can resolve the leaf routes and let the shared parent key route plus their templates supply the data. The three files are grouped because they are siblings under the same parent resource and together define the navigable surface of one OIDC key."
+- added `r.clients-inject-store` (MUST): "OidcKeyClientsRoute must declare the store as an injected Ember service via the @service decorator, so this.store resolves the application data store."
+- added `r.clients-model-reads-parent` (MUST): "OidcKeyClientsRoute.model must take allowedClientIds from the modelFor('vault.cluster.access.oidc.keys.key') result and use it as the query payload, so the clients list is scoped to the key rather than to all OIDC clients."
+- added `r.clients-query-store` (MUST): "The clients model hook must be async and return the awaited this.store.query('oidc/client', ...) promise, passing paramKey 'client_id' together with filterFor set to allowedClientIds."
+- added `r.clients-setup-controller-keyname` (MUST): "OidcKeyClientsRoute.setupController must call super.setupController(controller, model) first and then set the controller property keyName to the name from paramsFor('vault.cluster.access.oidc.keys.key'), so the template can show which key the clients belong to."
+- added `r.details-empty-route` (MUST): "OidcKeyDetailsRoute must extend Route and add no model, setupController, or other overrides, leaving data loading to the parent key route and the details template."
+- added `r.edit-empty-route` (MUST): "OidcKeyEditRoute must extend Route and add no model, setupController, or other overrides, leaving edit-form state to the shared parent key route and the edit template."
+
 ### third-party-openbao-ui-app-routes-vault-cluster-access-oidc-providers
 
 - intent: "" -> "This context exists to specify the data-loading contract of the OIDC provider routes in the OpenBao UI: which Ember Data operations each route performs, how a missing provider list is tolerated, and how a single provider is resolved from the route's name parameter, so that templates and downstream route behaviour can rely on a predictable model shape."

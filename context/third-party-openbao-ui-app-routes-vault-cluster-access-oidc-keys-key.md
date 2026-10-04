@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to describe the per-key sub-routes of the OIDC keys section: the clients tab, which needs a real model hook to fetch only the clients allowed to use the key, and the details and edit tabs, which are declared only so Ember's router can resolve the leaf routes and let the shared parent key route plus their templates supply the data. The three files are grouped because they are siblings under the same parent resource and together define the navigable surface of one OIDC key.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
