@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so that callers needing a simple, dependency-free XOR primitive -- typically for splitting or recombining a secret into two shares -- can do so without reimplementing length checking, base64 decoding, and error wrapping. The package is vendored third-party code from the OpenBao SDK, so its behavior is fixed: unequal lengths, malformed base64, and empty decoded inputs are all hard errors rather than silently truncated or padded results.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

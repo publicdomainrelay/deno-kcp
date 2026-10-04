@@ -3569,6 +3569,16 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.string-builds-agent-from-comments` (MUST): "String must build and return a User-Agent string from the variadic comment parts supplied by the caller, joining those parts with the package's own project URL marker and runtime version so every caller emits the same base format."
 - added `r.tests-cover-pluginstring` (SHOULD): "The package's tests should pin PluginString behaviour by overriding the project URL and runtime version package variables and asserting the returned agent for the nil environment, no-plugin-name, plugin-name, and extra-comment cases."
 
+### third-party-openbao-sdk-helper-xor
+
+- intent: "" -> "This context exists so that callers needing a simple, dependency-free XOR primitive -- typically for splitting or recombining a secret into two shares -- can do so without reimplementing length checking, base64 decoding, and error wrapping. The package is vendored third-party code from the OpenBao SDK, so its behavior is fixed: unequal lengths, malformed base64, and empty decoded inputs are all hard errors rather than silently truncated or padded results."
+- added `r.tests-cover-base64-path` (SHOULD): "xor_test.go should keep TestBase64XOR covering XORBase64, including the error paths for malformed and empty base64 input, so the documented failure behavior stays verified."
+- added `r.xorbase64-decoding` (MUST): "XORBase64 must decode both arguments with base64.StdEncoding, returning an error wrapping the decoder failure as "error decoding first base64 value: %w" or "error decoding second base64 value: %w" respectively, and must not proceed to XOR when either decode fails."
+- added `r.xorbase64-delegates` (MUST): "After both decodes succeed XORBase64 must pass the decoded byte slices to XORBytes and return its result and error unchanged, so that unequal decoded lengths surface the XORBytes length error rather than a base64 error."
+- added `r.xorbase64-empty-rejected` (MUST): "XORBase64 must reject a decoded value that is nil or empty, first position with "decoded first base64 value is nil or empty" and second position with "decoded second base64 value is nil or empty", so an empty input never yields a zero-length result."
+- added `r.xorbytes-equal-length` (MUST): "XORBytes must reject inputs whose lengths differ, returning a nil slice and an error of the form "length of byte slices is not equivalent: %d != %d" that reports both lengths, and must never read past the shorter slice."
+- added `r.xorbytes-result` (MUST): "On equal-length inputs XORBytes must return a newly allocated slice of that same length whose element i is a[i] XOR b[i], leaving both input slices unmodified."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -3834,3 +3844,4 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-sdk-helper-useragent-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-wrapping-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-sdk-helper-xor-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-sdk-logical-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
