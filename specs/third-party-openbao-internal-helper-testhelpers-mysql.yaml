@@ -1,10 +1,116 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
 - file:third_party/openbao/internal/helper/testhelpers/mysql/mysqlhelper.go mysqlhelper.go@third_party/openbao/internal/helper/testhelpers/mysql/mysqlhelper.go
+- function:49b703949fe78718321a963bd7dc8e5f TestCredsExist@third_party/openbao/internal/helper/testhelpers/mysql/mysqlhelper.go:65
+- function:5bb34b89c4a7b9aafbb8201734a768a5 PrepareTestContainer@third_party/openbao/internal/helper/testhelpers/mysql/mysqlhelper.go:24
+- struct:f5374581f30f9f80a49e719a95f6d25f Config@third_party/openbao/internal/helper/testhelpers/mysql/mysqlhelper.go:17
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-helper-testhelpers-mysql
   namespace: default
 spec:
+  intent: The context exists to give the OpenBao test suite a single, reusable way
+    to stand up a disposable MySQL server and to verify dynamically generated database
+    credentials against it. Tests for the MySQL database secrets engine need a real
+    server, and duplicating container startup logic in every test would be slow to
+    maintain. This package centralizes the image selection, the readiness probe, and
+    the connection string format, and it allows CI environments that already provide
+    a MySQL server to short-circuit container startup through the MYSQL_URL environment
+    variable. TestCredsExist exists so a test can assert that credentials minted by
+    the secrets engine actually authenticate, which is the core behavior those tests
+    exercise.
+  interfaces:
+  - file: third_party/openbao/internal/helper/testhelpers/mysql/mysqlhelper.go
+    kind: struct
+    name: Config
+    signature: type Config struct { docker.ServiceHostPort; ConnString string }
+  - file: third_party/openbao/internal/helper/testhelpers/mysql/mysqlhelper.go
+    kind: function
+    name: PrepareTestContainer
+    signature: func PrepareTestContainer(t *testing.T, legacy bool, pw string) (func(),
+      string)
+  - file: third_party/openbao/internal/helper/testhelpers/mysql/mysqlhelper.go
+    kind: function
+    name: TestCredsExist
+    signature: func TestCredsExist(t testing.TB, connURL, username, password string)
+      error
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/testhelpers/mysql/mysqlhelper.go
+    - struct:f5374581f30f9f80a49e719a95f6d25f
+    id: r.config-carries-host-port
+    level: MUST
+    text: Config must embed docker.ServiceHostPort so the container address is available
+      alongside ConnString, and it must carry the ConnString field that the readiness
+      adapter populates and PrepareTestContainer returns.
+  - codeRefs:
+    - function:5bb34b89c4a7b9aafbb8201734a768a5
+    id: r.conn-string-format
+    level: MUST
+    text: PrepareTestContainer must build the connection string as root:<pw>@tcp(<host>:<port>)/mysql?parseTime=true,
+      where host and port come from the running service, and must return exactly that
+      string to the caller.
+  - codeRefs:
+    - function:49b703949fe78718321a963bd7dc8e5f
+    id: r.creds-exist
+    level: MUST
+    text: TestCredsExist must replace the first occurrence of the literal root:secret
+      in connURL with the given username and password, open a MySQL connection with
+      the rewritten URL, and return the result of pinging it, closing the handle before
+      returning.
+  - codeRefs:
+    - function:5bb34b89c4a7b9aafbb8201734a768a5
+    id: r.fatal-on-startup-failure
+    level: MUST
+    text: When docker.NewServiceRunner or runner.StartService returns an error, PrepareTestContainer
+      must fail the test immediately with t.Fatalf and the message prefix "could not
+      start docker mysql" rather than returning a usable result.
+  - codeRefs:
+    - function:5bb34b89c4a7b9aafbb8201734a768a5
+    id: r.image-version-selection
+    level: MUST
+    text: PrepareTestContainer must select MySQL image tag 9.0 by default and tag
+      5.6 when the legacy argument is true, pulling image docker.mirror.hashicorp.services/library/mysql
+      under container name mysql and publishing 3306/tcp.
+  - codeRefs:
+    - function:5bb34b89c4a7b9aafbb8201734a768a5
+    id: r.mysql-url-short-circuit
+    level: MUST
+    text: PrepareTestContainer must check the MYSQL_URL environment variable first;
+      when it is non-empty the function returns a no-op cleanup function and the value
+      of MYSQL_URL as the connection string, starting no container and touching no
+      Docker API.
+  - codeRefs:
+    - function:5bb34b89c4a7b9aafbb8201734a768a5
+    id: r.readiness-ping
+    level: MUST
+    text: The service adapter passed to StartService must open a database handle with
+      the MySQL driver, ping it, and return the ping error so container startup fails
+      until the server accepts connections; the handle must be closed before the adapter
+      returns.
+  - codeRefs:
+    - function:5bb34b89c4a7b9aafbb8201734a768a5
+    - struct:f5374581f30f9f80a49e719a95f6d25f
+    id: r.result-config
+    level: MUST
+    text: PrepareTestContainer must return svc.Cleanup as the cleanup function and
+      must recover the connection string by type-asserting svc.Config to the package's
+      Config type and reading its ConnString field, so the adapter's returned value
+      and the caller's value are the same string.
+  - codeRefs:
+    - function:5bb34b89c4a7b9aafbb8201734a768a5
+    id: r.root-password-env
+    level: MUST
+    text: PrepareTestContainer must pass the caller-supplied password through the
+      MYSQL_ROOT_PASSWORD environment variable of the container, and must derive the
+      connection string from that same password so the returned URL and the container's
+      root password always agree.
+  - codeRefs:
+    - function:49b703949fe78718321a963bd7dc8e5f
+    id: r.tb-interface
+    level: SHOULD
+    text: TestCredsExist should accept testing.TB rather than *testing.T so benchmarks
+      and other test doubles can call it, and should return an error instead of failing
+      the test itself, leaving the pass or fail decision to the caller.
   upstream: self

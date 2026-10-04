@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so that OpenBao backend authors can write declarative acceptance and unit tests without standing up a server: a TestCase names the backend or factory, a list of TestStep requests, optional check callbacks, teardown and acceptance gating, and Test turns that description into a real in-memory core plus HTTP client run. It also centralizes the common assertions used across backend tests, so policy, entity, alias-metadata, display-name and error expectations are expressed once as composable TestCheckFunc values rather than repeated inline.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

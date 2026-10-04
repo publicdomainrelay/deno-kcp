@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists to give the OpenBao test suite a single, reusable way to stand up a disposable MySQL server and to verify dynamically generated database credentials against it. Tests for the MySQL database secrets engine need a real server, and duplicating container startup logic in every test would be slow to maintain. This package centralizes the image selection, the readiness probe, and the connection string format, and it allows CI environments that already provide a MySQL server to short-circuit container startup through the MYSQL_URL environment variable. TestCredsExist exists so a test can assert that credentials minted by the secrets engine actually authenticate, which is the core behavior those tests exercise.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
