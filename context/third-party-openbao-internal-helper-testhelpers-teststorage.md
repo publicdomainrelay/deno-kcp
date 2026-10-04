@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so integration tests can be parameterised over storage backends without each test knowing how a backend is constructed. The bundle constructors isolate backend setup (in-memory, latent in-memory, file, raft), the factory and setup functions adapt a bundle into the physical factory a test cluster expects, and the reusable variants exist so a cluster can be torn down and brought back up over the same physical data. Together they form the seam that lets one test body run against every storage engine.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

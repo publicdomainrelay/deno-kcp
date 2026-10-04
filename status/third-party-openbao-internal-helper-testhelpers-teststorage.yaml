@@ -1,11 +1,8 @@
 conditions:
-- message: 'undeclared: CloseRaftStorage, ClusterSetup, ClusterSetupMutator, FileBackendSetup,
-    InmemBackendSetup, InmemLatentBackendSetup, MakeFileBackend, MakeInmemBackend,
-    MakeLatentInmemBackend, MakeRaftBackend, MakeReusableRaftHAStorage, MakeReusableRaftStorage,
-    MakeReusableStorage, PhysicalBackendBundler, RaftBackendSetup, RaftHAFactory,
-    RaftHASetup, ReusableStorage, SharedPhysicalFactory, StorageCleanup'
-  reason: InterfacesMissing
-  status: "False"
+- message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+  reason: InterfacesObserved
+  status: "True"
   type: CodeSynced
 - message: observed facts match the synced fingerprint
   reason: FingerprintEqual
@@ -144,5 +141,5 @@ observed:
     name: MakeReusableRaftHAStorage
     signature: (t testing.T, logger hclog.Logger, numCores int, bundle *vault.PhysicalBackendBundle)
       (ReusableStorage, StorageCleanup)
-realizedSpecHash: ce60a560975850a99e433b1610e4bc5f41d07172da7443c6c2efe411d74e8793
+realizedSpecHash: 27fba5011987787ab497073ca6c693a70d0b3abc374564a01d28f6b2d57023e5
 syncedFingerprint: 0479d5baa0d02f356cb6d3a228fcd06cd21a96435f433601612613f592c95885

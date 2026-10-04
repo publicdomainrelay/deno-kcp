@@ -28380,8 +28380,242 @@ system_contexts:
     teststorage.go@third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go
   - file:third_party/openbao/internal/helper/testhelpers/teststorage/teststorage_reusable.go
     teststorage_reusable.go@third_party/openbao/internal/helper/testhelpers/teststorage/teststorage_reusable.go
+  - function:0392aa15916f342ab906dd45903d6d37 MakeFileBackend@third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go:59
+  - function:41bdaf91cb2930eb93f26aa5d9cb7526 MakeInmemBackend@third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go:32
+  - function:6343ba5ae1c857a80657f32ec3e0852e SharedPhysicalFactory@third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go:162
+  - function:74134058ecacf56f02caa5a51d30e7ad RaftHASetup@third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go:196
+  - function:840743623f522715a45780501fe93c8d MakeReusableRaftHAStorage@third_party/openbao/internal/helper/testhelpers/teststorage/teststorage_reusable.go:111
+  - function:9048813ff6393623d8ab30e39fe98ad6 CloseRaftStorage@third_party/openbao/internal/helper/testhelpers/teststorage/teststorage_reusable.go:104
+  - function:908eb9993c3603f3a06913bdf4601f69 MakeLatentInmemBackend@third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go:48
+  - function:a03b33a34006328260ca7e6bb7bd4e25 MakeRaftBackend@third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go:89
+  - function:b60b3195c6e22c81cbbbb59de547f93c InmemBackendSetup@third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go:173
+  - function:c9ffc8948aab6a365501915d777eb6a5 InmemLatentBackendSetup@third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go:177
+  - function:d786198fb6b186f82b6a98e2f9231d75 MakeReusableStorage@third_party/openbao/internal/helper/testhelpers/teststorage/teststorage_reusable.go:41
+  - function:d877cadc67515c9bfca3c055343b3ee8 MakeReusableRaftStorage@third_party/openbao/internal/helper/testhelpers/teststorage/teststorage_reusable.go:75
+  - function:ed0356e5bf6a70fd8cd960a858f078ae RaftHAFactory@third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go:119
+  - function:f3a99ead95bd12abb35a935419bcd5fd RaftBackendSetup@third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go:185
+  - function:f4fc2a80e200d65b53bcf469e55f9db4 ClusterSetup@third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go:201
+  - function:f9b33d00190a95e05df46f6d5393a788 FileBackendSetup@third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go:181
+  - struct:cddc3bcf9f24c213abf45f9cb41a38c3 ReusableStorage@third_party/openbao/internal/helper/testhelpers/teststorage/teststorage_reusable.go:21
+  - type_alias:6008a90f20ec6333d6d1eb98888d520d StorageCleanup@third_party/openbao/internal/helper/testhelpers/teststorage/teststorage_reusable.go:37
+  - type_alias:f971feb060ced1b4b7930e9c6cc183ea ClusterSetupMutator@third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go:171
   id: sc.third-party-openbao-internal-helper-testhelpers-teststorage
+  intent: This context exists so integration tests can be parameterised over storage
+    backends without each test knowing how a backend is constructed. The bundle constructors
+    isolate backend setup (in-memory, latent in-memory, file, raft), the factory and
+    setup functions adapt a bundle into the physical factory a test cluster expects,
+    and the reusable variants exist so a cluster can be torn down and brought back
+    up over the same physical data. Together they form the seam that lets one test
+    body run against every storage engine.
+  interfaces:
+  - file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage_reusable.go
+    kind: function
+    name: CloseRaftStorage
+    signature: func CloseRaftStorage(t testing.T, cluster *vault.TestCluster, idx
+      int)
+  - file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go
+    kind: function
+    name: ClusterSetup
+    signature: func ClusterSetup(conf *vault.CoreConfig, opts *vault.TestClusterOptions,
+      setup ClusterSetupMutator) (*vault.CoreConfig, *vault.TestClusterOptions)
+  - file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go
+    kind: type
+    name: ClusterSetupMutator
+    signature: type ClusterSetupMutator func(*vault.CoreConfig, *vault.TestClusterOptions)
+  - file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go
+    kind: function
+    name: FileBackendSetup
+    signature: func FileBackendSetup(conf *vault.CoreConfig, opts *vault.TestClusterOptions)
+  - file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go
+    kind: function
+    name: InmemBackendSetup
+    signature: func InmemBackendSetup(conf *vault.CoreConfig, opts *vault.TestClusterOptions)
+  - file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go
+    kind: function
+    name: InmemLatentBackendSetup
+    signature: func InmemLatentBackendSetup(conf *vault.CoreConfig, opts *vault.TestClusterOptions)
+  - file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go
+    kind: function
+    name: MakeFileBackend
+    signature: func MakeFileBackend(t testing.T, logger hclog.Logger) *vault.PhysicalBackendBundle
+  - file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go
+    kind: function
+    name: MakeInmemBackend
+    signature: func MakeInmemBackend(t testing.T, logger hclog.Logger) *vault.PhysicalBackendBundle
+  - file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go
+    kind: function
+    name: MakeLatentInmemBackend
+    signature: func MakeLatentInmemBackend(t testing.T, logger hclog.Logger) *vault.PhysicalBackendBundle
+  - file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go
+    kind: function
+    name: MakeRaftBackend
+    signature: func MakeRaftBackend(t testing.T, coreIdx int, logger hclog.Logger,
+      extraConf map[string]any) *vault.PhysicalBackendBundle
+  - file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage_reusable.go
+    kind: function
+    name: MakeReusableRaftHAStorage
+    signature: func MakeReusableRaftHAStorage(t testing.T, logger hclog.Logger, numCores
+      int, bundle *vault.PhysicalBackendBundle) (ReusableStorage, StorageCleanup)
+  - file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage_reusable.go
+    kind: function
+    name: MakeReusableRaftStorage
+    signature: func MakeReusableRaftStorage(t testing.T, logger hclog.Logger, numCores
+      int, addressProvider raftlib.ServerAddressProvider) ReusableStorage
+  - file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage_reusable.go
+    kind: function
+    name: MakeReusableStorage
+    signature: func MakeReusableStorage(t testing.T, logger hclog.Logger, bundle *vault.PhysicalBackendBundle)
+      (ReusableStorage, StorageCleanup)
+  - file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go
+    kind: type
+    name: PhysicalBackendBundler
+    signature: type PhysicalBackendBundler func(t testing.T, logger hclog.Logger)
+      *vault.PhysicalBackendBundle
+  - file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go
+    kind: function
+    name: RaftBackendSetup
+    signature: func RaftBackendSetup(conf *vault.CoreConfig, opts *vault.TestClusterOptions)
+  - file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go
+    kind: function
+    name: RaftHAFactory
+    signature: func RaftHAFactory(f PhysicalBackendBundler) func(t testing.T, coreIdx
+      int, logger hclog.Logger, conf map[string]any) *vault.PhysicalBackendBundle
+  - file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go
+    kind: function
+    name: RaftHASetup
+    signature: func RaftHASetup(conf *vault.CoreConfig, opts *vault.TestClusterOptions,
+      bundler PhysicalBackendBundler)
+  - file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage_reusable.go
+    kind: struct
+    name: ReusableStorage
+    signature: type ReusableStorage struct
+  - file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go
+    kind: function
+    name: SharedPhysicalFactory
+    signature: func SharedPhysicalFactory(f PhysicalBackendBundler) func(t testing.T,
+      coreIdx int, logger hclog.Logger, conf map[string]any) *vault.PhysicalBackendBundle
+  - file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage_reusable.go
+    kind: type
+    name: StorageCleanup
+    signature: type StorageCleanup func()
   name: third-party-openbao-internal-helper-testhelpers-teststorage
+  requirements:
+  - codeRefs:
+    - function:b60b3195c6e22c81cbbbb59de547f93c
+    - function:c9ffc8948aab6a365501915d777eb6a5
+    - function:f3a99ead95bd12abb35a935419bcd5fd
+    - function:f9b33d00190a95e05df46f6d5393a788
+    id: r.backend-setup-functions
+    level: MUST
+    text: InmemBackendSetup, InmemLatentBackendSetup, FileBackendSetup and RaftBackendSetup
+      each install the matching bundle constructor as opts.PhysicalFactory, so a test
+      cluster is built over in-memory, latent in-memory, file or raft storage respectively.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go
+    - function:0392aa15916f342ab906dd45903d6d37
+    - function:41bdaf91cb2930eb93f26aa5d9cb7526
+    - function:908eb9993c3603f3a06913bdf4601f69
+    - function:a03b33a34006328260ca7e6bb7bd4e25
+    id: r.bundle-constructors
+    level: MUST
+    text: The package exposes bundle constructors MakeInmemBackend, MakeLatentInmemBackend,
+      MakeFileBackend and MakeRaftBackend that each return a *vault.PhysicalBackendBundle
+      with a Backend and, where the backend offers one, an HABackend; every constructor
+      error path calls t.Fatal instead of returning an error.
+  - codeRefs:
+    - function:9048813ff6393623d8ab30e39fe98ad6
+    id: r.close-raft-storage
+    level: MUST
+    text: CloseRaftStorage shuts down the raft storage of the core at index idx in
+      the given vault.TestCluster, so a single core can be stopped while the reusable
+      storage survives.
+  - codeRefs:
+    - function:f4fc2a80e200d65b53bcf469e55f9db4
+    - type_alias:f971feb060ced1b4b7930e9c6cc183ea
+    id: r.cluster-setup-mutator
+    level: MUST
+    text: ClusterSetup applies a ClusterSetupMutator to the core config and test cluster
+      options and returns the resulting pair, giving callers a single hook to adjust
+      both before cluster construction.
+  - codeRefs:
+    - function:0392aa15916f342ab906dd45903d6d37
+    id: r.file-backend
+    level: MUST
+    text: MakeFileBackend creates a temporary directory named with prefix vault-integ-file-,
+      configures the file physical backend with that directory as its path, pairs
+      it with an inmem HA backend, and returns a bundle whose Cleanup removes the
+      temporary directory, failing the test on any error.
+  - codeRefs:
+    - function:41bdaf91cb2930eb93f26aa5d9cb7526
+    id: r.inmem-backend
+    level: MUST
+    text: MakeInmemBackend builds an inmem backend and a separate inmem HA backend
+      from the given logger and returns them as Backend and HABackend on the bundle,
+      failing the test if either constructor errors.
+  - codeRefs:
+    - function:908eb9993c3603f3a06913bdf4601f69
+    id: r.latent-inmem-backend
+    level: MUST
+    text: MakeLatentInmemBackend takes the inmem bundle and replaces its Backend with
+      a physical latency injector whose latency is a time-seeded random 0 to 14 milliseconds
+      and whose jitter is a random 0 to 19, leaving the HA backend untouched.
+  - codeRefs:
+    - function:a03b33a34006328260ca7e6bb7bd4e25
+    id: r.raft-backend
+    level: MUST
+    text: MakeRaftBackend builds a raft physical backend bundle for the core at index
+      coreIdx, taking the logger and an extra configuration map and returning a *vault.PhysicalBackendBundle
+      suitable for an HA cluster member.
+  - codeRefs:
+    - function:6343ba5ae1c857a80657f32ec3e0852e
+    - function:ed0356e5bf6a70fd8cd960a858f078ae
+    id: r.raft-ha-factory
+    level: MUST
+    text: RaftHAFactory adapts a PhysicalBackendBundler into a physical factory that
+      obtains the shared bundle for the core, substitutes an empty bundle when the
+      shared backend returns nil for a non-zero core, then sets HABackend to a raft
+      backend configured with path t.TempDir(), node_id core-<coreIdx>, performance_multiplier
+      8, autopilot_reconcile_interval 300ms and autopilot_update_interval 100ms; on
+      raft construction failure it runs the bundle cleanup and calls t.Fatal, and
+      it re-wraps Cleanup so the original cleanup is still invoked.
+  - codeRefs:
+    - function:74134058ecacf56f02caa5a51d30e7ad
+    id: r.raft-ha-setup
+    level: MUST
+    text: RaftHASetup wires a cluster for raft HA by setting opts.KeepStandbysSealed
+      to true and opts.PhysicalFactory to RaftHAFactory(bundler), so standby cores
+      stay sealed while raft supplies the HA backend.
+  - codeRefs:
+    - function:840743623f522715a45780501fe93c8d
+    id: r.reusable-raft-ha-storage
+    level: MUST
+    text: MakeReusableRaftHAStorage combines a *vault.PhysicalBackendBundle with reusable
+      raft HA storage over numCores cores and returns the ReusableStorage together
+      with its StorageCleanup.
+  - codeRefs:
+    - function:d877cadc67515c9bfca3c055343b3ee8
+    id: r.reusable-raft-storage
+    level: MUST
+    text: MakeReusableRaftStorage returns a ReusableStorage sized to numCores raft
+      cores, using the supplied raftlib.ServerAddressProvider to assign each core
+      its server address.
+  - codeRefs:
+    - function:d786198fb6b186f82b6a98e2f9231d75
+    - struct:cddc3bcf9f24c213abf45f9cb41a38c3
+    - type_alias:6008a90f20ec6333d6d1eb98888d520d
+    id: r.reusable-storage
+    level: MUST
+    text: MakeReusableStorage wraps a *vault.PhysicalBackendBundle into a ReusableStorage
+      together with a StorageCleanup, so a test can stop and restart a cluster over
+      the same physical backend and release it at the end.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go
+    - function:6343ba5ae1c857a80657f32ec3e0852e
+    id: r.shared-physical-factory
+    level: MUST
+    text: SharedPhysicalFactory adapts a PhysicalBackendBundler into a physical factory
+      that calls the bundler only for core index 0 and returns nil for every other
+      index, so a single shared physical backend is handed to the first core only.
   upstream: self
 - code:
   - third_party/openbao/internal/helper/timeutil/timeutil.go
