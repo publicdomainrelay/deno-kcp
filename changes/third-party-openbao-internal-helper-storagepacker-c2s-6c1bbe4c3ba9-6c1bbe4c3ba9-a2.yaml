@@ -1,0 +1,33 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-internal-helper-storagepacker-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-internal-helper-storagepacker
+  toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+status:
+  agentLog: 'This context is the OpenBao internal helper package storagepacker, vendored
+    under third_party/openbao/internal/helper/storagepacker. It packs many small records
+    into a small fixed number of storage buckets so a backend sees few large entries
+    instead of many small ones. StoragePacker holds a logical.Storage view, an hclog
+    logger, a per-key lock slice and a view prefix; NewStoragePacker allocates those.
+    BucketKey hashes an item ID with MD5 and uses the first digest byte as an unsigned
+    bucket index, so bucket keys are viewPrefix concatenated with the decimal index.
+    Reads take a lock on the key, read the raw entry, decompress it with compressutil.Decompress
+    (falling back to the raw value when uncompressed) and proto.Unmarshal it into
+    a Bucket; writes lock the same bucket, decompress, mutate and write back with
+    proto.Marshal. GetItem, PutItem, DeleteItem, DeleteMultipleItems and SwapItem
+    are the item-level entry points, each delegating to a WithStorage variant that
+    accepts an alternate view, and View exposes the constructor-supplied view. types.pb.go
+    holds the generated protobuf Item and Bucket messages: Item carries an ID and
+    an Any payload, Bucket carries a key, a repeated Item list and an ID-to-Any map.'
+  message: wrote 9 requirement(s) and 32 interface(s) for third-party-openbao-internal-helper-storagepacker
+  phase: Succeeded
+superseded:
+- message: wrote 9 requirement(s) and 32 interface(s) for third-party-openbao-internal-helper-storagepacker
+  name: third-party-openbao-internal-helper-storagepacker-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9
+  phase: Succeeded
