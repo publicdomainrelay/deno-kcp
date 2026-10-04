@@ -10,5 +10,24 @@ spec:
   systemContext: third-party-openbao-internal-helper-pluginutil-oci
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-helper-pluginutil-oci
-  phase: Running
+  agentLog: This context is the OpenBao OCI plugin downloader, a self-contained package
+    under third_party/openbao/internal/helper/pluginutil/oci. PluginDownloader is
+    constructed by NewPluginDownloader from a plugin directory, a *server.Config,
+    and an hclog.Logger, and it materializes declaratively configured plugin binaries
+    from OCI registries into that directory. Reconcile walks config.Plugins, skips
+    entries with a nil Image, validates each PluginConfig, and either fails or warns
+    according to config.PluginDownloadBehavior, then takes an IsCached fast path before
+    calling Download. IsCached resolves the plugin symlink, follows it, and returns
+    true only when the cache entry filename matches the digest reference and, if given,
+    the SHA256 sum matches, defaulting conservatively to false. Download detects the
+    local platform, fetches the OCI descriptor and image with the default keychain,
+    derives the binary name from config or the image Entrypoint/Cmd, rejects non-local
+    binary names, extracts into <pluginDirectory>/.oci-cache/<digest>, verifies an
+    optional SHA256 sum, and creates a relative symlink named after config.FullName().
+    Prune removes plugin symlinks and cache entries that the configuration no longer
+    references, in two passes over the plugin directory and the cache directory. The
+    package also holds the unexported helpers shouldFailOnError, maxPluginSize, and
+    extract, plus the constants PluginCacheDir and PluginMaxSizeBytes. downloader_test.go
+    exercises Download, extract, IsCached, and Prune.
+  message: wrote 13 requirement(s) and 6 interface(s) for third-party-openbao-internal-helper-pluginutil-oci
+  phase: Succeeded

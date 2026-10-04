@@ -24902,8 +24902,160 @@ system_contexts:
   codeRefIndex:
   - file:third_party/openbao/internal/helper/pluginutil/oci/downloader.go downloader.go@third_party/openbao/internal/helper/pluginutil/oci/downloader.go
   - file:third_party/openbao/internal/helper/pluginutil/oci/downloader_test.go downloader_test.go@third_party/openbao/internal/helper/pluginutil/oci/downloader_test.go
+  - function:83b6010e0b001058041ada9ccf0a7f47 NewPluginDownloader@third_party/openbao/internal/helper/pluginutil/oci/downloader.go:43
+  - method:0c31963a1d256e47e6fd88c31d7e8ab1 PluginDownloader.Download@third_party/openbao/internal/helper/pluginutil/oci/downloader.go:187
+  - method:364b9a07d9740dfbf70af0bcacda2843 PluginDownloader.IsCached@third_party/openbao/internal/helper/pluginutil/oci/downloader.go:127
+  - method:4491f433a58e1d354f3dd5795b47073c PluginDownloader.Prune@third_party/openbao/internal/helper/pluginutil/oci/downloader.go:398
+  - method:814afd6594193d47b551b264302aaf6f PluginDownloader.Reconcile@third_party/openbao/internal/helper/pluginutil/oci/downloader.go:52
+  - struct:a4123959d4f63cc63d31d23177faf31d PluginDownloader@third_party/openbao/internal/helper/pluginutil/oci/downloader.go:36
   id: sc.third-party-openbao-internal-helper-pluginutil-oci
+  intent: The context exists so that OpenBao servers can declare plugins by OCI image
+    reference and have the binary fetched, verified, cached, and pruned without an
+    out-of-band download step. It centralizes registry access, digest and checksum
+    verification, tar extraction with size and disk-space limits, symlink layout,
+    and garbage collection of unreferenced plugin binaries so that server startup
+    and plugin initialization code (plugin_init.go, server.go, plugin_catalog_oci)
+    share one implementation of plugin lifecycle on disk.
+  interfaces:
+  - file: third_party/openbao/internal/helper/pluginutil/oci/downloader.go
+    kind: function
+    name: NewPluginDownloader
+    signature: func NewPluginDownloader(pluginDirectory string, config *server.Config,
+      logger hclog.Logger) *PluginDownloader
+  - file: third_party/openbao/internal/helper/pluginutil/oci/downloader.go
+    kind: struct
+    name: PluginDownloader
+    signature: type PluginDownloader struct { pluginDirectory string; config *server.Config;
+      logger hclog.Logger }
+  - file: third_party/openbao/internal/helper/pluginutil/oci/downloader.go
+    kind: method
+    name: PluginDownloader.Download
+    signature: func (d *PluginDownloader) Download(ctx context.Context, config *server.PluginConfig,
+      logger hclog.Logger) error
+  - file: third_party/openbao/internal/helper/pluginutil/oci/downloader.go
+    kind: method
+    name: PluginDownloader.IsCached
+    signature: func (d *PluginDownloader) IsCached(config *server.PluginConfig) bool
+  - file: third_party/openbao/internal/helper/pluginutil/oci/downloader.go
+    kind: method
+    name: PluginDownloader.Prune
+    signature: func (d *PluginDownloader) Prune() error
+  - file: third_party/openbao/internal/helper/pluginutil/oci/downloader.go
+    kind: method
+    name: PluginDownloader.Reconcile
+    signature: func (d *PluginDownloader) Reconcile(ctx context.Context) error
   name: third-party-openbao-internal-helper-pluginutil-oci
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/pluginutil/oci/downloader.go
+    id: r.cache-layout-constants
+    level: MUST
+    text: PluginCacheDir is the relative directory name .oci-cache under the plugin
+      directory and PluginMaxSizeBytes is 512*1024*1024, so every cache path and size
+      limit in the package derives from those two constants.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/pluginutil/oci/downloader.go
+    - function:83b6010e0b001058041ada9ccf0a7f47
+    - struct:a4123959d4f63cc63d31d23177faf31d
+    id: r.constructor-binds-config
+    level: MUST
+    text: NewPluginDownloader returns a PluginDownloader holding the given plugin
+      directory, *server.Config, and hclog.Logger; every later method reads its behavior
+      from those three fields and never from global state.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/pluginutil/oci/downloader.go
+    - struct:a4123959d4f63cc63d31d23177faf31d
+    id: r.download-behavior-defaults-to-fail
+    level: MUST
+    text: shouldFailOnError treats an empty config.PluginDownloadBehavior as server.PluginDownloadFail
+      and returns true only when the configured behavior equals that value; maxPluginSize
+      returns config.PluginDownloadMaxSize when it is positive and PluginMaxSizeBytes
+      otherwise.
+  - codeRefs:
+    - method:0c31963a1d256e47e6fd88c31d7e8ab1
+    id: r.download-binary-name-resolution
+    level: MUST
+    text: Download uses config.BinaryName when set, otherwise takes the first image
+      Entrypoint entry, else the first Cmd entry, and errors when the name cannot
+      be determined; the chosen name is cleaned, stripped of a leading slash, and
+      rejected when it is not a local path so that image content cannot traverse outside
+      the plugin directory.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/pluginutil/oci/downloader.go
+    - method:0c31963a1d256e47e6fd88c31d7e8ab1
+    id: r.download-cache-then-symlink
+    level: MUST
+    text: Download extracts the binary to <pluginDirectory>/.oci-cache/<descriptor
+      digest>, verifies the SHA256 sum when configured and deletes the cached file
+      on mismatch or hash error, then replaces any existing entry with a relative
+      symlink at <pluginDirectory>/<config.FullName()> pointing into the cache.
+  - codeRefs:
+    - method:0c31963a1d256e47e6fd88c31d7e8ab1
+    id: r.download-platform-and-registry
+    level: MUST
+    text: Download parses the local platform from platforms.DefaultString(), fetches
+      the remote descriptor with the context and the default keychain authenticator,
+      and steps down to the image from that descriptor, returning a wrapped error
+      when any of those steps fails.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/pluginutil/oci/downloader.go
+    - method:0c31963a1d256e47e6fd88c31d7e8ab1
+    id: r.extract-limits
+    level: MUST
+    text: extract creates the target directory with mode 0755, streams the image filesystem
+      as tar and copies only the first regular-file entry whose name, with leading
+      slashes trimmed, equals the binary name; it refuses entries larger than maxPluginSize,
+      refuses to write when free disk space is below the entry size, copies through
+      an io.LimitReader of header.Size+1, fails when the copied byte count differs
+      from the header size, sets mode 0755 on success, and removes the partial file
+      on failure.
+  - codeRefs:
+    - method:364b9a07d9740dfbf70af0bcacda2843
+    id: r.iscached-conservative-validation
+    level: MUST
+    text: IsCached returns false when no plugin directory is set, when the plugin
+      path is missing or unreadable, or when the followed cache file does not exist;
+      it resolves a symlink to its absolute target, then returns true only if a digest
+      reference matches the cache file's base name or a configured SHA256Sum matches
+      the file's hash, and defaults to false when neither check ran.
+  - codeRefs:
+    - method:4491f433a58e1d354f3dd5795b47073c
+    id: r.prune-unreferenced-plugins
+    level: MUST
+    text: Prune errors when no plugin directory is configured, maps configured plugins
+      by FullName(), removes every top-level symlink that points into PluginCacheDir
+      but is not configured along with its target, keeps the targets of configured
+      plugins, and then walks the cache directory to delete every file not marked
+      as kept.
+  - codeRefs:
+    - method:364b9a07d9740dfbf70af0bcacda2843
+    - method:814afd6594193d47b551b264302aaf6f
+    id: r.reconcile-cache-fast-path
+    level: SHOULD
+    text: Reconcile calls IsCached before Download and skips the registry download
+      with an informational log when the plugin is already cached and valid.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/pluginutil/oci/downloader.go
+    - method:814afd6594193d47b551b264302aaf6f
+    id: r.reconcile-noop-without-plugins
+    level: MUST
+    text: Reconcile returns nil immediately when config.Plugins is empty, and returns
+      an error when no plugin directory was configured, before touching any plugin.
+  - codeRefs:
+    - method:814afd6594193d47b551b264302aaf6f
+    id: r.reconcile-skips-manual-plugins
+    level: MUST
+    text: Reconcile skips any plugin whose Image field is nil, so declaratively listed
+      plugins that are downloaded by other means are left alone.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/pluginutil/oci/downloader.go
+    - method:814afd6594193d47b551b264302aaf6f
+    id: r.reconcile-validates-and-honors-behavior
+    level: MUST
+    text: For each plugin with an image, Reconcile logs every PluginConfig validation
+      error, and when validation fails it returns an error if shouldFailOnError reports
+      true and otherwise warns and continues with the next plugin; download failures
+      are handled the same fail-or-warn way.
   upstream: self
 - code:
   - third_party/openbao/internal/helper/policies/policies.go

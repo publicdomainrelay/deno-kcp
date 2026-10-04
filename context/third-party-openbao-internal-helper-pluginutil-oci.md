@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so that OpenBao servers can declare plugins by OCI image reference and have the binary fetched, verified, cached, and pruned without an out-of-band download step. It centralizes registry access, digest and checksum verification, tar extraction with size and disk-space limits, symlink layout, and garbage collection of unreferenced plugin binaries so that server startup and plugin initialization code (plugin_init.go, server.go, plugin_catalog_oci) share one implementation of plugin lifecycle on disk.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
