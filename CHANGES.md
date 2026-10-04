@@ -5039,6 +5039,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.oidc-keys-list-reraise` (MUST): "The list query must rethrow every error that is not an httpStatus 404 rejection, so genuine failures are not swallowed."
 - added `r.store-service-injection` (MUST): "Each of the three route classes must inject the Ember Data store as the service named store, because every model hook resolves records through this.store."
 
+### third-party-openbao-ui-app-routes-vault-cluster-access-oidc-providers
+
+- intent: "" -> "This context exists to specify the data-loading contract of the OIDC provider routes in the OpenBao UI: which Ember Data operations each route performs, how a missing provider list is tolerated, and how a single provider is resolved from the route's name parameter, so that templates and downstream route behaviour can rely on a predictable model shape."
+- added `r.create-unsaved-record` (MUST): "OidcProvidersCreateRoute.model must return store.createRecord('oidc/provider'), giving the create route an unsaved OIDC provider record to populate, and must not persist it."
+- added `r.list-404-empty` (MUST): "When the oidc/provider query rejects with httpStatus 404, OidcProvidersRoute.model must resolve to an empty array instead of propagating the error; any other rejection must be re-thrown."
+- added `r.list-query` (MUST): "OidcProvidersRoute.model must return the result of store.query('oidc/provider', {}) so the index route renders the collection of OIDC providers."
+- added `r.resolve-by-name` (MUST): "OidcProviderRoute.model must read the name value from its route params and return store.findRecord('oidc/provider', name), so the single-provider route loads the record identified by the URL's name segment."
+- added `r.store-injection` (MUST): "Each of the three route classes must inject the Ember Data store service and perform all model loading through this.store, keeping data access in the route rather than the template."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5456,7 +5465,8 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-routes-vault-cluster-access-oidc-clients-client-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-oidc-clients-client-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-oidc-keys-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-routes-vault-cluster-access-oidc-keys-key-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-ui-app-routes-vault-cluster-access-oidc-providers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-routes-vault-cluster-access-oidc-keys-key-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-routes-vault-cluster-access-oidc-providers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-routes-vault-cluster-access-oidc-providers-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

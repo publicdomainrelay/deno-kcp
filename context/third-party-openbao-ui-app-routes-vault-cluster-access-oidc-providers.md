@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to specify the data-loading contract of the OIDC provider routes in the OpenBao UI: which Ember Data operations each route performs, how a missing provider list is tolerated, and how a single provider is resolved from the route's name parameter, so that templates and downstream route behaviour can rely on a predictable model shape.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
