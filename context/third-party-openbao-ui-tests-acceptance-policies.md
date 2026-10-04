@@ -9,5 +9,5 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/ui/tests/acceptance/policies/index-test.js` file index-test.js (third_party/openbao/ui/tests/acceptance/policies/index-test.js)
 <!-- SPECD_MANAGED_END -->
