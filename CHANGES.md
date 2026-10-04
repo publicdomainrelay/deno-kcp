@@ -886,6 +886,19 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.tls-config-only-when-set` (SHOULD): "The api.TLSConfig handed to the TLS provider should be nil unless at least one of -ca-cert, -ca-path, -client-cert, -client-key, -tls-server-name, or -tls-skip-verify was set, so an unconfigured plugin uses default transport settings."
 - added `r.tls-provider-from-plugin-metadata` (MUST): "main must pass TLSProviderFunc derived from api.VaultPluginTLSProvider(tlsConfig) into ServeOpts, so the plugin keeps backwards compatibility with hosts that do not support plugin AutoMTLS."
 
+### third-party-openbao-internal-builtin-logical-transit
+
+- intent: "" -> "The context exists to specify the Transit logical backend that the repository vendors from OpenBao: what the plugin factory must construct, how the policy cache is sized from storage, how policies are fetched under locks, how the external key factory bridges to the system view, and which Transit API paths and batch request/response shapes the backend must serve. It gives the contract for the transit package so that consumers and refactors can rely on the exported entry points and the path surface without re-reading every file."
+- added `r.associated-data-factory` (MUST): "AssocDataFactory supplies the associated data used by AEAD encryption, with GetAssociatedData returning the associated data bytes or an error so context binding can be threaded into encrypt calls."
+- added `r.cache-size-from-storage` (MUST): "GetCacheSizeFromStorage reads the "config/cache" storage entry, JSON-decodes it into the cache config struct, and returns its Size field; it returns 0 when the entry is absent and propagates storage and decode errors."
+- added `r.decrypt-batch-shape` (MUST): "The decrypt path answers with DecryptBatchResponseItem entries mirroring the encrypt batch shape so batched decryption returns one result per submitted ciphertext."
+- added `r.encrypt-batch-shapes` (MUST): "The encrypt path accepts a batch of BatchRequestItem entries and answers with EncryptBatchResponseItem entries, so a single request can encrypt many plaintexts and report per-item ciphertext and errors."
+- added `r.external-key-bridge-to-system-view` (MUST): "backend.ExternalKeyFactory returns an ExternalKeyFactory carrying the request context and the logical system view, and ExternalKeyFactory.GetExternalKey resolves a key reference by delegating to view.GetExternalKey, returning the context alongside the resolved kms.Key and error."
+- added `r.factory-builds-and-sets-up-backend` (MUST): "Factory builds the Transit backend through Backend(ctx, conf) and then calls Setup on it, returning nil and the error if either step fails, so a plugin host receives a fully initialized logical.Backend."
+- added `r.path-behaviour-tests` (SHOULD): "Every Transit path file has a companion _test.go exercising its handler, and the encrypt and decrypt paths additionally carry benchmark tests, so path behavior and performance stay covered as the vendored code changes."
+- added `r.policy-fetch-locking` (MUST): "backend.GetPolicy fetches a policy under a shared/read lock while backend.GetPolicyExclusive fetches under an exclusive lock with an optional random reader, both returning the policy, whether it was upserted, and any error so callers pick the weaker lock that still keeps the policy stable."
+- added `r.transit-path-surface` (MUST): "The backend registers the Transit path surface: key management (path_keys, path_keys_config, path_config_keys, path_rotate, path_trim), cryptographic operations (path_encrypt, path_decrypt, path_rewrap, path_datakey, path_hmac, path_sign_verify, path_hash, path_random, path_derive_key), key material movement (path_import, path_export, path_backup, path_restore, path_wrapping_key), and configuration (path_cache_config, path_byok, path_certificates)."
+
 ### third-party-openbao-internal-builtin-logical-transit-cmd-transit
 
 - intent: "" -> "The context exists so the transit logical backend can be built and run as a standalone multiplexed plugin process rather than being linked into a server. It separates process wiring, argument and TLS handling from the backend logic in the transit package, and it deliberately sets TLSProviderFunc so the plugin keeps backwards compatibility with Vault versions that do not support plugin AutoMTLS."
@@ -921,6 +934,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-builtin-logical-totp-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-totp-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-totp-cmd-totp-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-builtin-logical-transit-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-builtin-logical-transit-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-transit-cmd-transit-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-plugin-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-builtin-plugin-v5-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |

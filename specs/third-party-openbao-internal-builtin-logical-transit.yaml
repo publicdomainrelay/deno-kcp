@@ -56,10 +56,175 @@ codeRefIndex:
 - file:third_party/openbao/internal/builtin/logical/transit/path_wrapping_key_test.go
   path_wrapping_key_test.go@third_party/openbao/internal/builtin/logical/transit/path_wrapping_key_test.go
 - file:third_party/openbao/internal/builtin/logical/transit/stepwise_test.go stepwise_test.go@third_party/openbao/internal/builtin/logical/transit/stepwise_test.go
+- function:000c05a4ec7691f25a33662ebe0d9ee3 GetCacheSizeFromStorage@third_party/openbao/internal/builtin/logical/transit/backend.go:128
+- function:37d054dd2d2f22457c13fdcf492f375b Backend@third_party/openbao/internal/builtin/logical/transit/backend.go:41
+- function:381085114a51d0b08808d3cd9f47ba55 Factory@third_party/openbao/internal/builtin/logical/transit/backend.go:30
+- method:2400c6b8a16531e50c59fb35814c969c backend.GetPolicy@third_party/openbao/internal/builtin/logical/transit/backend.go:145
+- method:5d7f51f802dc1ba580ffde2e8ae3055f backend.GetPolicyExclusive@third_party/openbao/internal/builtin/logical/transit/backend.go:149
+- method:814de26db1b9b84ef3959a0cbb03030e AssocDataFactory.GetAssociatedData@third_party/openbao/internal/builtin/logical/transit/path_encrypt.go:68
+- method:8c04a897e645419609f28c7fdcb6b705 backend.ExternalKeyFactory@third_party/openbao/internal/builtin/logical/transit/backend.go:307
+- method:ee7e0af2d23d9f185a9b4788be656d2c ExternalKeyFactory.GetExternalKey@third_party/openbao/internal/builtin/logical/transit/backend.go:302
+- struct:138a09d1182d6e96561fa588ee32f835 DecryptBatchResponseItem@third_party/openbao/internal/builtin/logical/transit/path_decrypt.go:17
+- struct:59998bebe79acfe50dcdd01d22da84f3 AssocDataFactory@third_party/openbao/internal/builtin/logical/transit/path_encrypt.go:64
+- struct:64ef55a31f10f09cb907d56fdfe1a039 BatchRequestItem@third_party/openbao/internal/builtin/logical/transit/path_encrypt.go:22
+- struct:8a259263f720842e73cfba078b181b02 EncryptBatchResponseItem@third_party/openbao/internal/builtin/logical/transit/path_encrypt.go:47
+- struct:cd55fd15ab7316cd773b434a6dc39ee1 ExternalKeyFactory@third_party/openbao/internal/builtin/logical/transit/backend.go:295
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-builtin-logical-transit
   namespace: default
 spec:
+  intent: 'The context exists to specify the Transit logical backend that the repository
+    vendors from OpenBao: what the plugin factory must construct, how the policy cache
+    is sized from storage, how policies are fetched under locks, how the external
+    key factory bridges to the system view, and which Transit API paths and batch
+    request/response shapes the backend must serve. It gives the contract for the
+    transit package so that consumers and refactors can rely on the exported entry
+    points and the path surface without re-reading every file.'
+  interfaces:
+  - file: third_party/openbao/internal/builtin/logical/transit/path_encrypt.go
+    kind: struct
+    name: AssocDataFactory
+    signature: type AssocDataFactory struct
+  - file: third_party/openbao/internal/builtin/logical/transit/path_encrypt.go
+    kind: method
+    name: AssocDataFactory.GetAssociatedData
+    signature: () ([]byte, error)
+  - file: third_party/openbao/internal/builtin/logical/transit/backend.go
+    kind: function
+    name: Backend
+    signature: (ctx context.Context, conf *logical.BackendConfig) (*backend, error)
+  - file: third_party/openbao/internal/builtin/logical/transit/path_encrypt.go
+    kind: struct
+    name: BatchRequestItem
+    signature: type BatchRequestItem struct
+  - file: third_party/openbao/internal/builtin/logical/transit/path_decrypt.go
+    kind: struct
+    name: DecryptBatchResponseItem
+    signature: type DecryptBatchResponseItem struct
+  - file: third_party/openbao/internal/builtin/logical/transit/path_encrypt.go
+    kind: struct
+    name: EncryptBatchResponseItem
+    signature: type EncryptBatchResponseItem struct
+  - file: third_party/openbao/internal/builtin/logical/transit/backend.go
+    kind: struct
+    name: ExternalKeyFactory
+    signature: type ExternalKeyFactory struct { ctx context.Context; view logical.SystemView
+      }
+  - file: third_party/openbao/internal/builtin/logical/transit/backend.go
+    kind: method
+    name: ExternalKeyFactory.GetExternalKey
+    signature: (ref string) (context.Context, kms.Key, error)
+  - file: third_party/openbao/internal/builtin/logical/transit/backend.go
+    kind: function
+    name: Factory
+    signature: (ctx context.Context, conf *logical.BackendConfig) (logical.Backend,
+      error)
+  - file: third_party/openbao/internal/builtin/logical/transit/backend.go
+    kind: function
+    name: GetCacheSizeFromStorage
+    signature: (ctx context.Context, s logical.Storage) (int, error)
+  - file: third_party/openbao/internal/builtin/logical/transit/backend.go
+    kind: method
+    name: backend.ExternalKeyFactory
+    signature: (ctx context.Context) *ExternalKeyFactory
+  - file: third_party/openbao/internal/builtin/logical/transit/backend.go
+    kind: method
+    name: backend.GetPolicy
+    signature: (ctx context.Context, polReq keysutil.PolicyRequest, rand io.Reader)
+      (retP *keysutil.Policy, retUpserted bool, retErr error)
+  - file: third_party/openbao/internal/builtin/logical/transit/backend.go
+    kind: method
+    name: backend.GetPolicyExclusive
+    signature: (ctx context.Context, polReq keysutil.PolicyRequest, rand io.Reader)
+      (retP *keysutil.Policy, retUpserted bool, retErr error)
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/transit/path_encrypt.go
+    - method:814de26db1b9b84ef3959a0cbb03030e
+    - struct:59998bebe79acfe50dcdd01d22da84f3
+    id: r.associated-data-factory
+    level: MUST
+    text: AssocDataFactory supplies the associated data used by AEAD encryption, with
+      GetAssociatedData returning the associated data bytes or an error so context
+      binding can be threaded into encrypt calls.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/transit/path_cache_config.go
+    - function:000c05a4ec7691f25a33662ebe0d9ee3
+    id: r.cache-size-from-storage
+    level: MUST
+    text: GetCacheSizeFromStorage reads the "config/cache" storage entry, JSON-decodes
+      it into the cache config struct, and returns its Size field; it returns 0 when
+      the entry is absent and propagates storage and decode errors.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/transit/path_decrypt.go
+    - struct:138a09d1182d6e96561fa588ee32f835
+    id: r.decrypt-batch-shape
+    level: MUST
+    text: The decrypt path answers with DecryptBatchResponseItem entries mirroring
+      the encrypt batch shape so batched decryption returns one result per submitted
+      ciphertext.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/transit/path_encrypt.go
+    - struct:64ef55a31f10f09cb907d56fdfe1a039
+    - struct:8a259263f720842e73cfba078b181b02
+    id: r.encrypt-batch-shapes
+    level: MUST
+    text: The encrypt path accepts a batch of BatchRequestItem entries and answers
+      with EncryptBatchResponseItem entries, so a single request can encrypt many
+      plaintexts and report per-item ciphertext and errors.
+  - codeRefs:
+    - method:8c04a897e645419609f28c7fdcb6b705
+    - method:ee7e0af2d23d9f185a9b4788be656d2c
+    - struct:cd55fd15ab7316cd773b434a6dc39ee1
+    id: r.external-key-bridge-to-system-view
+    level: MUST
+    text: backend.ExternalKeyFactory returns an ExternalKeyFactory carrying the request
+      context and the logical system view, and ExternalKeyFactory.GetExternalKey resolves
+      a key reference by delegating to view.GetExternalKey, returning the context
+      alongside the resolved kms.Key and error.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/transit/backend.go
+    - function:37d054dd2d2f22457c13fdcf492f375b
+    - function:381085114a51d0b08808d3cd9f47ba55
+    id: r.factory-builds-and-sets-up-backend
+    level: MUST
+    text: Factory builds the Transit backend through Backend(ctx, conf) and then calls
+      Setup on it, returning nil and the error if either step fails, so a plugin host
+      receives a fully initialized logical.Backend.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/transit/backend_test.go
+    - file:third_party/openbao/internal/builtin/logical/transit/path_decrypt_bench_test.go
+    - file:third_party/openbao/internal/builtin/logical/transit/path_encrypt_bench_test.go
+    - file:third_party/openbao/internal/builtin/logical/transit/path_encrypt_test.go
+    id: r.path-behaviour-tests
+    level: SHOULD
+    text: Every Transit path file has a companion _test.go exercising its handler,
+      and the encrypt and decrypt paths additionally carry benchmark tests, so path
+      behavior and performance stay covered as the vendored code changes.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/transit/backend.go
+    - method:2400c6b8a16531e50c59fb35814c969c
+    - method:5d7f51f802dc1ba580ffde2e8ae3055f
+    id: r.policy-fetch-locking
+    level: MUST
+    text: backend.GetPolicy fetches a policy under a shared/read lock while backend.GetPolicyExclusive
+      fetches under an exclusive lock with an optional random reader, both returning
+      the policy, whether it was upserted, and any error so callers pick the weaker
+      lock that still keeps the policy stable.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/transit/path_byok.go
+    - file:third_party/openbao/internal/builtin/logical/transit/path_cache_config.go
+    - file:third_party/openbao/internal/builtin/logical/transit/path_encrypt.go
+    - file:third_party/openbao/internal/builtin/logical/transit/path_import.go
+    - file:third_party/openbao/internal/builtin/logical/transit/path_keys.go
+    id: r.transit-path-surface
+    level: MUST
+    text: 'The backend registers the Transit path surface: key management (path_keys,
+      path_keys_config, path_config_keys, path_rotate, path_trim), cryptographic operations
+      (path_encrypt, path_decrypt, path_rewrap, path_datakey, path_hmac, path_sign_verify,
+      path_hash, path_random, path_derive_key), key material movement (path_import,
+      path_export, path_backup, path_restore, path_wrapping_key), and configuration
+      (path_cache_config, path_byok, path_certificates).'
   upstream: self

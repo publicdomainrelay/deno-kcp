@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists to specify the Transit logical backend that the repository vendors from OpenBao: what the plugin factory must construct, how the policy cache is sized from storage, how policies are fetched under locks, how the external key factory bridges to the system view, and which Transit API paths and batch request/response shapes the backend must serve. It gives the contract for the transit package so that consumers and refactors can rely on the exported entry points and the path surface without re-reading every file.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
