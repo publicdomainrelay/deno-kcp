@@ -1,7 +1,7 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 kind: SpecChange
 metadata:
-  name: third-party-openbao-ui-app-adapters-identity-c2s-6c1bbe4c3ba9-89cee50ec5ae
+  name: third-party-openbao-ui-app-adapters-identity-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2
   namespace: default
 spec:
   delta: {}
@@ -19,14 +19,15 @@ status:
     entity-alias.js and group-alias.js extend base with no further overrides. entity-merge.js
     extends base, hardcodes the URL path identity/entity/merge, and rewrites createRecord
     to resolve with { id: toEntityId } so the caller can redirect to the surviving
-    entity. entity.js and group.js each extend base and add a lookup method that POSTs
-    to ${urlPrefix}/identity/lookup/entity or ${urlPrefix}/identity/lookup/group,
+    entity after a merge. entity.js and group.js each extend base and add a lookup
+    method that POSTs to ${urlPrefix}/identity/lookup/entity or ${urlPrefix}/identity/lookup/group,
     treats a 204 (falsy body) as no match by returning undefined, and otherwise normalizes
     the response through the matching serializer and pushes it into the store before
     returning the raw response.'
-  message: wrote 10 requirement(s) and 0 interface(s) for third-party-openbao-ui-app-adapters-identity
+  message: wrote 10 requirement(s) and 0 interface(s) for third-party-openbao-ui-app-adapters-identity;
+    the spec already said this
   phase: Succeeded
 superseded:
-- message: the agent is summarizing third-party-openbao-ui-app-adapters-identity
-  name: third-party-openbao-ui-app-adapters-identity-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2
-  phase: Running
+- message: wrote 10 requirement(s) and 0 interface(s) for third-party-openbao-ui-app-adapters-identity
+  name: third-party-openbao-ui-app-adapters-identity-c2s-6c1bbe4c3ba9-89cee50ec5ae
+  phase: Succeeded
