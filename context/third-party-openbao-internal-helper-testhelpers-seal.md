@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so that seal-migration and related tests can get a working transit seal without hand-building a cluster: one call starts a single-core in-memory OpenBao with transit mounted, and two methods create the transit key and produce the vault.Seal that wraps it. It isolates all the cluster, mount, wrapper-config and CA-cert plumbing behind a small helper so test bodies only name a key and receive a seal. It is not production code; it is a test helper, and its contract is that it fails the test through testing.T rather than returning setup errors for the cluster and key steps.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

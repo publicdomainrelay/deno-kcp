@@ -1917,6 +1917,14 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.root-password-env` (MUST): "PrepareTestContainer must pass the caller-supplied password through the MYSQL_ROOT_PASSWORD environment variable of the container, and must derive the connection string from that same password so the returned URL and the container's root password always agree."
 - added `r.tb-interface` (SHOULD): "TestCredsExist should accept testing.TB rather than *testing.T so benchmarks and other test doubles can call it, and should return an error instead of failing the test itself, leaving the pass or fail decision to the caller."
 
+### third-party-openbao-internal-helper-testhelpers-seal
+
+- intent: "" -> "The context exists so that seal-migration and related tests can get a working transit seal without hand-building a cluster: one call starts a single-core in-memory OpenBao with transit mounted, and two methods create the transit key and produce the vault.Seal that wraps it. It isolates all the cluster, mount, wrapper-config and CA-cert plumbing behind a small helper so test bodies only name a key and receive a seal. It is not production code; it is a test helper, and its contract is that it fails the test through testing.T rather than returning setup errors for the cluster and key steps."
+- added `r.make-key-creates-deletable-transit-key` (MUST): "TransitSealServer.MakeKey must write to transit/keys/<key> and then to transit/keys/<key>/config with deletion_allowed true, using the first core's logical client, and must fail the test via t.Fatal if either write returns an error."
+- added `r.make-seal-configures-wrapper-from-cluster` (MUST): "TransitSealServer.MakeSeal must create a transit wrapper, call SetConfig with context.Background() and a config map carrying the first core client's address and token, mount_path "transit", the given key_name and the cluster CACertPEMFile as tls_ca_cert, fail the test with t.Fatalf when SetConfig errors, and otherwise return vault.NewAutoSeal(seal.NewAccess(wrapper))."
+- added `r.new-transit-seal-server-starts-cluster` (MUST): "NewTransitSealServer must build a CoreConfig whose LogicalBackends registers the transit factory, build TestClusterOptions with one core, the http handler and a vault logger named after t.Name() plus the transit-seal<idx> suffix, apply the in-memory storage backend setup, create and start the cluster, and then mount a transit secrets engine at path "transit" through the first core's Sys().Mount, calling t.Fatal on a mount failure."
+- added `r.transit-seal-server-embeds-cluster` (MUST): "TransitSealServer must embed a *vault.TestCluster so that callers can reach the cluster's Cores, client and CACertPEMFile through the helper; the constructor returns a TransitSealServer built from the started cluster."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -2031,4 +2039,4 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-helper-testhelpers-logical-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-testhelpers-mysql-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-testhelpers-pluginhelpers-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-internal-helper-testhelpers-seal-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-helper-testhelpers-seal-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |

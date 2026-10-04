@@ -1,10 +1,78 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
 - file:third_party/openbao/internal/helper/testhelpers/seal/sealhelper.go sealhelper.go@third_party/openbao/internal/helper/testhelpers/seal/sealhelper.go
+- function:6154c2b5f91b0a3797a19e9242a685d0 NewTransitSealServer@third_party/openbao/internal/helper/testhelpers/seal/sealhelper.go:29
+- method:5879ba126d86f2800029a1a2453177c5 TransitSealServer.MakeKey@third_party/openbao/internal/helper/testhelpers/seal/sealhelper.go:53
+- method:f9f3bd86a14fd197bb1b7d6ab12600a1 TransitSealServer.MakeSeal@third_party/openbao/internal/helper/testhelpers/seal/sealhelper.go:65
+- struct:d74013fb41678c8875095071efe2fe8f TransitSealServer@third_party/openbao/internal/helper/testhelpers/seal/sealhelper.go:25
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-helper-testhelpers-seal
   namespace: default
 spec:
+  intent: 'The context exists so that seal-migration and related tests can get a working
+    transit seal without hand-building a cluster: one call starts a single-core in-memory
+    OpenBao with transit mounted, and two methods create the transit key and produce
+    the vault.Seal that wraps it. It isolates all the cluster, mount, wrapper-config
+    and CA-cert plumbing behind a small helper so test bodies only name a key and
+    receive a seal. It is not production code; it is a test helper, and its contract
+    is that it fails the test through testing.T rather than returning setup errors
+    for the cluster and key steps.'
+  interfaces:
+  - file: third_party/openbao/internal/helper/testhelpers/seal/sealhelper.go
+    kind: function
+    name: NewTransitSealServer
+    signature: func NewTransitSealServer(t testing.T, idx int) *TransitSealServer
+  - file: third_party/openbao/internal/helper/testhelpers/seal/sealhelper.go
+    kind: struct
+    name: TransitSealServer
+    signature: type TransitSealServer struct { *vault.TestCluster }
+  - file: third_party/openbao/internal/helper/testhelpers/seal/sealhelper.go
+    kind: method
+    name: TransitSealServer.MakeKey
+    signature: func (tss *TransitSealServer) MakeKey(t testing.T, key string)
+  - file: third_party/openbao/internal/helper/testhelpers/seal/sealhelper.go
+    kind: method
+    name: TransitSealServer.MakeSeal
+    signature: func (tss *TransitSealServer) MakeSeal(t testing.T, key string) (vault.Seal,
+      error)
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/testhelpers/seal/sealhelper.go
+    - method:5879ba126d86f2800029a1a2453177c5
+    id: r.make-key-creates-deletable-transit-key
+    level: MUST
+    text: TransitSealServer.MakeKey must write to transit/keys/<key> and then to transit/keys/<key>/config
+      with deletion_allowed true, using the first core's logical client, and must
+      fail the test via t.Fatal if either write returns an error.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/testhelpers/seal/sealhelper.go
+    - method:f9f3bd86a14fd197bb1b7d6ab12600a1
+    id: r.make-seal-configures-wrapper-from-cluster
+    level: MUST
+    text: TransitSealServer.MakeSeal must create a transit wrapper, call SetConfig
+      with context.Background() and a config map carrying the first core client's
+      address and token, mount_path "transit", the given key_name and the cluster
+      CACertPEMFile as tls_ca_cert, fail the test with t.Fatalf when SetConfig errors,
+      and otherwise return vault.NewAutoSeal(seal.NewAccess(wrapper)).
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/testhelpers/seal/sealhelper.go
+    - function:6154c2b5f91b0a3797a19e9242a685d0
+    id: r.new-transit-seal-server-starts-cluster
+    level: MUST
+    text: NewTransitSealServer must build a CoreConfig whose LogicalBackends registers
+      the transit factory, build TestClusterOptions with one core, the http handler
+      and a vault logger named after t.Name() plus the transit-seal<idx> suffix, apply
+      the in-memory storage backend setup, create and start the cluster, and then
+      mount a transit secrets engine at path "transit" through the first core's Sys().Mount,
+      calling t.Fatal on a mount failure.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/testhelpers/seal/sealhelper.go
+    - struct:d74013fb41678c8875095071efe2fe8f
+    id: r.transit-seal-server-embeds-cluster
+    level: MUST
+    text: TransitSealServer must embed a *vault.TestCluster so that callers can reach
+      the cluster's Cores, client and CACertPEMFile through the helper; the constructor
+      returns a TransitSealServer built from the started cluster.
   upstream: self
