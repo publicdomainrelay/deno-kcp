@@ -4,5 +4,95 @@ metadata:
   name: cmd-deno-kcp-provider
   namespace: default
 spec:
+  intent: 'This context exists to be the process entrypoint for the deno-kcp provider
+    controller. Everything it does is wiring: turn command line flags and environment
+    variables into a config, refuse to start without a kubeconfig, build the registry,
+    engine runner, pod runner and provider in the order their dependencies require,
+    and then run the provider until a termination signal arrives. The two non-obvious
+    behaviours it encodes are the KUBE_FEATURE_WatchListClient opt-out, which stops
+    a streaming list from hanging when kcp''s APIExport virtual workspace sends no
+    bookmark, and the deferred TrustBundle closure, which exists because the OpenBao
+    root CA does not exist until a namespace has requested a certificate and the provider
+    that generates it is built from the runner being constructed. It is deliberately
+    thin, holding no reconcile logic of its own.'
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:cmd/deno-kcp-provider/main.go
+    id: r.bundled-actions-default
+    level: MUST
+    text: When --bundled-actions-dir is empty, main derives it as the policy engine
+      directory joined with /../policies/gha-lite/bundled-actions.
+  - codeRefs:
+    - file:cmd/deno-kcp-provider/main.go
+    id: r.ca-data-fallback
+    level: MUST
+    text: caData returns the rest config's CAData when present, otherwise the contents
+      of CAFile when it can be read, otherwise nil.
+  - codeRefs:
+    - file:cmd/deno-kcp-provider/main.go
+    id: r.construction-order
+    level: MUST
+    text: main builds the registry, the engine runner, the exec pod runner, and then
+      the provider, exiting with status 1 and a logged error when any construction
+      fails.
+  - codeRefs:
+    - file:cmd/deno-kcp-provider/main.go
+    id: r.deferred-trust-bundle
+    level: MUST
+    text: The exec pod runner's TrustBundle is a closure that returns the kubeconfig
+      CA data from caData while the provider is nil and providerImpl.TrustBundle once
+      the provider exists, because the OpenBao root CA does not exist before a namespace
+      requests a certificate.
+  - codeRefs:
+    - file:cmd/deno-kcp-provider/main.go
+    id: r.disable-watch-list-client
+    level: MUST
+    text: main sets KUBE_FEATURE_WatchListClient to false before any client-go call,
+      because kcp's APIExport virtual workspace sends no bookmark and an informer's
+      initial list would otherwise never complete.
+  - codeRefs:
+    - file:cmd/deno-kcp-provider/main.go
+    id: r.flag-env-fallback
+    level: MUST
+    text: Every configuration value comes from a flag whose default is the environment
+      variable, and the environment is read through envOr for strings and envOrInt64
+      for integers, which ignore an empty or unparseable variable and use the fallback.
+  - codeRefs:
+    - file:cmd/deno-kcp-provider/main.go
+    id: r.host-override
+    level: MUST
+    text: The host passed to the registry and the provider is the kubeconfig's server
+      unless --host is set, in which case the flag wins.
+  - codeRefs:
+    - file:cmd/deno-kcp-provider/main.go
+    id: r.negative-run-ttl-disables
+    level: MUST
+    text: defaultRunTTL answers nil for a negative seconds value, which disables the
+      default run TTL, and otherwise returns a pointer to the value.
+  - codeRefs:
+    - file:cmd/deno-kcp-provider/main.go
+    id: r.openbao-ca-read-nonfatal
+    level: SHOULD
+    text: readIfSet returns nil and logs a warning, rather than failing startup, when
+      the PEM file named by the OpenBao CA flag cannot be read, so an https vault
+      surfaces as a failed TLS verification instead of a provider that will not start.
+  - codeRefs:
+    - file:cmd/deno-kcp-provider/main.go
+    id: r.require-kubeconfig
+    level: MUST
+    text: main exits with status 2 and a message on stderr when neither --kubeconfig
+      nor KUBECONFIG is set.
+  - codeRefs:
+    - file:cmd/deno-kcp-provider/main.go
+    id: r.run-until-signal
+    level: MUST
+    text: main runs providerImpl.Run under a context cancelled by SIGINT or SIGTERM,
+      and exits with status 1 and a logged error if Run returns an error.
+  - codeRefs:
+    - file:cmd/deno-kcp-provider/main.go
+    id: r.single-binary-entrypoint
+    level: MUST
+    text: The package provides a main function that acts as the provider process entrypoint
+      and holds no reconcile logic.
   upstream: self
