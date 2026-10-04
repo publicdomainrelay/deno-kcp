@@ -3651,6 +3651,22 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.read-write-symmetric-entry-type` (MUST): "Put must persist entries through PutInternal using the same JSON file entry representation that GetInternal decodes, so that a value written by Put is returned unchanged by Get for the same key."
 - added `r.test-coverage` (SHOULD): "file_test.go should continue to cover base64 URL encoding of keys, path validation and general backend behaviour through TestFileBackend_Base64URLEncoding, TestFileBackend_ValidatePath and TestFileBackend, each constructing its backend with NewFileBackend."
 
+### third-party-openbao-sdk-physical-inmem
+
+- intent: "" -> "This context exists to specify the in-memory implementation of the physical storage interface that the OpenBao SDK exposes for tests and for embedders that need a throwaway backend. It must provide the full physical.Backend contract (Put, Get, Delete, List, ListPage), optional transactional semantics through TransactionalInmemBackend and InmemBackendTransaction, deterministic failure injection so callers can exercise error paths, and an HA layer (InmemHABackend and InmemLock) that simulates lock contention in process. Read it when reasoning about what an in-memory backend guarantees, how transactions stage and commit writes, or how the HA lock map behaves."
+- added `r.backend-contract` (MUST): "InmemBackend must satisfy physical.Backend: Put, Get, Delete and List operate on an internally synchronized map, and each exported operation must delegate to its Internal counterpart (PutInternal, GetInternal, DeleteInternal, ListInternal) so that tests and callers can bypass the failure switches."
+- added `r.constructors` (MUST): "NewInmem must return a TransactionalInmemBackend so callers get transactional support, while NewDirectInmem must return the plain InmemBackend without transactions; both take the backend config map and a logger and return physical.Backend or an error."
+- added `r.failure-injection` (MUST): "InmemBackend must expose FailPut, FailGet, FailDelete and FailList setters that toggle per-operation error injection, and while a switch is on the corresponding exported operation must return an error instead of touching the map."
+- added `r.ha-backend` (MUST): "InmemHABackend must embed the in-memory backend, implement LockWith to hand out an InmemLock for a key and value, implement HookInvalidate to register a physical.InvalidateFunc, and report lock count and HA state through LockMapSize and HAEnabled."
+- added `r.ha-put-delete-invalidate` (SHOULD): "InmemHABackend.Put and InmemHABackend.Delete must update the in-memory data and, when the key is lock-related, notify registered invalidate hooks so lock holders learn their value changed."
+- added `r.lock-semantics` (MUST): "InmemLock.Lock must acquire the named lock, emitting on the returned channel when the lock is lost and honoring stopCh to abort waiting; Unlock must release it, and Value must report whether the lock is held together with its value."
+- added `r.op-naming` (MUST): "OpName must map each in-memory operation constant (put, delete, list, list-page, get, begin-tx, begin-ro-tx, commit-tx, rollback-tx) to its lowercase name and return "unknown" for any other value."
+- added `r.paginated-list` (MUST): "InmemBackend.ListPage and the internal ListPaginatedInternal must return keys under prefix in sorted order, skipping keys at or before the after cursor and returning at most limit keys when limit is positive."
+- added `r.test-coverage` (SHOULD): "The package tests must exercise the plain backend, the HA backend and the cache and view layers, covering CRUD, paginated listing, failure injection and lock behavior."
+- added `r.transaction-begin` (MUST): "TransactionalInmemBackend.BeginTx must start a read-write transaction and BeginReadOnlyTx must start one that rejects writes, both returning physical.Transaction or an error."
+- added `r.transaction-commit-rollback` (MUST): "InmemBackendTransaction.Commit must apply all staged operations to the parent backend, and Rollback must discard them without mutating the parent; both must consume the transaction so it cannot be reused."
+- added `r.transaction-staging` (MUST): "InmemBackendTransaction must keep staged writes and reads in a dirty overlay: Put and Delete record pending changes, Get and List/ListPage read the overlay before the parent backend, and no change reaches the parent map before Commit."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |

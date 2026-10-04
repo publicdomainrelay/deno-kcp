@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to specify the in-memory implementation of the physical storage interface that the OpenBao SDK exposes for tests and for embedders that need a throwaway backend. It must provide the full physical.Backend contract (Put, Get, Delete, List, ListPage), optional transactional semantics through TransactionalInmemBackend and InmemBackendTransaction, deterministic failure injection so callers can exercise error paths, and an HA layer (InmemHABackend and InmemLock) that simulates lock contention in process. Read it when reasoning about what an in-memory backend guarantees, how transactions stage and commit writes, or how the HA lock map behaves.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
