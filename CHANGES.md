@@ -5473,6 +5473,14 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.license-header` (MUST): "The file must keep the HashiCorp copyright notice and the SPDX-License-Identifier: MPL-2.0 header at the top of the module, since this tree is vendored third-party OpenBao source."
 - added `r.re-export-addon-default` (MUST): "The app-tree module must re-export the default binding of the addon module core/components/confirm/message as its own default export, and must define no local component state, template or behavior of its own, so that the app-namespace import and the addon-namespace import resolve to the same implementation."
 
+### third-party-openbao-ui-lib-core-app-components-linkable-item
+
+- intent: "" -> "This context exists so the linkable-item content and menu components are reachable through the app-level component path in the OpenBao UI app. It is a thin aliasing layer between the app/components directory and the core/components implementation, letting the Ember resolver look up linkable-item pieces without duplicating implementation, and it keeps the vendored third_party tree layout consistent with the upstream OpenBao UI source."
+- added `r.content-reexports-core-default` (MUST): "The file must re-export, as its default export, the default export of the module 'core/components/linkable-item/content', and must define no other exports or logic of its own."
+- added `r.license-header-retained` (MUST): "Both files must keep the HashiCorp copyright notice and the SPDX-License-Identifier: MPL-2.0 header comment at the top of the file."
+- added `r.menu-reexports-core-default` (MUST): "The file must re-export, as its default export, the default export of the module 'core/components/linkable-item/menu', and must define no other exports or logic of its own."
+- added `r.module-path-fidelity` (MUST): "Each re-export must keep pointing at the core/components/linkable-item path, so that consumers importing from the app/components path resolve the same component the core path provides."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5943,5 +5951,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-core-app-components-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-core-app-components-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-lib-core-app-components-confirm-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-lib-core-app-components-linkable-item-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-core-app-components-linkable-item-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-lib-core-app-components-linkable-item-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-lib-core-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

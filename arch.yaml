@@ -71673,7 +71673,43 @@ system_contexts:
   - file:third_party/openbao/ui/lib/core/app/components/linkable-item/content.js content.js@third_party/openbao/ui/lib/core/app/components/linkable-item/content.js
   - file:third_party/openbao/ui/lib/core/app/components/linkable-item/menu.js menu.js@third_party/openbao/ui/lib/core/app/components/linkable-item/menu.js
   id: sc.third-party-openbao-ui-lib-core-app-components-linkable-item
+  intent: This context exists so the linkable-item content and menu components are
+    reachable through the app-level component path in the OpenBao UI app. It is a
+    thin aliasing layer between the app/components directory and the core/components
+    implementation, letting the Ember resolver look up linkable-item pieces without
+    duplicating implementation, and it keeps the vendored third_party tree layout
+    consistent with the upstream OpenBao UI source.
   name: third-party-openbao-ui-lib-core-app-components-linkable-item
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/app/components/linkable-item/content.js
+    id: r.content-reexports-core-default
+    level: MUST
+    text: The file must re-export, as its default export, the default export of the
+      module 'core/components/linkable-item/content', and must define no other exports
+      or logic of its own.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/app/components/linkable-item/content.js
+    - file:third_party/openbao/ui/lib/core/app/components/linkable-item/menu.js
+    id: r.license-header-retained
+    level: MUST
+    text: 'Both files must keep the HashiCorp copyright notice and the SPDX-License-Identifier:
+      MPL-2.0 header comment at the top of the file.'
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/app/components/linkable-item/menu.js
+    id: r.menu-reexports-core-default
+    level: MUST
+    text: The file must re-export, as its default export, the default export of the
+      module 'core/components/linkable-item/menu', and must define no other exports
+      or logic of its own.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/app/components/linkable-item/content.js
+    - file:third_party/openbao/ui/lib/core/app/components/linkable-item/menu.js
+    id: r.module-path-fidelity
+    level: MUST
+    text: Each re-export must keep pointing at the core/components/linkable-item path,
+      so that consumers importing from the app/components path resolve the same component
+      the core path provides.
   upstream: self
 - code:
   - third_party/openbao/ui/lib/core/app/components/list-item/content.js
