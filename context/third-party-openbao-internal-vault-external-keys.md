@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the external keys subsystem is describable on its own: it is the storage-facing registry that the rest of OpenBao uses to configure external KMS plugins per namespace and to resolve external key references into usable kms.Key and kms.KMS values. It exists because external key material lives outside the barrier, so the registry must own the mapping from stored config and key entries to live, cached plugin clients, keep that mapping consistent under concurrent writes, and keep secret values out of unprivileged read paths.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

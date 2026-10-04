@@ -2,10 +2,287 @@ apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
 - file:third_party/openbao/internal/vault/external_keys/registry.go registry.go@third_party/openbao/internal/vault/external_keys/registry.go
 - file:third_party/openbao/internal/vault/external_keys/registry_test.go registry_test.go@third_party/openbao/internal/vault/external_keys/registry_test.go
+- function:526cfc52f6ebda162b4820ec9fcbc622 ParseRef@third_party/openbao/internal/vault/external_keys/registry.go:527
+- function:607eaa469f9a50f577b940d4dcaf39e0 NewRegistry@third_party/openbao/internal/vault/external_keys/registry.go:70
+- method:1d4baa27d491fa1fd71596fe5578918e Registry.ListKeys@third_party/openbao/internal/vault/external_keys/registry.go:338
+- method:1ecc6f17039bf8adb052ffeacab1aff7 Registry.ReadConfig@third_party/openbao/internal/vault/external_keys/registry.go:144
+- method:1fd63eab53c214ea6b6053a52c1ef73d nilCheckingKey.Decrypt@third_party/openbao/internal/vault/external_keys/registry.go:647
+- method:240bfc933b6b31053729e9655c13f86e Registry.GetExternalKey@third_party/openbao/internal/vault/external_keys/registry.go:477
+- method:4dbf59f10060e05ed0a672864d2fe5f9 Registry.ModifyConfig@third_party/openbao/internal/vault/external_keys/registry.go:185
+- method:4e04d2536759fd80b03fbfb091363c2d Registry.DeleteConfig@third_party/openbao/internal/vault/external_keys/registry.go:272
+- method:4ec4cb8f3875e08dbafddb73fbcd6781 nilCheckingKey.Sign@third_party/openbao/internal/vault/external_keys/registry.go:657
+- method:5ddc2f9a098beabfa68ff049e2d74c45 Registry.GetClient@third_party/openbao/internal/vault/external_keys/registry.go:544
+- method:63a4261ba7c508894a6f3a6832bcf244 nilCheckingKey.Verify@third_party/openbao/internal/vault/external_keys/registry.go:669
+- method:80e9b0daf4e715a4ab470cc6224c799a Registry.ModifyKey@third_party/openbao/internal/vault/external_keys/registry.go:389
+- method:8240917e9e440e7b87f2e08b4b7c401c Registry.Stop@third_party/openbao/internal/vault/external_keys/registry.go:610
+- method:99221a35bab3f4aa567da370a5bd295a Registry.ReadRedactedConfig@third_party/openbao/internal/vault/external_keys/registry.go:163
+- method:a2435bcb054a88973fb08ff5826ac2ba nilCheckingKey.Encrypt@third_party/openbao/internal/vault/external_keys/registry.go:637
+- method:b1fdf758ac6f2e25b7de9858b7e9c0b7 Registry.CleanupNamespace@third_party/openbao/internal/vault/external_keys/registry.go:586
+- method:c561f739d1971215eb63d39a5c0f3531 Registry.ListConfigs@third_party/openbao/internal/vault/external_keys/registry.go:139
+- method:e8ef5a5c70ef4c4e3ff8ec6422ee997f nilCheckingKey.ExportPublic@third_party/openbao/internal/vault/external_keys/registry.go:683
+- method:eee38b27fb79ebc439d0e715243d5d99 Registry.ReadRedactedKey@third_party/openbao/internal/vault/external_keys/registry.go:362
+- method:f3e992f489011fce6208f12ba5544f07 Registry.DeleteKey@third_party/openbao/internal/vault/external_keys/registry.go:468
+- method:ff1e24e4725f124c08dbe1c2f9ff03eb Registry.ReadKey@third_party/openbao/internal/vault/external_keys/registry.go:343
+- struct:9794ea1f3c51ecee54f93b41bb342df2 KeyEntry@third_party/openbao/internal/vault/external_keys/registry.go:44
+- struct:a71c53ad736f80e187bda4dd50aae869 ConfigEntry@third_party/openbao/internal/vault/external_keys/registry.go:38
+- struct:dfc93b108b0904fbfb9ecaedc56487be Registry@third_party/openbao/internal/vault/external_keys/registry.go:56
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-vault-external-keys
   namespace: default
 spec:
+  intent: 'This context exists so the external keys subsystem is describable on its
+    own: it is the storage-facing registry that the rest of OpenBao uses to configure
+    external KMS plugins per namespace and to resolve external key references into
+    usable kms.Key and kms.KMS values. It exists because external key material lives
+    outside the barrier, so the registry must own the mapping from stored config and
+    key entries to live, cached plugin clients, keep that mapping consistent under
+    concurrent writes, and keep secret values out of unprivileged read paths.'
+  interfaces:
+  - file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: struct
+    name: ConfigEntry
+    signature: type ConfigEntry struct { Plugin string `json:"plugin"`; Values map[string]any
+      `json:"values"` }
+  - file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: struct
+    name: KeyEntry
+    signature: type KeyEntry struct { Values map[string]any `json:"values"`; Grants
+      map[string]struct{} `json:"grants"` }
+  - file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: function
+    name: NewRegistry
+    signature: func NewRegistry(plugins *kmsplugin.Catalog, logger log.Logger) *Registry
+  - file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: function
+    name: ParseRef
+    signature: func ParseRef(input string) (string, string, error)
+  - file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: struct
+    name: Registry
+    signature: type Registry struct
+  - file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    name: Registry.CleanupNamespace
+    signature: func (r *Registry) CleanupNamespace(ctx context.Context, ns *namespace.Namespace)
+  - file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    name: Registry.DeleteConfig
+    signature: func (r *Registry) DeleteConfig(ctx context.Context, s logical.Storage,
+      name string) error
+  - file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    name: Registry.DeleteKey
+    signature: func (r *Registry) DeleteKey(ctx context.Context, s logical.Storage,
+      configName, keyName string) error
+  - file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    name: Registry.GetClient
+    signature: func (r *Registry) GetClient(ctx context.Context, s logical.Storage,
+      ns *namespace.Namespace, name string) (kms.KMS, error)
+  - file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    name: Registry.GetExternalKey
+    signature: func (r *Registry) GetExternalKey(ctx context.Context, s logical.Storage,
+      ns *namespace.Namespace, mount, ref string) (kms.Key, error)
+  - file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    name: Registry.InvalidateConfig
+    signature: func (r *Registry) InvalidateConfig(ctx context.Context, name string)
+      error
+  - file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    name: Registry.ListConfigs
+    signature: func (r *Registry) ListConfigs(ctx context.Context, s logical.Storage,
+      after string, limit int) ([]string, error)
+  - file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    name: Registry.ListKeys
+    signature: func (r *Registry) ListKeys(ctx context.Context, s logical.Storage,
+      config string, after string, limit int) ([]string, error)
+  - file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    name: Registry.ModifyConfig
+    signature: func (r *Registry) ModifyConfig(ctx context.Context, s logical.Storage,
+      name string, verify bool, f func(ce *ConfigEntry, exists bool) error) error
+  - file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    name: Registry.ModifyKey
+    signature: func (r *Registry) ModifyKey(ctx context.Context, s logical.Storage,
+      configName, keyName string, verify bool, f func(ke *KeyEntry, exists bool) error)
+      error
+  - file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    name: Registry.ReadConfig
+    signature: func (r *Registry) ReadConfig(ctx context.Context, s logical.Storage,
+      name string) (*ConfigEntry, error)
+  - file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    name: Registry.ReadKey
+    signature: func (r *Registry) ReadKey(ctx context.Context, s logical.Storage,
+      configName, keyName string) (*KeyEntry, error)
+  - file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    name: Registry.ReadRedactedConfig
+    signature: func (r *Registry) ReadRedactedConfig(ctx context.Context, s logical.Storage,
+      name string) (*ConfigEntry, error)
+  - file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    name: Registry.ReadRedactedKey
+    signature: func (r *Registry) ReadRedactedKey(ctx context.Context, s logical.Storage,
+      configName, keyName string) (*KeyEntry, error)
+  - file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    name: Registry.Stop
+    signature: func (r *Registry) Stop(ctx context.Context)
+  - file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    name: nilCheckingKey.Decrypt
+    signature: func (k nilCheckingKey) Decrypt(ctx context.Context, opts *kms.CipherOptions)
+      ([]byte, error)
+  - file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    name: nilCheckingKey.Encrypt
+    signature: func (k nilCheckingKey) Encrypt(ctx context.Context, opts *kms.CipherOptions)
+      ([]byte, error)
+  - file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    name: nilCheckingKey.ExportPublic
+    signature: func (k nilCheckingKey) ExportPublic(ctx context.Context) (crypto.PublicKey,
+      error)
+  - file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    name: nilCheckingKey.Sign
+    signature: func (k nilCheckingKey) Sign(ctx context.Context, opts *kms.SignOptions)
+      ([]byte, error)
+  - file: third_party/openbao/internal/vault/external_keys/registry.go
+    kind: method
+    name: nilCheckingKey.Verify
+    signature: func (k nilCheckingKey) Verify(ctx context.Context, opts *kms.VerifyOptions)
+      error
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - method:4e04d2536759fd80b03fbfb091363c2d
+    - method:5ddc2f9a098beabfa68ff049e2d74c45
+    - struct:dfc93b108b0904fbfb9ecaedc56487be
+    id: r.client-cache-lifecycle
+    level: MUST
+    text: The Registry MUST cache opened KMS clients keyed by namespace and config
+      name, pop and close the cached client when its config is modified or deleted,
+      and treat a failure to close an old client as a logged condition rather than
+      a failed request, so plugins that cannot hold two configurations at once stay
+      usable.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_keys/registry.go
+    - struct:a71c53ad736f80e187bda4dd50aae869
+    id: r.config-entry-shape
+    level: MUST
+    text: ConfigEntry MUST carry the name of the plugin to use (JSON field "plugin")
+      and the config map values passed to the plugin's OpenKMS call (JSON field "values"),
+      so a stored config fully describes how to open a KMS client.
+  - codeRefs:
+    - method:4e04d2536759fd80b03fbfb091363c2d
+    - method:f3e992f489011fce6208f12ba5544f07
+    id: r.delete-and-invalidate
+    level: MUST
+    text: DeleteConfig and DeleteKey MUST remove the stored entry and drop any cached
+      client derived from it, and InvalidateConfig MUST drop the cached client for
+      a config without touching storage, so a caller can force a client to be reopened.
+  - codeRefs:
+    - function:526cfc52f6ebda162b4820ec9fcbc622
+    - method:240bfc933b6b31053729e9655c13f86e
+    - method:5ddc2f9a098beabfa68ff049e2d74c45
+    id: r.get-external-key
+    level: MUST
+    text: GetExternalKey MUST resolve a mount path plus a key reference into a kms.Key
+      by parsing the reference, reading the stored key entry, and honoring that entry's
+      grant set, and GetClient MUST return the namespaced KMS client for a config
+      by name.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_keys/registry.go
+    - struct:9794ea1f3c51ecee54f93b41bb342df2
+    id: r.key-entry-shape
+    level: MUST
+    text: KeyEntry MUST carry the values map passed to the plugin's GetKey call and
+      a grants set of mount paths that may access the key, so access to an external
+      key is decided by the stored grant set and not by the caller.
+  - codeRefs:
+    - method:1d4baa27d491fa1fd71596fe5578918e
+    - method:c561f739d1971215eb63d39a5c0f3531
+    id: r.list-configs-paged
+    level: MUST
+    text: ListConfigs MUST page the storage listing under the config storage prefix,
+      forwarding the after cursor and limit to the storage layer so listing never
+      materializes every config at once.
+  - codeRefs:
+    - method:4dbf59f10060e05ed0a672864d2fe5f9
+    - method:80e9b0daf4e715a4ab470cc6224c799a
+    id: r.modify-locking-and-callback
+    level: MUST
+    text: ModifyConfig and ModifyKey MUST hold a per-object, per-namespace lock across
+      the read-modify-write, pass the caller a zero-valued entry plus an exists flag
+      when the object is new, and abandon the write when the callback returns an error.
+  - codeRefs:
+    - method:8240917e9e440e7b87f2e08b4b7c401c
+    - method:b1fdf758ac6f2e25b7de9858b7e9c0b7
+    id: r.namespace-cleanup-and-stop
+    level: MUST
+    text: CleanupNamespace MUST discard the cached clients held for a namespace when
+      that namespace is torn down, and Stop MUST close every cached client the registry
+      still holds so no plugin connection outlives the registry.
+  - codeRefs:
+    - method:1fd63eab53c214ea6b6053a52c1ef73d
+    - method:4ec4cb8f3875e08dbafddb73fbcd6781
+    - method:63a4261ba7c508894a6f3a6832bcf244
+    - method:a2435bcb054a88973fb08ff5826ac2ba
+    - method:e8ef5a5c70ef4c4e3ff8ec6422ee997f
+    id: r.nil-checking-key
+    level: MUST
+    text: The nilCheckingKey wrapper MUST implement Encrypt, Decrypt, Sign, Verify
+      and ExportPublic so that each operation returns an error instead of dereferencing
+      a nil underlying key, letting callers hold a kms.Key value while an external
+      key is unresolved.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_keys/registry.go
+    - function:526cfc52f6ebda162b4820ec9fcbc622
+    id: r.parse-ref
+    level: MUST
+    text: ParseRef MUST split an external key reference into its config name and key
+      name and MUST return an error for input that does not carry both parts, so callers
+      cannot resolve a half-formed reference.
+  - codeRefs:
+    - method:1ecc6f17039bf8adb052ffeacab1aff7
+    - method:ff1e24e4725f124c08dbe1c2f9ff03eb
+    id: r.read-config-semantics
+    level: MUST
+    text: ReadConfig MUST return a nil entry and nil error when the named config is
+      absent, and MUST return a wrapped error when the storage read or the JSON decode
+      of the entry fails; ReadKey MUST follow the same absent-versus-error split for
+      config and key names.
+  - codeRefs:
+    - method:99221a35bab3f4aa567da370a5bd295a
+    - method:eee38b27fb79ebc439d0e715243d5d99
+    id: r.redacted-reads
+    level: MUST
+    text: ReadRedactedConfig and ReadRedactedKey MUST return the same entry shape
+      as the unredacted readers with secret values removed, so unprivileged paths
+      never receive raw config or key secrets.
+  - codeRefs:
+    - function:607eaa469f9a50f577b940d4dcaf39e0
+    - struct:dfc93b108b0904fbfb9ecaedc56487be
+    id: r.registry-construction
+    level: MUST
+    text: NewRegistry MUST construct a Registry bound to the given kmsplugin.Catalog
+      and logger, so every client opened by the registry comes from that catalog and
+      every failure is logged through that logger.
+  - codeRefs:
+    - method:4dbf59f10060e05ed0a672864d2fe5f9
+    - method:80e9b0daf4e715a4ab470cc6224c799a
+    id: r.verify-before-write
+    level: MUST
+    text: When the verify flag is set, ModifyConfig and ModifyKey MUST open the KMS
+      client against the edited entry before writing storage and MUST leave storage
+      untouched if that open fails, closing a successfully opened client again if
+      the storage write fails.
   upstream: self

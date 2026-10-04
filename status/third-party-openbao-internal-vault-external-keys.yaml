@@ -1,12 +1,8 @@
 conditions:
-- message: 'undeclared: ConfigEntry, KeyEntry, NewRegistry, ParseRef, Registry, Registry.CleanupNamespace,
-    Registry.DeleteConfig, Registry.DeleteKey, Registry.GetClient, Registry.GetExternalKey,
-    Registry.InvalidateConfig, Registry.ListConfigs, Registry.ListKeys, Registry.ModifyConfig,
-    Registry.ModifyKey, Registry.ReadConfig, Registry.ReadKey, Registry.ReadRedactedConfig,
-    Registry.ReadRedactedKey, Registry.Stop, nilCheckingKey.Decrypt, nilCheckingKey.Encrypt,
-    nilCheckingKey.ExportPublic, nilCheckingKey.Sign, nilCheckingKey.Verify'
-  reason: InterfacesMissing
-  status: "False"
+- message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+  reason: InterfacesObserved
+  status: "True"
   type: CodeSynced
 - message: observed facts match the synced fingerprint
   reason: FingerprintEqual
@@ -180,5 +176,5 @@ observed:
     line: 683
     name: nilCheckingKey.ExportPublic
     signature: (ctx context.Context) (crypto.PublicKey, error)
-realizedSpecHash: a7fa1f8424c7dcee774d23d67a4e8ab989d611088e364be77062ce81beec87d6
+realizedSpecHash: 82065117de710abe5cabc0954735fbe59b46284733c6992daffcada3aa84577f
 syncedFingerprint: 99d103742b25dae8090bcd4188cc6396a6a4ee3145fab67ee4d1bf918dfad60f

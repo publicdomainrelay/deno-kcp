@@ -2260,6 +2260,24 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.network-listener-deadline` (MUST): "NetworkListener extends a net.Listener with SetDeadline, so the Listener can bound how long an accept or TLS handshake may block."
 - added `r.tcp-layer` (MUST): "NewTCPLayer creates the socket-backed NetworkLayer from a list of TCP addresses: Addrs and Listeners report the bound TCP endpoints, DialContext opens a TLS connection over TCP to the requested address, and Close releases the listeners."
 
+### third-party-openbao-internal-vault-external-keys
+
+- intent: "" -> "This context exists so the external keys subsystem is describable on its own: it is the storage-facing registry that the rest of OpenBao uses to configure external KMS plugins per namespace and to resolve external key references into usable kms.Key and kms.KMS values. It exists because external key material lives outside the barrier, so the registry must own the mapping from stored config and key entries to live, cached plugin clients, keep that mapping consistent under concurrent writes, and keep secret values out of unprivileged read paths."
+- added `r.client-cache-lifecycle` (MUST): "The Registry MUST cache opened KMS clients keyed by namespace and config name, pop and close the cached client when its config is modified or deleted, and treat a failure to close an old client as a logged condition rather than a failed request, so plugins that cannot hold two configurations at once stay usable."
+- added `r.config-entry-shape` (MUST): "ConfigEntry MUST carry the name of the plugin to use (JSON field "plugin") and the config map values passed to the plugin's OpenKMS call (JSON field "values"), so a stored config fully describes how to open a KMS client."
+- added `r.delete-and-invalidate` (MUST): "DeleteConfig and DeleteKey MUST remove the stored entry and drop any cached client derived from it, and InvalidateConfig MUST drop the cached client for a config without touching storage, so a caller can force a client to be reopened."
+- added `r.get-external-key` (MUST): "GetExternalKey MUST resolve a mount path plus a key reference into a kms.Key by parsing the reference, reading the stored key entry, and honoring that entry's grant set, and GetClient MUST return the namespaced KMS client for a config by name."
+- added `r.key-entry-shape` (MUST): "KeyEntry MUST carry the values map passed to the plugin's GetKey call and a grants set of mount paths that may access the key, so access to an external key is decided by the stored grant set and not by the caller."
+- added `r.list-configs-paged` (MUST): "ListConfigs MUST page the storage listing under the config storage prefix, forwarding the after cursor and limit to the storage layer so listing never materializes every config at once."
+- added `r.modify-locking-and-callback` (MUST): "ModifyConfig and ModifyKey MUST hold a per-object, per-namespace lock across the read-modify-write, pass the caller a zero-valued entry plus an exists flag when the object is new, and abandon the write when the callback returns an error."
+- added `r.namespace-cleanup-and-stop` (MUST): "CleanupNamespace MUST discard the cached clients held for a namespace when that namespace is torn down, and Stop MUST close every cached client the registry still holds so no plugin connection outlives the registry."
+- added `r.nil-checking-key` (MUST): "The nilCheckingKey wrapper MUST implement Encrypt, Decrypt, Sign, Verify and ExportPublic so that each operation returns an error instead of dereferencing a nil underlying key, letting callers hold a kms.Key value while an external key is unresolved."
+- added `r.parse-ref` (MUST): "ParseRef MUST split an external key reference into its config name and key name and MUST return an error for input that does not carry both parts, so callers cannot resolve a half-formed reference."
+- added `r.read-config-semantics` (MUST): "ReadConfig MUST return a nil entry and nil error when the named config is absent, and MUST return a wrapped error when the storage read or the JSON decode of the entry fails; ReadKey MUST follow the same absent-versus-error split for config and key names."
+- added `r.redacted-reads` (MUST): "ReadRedactedConfig and ReadRedactedKey MUST return the same entry shape as the unredacted readers with secret values removed, so unprivileged paths never receive raw config or key secrets."
+- added `r.registry-construction` (MUST): "NewRegistry MUST construct a Registry bound to the given kmsplugin.Catalog and logger, so every client opened by the registry comes from that catalog and every failure is logged through that logger."
+- added `r.verify-before-write` (MUST): "When the verify flag is set, ModifyConfig and ModifyKey MUST open the KMS client against the edited entry before writing storage and MUST leave storage untouched if that open fails, closing a successfully opened client again if the storage write fails."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -2404,4 +2422,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-vault-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-cluster-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-diagnose-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-internal-vault-external-keys-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-vault-external-keys-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-internal-vault-external-tests-api-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
