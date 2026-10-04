@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so that identity-aware strings in OpenBao policies and JSON payloads can be expanded from an entity, its aliases, its group memberships and metadata, without each caller reimplementing template parsing. It is a vendored third-party helper inside the deno-kcp repository, kept in third_party so the surrounding Go code can reference OpenBao templating semantics with a stable local copy. The spec pins the observable contract of PopulateString and the shape of its input struct so that changes to the vendored copy stay visible and callers can rely on specific return values and error conditions.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

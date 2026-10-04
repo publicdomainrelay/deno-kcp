@@ -3174,6 +3174,20 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.when-hcl-key-present-ignores-other-nodes` (MUST): "WhenHCLKeyPresent accepts *ast.ObjectList and *ast.ObjectType nodes and derives the item list from each; for any other node type it returns nil without invoking the callback and without an error, so an absent or unexpected node shape is treated as nothing to do."
 - added `r.when-hcl-key-present-invokes-callback` (MUST): "WhenHCLKeyPresent filters the node's object list by the given key and invokes the supplied callback with each matching *ast.ObjectItem; errors returned by the callback are accumulated with multierror and returned after the walk completes, so one failing item does not stop the remaining items from being visited."
 
+### third-party-openbao-sdk-helper-identitytpl
+
+- intent: "" -> "This context exists so that identity-aware strings in OpenBao policies and JSON payloads can be expanded from an entity, its aliases, its group memberships and metadata, without each caller reimplementing template parsing. It is a vendored third-party helper inside the deno-kcp repository, kept in third_party so the surrounding Go code can reference OpenBao templating semantics with a stable local copy. The spec pins the observable contract of PopulateString and the shape of its input struct so that changes to the vendored copy stay visible and callers can rely on specific return values and error conditions."
+- added `r.blocked-substitutions` (MUST): "After expanding each templated segment, PopulateString must check the expanded text against every entry in BlockedSubstitutions and return an error wrapping ErrTemplateWildcard, quoting the offending blocked value, on the first match."
+- added `r.empty-string-passthrough` (MUST): "PopulateString must treat an empty input String as a no-op and return false, the empty string, and a nil error, without inspecting the mode or entity."
+- added `r.group-preprocessing` (MUST): "PopulateString must flatten the input Groups into parallel groupNames and groupIDs slices before templating, so that templating tokens over groups can read names and IDs positionally."
+- added `r.mode-handler-selection` (MUST): "PopulateString must select an internal template handler from Mode, using the ACL handler for ACLTemplating and the JSON handler for JSONTemplating, and must fail with an error of the form "unknown mode %v" for any other mode value."
+- added `r.no-delimiter-passthrough` (MUST): "PopulateString must return false and the original String unchanged when the input contains no opening delimiter, so strings without templates pass through untouched."
+- added `r.substitution-flag` (MUST): "PopulateString must report true as its first return value whenever at least one well-formed templated segment was found, and false otherwise, independent of whether output text was actually built."
+- added `r.template-input-fields` (MUST): "PopulateStringInput must carry the template String, the ValidityCheckOnly flag, the Entity and Groups that substitutions read from, the NamespaceID, the Mode selecting ACL or JSON templating, an optional Now used as the reference time for time tokens, and the optional BlockedSubstitutions list, with handler and derived group slices kept unexported."
+- added `r.test-coverage` (SHOULD): "The package should keep table-driven tests that exercise PopulateString through TestPopulate_Basic, TestPopulate_CurrentTime and TestPopulate_FullObject, covering time arithmetic tokens, metadata and custom-metadata lookups, nil entities, blocked substitutions and validity-only runs."
+- added `r.unbalanced-characters` (MUST): "PopulateString must return ErrUnbalancedTemplatingCharacter when a closing "}}" appears before any opening "{{", and also when a segment after an opening delimiter does not contain exactly one closing "]}" pair, so malformed templates never produce partial output."
+- added `r.validity-check-only` (MUST): "When ValidityCheckOnly is set on the input, PopulateString must validate structure and report substitution without invoking performTemplating or writing any text into the builder, so the returned string is empty while syntax errors still surface."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -3405,5 +3419,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-sdk-helper-errutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-errutil-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-hclutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-sdk-helper-identitytpl-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-helper-identitytpl-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-jsonutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
