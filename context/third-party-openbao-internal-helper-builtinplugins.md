@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the builtin plugin registry's lookup surface can be described and depended on without reading the vendored OpenBao sources: it is the single place that maps a builtin plugin name plus plugin type to its factory, its deprecation status, and the list of names that are still considered builtin. It exists because the rest of the tree, notably Vault core, binds to a BuiltinRegistry interface offering exactly Get, Keys, Contains and DeprecationStatus, so the behaviour of those four methods, including what happens for an unknown name or an unrecognised plugin type, is the contract callers rely on.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

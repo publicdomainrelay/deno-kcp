@@ -1379,6 +1379,18 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.read-error-propagates` (MUST): "NewSeekableReader returns a nil reader and the underlying error when io.ReadAll fails, and does not close the source reader in that case."
 - added `r.wrap-readseeker` (MUST): "When the input implements io.ReadSeeker but not io.ReadSeekCloser, NewSeekableReader returns a nopSeekableReader value embedding that seeker, so seeking is delegated to the original and closing becomes a no-op."
 
+### third-party-openbao-internal-helper-builtinplugins
+
+- intent: "" -> "This context exists so the builtin plugin registry's lookup surface can be described and depended on without reading the vendored OpenBao sources: it is the single place that maps a builtin plugin name plus plugin type to its factory, its deprecation status, and the list of names that are still considered builtin. It exists because the rest of the tree, notably Vault core, binds to a BuiltinRegistry interface offering exactly Get, Keys, Contains and DeprecationStatus, so the behaviour of those four methods, including what happens for an unknown name or an unrecognised plugin type, is the contract callers rely on."
+- added `r.builtin-factory-shape` (MUST): "A builtin plugin constructor must have the BuiltinFactory shape: a function taking no arguments and returning an any value with an error, so the registry can hand callers a uniform lazy constructor regardless of the concrete plugin type."
+- added `r.contains-membership-check` (MUST): "Contains must report whether a name is registered as a builtin for the given plugin type, so callers can test membership without obtaining the factory itself."
+- added `r.deprecation-status-per-type` (MUST): "DeprecationStatus must look the name up in the map for the given plugin type and return that entry's stored DeprecationStatus together with a true found flag. When the name is missing, or the plugin type is not credential, secrets or database, it must return consts.Unknown with false."
+- added `r.get-dispatch-by-plugin-type` (MUST): "Get must resolve a builtin factory by switching on the plugin type: PluginTypeCredential reads credentialBackends, PluginTypeSecrets reads logicalBackends, and PluginTypeDatabase reads databasePlugins. Credential and secrets factories are adapted through toFunc, database factories are returned as stored."
+- added `r.get-miss-returns-not-found` (MUST): "Get must return a nil factory and false when the name is absent from the map for that plugin type, and must also return nil and false for any plugin type outside the credential, secrets and database cases."
+- added `r.keys-exclude-removed` (MUST): "Keys must return the names of builtin plugins for one plugin type, collected from databasePlugins, credentialBackends or logicalBackends respectively, and must omit every entry whose deprecation status marks it as removed by passing it through appendIfNotRemoved. An unrecognised plugin type yields an empty list."
+- added `r.registry-map-partition` (MUST): "The registry must keep its entries in three separate maps keyed by plugin name, one each for credential backends, logical (secrets) backends and database plugins, so a name registered under one plugin type is never returned for another."
+- added `r.tests-cover-lookup-and-status` (SHOULD): "The registry behaviour must stay covered by tests: Test_RegistryGet exercises Get, Test_RegistryKeyCounts exercises Keys key counts, and Test_RegistryStatus exercises DeprecationStatus for a non-existent builtin, a name paired with a mismatched plugin type, a valid name paired with an invalid plugin type, and a supported builtin lookup returning consts.Supported with true."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -1449,3 +1461,4 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-helper-buffer-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-builtinplugins-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-configutil-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-helper-dhutil-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |

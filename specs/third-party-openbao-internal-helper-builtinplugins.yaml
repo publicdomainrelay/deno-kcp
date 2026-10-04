@@ -2,10 +2,114 @@ apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
 - file:third_party/openbao/internal/helper/builtinplugins/registry.go registry.go@third_party/openbao/internal/helper/builtinplugins/registry.go
 - file:third_party/openbao/internal/helper/builtinplugins/registry_test.go registry_test.go@third_party/openbao/internal/helper/builtinplugins/registry_test.go
+- method:5202e75fa5e63c649bc628d07fd71ead registry.DeprecationStatus@third_party/openbao/internal/helper/builtinplugins/registry.go:152
+- method:7009fa0b248f9892a4636e7bb62f619b registry.Keys@third_party/openbao/internal/helper/builtinplugins/registry.go:128
+- method:b90fa5e560e9c3a6dd1a421c0cae9e35 registry.Get@third_party/openbao/internal/helper/builtinplugins/registry.go:106
+- method:df1edaefd7afbff8f01427741ebda7bb registry.Contains@third_party/openbao/internal/helper/builtinplugins/registry.go:147
+- type_alias:f05ff2dd7360b0020cc866b46e434703 BuiltinFactory@third_party/openbao/internal/helper/builtinplugins/registry.go:38
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-helper-builtinplugins
   namespace: default
 spec:
+  intent: 'This context exists so the builtin plugin registry''s lookup surface can
+    be described and depended on without reading the vendored OpenBao sources: it
+    is the single place that maps a builtin plugin name plus plugin type to its factory,
+    its deprecation status, and the list of names that are still considered builtin.
+    It exists because the rest of the tree, notably Vault core, binds to a BuiltinRegistry
+    interface offering exactly Get, Keys, Contains and DeprecationStatus, so the behaviour
+    of those four methods, including what happens for an unknown name or an unrecognised
+    plugin type, is the contract callers rely on.'
+  interfaces:
+  - file: third_party/openbao/internal/helper/builtinplugins/registry.go
+    kind: type_alias
+    name: BuiltinFactory
+    signature: type BuiltinFactory func() (any, error)
+  - file: third_party/openbao/internal/helper/builtinplugins/registry.go
+    kind: method
+    name: registry.Contains
+    signature: func (r *registry) Contains(name string, pluginType consts.PluginType)
+      bool
+  - file: third_party/openbao/internal/helper/builtinplugins/registry.go
+    kind: method
+    name: registry.DeprecationStatus
+    signature: func (r *registry) DeprecationStatus(name string, pluginType consts.PluginType)
+      (consts.DeprecationStatus, bool)
+  - file: third_party/openbao/internal/helper/builtinplugins/registry.go
+    kind: method
+    name: registry.Get
+    signature: func (r *registry) Get(name string, pluginType consts.PluginType) (func()
+      (any, error), bool)
+  - file: third_party/openbao/internal/helper/builtinplugins/registry.go
+    kind: method
+    name: registry.Keys
+    signature: func (r *registry) Keys(pluginType consts.PluginType) []string
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/builtinplugins/registry.go
+    - type_alias:f05ff2dd7360b0020cc866b46e434703
+    id: r.builtin-factory-shape
+    level: MUST
+    text: 'A builtin plugin constructor must have the BuiltinFactory shape: a function
+      taking no arguments and returning an any value with an error, so the registry
+      can hand callers a uniform lazy constructor regardless of the concrete plugin
+      type.'
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/builtinplugins/registry.go
+    - method:df1edaefd7afbff8f01427741ebda7bb
+    id: r.contains-membership-check
+    level: MUST
+    text: Contains must report whether a name is registered as a builtin for the given
+      plugin type, so callers can test membership without obtaining the factory itself.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/builtinplugins/registry.go
+    - method:5202e75fa5e63c649bc628d07fd71ead
+    id: r.deprecation-status-per-type
+    level: MUST
+    text: DeprecationStatus must look the name up in the map for the given plugin
+      type and return that entry's stored DeprecationStatus together with a true found
+      flag. When the name is missing, or the plugin type is not credential, secrets
+      or database, it must return consts.Unknown with false.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/builtinplugins/registry.go
+    - method:b90fa5e560e9c3a6dd1a421c0cae9e35
+    id: r.get-dispatch-by-plugin-type
+    level: MUST
+    text: 'Get must resolve a builtin factory by switching on the plugin type: PluginTypeCredential
+      reads credentialBackends, PluginTypeSecrets reads logicalBackends, and PluginTypeDatabase
+      reads databasePlugins. Credential and secrets factories are adapted through
+      toFunc, database factories are returned as stored.'
+  - codeRefs:
+    - method:b90fa5e560e9c3a6dd1a421c0cae9e35
+    id: r.get-miss-returns-not-found
+    level: MUST
+    text: Get must return a nil factory and false when the name is absent from the
+      map for that plugin type, and must also return nil and false for any plugin
+      type outside the credential, secrets and database cases.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/builtinplugins/registry.go
+    - method:7009fa0b248f9892a4636e7bb62f619b
+    id: r.keys-exclude-removed
+    level: MUST
+    text: Keys must return the names of builtin plugins for one plugin type, collected
+      from databasePlugins, credentialBackends or logicalBackends respectively, and
+      must omit every entry whose deprecation status marks it as removed by passing
+      it through appendIfNotRemoved. An unrecognised plugin type yields an empty list.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/builtinplugins/registry.go
+    id: r.registry-map-partition
+    level: MUST
+    text: The registry must keep its entries in three separate maps keyed by plugin
+      name, one each for credential backends, logical (secrets) backends and database
+      plugins, so a name registered under one plugin type is never returned for another.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/builtinplugins/registry_test.go
+    id: r.tests-cover-lookup-and-status
+    level: SHOULD
+    text: 'The registry behaviour must stay covered by tests: Test_RegistryGet exercises
+      Get, Test_RegistryKeyCounts exercises Keys key counts, and Test_RegistryStatus
+      exercises DeprecationStatus for a non-existent builtin, a name paired with a
+      mismatched plugin type, a valid name paired with an invalid plugin type, and
+      a supported builtin lookup returning consts.Supported with true.'
   upstream: self
