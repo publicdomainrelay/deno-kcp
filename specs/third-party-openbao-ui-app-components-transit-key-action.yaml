@@ -1,10 +1,60 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
+- class:8e8a75e4ad7a4ab6edf02c3155b3f164 ExportComponent@third_party/openbao/ui/app/components/transit-key-action/export.js:9
 - file:third_party/openbao/ui/app/components/transit-key-action/export.js export.js@third_party/openbao/ui/app/components/transit-key-action/export.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-app-components-transit-key-action
   namespace: default
 spec:
+  intent: 'This context exists to pin down the public shape of the transit key export
+    action component so downstream work — templates that bind to it, route or controller
+    code that invokes it, and any refactor or port of the OpenBao UI — has a stable,
+    machine-checkable description of what the file exposes. It records that the component
+    is state-only in the observed facts: two tracked fields and no behaviour, which
+    is what a caller must assume when consuming it. Anchoring the specification to
+    the CodeGraph id and repository-relative path keeps the description traceable
+    to the exact declaration rather than to prose about how the component is used
+    elsewhere.'
+  interfaces:
+  - file: third_party/openbao/ui/app/components/transit-key-action/export.js
+    kind: class
+    name: ExportComponent
+    signature: class ExportComponent extends Component
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - class:8e8a75e4ad7a4ab6edf02c3155b3f164
+    - file:third_party/openbao/ui/app/components/transit-key-action/export.js
+    id: r.export-component-class
+    level: MUST
+    text: The module third_party/openbao/ui/app/components/transit-key-action/export.js
+      MUST default-export a class named ExportComponent that extends the Ember Component
+      base class, so that Ember's resolver can load it as the component backing the
+      transit key export action.
+  - codeRefs:
+    - class:8e8a75e4ad7a4ab6edf02c3155b3f164
+    - file:third_party/openbao/ui/app/components/transit-key-action/export.js
+    id: r.state-only-surface
+    level: MUST
+    text: ExportComponent MUST expose only the tracked state fields wrapTTL and exportVersion
+      as its own declared members, with no methods, actions, or injected services
+      declared in the class body; consumers therefore MUST supply all export behaviour
+      from outside the class.
+  - codeRefs:
+    - class:8e8a75e4ad7a4ab6edf02c3155b3f164
+    - file:third_party/openbao/ui/app/components/transit-key-action/export.js
+    id: r.tracked-export-version
+    level: MUST
+    text: ExportComponent MUST declare a tracked property exportVersion whose initial
+      value is false, so that the export-version toggle defaults to off and mutating
+      it invalidates any template or computed value that depends on it.
+  - codeRefs:
+    - class:8e8a75e4ad7a4ab6edf02c3155b3f164
+    - file:third_party/openbao/ui/app/components/transit-key-action/export.js
+    id: r.tracked-wrap-ttl
+    level: MUST
+    text: ExportComponent MUST declare a tracked property wrapTTL whose initial value
+      is null, so that the wrap time-to-live starts unset and any binding or template
+      read of wrapTTL before user input resolves to null rather than undefined.
   upstream: self

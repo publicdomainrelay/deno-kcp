@@ -4176,6 +4176,14 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.tagless-components` (MUST): "Each of the three modules must default-export an Ember component created with Component.extend and must set tagName to the empty string, so the component renders its template without emitting a wrapping DOM element."
 - added `r.upstream-parity` (SHOULD): "The three files should stay identical to one another except for their file name, so that a future re-sync from upstream OpenBao can be applied as a whole and any asymmetry between header, content and footer is visible as an intentional local change."
 
+### third-party-openbao-ui-app-components-transit-key-action
+
+- intent: "" -> "This context exists to pin down the public shape of the transit key export action component so downstream work — templates that bind to it, route or controller code that invokes it, and any refactor or port of the OpenBao UI — has a stable, machine-checkable description of what the file exposes. It records that the component is state-only in the observed facts: two tracked fields and no behaviour, which is what a caller must assume when consuming it. Anchoring the specification to the CodeGraph id and repository-relative path keeps the description traceable to the exact declaration rather than to prose about how the component is used elsewhere."
+- added `r.export-component-class` (MUST): "The module third_party/openbao/ui/app/components/transit-key-action/export.js MUST default-export a class named ExportComponent that extends the Ember Component base class, so that Ember's resolver can load it as the component backing the transit key export action."
+- added `r.state-only-surface` (MUST): "ExportComponent MUST expose only the tracked state fields wrapTTL and exportVersion as its own declared members, with no methods, actions, or injected services declared in the class body; consumers therefore MUST supply all export behaviour from outside the class."
+- added `r.tracked-export-version` (MUST): "ExportComponent MUST declare a tracked property exportVersion whose initial value is false, so that the export-version toggle defaults to off and mutating it invalidates any template or computed value that depends on it."
+- added `r.tracked-wrap-ttl` (MUST): "ExportComponent MUST declare a tracked property wrapTTL whose initial value is null, so that the wrap time-to-live starts unset and any binding or template read of wrapTTL before user input resolves to null rather than undefined."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4502,5 +4510,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-components-sidebar-nav-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-components-splash-page-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-components-splash-page-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-components-transit-key-action-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-components-transit-key-action-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-components-transit-key-action-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-components-wizard-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to pin down the public shape of the transit key export action component so downstream work — templates that bind to it, route or controller code that invokes it, and any refactor or port of the OpenBao UI — has a stable, machine-checkable description of what the file exposes. It records that the component is state-only in the observed facts: two tracked fields and no behaviour, which is what a caller must assume when consuming it. Anchoring the specification to the CodeGraph id and repository-relative path keeps the description traceable to the exact declaration rather than to prose about how the component is used elsewhere.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
