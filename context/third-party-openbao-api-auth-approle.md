@@ -2,13 +2,161 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to describe the vendored OpenBao AppRole auth-method package that deno-kcp carries under `third_party/openbao`, so its public surface (constructor, functional options, `Login`) and its documented behavior (single secret-ID source, late resolution of file and environment values, bounded file read, optional wrapping-token unwrap, write to `auth/<mountPath>/login`) are recorded as requirements rather than re-derived from source on each change. It anchors the contract other parts of the repository rely on when authenticating to OpenBao with a role ID and secret ID, and it marks the package as upstream code whose behavior is already exercised by its own tests.
 
 _Write the prose above and the fields in the spec block. `codeRefs` and the resolved references below are maintained by the tool; an edit there is lost._
 
 ## spec
 
 ```yaml spec
+interfaces:
+- file: third_party/openbao/api/auth/approle/approle.go
+  kind: struct
+  name: AppRoleAuth
+  signature: type AppRoleAuth struct
+- file: third_party/openbao/api/auth/approle/approle.go
+  kind: method
+  name: AppRoleAuth.Login
+  signature: func (a *AppRoleAuth) Login(ctx context.Context, client *api.Client)
+    (*api.Secret, error)
+- file: third_party/openbao/api/auth/approle/approle.go
+  kind: method
+  name: AppRoleAuth.readSecretIDFromFile
+  signature: func (a *AppRoleAuth) readSecretIDFromFile() (string, error)
+- file: third_party/openbao/api/auth/approle/approle.go
+  kind: type_alias
+  name: LoginOption
+  signature: type LoginOption func(a *AppRoleAuth) error
+- file: third_party/openbao/api/auth/approle/approle.go
+  kind: function
+  name: NewAppRoleAuth
+  signature: func NewAppRoleAuth(roleID string, secretID *SecretID, opts ...LoginOption)
+    (*AppRoleAuth, error)
+- file: third_party/openbao/api/auth/approle/approle.go
+  kind: struct
+  name: SecretID
+  signature: type SecretID struct
+- file: third_party/openbao/api/auth/approle/approle.go
+  kind: method
+  name: SecretID.validate
+  signature: func (secretID *SecretID) validate() error
+- file: third_party/openbao/api/auth/approle/approle.go
+  kind: function
+  name: WithMountPath
+  signature: func WithMountPath(mountPath string) LoginOption
+- file: third_party/openbao/api/auth/approle/approle.go
+  kind: function
+  name: WithWrappingToken
+  signature: func WithWrappingToken() LoginOption
+requirements:
+- codeRefs:
+  - file:third_party/openbao/api/auth/approle/approle.go
+  - method:4a1253c4affe90d74083c66b48949310
+  - struct:c3b9a9c281a7dab56060d3c1d0f103f3
+  id: r.auth-method-interface
+  level: MUST
+  text: AppRoleAuth satisfies api.AuthMethod, asserted at compile time with var _
+    api.AuthMethod = (*AppRoleAuth)(nil).
+- codeRefs:
+  - file:third_party/openbao/api/auth/approle/approle.go
+  - function:0c0251b3ee8a686ab995281e430c7e47
+  id: r.constructor-requires-role-id
+  level: MUST
+  text: NewAppRoleAuth returns the error "no role ID provided for login" when roleID
+    is the empty string.
+- codeRefs:
+  - file:third_party/openbao/api/auth/approle/approle.go
+  - function:0c0251b3ee8a686ab995281e430c7e47
+  id: r.constructor-requires-secret-id
+  level: MUST
+  text: NewAppRoleAuth returns the error "no secret ID provided for login" when secretID
+    is nil.
+- codeRefs:
+  - file:third_party/openbao/api/auth/approle/approle.go
+  - function:0c0251b3ee8a686ab995281e430c7e47
+  - function:b150309c06eb8e362fc9a3720b1bbc68
+  id: r.default-mount-path
+  level: MUST
+  text: NewAppRoleAuth sets mountPath to the constant defaultMountPath, which is "approle";
+    WithMountPath overrides it.
+- codeRefs:
+  - file:third_party/openbao/api/auth/approle/approle.go
+  - method:4a1253c4affe90d74083c66b48949310
+  id: r.file-read-bounded-and-trimmed
+  level: MUST
+  text: 'readSecretIDFromFile reads at most 1000 bytes through io.LimitReader and
+    trims exactly one trailing newline with strings.TrimSuffix, returning wrapped
+    errors "unable to open file containing secret ID: %w" and "unable to read secret
+    ID: %w".'
+- codeRefs:
+  - file:third_party/openbao/api/auth/approle/approle.go
+  - method:4a1253c4affe90d74083c66b48949310
+  id: r.login-empty-env-var-fails
+  level: MUST
+  text: AppRoleAuth.Login fails when the configured environment variable holds an
+    empty value, reporting "secret ID was specified with an environment variable %q
+    with an empty value".
+- codeRefs:
+  - file:third_party/openbao/api/auth/approle/approle.go
+  - method:4a1253c4affe90d74083c66b48949310
+  id: r.login-nil-context-defaulted
+  level: MUST
+  text: AppRoleAuth.Login replaces a nil context with context.Background() before
+    making any client call.
+- codeRefs:
+  - file:third_party/openbao/api/auth/approle/approle.go
+  - function:0c0251b3ee8a686ab995281e430c7e47
+  - type_alias:de2ec0e4cb842660b1b1f573ff29926d
+  id: r.login-option-errors-wrapped
+  level: MUST
+  text: 'NewAppRoleAuth applies each LoginOption to the new AppRoleAuth and returns
+    a wrapped error "error with login option: %w" if any option returns non-nil.'
+- codeRefs:
+  - file:third_party/openbao/api/auth/approle/approle.go
+  - method:4a1253c4affe90d74083c66b48949310
+  - struct:c3b9a9c281a7dab56060d3c1d0f103f3
+  id: r.login-resolves-secret-id-late
+  level: MUST
+  text: AppRoleAuth.Login resolves the secret ID at login time, preferring the file
+    source, then the environment variable source, then the plaintext string; file
+    and environment values are read late so the underlying value may change between
+    construction and login.
+- codeRefs:
+  - file:third_party/openbao/api/auth/approle/approle.go
+  - method:4a1253c4affe90d74083c66b48949310
+  id: r.login-write-path
+  level: MUST
+  text: 'AppRoleAuth.Login writes the map {role_id, secret_id} to the path auth/<mountPath>/login
+    using client.Logical().WriteWithContext and returns the resulting *api.Secret,
+    wrapping failures as "unable to log in with app role auth: %w".'
+- codeRefs:
+  - file:third_party/openbao/api/auth/approle/approle.go
+  - function:0c0251b3ee8a686ab995281e430c7e47
+  - struct:fdf7d8abfcfc08357b55b8a35bd83ff6
+  id: r.secret-id-single-source
+  level: MUST
+  text: 'SecretID.validate requires at least one of FromFile, FromEnv or FromString
+    to be set, and rejects more than one source with the error "only one source for
+    the secret ID should be specified"; NewAppRoleAuth wraps a failure as "invalid
+    secret ID: %w".'
+- codeRefs:
+  - file:third_party/openbao/api/auth/approle/approle.go
+  - file:third_party/openbao/api/auth/approle/approle_test.go
+  id: r.third-party-vendored
+  level: SHOULD
+  text: The package is vendored upstream OpenBao code carrying the HashiCorp copyright
+    header and the MPL-2.0 SPDX license identifier, and its behavior is exercised
+    by TestLogin in approle_test.go.
+- codeRefs:
+  - file:third_party/openbao/api/auth/approle/approle.go
+  - function:cf9e6e345dad7784ebf823bf8dc110b4
+  - method:4a1253c4affe90d74083c66b48949310
+  id: r.wrapping-token-unwrap
+  level: MUST
+  text: 'WithWrappingToken sets the unwrap flag, and AppRoleAuth.Login then calls
+    client.Logical().UnwrapWithContext with the resolved value and uses the unwrapped
+    token''s secret_id field, failing with "unable to unwrap response wrapping token:
+    %w" on error.'
 upstream: self
 ```
 
