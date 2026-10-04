@@ -4966,6 +4966,19 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.extend-ember-route` (MUST): "MfaMethodEditRoute must extend Ember's Route base class, so the route inherits the framework's default model resolution, transition hooks and controller setup."
 - added `r.no-hook-overrides` (MUST): "The class body must stay empty, overriding no Route hook and declaring no actions, so the MFA method edit route uses only inherited behaviour and adds no custom data loading or teardown."
 
+### third-party-openbao-ui-app-routes-vault-cluster-access-namespaces
+
+- intent: "" -> "These routes exist so the cluster access namespaces area can render two screens from the same store-backed data layer: a create screen that needs an unsaved namespace model bound to the form, and a list screen that needs a paged namespace query with query-string page state. The context exists to record the model-hook contracts, the query parameter behaviour, and the controller cleanup hooks that the matching controllers and templates depend on."
+- added `r.create-model` (MUST): "CreateRoute.model() returns an unsaved record created through the injected store with the type name 'namespace', so the create form edits a new namespace rather than an existing one."
+- added `r.create-reset-cleanup` (MUST): "When the route is exiting, its resetController calls cleanupModel on the controller if that method exists, discarding create-form state left behind by the previous visit."
+- added `r.create-services` (MUST): "CreateRoute declares the injected store and version services on the route, so the model hook can reach the store and templates or controllers can read the running version."
+- added `r.index-404-empty` (MUST): "A namespace query that fails with HTTP status 404 resolves to an empty array instead of rejecting, so a cluster with no namespaces renders an empty list; any other error is rethrown."
+- added `r.index-error-action` (MUST): "The index route error action aborts the transition and records has404 when the controller already had a model and the error status is 404, otherwise it returns true so the error keeps propagating."
+- added `r.index-page-query-param` (MUST): "The index route declares page as a query parameter with refreshModel enabled, so changing the page in the URL refetches the namespace listing."
+- added `r.index-paged-query` (MUST): "The index route model hook runs a lazyPaginatedQuery against the 'namespace' type with responsePath 'data.keys' and a page number taken from the route's page query parameter, defaulting to 1 when the parameter is absent or not numeric."
+- added `r.index-setup-controller` (MUST): "The index route setupController passes the model, a has404 flag and hasModel true to the controller, and when no 404 was recorded also sets the controller page property from the model meta currentPage, defaulting to 1."
+- added `r.index-transition-cache` (MUST): "The willTransition action scrolls the window to the top and clears all store datasets whenever the transition target is not this route, and the reload action clears all datasets before refreshing the route."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5374,7 +5387,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-routes-vault-cluster-access-mfa-enforcements-enforcement-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-mfa-methods-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-mfa-methods-method-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-routes-vault-cluster-access-namespaces-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-routes-vault-cluster-access-namespaces-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-oidc-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
