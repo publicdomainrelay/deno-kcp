@@ -1,71 +1,23 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'missing: ExecutionObservation, ExecutionState, New, Observed, Op, Options,
+    Reconciler, Reconciler.Reconcile, Result; unresolved: r.execution-observation-identifies-run-and-state:
+    struct:51a6de2d483d5be40201c7de454f6cd7, r.execution-observation-identifies-run-and-state:
+    type_alias:c2475e9a59e50fceb012111299966c7a, r.new-builds-reconciler-from-options:
+    function:26e6969406488bfc97e9ed77febe4974, r.new-builds-reconciler-from-options:
+    struct:c5868ebca402d6036b8a7d908bf1a8ba, r.observed-carries-engine-and-execution:
+    struct:7b1226e6c85673295723299601dd8674, r.ops-name-the-actions-the-provider-applies:
+    struct:bea3d6cd026242f0ba9701845a99d9ef, r.ops-name-the-actions-the-provider-applies:
+    type_alias:43971b7fe73a576e55a3463fe8f33daf, r.reconcile-is-a-pure-decision: method:cf15bd5457ef89fffc8abf3947dbb830,
+    r.reconcile-is-a-pure-decision: struct:2c2a9e18bb5ac0b6ffbbc8977980dbed'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+- message: no synced fingerprint has been recorded yet
+  reason: NotSyncedYet
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed:
-  files:
-  - internal/policyengine/policyengine.go
-  - internal/policyengine/policyengine_test.go
-  fingerprint: 42ce5aae7aa756e0ff42fadfd956e8327dd77b2711487f1e0c24c37c62a6b053
-  interfaces:
-  - codegraphId: type_alias:c2475e9a59e50fceb012111299966c7a
-    file: internal/policyengine/policyengine.go
-    kind: type_alias
-    line: 16
-    name: ExecutionState
-  - codegraphId: struct:51a6de2d483d5be40201c7de454f6cd7
-    file: internal/policyengine/policyengine.go
-    kind: struct
-    line: 24
-    name: ExecutionObservation
-  - codegraphId: struct:7b1226e6c85673295723299601dd8674
-    file: internal/policyengine/policyengine.go
-    kind: struct
-    line: 32
-    name: Observed
-  - codegraphId: type_alias:43971b7fe73a576e55a3463fe8f33daf
-    file: internal/policyengine/policyengine.go
-    kind: type_alias
-    line: 46
-    name: Op
-  - codegraphId: struct:bea3d6cd026242f0ba9701845a99d9ef
-    file: internal/policyengine/policyengine.go
-    kind: struct
-    line: 58
-    name: Result
-  - codegraphId: struct:c5868ebca402d6036b8a7d908bf1a8ba
-    file: internal/policyengine/policyengine.go
-    kind: struct
-    line: 86
-    name: Options
-  - codegraphId: struct:2c2a9e18bb5ac0b6ffbbc8977980dbed
-    file: internal/policyengine/policyengine.go
-    kind: struct
-    line: 90
-    name: Reconciler
-  - codegraphId: function:26e6969406488bfc97e9ed77febe4974
-    file: internal/policyengine/policyengine.go
-    kind: function
-    line: 94
-    name: New
-    signature: (opts Options) *Reconciler
-  - codegraphId: method:cf15bd5457ef89fffc8abf3947dbb830
-    file: internal/policyengine/policyengine.go
-    kind: method
-    line: 101
-    name: Reconciler.Reconcile
-    signature: (ctx context.Context, o Observed) (Result, error)
-observedCommit: 44bd6951fa6bf8f6e6d0264e27b7dfe6b967e21e
-realizedSpecHash: 6ce56c849e06698f90d8f3386f2ffd52eb9bb28ddd991459c7783af1c182e684
-syncedCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
-syncedFingerprint: 42ce5aae7aa756e0ff42fadfd956e8327dd77b2711487f1e0c24c37c62a6b053
+observed: {}

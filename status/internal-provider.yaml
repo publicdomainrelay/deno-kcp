@@ -1,774 +1,114 @@
 conditions:
-- message: 'missing: admissionSource, summaryObserver'
+- message: 'missing: Instances, Instances.Delete, Instances.Read, Instances.RemoveFinalizer,
+    Instances.WriteStatus, New, NewRegistry, Options, Pass, Provider, Provider.ActiveRuns,
+    Provider.Close, Provider.MaxActiveRuns, Provider.Reconcile, Provider.Reconciles,
+    Provider.Run, Provider.RunStarts, Provider.RunWatch, Provider.TrustBundle, Reader,
+    Reader.ListRuns, Reader.ListWorkflowRuns, Reader.Read, Reader.ReadEngine, Reader.ReadJob,
+    Reader.ReadOpenBao, Reader.ReadPod, Reader.ReadRun, Reader.ReadTrigger, Reader.ReadWorkflowPod,
+    Registry, Registry.ClusterPath, Registry.CreateJob, Registry.CreatePod, Registry.CreateRun,
+    Registry.CreateWorkflowRun, Registry.Delete, Registry.DeleteEngine, Registry.DeleteJob,
+    Registry.DeleteOpenBao, Registry.DeletePod, Registry.DeleteRun, Registry.DeleteWorkflowPod,
+    Registry.ListOpenBaos, Registry.ListRuns, Registry.ListWorkflowRuns, Registry.MintServiceAccountToken,
+    Registry.Read, Registry.ReadEngine, Registry.ReadJob, Registry.ReadOpenBao, Registry.ReadPod,
+    Registry.ReadRun, Registry.ReadTrigger, Registry.ReadWorkflowPod, Registry.RemoveEngineFinalizer,
+    Registry.RemoveFinalizer, Registry.RemoveOpenBaoFinalizer, Registry.RemovePodFinalizer,
+    Registry.RemoveRunFinalizer, Registry.RemoveRunFinalizerKnown, Registry.WriteEngineStatus,
+    Registry.WriteJobStatus, Registry.WriteOpenBaoFinalizer, Registry.WriteOpenBaoStatus,
+    Registry.WritePodStatus, Registry.WriteRunStatus, Registry.WriteStatus, Registry.WriteTriggerStatus,
+    Registry.WriteWorkflowPodStatus, RegistryOptions, Runtime, Runtime.CreateJob,
+    Runtime.CreatePod, Runtime.CreateRun, Runtime.CreateWorkflowRun, Runtime.DeleteEngine,
+    Runtime.DeleteJob, Runtime.DeleteOpenBao, Runtime.DeletePod, Runtime.DeleteRun,
+    Runtime.DeleteWorkflowPod, Runtime.ListOpenBaos, Runtime.RemoveEngineFinalizer,
+    Runtime.RemoveOpenBaoFinalizer, Runtime.RemovePodFinalizer, Runtime.RemoveRunFinalizer,
+    Runtime.WriteEngineStatus, Runtime.WriteJobStatus, Runtime.WriteOpenBaoFinalizer,
+    Runtime.WriteOpenBaoStatus, Runtime.WritePodStatus, Runtime.WriteRunStatus, Runtime.WriteTriggerStatus,
+    Runtime.WriteWorkflowPodStatus, TokenMinter, TokenMinter.MintServiceAccountToken,
+    admissionSource, admissionSource.Capacity, admissionSource.Parent, admissionSource.Runs,
+    cacheReader.ListRuns, cacheReader.ListRunsForJob, cacheReader.ListWorkflowRuns,
+    cacheReader.ListWorkflowRunsForPod, cacheReader.Read, cacheReader.ReadEngine,
+    cacheReader.ReadJob, cacheReader.ReadOpenBao, cacheReader.ReadPod, cacheReader.ReadRun,
+    cacheReader.ReadTrigger, cacheReader.ReadWorkflowPod, jobRunLister.ListRunsForJob,
+    podWorkflowRunLister.ListWorkflowRunsForPod, runFinalizerRemover.RemoveRunFinalizerKnown,
+    summaryObserver, summaryObserver.Observe; unresolved: r.admission-default-policy-forbid:
+    file:internal/provider/admission.go, r.admission-default-policy-forbid: method:a07bdbb2bda3bec3a983caa0cbe3f545,
+    r.admission-source-gates-runs: method:dedfd34a67b569d3bd5df1bbfd2d518e, r.admission-source-gates-runs:
+    method:ea874e105ac66c1a2a0d988371fa3509, r.instances-port-for-workflow-runs: file:internal/provider/provider.go,
+    r.instances-port-for-workflow-runs: interface:79e02cbf716ad7f732147264ef6ffc96,
+    r.instances-port-for-workflow-runs: method:6991aa64677e82d8faedb257a0a4dac9, r.instances-port-for-workflow-runs:
+    method:7177e5fd2c4cb312cc5bffedc7bb8225, r.instances-port-for-workflow-runs: method:770a1f486fcb2d924b16f1423b6a6f45,
+    r.instances-port-for-workflow-runs: method:dbb9820bfd360e31ac1295c45d8f0cd5, r.live-tests-cover-behaviour:
+    file:internal/provider/admission_test.go, r.live-tests-cover-behaviour: file:internal/provider/live_denojob_drain_test.go,
+    r.live-tests-cover-behaviour: file:internal/provider/live_denoruntime_test.go,
+    r.live-tests-cover-behaviour: file:internal/provider/live_helpers_test.go, r.live-tests-cover-behaviour:
+    file:internal/provider/live_maxconcurrent_test.go, r.live-tests-cover-behaviour:
+    file:internal/provider/live_native_admission_test.go, r.live-tests-cover-behaviour:
+    file:internal/provider/live_ttl_test.go, r.live-tests-cover-behaviour: file:internal/provider/metrics_test.go,
+    r.live-tests-cover-behaviour: file:internal/provider/registry_test.go, r.live-tests-cover-behaviour:
+    file:internal/provider/run_refs_test.go, r.live-tests-cover-behaviour: file:internal/provider/watch_test.go,
+    r.metrics-observed: file:internal/provider/metrics.go, r.metrics-observed: method:783d67229120389163d8738cc3d1a3ec,
+    r.pod-run-lookup-helpers: method:2493a2c710828f8b4fe3808ad1408907, r.pod-run-lookup-helpers:
+    method:40c76b6ba2cb4f1a4bf8529657373b18, r.provider-constructed-from-options:
+    function:f4e5cfdbb89305e5310f8800b3c5e307, r.provider-constructed-from-options:
+    struct:616ab943fe3365809df93a906c1942bc, r.provider-constructed-from-options:
+    struct:cd6145b620673d1d890a45c3b08eaaf5, r.provider-constructed-from-options:
+    struct:d27a8fecd6ae256e43a6e3e8a3089705, r.provider-runs-reconcile-loop: method:83f50090d7ebe3148f7aa5e0db332b4d,
+    r.provider-runs-reconcile-loop: method:bedc23e806b40419ad4ae31c624ffdf9, r.reader-port-covers-all-kinds:
+    interface:4823d030f55cc3629f5f52b93b924b77, r.reader-port-covers-all-kinds: method:17d9aa5639d88e18ced092858a5abe2c,
+    r.reader-port-covers-all-kinds: method:212b93b0660339a29ad743c47c0a2f5c, r.reader-port-covers-all-kinds:
+    method:2fd4bea770ce6a63d90f4daec420b54e, r.reader-port-covers-all-kinds: method:307b5bfc55c641acbb8ada3045f9d25c,
+    r.reader-port-covers-all-kinds: method:41cf2306d6452e1d718d6ef94ff97566, r.reader-port-covers-all-kinds:
+    method:478c272d9a449a55c6ed18fadd0618d4, r.reader-port-covers-all-kinds: method:990b41bd5a2ffe1389dc5d05ce1da085,
+    r.reader-port-covers-all-kinds: method:d08efa306908e97a03fc66d8df7d9706, r.reader-port-covers-all-kinds:
+    method:d176f51800814ad517e2c40e2c2e0ee7, r.reader-port-covers-all-kinds: method:db20977428ee57d0ef1f56f51ca0243e,
+    r.reconcile-per-kind: file:internal/provider/reconcile_engine.go, r.reconcile-per-kind:
+    file:internal/provider/reconcile_job.go, r.reconcile-per-kind: file:internal/provider/reconcile_openbao.go,
+    r.reconcile-per-kind: file:internal/provider/reconcile_pod.go, r.reconcile-per-kind:
+    file:internal/provider/reconcile_run.go, r.reconcile-per-kind: file:internal/provider/reconcile_trigger.go,
+    r.reconcile-per-kind: file:internal/provider/reconcile_workflowpod.go, r.registry-resolves-cluster-path:
+    file:internal/provider/cluster_path.go, r.registry-resolves-cluster-path: method:1711073a6a2c66ef8dbc0850814be58e,
+    r.registry-satisfies-ports: file:internal/provider/registry.go, r.registry-satisfies-ports:
+    file:internal/provider/registry_engine.go, r.registry-satisfies-ports: file:internal/provider/registry_job.go,
+    r.registry-satisfies-ports: file:internal/provider/registry_openbao.go, r.registry-satisfies-ports:
+    file:internal/provider/registry_pod.go, r.registry-satisfies-ports: file:internal/provider/registry_run.go,
+    r.registry-satisfies-ports: file:internal/provider/registry_runtime.go, r.registry-satisfies-ports:
+    file:internal/provider/registry_trigger.go, r.registry-satisfies-ports: file:internal/provider/registry_workflowpod.go,
+    r.registry-satisfies-ports: function:d8299700880b325d38c3aa20aa84ac24, r.registry-satisfies-ports:
+    struct:01896200f64256e833b4818f731d0300, r.registry-satisfies-ports: struct:eafb527137f9ed90cec30417e467987b,
+    r.registry-workflow-run-operations: method:0336e9c05327f7b15cb6ddb11d9ecda3, r.registry-workflow-run-operations:
+    method:23fc06d135fb3a4b8a0273710865368f, r.registry-workflow-run-operations: method:4ca472be4f4fd37e73d3fb239a03dbec,
+    r.registry-workflow-run-operations: method:73dfeb14f71c1a7d5e2ee751c233cbf1, r.registry-workflow-run-operations:
+    method:9c58b2e5cdc887157dd853e80e10a086, r.registry-workflow-run-operations: method:b57ea92a3ea6bd92ab5c167ae09dbd8e,
+    r.registry-workflow-run-operations: method:d01339d025223140bb9535dcbac67476, r.registry-workflow-run-operations:
+    method:d362b34ab599ab6e512bda32f222f3e6, r.run-gauges-exposed: file:internal/provider/run_refs.go,
+    r.run-gauges-exposed: method:2188f1b23ffddba57fd070190f3dfab1, r.run-gauges-exposed:
+    method:23233a41823fe7b5628f032a2767752f, r.run-gauges-exposed: method:a6a75598b35908e08153f182c3febf00,
+    r.runtime-port-writes-every-kind: file:internal/provider/provider_runtime.go,
+    r.runtime-port-writes-every-kind: interface:c7e3ce30c0c4b864a4256ae1255ecf6f,
+    r.runtime-port-writes-every-kind: method:04c9c12ef6ee491671f3ef14f8486cee, r.runtime-port-writes-every-kind:
+    method:0a1baf118dfd1184e6e20c9bc6c2149d, r.runtime-port-writes-every-kind: method:0f7acc2d0feaf48c63fed92350649ba4,
+    r.runtime-port-writes-every-kind: method:6105d5fa8fec2e32966496e6bf32e4b3, r.runtime-port-writes-every-kind:
+    method:8acde20985786551e6319db9f3851eb0, r.runtime-port-writes-every-kind: method:8ccafd0b3f41743e3ad8ab9b9c96bae0,
+    r.runtime-port-writes-every-kind: method:aacfccc54b2b56d00fcf7852988d658c, r.runtime-port-writes-every-kind:
+    method:b27c6b3d66fe2bf13cb22e4df562eac1, r.runtime-port-writes-every-kind: method:d43625922ebf891922c49f440fefca1e,
+    r.runtime-port-writes-every-kind: method:d49d27ff9e2c256263815edfc2d08750, r.runtime-port-writes-every-kind:
+    method:ea1c6b0ecc9e6f6856824a87e673b682, r.service-dns-injection: file:internal/provider/service_dns.go,
+    r.service-dns-injection: file:internal/provider/service_dns_inject_test.go, r.token-minter-mints-service-account-token:
+    interface:d81c0020017b8c1b77c14748b34a1695, r.token-minter-mints-service-account-token:
+    method:08cbdd1a97d2aeb9d9187918def0a3ff, r.token-minter-mints-service-account-token:
+    method:9630ebc295fc1d2ed8be58298913156a, r.watch-cache-serves-reader: file:internal/provider/watch.go,
+    r.watch-cache-serves-reader: file:internal/provider/watch_cache.go, r.watch-cache-serves-reader:
+    method:0c338b727be3207f28cbf878427e832a, r.watch-cache-serves-reader: method:233229f09be3f2275ac69f207bb6268b,
+    r.watch-cache-serves-reader: method:3fdfde3c1a480d83c360edc8c048bc7b, r.watch-cache-serves-reader:
+    method:f34958b11727b06606bdafed3381d854, r.watch-cache-serves-reader: method:fec4d29b214cd73931b1d89410112759'
   reason: InterfacesMissing
   status: "False"
   type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+- message: no synced fingerprint has been recorded yet
+  reason: NotSyncedYet
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed:
-  files:
-  - internal/provider/admission.go
-  - internal/provider/admission_test.go
-  - internal/provider/cluster_path.go
-  - internal/provider/driver.go
-  - internal/provider/live_denojob_drain_test.go
-  - internal/provider/live_denoruntime_test.go
-  - internal/provider/live_helpers_test.go
-  - internal/provider/live_maxconcurrent_test.go
-  - internal/provider/live_native_admission_test.go
-  - internal/provider/live_ttl_test.go
-  - internal/provider/main_test.go
-  - internal/provider/metrics.go
-  - internal/provider/metrics_test.go
-  - internal/provider/provider.go
-  - internal/provider/provider_runtime.go
-  - internal/provider/provider_runtime_test.go
-  - internal/provider/provider_test.go
-  - internal/provider/reconcile_engine.go
-  - internal/provider/reconcile_job.go
-  - internal/provider/reconcile_openbao.go
-  - internal/provider/reconcile_openbao_test.go
-  - internal/provider/reconcile_pod.go
-  - internal/provider/reconcile_run.go
-  - internal/provider/reconcile_trigger.go
-  - internal/provider/reconcile_workflowpod.go
-  - internal/provider/registry.go
-  - internal/provider/registry_engine.go
-  - internal/provider/registry_job.go
-  - internal/provider/registry_openbao.go
-  - internal/provider/registry_pod.go
-  - internal/provider/registry_run.go
-  - internal/provider/registry_runtime.go
-  - internal/provider/registry_test.go
-  - internal/provider/registry_trigger.go
-  - internal/provider/registry_workflowpod.go
-  - internal/provider/run_refs.go
-  - internal/provider/run_refs_test.go
-  - internal/provider/service_dns.go
-  - internal/provider/service_dns_inject_test.go
-  - internal/provider/watch.go
-  - internal/provider/watch_cache.go
-  - internal/provider/watch_test.go
-  fingerprint: d8fab230a0bcac1073be293ec25ef7e4f1455af65b7937ba71707b357dd52f32
-  interfaces:
-  - codegraphId: method:dedfd34a67b569d3bd5df1bbfd2d518e
-    file: internal/provider/admission.go
-    kind: method
-    line: 67
-    name: admissionSource.Parent
-    signature: (ctx context.Context, run queue.Run) (Ref, bool, error)
-  - codegraphId: method:ea874e105ac66c1a2a0d988371fa3509
-    file: internal/provider/admission.go
-    kind: method
-    line: 85
-    name: admissionSource.Runs
-    signature: (ctx context.Context, parent Ref) ([]queue.Run, error)
-  - codegraphId: method:a07bdbb2bda3bec3a983caa0cbe3f545
-    file: internal/provider/admission.go
-    kind: method
-    line: 101
-    name: admissionSource.Capacity
-    signature: (ctx context.Context, parent Ref) (queue.Capacity, *queue.Blocker,
-      error)
-  - codegraphId: method:1711073a6a2c66ef8dbc0850814be58e
-    file: internal/provider/cluster_path.go
-    kind: method
-    line: 16
-    name: Registry.ClusterPath
-    signature: (ctx context.Context, id string) (string, error)
-  - codegraphId: method:783d67229120389163d8738cc3d1a3ec
-    file: internal/provider/metrics.go
-    kind: method
-    line: 31
-    name: summaryObserver.Observe
-    signature: (float64)
-  - codegraphId: interface:79e02cbf716ad7f732147264ef6ffc96
-    file: internal/provider/provider.go
-    kind: interface
-    line: 40
-    name: Instances
-  - codegraphId: method:dbb9820bfd360e31ac1295c45d8f0cd5
-    file: internal/provider/provider.go
-    kind: method
-    line: 41
-    name: Instances.Read
-    signature: (ctx context.Context, ref Ref) (*v1alpha1.PolicyWorkflowRun, error)
-  - codegraphId: method:6991aa64677e82d8faedb257a0a4dac9
-    file: internal/provider/provider.go
-    kind: method
-    line: 43
-    name: Instances.WriteStatus
-    signature: (ctx context.Context, ref Ref, st v1alpha1.PolicyWorkflowRunStatus)
-      error
-  - codegraphId: method:770a1f486fcb2d924b16f1423b6a6f45
-    file: internal/provider/provider.go
-    kind: method
-    line: 45
-    name: Instances.Delete
-    signature: (ctx context.Context, ref Ref) error
-  - codegraphId: method:7177e5fd2c4cb312cc5bffedc7bb8225
-    file: internal/provider/provider.go
-    kind: method
-    line: 47
-    name: Instances.RemoveFinalizer
-    signature: (ctx context.Context, ref Ref) error
-  - codegraphId: interface:4823d030f55cc3629f5f52b93b924b77
-    file: internal/provider/provider.go
-    kind: interface
-    line: 52
-    name: Reader
-  - codegraphId: method:990b41bd5a2ffe1389dc5d05ce1da085
-    file: internal/provider/provider.go
-    kind: method
-    line: 53
-    name: Reader.Read
-    signature: (ctx context.Context, ref Ref) (*v1alpha1.PolicyWorkflowRun, error)
-  - codegraphId: method:d08efa306908e97a03fc66d8df7d9706
-    file: internal/provider/provider.go
-    kind: method
-    line: 55
-    name: Reader.ReadRun
-    signature: (ctx context.Context, ref Ref) (*v1alpha1.DenoRun, error)
-  - codegraphId: method:478c272d9a449a55c6ed18fadd0618d4
-    file: internal/provider/provider.go
-    kind: method
-    line: 57
-    name: Reader.ListRuns
-    signature: (ctx context.Context, logicalCluster string) ([]v1alpha1.DenoRun, error)
-  - codegraphId: method:17d9aa5639d88e18ced092858a5abe2c
-    file: internal/provider/provider.go
-    kind: method
-    line: 59
-    name: Reader.ReadPod
-    signature: (ctx context.Context, ref Ref) (*v1alpha1.DenoPod, error)
-  - codegraphId: method:212b93b0660339a29ad743c47c0a2f5c
-    file: internal/provider/provider.go
-    kind: method
-    line: 61
-    name: Reader.ReadJob
-    signature: (ctx context.Context, ref Ref) (*v1alpha1.DenoJob, error)
-  - codegraphId: method:307b5bfc55c641acbb8ada3045f9d25c
-    file: internal/provider/provider.go
-    kind: method
-    line: 63
-    name: Reader.ReadTrigger
-    signature: (ctx context.Context, ref Ref) (*v1alpha1.RunTrigger, error)
-  - codegraphId: method:d176f51800814ad517e2c40e2c2e0ee7
-    file: internal/provider/provider.go
-    kind: method
-    line: 65
-    name: Reader.ReadEngine
-    signature: (ctx context.Context, ref Ref) (*v1alpha1.PolicyEngine, error)
-  - codegraphId: method:2fd4bea770ce6a63d90f4daec420b54e
-    file: internal/provider/provider.go
-    kind: method
-    line: 67
-    name: Reader.ReadOpenBao
-    signature: (ctx context.Context, ref Ref) (*v1alpha1.OpenBao, error)
-  - codegraphId: method:41cf2306d6452e1d718d6ef94ff97566
-    file: internal/provider/provider.go
-    kind: method
-    line: 69
-    name: Reader.ReadWorkflowPod
-    signature: (ctx context.Context, ref Ref) (*v1alpha1.PolicyWorkflowPod, error)
-  - codegraphId: method:db20977428ee57d0ef1f56f51ca0243e
-    file: internal/provider/provider.go
-    kind: method
-    line: 71
-    name: Reader.ListWorkflowRuns
-    signature: (ctx context.Context, logicalCluster string) ([]v1alpha1.PolicyWorkflowRun,
-      error)
-  - codegraphId: struct:616ab943fe3365809df93a906c1942bc
-    file: internal/provider/provider.go
-    kind: struct
-    line: 76
-    name: Options
-  - codegraphId: struct:d27a8fecd6ae256e43a6e3e8a3089705
-    file: internal/provider/provider.go
-    kind: struct
-    line: 150
-    name: Provider
-  - codegraphId: struct:cd6145b620673d1d890a45c3b08eaaf5
-    file: internal/provider/provider.go
-    kind: struct
-    line: 197
-    name: Pass
-  - codegraphId: function:f4e5cfdbb89305e5310f8800b3c5e307
-    file: internal/provider/provider.go
-    kind: function
-    line: 203
-    name: New
-    signature: (opts Options) (*Provider, error)
-  - codegraphId: method:f57c1668b886e5485cb302198237df3c
-    file: internal/provider/provider.go
-    kind: method
-    line: 322
-    name: Provider.TrustBundle
-    signature: () []byte
-  - codegraphId: method:bedc23e806b40419ad4ae31c624ffdf9
-    file: internal/provider/provider.go
-    kind: method
-    line: 330
-    name: Provider.Close
-    signature: () error
-  - codegraphId: method:e77a20a79e63ff4ddd7d130f60aff357
-    file: internal/provider/provider.go
-    kind: method
-    line: 337
-    name: Provider.Run
-    signature: (ctx context.Context) error
-  - codegraphId: method:83f50090d7ebe3148f7aa5e0db332b4d
-    file: internal/provider/provider.go
-    kind: method
-    line: 341
-    name: Provider.Reconciles
-    signature: () uint64
-  - codegraphId: method:2493a2c710828f8b4fe3808ad1408907
-    file: internal/provider/provider.go
-    kind: method
-    line: 386
-    name: jobRunLister.ListRunsForJob
-    signature: (ctx context.Context, logicalCluster, namespace, jobName string) ([]v1alpha1.DenoRun,
-      error)
-  - codegraphId: method:40c76b6ba2cb4f1a4bf8529657373b18
-    file: internal/provider/provider.go
-    kind: method
-    line: 464
-    name: podWorkflowRunLister.ListWorkflowRunsForPod
-    signature: (ctx context.Context, logicalCluster, namespace, podName string) ([]v1alpha1.PolicyWorkflowRun,
-      error)
-  - codegraphId: method:8bfddbaa8080d45fcb240bd22d4cd5eb
-    file: internal/provider/provider.go
-    kind: method
-    line: 485
-    name: Provider.Reconcile
-    signature: (ctx context.Context, ref Ref) (Pass, error)
-  - codegraphId: interface:c7e3ce30c0c4b864a4256ae1255ecf6f
-    file: internal/provider/provider_runtime.go
-    kind: interface
-    line: 20
-    name: Runtime
-  - codegraphId: method:8acde20985786551e6319db9f3851eb0
-    file: internal/provider/provider_runtime.go
-    kind: method
-    line: 23
-    name: Runtime.CreateRun
-    signature: (ctx context.Context, logicalCluster string, run *v1alpha1.DenoRun)
-      error
-  - codegraphId: method:04c9c12ef6ee491671f3ef14f8486cee
-    file: internal/provider/provider_runtime.go
-    kind: method
-    line: 25
-    name: Runtime.WriteRunStatus
-    signature: (ctx context.Context, ref Ref, st v1alpha1.DenoRunStatus) error
-  - codegraphId: method:6105d5fa8fec2e32966496e6bf32e4b3
-    file: internal/provider/provider_runtime.go
-    kind: method
-    line: 27
-    name: Runtime.DeleteRun
-    signature: (ctx context.Context, ref Ref) error
-  - codegraphId: method:dc1e88b9de527b8cfd746d9549256481
-    file: internal/provider/provider_runtime.go
-    kind: method
-    line: 29
-    name: Runtime.RemoveRunFinalizer
-    signature: (ctx context.Context, ref Ref) error
-  - codegraphId: method:d49d27ff9e2c256263815edfc2d08750
-    file: internal/provider/provider_runtime.go
-    kind: method
-    line: 31
-    name: Runtime.CreatePod
-    signature: (ctx context.Context, logicalCluster string, pod *v1alpha1.DenoPod)
-      error
-  - codegraphId: method:c7eaca591eb9a88f6fa445fb6f6d242a
-    file: internal/provider/provider_runtime.go
-    kind: method
-    line: 33
-    name: Runtime.WritePodStatus
-    signature: (ctx context.Context, ref Ref, st v1alpha1.DenoPodStatus) error
-  - codegraphId: method:804fdd03b129fdca5e8ad7ec46dea9e5
-    file: internal/provider/provider_runtime.go
-    kind: method
-    line: 35
-    name: Runtime.DeletePod
-    signature: (ctx context.Context, ref Ref) error
-  - codegraphId: method:f421f07e7f83dabd28647dda00ffc023
-    file: internal/provider/provider_runtime.go
-    kind: method
-    line: 37
-    name: Runtime.RemovePodFinalizer
-    signature: (ctx context.Context, ref Ref) error
-  - codegraphId: method:ea1c6b0ecc9e6f6856824a87e673b682
-    file: internal/provider/provider_runtime.go
-    kind: method
-    line: 39
-    name: Runtime.CreateJob
-    signature: (ctx context.Context, logicalCluster string, job *v1alpha1.DenoJob)
-      error
-  - codegraphId: method:1e9a03c8f1842e279974c3478e1a3e97
-    file: internal/provider/provider_runtime.go
-    kind: method
-    line: 41
-    name: Runtime.WriteJobStatus
-    signature: (ctx context.Context, ref Ref, st v1alpha1.DenoJobStatus) error
-  - codegraphId: method:3a07b07564f6ddb4f5108ce8579bb872
-    file: internal/provider/provider_runtime.go
-    kind: method
-    line: 43
-    name: Runtime.DeleteJob
-    signature: (ctx context.Context, ref Ref) error
-  - codegraphId: method:0f7acc2d0feaf48c63fed92350649ba4
-    file: internal/provider/provider_runtime.go
-    kind: method
-    line: 45
-    name: Runtime.WriteTriggerStatus
-    signature: (ctx context.Context, ref Ref, st v1alpha1.RunTriggerStatus) error
-  - codegraphId: method:7537bacd7701d8abc4d96ea55d9be394
-    file: internal/provider/provider_runtime.go
-    kind: method
-    line: 47
-    name: Runtime.ListOpenBaos
-    signature: (ctx context.Context, logicalCluster, namespace string) ([]v1alpha1.OpenBao,
-      error)
-  - codegraphId: method:b27c6b3d66fe2bf13cb22e4df562eac1
-    file: internal/provider/provider_runtime.go
-    kind: method
-    line: 49
-    name: Runtime.WriteOpenBaoStatus
-    signature: (ctx context.Context, ref Ref, st v1alpha1.OpenBaoStatus) error
-  - codegraphId: method:d43625922ebf891922c49f440fefca1e
-    file: internal/provider/provider_runtime.go
-    kind: method
-    line: 51
-    name: Runtime.WriteOpenBaoFinalizer
-    signature: (ctx context.Context, ref Ref, finalizers []string) error
-  - codegraphId: method:4b92cbbd2a331162760253795e100263
-    file: internal/provider/provider_runtime.go
-    kind: method
-    line: 53
-    name: Runtime.RemoveOpenBaoFinalizer
-    signature: (ctx context.Context, ref Ref) error
-  - codegraphId: method:2661a7214e0cb6cdb3162fed1d4280ae
-    file: internal/provider/provider_runtime.go
-    kind: method
-    line: 55
-    name: Runtime.DeleteOpenBao
-    signature: (ctx context.Context, ref Ref) error
-  - codegraphId: method:0a1baf118dfd1184e6e20c9bc6c2149d
-    file: internal/provider/provider_runtime.go
-    kind: method
-    line: 57
-    name: Runtime.WriteEngineStatus
-    signature: (ctx context.Context, ref Ref, st v1alpha1.PolicyEngineStatus) error
-  - codegraphId: method:66c63659d64172de6013bbafc13676fa
-    file: internal/provider/provider_runtime.go
-    kind: method
-    line: 59
-    name: Runtime.DeleteEngine
-    signature: (ctx context.Context, ref Ref) error
-  - codegraphId: method:a21691bc8548c8aa4c59e03f894aacca
-    file: internal/provider/provider_runtime.go
-    kind: method
-    line: 61
-    name: Runtime.RemoveEngineFinalizer
-    signature: (ctx context.Context, ref Ref) error
-  - codegraphId: method:aacfccc54b2b56d00fcf7852988d658c
-    file: internal/provider/provider_runtime.go
-    kind: method
-    line: 63
-    name: Runtime.WriteWorkflowPodStatus
-    signature: (ctx context.Context, ref Ref, st v1alpha1.PolicyWorkflowPodStatus)
-      error
-  - codegraphId: method:f9b5c64ccbed1d91e606b24a460d68aa
-    file: internal/provider/provider_runtime.go
-    kind: method
-    line: 65
-    name: Runtime.DeleteWorkflowPod
-    signature: (ctx context.Context, ref Ref) error
-  - codegraphId: method:8ccafd0b3f41743e3ad8ab9b9c96bae0
-    file: internal/provider/provider_runtime.go
-    kind: method
-    line: 67
-    name: Runtime.CreateWorkflowRun
-    signature: (ctx context.Context, logicalCluster string, run *v1alpha1.PolicyWorkflowRun)
-      error
-  - codegraphId: interface:d81c0020017b8c1b77c14748b34a1695
-    file: internal/provider/provider_runtime.go
-    kind: interface
-    line: 70
-    name: TokenMinter
-  - codegraphId: method:08cbdd1a97d2aeb9d9187918def0a3ff
-    file: internal/provider/provider_runtime.go
-    kind: method
-    line: 71
-    name: TokenMinter.MintServiceAccountToken
-    signature: (ctx context.Context, logicalCluster, namespace, name string, ttl time.Duration)
-      (string, error)
-  - codegraphId: method:9c58b2e5cdc887157dd853e80e10a086
-    file: internal/provider/reconcile_run.go
-    kind: method
-    line: 157
-    name: runFinalizerRemover.RemoveRunFinalizerKnown
-    signature: (ctx context.Context, ref Ref, finalizers []string) error
-  - codegraphId: struct:01896200f64256e833b4818f731d0300
-    file: internal/provider/registry.go
-    kind: struct
-    line: 20
-    name: RegistryOptions
-  - codegraphId: struct:eafb527137f9ed90cec30417e467987b
-    file: internal/provider/registry.go
-    kind: struct
-    line: 28
-    name: Registry
-  - codegraphId: function:d8299700880b325d38c3aa20aa84ac24
-    file: internal/provider/registry.go
-    kind: function
-    line: 48
-    name: NewRegistry
-    signature: (opts RegistryOptions) (*Registry, error)
-  - codegraphId: method:0336e9c05327f7b15cb6ddb11d9ecda3
-    file: internal/provider/registry.go
-    kind: method
-    line: 91
-    name: Registry.Read
-    signature: (ctx context.Context, ref Ref) (*v1alpha1.PolicyWorkflowRun, error)
-  - codegraphId: method:4ca472be4f4fd37e73d3fb239a03dbec
-    file: internal/provider/registry.go
-    kind: method
-    line: 95
-    name: Registry.WriteStatus
-    signature: (ctx context.Context, ref Ref, st v1alpha1.PolicyWorkflowRunStatus)
-      error
-  - codegraphId: method:d01339d025223140bb9535dcbac67476
-    file: internal/provider/registry.go
-    kind: method
-    line: 103
-    name: Registry.Delete
-    signature: (ctx context.Context, ref Ref) error
-  - codegraphId: method:d362b34ab599ab6e512bda32f222f3e6
-    file: internal/provider/registry.go
-    kind: method
-    line: 107
-    name: Registry.RemoveFinalizer
-    signature: (ctx context.Context, ref Ref) error
-  - codegraphId: method:73dfeb14f71c1a7d5e2ee751c233cbf1
-    file: internal/provider/registry.go
-    kind: method
-    line: 111
-    name: Registry.CreateWorkflowRun
-    signature: (ctx context.Context, logicalCluster string, run *v1alpha1.PolicyWorkflowRun)
-      error
-  - codegraphId: method:b57ea92a3ea6bd92ab5c167ae09dbd8e
-    file: internal/provider/registry.go
-    kind: method
-    line: 115
-    name: Registry.ListWorkflowRuns
-    signature: (ctx context.Context, logicalCluster string) ([]v1alpha1.PolicyWorkflowRun,
-      error)
-  - codegraphId: method:b6644d333a0075bb18014f8ab370ab20
-    file: internal/provider/registry_engine.go
-    kind: method
-    line: 10
-    name: Registry.ReadEngine
-    signature: (ctx context.Context, ref Ref) (*v1alpha1.PolicyEngine, error)
-  - codegraphId: method:4253e5a8e91efdfd85eb387e9a40a5e1
-    file: internal/provider/registry_engine.go
-    kind: method
-    line: 14
-    name: Registry.WriteEngineStatus
-    signature: (ctx context.Context, ref Ref, st v1alpha1.PolicyEngineStatus) error
-  - codegraphId: method:6297764ce71ce0ae3590cec4347b93f3
-    file: internal/provider/registry_engine.go
-    kind: method
-    line: 22
-    name: Registry.DeleteEngine
-    signature: (ctx context.Context, ref Ref) error
-  - codegraphId: method:ed0c6f28699476fcfe4504c489bc7627
-    file: internal/provider/registry_engine.go
-    kind: method
-    line: 26
-    name: Registry.RemoveEngineFinalizer
-    signature: (ctx context.Context, ref Ref) error
-  - codegraphId: method:896d3c25dce186f2d1a6337161092909
-    file: internal/provider/registry_job.go
-    kind: method
-    line: 10
-    name: Registry.ReadJob
-    signature: (ctx context.Context, ref Ref) (*v1alpha1.DenoJob, error)
-  - codegraphId: method:01cb819eee51f5237be8f8e6f1639443
-    file: internal/provider/registry_job.go
-    kind: method
-    line: 14
-    name: Registry.CreateJob
-    signature: (ctx context.Context, logicalCluster string, job *v1alpha1.DenoJob)
-      error
-  - codegraphId: method:0cb5c9e3b143e0c4ed9b5147fe59f6b3
-    file: internal/provider/registry_job.go
-    kind: method
-    line: 18
-    name: Registry.WriteJobStatus
-    signature: (ctx context.Context, ref Ref, st v1alpha1.DenoJobStatus) error
-  - codegraphId: method:c304957720259fe3392e80d43b6db521
-    file: internal/provider/registry_job.go
-    kind: method
-    line: 26
-    name: Registry.DeleteJob
-    signature: (ctx context.Context, ref Ref) error
-  - codegraphId: method:ec98f9eb9581d80c4aa6177d14d383d2
-    file: internal/provider/registry_openbao.go
-    kind: method
-    line: 10
-    name: Registry.ReadOpenBao
-    signature: (ctx context.Context, ref Ref) (*v1alpha1.OpenBao, error)
-  - codegraphId: method:bf5b74bd0c00ecaf10d023020386de68
-    file: internal/provider/registry_openbao.go
-    kind: method
-    line: 19
-    name: Registry.ListOpenBaos
-    signature: (ctx context.Context, logicalCluster, namespace string) ([]v1alpha1.OpenBao,
-      error)
-  - codegraphId: method:82f7749e7974268fa2a07f5005f90991
-    file: internal/provider/registry_openbao.go
-    kind: method
-    line: 23
-    name: Registry.WriteOpenBaoStatus
-    signature: (ctx context.Context, ref Ref, st v1alpha1.OpenBaoStatus) error
-  - codegraphId: method:f7d344d32bb7acc01c22499b77b395d7
-    file: internal/provider/registry_openbao.go
-    kind: method
-    line: 31
-    name: Registry.DeleteOpenBao
-    signature: (ctx context.Context, ref Ref) error
-  - codegraphId: method:70a55f22a388e28e2455d95afeb3c395
-    file: internal/provider/registry_openbao.go
-    kind: method
-    line: 35
-    name: Registry.RemoveOpenBaoFinalizer
-    signature: (ctx context.Context, ref Ref) error
-  - codegraphId: method:a96ffcf31de36d3e932011306e905d64
-    file: internal/provider/registry_openbao.go
-    kind: method
-    line: 39
-    name: Registry.WriteOpenBaoFinalizer
-    signature: (ctx context.Context, ref Ref, finalizers []string) error
-  - codegraphId: method:b0d01b1a15b1aad53db4705b44a5afde
-    file: internal/provider/registry_pod.go
-    kind: method
-    line: 10
-    name: Registry.ReadPod
-    signature: (ctx context.Context, ref Ref) (*v1alpha1.DenoPod, error)
-  - codegraphId: method:383797f8b833d5944ec6df48060de7b7
-    file: internal/provider/registry_pod.go
-    kind: method
-    line: 14
-    name: Registry.CreatePod
-    signature: (ctx context.Context, logicalCluster string, pod *v1alpha1.DenoPod)
-      error
-  - codegraphId: method:802104bebde2435105f646b51bd5ff92
-    file: internal/provider/registry_pod.go
-    kind: method
-    line: 18
-    name: Registry.WritePodStatus
-    signature: (ctx context.Context, ref Ref, st v1alpha1.DenoPodStatus) error
-  - codegraphId: method:25815b88f4e7c14b5d9dd8a3a505f8b9
-    file: internal/provider/registry_pod.go
-    kind: method
-    line: 26
-    name: Registry.DeletePod
-    signature: (ctx context.Context, ref Ref) error
-  - codegraphId: method:dc9d9b7767522c93d4fae736c5ab0170
-    file: internal/provider/registry_pod.go
-    kind: method
-    line: 30
-    name: Registry.RemovePodFinalizer
-    signature: (ctx context.Context, ref Ref) error
-  - codegraphId: method:92c84fd89486698aa49fd036d4518a82
-    file: internal/provider/registry_run.go
-    kind: method
-    line: 10
-    name: Registry.ListRuns
-    signature: (ctx context.Context, logicalCluster string) ([]v1alpha1.DenoRun, error)
-  - codegraphId: method:20addd5109fef7ac0ae28a184341077b
-    file: internal/provider/registry_run.go
-    kind: method
-    line: 14
-    name: Registry.ReadRun
-    signature: (ctx context.Context, ref Ref) (*v1alpha1.DenoRun, error)
-  - codegraphId: method:4911c5ef37f74ec42e3cc92e59bb4676
-    file: internal/provider/registry_run.go
-    kind: method
-    line: 18
-    name: Registry.CreateRun
-    signature: (ctx context.Context, logicalCluster string, run *v1alpha1.DenoRun)
-      error
-  - codegraphId: method:61d866193448ab0676f58e343d254c3a
-    file: internal/provider/registry_run.go
-    kind: method
-    line: 22
-    name: Registry.WriteRunStatus
-    signature: (ctx context.Context, ref Ref, st v1alpha1.DenoRunStatus) error
-  - codegraphId: method:8c29bef53598b65e6b65a862f680400d
-    file: internal/provider/registry_run.go
-    kind: method
-    line: 30
-    name: Registry.DeleteRun
-    signature: (ctx context.Context, ref Ref) error
-  - codegraphId: method:afe5cd25ad2085f5ec294ab8e4038ef3
-    file: internal/provider/registry_run.go
-    kind: method
-    line: 34
-    name: Registry.RemoveRunFinalizer
-    signature: (ctx context.Context, ref Ref) error
-  - codegraphId: method:23fc06d135fb3a4b8a0273710865368f
-    file: internal/provider/registry_run.go
-    kind: method
-    line: 38
-    name: Registry.RemoveRunFinalizerKnown
-    signature: (ctx context.Context, ref Ref, finalizers []string) error
-  - codegraphId: method:9630ebc295fc1d2ed8be58298913156a
-    file: internal/provider/registry_runtime.go
-    kind: method
-    line: 10
-    name: Registry.MintServiceAccountToken
-    signature: (ctx context.Context, logicalCluster, namespace, name string, ttl time.Duration)
-      (string, error)
-  - codegraphId: method:b2fb2d47f670b310f529063d07df2c47
-    file: internal/provider/registry_trigger.go
-    kind: method
-    line: 10
-    name: Registry.ReadTrigger
-    signature: (ctx context.Context, ref Ref) (*v1alpha1.RunTrigger, error)
-  - codegraphId: method:5058fca927752c8339c737370a15b47f
-    file: internal/provider/registry_trigger.go
-    kind: method
-    line: 14
-    name: Registry.WriteTriggerStatus
-    signature: (ctx context.Context, ref Ref, st v1alpha1.RunTriggerStatus) error
-  - codegraphId: method:3e1303069b8934c8d655158b46e07d68
-    file: internal/provider/registry_workflowpod.go
-    kind: method
-    line: 10
-    name: Registry.ReadWorkflowPod
-    signature: (ctx context.Context, ref Ref) (*v1alpha1.PolicyWorkflowPod, error)
-  - codegraphId: method:b629ea887404726a149cc1a99c37823c
-    file: internal/provider/registry_workflowpod.go
-    kind: method
-    line: 14
-    name: Registry.WriteWorkflowPodStatus
-    signature: (ctx context.Context, ref Ref, st v1alpha1.PolicyWorkflowPodStatus)
-      error
-  - codegraphId: method:f60cebab8718e9fd41da53ddfd80ebf1
-    file: internal/provider/registry_workflowpod.go
-    kind: method
-    line: 22
-    name: Registry.DeleteWorkflowPod
-    signature: (ctx context.Context, ref Ref) error
-  - codegraphId: method:2188f1b23ffddba57fd070190f3dfab1
-    file: internal/provider/run_refs.go
-    kind: method
-    line: 51
-    name: Provider.ActiveRuns
-    signature: () int64
-  - codegraphId: method:23233a41823fe7b5628f032a2767752f
-    file: internal/provider/run_refs.go
-    kind: method
-    line: 55
-    name: Provider.MaxActiveRuns
-    signature: () int64
-  - codegraphId: method:a6a75598b35908e08153f182c3febf00
-    file: internal/provider/run_refs.go
-    kind: method
-    line: 59
-    name: Provider.RunStarts
-    signature: () int64
-  - codegraphId: method:f34958b11727b06606bdafed3381d854
-    file: internal/provider/watch.go
-    kind: method
-    line: 88
-    name: Provider.RunWatch
-    signature: (ctx context.Context) error
-  - codegraphId: method:0c338b727be3207f28cbf878427e832a
-    file: internal/provider/watch_cache.go
-    kind: method
-    line: 115
-    name: cacheReader.Read
-    signature: (_ context.Context, ref Ref) (*v1alpha1.PolicyWorkflowRun, error)
-  - codegraphId: method:39357fde02deb917a6d729cd64103e58
-    file: internal/provider/watch_cache.go
-    kind: method
-    line: 119
-    name: cacheReader.ReadRun
-    signature: (_ context.Context, ref Ref) (*v1alpha1.DenoRun, error)
-  - codegraphId: method:d3b126aa7c393857fc52b276be2775e8
-    file: internal/provider/watch_cache.go
-    kind: method
-    line: 123
-    name: cacheReader.ListRuns
-    signature: (_ context.Context, logicalCluster string) ([]v1alpha1.DenoRun, error)
-  - codegraphId: method:233229f09be3f2275ac69f207bb6268b
-    file: internal/provider/watch_cache.go
-    kind: method
-    line: 127
-    name: cacheReader.ListRunsForJob
-    signature: (_ context.Context, logicalCluster, namespace, jobName string) ([]v1alpha1.DenoRun,
-      error)
-  - codegraphId: method:4234fcb2deb93cd1d3ffff30a08e9bac
-    file: internal/provider/watch_cache.go
-    kind: method
-    line: 144
-    name: cacheReader.ReadPod
-    signature: (_ context.Context, ref Ref) (*v1alpha1.DenoPod, error)
-  - codegraphId: method:bc5ee52232736b9e76295ebe1658d03a
-    file: internal/provider/watch_cache.go
-    kind: method
-    line: 148
-    name: cacheReader.ReadJob
-    signature: (_ context.Context, ref Ref) (*v1alpha1.DenoJob, error)
-  - codegraphId: method:b9504aa99cdd8e93e139e86c24b33700
-    file: internal/provider/watch_cache.go
-    kind: method
-    line: 152
-    name: cacheReader.ReadTrigger
-    signature: (_ context.Context, ref Ref) (*v1alpha1.RunTrigger, error)
-  - codegraphId: method:156f2b8e2e488a6f619076e2b3281489
-    file: internal/provider/watch_cache.go
-    kind: method
-    line: 156
-    name: cacheReader.ReadOpenBao
-    signature: (_ context.Context, ref Ref) (*v1alpha1.OpenBao, error)
-  - codegraphId: method:63085a4016a0611c83abdda86074ad51
-    file: internal/provider/watch_cache.go
-    kind: method
-    line: 160
-    name: cacheReader.ReadEngine
-    signature: (_ context.Context, ref Ref) (*v1alpha1.PolicyEngine, error)
-  - codegraphId: method:1bd007e7df0c379bccb2c4e5927b024d
-    file: internal/provider/watch_cache.go
-    kind: method
-    line: 164
-    name: cacheReader.ReadWorkflowPod
-    signature: (_ context.Context, ref Ref) (*v1alpha1.PolicyWorkflowPod, error)
-  - codegraphId: method:fec4d29b214cd73931b1d89410112759
-    file: internal/provider/watch_cache.go
-    kind: method
-    line: 168
-    name: cacheReader.ListWorkflowRuns
-    signature: (_ context.Context, logicalCluster string) ([]v1alpha1.PolicyWorkflowRun,
-      error)
-  - codegraphId: method:3fdfde3c1a480d83c360edc8c048bc7b
-    file: internal/provider/watch_cache.go
-    kind: method
-    line: 191
-    name: cacheReader.ListWorkflowRunsForPod
-    signature: (_ context.Context, logicalCluster, namespace, podName string) ([]v1alpha1.PolicyWorkflowRun,
-      error)
-observedCommit: 44bd6951fa6bf8f6e6d0264e27b7dfe6b967e21e
-realizedSpecHash: 4cfe73e3aca6ef3547409df53fa0cb01fae8ceec6ed55cc47988395994803abd
-syncedCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
-syncedFingerprint: d8fab230a0bcac1073be293ec25ef7e4f1455af65b7937ba71707b357dd52f32
+observed: {}

@@ -1,41 +1,17 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'missing: Require, RequiresLive, Short; unresolved: r.helpers-attribute-caller:
+    file:internal/livegate/livegate.go, r.helpers-attribute-caller: function:105aa5910047c1743f2bbed1f73895c8,
+    r.helpers-attribute-caller: function:cc9c12855dee252d71eac5766360e2f9, r.live-flag-from-env:
+    function:0e31bdc8610f1db91dd40606eac8d2a2'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+- message: no synced fingerprint has been recorded yet
+  reason: NotSyncedYet
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed:
-  files:
-  - internal/livegate/livegate.go
-  fingerprint: 1f5e7afa7913dc5790af85ee66f79aaa210b6bb9ddef897827f906b3b49ed735
-  interfaces:
-  - codegraphId: function:0e31bdc8610f1db91dd40606eac8d2a2
-    file: internal/livegate/livegate.go
-    kind: function
-    line: 8
-    name: RequiresLive
-    signature: () bool
-  - codegraphId: function:cc9c12855dee252d71eac5766360e2f9
-    file: internal/livegate/livegate.go
-    kind: function
-    line: 12
-    name: Require
-    signature: (t *testing.T, format string, args ...any)
-  - codegraphId: function:105aa5910047c1743f2bbed1f73895c8
-    file: internal/livegate/livegate.go
-    kind: function
-    line: 20
-    name: Short
-    signature: (t *testing.T, format string, args ...any)
-observedCommit: 44bd6951fa6bf8f6e6d0264e27b7dfe6b967e21e
-realizedSpecHash: e319a42f890d2547284aec62b32b3e65a9a544d4056477a393b248a0816ca554
-syncedCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
-syncedFingerprint: 1f5e7afa7913dc5790af85ee66f79aaa210b6bb9ddef897827f906b3b49ed735
+observed: {}

@@ -14,28 +14,21 @@ conditions:
     liveCluster.workflowRuns, liveCluster.workspacePhase, loadExample, loadExampleFile,
     localExamples, policyEngineDir, process.kill, repoRoot, requireBinary, requireDir,
     requireLive, startBao, startCluster, startEmbeddedBao, startEmbeddedBaoTLS, startProcess,
-    tail, tcpOpen, withOpenBao'
+    tail, tcpOpen, withOpenBao; unresolved: r.deno-binaries-are-located-by-name-or-env:
+    file:test/integration/fixture_test.go, r.embedded-bao-runs-in-development-mode:
+    file:test/integration/bao_test.go, r.every-example-decodes: file:test/integration/examples.go,
+    r.every-example-decodes: file:test/integration/offline_test.go, r.live-suite-requires-explicit-opt-in:
+    file:test/integration/live_test.go, r.namespace-certificate-hierarchy-is-covered:
+    file:test/integration/openbao_live_test.go'
   reason: InterfacesMissing
   status: "False"
   type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+- message: no synced fingerprint has been recorded yet
+  reason: NotSyncedYet
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed:
-  files:
-  - test/integration/bao_test.go
-  - test/integration/examples.go
-  - test/integration/fixture_test.go
-  - test/integration/live_test.go
-  - test/integration/offline_test.go
-  - test/integration/openbao_live_test.go
-  fingerprint: 6032ee9fcaca3f68fc86157fd58508f3b1032850b1a30590298e90cb344c6bcc
-observedCommit: 44bd6951fa6bf8f6e6d0264e27b7dfe6b967e21e
-realizedSpecHash: 2a27b66a9a16b26c1f1bd6f842d0bcfbb99e40aba6fc6358a28cb3b1e3429d57
-syncedCommit: 44bd6951fa6bf8f6e6d0264e27b7dfe6b967e21e
-syncedFingerprint: 6032ee9fcaca3f68fc86157fd58508f3b1032850b1a30590298e90cb344c6bcc
+observed: {}
