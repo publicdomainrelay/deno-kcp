@@ -4946,6 +4946,19 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.no-injected-dependencies` (MAY): "MfaLoginEnforcementEditRoute may remain free of injected services and of any own properties or methods; if services are ever needed for the edit screen, they must be added to this class rather than assumed to be present."
 - added `r.no-model-hook` (MUST): "MfaLoginEnforcementEditRoute must declare an empty class body: it must not define a model hook, so loading of the enforcement record for the edit screen is left to the framework's default model resolution (the route's dynamic segment plus the default store lookup) rather than to code in this route."
 
+### third-party-openbao-ui-app-routes-vault-cluster-access-mfa-methods
+
+- intent: "" -> "This context exists to specify the routing behavior that backs the MFA methods list, detail, and creation pages of the OpenBao UI. It documents what each route fetches from the Ember Data store, how each handles missing or failing data, when the router redirects away, how the detail view correlates login enforcements with a method, and how the create route synchronizes the type query parameter with the form's model objects. The spec is the contract the controllers and templates of those pages depend on."
+- added `r.create-reset-type-on-exit` (MUST): "MfaLoginEnforcementCreateRoute.resetController must set the controller's 'type' to null only when the isExiting flag is true, so saving or cancelling the create form resets the type query parameter while an in-place page refresh leaves the selection intact."
+- added `r.create-type-selected-models` (MUST): "MfaLoginEnforcementCreateRoute.setupController must delegate to the base Route.setupController with the original arguments, then read 'type' from the controller and call controller.createModels() when a type is present, so a refresh after type selection rebuilds the method and enforcement models the forms need."
+- added `r.method-detail-controller-model` (MUST): "MfaMethodRoute.setupController must set the resolved hash on the controller as 'model', with the store service injected into the route."
+- added `r.method-detail-enforcement-filter` (MUST): "The enforcements branch must query all 'mfa-login-enforcement' records, keep only those whose hasMany('mfa_methods') relationship ids include the route id, and swallow any query rejection so a failure yields no enforcements rather than breaking the detail route."
+- added `r.method-detail-hash` (MUST): "MfaMethodRoute.model must take the route's id parameter and resolve an RSVP hash with two keys, 'method' holding the 'mfa-method' record found by that id and 'enforcements' holding the filtered enforcement list, so the detail template receives both in one settled object."
+- added `r.methods-list-controller-model` (MUST): "MfaMethodsRoute.setupController must set the resolved model on the controller as 'model', injecting the store and router services into the route."
+- added `r.methods-list-empty-redirect` (MUST): "MfaMethodsRoute.afterModel must transition to the 'vault.cluster.access.mfa' route whenever the resolved model is an empty list, so the bare methods page never renders with zero methods."
+- added `r.methods-list-query` (MUST): "MfaMethodsRoute.model must query the 'mfa-method' store with an empty filter object and return the resulting collection, and must return an empty array when the query fails with httpStatus 404, rethrowing any other error so non-404 failures still surface."
+- added `r.routes-extend-ember-route` (SHOULD): "Each of the three route classes should remain an ES module default export extending '@ember/routing/route' Route, with store (and router where used) injected through the '@ember/service' decorator, matching the surrounding OpenBao UI route conventions."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5354,5 +5367,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-routes-vault-cluster-access-mfa-enforcements-enforcement-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-mfa-methods-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-mfa-methods-method-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-routes-vault-cluster-access-namespaces-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

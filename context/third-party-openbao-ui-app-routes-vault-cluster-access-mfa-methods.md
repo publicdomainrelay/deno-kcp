@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to specify the routing behavior that backs the MFA methods list, detail, and creation pages of the OpenBao UI. It documents what each route fetches from the Ember Data store, how each handles missing or failing data, when the router redirects away, how the detail view correlates login enforcements with a method, and how the create route synchronizes the type query parameter with the form's model objects. The spec is the contract the controllers and templates of those pages depend on.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
