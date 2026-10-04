@@ -1,0 +1,41 @@
+conditions:
+- message: 'undeclared: CounterMode, HMACSHA256PRF, PRF'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/sdk/helper/kdf/kdf.go
+  - third_party/openbao/sdk/helper/kdf/kdf_test.go
+  fingerprint: a9367c84353d03e49886f2ba030cde89ee0e48b01b7db724efd6d7e769265bf4
+  interfaces:
+  - codegraphId: type_alias:5e2017560087551f07a878e239569078
+    file: third_party/openbao/sdk/helper/kdf/kdf.go
+    kind: type_alias
+    line: 23
+    name: PRF
+  - codegraphId: function:57ef1c334238af3ef1acf9a5cfc81c66
+    file: third_party/openbao/sdk/helper/kdf/kdf.go
+    kind: function
+    line: 28
+    name: CounterMode
+    signature: (prf PRF, prfLen uint32, key []byte, context []byte, bits uint32) ([]byte,
+      error)
+  - codegraphId: function:8b0939bcb7f14c09092be37897617ef5
+    file: third_party/openbao/sdk/helper/kdf/kdf.go
+    kind: function
+    line: 82
+    name: HMACSHA256PRF
+    signature: (key []byte, data []byte) ([]byte, error)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: d3e558f7cce3e656a39f04a433c6027b8e146b30db12cf920b59dfbb7ab11f28
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: a9367c84353d03e49886f2ba030cde89ee0e48b01b7db724efd6d7e769265bf4

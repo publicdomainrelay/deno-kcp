@@ -1,0 +1,47 @@
+conditions:
+- message: 'undeclared: DecodeJSON, DecodeJSONFromReader, EncodeJSON, EncodeJSONAndCompress'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/sdk/helper/jsonutil/json.go
+  - third_party/openbao/sdk/helper/jsonutil/json_test.go
+  fingerprint: 2a3a57ed389c7ca49b39bfc6852879d4473143b2ae9226f50b978523c7c99dd0
+  interfaces:
+  - codegraphId: function:182e13ed382d22eedd3d9a5a1a2a4585
+    file: third_party/openbao/sdk/helper/jsonutil/json.go
+    kind: function
+    line: 18
+    name: EncodeJSON
+    signature: (in any) ([]byte, error)
+  - codegraphId: function:f8402c5f985190e386f7283f906c2157
+    file: third_party/openbao/sdk/helper/jsonutil/json.go
+    kind: function
+    line: 34
+    name: EncodeJSONAndCompress
+    signature: (in any, config *compressutil.CompressionConfig) ([]byte, error)
+  - codegraphId: function:186d1ab83658f923b0f4e72c1353748e
+    file: third_party/openbao/sdk/helper/jsonutil/json.go
+    kind: function
+    line: 60
+    name: DecodeJSON
+    signature: (data []byte, out any) error
+  - codegraphId: function:508dfa21a4c58aba9d9ec2ee8d9f996a
+    file: third_party/openbao/sdk/helper/jsonutil/json.go
+    kind: function
+    line: 88
+    name: DecodeJSONFromReader
+    signature: (r io.Reader, out any) error
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 37d66b65b71b2a84d5473d3bbf547c6e7b6aac0383a1b398e6b93cd056fc4c14
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 2a3a57ed389c7ca49b39bfc6852879d4473143b2ae9226f50b978523c7c99dd0
