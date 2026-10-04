@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-This context describes the cluster-access routing surface of the vendored OpenBao web UI: the list route for auth methods, the OIDC configure placeholder route, and the identity, leases and per-method detail routes. It exists so the routes' data loading, param mapping and 404 behaviour are recorded as a specification before any change to the vendored UI is made.
+This context records the cluster-access routing surface of the vendored OpenBao web UI as a specification before any change to the vendored UI is made: the list route for auth methods, the OIDC configure placeholder route, and the identity, leases and per-method detail routes. It exists so the routes' data loading, param mapping and 404 behaviour stay fixed and reviewable while the UI is patched downstream.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

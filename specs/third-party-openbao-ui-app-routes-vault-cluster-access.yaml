@@ -12,11 +12,12 @@ metadata:
   name: third-party-openbao-ui-app-routes-vault-cluster-access
   namespace: default
 spec:
-  intent: 'This context describes the cluster-access routing surface of the vendored
-    OpenBao web UI: the list route for auth methods, the OIDC configure placeholder
-    route, and the identity, leases and per-method detail routes. It exists so the
-    routes'' data loading, param mapping and 404 behaviour are recorded as a specification
-    before any change to the vendored UI is made.'
+  intent: 'This context records the cluster-access routing surface of the vendored
+    OpenBao web UI as a specification before any change to the vendored UI is made:
+    the list route for auth methods, the OIDC configure placeholder route, and the
+    identity, leases and per-method detail routes. It exists so the routes'' data
+    loading, param mapping and 404 behaviour stay fixed and reviewable while the UI
+    is patched downstream.'
   interfaces:
   - file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc.js
     kind: class
@@ -69,6 +70,7 @@ spec:
       404 when no record matches.
   - codeRefs:
     - class:9373017409ee56837c91b943f45e421f
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/methods.js
     id: r.methods-injects-store
     level: MUST
     text: VaultClusterAccessMethodsRoute must inject the store service, because the

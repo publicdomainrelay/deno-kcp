@@ -4830,7 +4830,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 
 ### third-party-openbao-ui-app-routes-vault-cluster-access
 
-- intent: "" -> "This context describes the cluster-access routing surface of the vendored OpenBao web UI: the list route for auth methods, the OIDC configure placeholder route, and the identity, leases and per-method detail routes. It exists so the routes' data loading, param mapping and 404 behaviour are recorded as a specification before any change to the vendored UI is made."
+- intent: "" -> "This context records the cluster-access routing surface of the vendored OpenBao web UI as a specification before any change to the vendored UI is made: the list route for auth methods, the OIDC configure placeholder route, and the identity, leases and per-method detail routes. It exists so the routes' data loading, param mapping and 404 behaviour stay fixed and reviewable while the UI is patched downstream."
 - added `r.identity-param-to-model` (MUST): "The identity route's model(params) must translate params.item_type 'entities' to model 'entity' and 'groups' to model 'group' and return that string."
 - added `r.identity-unknown-type-404` (MUST): "The identity route must throw an AdapterError with httpStatus 404 when params.item_type is not one of the two known keys, instead of returning an undefined model."
 - added `r.leases-capabilities-record` (MUST): "The leases route must extend ClusterBaseRoute and its model hook must return store.findRecord('capabilities', 'sys/leases/lookup/'), so the page is gated on that capability record."
@@ -5236,7 +5236,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-routes-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-routes-vault-cluster-access-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-routes-vault-cluster-access-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-identity-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
