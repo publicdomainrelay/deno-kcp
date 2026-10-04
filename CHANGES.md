@@ -5740,6 +5740,16 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.no-op-model-hook` (MUST): "The route defines a no-op model hook returning nothing, so Ember does not reuse the parent route's model, which would conflict with this route's query params."
 - added `r.warning-content` (MUST): "The warning text states that "Try it out" makes requests to the OpenBao server on the user's behalf, that a token with the proper capabilities will create and delete items on that server, and that the token will also be shown on screen in the example curl command output."
 
+### third-party-openbao-ui-lib-open-api-explorer-config
+
+- intent: "" -> "The context exists to describe the build-time environment configuration module of the vendored OpenBao open-api-explorer UI library. It is a third-party asset inside deno-kcp, so the specification records its contract for consumers and for anyone auditing the vendored tree: what the module exports, which keys the returned configuration object carries, and which namespace root URLs the explorer treats as unauthenticated system endpoints. It is deliberately narrow because the module is a leaf with no imports and no exported named interfaces."
+- added `r.app-namespace-root-urls` (MUST): "The returned configuration object must carry an APP block whose NAMESPACE_ROOT_URLS array lists exactly the two namespace root paths 'sys/health' and 'sys/seal-status', in that order."
+- added `r.environment-echo` (MUST): "The returned configuration object must copy the function's environment argument into its own environment field unchanged."
+- added `r.exports-environment-builder` (MUST): "The module must export, through module.exports, a single function that accepts one argument, the environment name, and returns a configuration object built from it."
+- added `r.module-prefix` (MUST): "The returned configuration object must set modulePrefix to the literal string 'open-api-explorer'."
+- added `r.no-external-state` (MUST): "The function must derive its result only from its argument, importing no modules and reading no process, file, or environment state outside the passed environment name."
+- added `r.strict-mode-and-license-header` (SHOULD): "The file should keep its 'use strict' directive, its eslint-env node comment, and the HashiCorp copyright header with the MPL-2.0 SPDX identifier intact."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -6246,7 +6256,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-open-api-explorer-addon-components-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-open-api-explorer-addon-controllers-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-open-api-explorer-addon-routes-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-lib-open-api-explorer-addon-routes-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-open-api-explorer-addon-routes-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-open-api-explorer-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-open-api-explorer-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-lib-open-api-explorer-config-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-open-api-explorer-config-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |

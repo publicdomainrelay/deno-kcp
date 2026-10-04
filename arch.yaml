@@ -73545,7 +73545,54 @@ system_contexts:
   codeRefIndex:
   - file:third_party/openbao/ui/lib/open-api-explorer/config/environment.js environment.js@third_party/openbao/ui/lib/open-api-explorer/config/environment.js
   id: sc.third-party-openbao-ui-lib-open-api-explorer-config
+  intent: 'The context exists to describe the build-time environment configuration
+    module of the vendored OpenBao open-api-explorer UI library. It is a third-party
+    asset inside deno-kcp, so the specification records its contract for consumers
+    and for anyone auditing the vendored tree: what the module exports, which keys
+    the returned configuration object carries, and which namespace root URLs the explorer
+    treats as unauthenticated system endpoints. It is deliberately narrow because
+    the module is a leaf with no imports and no exported named interfaces.'
   name: third-party-openbao-ui-lib-open-api-explorer-config
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/open-api-explorer/config/environment.js
+    id: r.app-namespace-root-urls
+    level: MUST
+    text: The returned configuration object must carry an APP block whose NAMESPACE_ROOT_URLS
+      array lists exactly the two namespace root paths 'sys/health' and 'sys/seal-status',
+      in that order.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/open-api-explorer/config/environment.js
+    id: r.environment-echo
+    level: MUST
+    text: The returned configuration object must copy the function's environment argument
+      into its own environment field unchanged.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/open-api-explorer/config/environment.js
+    id: r.exports-environment-builder
+    level: MUST
+    text: The module must export, through module.exports, a single function that accepts
+      one argument, the environment name, and returns a configuration object built
+      from it.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/open-api-explorer/config/environment.js
+    id: r.module-prefix
+    level: MUST
+    text: The returned configuration object must set modulePrefix to the literal string
+      'open-api-explorer'.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/open-api-explorer/config/environment.js
+    id: r.no-external-state
+    level: MUST
+    text: The function must derive its result only from its argument, importing no
+      modules and reading no process, file, or environment state outside the passed
+      environment name.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/open-api-explorer/config/environment.js
+    id: r.strict-mode-and-license-header
+    level: SHOULD
+    text: The file should keep its 'use strict' directive, its eslint-env node comment,
+      and the HashiCorp copyright header with the MPL-2.0 SPDX identifier intact.
   upstream: self
 - code:
   - third_party/openbao/ui/lib/pki/index.js
