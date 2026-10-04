@@ -7826,11 +7826,13 @@ system_contexts:
   - third_party/openbao/internal/builtin/database/influxdb/influxdb_test.go
   id: sc.third-party-openbao-internal-builtin-database-influxdb
   intent: 'The context exists so the plugin''s contract is stated without reading
-    the tree: what the engine must accept at configuration time, how a client is lazily
-    created and reused, and which dbplugin v5 methods must be implemented for the
-    plugin to register. It also fixes the split of responsibility between the exported
-    Influxdb type and the reusable embedded connection producer, so changes to connection
-    lifecycle do not leak into user-management methods and vice versa.'
+    the tree: what the engine must accept at configuration time (host, username, password,
+    port and connect timeout defaults, PEM-based TLS material), how a client is lazily
+    created and reused behind the connection producer, and which dbplugin v5 methods
+    must be implemented for the plugin to register. It also fixes the split of responsibility
+    between the exported Influxdb type and the reusable embedded connection producer,
+    so changes to connection lifecycle do not leak into user-management methods and
+    vice versa.'
   interfaces:
   - file: third_party/openbao/internal/builtin/database/influxdb/influxdb.go
     kind: struct

@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-The context exists so the plugin's contract is stated without reading the tree: what the engine must accept at configuration time, how a client is lazily created and reused, and which dbplugin v5 methods must be implemented for the plugin to register. It also fixes the split of responsibility between the exported Influxdb type and the reusable embedded connection producer, so changes to connection lifecycle do not leak into user-management methods and vice versa.
+The context exists so the plugin's contract is stated without reading the tree: what the engine must accept at configuration time (host, username, password, port and connect timeout defaults, PEM-based TLS material), how a client is lazily created and reused behind the connection producer, and which dbplugin v5 methods must be implemented for the plugin to register. It also fixes the split of responsibility between the exported Influxdb type and the reusable embedded connection producer, so changes to connection lifecycle do not leak into user-management methods and vice versa.
 
 _Write the prose above and the fields in the spec block. `codeRefs` and the resolved references below are maintained by the tool; an edit there is lost._
 
