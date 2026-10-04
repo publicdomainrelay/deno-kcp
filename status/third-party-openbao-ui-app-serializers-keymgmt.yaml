@@ -1,15 +1,33 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: KeymgmtKeySerializer, KeymgmtProviderSerializer'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/ui/app/serializers/keymgmt/key.js
+  - third_party/openbao/ui/app/serializers/keymgmt/provider.js
+  fingerprint: 00035346d347fc35fe8a6d380649db0af3c226380c619c303e694a9fa14a7a52
+  interfaces:
+  - codegraphId: class:d2f1cce48f9d3fc208c3a35c8df4e55a
+    file: third_party/openbao/ui/app/serializers/keymgmt/key.js
+    kind: class
+    line: 8
+    name: KeymgmtKeySerializer
+  - codegraphId: class:88cba2da41a41350ecfad514d4118378
+    file: third_party/openbao/ui/app/serializers/keymgmt/provider.js
+    kind: class
+    line: 8
+    name: KeymgmtProviderSerializer
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: f28454d5f3ab4a48ff5f634e7fb9d3eaa0eafc0ed927c6c9f552e41bb541b5a4
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 00035346d347fc35fe8a6d380649db0af3c226380c619c303e694a9fa14a7a52

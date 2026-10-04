@@ -9,5 +9,9 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `class:6768f8a77ef44e47f4b276581b9678a2` class PkiCertificateGenerateSerializer (third_party/openbao/ui/app/serializers/pki/certificate/generate.js)
+- `class:f911826941e024f780359dc88ceefb1f` class PkiCertificateBaseSerializer (third_party/openbao/ui/app/serializers/pki/certificate/base.js)
+- `file:third_party/openbao/ui/app/serializers/pki/certificate/base.js` file base.js (third_party/openbao/ui/app/serializers/pki/certificate/base.js)
+- `file:third_party/openbao/ui/app/serializers/pki/certificate/generate.js` file generate.js (third_party/openbao/ui/app/serializers/pki/certificate/generate.js)
+- `file:third_party/openbao/ui/app/serializers/pki/certificate/sign.js` file sign.js (third_party/openbao/ui/app/serializers/pki/certificate/sign.js)
 <!-- SPECD_MANAGED_END -->
