@@ -1081,6 +1081,7 @@ system_contexts:
   - file:deploy/examples/atproto/market/60-bob-pds.yaml 60-bob-pds.yaml@deploy/examples/atproto/market/60-bob-pds.yaml
   - file:deploy/examples/atproto/market/70-bidder.yaml 70-bidder.yaml@deploy/examples/atproto/market/70-bidder.yaml
   - file:deploy/examples/atproto/market/README.md README.md@deploy/examples/atproto/market/README.md
+  - file:deploy/examples/atproto/market/accept.sh accept.sh@deploy/examples/atproto/market/accept.sh
   - file:deploy/examples/atproto/market/apply.sh apply.sh@deploy/examples/atproto/market/apply.sh
   id: tb.child-process
   intent: 'This context exists to pin down the deploy/examples/atproto/market example
@@ -1110,6 +1111,21 @@ system_contexts:
     signature: func exampleFiles() []example
   name: deploy-examples-atproto-market
   requirements:
+  - codeRefs:
+    - file:deploy/examples/atproto/market/accept.sh
+    id: r.acceptance-survives-a-stalled-provider
+    level: MUST
+    text: 'accept.sh must survive a provider that comes up, logs that it is waiting
+      for its APIExport virtual workspace endpoints, and then reconciles nothing:
+      every object apply.sh applies stays without a status and apply.sh fails on its
+      first wait. After the provider is started and apply.sh returns, accept.sh must
+      detect that state within a bounded window -- no OpenBao object in any workspace
+      carries status.ready true and no DenoPod exists in any workspace -- and, when
+      no workload exists yet, stop the provider, start it again, and run apply.sh
+      again. It must make at least two and at most three attempts, print which attempt
+      it is on, and record each attempt''s apply.sh exit code. It must never restart
+      the provider once a DenoPod exists, because the workloads are children of the
+      provider and stopping it would orphan them.'
   - codeRefs:
     - file:deploy/examples/atproto/market/apply.sh
     id: r.apply-includes-bob-and-bidder
@@ -1323,6 +1339,19 @@ system_contexts:
     text: The verifier treats relay frames as bytes, decoding ArrayBuffer and Blob
       payloads with TextDecoder before searching for its own DID, because the relay
       emits DRISL where a CBOR string is its bytes verbatim.
+  - codeRefs:
+    - file:deploy/examples/atproto/market/apply.sh
+    id: r.verifier-waits-for-its-peers
+    level: MUST
+    text: apply.sh must not create the verifier after a fixed sleep. It must instead
+      wait, with the same bounded WAIT_SECONDS deadline it uses elsewhere, until the
+      peers the verifier reaches are observable -- DenoPod pds in root:alice reports
+      phase Running and ready true, which is the provider's own proof that pds.default.alice.svc.kcp.local
+      resolves through the virtual DNS table and answers on /xrpc/_health -- and only
+      then apply 50-verifier.yaml. When the deadline passes without that pod becoming
+      ready, apply.sh must say so on stderr and still create the verifier, so the
+      run reports the failure instead of hanging. A fixed sleep before a pod whose
+      restartPolicy is Never is not a wait for anything and must not be written.
   upstream: self
 - code:
   - internal/baoembed/cmd/baoembed/main.go
