@@ -4219,6 +4219,24 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.service-injections` (SHOULD): "The controller injects the services auth, store, media, router, permissions, namespace (as namespaceService), flash-messages, version (as vaultVersion), and console, which its aliases, observer, and action depend on."
 - added `r.toggle-console-action` (MUST): "The actions hash provides a toggleConsole action that toggles the consoleOpen property."
 
+### third-party-openbao-ui-app-controllers-vault-cluster
+
+- intent: "" -> "The context exists to specify the behavior of the OpenBao UI's vault/cluster controllers so that the cluster-level user flows (init, unseal, authenticate with optional MFA and OIDC, namespace selection, cluster settings) stay described independently of the templates and routes that consume them. It records which state each controller tracks, which query parameters it binds, and which transitions or adapter calls it performs, so that changes to these controllers can be checked against the documented contract."
+- added `r.auth-mfa-branching` (MUST): "The auth controller binds queryParams authMethod and oidcProvider, debounces namespace updates by 500 ms before setting the namespace and the namespace query param, and on onAuthResponse stores mfaAuthData with the requirement, backend and data when the response carries mfa_requirement, otherwise calls authSuccess; onMfaSuccess completes the login and onMfaErrorDismiss clears mfaAuthData and mfaErrors."
+- added `r.auth-redirect-and-root-warning` (MUST): "The auth controller aliases namespaceQueryParam, wrappedToken and redirectTo from its vault and cluster controllers, and after a transition it warns the user through flashMessages when the login used a root token, since the token is not stored by the browser; authSuccess redirects to redirectTo when set, clearing it afterwards, and otherwise transitions to vault.cluster with the namespace query parameter."
+- added `r.init-cluster-payload` (MUST): "initCluster(event) prevents the default event, builds the init payload from the controller fields, and treats the seal as a cloud seal when model.sealType is set and is not 'shamir'; in that case shares and threshold are sent as recovery_shares and recovery_threshold, otherwise as secret_shares and secret_threshold, both parsed as base-10 integers."
+- added `r.init-controller-state` (MUST): "InitController tracks keyData, secret_shares, secret_threshold, pgp_keys, use_pgp, loading and prefersInit; its constructor calls reset(), which sets keyData, secret_shares, secret_threshold and the pgp key to null, use_pgp and loading to false."
+- added `r.init-key-filename` (MUST): "The keyFilename getter derives the download filename as 'vault-cluster-' followed by the model name, and setPrefersInit() sets prefersInit to true."
+- added `r.init-pgp-payload` (MUST): "When use_pgp is set, initCluster sends pgp_keys, and additionally sends recovery_pgp_keys when the seal is a cloud seal; when use_pgp_for_root is set it sends the pgp key collected by setRootKey as root_token_pgp_key. setKeys(data) stores the given PGP keys and setRootKey([key]) stores the first element as the root token PGP key."
+- added `r.init-request-outcome` (MUST): "initCluster sets loading true and clears errors before calling initCluster(data) on the cluster adapter; initSuccess(resp) clears loading, stores the response in keyData and reloads the model; initError(e) clears loading and assigns e.errors to the controller when e.httpStatus is 400, and otherwise rethrows the error."
+- added `r.mfa-setup-save-warning` (MUST): "saveUUIDandQrCode(uuid, qrCode) stores both values, where qrCode may be an empty string if admin-generate failed, and showWarning(warning) stores the warning and moves onStep to 2."
+- added `r.mfa-setup-steps` (MUST): "VaultClusterMfaSetupController tracks onStep starting at 1, warning, uuid and qrCode as empty strings; entityId is a getter returning auth.authData.entity_id; restartFlow() returns onStep to 1, and isUUIDVerified(verified) clears warning and advances to step 2 when verified, otherwise calls restartFlow()."
+- added `r.oidc-callback-query-params` (MUST): "The oidc-callback controller exposes exactly the state and code query parameters, both initialized to null."
+- added `r.oidc-provider-ns-inherits` (MUST): "VaultClusterOidcProviderNsController extends VaultClusterOidcProviderController with an empty body, so the namespace-scoped OIDC provider route uses the same query parameter set as the base route."
+- added `r.oidc-provider-query-params` (MUST): "VaultClusterOidcProviderController declares queryParams scope, response_type, client_id, redirect_uri, state, nonce, display, prompt, max_age, code_challenge, code_challenge_method, request and request_uri, and initializes every one of them to null."
+- added `r.settings-namespace-service` (MUST): "The cluster settings controller injects the namespace service so the settings route can read and change the active namespace."
+- added `r.unseal-transition` (MUST): "The unseal controller's transitionToCluster action reloads the model and then transitions safely to vault.cluster with the model name, and isUnsealed(data) reports unsealed as data.sealed being exactly false."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4552,5 +4570,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-controllers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

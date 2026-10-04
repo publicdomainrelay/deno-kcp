@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists to specify the behavior of the OpenBao UI's vault/cluster controllers so that the cluster-level user flows (init, unseal, authenticate with optional MFA and OIDC, namespace selection, cluster settings) stay described independently of the templates and routes that consume them. It records which state each controller tracks, which query parameters it binds, and which transitions or adapter calls it performs, so that changes to these controllers can be checked against the documented contract.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
