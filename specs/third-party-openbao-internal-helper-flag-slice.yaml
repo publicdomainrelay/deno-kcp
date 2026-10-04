@@ -2,10 +2,70 @@ apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
 - file:third_party/openbao/internal/helper/flag-slice/flag.go flag.go@third_party/openbao/internal/helper/flag-slice/flag.go
 - file:third_party/openbao/internal/helper/flag-slice/flag_test.go flag_test.go@third_party/openbao/internal/helper/flag-slice/flag_test.go
+- method:034969529844a720667adcf3ed37c437 StringFlag.Set@third_party/openbao/internal/helper/flag-slice/flag.go:16
+- method:7200b0805cd103fa07c81138c4863073 StringFlag.String@third_party/openbao/internal/helper/flag-slice/flag.go:12
+- type_alias:718f3bbeb4da00e52797b13de56943dd StringFlag@third_party/openbao/internal/helper/flag-slice/flag.go:10
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-helper-flag-slice
   namespace: default
 spec:
+  intent: The package exists so CLI commands can accept a flag that may appear more
+    than once, each occurrence contributing one more string to an ordered collection.
+    It is a Leaf helper in the vendored third-party tree, depending only on the standard
+    library strings package, and it is consumed by the OpenBao command layer rather
+    than by this repository's own code.
+  interfaces:
+  - file: third_party/openbao/internal/helper/flag-slice/flag.go
+    kind: type_alias
+    name: StringFlag
+    signature: type StringFlag []string
+  - file: third_party/openbao/internal/helper/flag-slice/flag.go
+    kind: method
+    name: StringFlag.Set
+    signature: func (s *StringFlag) Set(value string) error
+  - file: third_party/openbao/internal/helper/flag-slice/flag.go
+    kind: method
+    name: StringFlag.String
+    signature: func (s *StringFlag) String() string
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - method:034969529844a720667adcf3ed37c437
+    - method:7200b0805cd103fa07c81138c4863073
+    id: r.both-methods-on-pointer-receiver
+    level: MUST
+    text: Both String and Set must be declared on a pointer receiver to StringFlag,
+      so appending in Set mutates the caller's slice and the type satisfies the flag.Value
+      interface when registered by address.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/flag-slice/flag.go
+    - method:034969529844a720667adcf3ed37c437
+    id: r.set-appends-value
+    level: MUST
+    text: StringFlag.Set must append the received value to the slice through the pointer
+      receiver, so successive calls grow the collection instead of overwriting it,
+      and it must return a nil error on every call because no input is rejected.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/flag-slice/flag.go
+    - type_alias:718f3bbeb4da00e52797b13de56943dd
+    id: r.string-flag-is-string-slice
+    level: MUST
+    text: StringFlag must be defined as a named type whose underlying type is a slice
+      of strings, so a repeated flag accumulates an ordered list of the values passed
+      on the command line.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/flag-slice/flag.go
+    - method:7200b0805cd103fa07c81138c4863073
+    id: r.string-joins-with-comma
+    level: MUST
+    text: StringFlag.String must return the elements of the slice joined with a single
+      comma and no surrounding spaces, giving the flag package a stable textual rendering
+      of the accumulated values.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/flag-slice/flag_test.go
+    id: r.tests-cover-behaviour
+    level: SHOULD
+    text: The package's behaviour should stay covered by the accompanying test file,
+      which exercises the flag slice helper alongside the implementation.
   upstream: self
