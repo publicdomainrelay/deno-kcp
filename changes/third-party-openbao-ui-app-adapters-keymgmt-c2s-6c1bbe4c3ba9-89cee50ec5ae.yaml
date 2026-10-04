@@ -10,5 +10,80 @@ spec:
   systemContext: third-party-openbao-ui-app-adapters-keymgmt
   toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
 status:
-  message: the agent is summarizing third-party-openbao-ui-app-adapters-keymgmt
-  phase: Running
+  agentLog: |-
+    ...he snapshot and sends a PUT (not POST) to the update-record URL built with the provider's name, resolving with the serialized data so the caller receives the record it sent.",
+          "codeRefs": ["file:third_party/openbao/ui/app/adapters/keymgmt/provider.js"]
+        },
+        {
+          "id": "r.provider-find-injects-name",
+          "level": "MUST",
+          "text": "findRecord delegates to the base implementation and adds the requested name back into resp.data, because the single-record response does not carry it.",
+          "codeRefs": ["file:third_party/openbao/ui/app/adapters/keymgmt/provider.js"]
+        },
+        {
+          "id": "r.provider-query-hydrates-keys",
+          "level": "MUST",
+          "text": "query GETs the backend provider list with listPayload and then, for every key name in resp.data.keys, loads the full key record through findRecord using a mock snapshot carrying the backend, replaces resp.data.keys with those record payloads, and stamps query.backend onto the response as res.backend.",
+          "codeRefs": ["file:third_party/openbao/ui/app/adapters/keymgmt/provider.js"]
+        },
+        {
+          "id": "r.provider-query-record-and-mock-snapshot",
+          "level": "MUST",
+          "text": "queryRecord resolves through findRecord using the query id and a mock snapshot, and _mockSnapshot provides that stand-in object whose attr(prop) returns the backend for 'backend' and null for anything else, since Ember does not supply a snapshot when findRecord or query is overridden but buildURL needs the backend dynamic segment.",
+          "codeRefs": ["file:third_party/openbao/ui/app/adapters/keymgmt/provider.js"]
+        }
+      ],
+      "interfaces": [
+        {
+          "name": "KeymgmtKeyAdapter",
+          "kind": "class",
+          "signature": "KeymgmtKeyAdapter ()",
+          "file": "third_party/openbao/ui/app/adapters/keymgmt/key.js"
+        },
+        {
+          "name": "KeymgmtKeyAdapter",
+          "kind": "class",
+          "signature": "KeymgmtKeyAdapter ()",
+          "file": "third_party/openbao/ui/app/adapters/keymgmt/provider.js"
+        }
+      ]
+    }
+  message: |-
+    ...he snapshot and sends a PUT (not POST) to the update-record URL built with the provider's name, resolving with the serialized data so the caller receives the record it sent.",
+          "codeRefs": ["file:third_party/openbao/ui/app/adapters/keymgmt/provider.js"]
+        },
+        {
+          "id": "r.provider-find-injects-name",
+          "level": "MUST",
+          "text": "findRecord delegates to the base implementation and adds the requested name back into resp.data, because the single-record response does not carry it.",
+          "codeRefs": ["file:third_party/openbao/ui/app/adapters/keymgmt/provider.js"]
+        },
+        {
+          "id": "r.provider-query-hydrates-keys",
+          "level": "MUST",
+          "text": "query GETs the backend provider list with listPayload and then, for every key name in resp.data.keys, loads the full key record through findRecord using a mock snapshot carrying the backend, replaces resp.data.keys with those record payloads, and stamps query.backend onto the response as res.backend.",
+          "codeRefs": ["file:third_party/openbao/ui/app/adapters/keymgmt/provider.js"]
+        },
+        {
+          "id": "r.provider-query-record-and-mock-snapshot",
+          "level": "MUST",
+          "text": "queryRecord resolves through findRecord using the query id and a mock snapshot, and _mockSnapshot provides that stand-in object whose attr(prop) returns the backend for 'backend' and null for anything else, since Ember does not supply a snapshot when findRecord or query is overridden but buildURL needs the backend dynamic segment.",
+          "codeRefs": ["file:third_party/openbao/ui/app/adapters/keymgmt/provider.js"]
+        }
+      ],
+      "interfaces": [
+        {
+          "name": "KeymgmtKeyAdapter",
+          "kind": "class",
+          "signature": "KeymgmtKeyAdapter ()",
+          "file": "third_party/openbao/ui/app/adapters/keymgmt/key.js"
+        },
+        {
+          "name": "KeymgmtKeyAdapter",
+          "kind": "class",
+          "signature": "KeymgmtKeyAdapter ()",
+          "file": "third_party/openbao/ui/app/adapters/keymgmt/provider.js"
+        }
+      ]
+    }
+  phase: Failed
