@@ -2772,5 +2772,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-vault-external-tests-router-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-sealmigration-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-sealmigrationext-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-vault-external-tests-standby-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Pending |  | 0 | - |
-| third-party-openbao-internal-vault-external-tests-storage-crosstest-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Pending |  | 0 | - |
+| third-party-openbao-internal-vault-external-tests-standby-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-vault-external-tests-storage-crosstest-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
