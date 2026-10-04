@@ -10,5 +10,17 @@ spec:
   systemContext: internal-denojob
   toCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
 status:
-  message: the agent is summarizing internal-denojob
-  phase: Running
+  agentLog: internal/denojob holds the pure decision layer for the DenoJob custom
+    resource. New builds a Reconciler from an Options value, and Reconciler.Reconcile
+    takes a context plus an Observed snapshot — the DenoJob itself, the observations
+    of its runs, and the current time — and returns a Result describing the job phase,
+    which runs to create or stop, the run name, active/ready/succeeded/failed/retry
+    counters, start and completion times, exit code, outputs, conditions, requeue
+    delay, and the delete flags. RunObservation is the per-run input, carrying the
+    run name, its v1alpha1.DenoRunPhase, an optional exit code, a message, and the
+    run's outputs map. The package is exercised by denojob_test.go, which reconciles
+    constructed Observed values and asserts on the returned Result, for example that
+    a fresh job creates one run named demo-1 with active one, and that a job succeeds
+    with its run's outputs when that run reaches DenoRunSucceeded.
+  message: wrote 6 requirement(s) and 7 interface(s) for internal-denojob
+  phase: Succeeded

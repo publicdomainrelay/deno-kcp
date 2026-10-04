@@ -1201,7 +1201,92 @@ system_contexts:
   - internal/denojob/denojob.go
   - internal/denojob/denojob_test.go
   id: sc.internal-denojob
+  intent: 'This context exists to fix the contract of the DenoJob decider: the inputs
+    it reads (Observed plus Options) and the plan it emits (Result), separate from
+    any Kubernetes client work. It is the place where job semantics — run creation,
+    parallelism, completion counts, backoff and retries, suspension, deadlines, TTL
+    deletion — are decided as a pure function so the provider can apply the result,
+    and so the behaviour is testable by handing Reconcile an Observed and checking
+    the Result. The tests in denojob_test.go are the executable statement of that
+    contract.'
+  interfaces:
+  - file: internal/denojob/denojob.go
+    kind: function
+    name: New
+    signature: func New(opts Options) *Reconciler
+  - file: internal/denojob/denojob.go
+    kind: struct
+    name: Observed
+  - file: internal/denojob/denojob.go
+    kind: struct
+    name: Options
+  - file: internal/denojob/denojob.go
+    kind: struct
+    name: Reconciler
+  - file: internal/denojob/denojob.go
+    kind: method
+    name: Reconciler.Reconcile
+    signature: func (r *Reconciler) Reconcile(ctx context.Context, o Observed) (Result,
+      error)
+  - file: internal/denojob/denojob.go
+    kind: struct
+    name: Result
+  - file: internal/denojob/denojob.go
+    kind: struct
+    name: RunObservation
   name: internal-denojob
+  requirements:
+  - codeRefs:
+    - struct:0ba4feb0fbc5bf2cadab0956427bd073
+    - struct:d14a57a215b6cff18c212b07ddfe93f7
+    id: r.observed-carries-job-runs-and-now
+    level: MUST
+    text: 'Observed supplies the Decoded observed state: the v1alpha1.DenoJob, the
+      slice of RunObservation for its runs, and the time the decision is made against.'
+  - codeRefs:
+    - method:609e5eaa8563a6ad1508b812aa5604b4
+    - struct:0ba4feb0fbc5bf2cadab0956427bd073
+    - struct:a76d5210541b3f0c4f0346477f21b1c1
+    id: r.reconcile-is-a-pure-decision
+    level: MUST
+    text: Reconciler.Reconcile takes a context and an Observed snapshot and returns
+      a Result plus an error; the Result is the complete plan for the job, so no Kubernetes
+      client work happens inside the decider.
+  - codeRefs:
+    - function:0d2947cb5cecdc22a1eed7036e77229b
+    - struct:8a80dd72dde5aa7fad20d4a2a56c0c77
+    - struct:f9b27eae82ab32e2cb4cf25ca02b0e65
+    id: r.reconciler-built-from-options
+    level: MUST
+    text: The decider is a Reconciler value that is constructed by New from an Options
+      value; New returns a *Reconciler.
+  - codeRefs:
+    - file:internal/denojob/denojob.go
+    - struct:a76d5210541b3f0c4f0346477f21b1c1
+    id: r.result-is-the-job-plan
+    level: MUST
+    text: Result carries the DenoJobPhase, the observed run names, the single run
+      name, the runs to create and to stop, start and completion times, the active,
+      ready, succeeded, failed and retry counters, the exit code, the outputs map,
+      the conditions, the requeue delay, and the delete flags for the job and for
+      its runs.
+  - codeRefs:
+    - file:internal/denojob/denojob.go
+    - struct:d14a57a215b6cff18c212b07ddfe93f7
+    id: r.run-observation-reports-run-outcome
+    level: MUST
+    text: RunObservation reports one run by name with its v1alpha1.DenoRunPhase, an
+      optional exit code, a message, and the run's outputs map.
+  - codeRefs:
+    - file:internal/denojob/denojob_test.go
+    - struct:0ba4feb0fbc5bf2cadab0956427bd073
+    - struct:a76d5210541b3f0c4f0346477f21b1c1
+    id: r.tests-assert-the-decider-contract
+    level: MUST
+    text: denojob_test.go MUST reconcile constructed Observed values and assert on
+      the returned Result, covering at least that an unstarted job creates one run
+      and reports pending with active one, and that the job succeeds with its run's
+      outputs once that run reaches DenoRunSucceeded.
   upstream: self
 - code:
   - internal/denopod/denopod.go
