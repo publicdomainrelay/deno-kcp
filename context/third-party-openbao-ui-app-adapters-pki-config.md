@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-This context exists so that the PKI configuration read/write HTTP surface of the OpenBao UI stays described in one place: a single generic adapter holds the request logic (GET for findRecord, POST for updateRecord) while thin subclasses supply only the URL for each of the four PKI config endpoints. It documents that contract so refactors of the adapters preserve the mount-path encoding, the v1 namespace, and the data unwrapping of resp.data on find.
+This context exists so that the PKI configuration HTTP surface of the OpenBao UI stays described in one place: a single generic adapter holds all request logic (GET for findRecord, POST for updateRecord) while thin subclasses supply only the URL for each of the four PKI config endpoints. It documents that contract so future refactors of the adapters preserve the v1 namespace, the mount-path encoding through encodePath, and the unwrapping of resp.data on find.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

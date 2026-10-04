@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to pin down the per-type policy adapters in the vendored OpenBao UI so the resolver keeps a separate adapter for acl, egp, and rgp models while all shared request logic stays in one place. It documents that these modules are deliberate empty subclasses, not places where policy-type-specific behavior lives, so that any future change to policy requests is made in the base adapter rather than duplicated here.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

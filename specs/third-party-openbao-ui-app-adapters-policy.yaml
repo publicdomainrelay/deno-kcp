@@ -8,5 +8,48 @@ metadata:
   name: third-party-openbao-ui-app-adapters-policy
   namespace: default
 spec:
+  intent: This context exists to pin down the per-type policy adapters in the vendored
+    OpenBao UI so the resolver keeps a separate adapter for acl, egp, and rgp models
+    while all shared request logic stays in one place. It documents that these modules
+    are deliberate empty subclasses, not places where policy-type-specific behavior
+    lives, so that any future change to policy requests is made in the base adapter
+    rather than duplicated here.
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/app/adapters/policy/acl.js
+    - file:third_party/openbao/ui/app/adapters/policy/egp.js
+    - file:third_party/openbao/ui/app/adapters/policy/rgp.js
+    id: r.export-as-default
+    level: MUST
+    text: Each adapter module must expose the extended class as its default export,
+      because Ember Data resolves the adapter for the acl, egp, and rgp models through
+      that default export.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/adapters/policy/acl.js
+    - file:third_party/openbao/ui/app/adapters/policy/egp.js
+    - file:third_party/openbao/ui/app/adapters/policy/rgp.js
+    id: r.no-per-type-overrides
+    level: SHOULD
+    text: The three adapters must stay free of properties and method overrides, so
+      that no policy-type-specific request behavior diverges between acl, egp, and
+      rgp; any such behavior belongs in the shared base policy adapter.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/adapters/policy/acl.js
+    - file:third_party/openbao/ui/app/adapters/policy/egp.js
+    - file:third_party/openbao/ui/app/adapters/policy/rgp.js
+    id: r.subclass-shared-policy-adapter
+    level: MUST
+    text: Each of the acl, egp, and rgp adapters must be produced by calling `extend()`
+      on the shared policy adapter imported from `../policy`, so that all three inherit
+      their request behavior from that single base adapter instead of redefining it.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/adapters/policy/acl.js
+    - file:third_party/openbao/ui/app/adapters/policy/egp.js
+    - file:third_party/openbao/ui/app/adapters/policy/rgp.js
+    id: r.upstream-license-header
+    level: MUST
+    text: 'Each adapter file must keep the HashiCorp copyright header and the `SPDX-License-Identifier:
+      MPL-2.0` line at the top of the file, since these files are vendored upstream
+      sources.'
   upstream: self
