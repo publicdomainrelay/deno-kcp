@@ -3218,7 +3218,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 
 ### third-party-openbao-sdk-helper-keysutil
 
-- intent: "" -> "This context exists so a caller can create, cache, lock, persist, rotate and use encryption/signing key policies without touching the crypto or storage plumbing directly. It is the third-party vendored OpenBao SDK surface that the rest of deno-kcp consumes; the specification records the exported contracts, the invariants the package enforces (bounded vs unbounded cache, policy upsert semantics, encrypted-key-storage policy preconditions) and the error behaviour callers depend on."
+- intent: "" -> "The context exists so a caller can create, cache, lock, persist, rotate and use encryption and signing key policies without touching crypto or storage plumbing directly. It is the third-party vendored OpenBao SDK surface that deno-kcp imports; the specification records the exported contracts, the invariants the package enforces (bounded versus unbounded cache, policy upsert semantics, encrypted-key-storage policy preconditions) and the error behaviour callers depend on."
 - added `r.bounded-lru-cache` (MUST): "NewTransitLRU builds a size-bounded cache and returns an error for an invalid size; Store must evict once Size exceeds the configured bound, so a LockManager configured with a cache size never grows past that bound."
 - added `r.cache-abstraction` (MUST): "The package defines a Cache abstraction of Delete, Load, Store and Size, and both TransitLRU and TransitSyncMap must satisfy it so LockManager can hold either a bounded or an unbounded policy cache behind the same type."
 - added `r.csr-cert-chain` (MUST): "CreateCSR builds a PKCS#10 certificate request from a key version and a template, and PersistCertificateChain stores the issued certificate chain for that version alongside the key entry."
@@ -3513,7 +3513,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-sdk-helper-kdf-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-kdf-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-keysutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-sdk-helper-keysutil-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-helper-keysutil-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-ldaputil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-locksutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-locksutil-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |

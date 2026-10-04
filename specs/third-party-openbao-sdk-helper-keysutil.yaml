@@ -114,13 +114,12 @@ metadata:
   name: third-party-openbao-sdk-helper-keysutil
   namespace: default
 spec:
-  intent: This context exists so a caller can create, cache, lock, persist, rotate
-    and use encryption/signing key policies without touching the crypto or storage
-    plumbing directly. It is the third-party vendored OpenBao SDK surface that the
-    rest of deno-kcp consumes; the specification records the exported contracts, the
-    invariants the package enforces (bounded vs unbounded cache, policy upsert semantics,
-    encrypted-key-storage policy preconditions) and the error behaviour callers depend
-    on.
+  intent: The context exists so a caller can create, cache, lock, persist, rotate
+    and use encryption and signing key policies without touching crypto or storage
+    plumbing directly. It is the third-party vendored OpenBao SDK surface that deno-kcp
+    imports; the specification records the exported contracts, the invariants the
+    package enforces (bounded versus unbounded cache, policy upsert semantics, encrypted-key-storage
+    policy preconditions) and the error behaviour callers depend on.
   interfaces:
   - file: third_party/openbao/sdk/helper/keysutil/policy.go
     kind: interface
@@ -720,7 +719,6 @@ spec:
       to storage; MigrateKeyToKeysMap moves a legacy single-key policy into the versioned
       keys map.
   - codeRefs:
-    - file:third_party/openbao/sdk/helper/keysutil/policy.go
     - method:10c919ab6415c55c48deccde25449eef
     - method:23ede54f884d8ccf0c57cf484599e312
     - method:2a0ee584815d96b65f4e206798cc3e7a
