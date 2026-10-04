@@ -43,5 +43,184 @@ spec:
   systemContext: internal-provider
   toSpecHash: 5c4b091d79b5f25241dbed814199a53274a9f2b7d0337b1340744dbe8de32ed8
 status:
-  message: the agent is realizing internal-provider
-  phase: Running
+  acceptance:
+  - durationSeconds: 282.056429032
+    exitCode: 1
+    name: market-live-acceptance
+    outputTail: |-
+      ...denoruntime          08c3f9aba4aefd9a12977fddc4b97bdcd43139f0fd4aadea77398a3082ec8e6f
+      policyworkflowruns   cd9f33381504ac4a52f7b79e9671747b34f03251f79146b1da6feb3e525e1793
+
+      == provider build ==
+
+      == openbao ==
+      started /usr/local/bin/bao (pid 1438133), log /tmp/tmp.vJkZuEs9wr/openbao/bao.log
+      openbao is up at http://127.0.0.1:45647
+
+      start the provider against it with:
+        --openbao-addr http://127.0.0.1:45647 --openbao-token root
+
+      == provider ==
+
+      == apply ==
+      org root:   /home/johnandersen777/src/publicdomainrelay-kcp
+      root server: https://127.0.0.1:52177/clusters/root
+      workspace.tenancy.kcp.io/global created
+      workspace.tenancy.kcp.io/relay created
+      workspace.tenancy.kcp.io/alice created
+      workspace.tenancy.kcp.io/bob created
+      workspace root:global Ready
+      workspace root:relay Ready
+      workspace root:alice Ready
+      workspace root:bob Ready
+      generated a PDS signing key at /tmp/tmp.vJkZuEs9wr/alice-pds-key.hex
+      generated a bob PDS signing key at /tmp/tmp.vJkZuEs9wr/bob-pds-key.hex
+      generated a bidder signing key at /tmp/tmp.vJkZuEs9wr/bidder-key.hex
+      the OpenBao namespace for root:global never became ready
+      apiVersion: deno.computer/v1alpha1
+      kind: OpenBao
+      metadata:
+        annotations:
+          kcp.io/cluster: 1z2f2bctunnlxtss
+          kubectl.kubernetes.io/last-applied-configuration: |
+            {"apiVersion":"deno.computer/v1alpha1","kind":"OpenBao","metadata":{"annotations":{},"finalizers":["openbao.deno.computer/namespace"],"name":"openbao","namespace":"default"},"spec":{"namespace":"global.default"}}
+        creationTimestamp: "2026-10-04T21:13:33Z"
+        finalizers:
+        - openbao.deno.computer/namespace
+        generation: 1
+        name: openbao
+        namespace: default
+        resourceVersion: "1014"
+        uid: 203e878e-a10c-4d5e-9911-15979a84adb6
+      spec:
+        namespace: global.default
+
+      == checks ==
+      waiting 10s, then reading the long-running pods again
+
+      results:
+        check                                result evidence
+        apply.sh                             FAIL exit=1
+        denopod root:global/plc              FAIL phase=missing ready=missing
+        denopod root:relay/relay             FAIL phase=missing ready=missing
+        denopod root:alice/pds               FAIL phase=missing ready=missing
+        denopod root:bob/pds                 FAIL phase=missing ready=missing
+        denopod root:bob/bidder              FAIL phase=missing ready=missing
+        denopod root:alice/verifier          FAIL phase=missing
+        bob pds on its name                  FAIL ready=missing probe=kcpdns pds.default.bob.svc.kcp.local /xrpc/_health
+        bob pds on the host                  PASS GET https://127.0.0.1:2585/xrpc/_health -> 200
+        bidder on its name                   FAIL ready=missing probe=kcpdns bidder.default.bob.svc.kcp.local /oauth-client-metadata.json
+        bidder on the host                   FAIL GET https://127.0.0.1:2586/oauth-client-metadata.json -> 000
+        still up root:global/plc             FAIL phase=missing ready=missing after 10s
+        still up root:relay/relay            FAIL phase=missing ready=missing after 10s
+        still up root:alice/pds              FAIL phase=missing ready=missing after 10s
+        still up root:bob/pds                FAIL phase=missing ready=missing after 10s
+        still up root:bob/bidder             FAIL phase=missing ready=missing after 10s
+
+      provider log, tail of /tmp/tmp.vJkZuEs9wr/provider.log:
+      time=2026-10-04T14:13:29.815-07:00 level=INFO msg="watch: waiting for APIExport virtual workspace endpoints" denoruntime=0 policyworkflowruns=0
+
+      status of the pods that are not Running and ready:
+      root:global plc:
+        Error from server (NotFound): denopods.deno.computer "plc" not found
+
+      root:relay relay:
+        Error from server (NotFound): denopods.deno.computer "relay" not found
+
+      root:alice pds:
+        Error from server (NotFound): denopods.deno.computer "pds" not found
+
+      root:bob pds:
+        Error from server (NotFound): denopods.deno.computer "pds" not found
+
+      root:bob bidder:
+        Error from server (NotFound): denopods.deno.computer "bidder" not found
+
+      root:alice verifier:
+        Error from server (NotFound): denopods.deno.computer "verifier" not found
+
+
+      accept: fail
+    passed: false
+  agentLog: ".../name-keyed indexer.\n- `internal/provider/watch_test.go` — added
+    `podObject` and `TestTheWatchCacheKeepsSameNamedPodsFromDifferentWorkspaces`:
+    two `pds` pods in `default`, one in `root:alice` one in `root:bob`, both survive
+    a re-list, `allPods` returns both, `ReadPod` resolves each by its own workspace.
+    Verified it fails (`allPods returned 1 pods`) when the key func is namespace/name
+    alone.\n- `internal/provider/service_dns_inject_test.go` — helper updated to the
+    `upsert` API.\n\nNote: the informer's internal store still keys by namespace/name,
+    so a workspace-scoped object deleted while the watch is disconnected (surfaced
+    only through a re-list, not a Delete delta) can linger in the reader's store.
+    Event-delivered deletes are handled correctly. Flagging because re-list-only deletion
+    is a residual limit of the wildcard informer, not something the overlay can recover.\n\n⚠
+    claude.ai connectors are disabled because ANTHROPIC_API_KEY or another auth source
+    is set and takes precedence over your claude.ai login · Unset it to load your
+    organization's connectors\n[claude-code:unrecognized_model] {\"model\":\"deepseek-v4-flash\",\"query_source\":\"sdk\"}\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/api/v1alpha1\t(cached)\n?   \tgithub.com/johnandersen777/deno-kcp/cmd/deno-kcp-provider\t[no
+    test files]\nok  \tgithub.com/johnandersen777/deno-kcp/internal/denojob\t(cached)\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/internal/denopod\t(cached)\nok  \tgithub.com/johnandersen777/deno-kcp/internal/denorun\t(cached)\n?
+    \  \tgithub.com/johnandersen777/deno-kcp/internal/livegate\t[no test files]\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/internal/policyengine\t(cached)\nok  \tgithub.com/johnandersen777/deno-kcp/internal/policyworkflowpod\t(cached)\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/internal/policyworkflowrun\t(cached)\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/internal/provider\t0.044s\nok  \tgithub.com/johnandersen777/deno-kcp/internal/trigger\t(cached)\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/test/integration\t(cached)"
+  branch: spec/internal-provider/5c4b091d
+  commit: 3749680f064033dbfd6d5f458b665486a0779efc
+  filesTouched:
+  - internal/provider/service_dns_inject_test.go
+  - internal/provider/watch.go
+  - internal/provider/watch_cache.go
+  - internal/provider/watch_test.go
+  message: 'realized internal-provider on spec/internal-provider/5c4b091d: 4 file(s)
+    touched, verify exit 0'
+  phase: Succeeded
+  progress:
+  - at: "2026-10-04T21:11:01Z"
+    files:
+    - internal/provider/watch_cache.go
+    tool: Read
+  - at: "2026-10-04T21:11:01Z"
+    files:
+    - internal/provider/watch.go
+    tool: Read
+  - at: "2026-10-04T21:11:46Z"
+    files:
+    - internal/provider/service_dns_inject_test.go
+    tool: Read
+  - at: "2026-10-04T21:12:19Z"
+    files:
+    - internal/provider/watch_cache.go
+    tool: Edit
+  - at: "2026-10-04T21:12:27Z"
+    files:
+    - internal/provider/watch.go
+    tool: Edit
+  - at: "2026-10-04T21:12:32Z"
+    files:
+    - internal/provider/watch_test.go
+    tool: Edit
+  - at: "2026-10-04T21:12:36Z"
+    files:
+    - internal/provider/service_dns_inject_test.go
+    tool: Edit
+  - at: "2026-10-04T21:12:42Z"
+    files:
+    - internal/provider/watch_test.go
+    tool: Edit
+  - at: "2026-10-04T21:12:47Z"
+    files:
+    - internal/provider/watch_test.go
+    tool: Read
+  - at: "2026-10-04T21:12:50Z"
+    files:
+    - internal/provider/watch_test.go
+    tool: Edit
+  - at: "2026-10-04T21:13:01Z"
+    files:
+    - internal/provider/watch.go
+    tool: Edit
+  - at: "2026-10-04T21:13:12Z"
+    note: turn
+  - at: "2026-10-04T21:13:13Z"
+    note: turn
+    turn: 1
