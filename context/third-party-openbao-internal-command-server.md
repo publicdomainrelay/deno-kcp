@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so that the server configuration surface of the vendored OpenBao fork can be described and reasoned about without reading the whole tree: what a config file may contain, how it is parsed and merged, which of its parts are validated, and how listener stanzas and dev-mode TLS material become live listeners. It is the configuration and listener half of the OpenBao server command, separated from the much larger server run loop.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

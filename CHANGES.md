@@ -1324,6 +1324,34 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.transport-dialer` (MUST): "The transportDialer interface must expose Dial(network, address string) (net.Conn, error) and DialContext(ctx context.Context, network, address string) (net.Conn, error) so a custom dialer can be handed to the cache's HTTP transport config; the cache holds one as InProcDialer."
 - added `r.validate-config` (MUST): "ValidateConfig must reject, on a fully merged config: a cache or api_proxy without at least one listener; api_proxy.use_auto_auth_token=true with no auto_auth or with a wrapping auth method; auto_auth with no sinks unless use_auto_auth_token is true; and a config with no auto_auth, no cache and no listener."
 
+### third-party-openbao-internal-command-server
+
+- intent: "" -> "The context exists so that the server configuration surface of the vendored OpenBao fork can be described and reasoned about without reading the whole tree: what a config file may contain, how it is parsed and merged, which of its parts are validated, and how listener stanzas and dev-mode TLS material become live listeners. It is the configuration and listener half of the OpenBao server command, separated from the much larger server run loop."
+- added `r.audit-device` (MUST): "AuditDevice.Validate reports the unused keys of an audit device block against the source path, and AuditDevice.GoString renders the device without exposing its options."
+- added `r.check-config` (MUST): "CheckConfig folds the error from a load or parse step together with the syntactic validation of the resulting Config, so a caller receives either a usable Config or a failure that names every problem found."
+- added `r.config-aggregate` (MUST): "Config is the in-memory representation of a server configuration document, and every downstream operation on a parsed configuration — Validate, Merge, Sanitized, Prune and ToVaultNodeConfig — is a method on it."
+- added `r.config-merge` (MUST): "Config.Merge combines a second Config into the receiver and returns the merged result, so that later-loaded files override earlier ones while unset fields keep the earlier value."
+- added `r.config-prune` (MUST): "Config.Prune mutates the receiver to drop the bookkeeping values that were only needed during parsing, so the Config reflects the effective runtime settings."
+- added `r.config-sanitized` (MUST): "Config.Sanitized renders the configuration as a map with secret and credential-bearing values removed, so the result is safe to log or return to an operator."
+- added `r.config-to-vault-node-config` (SHOULD): "Config.ToVaultNodeConfig converts the parsed server configuration into a test-cluster node configuration, returning an error when the configuration cannot be represented as one."
+- added `r.config-validate` (MUST): "Config.Validate collects configuration errors from one source path: unused-field errors for the Config itself, then the validation of telemetry, service registration, every listener, every audit device, every plugin and every initialization block, and it additionally rejects a plugin_download_behavior that is neither the fail nor the continue constant, naming the offending value in the message."
+- added `r.dev-config` (MUST): "DevConfig parses an inline HCL document into a Config for dev mode: one tcp listener on 127.0.0.1:8200 with TLS disabled and proxy protocol set to allow_authorized for 127.0.0.1:8200, telemetry with a 24h Prometheus retention and hostname reporting disabled, the raw endpoint enabled, the UI enabled, and a storage block of the caller-supplied storage type; a parse failure is wrapped as an error parsing the dev config."
+- added `r.dev-tls-config` (SHOULD): "DevTLSConfig builds the same dev-mode configuration as DevConfig but with TLS enabled and certificate material taken from the supplied certificate directory."
+- added `r.load-config-dir` (MUST): "LoadConfigDir loads every configuration file found in a directory and merges them into one Config, returning an error when the directory holds nothing loadable or a file fails to parse."
+- added `r.load-config-dispatch` (MUST): "LoadConfig is the single entry point for configuration loading: it dispatches on the supplied path to stdin, a directory or a single file, and returns a nil Config when no path is given."
+- added `r.load-config-file` (MUST): "LoadConfigFile reads one configuration file, selects the HCL or JSON parser by file extension, records the file in allPaths for unknown-field reporting, and returns a Config or an error."
+- added `r.new-config-defaults` (MUST): "NewConfig returns a Config carrying the package defaults, and ParseConfig starts decoding from that value so unspecified keys keep their default."
+- added `r.new-listener` (MUST): "NewListener turns one listener stanza into a bound net.Listener: it dispatches on the listener type through the ListenerFactory table, returns the extra listener configuration values, and returns a reloadable certificate getter when the listener terminated TLS, or an error when the type is unknown, the address is unusable, or the TLS material cannot be loaded."
+- added `r.parse-config-document` (MUST): "ParseConfig accepts one document that is either HCL or JSON, decodes it into a Config, renders the APIAddr and ClusterAddr IP templates, parses the raw lease TTL, UI and cache fields into their typed forms, and attaches a shared config parsed from the same text; any parse failure is returned as an error rather than a partial Config."
+- added `r.parse-storage-stanza` (MUST): "ParseStorage takes the HCL object list and stanza name and fills the storage block of the result Config, returning an error when the stanza cannot be interpreted."
+- added `r.plugin-config-identity` (MUST): "PluginConfig derives its printable identity from its fields: Slug returns the plugin name in slug form, FullName returns the fully qualified plugin name, and CommandPath returns the path of the plugin binary that the server will execute."
+- added `r.plugin-config-validate` (MUST): "PluginConfig.Validate reports the unused keys of a plugin block against the source path so that a misspelled plugin option is surfaced rather than silently ignored."
+- added `r.service-registration` (MUST): "ServiceRegistration.Validate reports the unused keys of a service registration block against the source path, and ServiceRegistration.GoString renders the block without exposing its configuration values."
+- added `r.storage-string` (SHOULD): "Storage.GoString renders a storage block for logging without printing the credentials inside its configuration map."
+- added `r.tcp-keep-alive-listener` (MUST): "TCPKeepAliveListener wraps a TCP listener and its Accept enables TCP keep-alive on every accepted connection before returning it, so dead peers are eventually detected."
+- added `r.test-coverage` (SHOULD): "The parsing, validation, plugin, telemetry, listener and TLS behaviour of this package is pinned by tests in the same directory, with shared helpers that construct and compare configurations and with real TLS material generated by tls_util.go."
+- added `r.tls-generation` (MUST): "GenerateCA produces a self-signed certificate authority with its key, and GenerateCert issues a leaf certificate signed by that CA from a certificate template plus the CA signer, returning the certificate and key as PEM strings; either returns an error when the material cannot be produced."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -1388,4 +1416,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-command-healthcheck-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-healthcheck-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-internal-command-proxy-config-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-command-server-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-command-server-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-internal-command-token-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |

@@ -18835,8 +18835,402 @@ system_contexts:
   - file:third_party/openbao/internal/command/server/listener_unix.go listener_unix.go@third_party/openbao/internal/command/server/listener_unix.go
   - file:third_party/openbao/internal/command/server/listener_unix_test.go listener_unix_test.go@third_party/openbao/internal/command/server/listener_unix_test.go
   - file:third_party/openbao/internal/command/server/tls_util.go tls_util.go@third_party/openbao/internal/command/server/tls_util.go
+  - function:03144b89852a78296c71206dadc98175 ParseStorage@third_party/openbao/internal/command/server/config.go:1200
+  - function:0b87c92a006924445170e92eb9fd3ac6 NewConfig@third_party/openbao/internal/command/server/config.go:491
+  - function:25d191a1c582b2afff5c117b0c98d892 DevConfig@third_party/openbao/internal/command/server/config.go:194
+  - function:336c55c9040b22b705deb645348aeae1 GenerateCA@third_party/openbao/internal/command/server/tls_util.go:96
+  - function:6dedc4a5dc32fe052d06d52b24fcd566 GenerateCert@third_party/openbao/internal/command/server/tls_util.go:32
+  - function:958c77c54e3d19f60e8370d4eec48511 ParseConfig@third_party/openbao/internal/command/server/config.go:861
+  - function:a93f3eab7b0c4eb35407fb4473459e82 LoadConfigFile@third_party/openbao/internal/command/server/config.go:805
+  - function:b56dd38ccbd2881d4021840d20796e60 CheckConfig@third_party/openbao/internal/command/server/config.go:787
+  - function:ce54ba88db8a7cc2d9fb83b3c0ad91b5 LoadConfig@third_party/openbao/internal/command/server/config.go:752
+  - function:d449e3c77a6f2ae4ca4924a6528f57ae NewListener@third_party/openbao/internal/command/server/listener.go:32
+  - function:dc9cec84675661684ef50f71f836876c DevTLSConfig@third_party/openbao/internal/command/server/config.go:224
+  - function:ebac0163d349adaca8243e545103be78 LoadConfigDir@third_party/openbao/internal/command/server/config.go:1125
+  - method:04a00522ec09e8828a14449e51257aca PluginConfig.FullName@third_party/openbao/internal/command/server/config.go:328
+  - method:1e2b78057ea3261cec98c003011000b3 Config.Merge@third_party/openbao/internal/command/server/config.go:498
+  - method:2aeb95c290196a8338bee818f2f2da9d ServiceRegistration.GoString@third_party/openbao/internal/command/server/config.go:304
+  - method:46291d598e445725edf9c16649397f06 Config.Sanitized@third_party/openbao/internal/command/server/config.go:1397
+  - method:5237a00d60222596780babd141d0b54f PluginConfig.Validate@third_party/openbao/internal/command/server/config.go:341
+  - method:64c3ada9252b647581c194fc64cdcdb2 PluginConfig.Slug@third_party/openbao/internal/command/server/config.go:324
+  - method:6aba0f8d267b7079b058de03a6dc991c AuditDevice.Validate@third_party/openbao/internal/command/server/config.go:1596
+  - method:6b0b29f1cc7f42aab557545e3d264c92 Config.ToVaultNodeConfig@third_party/openbao/internal/command/server/config.go:1546
+  - method:7bdac16f01c5ea155ebcbf4784ec6468 Config.Validate@third_party/openbao/internal/command/server/config.go:160
+  - method:9e072e25d8c94deae7afc680407f1016 Storage.GoString@third_party/openbao/internal/command/server/config.go:289
+  - method:b2e8befe16960a229617e8a4339cae16 TCPKeepAliveListener.Accept@third_party/openbao/internal/command/server/listener_tcp.go:97
+  - method:d8c26748252a06f94eeb67a95ef4bde3 ServiceRegistration.Validate@third_party/openbao/internal/command/server/config.go:300
+  - method:dd879843d58ee64591c50ee959a6590c Config.Prune@third_party/openbao/internal/command/server/config.go:1526
+  - method:f0f2e32b6c83cb5abd5d5e3309e05218 AuditDevice.GoString@third_party/openbao/internal/command/server/config.go:1600
+  - method:f8cf98197bc0197fa6d91b935722c904 PluginConfig.CommandPath@third_party/openbao/internal/command/server/config.go:332
+  - struct:3017d05b44fddeef00f6df7ce311ab72 PluginConfig@third_party/openbao/internal/command/server/config.go:309
+  - struct:463f6d147378f09cf4090ac0289e86ca AuditDevice@third_party/openbao/internal/command/server/config.go:1585
+  - struct:4bdf678f74dd0912dcde5e5a84b683ed Config@third_party/openbao/internal/command/server/config.go:45
+  - struct:50f523b4646e342801663df8560f611a ServiceRegistration@third_party/openbao/internal/command/server/config.go:294
+  - struct:74aced83ab721c3aef75e861a8d5dc49 Storage@third_party/openbao/internal/command/server/config.go:281
+  - struct:936b3ecb8c374add186971d8a9e30073 TCPKeepAliveListener@third_party/openbao/internal/command/server/listener_tcp.go:93
+  - struct:a00667479a3f5bebc162cd6582de4991 CaCert@third_party/openbao/internal/command/server/tls_util.go:25
+  - type_alias:c4cacf93cb6abf0d30fc16f0c8c7e5c9 ListenerFactory@third_party/openbao/internal/command/server/listener.go:22
   id: sc.third-party-openbao-internal-command-server
+  intent: 'The context exists so that the server configuration surface of the vendored
+    OpenBao fork can be described and reasoned about without reading the whole tree:
+    what a config file may contain, how it is parsed and merged, which of its parts
+    are validated, and how listener stanzas and dev-mode TLS material become live
+    listeners. It is the configuration and listener half of the OpenBao server command,
+    separated from the much larger server run loop.'
+  interfaces:
+  - file: third_party/openbao/internal/command/server/config.go
+    kind: struct
+    name: AuditDevice
+    signature: struct
+  - file: third_party/openbao/internal/command/server/config.go
+    kind: method
+    name: AuditDevice.GoString
+    signature: () string
+  - file: third_party/openbao/internal/command/server/config.go
+    kind: method
+    name: AuditDevice.Validate
+    signature: (source string) []configutil.ConfigError
+  - file: third_party/openbao/internal/command/server/tls_util.go
+    kind: struct
+    name: CaCert
+    signature: struct
+  - file: third_party/openbao/internal/command/server/config.go
+    kind: function
+    name: CheckConfig
+    signature: (c *Config, e error) (*Config, error)
+  - file: third_party/openbao/internal/command/server/config.go
+    kind: struct
+    name: Config
+    signature: struct
+  - file: third_party/openbao/internal/command/server/config.go
+    kind: method
+    name: Config.Merge
+    signature: (c2 *Config) *Config
+  - file: third_party/openbao/internal/command/server/config.go
+    kind: method
+    name: Config.Prune
+    signature: ()
+  - file: third_party/openbao/internal/command/server/config.go
+    kind: method
+    name: Config.Sanitized
+    signature: () map[string]any
+  - file: third_party/openbao/internal/command/server/config.go
+    kind: method
+    name: Config.ToVaultNodeConfig
+    signature: () (*testcluster.VaultNodeConfig, error)
+  - file: third_party/openbao/internal/command/server/config.go
+    kind: method
+    name: Config.Validate
+    signature: (sourceFilePath string) []configutil.ConfigError
+  - file: third_party/openbao/internal/command/server/config.go
+    kind: function
+    name: DevConfig
+    signature: (storageType string) (*Config, error)
+  - file: third_party/openbao/internal/command/server/config.go
+    kind: function
+    name: DevTLSConfig
+    signature: (storageType, certDir string) (*Config, error)
+  - file: third_party/openbao/internal/command/server/tls_util.go
+    kind: function
+    name: GenerateCA
+    signature: () (*CaCert, error)
+  - file: third_party/openbao/internal/command/server/tls_util.go
+    kind: function
+    name: GenerateCert
+    signature: (caCertTemplate *x509.Certificate, caSigner crypto.Signer) (string,
+      string, error)
+  - file: third_party/openbao/internal/command/server/listener.go
+    kind: type_alias
+    name: ListenerFactory
+    signature: type ListenerFactory
+  - file: third_party/openbao/internal/command/server/config.go
+    kind: function
+    name: LoadConfig
+    signature: (path string, allPaths []string) (cfg *Config, err error)
+  - file: third_party/openbao/internal/command/server/config.go
+    kind: function
+    name: LoadConfigDir
+    signature: (dir string) (cfg *Config, err error)
+  - file: third_party/openbao/internal/command/server/config.go
+    kind: function
+    name: LoadConfigFile
+    signature: (path string, allPaths []string) (cfg *Config, err error)
+  - file: third_party/openbao/internal/command/server/config.go
+    kind: function
+    name: NewConfig
+    signature: () *Config
+  - file: third_party/openbao/internal/command/server/listener.go
+    kind: function
+    name: NewListener
+    signature: (l *configutil.Listener, logger hclog.Logger, ui cli.Ui) (net.Listener,
+      map[string]string, listenerutil.ReloadableCertGetter, error)
+  - file: third_party/openbao/internal/command/server/config.go
+    kind: function
+    name: ParseConfig
+    signature: (d, source string) (*Config, error)
+  - file: third_party/openbao/internal/command/server/config.go
+    kind: function
+    name: ParseStorage
+    signature: (result *Config, list *ast.ObjectList, name string) error
+  - file: third_party/openbao/internal/command/server/config.go
+    kind: struct
+    name: PluginConfig
+    signature: struct
+  - file: third_party/openbao/internal/command/server/config.go
+    kind: method
+    name: PluginConfig.CommandPath
+    signature: () string
+  - file: third_party/openbao/internal/command/server/config.go
+    kind: method
+    name: PluginConfig.FullName
+    signature: () string
+  - file: third_party/openbao/internal/command/server/config.go
+    kind: method
+    name: PluginConfig.Slug
+    signature: () string
+  - file: third_party/openbao/internal/command/server/config.go
+    kind: method
+    name: PluginConfig.Validate
+    signature: (sourceFilePath string) []configutil.ConfigError
+  - file: third_party/openbao/internal/command/server/config.go
+    kind: struct
+    name: ServiceRegistration
+    signature: struct
+  - file: third_party/openbao/internal/command/server/config.go
+    kind: method
+    name: ServiceRegistration.GoString
+    signature: () string
+  - file: third_party/openbao/internal/command/server/config.go
+    kind: method
+    name: ServiceRegistration.Validate
+    signature: (source string) []configutil.ConfigError
+  - file: third_party/openbao/internal/command/server/config.go
+    kind: struct
+    name: Storage
+    signature: struct
+  - file: third_party/openbao/internal/command/server/config.go
+    kind: method
+    name: Storage.GoString
+    signature: () string
+  - file: third_party/openbao/internal/command/server/listener_tcp.go
+    kind: struct
+    name: TCPKeepAliveListener
+    signature: struct
+  - file: third_party/openbao/internal/command/server/listener_tcp.go
+    kind: method
+    name: TCPKeepAliveListener.Accept
+    signature: () (c net.Conn, err error)
   name: third-party-openbao-internal-command-server
+  requirements:
+  - codeRefs:
+    - method:6aba0f8d267b7079b058de03a6dc991c
+    - method:f0f2e32b6c83cb5abd5d5e3309e05218
+    - struct:463f6d147378f09cf4090ac0289e86ca
+    id: r.audit-device
+    level: MUST
+    text: AuditDevice.Validate reports the unused keys of an audit device block against
+      the source path, and AuditDevice.GoString renders the device without exposing
+      its options.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/server/config.go
+    - function:b56dd38ccbd2881d4021840d20796e60
+    id: r.check-config
+    level: MUST
+    text: CheckConfig folds the error from a load or parse step together with the
+      syntactic validation of the resulting Config, so a caller receives either a
+      usable Config or a failure that names every problem found.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/server/config.go
+    - struct:4bdf678f74dd0912dcde5e5a84b683ed
+    id: r.config-aggregate
+    level: MUST
+    text: Config is the in-memory representation of a server configuration document,
+      and every downstream operation on a parsed configuration — Validate, Merge,
+      Sanitized, Prune and ToVaultNodeConfig — is a method on it.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/server/config.go
+    - method:1e2b78057ea3261cec98c003011000b3
+    id: r.config-merge
+    level: MUST
+    text: Config.Merge combines a second Config into the receiver and returns the
+      merged result, so that later-loaded files override earlier ones while unset
+      fields keep the earlier value.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/server/config.go
+    - method:dd879843d58ee64591c50ee959a6590c
+    id: r.config-prune
+    level: MUST
+    text: Config.Prune mutates the receiver to drop the bookkeeping values that were
+      only needed during parsing, so the Config reflects the effective runtime settings.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/server/config.go
+    - method:46291d598e445725edf9c16649397f06
+    id: r.config-sanitized
+    level: MUST
+    text: Config.Sanitized renders the configuration as a map with secret and credential-bearing
+      values removed, so the result is safe to log or return to an operator.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/server/config.go
+    - method:6b0b29f1cc7f42aab557545e3d264c92
+    id: r.config-to-vault-node-config
+    level: SHOULD
+    text: Config.ToVaultNodeConfig converts the parsed server configuration into a
+      test-cluster node configuration, returning an error when the configuration cannot
+      be represented as one.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/server/config.go
+    - method:7bdac16f01c5ea155ebcbf4784ec6468
+    id: r.config-validate
+    level: MUST
+    text: 'Config.Validate collects configuration errors from one source path: unused-field
+      errors for the Config itself, then the validation of telemetry, service registration,
+      every listener, every audit device, every plugin and every initialization block,
+      and it additionally rejects a plugin_download_behavior that is neither the fail
+      nor the continue constant, naming the offending value in the message.'
+  - codeRefs:
+    - file:third_party/openbao/internal/command/server/config.go
+    - function:25d191a1c582b2afff5c117b0c98d892
+    id: r.dev-config
+    level: MUST
+    text: 'DevConfig parses an inline HCL document into a Config for dev mode: one
+      tcp listener on 127.0.0.1:8200 with TLS disabled and proxy protocol set to allow_authorized
+      for 127.0.0.1:8200, telemetry with a 24h Prometheus retention and hostname reporting
+      disabled, the raw endpoint enabled, the UI enabled, and a storage block of the
+      caller-supplied storage type; a parse failure is wrapped as an error parsing
+      the dev config.'
+  - codeRefs:
+    - file:third_party/openbao/internal/command/server/config.go
+    - function:dc9cec84675661684ef50f71f836876c
+    id: r.dev-tls-config
+    level: SHOULD
+    text: DevTLSConfig builds the same dev-mode configuration as DevConfig but with
+      TLS enabled and certificate material taken from the supplied certificate directory.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/server/config.go
+    - function:ebac0163d349adaca8243e545103be78
+    id: r.load-config-dir
+    level: MUST
+    text: LoadConfigDir loads every configuration file found in a directory and merges
+      them into one Config, returning an error when the directory holds nothing loadable
+      or a file fails to parse.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/server/config.go
+    - function:ce54ba88db8a7cc2d9fb83b3c0ad91b5
+    id: r.load-config-dispatch
+    level: MUST
+    text: 'LoadConfig is the single entry point for configuration loading: it dispatches
+      on the supplied path to stdin, a directory or a single file, and returns a nil
+      Config when no path is given.'
+  - codeRefs:
+    - file:third_party/openbao/internal/command/server/config.go
+    - function:a93f3eab7b0c4eb35407fb4473459e82
+    id: r.load-config-file
+    level: MUST
+    text: LoadConfigFile reads one configuration file, selects the HCL or JSON parser
+      by file extension, records the file in allPaths for unknown-field reporting,
+      and returns a Config or an error.
+  - codeRefs:
+    - function:0b87c92a006924445170e92eb9fd3ac6
+    - function:958c77c54e3d19f60e8370d4eec48511
+    id: r.new-config-defaults
+    level: MUST
+    text: NewConfig returns a Config carrying the package defaults, and ParseConfig
+      starts decoding from that value so unspecified keys keep their default.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/server/listener.go
+    - function:d449e3c77a6f2ae4ca4924a6528f57ae
+    - type_alias:c4cacf93cb6abf0d30fc16f0c8c7e5c9
+    id: r.new-listener
+    level: MUST
+    text: 'NewListener turns one listener stanza into a bound net.Listener: it dispatches
+      on the listener type through the ListenerFactory table, returns the extra listener
+      configuration values, and returns a reloadable certificate getter when the listener
+      terminated TLS, or an error when the type is unknown, the address is unusable,
+      or the TLS material cannot be loaded.'
+  - codeRefs:
+    - file:third_party/openbao/internal/command/server/config.go
+    - function:958c77c54e3d19f60e8370d4eec48511
+    id: r.parse-config-document
+    level: MUST
+    text: ParseConfig accepts one document that is either HCL or JSON, decodes it
+      into a Config, renders the APIAddr and ClusterAddr IP templates, parses the
+      raw lease TTL, UI and cache fields into their typed forms, and attaches a shared
+      config parsed from the same text; any parse failure is returned as an error
+      rather than a partial Config.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/server/config.go
+    - function:03144b89852a78296c71206dadc98175
+    id: r.parse-storage-stanza
+    level: MUST
+    text: ParseStorage takes the HCL object list and stanza name and fills the storage
+      block of the result Config, returning an error when the stanza cannot be interpreted.
+  - codeRefs:
+    - method:04a00522ec09e8828a14449e51257aca
+    - method:64c3ada9252b647581c194fc64cdcdb2
+    - method:f8cf98197bc0197fa6d91b935722c904
+    - struct:3017d05b44fddeef00f6df7ce311ab72
+    id: r.plugin-config-identity
+    level: MUST
+    text: 'PluginConfig derives its printable identity from its fields: Slug returns
+      the plugin name in slug form, FullName returns the fully qualified plugin name,
+      and CommandPath returns the path of the plugin binary that the server will execute.'
+  - codeRefs:
+    - file:third_party/openbao/internal/command/server/config.go
+    - method:5237a00d60222596780babd141d0b54f
+    id: r.plugin-config-validate
+    level: MUST
+    text: PluginConfig.Validate reports the unused keys of a plugin block against
+      the source path so that a misspelled plugin option is surfaced rather than silently
+      ignored.
+  - codeRefs:
+    - method:2aeb95c290196a8338bee818f2f2da9d
+    - method:d8c26748252a06f94eeb67a95ef4bde3
+    - struct:50f523b4646e342801663df8560f611a
+    id: r.service-registration
+    level: MUST
+    text: ServiceRegistration.Validate reports the unused keys of a service registration
+      block against the source path, and ServiceRegistration.GoString renders the
+      block without exposing its configuration values.
+  - codeRefs:
+    - method:9e072e25d8c94deae7afc680407f1016
+    - struct:74aced83ab721c3aef75e861a8d5dc49
+    id: r.storage-string
+    level: SHOULD
+    text: Storage.GoString renders a storage block for logging without printing the
+      credentials inside its configuration map.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/server/listener_tcp.go
+    - method:b2e8befe16960a229617e8a4339cae16
+    - struct:936b3ecb8c374add186971d8a9e30073
+    id: r.tcp-keep-alive-listener
+    level: MUST
+    text: TCPKeepAliveListener wraps a TCP listener and its Accept enables TCP keep-alive
+      on every accepted connection before returning it, so dead peers are eventually
+      detected.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/server/config_plugin_test.go
+    - file:third_party/openbao/internal/command/server/config_test.go
+    - file:third_party/openbao/internal/command/server/config_test_helpers.go
+    - file:third_party/openbao/internal/command/server/listener_tcp_test.go
+    - file:third_party/openbao/internal/command/server/listener_test.go
+    - file:third_party/openbao/internal/command/server/listener_unix_test.go
+    id: r.test-coverage
+    level: SHOULD
+    text: The parsing, validation, plugin, telemetry, listener and TLS behaviour of
+      this package is pinned by tests in the same directory, with shared helpers that
+      construct and compare configurations and with real TLS material generated by
+      tls_util.go.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/server/tls_util.go
+    - function:336c55c9040b22b705deb645348aeae1
+    - function:6dedc4a5dc32fe052d06d52b24fcd566
+    - struct:a00667479a3f5bebc162cd6582de4991
+    id: r.tls-generation
+    level: MUST
+    text: GenerateCA produces a self-signed certificate authority with its key, and
+      GenerateCert issues a leaf certificate signed by that CA from a certificate
+      template plus the CA signer, returning the certificate and key as PEM strings;
+      either returns an error when the material cannot be produced.
   upstream: self
 - code:
   - third_party/openbao/internal/command/token/helper.go

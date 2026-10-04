@@ -1,13 +1,8 @@
 conditions:
-- message: 'undeclared: AuditDevice, AuditDevice.GoString, AuditDevice.Validate, CaCert,
-    CheckConfig, Config, Config.Merge, Config.Prune, Config.Sanitized, Config.ToVaultNodeConfig,
-    Config.Validate, DevConfig, DevTLSConfig, GenerateCA, GenerateCert, ListenerFactory,
-    LoadConfig, LoadConfigDir, LoadConfigFile, NewConfig, NewListener, ParseConfig,
-    ParseStorage, PluginConfig, PluginConfig.CommandPath, PluginConfig.FullName, PluginConfig.Slug,
-    PluginConfig.Validate, ServiceRegistration, ServiceRegistration.GoString, ServiceRegistration.Validate,
-    Storage, Storage.GoString, TCPKeepAliveListener, TCPKeepAliveListener.Accept'
-  reason: InterfacesMissing
-  status: "False"
+- message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+  reason: InterfacesObserved
+  status: "True"
   type: CodeSynced
 - message: observed facts match the synced fingerprint
   reason: FingerprintEqual
@@ -239,5 +234,5 @@ observed:
     line: 96
     name: GenerateCA
     signature: () (*CaCert, error)
-realizedSpecHash: c1711a6b71a3601d773c97d46cc7bc8bc58dd2ae4a4dee6734e9ffa8d9b41741
+realizedSpecHash: e184b5fe4391714f6428576f6ad1109a32b27da5b851871925b35822d53fc1da
 syncedFingerprint: 15260140e75444e46479fb58238eb1ad98d372fb6198ed5e83c7fff0bd4a16b0
