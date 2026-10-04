@@ -4,5 +4,154 @@ metadata:
   name: third-party-openbao-github-workflows
   namespace: default
 spec:
+  intent: 'This context exists so the upstream OpenBao GitHub Actions automation travels
+    with the vendored OpenBao tree instead of being reimplemented in deno-kcp. Keeping
+    the eighteen workflow files verbatim under third_party/openbao/.github/workflows/
+    preserves the upstream CI, release, docs, security and housekeeping definitions
+    as one identifiable vendored unit, so they can be diffed against upstream, re-synced
+    when OpenBao changes, and kept clearly separate from any first-party workflow
+    directory in deno-kcp. Nothing here is a program interface: the context describes
+    configuration artifacts, not callable code.'
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/.github/workflows/changelog-checker.yml
+    id: r.changelog-checker-workflow
+    level: MUST
+    text: changelog-checker.yml is present and provides the upstream changelog entry
+      verification workflow.
+  - codeRefs:
+    - file:third_party/openbao/.github/workflows/ci.yml
+    id: r.ci-workflow
+    level: MUST
+    text: ci.yml is present and provides the upstream primary continuous integration
+      workflow.
+  - codeRefs:
+    - file:third_party/openbao/.github/workflows/code-checker.yml
+    id: r.code-checker-workflow
+    level: MUST
+    text: code-checker.yml is present and provides the upstream source code checking
+      workflow.
+  - codeRefs:
+    - file:third_party/openbao/.github/workflows/codeql.yml
+    id: r.codeql-workflow
+    level: MUST
+    text: codeql.yml is present and provides the upstream CodeQL static analysis workflow.
+  - codeRefs:
+    - file:third_party/openbao/.github/workflows/docs-ci.yml
+    id: r.docs-ci-workflow
+    level: MUST
+    text: docs-ci.yml is present and provides the upstream documentation build and
+      check workflow.
+  - codeRefs:
+    - file:third_party/openbao/.github/workflows/docs-deploy.yml
+    id: r.docs-deploy-workflow
+    level: MUST
+    text: docs-deploy.yml is present and provides the upstream documentation deployment
+      workflow.
+  - codeRefs:
+    - file:third_party/openbao/.github/workflows/go-dependency-submission.yml
+    id: r.go-dependency-submission-workflow
+    level: MUST
+    text: go-dependency-submission.yml is present and provides the upstream Go module
+      dependency submission workflow.
+  - codeRefs:
+    - file:third_party/openbao/.github/workflows/mirror.yml
+    id: r.mirror-workflow
+    level: MUST
+    text: mirror.yml is present and provides the upstream repository mirroring workflow.
+  - codeRefs:
+    - file:third_party/openbao/.github/workflows/ci.yml
+    id: r.no-exported-interface
+    level: MUST
+    text: This context exports no callable interface; it contributes no function,
+      type or method to deno-kcp's program surface.
+  - codeRefs:
+    - file:third_party/openbao/.github/workflows/publiccodeyml-check.yml
+    id: r.publiccodeyml-check-workflow
+    level: MUST
+    text: publiccodeyml-check.yml is present and provides the upstream publiccode.yml
+      validation workflow.
+  - codeRefs:
+    - file:third_party/openbao/.github/workflows/release-images.yml
+    id: r.release-images-workflow
+    level: MUST
+    text: release-images.yml is present and provides the upstream container image
+      release workflow.
+  - codeRefs:
+    - file:third_party/openbao/.github/workflows/release-packages.yml
+    id: r.release-packages-workflow
+    level: MUST
+    text: release-packages.yml is present and provides the upstream package release
+      workflow.
+  - codeRefs:
+    - file:third_party/openbao/.github/workflows/release.yml
+    id: r.release-workflow
+    level: MUST
+    text: release.yml is present and provides the upstream top-level release workflow.
+  - codeRefs:
+    - file:third_party/openbao/.github/workflows/scorecard.yml
+    id: r.scorecard-workflow
+    level: MUST
+    text: scorecard.yml is present and provides the upstream OpenSSF Scorecard supply
+      chain security workflow.
+  - codeRefs:
+    - file:third_party/openbao/.github/workflows/sync-deps.yaml
+    id: r.sync-deps-workflow
+    level: MUST
+    text: sync-deps.yaml is present and provides the upstream dependency synchronization
+      workflow.
+  - codeRefs:
+    - file:third_party/openbao/.github/workflows/test-acc-dockeronly-nightly.yml
+    id: r.test-acc-dockeronly-nightly-workflow
+    level: MUST
+    text: test-acc-dockeronly-nightly.yml is present and provides the upstream nightly
+      Docker-only acceptance test workflow.
+  - codeRefs:
+    - file:third_party/openbao/.github/workflows/test-go.yml
+    id: r.test-go-workflow
+    level: MUST
+    text: test-go.yml is present and provides the upstream Go test workflow.
+  - codeRefs:
+    - file:third_party/openbao/.github/workflows/ui-ci.yml
+    id: r.ui-ci-workflow
+    level: MUST
+    text: ui-ci.yml is present and provides the upstream user interface continuous
+      integration workflow.
+  - codeRefs:
+    - file:third_party/openbao/.github/workflows/ci.yml
+    id: r.vendored-workflow-directory
+    level: MUST
+    text: The OpenBao GitHub Actions workflows live under third_party/openbao/.github/workflows/,
+      so they stay identifiable as vendored upstream files distinct from any first-party
+      workflow directory in deno-kcp.
+  - codeRefs:
+    - file:third_party/openbao/.github/workflows/verify-commits.yml
+    id: r.verify-commits-workflow
+    level: MUST
+    text: verify-commits.yml is present and provides the upstream commit signature
+      verification workflow.
+  - codeRefs:
+    - file:third_party/openbao/.github/workflows/changelog-checker.yml
+    - file:third_party/openbao/.github/workflows/ci.yml
+    - file:third_party/openbao/.github/workflows/code-checker.yml
+    - file:third_party/openbao/.github/workflows/codeql.yml
+    - file:third_party/openbao/.github/workflows/docs-ci.yml
+    - file:third_party/openbao/.github/workflows/docs-deploy.yml
+    - file:third_party/openbao/.github/workflows/go-dependency-submission.yml
+    - file:third_party/openbao/.github/workflows/mirror.yml
+    - file:third_party/openbao/.github/workflows/publiccodeyml-check.yml
+    - file:third_party/openbao/.github/workflows/release-images.yml
+    - file:third_party/openbao/.github/workflows/release-packages.yml
+    - file:third_party/openbao/.github/workflows/release.yml
+    - file:third_party/openbao/.github/workflows/scorecard.yml
+    - file:third_party/openbao/.github/workflows/sync-deps.yaml
+    - file:third_party/openbao/.github/workflows/test-acc-dockeronly-nightly.yml
+    - file:third_party/openbao/.github/workflows/test-go.yml
+    - file:third_party/openbao/.github/workflows/ui-ci.yml
+    - file:third_party/openbao/.github/workflows/verify-commits.yml
+    id: r.workflow-file-format
+    level: MUST
+    text: Every file in this context is a YAML GitHub Actions workflow definition,
+      so its contents are parsed as the workflow schema rather than as program source.
   upstream: self
