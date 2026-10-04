@@ -159,5 +159,6 @@ upstream: self
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:internal/policyworkflowpod/policyworkflowpod.go` file policyworkflowpod.go (internal/policyworkflowpod/policyworkflowpod.go)
+- `file:internal/policyworkflowpod/policyworkflowpod_test.go` file policyworkflowpod_test.go (internal/policyworkflowpod/policyworkflowpod_test.go)
 <!-- SPECD_MANAGED_END -->
