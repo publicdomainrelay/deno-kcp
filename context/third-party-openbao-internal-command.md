@@ -58,5 +58,5 @@ upstream: self
 - `file:third_party/openbao/internal/command/delete.go` file delete.go (third_party/openbao/internal/command/delete.go)
 - `file:third_party/openbao/internal/command/delete_test.go` file delete_test.go (third_party/openbao/internal/command/delete_test.go)
 
-_194 more reference(s) indexed but not listed here to stay inside the 1500-token budget._
+_1252 more reference(s) indexed but not listed here to stay inside the 1500-token budget._
 <!-- SPECD_MANAGED_END -->

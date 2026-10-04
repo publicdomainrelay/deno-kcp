@@ -1,0 +1,57 @@
+conditions:
+- message: 'undeclared: NewServer, ProcessExitError, ProcessExitError.Error, Server,
+    Server.Run, ServerConfig'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/command/agent/exec/exec.go
+  - third_party/openbao/internal/command/agent/exec/exec_test.go
+  fingerprint: 25a4b4116832e3f64ca3c3681e53d813645da035aac28e2bca77d6a5d281550e
+  interfaces:
+  - codegraphId: struct:aba0f8b75a0682a2aedeae8345a175fc
+    file: third_party/openbao/internal/command/agent/exec/exec.go
+    kind: struct
+    line: 32
+    name: ServerConfig
+  - codegraphId: struct:021265e04d39a5bf274b9d3278a1e0aa
+    file: third_party/openbao/internal/command/agent/exec/exec.go
+    kind: struct
+    line: 48
+    name: Server
+  - codegraphId: struct:1c43932d16944fc9cc3f63f66ca570d9
+    file: third_party/openbao/internal/command/agent/exec/exec.go
+    kind: struct
+    line: 76
+    name: ProcessExitError
+  - codegraphId: method:6e442a147416a14cb234be2ec46b6ebe
+    file: third_party/openbao/internal/command/agent/exec/exec.go
+    kind: method
+    line: 80
+    name: ProcessExitError.Error
+    signature: () string
+  - codegraphId: function:e33e1ebed1f36c917fef8deab4475932
+    file: third_party/openbao/internal/command/agent/exec/exec.go
+    kind: function
+    line: 84
+    name: NewServer
+    signature: (cfg *ServerConfig) *Server
+  - codegraphId: method:db69fdf5be5c51d15f8e995d1175c4a5
+    file: third_party/openbao/internal/command/agent/exec/exec.go
+    kind: method
+    line: 95
+    name: Server.Run
+    signature: (ctx context.Context, incomingVaultToken chan string) error
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 849ec3ba22772ae777bb408a95199420272f596ec6c8a89973261d9f85ee746b
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 25a4b4116832e3f64ca3c3681e53d813645da035aac28e2bca77d6a5d281550e

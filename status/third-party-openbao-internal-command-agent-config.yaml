@@ -1,0 +1,136 @@
+conditions:
+- message: 'undeclared: APIProxy, AutoAuth, Cache, Config, Config.IsDefaultListerDefined,
+    Config.Merge, Config.Prune, Config.ValidateConfig, ExecConfig, LoadConfig, LoadConfigDir,
+    LoadConfigFile, Method, NewConfig, Retry, Sink, TemplateConfig, Vault, transportDialer.Dial,
+    transportDialer.DialContext'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/command/agent/config/config.go
+  - third_party/openbao/internal/command/agent/config/config_test.go
+  fingerprint: 00558228be4be6f379b2bf6abfb449b9795f87ac334b8ec6ef7922620907201c
+  interfaces:
+  - codegraphId: struct:ac66f17e5f4fabf2cf84d94fb54cb5ec
+    file: third_party/openbao/internal/command/agent/config/config.go
+    kind: struct
+    line: 36
+    name: Config
+  - codegraphId: method:2de5b2addd58dfa33ca845032bbc3fda
+    file: third_party/openbao/internal/command/agent/config/config.go
+    kind: method
+    line: 63
+    name: Config.Prune
+    signature: ()
+  - codegraphId: struct:ddbfb0c13f698324033d443acb021af5
+    file: third_party/openbao/internal/command/agent/config/config.go
+    kind: struct
+    line: 80
+    name: Retry
+  - codegraphId: struct:b2749db8a09b8055c3236fd3f45afbfa
+    file: third_party/openbao/internal/command/agent/config/config.go
+    kind: struct
+    line: 85
+    name: Vault
+  - codegraphId: method:d51536a7e952ec0386af644c07169ec3
+    file: third_party/openbao/internal/command/agent/config/config.go
+    kind: method
+    line: 101
+    name: transportDialer.Dial
+    signature: (network, address string) (net.Conn, error)
+  - codegraphId: method:33819d9eb533c481516c0e9f498b0efe
+    file: third_party/openbao/internal/command/agent/config/config.go
+    kind: method
+    line: 104
+    name: transportDialer.DialContext
+    signature: (ctx context.Context, network, address string) (net.Conn, error)
+  - codegraphId: struct:395626fce95617b4e4ef8719da52ce58
+    file: third_party/openbao/internal/command/agent/config/config.go
+    kind: struct
+    line: 108
+    name: APIProxy
+  - codegraphId: struct:e690bcb76158075ce108dc746d196ce1
+    file: third_party/openbao/internal/command/agent/config/config.go
+    kind: struct
+    line: 115
+    name: Cache
+  - codegraphId: struct:d94331f190c4482eddf512fb13aa508e
+    file: third_party/openbao/internal/command/agent/config/config.go
+    kind: struct
+    line: 124
+    name: AutoAuth
+  - codegraphId: struct:1e61102ed4280e90915a3b0faa7abaef
+    file: third_party/openbao/internal/command/agent/config/config.go
+    kind: struct
+    line: 134
+    name: Method
+  - codegraphId: struct:5c371d991b82ea353ada34a8c5bd550f
+    file: third_party/openbao/internal/command/agent/config/config.go
+    kind: struct
+    line: 149
+    name: Sink
+  - codegraphId: struct:5dcd267d8757551adf2d2b5e65efb7ad
+    file: third_party/openbao/internal/command/agent/config/config.go
+    kind: struct
+    line: 162
+    name: TemplateConfig
+  - codegraphId: struct:44449fb715c31140e1e50908dc3e93ff
+    file: third_party/openbao/internal/command/agent/config/config.go
+    kind: struct
+    line: 168
+    name: ExecConfig
+  - codegraphId: function:294cb86e42204c2b1e779df712442e7c
+    file: third_party/openbao/internal/command/agent/config/config.go
+    kind: function
+    line: 174
+    name: NewConfig
+    signature: () *Config
+  - codegraphId: method:14758788adb7aaacf8bc499df1e36609
+    file: third_party/openbao/internal/command/agent/config/config.go
+    kind: method
+    line: 181
+    name: Config.Merge
+    signature: (c2 *Config) *Config
+  - codegraphId: method:159bd10ec29b623bd2509959fbb3378d
+    file: third_party/openbao/internal/command/agent/config/config.go
+    kind: method
+    line: 275
+    name: Config.IsDefaultListerDefined
+    signature: () bool
+  - codegraphId: method:8fb9e5ef63e7856d62d727089b7b3173
+    file: third_party/openbao/internal/command/agent/config/config.go
+    kind: method
+    line: 286
+    name: Config.ValidateConfig
+    signature: () error
+  - codegraphId: function:7d03046ef74c3b4828473c26ca07b14e
+    file: third_party/openbao/internal/command/agent/config/config.go
+    kind: function
+    line: 465
+    name: LoadConfig
+    signature: (path string) (*Config, error)
+  - codegraphId: function:cdf4d68dbad872e3cc019b30335916e8
+    file: third_party/openbao/internal/command/agent/config/config.go
+    kind: function
+    line: 478
+    name: LoadConfigDir
+    signature: (dir string) (cfg *Config, err error)
+  - codegraphId: function:7de4097c49ecd17b3154c91c54c4bc66
+    file: third_party/openbao/internal/command/agent/config/config.go
+    kind: function
+    line: 554
+    name: LoadConfigFile
+    signature: (path string) (*Config, error)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 1dc641cad56a621d94b4cb358a9281dea2c636492f0f033b9324b40bb2e43ec8
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 00558228be4be6f379b2bf6abfb449b9795f87ac334b8ec6ef7922620907201c
