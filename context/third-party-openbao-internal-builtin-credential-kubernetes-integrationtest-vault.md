@@ -2,13 +2,53 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to hold the Kubernetes RBAC fixture manifests that the openbao kubernetes credential backend integration test applies before running. The test needs a ServiceAccount that the Vault server can use to review other pods' tokens, and it needs namespace-listing permission for both that reviewer account and the vault account so the test scenarios can enumerate namespaces during the auth flow. Keeping these as standalone YAML files under integrationtest/vault lets the test harness apply them verbatim to a throwaway cluster, isolating the test from any pre-existing RBAC state.
 
 _Write the prose above and the fields in the spec block. `codeRefs` and the resolved references below are maintained by the tool; an edit there is lost._
 
 ## spec
 
 ```yaml spec
+requirements:
+- codeRefs:
+  - file:third_party/openbao/internal/builtin/credential/kubernetes/integrationtest/vault/namespaceControllerBinding.yaml
+  - file:third_party/openbao/internal/builtin/credential/kubernetes/integrationtest/vault/tokenReviewerBinding.yaml
+  - file:third_party/openbao/internal/builtin/credential/kubernetes/integrationtest/vault/tokenReviewerServiceAccount.yaml
+  id: r.license-header
+  level: SHOULD
+  text: Carry the HashiCorp copyright header and SPDX-License-Identifier MPL-2.0 comment
+    at the top of each fixture file.
+- codeRefs:
+  - file:third_party/openbao/internal/builtin/credential/kubernetes/integrationtest/vault/namespaceControllerBinding.yaml
+  id: r.namespace-controller-binding-reviewer
+  level: MUST
+  text: Bind the test-token-reviewer-account ServiceAccount in namespace test to ClusterRole
+    system:controller:namespace-controller via a ClusterRoleBinding named test-namespacelister-account-binding.
+- codeRefs:
+  - file:third_party/openbao/internal/builtin/credential/kubernetes/integrationtest/vault/namespaceControllerBinding.yaml
+  id: r.namespace-controller-binding-vault
+  level: MUST
+  text: Bind the vault ServiceAccount in namespace test to ClusterRole system:controller:namespace-controller
+    via a ClusterRoleBinding named test-namespacelister-account-binding-vault.
+- codeRefs:
+  - file:third_party/openbao/internal/builtin/credential/kubernetes/integrationtest/vault/namespaceControllerBinding.yaml
+  - file:third_party/openbao/internal/builtin/credential/kubernetes/integrationtest/vault/tokenReviewerBinding.yaml
+  id: r.rbac-api-version
+  level: MUST
+  text: Use apiVersion rbac.authorization.k8s.io/v1 and apiGroup rbac.authorization.k8s.io
+    on every ClusterRoleBinding in these fixtures.
+- codeRefs:
+  - file:third_party/openbao/internal/builtin/credential/kubernetes/integrationtest/vault/tokenReviewerBinding.yaml
+  id: r.token-reviewer-auth-delegator-binding
+  level: MUST
+  text: Bind the test-token-reviewer-account ServiceAccount in namespace test to ClusterRole
+    system:auth-delegator via a ClusterRoleBinding named test-token-reviewer-account-binding.
+- codeRefs:
+  - file:third_party/openbao/internal/builtin/credential/kubernetes/integrationtest/vault/tokenReviewerServiceAccount.yaml
+  id: r.token-reviewer-service-account
+  level: MUST
+  text: Declare a ServiceAccount named test-token-reviewer-account in namespace test
+    (apiVersion v1, kind ServiceAccount).
 upstream: self
 ```
 
