@@ -49673,8 +49673,173 @@ system_contexts:
   codeRefIndex:
   - file:third_party/openbao/sdk/helper/salt/salt.go salt.go@third_party/openbao/sdk/helper/salt/salt.go
   - file:third_party/openbao/sdk/helper/salt/salt_test.go salt_test.go@third_party/openbao/sdk/helper/salt/salt_test.go
+  - function:29c38f0f6b6f2ef26a94545f1a25b8b4 SaltID@third_party/openbao/sdk/helper/salt/salt.go:172
+  - function:647708e4e3fba40683b937c1a4e7e986 SHA256Hash@third_party/openbao/sdk/helper/salt/salt.go:195
+  - function:69669d2fcbda6ced1d85b2bbd49d6a27 HMACValue@third_party/openbao/sdk/helper/salt/salt.go:178
+  - function:816fc49eb26bd61183f198047efaee03 HMACIdentifiedValue@third_party/openbao/sdk/helper/salt/salt.go:184
+  - function:8b0bf0298e5d76baa06f89d699ef77bc NewNonpersistentSalt@third_party/openbao/sdk/helper/salt/salt.go:122
+  - function:ada98ce13a571a1ab3ea45efe04dfd1d NewSalt@third_party/openbao/sdk/helper/salt/salt.go:58
+  - function:e6f01ecbf16d2fbaa0cf757ff29aebb0 SHA1Hash@third_party/openbao/sdk/helper/salt/salt.go:189
+  - method:3ca946c377612e6d67838c409a2bc0d8 Salt.DidGenerate@third_party/openbao/sdk/helper/salt/salt.go:160
+  - method:5cd808cb4b1b12965ebbb1fd4014712e Salt.GetHMAC@third_party/openbao/sdk/helper/salt/salt.go:146
+  - method:6149150e8291270af421811963b3dc87 Salt.SaltIDHashFunc@third_party/openbao/sdk/helper/salt/salt.go:166
+  - method:c41e90acac0bb2cf56cdb9c229633fed Salt.GetIdentifiedHMAC@third_party/openbao/sdk/helper/salt/salt.go:154
+  - method:f2e3aac23518ef74b39e165cdb5d279f Salt.SaltID@third_party/openbao/sdk/helper/salt/salt.go:140
+  - struct:a1fed3ab6292f17841889ba2b4b932d9 Salt@third_party/openbao/sdk/helper/salt/salt.go:30
+  - struct:ea5a758f1b77c9a0e3e76dae5afe0969 Config@third_party/openbao/sdk/helper/salt/salt.go:39
+  - type_alias:784f3ffcf9b9c8ae309e23b867deac40 HashFunc@third_party/openbao/sdk/helper/salt/salt.go:36
   id: sc.third-party-openbao-sdk-helper-salt
+  intent: 'The context exists so that callers can obfuscate sensitive identifiers
+    and storage paths with a stable, optionally persisted salt without reimplementing
+    the hashing and HMAC plumbing. It fixes the observable contract of the package:
+    which defaults NewSalt applies when Config is nil or sparse, when a salt is treated
+    as generated versus restored, how the salt is persisted and read through logical.Storage,
+    and the exact hash and HMAC output formats that downstream audit, token store
+    and KV backends depend on.'
+  interfaces:
+  - file: third_party/openbao/sdk/helper/salt/salt.go
+    kind: struct
+    name: Config
+    signature: type Config struct { Location string; HashFunc HashFunc; HMAC func()
+      hash.Hash; HMACType string }
+  - file: third_party/openbao/sdk/helper/salt/salt.go
+    kind: function
+    name: HMACIdentifiedValue
+    signature: func HMACIdentifiedValue(salt, val, hmacType string, hashFunc func()
+      hash.Hash) string
+  - file: third_party/openbao/sdk/helper/salt/salt.go
+    kind: function
+    name: HMACValue
+    signature: func HMACValue(salt, val string, hashFunc func() hash.Hash) string
+  - file: third_party/openbao/sdk/helper/salt/salt.go
+    kind: type
+    name: HashFunc
+    signature: type HashFunc func([]byte) []byte
+  - file: third_party/openbao/sdk/helper/salt/salt.go
+    kind: function
+    name: NewNonpersistentSalt
+    signature: func NewNonpersistentSalt() *Salt
+  - file: third_party/openbao/sdk/helper/salt/salt.go
+    kind: function
+    name: NewSalt
+    signature: func NewSalt(ctx context.Context, view logical.Storage, config *Config)
+      (*Salt, error)
+  - file: third_party/openbao/sdk/helper/salt/salt.go
+    kind: function
+    name: SHA1Hash
+    signature: func SHA1Hash(inp []byte) []byte
+  - file: third_party/openbao/sdk/helper/salt/salt.go
+    kind: function
+    name: SHA256Hash
+    signature: func SHA256Hash(inp []byte) []byte
+  - file: third_party/openbao/sdk/helper/salt/salt.go
+    kind: struct
+    name: Salt
+    signature: type Salt struct { config *Config; salt string; generated bool }
+  - file: third_party/openbao/sdk/helper/salt/salt.go
+    kind: method
+    name: Salt.DidGenerate
+    signature: func (s *Salt) DidGenerate() bool
+  - file: third_party/openbao/sdk/helper/salt/salt.go
+    kind: method
+    name: Salt.GetHMAC
+    signature: func (s *Salt) GetHMAC(data string) string
+  - file: third_party/openbao/sdk/helper/salt/salt.go
+    kind: method
+    name: Salt.GetIdentifiedHMAC
+    signature: func (s *Salt) GetIdentifiedHMAC(data string) string
+  - file: third_party/openbao/sdk/helper/salt/salt.go
+    kind: method
+    name: Salt.SaltID
+    signature: func (s *Salt) SaltID(id string) string
+  - file: third_party/openbao/sdk/helper/salt/salt.go
+    kind: method
+    name: Salt.SaltIDHashFunc
+    signature: func (s *Salt) SaltIDHashFunc(id string, hashFunc HashFunc) string
+  - file: third_party/openbao/sdk/helper/salt/salt.go
+    kind: function
+    name: SaltID
+    signature: func SaltID(salt, id string, hash HashFunc) string
   name: third-party-openbao-sdk-helper-salt
+  requirements:
+  - codeRefs:
+    - method:3ca946c377612e6d67838c409a2bc0d8
+    - struct:a1fed3ab6292f17841889ba2b4b932d9
+    id: r.generation-flag
+    level: MUST
+    text: Salt.DidGenerate must report true only when the salt value was produced
+      during initialization rather than restored from storage, so callers can detect
+      a newly created salt.
+  - codeRefs:
+    - function:647708e4e3fba40683b937c1a4e7e986
+    - function:e6f01ecbf16d2fbaa0cf757ff29aebb0
+    id: r.hash-functions
+    level: MUST
+    text: SHA1Hash and SHA256Hash must return the raw digest bytes of the input for
+      their respective algorithms, which SaltID then hex-encodes.
+  - codeRefs:
+    - function:69669d2fcbda6ced1d85b2bbd49d6a27
+    - function:816fc49eb26bd61183f198047efaee03
+    - method:5cd808cb4b1b12965ebbb1fd4014712e
+    - method:c41e90acac0bb2cf56cdb9c229633fed
+    id: r.hmac-helpers
+    level: MUST
+    text: Salt.GetHMAC must key an HMAC built from the configured HMAC constructor
+      with the salt value, write the data through it and return the hex digest; Salt.GetIdentifiedHMAC
+      must return that digest prefixed with HMACType and a colon; the standalone HMACValue
+      and HMACIdentifiedValue must provide the same computation with an explicit hash
+      constructor and optional prefix.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/salt/salt.go
+    - function:ada98ce13a571a1ab3ea45efe04dfd1d
+    - struct:ea5a758f1b77c9a0e3e76dae5afe0969
+    id: r.new-salt-defaults
+    level: MUST
+    text: NewSalt must fill a nil Config with a new Config, set Location to DefaultLocation
+      (the constant string "salt") when empty, set HashFunc to SHA256Hash when nil,
+      and set HMAC to sha256.New with HMACType "hmac-sha256" when HMAC is nil; it
+      must return an error when HMAC is set but HMACType is empty.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/salt/salt.go
+    - function:ada98ce13a571a1ab3ea45efe04dfd1d
+    id: r.new-salt-persistence
+    level: MUST
+    text: NewSalt must read the entry at config.Location from the view with view.Get
+      when the view is not nil, restore the stored bytes as the salt value without
+      marking it generated, and otherwise generate a UUID salt, set the generated
+      flag, and write a StorageEntry keyed by config.Location back through view.Put;
+      each of read, generate and persist failure must return a wrapped error and a
+      nil Salt.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/salt/salt.go
+    - function:8b0bf0298e5d76baa06f89d699ef77bc
+    id: r.nonpersistent-salt
+    level: MUST
+    text: NewNonpersistentSalt must build a Salt with a fresh Config (empty Location,
+      SHA256Hash, sha256.New, HMACType "hmac-sha256"), generate a UUID salt without
+      touching any storage, and report the salt as generated.
+  - codeRefs:
+    - function:29c38f0f6b6f2ef26a94545f1a25b8b4
+    - method:6149150e8291270af421811963b3dc87
+    - method:f2e3aac23518ef74b39e165cdb5d279f
+    - type_alias:784f3ffcf9b9c8ae309e23b867deac40
+    id: r.salt-id-hashing
+    level: MUST
+    text: Salt.SaltID must hash the concatenation of the salt value and the id with
+      the salt's configured HashFunc, and Salt.SaltIDHashFunc must do the same with
+      a caller-supplied HashFunc instead; the package-level SaltID must take salt,
+      id and hash explicitly, concatenate salt+id, apply the hash and return the lowercase
+      hex encoding of the digest.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/salt/salt_test.go
+    - function:29c38f0f6b6f2ef26a94545f1a25b8b4
+    - function:ada98ce13a571a1ab3ea45efe04dfd1d
+    id: r.tests-cover-round-trip
+    level: SHOULD
+    text: The package tests must check that a first NewSalt against an InmemStorage
+      reports generation and stores an entry at DefaultLocation, that a second NewSalt
+      restores the same salt without reporting generation and yields the same SaltID,
+      and that SaltID output length equals twice the digest size for SHA1 and SHA256.
   upstream: self
 - code:
   - third_party/openbao/sdk/helper/shamir/shamir.go

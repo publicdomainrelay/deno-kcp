@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so that callers can obfuscate sensitive identifiers and storage paths with a stable, optionally persisted salt without reimplementing the hashing and HMAC plumbing. It fixes the observable contract of the package: which defaults NewSalt applies when Config is nil or sparse, when a salt is treated as generated versus restored, how the salt is persisted and read through logical.Storage, and the exact hash and HMAC output formats that downstream audit, token store and KV backends depend on.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
