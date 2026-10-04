@@ -6,5 +6,49 @@ metadata:
   name: third-party-openbao-ui-lib-pki-config
   namespace: default
 spec:
+  intent: The context exists to pin down the build-time environment configuration
+    seam for the vendored OpenBao PKI UI addon, so that downstream tooling can rely
+    on the module's exported shape without reading the whole third-party tree. It
+    records that this file is the addon's identity and environment declaration point,
+    that the module prefix is fixed at `pki`, and that no build flags, API hosts,
+    or feature toggles are declared here.
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/pki/config/environment.js
+    id: r.echo-environment
+    level: MUST
+    text: The returned ENV object must copy the `environment` argument into its `environment`
+      key unchanged, so the caller-supplied build target is visible to the application.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/pki/config/environment.js
+    id: r.exports-config-function
+    level: MUST
+    text: The module must export a single function that accepts the Ember environment
+      name as its argument and returns the ENV object, so consumers can invoke it
+      per build target.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/pki/config/environment.js
+    id: r.license-header
+    level: MUST
+    text: The file must keep the HashiCorp copyright notice and the MPL-2.0 SPDX license
+      identifier at the top.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/pki/config/environment.js
+    id: r.module-prefix-pki
+    level: MUST
+    text: The returned ENV object must set `modulePrefix` to the literal string `pki`,
+      which fixes the Ember module namespace for the addon.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/pki/config/environment.js
+    id: r.no-other-keys
+    level: SHOULD
+    text: The returned ENV object should stay limited to modulePrefix and environment,
+      adding no API hostnames, feature flags, or nested configuration blocks.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/pki/config/environment.js
+    id: r.node-strict-mode
+    level: MUST
+    text: The file must run as a CommonJS module under Node with `'use strict'` in
+      effect and the `eslint-env node` directive marking it as Node-scoped.
   upstream: self

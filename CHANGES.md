@@ -6022,6 +6022,22 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.pure-export` (SHOULD): "The helper must be a pure named export with no external state or side effects, so callers can invoke it during serialization and field lookup without ordering concerns."
 - added `r.unknown-type-defaults` (MUST): "An unrecognized or absent type must fall through to the default field list keyName, keyType and keyBits without throwing."
 
+### third-party-openbao-ui-lib-pki-app-utils
+
+- intent: "" -> "The context exists to pin down the app-level utility directory of the vendored OpenBao PKI UI as a thin compatibility shim rather than a place with real behavior. Any consumer or test that imports keyParamsByType from the app utils path depends on this file forwarding to the library utils module; the context records that dependency so a refactor of the re-export is known to break pki-generate-root component tests."
+- added `r.license-header` (MUST): "The module keeps the HashiCorp copyright notice and the SPDX-License-Identifier MPL-2.0 header at the top of the file."
+- added `r.reexport-key-params-by-type` (MUST): "The app utils module re-export keyParamsByType from pki/utils/action-params as a named export, with no local definition or transformation of the value, so that the pki-generate-root component tests resolve the symbol through the app path."
+
+### third-party-openbao-ui-lib-pki-config
+
+- intent: "" -> "The context exists to pin down the build-time environment configuration seam for the vendored OpenBao PKI UI addon, so that downstream tooling can rely on the module's exported shape without reading the whole third-party tree. It records that this file is the addon's identity and environment declaration point, that the module prefix is fixed at `pki`, and that no build flags, API hosts, or feature toggles are declared here."
+- added `r.echo-environment` (MUST): "The returned ENV object must copy the `environment` argument into its `environment` key unchanged, so the caller-supplied build target is visible to the application."
+- added `r.exports-config-function` (MUST): "The module must export a single function that accepts the Ember environment name as its argument and returns the ENV object, so consumers can invoke it per build target."
+- added `r.license-header` (MUST): "The file must keep the HashiCorp copyright notice and the MPL-2.0 SPDX license identifier at the top."
+- added `r.module-prefix-pki` (MUST): "The returned ENV object must set `modulePrefix` to the literal string `pki`, which fixes the Ember module namespace for the addon."
+- added `r.no-other-keys` (SHOULD): "The returned ENV object should stay limited to modulePrefix and environment, adding no API hostnames, feature flags, or nested configuration blocks."
+- added `r.node-strict-mode` (MUST): "The file must run as a CommonJS module under Node with `'use strict'` in effect and the `eslint-env node` directive marking it as Node-scoped."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -6567,7 +6583,9 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-pki-addon-routes-tidy-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-routes-tidy-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-utils-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-lib-pki-app-utils-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-pki-app-utils-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-lib-pki-config-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-pki-config-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-lib-pki-config-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-service-worker-authenticated-download-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
