@@ -2592,6 +2592,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.pre14-shamir-to-transit-wiring` (MUST): "TestSealMigration_ShamirToTransit_Pre14 must call sealmigration.ParamTestSealMigrationShamirToTransit_Pre14, while TestSealMigration_ShamirToTransit_Post14 must call sealmigration.ParamTestSealMigrationTransitToShamir_Post14, which is the helper the file actually wires to that test name."
 - added `r.transit-to-transit` (SHOULD): "The Transit-to-Transit scenario must run only in its post-1.4 form, through sealmigration.ParamTestSealMigration_TransitToTransit, with no pre-1.4 counterpart in this package."
 
+### third-party-openbao-internal-vault-external-tests-standby
+
+- intent: "" -> "This context exists to pin down, as executable tests, the contract that a standby node in an OpenBao/Vault-style cluster remains readable: it serves read requests for data written on the primary, it must not accept a token that the primary has revoked, and write or wrapping operations it cannot serve locally must be refused with a forwarding error rather than handled. It lives under third_party/openbao as upstream external tests, so it exercises the public-ish surface (vault.NewTestCluster, Core.Standby, Core.HAState, Core.HandleRequest, logical.ShouldForward, teststorage.RaftBackendSetup, testhelpers.WaitForActiveNodeAndStandbys) rather than internals, and is kept so the deno-kcp repository inherits upstream regression coverage for standby semantics."
+- added `r.active-core-serves-wrapping-standby-forwards` (MUST): "For a ReadOperation carrying logical.RequestWrapInfo with a 15 second TTL, a core whose HAState() is consts.Active must return no error and a non-nil response whose WrapInfo.TTL equals 15 seconds, while every other core must return an error for which logical.ShouldForward(err) is true."
+- added `r.revoked-token-denied-on-standby` (MUST): "After the primary revokes the token tree, the standby client must eventually fail its KVv2 read with an error containing "permission denied", showing that secondary nodes honor revocation performed on the primary."
+- added `r.standby-cluster-reaches-active-plus-standby` (MUST): "The test cluster must reach a state with an active node and standbys before assertions run: after cluster.Start() and testhelpers.WaitForActiveNodeAndStandbys, cluster.Cores[0].Standby() must be false, and cleanup must be registered via t.Cleanup(cluster.Cleanup)."
+- added `r.standby-uses-forwarding-not-local-handling` (SHOULD): "Standby nodes should handle requests that they cannot serve themselves by returning a forwardable error rather than executing the request locally, so callers can detect the condition with logical.ShouldForward."
+- added `r.writes-from-any-core-visible-on-primary-and-standby` (MUST): "A value written through any core's KVv2 client into the kv mount must become readable through both the primary client and the standby client, polled with require.EventuallyWithT at a 10 second timeout and 100 millisecond tick, with the exact per-core expected value compared against data.Data["bar"]."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -2772,5 +2781,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-vault-external-tests-router-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-sealmigration-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-sealmigrationext-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-vault-external-tests-standby-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-vault-external-tests-standby-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-storage-crosstest-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |

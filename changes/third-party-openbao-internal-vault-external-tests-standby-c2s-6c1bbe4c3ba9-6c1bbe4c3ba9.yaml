@@ -10,5 +10,21 @@ spec:
   systemContext: third-party-openbao-internal-vault-external-tests-standby
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-vault-external-tests-standby
-  phase: Running
+  agentLog: This context is the Go external test suite for read-only standby behaviour
+    in the vendored OpenBao tree, at third_party/openbao/internal/vault/external_tests/standby/read_only_standby_test.go
+    (package standby_test). TestReadOnlyStandby builds a three-core Raft test cluster
+    with the pki and kv logical backends registered, starts it, waits for one active
+    node plus standbys, mounts kv-v2 on the primary, mints a token on the primary
+    and copies it to the standby client, then for each core writes a distinct value
+    through that core's KVv2 client and asserts, with require.EventuallyWithT at a
+    10s timeout and 100ms tick, that the value is readable both through the primary
+    client and through the standby client. It then revokes the token tree on the primary
+    and asserts that reads through the standby client eventually fail with "permission
+    denied". TestReadOnlyStandbysForwardingWrapping builds a cluster with a passthrough
+    kv-v2 backend, mounts wraptest on the active node, performs a CreateOperation
+    through the leader's HandleRequest, then issues a ReadOperation with WrapInfo
+    (15s TTL) against every core and asserts that the active core returns a response
+    whose WrapInfo.TTL is 15s while non-active cores return an error for which logical.ShouldForward
+    is true.
+  message: wrote 5 requirement(s) and 0 interface(s) for third-party-openbao-internal-vault-external-tests-standby
+  phase: Succeeded

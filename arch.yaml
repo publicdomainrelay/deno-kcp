@@ -36747,7 +36747,55 @@ system_contexts:
   - file:third_party/openbao/internal/vault/external_tests/standby/read_only_standby_test.go
     read_only_standby_test.go@third_party/openbao/internal/vault/external_tests/standby/read_only_standby_test.go
   id: sc.third-party-openbao-internal-vault-external-tests-standby
+  intent: 'This context exists to pin down, as executable tests, the contract that
+    a standby node in an OpenBao/Vault-style cluster remains readable: it serves read
+    requests for data written on the primary, it must not accept a token that the
+    primary has revoked, and write or wrapping operations it cannot serve locally
+    must be refused with a forwarding error rather than handled. It lives under third_party/openbao
+    as upstream external tests, so it exercises the public-ish surface (vault.NewTestCluster,
+    Core.Standby, Core.HAState, Core.HandleRequest, logical.ShouldForward, teststorage.RaftBackendSetup,
+    testhelpers.WaitForActiveNodeAndStandbys) rather than internals, and is kept so
+    the deno-kcp repository inherits upstream regression coverage for standby semantics.'
   name: third-party-openbao-internal-vault-external-tests-standby
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/standby/read_only_standby_test.go
+    id: r.active-core-serves-wrapping-standby-forwards
+    level: MUST
+    text: For a ReadOperation carrying logical.RequestWrapInfo with a 15 second TTL,
+      a core whose HAState() is consts.Active must return no error and a non-nil response
+      whose WrapInfo.TTL equals 15 seconds, while every other core must return an
+      error for which logical.ShouldForward(err) is true.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/standby/read_only_standby_test.go
+    id: r.revoked-token-denied-on-standby
+    level: MUST
+    text: After the primary revokes the token tree, the standby client must eventually
+      fail its KVv2 read with an error containing "permission denied", showing that
+      secondary nodes honor revocation performed on the primary.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/standby/read_only_standby_test.go
+    id: r.standby-cluster-reaches-active-plus-standby
+    level: MUST
+    text: 'The test cluster must reach a state with an active node and standbys before
+      assertions run: after cluster.Start() and testhelpers.WaitForActiveNodeAndStandbys,
+      cluster.Cores[0].Standby() must be false, and cleanup must be registered via
+      t.Cleanup(cluster.Cleanup).'
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/standby/read_only_standby_test.go
+    id: r.standby-uses-forwarding-not-local-handling
+    level: SHOULD
+    text: Standby nodes should handle requests that they cannot serve themselves by
+      returning a forwardable error rather than executing the request locally, so
+      callers can detect the condition with logical.ShouldForward.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/standby/read_only_standby_test.go
+    id: r.writes-from-any-core-visible-on-primary-and-standby
+    level: MUST
+    text: A value written through any core's KVv2 client into the kv mount must become
+      readable through both the primary client and the standby client, polled with
+      require.EventuallyWithT at a 10 second timeout and 100 millisecond tick, with
+      the exact per-core expected value compared against data.Data["bar"].
   upstream: self
 - code:
   - third_party/openbao/internal/vault/external_tests/storage/crosstest/cross_test.go
