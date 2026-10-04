@@ -1,10 +1,186 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
 - file:third_party/openbao/internal/builtin/logical/pki/dnstest/server.go server.go@third_party/openbao/internal/builtin/logical/pki/dnstest/server.go
+- function:769bf9a407752d46c66e4c62f29a9e3d SetupResolverOnNetwork@third_party/openbao/internal/builtin/logical/pki/dnstest/server.go:45
+- function:88f0f0268853a2055eba1644ceea6e4e SetupResolver@third_party/openbao/internal/builtin/logical/pki/dnstest/server.go:41
+- method:158ff4a89391b2d07b470a73e9d63382 TestServer.AddDomain@third_party/openbao/internal/builtin/logical/pki/dnstest/server.go:296
+- method:55f9f3a2853673bbf964a50d65a1f2de TestServer.RemoveRecordsOfTypeForDomain@third_party/openbao/internal/builtin/logical/pki/dnstest/server.go:371
+- method:586406dafe979d86dc8d3b4e0a83cc13 TestServer.Cleanup@third_party/openbao/internal/builtin/logical/pki/dnstest/server.go:426
+- method:6248feb08d12f960753200d1bb8ac089 TestServer.RemoveAllRecords@third_party/openbao/internal/builtin/logical/pki/dnstest/server.go:419
+- method:6ca5f3cf3a0af374c79ca10e46735d56 TestServer.PushConfig@third_party/openbao/internal/builtin/logical/pki/dnstest/server.go:214
+- method:93395f6ee0e52bc88dfc8d77ada5bec8 TestServer.GetLocalAddr@third_party/openbao/internal/builtin/logical/pki/dnstest/server.go:288
+- method:a01ec1c6398f282d07519771cffce0b8 TestServer.GetRemoteAddr@third_party/openbao/internal/builtin/logical/pki/dnstest/server.go:292
+- method:aa35f509411a5732c3b92dfd0c96be1d TestServer.RemoveRecordsForDomain@third_party/openbao/internal/builtin/logical/pki/dnstest/server.go:395
+- method:ba1201102a00df0a994c03e5aeaed589 TestServer.RemoveRecord@third_party/openbao/internal/builtin/logical/pki/dnstest/server.go:337
+- method:ebfaea9507c84692de195294c309b464 TestServer.AddRecord@third_party/openbao/internal/builtin/logical/pki/dnstest/server.go:307
+- struct:a90e3c5d2d24007c86c24ef772e6cf58 TestServer@third_party/openbao/internal/builtin/logical/pki/dnstest/server.go:23
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-builtin-logical-pki-dnstest
   namespace: default
 spec:
+  intent: 'This context exists to specify the contract of the DNS test harness the
+    PKI backend relies on: what the constructors guarantee about container startup
+    and configuration, how domain and record state is mutated and synchronized, how
+    the running resolver''s addresses are exposed to tests, and how resources are
+    released. It gives an implementer or reviewer the invariants the helper must hold
+    so that PKI tests can depend on a deterministic in-container DNS server without
+    re-reading the whole file.'
+  interfaces:
+  - file: third_party/openbao/internal/builtin/logical/pki/dnstest/server.go
+    kind: function
+    name: SetupResolver
+    signature: func SetupResolver(t *testing.T, domain string) *TestServer
+  - file: third_party/openbao/internal/builtin/logical/pki/dnstest/server.go
+    kind: function
+    name: SetupResolverOnNetwork
+    signature: func SetupResolverOnNetwork(t *testing.T, domain string, network string)
+      *TestServer
+  - file: third_party/openbao/internal/builtin/logical/pki/dnstest/server.go
+    kind: struct
+    name: TestServer
+    signature: type TestServer struct
+  - file: third_party/openbao/internal/builtin/logical/pki/dnstest/server.go
+    kind: method
+    name: TestServer.AddDomain
+    signature: func (ts *TestServer) AddDomain(domain string)
+  - file: third_party/openbao/internal/builtin/logical/pki/dnstest/server.go
+    kind: method
+    name: TestServer.AddRecord
+    signature: func (ts *TestServer) AddRecord(domain string, record string, value
+      string)
+  - file: third_party/openbao/internal/builtin/logical/pki/dnstest/server.go
+    kind: method
+    name: TestServer.Cleanup
+    signature: func (ts *TestServer) Cleanup()
+  - file: third_party/openbao/internal/builtin/logical/pki/dnstest/server.go
+    kind: method
+    name: TestServer.GetLocalAddr
+    signature: func (ts *TestServer) GetLocalAddr() string
+  - file: third_party/openbao/internal/builtin/logical/pki/dnstest/server.go
+    kind: method
+    name: TestServer.GetRemoteAddr
+    signature: func (ts *TestServer) GetRemoteAddr() string
+  - file: third_party/openbao/internal/builtin/logical/pki/dnstest/server.go
+    kind: method
+    name: TestServer.PushConfig
+    signature: func (ts *TestServer) PushConfig()
+  - file: third_party/openbao/internal/builtin/logical/pki/dnstest/server.go
+    kind: method
+    name: TestServer.RemoveAllRecords
+    signature: func (ts *TestServer) RemoveAllRecords()
+  - file: third_party/openbao/internal/builtin/logical/pki/dnstest/server.go
+    kind: method
+    name: TestServer.RemoveRecord
+    signature: func (ts *TestServer) RemoveRecord(domain string, record string, value
+      string)
+  - file: third_party/openbao/internal/builtin/logical/pki/dnstest/server.go
+    kind: method
+    name: TestServer.RemoveRecordsForDomain
+    signature: func (ts *TestServer) RemoveRecordsForDomain(domain string)
+  - file: third_party/openbao/internal/builtin/logical/pki/dnstest/server.go
+    kind: method
+    name: TestServer.RemoveRecordsOfTypeForDomain
+    signature: func (ts *TestServer) RemoveRecordsOfTypeForDomain(domain string, record
+      string)
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - method:158ff4a89391b2d07b470a73e9d63382
+    - method:ebfaea9507c84692de195294c309b464
+    id: r.addrecord-appends-value-for-domain-and-type
+    level: MUST
+    text: AddRecord must append the given value to the value list for the (domain,
+      record type) pair, creating the domain and record-type entries when absent,
+      and must record the domain in the server's domain list so zone generation includes
+      it.
+  - codeRefs:
+    - method:93395f6ee0e52bc88dfc8d77ada5bec8
+    - method:a01ec1c6398f282d07519771cffce0b8
+    id: r.addresses-report-running-container
+    level: MUST
+    text: GetLocalAddr must return the address the started DNS service is reachable
+      at locally, and GetRemoteAddr must return the address remote clients use, both
+      read from the running service's configuration rather than from cached test input.
+  - codeRefs:
+    - method:55f9f3a2853673bbf964a50d65a1f2de
+    - method:6248feb08d12f960753200d1bb8ac089
+    - method:aa35f509411a5732c3b92dfd0c96be1d
+    id: r.bulk-removal-scopes
+    level: MUST
+    text: RemoveRecordsOfTypeForDomain must clear only the named record type for one
+      domain, RemoveRecordsForDomain must clear every record type for one domain,
+      and RemoveAllRecords must clear all records for all domains, each leaving the
+      remaining scope intact; RemoveAllRecords must not remove the domains themselves
+      from the domain list.
+  - codeRefs:
+    - method:586406dafe979d86dc8d3b4e0a83cc13
+    - struct:a90e3c5d2d24007c86c24ef772e6cf58
+    id: r.cleanup-releases-resources
+    level: MUST
+    text: Cleanup must release the resources the server acquired — running the registered
+      cleanup callback and stopping the DNS container — so tests leave no containers
+      behind.
+  - codeRefs:
+    - function:769bf9a407752d46c66e4c62f29a9e3d
+    - function:88f0f0268853a2055eba1644ceea6e4e
+    id: r.constructor-defaults-to-default-network
+    level: MUST
+    text: SetupResolver must construct a TestServer for the given domain by delegating
+      to SetupResolverOnNetwork with an empty network string, so callers that do not
+      care about the Docker network get the default one.
+  - codeRefs:
+    - function:769bf9a407752d46c66e4c62f29a9e3d
+    - struct:a90e3c5d2d24007c86c24ef772e6cf58
+    id: r.constructor-initializes-server-state
+    level: MUST
+    text: SetupResolverOnNetwork must initialize the TestServer with the testing handle,
+      a background context, the single requested domain, an empty domain-to-record-to-values
+      map, the requested network, and a logger before any container work happens.
+  - codeRefs:
+    - function:769bf9a407752d46c66e4c62f29a9e3d
+    - method:6ca5f3cf3a0af374c79ca10e46735d56
+    id: r.constructor-starts-container-and-pushes-config
+    level: MUST
+    text: SetupResolverOnNetwork must run the three startup steps in order — set up
+      the Docker runner, start the DNS container on the given network, then push the
+      generated configuration — and return a non-nil *TestServer only after the resolver
+      is running and configured.
+  - codeRefs:
+    - method:6ca5f3cf3a0af374c79ca10e46735d56
+    - struct:a90e3c5d2d24007c86c24ef772e6cf58
+    id: r.pushconfig-regenerates-and-uploads-zone-data
+    level: MUST
+    text: PushConfig must regenerate the BIND configuration and zone files from the
+      current domain and record state and upload them into the running container,
+      so that records added or removed after startup take effect on the live resolver.
+  - codeRefs:
+    - method:158ff4a89391b2d07b470a73e9d63382
+    - method:55f9f3a2853673bbf964a50d65a1f2de
+    - method:6248feb08d12f960753200d1bb8ac089
+    - method:aa35f509411a5732c3b92dfd0c96be1d
+    - method:ba1201102a00df0a994c03e5aeaed589
+    - method:ebfaea9507c84692de195294c309b464
+    - struct:a90e3c5d2d24007c86c24ef772e6cf58
+    id: r.record-mutation-guarded-by-lock
+    level: MUST
+    text: Every operation that reads or writes the domains slice and the records map
+      — AddDomain, AddRecord, RemoveRecord, RemoveRecordsOfTypeForDomain, RemoveRecordsForDomain,
+      and RemoveAllRecords — must take the TestServer mutex so concurrent test goroutines
+      cannot race on the shared state.
+  - codeRefs:
+    - method:ba1201102a00df0a994c03e5aeaed589
+    id: r.removerecord-drops-single-value
+    level: MUST
+    text: RemoveRecord must remove exactly the matching value from the (domain, record
+      type) list, leaving other values of the same type in place, and must not fail
+      when the domain or record type is unknown.
+  - codeRefs:
+    - function:769bf9a407752d46c66e4c62f29a9e3d
+    - struct:a90e3c5d2d24007c86c24ef772e6cf58
+    id: r.runner-uses-bind9-image-and-domain-named-container
+    level: SHOULD
+    text: The Docker runner should be created against the ubuntu/bind9 image with
+      tag latest, expose port 53/udp, join the caller-supplied network, and derive
+      the container name from the domain by replacing dots with dashes.
   upstream: self

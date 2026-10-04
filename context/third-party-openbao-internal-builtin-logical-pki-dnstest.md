@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to specify the contract of the DNS test harness the PKI backend relies on: what the constructors guarantee about container startup and configuration, how domain and record state is mutated and synchronized, how the running resolver's addresses are exposed to tests, and how resources are released. It gives an implementer or reviewer the invariants the helper must hold so that PKI tests can depend on a deterministic in-container DNS server without re-reading the whole file.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
