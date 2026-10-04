@@ -7,5 +7,42 @@ metadata:
   name: third-party-openbao-internal-vault-external-tests-raft-raft-binary
   namespace: default
 spec:
+  intent: 'This context exists so the raft configuration behaviour exercised by the
+    shared external raft test suite is also covered against real docker-hosted vault
+    nodes driven by a locally built binary, rather than only in-process nodes. It
+    guards the join and reconfiguration path: the cluster must behave correctly both
+    before and after a node is added, and the test only runs where a binary path is
+    supplied, so developers without docker or a built binary get a skip instead of
+    a failure.'
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/raft/raft_binary/raft_test.go
+    id: r.config-test-before-and-after-add-node
+    level: MUST
+    text: rafttest.Raft_Configuration_Test runs against the cluster once before cluster.AddNode
+      and again after AddNode succeeds; a non-nil error from AddNode fails the test
+      with t.Fatal and prevents the second run.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/raft/raft_binary/raft_test.go
+    id: r.docker-cluster-options
+    level: MUST
+    text: The cluster is built from docker.DockerClusterOptions with ImageRepo "quay.io/openbao/openbao",
+      ImageTag "latest", VaultBinary set to the BAO_BINARY value, and VaultNodeConfig
+      LogLevel "TRACE", then passed to docker.NewTestDockerCluster.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/raft/raft_binary/raft_test.go
+    id: r.parallel-and-cleanup
+    level: MUST
+    text: The test calls t.Parallel() before any setup and defers cluster.Cleanup()
+      immediately after creating the docker cluster, so clusters do not leak when
+      the test fails.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/raft/raft_binary/raft_test.go
+    id: r.skip-without-binary
+    level: MUST
+    text: TestRaft_Configuration_Docker reads api.ReadBaoVariable("BAO_BINARY") and
+      skips with the message "only running docker test when $BAO_BINARY present" when
+      that variable is empty, so the docker test runs only where a binary path is
+      provided.
   upstream: self
