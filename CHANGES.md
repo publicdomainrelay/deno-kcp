@@ -1010,6 +1010,24 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.shutdown-and-exit` (MUST): "After a stop condition the HTTP server is shut down gracefully, a failing ListenAndServe returns an error unless it is http.ErrServerClosed, and main exits with the --exit-code value, logging an error and exiting through log.Fatalf when run returns an error."
 - added `r.stop-conditions` (MUST): "The process stops on whichever comes first: a 60 second context timeout, the configured stop signal, or the --stop-after duration elapsing; on a stop signal it sleeps for --sleep-after-stop-signal when that value is positive before continuing."
 
+### third-party-openbao-internal-command-agent-internal-ctmanager
+
+- intent: "" -> "This context exists to record the configuration surface of the consul-template runner inside the OpenBao agent: which agent-level settings map onto which ctconfig.Config fields, which values are forced rather than inherited from the environment, what the defaults are, and the one condition under which construction fails. The file is vendored third-party code under third_party/openbao, carried in this repository unchanged, so the spec describes the upstream behavior as observed rather than any local design choice."
+- added `r.autoauth-backoff-sync` (MUST): "When auto-auth is configured with a method, a positive MinBackoff must be copied into Vault.Retry.Backoff and a positive MaxBackoff into Vault.Retry.MaxBackoff, so consul-template's retry follows the auto-auth initial backoff."
+- added `r.cache-branch-address` (MUST): "When the cache is present and valid, the in-process dialer must be installed on Vault.Transport.CustomDialer, creating the TransportConfig if it is nil, and Vault.Address must be forced to "http://127.0.0.1:8200" so the HTTP client does not default to https."
+- added `r.cache-dialer-required` (MUST): "When the agent config has a non-nil Cache whose InProcDialer is nil, NewConfig must return the error "missing in-process dialer configuration" instead of a config."
+- added `r.connection-tuning` (MUST): "DisableIdleConnsTemplating must set Vault.Transport.MaxIdleConns to -1, and DisableKeepAlivesTemplating must set Vault.Transport.DisableKeepAlives to true, each independently of the other."
+- added `r.default-config-base` (MUST): "NewConfig must start from ctconfig.DefaultConfig and replace its Templates field with a copy of the passed TemplateConfigs, so callers cannot mutate the caller-owned template set through the returned config."
+- added `r.finalize-before-logging` (MUST): "conf.Finalize() must be called after the Vault, transport and retry fields are set, and the log level must then be derived from ManagerConfig.LogLevel before logging is configured."
+- added `r.logging-setup` (MUST): "ctlogging must be set up with the converted log level string and ManagerConfig.LogWriter, and any error from that setup must be returned to the caller rather than swallowed."
+- added `r.manager-config-inputs` (MUST): "ManagerConfig must carry exactly the inputs NewConfig reads: the agent config pointer holding Vault, cache, template, auto-auth and transport-tuning settings; the namespace; the hclog level; and the log writer."
+- added `r.namespace-conditional` (MUST): "Vault.Namespace must be set from ManagerConfig.Namespace only when that field is not the empty string; an empty namespace leaves the field untouched."
+- added `r.retry-attempts` (MUST): "Retry attempts must default to ctconfig.DefaultRetryAttempts and be overridden by the agent's Vault.Retry.NumRetries when both the Vault block and its Retry block are non-nil; Vault.Retry must then be set with those attempts and Enabled equal to attempts greater than zero."
+- added `r.ssl-default-disabled` (MUST): "Before the transport branches run, the Vault SSL block must be set to a disabled configuration with Enabled false, Verify false, and empty Cert, Key, CaCert, CaPath and ServerName values."
+- added `r.static-secret-lease` (MUST): "When the agent has a non-nil TemplateConfig with a non-zero StaticSecretRenderInt, that value must become Vault.DefaultLeaseDuration; otherwise the consul-template default stays in place."
+- added `r.tls-branch` (MUST): "When there is no cache and the Vault address starts with "https" or a CA cert is configured, the SSL block must be rebuilt as enabled, with Verify set to the inverse of Vault.TLSSkipVerify and Cert, Key, CaCert, CaPath and ServerName taken from the agent's Vault client TLS settings."
+- added `r.vault-environment-isolation` (MUST): "The Vault section must always set RenewToken to false, Token to the empty string, and Address to the agent config's Vault address, so no token, renew behavior or address is picked up from the environment."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -1047,6 +1065,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-command-agent-exec-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agent-exec-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agent-exec-test-app-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-command-agent-internal-ctmanager-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-command-agent-internal-ctmanager-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agent-template-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-internal-command-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
