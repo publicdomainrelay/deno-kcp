@@ -4042,8 +4042,63 @@ system_contexts:
   id: sc.third-party-openbao-internal-builtin-database-valkey
   name: third-party-openbao-internal-builtin-database-valkey
   upstream: self
-- id: sc.third-party-openbao-internal-builtin-database-valkey-bootstrap-terraform
+- code:
+  - third_party/openbao/internal/builtin/database/valkey/bootstrap/terraform/docker-compose.yml
+  - third_party/openbao/internal/builtin/database/valkey/bootstrap/terraform/redis.tf
+  id: sc.third-party-openbao-internal-builtin-database-valkey-bootstrap-terraform
   name: third-party-openbao-internal-builtin-database-valkey-bootstrap-terraform
+  upstream: self
+- code:
+  - third_party/openbao/internal/builtin/database/valkey/valkey-database-plugin/main.go
+  id: sc.third-party-openbao-internal-builtin-database-valkey-valkey-database-plugin
+  name: third-party-openbao-internal-builtin-database-valkey-valkey-database-plugin
+  upstream: self
+- code:
+  - third_party/openbao/internal/builtin/logical/database/backend.go
+  - third_party/openbao/internal/builtin/logical/database/backend_test.go
+  - third_party/openbao/internal/builtin/logical/database/credentials.go
+  - third_party/openbao/internal/builtin/logical/database/credentials_test.go
+  - third_party/openbao/internal/builtin/logical/database/mocks_test.go
+  - third_party/openbao/internal/builtin/logical/database/mockv4.go
+  - third_party/openbao/internal/builtin/logical/database/mockv5.go
+  - third_party/openbao/internal/builtin/logical/database/path_config_connection.go
+  - third_party/openbao/internal/builtin/logical/database/path_config_connection_test.go
+  - third_party/openbao/internal/builtin/logical/database/path_creds_create.go
+  - third_party/openbao/internal/builtin/logical/database/path_roles.go
+  - third_party/openbao/internal/builtin/logical/database/path_roles_test.go
+  - third_party/openbao/internal/builtin/logical/database/path_rotate_credentials.go
+  - third_party/openbao/internal/builtin/logical/database/rollback.go
+  - third_party/openbao/internal/builtin/logical/database/rollback_test.go
+  - third_party/openbao/internal/builtin/logical/database/rotation.go
+  - third_party/openbao/internal/builtin/logical/database/rotation_test.go
+  - third_party/openbao/internal/builtin/logical/database/secret_creds.go
+  - third_party/openbao/internal/builtin/logical/database/version_wrapper.go
+  - third_party/openbao/internal/builtin/logical/database/version_wrapper_test.go
+  - third_party/openbao/internal/builtin/logical/database/versioning_large_test.go
+  id: sc.third-party-openbao-internal-builtin-logical-database
+  name: third-party-openbao-internal-builtin-logical-database
+  upstream: self
+- code:
+  - third_party/openbao/internal/builtin/logical/database/dbplugin/plugin_test.go
+  id: sc.third-party-openbao-internal-builtin-logical-database-dbplugin
+  name: third-party-openbao-internal-builtin-logical-database-dbplugin
+  upstream: self
+- code:
+  - third_party/openbao/internal/builtin/logical/kubernetes/backend.go
+  - third_party/openbao/internal/builtin/logical/kubernetes/backend_test.go
+  - third_party/openbao/internal/builtin/logical/kubernetes/client.go
+  - third_party/openbao/internal/builtin/logical/kubernetes/client_test.go
+  - third_party/openbao/internal/builtin/logical/kubernetes/kube_service_account.go
+  - third_party/openbao/internal/builtin/logical/kubernetes/path_check.go
+  - third_party/openbao/internal/builtin/logical/kubernetes/path_config.go
+  - third_party/openbao/internal/builtin/logical/kubernetes/path_config_test.go
+  - third_party/openbao/internal/builtin/logical/kubernetes/path_creds.go
+  - third_party/openbao/internal/builtin/logical/kubernetes/path_creds_test.go
+  - third_party/openbao/internal/builtin/logical/kubernetes/path_roles.go
+  - third_party/openbao/internal/builtin/logical/kubernetes/path_roles_test.go
+  - third_party/openbao/internal/builtin/logical/kubernetes/wal.go
+  id: sc.third-party-openbao-internal-builtin-logical-kubernetes
+  name: third-party-openbao-internal-builtin-logical-kubernetes
   upstream: self
 - code:
   - third_party/openbao/.release/nfpm.yaml

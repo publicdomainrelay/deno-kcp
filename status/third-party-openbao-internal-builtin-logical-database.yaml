@@ -1,0 +1,345 @@
+conditions:
+- message: 'undeclared: Backend, ClientCertificateGenerator, DatabaseConfig, DatabaseConfig.SupportsCredentialType,
+    Factory, MockDatabaseV4, MockDatabaseV4.Close, MockDatabaseV4.CreateUser, MockDatabaseV4.GenerateCredentials,
+    MockDatabaseV4.Init, MockDatabaseV4.Initialize, MockDatabaseV4.RenewUser, MockDatabaseV4.RevokeUser,
+    MockDatabaseV4.RotateRootCredentials, MockDatabaseV4.SetCredentials, MockDatabaseV4.Type,
+    MockDatabaseV5, MockDatabaseV5.Close, MockDatabaseV5.DeleteUser, MockDatabaseV5.Initialize,
+    MockDatabaseV5.NewUser, MockDatabaseV5.Type, MockDatabaseV5.UpdateUser, New, NewV4,
+    RunV4, RunV5, RunV6Multiplexed, databaseBackend.ClearConnection, databaseBackend.ClearConnectionId,
+    databaseBackend.CloseIfShutdown, databaseBackend.DatabaseConfig, databaseBackend.GetConnection,
+    databaseBackend.GetConnectionWithConfig, databaseBackend.Role, databaseBackend.StaticRole,
+    databaseVersionWrapper.Close, databaseVersionWrapper.DeleteUser, databaseVersionWrapper.Initialize,
+    databaseVersionWrapper.NewUser, databaseVersionWrapper.PluginVersion, databaseVersionWrapper.Type,
+    databaseVersionWrapper.UpdateUser, dbPluginInstance.Close, staticAccount.CredentialTTL,
+    staticAccount.NextRotationTime'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/builtin/logical/database/backend.go
+  - third_party/openbao/internal/builtin/logical/database/backend_test.go
+  - third_party/openbao/internal/builtin/logical/database/credentials.go
+  - third_party/openbao/internal/builtin/logical/database/credentials_test.go
+  - third_party/openbao/internal/builtin/logical/database/mocks_test.go
+  - third_party/openbao/internal/builtin/logical/database/mockv4.go
+  - third_party/openbao/internal/builtin/logical/database/mockv5.go
+  - third_party/openbao/internal/builtin/logical/database/path_config_connection.go
+  - third_party/openbao/internal/builtin/logical/database/path_config_connection_test.go
+  - third_party/openbao/internal/builtin/logical/database/path_creds_create.go
+  - third_party/openbao/internal/builtin/logical/database/path_roles.go
+  - third_party/openbao/internal/builtin/logical/database/path_roles_test.go
+  - third_party/openbao/internal/builtin/logical/database/path_rotate_credentials.go
+  - third_party/openbao/internal/builtin/logical/database/rollback.go
+  - third_party/openbao/internal/builtin/logical/database/rollback_test.go
+  - third_party/openbao/internal/builtin/logical/database/rotation.go
+  - third_party/openbao/internal/builtin/logical/database/rotation_test.go
+  - third_party/openbao/internal/builtin/logical/database/secret_creds.go
+  - third_party/openbao/internal/builtin/logical/database/version_wrapper.go
+  - third_party/openbao/internal/builtin/logical/database/version_wrapper_test.go
+  - third_party/openbao/internal/builtin/logical/database/versioning_large_test.go
+  fingerprint: 264b11218b32444c2cdd955edd585bf1eb853f33386881c29b2f90516af53d7e
+  interfaces:
+  - codegraphId: method:551f1c6ddbd5443f663240c49a3e0b01
+    file: third_party/openbao/internal/builtin/logical/database/backend.go
+    kind: method
+    line: 45
+    name: dbPluginInstance.Close
+    signature: () error
+  - codegraphId: function:46b03c6a5071694623273c1859a79474
+    file: third_party/openbao/internal/builtin/logical/database/backend.go
+    kind: function
+    line: 57
+    name: Factory
+    signature: (ctx context.Context, conf *logical.BackendConfig) (logical.Backend,
+      error)
+  - codegraphId: function:69f986706c3bf46fe5958edbeabb4471
+    file: third_party/openbao/internal/builtin/logical/database/backend.go
+    kind: function
+    line: 85
+    name: Backend
+    signature: (conf *logical.BackendConfig) *databaseBackend
+  - codegraphId: method:21045c51cbf5612d8ff03b9967a11589
+    file: third_party/openbao/internal/builtin/logical/database/backend.go
+    kind: method
+    line: 227
+    name: databaseBackend.DatabaseConfig
+    signature: (ctx context.Context, s logical.Storage, name string) (*DatabaseConfig,
+      error)
+  - codegraphId: method:b96bd1b43f591e50a3e2239d08fc060e
+    file: third_party/openbao/internal/builtin/logical/database/backend.go
+    kind: method
+    line: 244
+    name: databaseBackend.Role
+    signature: (ctx context.Context, s logical.Storage, roleName string) (*roleEntry,
+      error)
+  - codegraphId: method:102323d53aba8f635a3085ddef98327f
+    file: third_party/openbao/internal/builtin/logical/database/backend.go
+    kind: method
+    line: 248
+    name: databaseBackend.StaticRole
+    signature: (ctx context.Context, s logical.Storage, roleName string) (*roleEntry,
+      error)
+  - codegraphId: method:aef00ac05268ccf0fbf07b41db40bdab
+    file: third_party/openbao/internal/builtin/logical/database/backend.go
+    kind: method
+    line: 274
+    name: databaseBackend.GetConnection
+    signature: (ctx context.Context, s logical.Storage, name string) (*dbPluginInstance,
+      error)
+  - codegraphId: method:97488329b00022bfba5af7b37652f4eb
+    file: third_party/openbao/internal/builtin/logical/database/backend.go
+    kind: method
+    line: 283
+    name: databaseBackend.GetConnectionWithConfig
+    signature: (ctx context.Context, name string, config *DatabaseConfig) (*dbPluginInstance,
+      error)
+  - codegraphId: method:b2d5ee9d33345ba70b919f5ce735ac7a
+    file: third_party/openbao/internal/builtin/logical/database/backend.go
+    kind: method
+    line: 326
+    name: databaseBackend.ClearConnection
+    signature: (name string) error
+  - codegraphId: method:3f5a589e335f572f15dc5553a2e340a1
+    file: third_party/openbao/internal/builtin/logical/database/backend.go
+    kind: method
+    line: 337
+    name: databaseBackend.ClearConnectionId
+    signature: (name, id string) error
+  - codegraphId: method:78540755cd4f2e19a78cab46570fd1b1
+    file: third_party/openbao/internal/builtin/logical/database/backend.go
+    kind: method
+    line: 346
+    name: databaseBackend.CloseIfShutdown
+    signature: (db *dbPluginInstance, err error)
+  - codegraphId: struct:e4a5d01937edb1e02b67d203fc7be2d0
+    file: third_party/openbao/internal/builtin/logical/database/credentials.go
+    kind: struct
+    line: 180
+    name: ClientCertificateGenerator
+  - codegraphId: struct:418295cc73905726c6061955513ad876
+    file: third_party/openbao/internal/builtin/logical/database/mockv4.go
+    kind: struct
+    line: 19
+    name: MockDatabaseV4
+  - codegraphId: function:625945c626d767c4238ce3a4d0ef9e59
+    file: third_party/openbao/internal/builtin/logical/database/mockv4.go
+    kind: function
+    line: 26
+    name: NewV4
+    signature: () (any, error)
+  - codegraphId: function:602120409f1d3c280ad783306bdf1723
+    file: third_party/openbao/internal/builtin/logical/database/mockv4.go
+    kind: function
+    line: 31
+    name: RunV4
+    signature: (apiTLSConfig *api.TLSConfig) error
+  - codegraphId: method:562852e514c6eaad37da1a82381e71d6
+    file: third_party/openbao/internal/builtin/logical/database/mockv4.go
+    kind: method
+    line: 42
+    name: MockDatabaseV4.Init
+    signature: (ctx context.Context, config map[string]any, verifyConnection bool)
+      (saveConfig map[string]any, err error)
+  - codegraphId: method:436a704b9c773d4dd65b1b74983c2929
+    file: third_party/openbao/internal/builtin/logical/database/mockv4.go
+    kind: method
+    line: 50
+    name: MockDatabaseV4.Initialize
+    signature: (ctx context.Context, config map[string]any, verifyConnection bool)
+      (err error)
+  - codegraphId: method:8e9bb3b1234c58b08520739f58e2dc71
+    file: third_party/openbao/internal/builtin/logical/database/mockv4.go
+    kind: method
+    line: 55
+    name: MockDatabaseV4.CreateUser
+    signature: (ctx context.Context, statements v4.Statements, usernameConfig v4.UsernameConfig,
+      expiration time.Time) (username string, password string, err error)
+  - codegraphId: method:914f27c484fa99eae337917680b2905b
+    file: third_party/openbao/internal/builtin/logical/database/mockv4.go
+    kind: method
+    line: 70
+    name: MockDatabaseV4.RenewUser
+    signature: (ctx context.Context, statements v4.Statements, username string, expiration
+      time.Time) error
+  - codegraphId: method:ab86bf3fe68d79b155340cf90f778a9f
+    file: third_party/openbao/internal/builtin/logical/database/mockv4.go
+    kind: method
+    line: 79
+    name: MockDatabaseV4.RevokeUser
+    signature: (ctx context.Context, statements v4.Statements, username string) error
+  - codegraphId: method:62ae0027fbdeffe6f306d91c67d88b3e
+    file: third_party/openbao/internal/builtin/logical/database/mockv4.go
+    kind: method
+    line: 87
+    name: MockDatabaseV4.RotateRootCredentials
+    signature: (ctx context.Context, statements []string) (config map[string]any,
+      err error)
+  - codegraphId: method:fdc0cb35734deb83cc829b9819e3cc98
+    file: third_party/openbao/internal/builtin/logical/database/mockv4.go
+    kind: method
+    line: 100
+    name: MockDatabaseV4.SetCredentials
+    signature: (ctx context.Context, statements v4.Statements, staticConfig v4.StaticUserConfig)
+      (username string, password string, err error)
+  - codegraphId: method:ff546b548c1866f14de100a8216334f1
+    file: third_party/openbao/internal/builtin/logical/database/mockv4.go
+    kind: method
+    line: 107
+    name: MockDatabaseV4.GenerateCredentials
+    signature: (ctx context.Context) (password string, err error)
+  - codegraphId: method:3409ee4597651f3731a33c632acfe7f8
+    file: third_party/openbao/internal/builtin/logical/database/mockv4.go
+    kind: method
+    line: 113
+    name: MockDatabaseV4.Type
+    signature: () (string, error)
+  - codegraphId: method:d9e7bccfc4f59e86c4805778cf82a7c1
+    file: third_party/openbao/internal/builtin/logical/database/mockv4.go
+    kind: method
+    line: 118
+    name: MockDatabaseV4.Close
+    signature: () error
+  - codegraphId: struct:f8c14d24d6d75319fc8b53098335a04a
+    file: third_party/openbao/internal/builtin/logical/database/mockv5.go
+    kind: struct
+    line: 18
+    name: MockDatabaseV5
+  - codegraphId: function:9590727b1790d44883ac5e32446d9815
+    file: third_party/openbao/internal/builtin/logical/database/mockv5.go
+    kind: function
+    line: 23
+    name: New
+    signature: () (any, error)
+  - codegraphId: function:6a3315a2298212e20d7fe65e6b33d0df
+    file: third_party/openbao/internal/builtin/logical/database/mockv5.go
+    kind: function
+    line: 29
+    name: RunV5
+    signature: () error
+  - codegraphId: function:e0e35ed3467a27074242ec85380b5890
+    file: third_party/openbao/internal/builtin/logical/database/mockv5.go
+    kind: function
+    line: 41
+    name: RunV6Multiplexed
+    signature: () error
+  - codegraphId: method:644b53df6785aebe7899eb5ea8ee8eb6
+    file: third_party/openbao/internal/builtin/logical/database/mockv5.go
+    kind: method
+    line: 47
+    name: MockDatabaseV5.Initialize
+    signature: (ctx context.Context, req v5.InitializeRequest) (v5.InitializeResponse,
+      error)
+  - codegraphId: method:50718b2f8588f736c1dc4c6931e9237c
+    file: third_party/openbao/internal/builtin/logical/database/mockv5.go
+    kind: method
+    line: 60
+    name: MockDatabaseV5.NewUser
+    signature: (ctx context.Context, req v5.NewUserRequest) (v5.NewUserResponse, error)
+  - codegraphId: method:06211080d95cd2246ec3ae8f2539325d
+    file: third_party/openbao/internal/builtin/logical/database/mockv5.go
+    kind: method
+    line: 72
+    name: MockDatabaseV5.UpdateUser
+    signature: (ctx context.Context, req v5.UpdateUserRequest) (v5.UpdateUserResponse,
+      error)
+  - codegraphId: method:b7588fd1277a6ba5371ae88c691273da
+    file: third_party/openbao/internal/builtin/logical/database/mockv5.go
+    kind: method
+    line: 78
+    name: MockDatabaseV5.DeleteUser
+    signature: (ctx context.Context, req v5.DeleteUserRequest) (v5.DeleteUserResponse,
+      error)
+  - codegraphId: method:171b816c74e0728d13ec042f10e27f4f
+    file: third_party/openbao/internal/builtin/logical/database/mockv5.go
+    kind: method
+    line: 84
+    name: MockDatabaseV5.Type
+    signature: () (string, error)
+  - codegraphId: method:592e9b6983bfeb7536b1ec389b61f168
+    file: third_party/openbao/internal/builtin/logical/database/mockv5.go
+    kind: method
+    line: 89
+    name: MockDatabaseV5.Close
+    signature: () error
+  - codegraphId: struct:0401dd6a3ae23898af099f2eb5049cba
+    file: third_party/openbao/internal/builtin/logical/database/path_config_connection.go
+    kind: struct
+    line: 33
+    name: DatabaseConfig
+  - codegraphId: method:0ef6e016c964d2998368213081a1fe62
+    file: third_party/openbao/internal/builtin/logical/database/path_config_connection.go
+    kind: method
+    line: 46
+    name: DatabaseConfig.SupportsCredentialType
+    signature: (credentialType v5.CredentialType) bool
+  - codegraphId: method:8d5a1d841e800e1f4dee9f3d9db11719
+    file: third_party/openbao/internal/builtin/logical/database/path_roles.go
+    kind: method
+    line: 816
+    name: staticAccount.NextRotationTime
+    signature: () time.Time
+  - codegraphId: method:0c3d1048e3c9ef9e668c347b6704756b
+    file: third_party/openbao/internal/builtin/logical/database/path_roles.go
+    kind: method
+    line: 828
+    name: staticAccount.CredentialTTL
+    signature: () time.Duration
+  - codegraphId: method:3602402a0da7635c4715341b96e7c0f7
+    file: third_party/openbao/internal/builtin/logical/database/version_wrapper.go
+    kind: method
+    line: 64
+    name: databaseVersionWrapper.Initialize
+    signature: (ctx context.Context, req v5.InitializeRequest) (v5.InitializeResponse,
+      error)
+  - codegraphId: method:ce9c6205bf10840b0a234bb371df28d3
+    file: third_party/openbao/internal/builtin/logical/database/version_wrapper.go
+    kind: method
+    line: 90
+    name: databaseVersionWrapper.NewUser
+    signature: (ctx context.Context, req v5.NewUserRequest) (resp v5.NewUserResponse,
+      password string, err error)
+  - codegraphId: method:39a3a0ddef46a2ba2cf55d3230472b13
+    file: third_party/openbao/internal/builtin/logical/database/version_wrapper.go
+    kind: method
+    line: 122
+    name: databaseVersionWrapper.UpdateUser
+    signature: (ctx context.Context, req v5.UpdateUserRequest, isRootUser bool) (saveConfig
+      map[string]any, err error)
+  - codegraphId: method:59161c52a0ad76f3f9625506728eb7df
+    file: third_party/openbao/internal/builtin/logical/database/version_wrapper.go
+    kind: method
+    line: 193
+    name: databaseVersionWrapper.DeleteUser
+    signature: (ctx context.Context, req v5.DeleteUserRequest) (v5.DeleteUserResponse,
+      error)
+  - codegraphId: method:735fb3d88ff60015f26504b7c7be215a
+    file: third_party/openbao/internal/builtin/logical/database/version_wrapper.go
+    kind: method
+    line: 211
+    name: databaseVersionWrapper.Type
+    signature: () (string, error)
+  - codegraphId: method:7b74b4c6e32ac8bf905b8accb27dc581
+    file: third_party/openbao/internal/builtin/logical/database/version_wrapper.go
+    kind: method
+    line: 226
+    name: databaseVersionWrapper.Close
+    signature: () error
+  - codegraphId: method:74e83a4bb3dc54d6be26f6256e890b49
+    file: third_party/openbao/internal/builtin/logical/database/version_wrapper.go
+    kind: method
+    line: 239
+    name: databaseVersionWrapper.PluginVersion
+    signature: () logical.PluginVersion
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 036f19485448073a67e1f8f1cf3c80450e9b960f39ca4894bf3aa5e3a9d69fa5
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 264b11218b32444c2cdd955edd585bf1eb853f33386881c29b2f90516af53d7e

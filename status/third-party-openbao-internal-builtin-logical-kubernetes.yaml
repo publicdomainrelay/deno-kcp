@@ -1,0 +1,47 @@
+conditions:
+- message: 'undeclared: Factory, roleEntry.HasSingleK8sNamespace'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/builtin/logical/kubernetes/backend.go
+  - third_party/openbao/internal/builtin/logical/kubernetes/backend_test.go
+  - third_party/openbao/internal/builtin/logical/kubernetes/client.go
+  - third_party/openbao/internal/builtin/logical/kubernetes/client_test.go
+  - third_party/openbao/internal/builtin/logical/kubernetes/kube_service_account.go
+  - third_party/openbao/internal/builtin/logical/kubernetes/path_check.go
+  - third_party/openbao/internal/builtin/logical/kubernetes/path_config.go
+  - third_party/openbao/internal/builtin/logical/kubernetes/path_config_test.go
+  - third_party/openbao/internal/builtin/logical/kubernetes/path_creds.go
+  - third_party/openbao/internal/builtin/logical/kubernetes/path_creds_test.go
+  - third_party/openbao/internal/builtin/logical/kubernetes/path_roles.go
+  - third_party/openbao/internal/builtin/logical/kubernetes/path_roles_test.go
+  - third_party/openbao/internal/builtin/logical/kubernetes/wal.go
+  fingerprint: ab21455ba74142e8c5ee1d6a2a5f4669730659ebab87e674da4a0f783c7f082c
+  interfaces:
+  - codegraphId: function:04661f0f2644d956bb6f4e77fb890a0e
+    file: third_party/openbao/internal/builtin/logical/kubernetes/backend.go
+    kind: function
+    line: 61
+    name: Factory
+    signature: (ctx context.Context, conf *logical.BackendConfig) (logical.Backend,
+      error)
+  - codegraphId: method:ee01baed1d01f2b3529fd85850c64bf8
+    file: third_party/openbao/internal/builtin/logical/kubernetes/path_roles.go
+    kind: method
+    line: 43
+    name: roleEntry.HasSingleK8sNamespace
+    signature: () bool
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 1c2229f4b31804e034acd9031b71fb4a6fbf20e44e1f9ec98e366f15d42ae77b
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: ab21455ba74142e8c5ee1d6a2a5f4669730659ebab87e674da4a0f783c7f082c
