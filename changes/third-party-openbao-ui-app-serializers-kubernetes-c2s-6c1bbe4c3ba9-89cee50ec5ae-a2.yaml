@@ -10,8 +10,22 @@ spec:
   systemContext: third-party-openbao-ui-app-serializers-kubernetes
   toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
 status:
-  message: the agent is summarizing third-party-openbao-ui-app-serializers-kubernetes
-  phase: Running
+  agentLog: 'This context covers the two Ember Data serializers under third_party/openbao/ui/app/serializers/kubernetes
+    in the deno-kcp repository: config.js and role.js. Each file default-exports a
+    serializer class named KubernetesConfigSerializer that extends the shared ApplicationSerializer,
+    declares primaryKey = ''backend'', and overrides serialize(). Both overrides call
+    super.serialize with the forwarded arguments and then delete the backend key from
+    the resulting JSON so the backend is not sent in the request payload. The config.js
+    override adds one more step: when the serialized disable_local_ca_jwt is exactly
+    false, it also nulls kubernetes_ca_cert, kubernetes_host, and service_account_jwt,
+    which clears values left over from a previous manual configuration. role.js does
+    no such clearing. These serializers shape the JSON bodies that the Kubernetes
+    secrets engine UI sends to the OpenBao backend when saving a config or a role.'
+  message: wrote 5 requirement(s) and 1 interface(s) for third-party-openbao-ui-app-serializers-kubernetes;
+    interface KubernetesConfigSerializer.serialize is not in the observed facts; dropped;
+    interface KubernetesConfigSerializer.primaryKey is not in the observed facts;
+    dropped
+  phase: Succeeded
 superseded:
 - message: |-
     ...e, the config serializer sets kubernetes_ca_cert, kubernetes_host and service_account_jwt to null, unsetting values left over from a previous manual configuration.",

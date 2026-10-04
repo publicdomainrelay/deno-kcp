@@ -5240,6 +5240,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.provider-primary-key-name` (MUST): "KeymgmtProviderSerializer must set primaryKey to the string 'name', so provider records are identified by their name attribute rather than by an id attribute."
 - added `r.provider-serialize-credentials` (MUST): "KeymgmtProviderSerializer.serialize must call the superclass serialize with the original arguments and return the resulting JSON spread together with a credentials key holding snapshot.record.credentials, so provider credentials reach the request body alongside the serialized attributes even though they are not serialized attributes."
 
+### third-party-openbao-ui-app-serializers-kubernetes
+
+- intent: "" -> "The context exists to pin down the payload-shaping behaviour of the OpenBao UI Kubernetes serializers, which is easy to get wrong because the model identity key and the wire payload disagree: the model is keyed by backend, yet backend must never reach the API body. It also records the asymmetric cleanup rule, found only in config.js, that discards stale manual-CA fields when disable_local_ca_jwt is false, a condition the role serializer does not share. Recording both files together keeps the pair that looks identical in outline but differs in one branch explicit."
+- added `r.config-clears-manual-ca-fields` (MUST): "When the serialized config has disable_local_ca_jwt strictly equal to false, serialize() sets kubernetes_ca_cert, kubernetes_host, and service_account_jwt to null, so values saved by an earlier manual configuration are unset. When disable_local_ca_jwt is true or absent, those three fields are left as the base serializer produced them."
+- added `r.config-serialize-delegates-to-super` (MUST): "KubernetesConfigSerializer.serialize forwards all of its arguments to super.serialize and mutates the returned JSON object, so the base serializer's attribute mapping still applies."
+- added `r.config-serialize-drops-backend` (MUST): "The config serializer's serialize() deletes json.backend before returning, so the backend identifier is removed from the payload that the Kubernetes config request sends to the server."
+- added `r.config-serializer-identity-key` (MUST): "The Kubernetes config serializer declares primaryKey = 'backend', so an Ember Data record is identified by its backend while the payload built by serialize() carries no backend key."
+- added `r.role-serialize-drops-backend` (MUST): "The Kubernetes role serializer's serialize() calls super.serialize with the forwarded arguments and deletes json.backend before returning, without applying the config serializer's manual-CA cleanup."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5682,6 +5691,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-serializers-keymgmt-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-serializers-keymgmt-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-serializers-kubernetes-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Failed |  | 0 | - |
-| third-party-openbao-ui-app-serializers-kubernetes-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-serializers-kubernetes-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-serializers-oidc-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

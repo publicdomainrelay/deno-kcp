@@ -1,5 +1,6 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
+- class:8676fa2c6e4d5a795d361476a4483ad5 KubernetesConfigSerializer@third_party/openbao/ui/app/serializers/kubernetes/config.js:8
 - file:third_party/openbao/ui/app/serializers/kubernetes/config.js config.js@third_party/openbao/ui/app/serializers/kubernetes/config.js
 - file:third_party/openbao/ui/app/serializers/kubernetes/role.js role.js@third_party/openbao/ui/app/serializers/kubernetes/role.js
 kind: SystemContext
@@ -7,5 +8,59 @@ metadata:
   name: third-party-openbao-ui-app-serializers-kubernetes
   namespace: default
 spec:
+  intent: 'The context exists to pin down the payload-shaping behaviour of the OpenBao
+    UI Kubernetes serializers, which is easy to get wrong because the model identity
+    key and the wire payload disagree: the model is keyed by backend, yet backend
+    must never reach the API body. It also records the asymmetric cleanup rule, found
+    only in config.js, that discards stale manual-CA fields when disable_local_ca_jwt
+    is false, a condition the role serializer does not share. Recording both files
+    together keeps the pair that looks identical in outline but differs in one branch
+    explicit.'
+  interfaces:
+  - file: third_party/openbao/ui/app/serializers/kubernetes/config.js
+    kind: class
+    name: KubernetesConfigSerializer
+    signature: class KubernetesConfigSerializer extends ApplicationSerializer
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - class:8676fa2c6e4d5a795d361476a4483ad5
+    - file:third_party/openbao/ui/app/serializers/kubernetes/config.js
+    id: r.config-clears-manual-ca-fields
+    level: MUST
+    text: When the serialized config has disable_local_ca_jwt strictly equal to false,
+      serialize() sets kubernetes_ca_cert, kubernetes_host, and service_account_jwt
+      to null, so values saved by an earlier manual configuration are unset. When
+      disable_local_ca_jwt is true or absent, those three fields are left as the base
+      serializer produced them.
+  - codeRefs:
+    - class:8676fa2c6e4d5a795d361476a4483ad5
+    id: r.config-serialize-delegates-to-super
+    level: MUST
+    text: KubernetesConfigSerializer.serialize forwards all of its arguments to super.serialize
+      and mutates the returned JSON object, so the base serializer's attribute mapping
+      still applies.
+  - codeRefs:
+    - class:8676fa2c6e4d5a795d361476a4483ad5
+    - file:third_party/openbao/ui/app/serializers/kubernetes/config.js
+    id: r.config-serialize-drops-backend
+    level: MUST
+    text: The config serializer's serialize() deletes json.backend before returning,
+      so the backend identifier is removed from the payload that the Kubernetes config
+      request sends to the server.
+  - codeRefs:
+    - class:8676fa2c6e4d5a795d361476a4483ad5
+    - file:third_party/openbao/ui/app/serializers/kubernetes/config.js
+    id: r.config-serializer-identity-key
+    level: MUST
+    text: The Kubernetes config serializer declares primaryKey = 'backend', so an
+      Ember Data record is identified by its backend while the payload built by serialize()
+      carries no backend key.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/serializers/kubernetes/role.js
+    id: r.role-serialize-drops-backend
+    level: MUST
+    text: The Kubernetes role serializer's serialize() calls super.serialize with
+      the forwarded arguments and deletes json.backend before returning, without applying
+      the config serializer's manual-CA cleanup.
   upstream: self
