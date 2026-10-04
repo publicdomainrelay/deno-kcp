@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The package exists so that a plugin can declare its HTTP surface as data — a list of Path values with patterns, fields and an OperationFunc each — and let the framework do routing, existence checks, field decoding and validation, response shaping, lease extension, and OpenAPI emission. It is vendored third-party code under third_party/openbao/sdk, consumed by this repository rather than authored here, so the spec records the exported API surface and the behaviour the code must keep for the depending backends to work.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
