@@ -76087,12 +76087,141 @@ system_contexts:
   - third_party/openbao/ui/lib/pki/addon/routes/roles/role/generate.js
   - third_party/openbao/ui/lib/pki/addon/routes/roles/role/sign.js
   codeRefIndex:
+  - class:13f77d36ece7f79c59949a18346dfd23 PkiRoleGenerateRoute@third_party/openbao/ui/lib/pki/addon/routes/roles/role/generate.js:11
+  - class:90b2455314cd905b3305d9d965346074 RolesRoleDetailsRoute@third_party/openbao/ui/lib/pki/addon/routes/roles/role/details.js:9
+  - class:a2c23f3b2610327a5496643e076dd636 PkiRoleSignRoute@third_party/openbao/ui/lib/pki/addon/routes/roles/role/sign.js:11
+  - class:b5067a024e68d3288237ecaabc776b56 PkiRoleEditRoute@third_party/openbao/ui/lib/pki/addon/routes/roles/role/edit.js:12
   - file:third_party/openbao/ui/lib/pki/addon/routes/roles/role/details.js details.js@third_party/openbao/ui/lib/pki/addon/routes/roles/role/details.js
   - file:third_party/openbao/ui/lib/pki/addon/routes/roles/role/edit.js edit.js@third_party/openbao/ui/lib/pki/addon/routes/roles/role/edit.js
   - file:third_party/openbao/ui/lib/pki/addon/routes/roles/role/generate.js generate.js@third_party/openbao/ui/lib/pki/addon/routes/roles/role/generate.js
   - file:third_party/openbao/ui/lib/pki/addon/routes/roles/role/sign.js sign.js@third_party/openbao/ui/lib/pki/addon/routes/roles/role/sign.js
   id: sc.third-party-openbao-ui-lib-pki-addon-routes-roles-role
+  intent: 'These files exist so the OpenBao PKI secrets engine UI can render and drive
+    the per-role screens: view a role, edit a role, generate a certificate from a
+    role, and sign a certificate with a role. They form the routing layer that turns
+    URL params plus the selected secrets mount into the Ember Data records the controllers
+    and templates render, and they own the breadcrumb and unsaved-change-confirmation
+    behavior for those screens.'
+  interfaces:
+  - file: third_party/openbao/ui/lib/pki/addon/routes/roles/role/edit.js
+    kind: class
+    name: PkiRoleEditRoute
+    signature: PkiRoleEditRoute()
+  - file: third_party/openbao/ui/lib/pki/addon/routes/roles/role/generate.js
+    kind: class
+    name: PkiRoleGenerateRoute
+    signature: PkiRoleGenerateRoute()
+  - file: third_party/openbao/ui/lib/pki/addon/routes/roles/role/sign.js
+    kind: class
+    name: PkiRoleSignRoute
+    signature: PkiRoleSignRoute()
+  - file: third_party/openbao/ui/lib/pki/addon/routes/roles/role/details.js
+    kind: class
+    name: RolesRoleDetailsRoute
+    signature: RolesRoleDetailsRoute()
   name: third-party-openbao-ui-lib-pki-addon-routes-roles-role
+  requirements:
+  - codeRefs:
+    - class:90b2455314cd905b3305d9d965346074
+    - file:third_party/openbao/ui/lib/pki/addon/routes/roles/role/details.js
+    id: r.details-breadcrumbs
+    level: MUST
+    text: 'After calling the superclass `setupController`, the details route sets
+      `controller.breadcrumbs` to a four-entry trail: `secrets` (external link), the
+      current mount path via the `overview` route, `roles` via `roles.index`, and
+      the role `id` with no route.'
+  - codeRefs:
+    - class:90b2455314cd905b3305d9d965346074
+    - file:third_party/openbao/ui/lib/pki/addon/routes/roles/role/details.js
+    id: r.details-model-loads-role
+    level: MUST
+    text: 'The details route reads the `role` param from the parent `roles/role` route
+      and returns the result of `store.queryRecord(''pki/role'', { backend: secretMountPath.currentPath,
+      id: role })`, so the record is always scoped to the currently selected secrets
+      mount.'
+  - codeRefs:
+    - class:b5067a024e68d3288237ecaabc776b56
+    - file:third_party/openbao/ui/lib/pki/addon/routes/roles/role/edit.js
+    id: r.edit-breadcrumbs
+    level: MUST
+    text: The edit route sets `controller.breadcrumbs` to a five-entry trail ending
+      in the role `id` linked to `roles.role.details` followed by a terminal `edit`
+      label.
+  - codeRefs:
+    - class:b5067a024e68d3288237ecaabc776b56
+    - file:third_party/openbao/ui/lib/pki/addon/routes/roles/role/edit.js
+    id: r.edit-confirm-leave
+    level: MUST
+    text: The edit route class is decorated with `withConfirmLeave('model.role', ['model.issuers'])`,
+      so navigation away is confirmed while the role or issuer models hold unsaved
+      changes.
+  - codeRefs:
+    - class:b5067a024e68d3288237ecaabc776b56
+    - file:third_party/openbao/ui/lib/pki/addon/routes/roles/role/edit.js
+    id: r.edit-issuer-404-tolerated
+    level: MUST
+    text: The issuers query in the edit route catches errors and returns an empty
+      array when `err.httpStatus === 404`, otherwise rethrows, so a mount with no
+      issuers still renders the edit form.
+  - codeRefs:
+    - class:b5067a024e68d3288237ecaabc776b56
+    - file:third_party/openbao/ui/lib/pki/addon/routes/roles/role/edit.js
+    id: r.edit-model-hash
+    level: MUST
+    text: The edit route resolves its model as an `rsvp` hash of the `pki/role` record
+      for the `role` param and a `pki/issuer` collection queried against the current
+      mount path, so the edit form receives both the role and the list of issuers.
+  - codeRefs:
+    - class:13f77d36ece7f79c59949a18346dfd23
+    - file:third_party/openbao/ui/lib/pki/addon/routes/roles/role/generate.js
+    id: r.generate-controller-state
+    level: MUST
+    text: The generate route's `setupController` sets `controller.breadcrumbs` to
+      a trail ending in a terminal `generate certificate` label and sets `controller.hasSubmitted
+      = false`, which the controller updates on a successful generate.
+  - codeRefs:
+    - class:13f77d36ece7f79c59949a18346dfd23
+    - file:third_party/openbao/ui/lib/pki/addon/routes/roles/role/generate.js
+    id: r.generate-model
+    level: MUST
+    text: The generate route's async model hook reads the `role` param from `roles/role`
+      and returns `store.createRecord('pki/certificate/generate', { role })`, producing
+      an unsaved model for the generation form.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/pki/addon/routes/roles/role/generate.js
+    - file:third_party/openbao/ui/lib/pki/addon/routes/roles/role/sign.js
+    id: r.generate-sign-confirm-leave
+    level: MUST
+    text: '`generate.js` and `sign.js` each invoke `withConfirmLeave()` at module
+      scope before the route class definition, enabling the unsaved-change confirmation
+      for the whole module.'
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/pki/addon/routes/roles/role/details.js
+    - file:third_party/openbao/ui/lib/pki/addon/routes/roles/role/edit.js
+    - file:third_party/openbao/ui/lib/pki/addon/routes/roles/role/generate.js
+    - file:third_party/openbao/ui/lib/pki/addon/routes/roles/role/sign.js
+    id: r.mount-path-scoping
+    level: MUST
+    text: Every route in this context resolves the secrets backend from `secretMountPath.currentPath`
+      and uses it in the breadcrumb `overview` and `roles.index` entries and, where
+      it queries, in the request `backend` option, so all four screens follow the
+      currently selected mount.
+  - codeRefs:
+    - class:a2c23f3b2610327a5496643e076dd636
+    - file:third_party/openbao/ui/lib/pki/addon/routes/roles/role/sign.js
+    id: r.sign-controller-state
+    level: MUST
+    text: The sign route's `setupController` sets `controller.breadcrumbs` to a trail
+      ending in a terminal `sign certificate` label and sets `controller.hasSubmitted
+      = false`, which the controller updates on a successful sign.
+  - codeRefs:
+    - class:a2c23f3b2610327a5496643e076dd636
+    - file:third_party/openbao/ui/lib/pki/addon/routes/roles/role/sign.js
+    id: r.sign-model
+    level: MUST
+    text: The sign route's model hook reads the `role` param from `roles/role` and
+      returns `store.createRecord('pki/certificate/sign', { role })`, producing an
+      unsaved model for the signing form.
   upstream: self
 - code:
   - third_party/openbao/ui/lib/pki/addon/routes/tidy/auto.js

@@ -10,5 +10,25 @@ spec:
   systemContext: third-party-openbao-ui-lib-pki-addon-routes-roles-role
   toCommit: e33a5585dc1ac9d3bf63bc1ebdcf5dbb45369989
 status:
-  message: the agent is summarizing third-party-openbao-ui-lib-pki-addon-routes-roles-role
-  phase: Running
+  agentLog: 'This context holds the four Ember route classes that serve a single PKI
+    role under a secrets mount in the OpenBao web UI: the role details route, the
+    role edit route, the certificate generate route, and the certificate sign route.
+    Each route injects the `store` and `secretMountPath` services, reads the `role`
+    param from its parent `roles/role` route, loads or creates a `pki/*` model against
+    the current mount path, and then in `setupController` assigns a breadcrumb trail
+    to the controller. The details and edit routes read existing server state (`pki/role`,
+    `pki/issuer`); the generate and sign routes build unsaved `pki/certificate/*`
+    records and seed `hasSubmitted` on the controller. The edit route guards against
+    losing unsaved changes through the `withConfirmLeave` decorator keyed on the role
+    and issuers models, while the generate and sign routes call `withConfirmLeave()`
+    at module scope.'
+  message: wrote 12 requirement(s) and 4 interface(s) for third-party-openbao-ui-lib-pki-addon-routes-roles-role;
+    interface RolesRoleDetailsRoute.model is not in the observed facts; dropped; interface
+    RolesRoleDetailsRoute.setupController is not in the observed facts; dropped; interface
+    PkiRoleEditRoute.model is not in the observed facts; dropped; interface PkiRoleEditRoute.setupController
+    is not in the observed facts; dropped; interface PkiRoleGenerateRoute.model is
+    not in the observed facts; dropped; interface PkiRoleGenerateRoute.setupController
+    is not in the observed facts; dropped; interface PkiRoleSignRoute.model is not
+    in the observed facts; dropped; interface PkiRoleSignRoute.setupController is
+    not in the observed facts; dropped
+  phase: Succeeded

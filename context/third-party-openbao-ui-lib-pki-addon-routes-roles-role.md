@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+These files exist so the OpenBao PKI secrets engine UI can render and drive the per-role screens: view a role, edit a role, generate a certificate from a role, and sign a certificate with a role. They form the routing layer that turns URL params plus the selected secrets mount into the Ember Data records the controllers and templates render, and they own the breadcrumb and unsaved-change-confirmation behavior for those screens.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

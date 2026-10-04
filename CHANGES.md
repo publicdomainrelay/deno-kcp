@@ -5978,6 +5978,22 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.roles-index-not-configured-message` (MUST): "PkiRolesIndexRoute.setupController must call the super implementation, then set `controller.notConfiguredMessage` to `getCliMessage('roles')` when the resolved role list is non-empty and to `getCliMessage()` with no argument otherwise."
 - added `r.roles-index-query-by-mount` (MUST): "PkiRolesIndexRoute.fetchRoles must query the `pki/role` records from the store with `backend` set to `secretMountPath.currentPath`; a thrown error whose `httpStatus` is 404 must be replaced by an object carrying `parentModel` from `modelFor('roles')`, and any other error must be rethrown."
 
+### third-party-openbao-ui-lib-pki-addon-routes-roles-role
+
+- intent: "" -> "These files exist so the OpenBao PKI secrets engine UI can render and drive the per-role screens: view a role, edit a role, generate a certificate from a role, and sign a certificate with a role. They form the routing layer that turns URL params plus the selected secrets mount into the Ember Data records the controllers and templates render, and they own the breadcrumb and unsaved-change-confirmation behavior for those screens."
+- added `r.details-breadcrumbs` (MUST): "After calling the superclass `setupController`, the details route sets `controller.breadcrumbs` to a four-entry trail: `secrets` (external link), the current mount path via the `overview` route, `roles` via `roles.index`, and the role `id` with no route."
+- added `r.details-model-loads-role` (MUST): "The details route reads the `role` param from the parent `roles/role` route and returns the result of `store.queryRecord('pki/role', { backend: secretMountPath.currentPath, id: role })`, so the record is always scoped to the currently selected secrets mount."
+- added `r.edit-breadcrumbs` (MUST): "The edit route sets `controller.breadcrumbs` to a five-entry trail ending in the role `id` linked to `roles.role.details` followed by a terminal `edit` label."
+- added `r.edit-confirm-leave` (MUST): "The edit route class is decorated with `withConfirmLeave('model.role', ['model.issuers'])`, so navigation away is confirmed while the role or issuer models hold unsaved changes."
+- added `r.edit-issuer-404-tolerated` (MUST): "The issuers query in the edit route catches errors and returns an empty array when `err.httpStatus === 404`, otherwise rethrows, so a mount with no issuers still renders the edit form."
+- added `r.edit-model-hash` (MUST): "The edit route resolves its model as an `rsvp` hash of the `pki/role` record for the `role` param and a `pki/issuer` collection queried against the current mount path, so the edit form receives both the role and the list of issuers."
+- added `r.generate-controller-state` (MUST): "The generate route's `setupController` sets `controller.breadcrumbs` to a trail ending in a terminal `generate certificate` label and sets `controller.hasSubmitted = false`, which the controller updates on a successful generate."
+- added `r.generate-model` (MUST): "The generate route's async model hook reads the `role` param from `roles/role` and returns `store.createRecord('pki/certificate/generate', { role })`, producing an unsaved model for the generation form."
+- added `r.generate-sign-confirm-leave` (MUST): "`generate.js` and `sign.js` each invoke `withConfirmLeave()` at module scope before the route class definition, enabling the unsaved-change confirmation for the whole module."
+- added `r.mount-path-scoping` (MUST): "Every route in this context resolves the secrets backend from `secretMountPath.currentPath` and uses it in the breadcrumb `overview` and `roles.index` entries and, where it queries, in the request `backend` option, so all four screens follow the currently selected mount."
+- added `r.sign-controller-state` (MUST): "The sign route's `setupController` sets `controller.breadcrumbs` to a trail ending in a terminal `sign certificate` label and sets `controller.hasSubmitted = false`, which the controller updates on a successful sign."
+- added `r.sign-model` (MUST): "The sign route's model hook reads the `role` param from `roles/role` and returns `store.createRecord('pki/certificate/sign', { role })`, producing an unsaved model for the signing form."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -6517,7 +6533,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-pki-addon-routes-keys-key-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-routes-roles-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-routes-roles-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-lib-pki-addon-routes-roles-role-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-pki-addon-routes-roles-role-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-routes-tidy-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
