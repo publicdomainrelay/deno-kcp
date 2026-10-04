@@ -9,5 +9,7 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/ui/tests/integration/components/keymgmt/distribute-test.js` file distribute-test.js (third_party/openbao/ui/tests/integration/components/keymgmt/distribute-test.js)
+- `file:third_party/openbao/ui/tests/integration/components/keymgmt/key-edit-test.js` file key-edit-test.js (third_party/openbao/ui/tests/integration/components/keymgmt/key-edit-test.js)
+- `file:third_party/openbao/ui/tests/integration/components/keymgmt/provider-edit-test.js` file provider-edit-test.js (third_party/openbao/ui/tests/integration/components/keymgmt/provider-edit-test.js)
 <!-- SPECD_MANAGED_END -->

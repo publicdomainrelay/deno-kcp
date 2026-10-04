@@ -9,5 +9,6 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/ui/tests/integration/components/kubernetes/config-cta-test.js` file config-cta-test.js (third_party/openbao/ui/tests/integration/components/kubernetes/config-cta-test.js)
+- `file:third_party/openbao/ui/tests/integration/components/kubernetes/tab-page-header-test.js` file tab-page-header-test.js (third_party/openbao/ui/tests/integration/components/kubernetes/tab-page-header-test.js)
 <!-- SPECD_MANAGED_END -->
