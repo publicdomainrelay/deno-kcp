@@ -9,5 +9,6 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/internal/vault/external_tests/approle/alias_name_panic_test.go` file alias_name_panic_test.go (third_party/openbao/internal/vault/external_tests/approle/alias_name_panic_test.go)
+- `file:third_party/openbao/internal/vault/external_tests/approle/wrapped_secretid_test.go` file wrapped_secretid_test.go (third_party/openbao/internal/vault/external_tests/approle/wrapped_secretid_test.go)
 <!-- SPECD_MANAGED_END -->

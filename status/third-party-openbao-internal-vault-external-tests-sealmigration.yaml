@@ -1,15 +1,69 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: InitializeTransit, ParamTestSealMigrationShamirToTransit_Post14,
+    ParamTestSealMigrationShamirToTransit_Pre14, ParamTestSealMigrationTransitToShamir_Post14,
+    ParamTestSealMigrationTransitToShamir_Pre14, ParamTestSealMigration_TransitToTransit'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/internal/vault/external_tests/sealmigration/seal_migration_pre14_test.go
+  - third_party/openbao/internal/vault/external_tests/sealmigration/seal_migration_test.go
+  - third_party/openbao/internal/vault/external_tests/sealmigration/testshared.go
+  fingerprint: 1122fe78d953bb8d30346a238f324dd67def10d1b7ce56ef2a13f0f13ee2b8ad
+  interfaces:
+  - codegraphId: function:40d8d4cf39f7e9a7ce033ff593e61364
+    file: third_party/openbao/internal/vault/external_tests/sealmigration/testshared.go
+    kind: function
+    line: 39
+    name: ParamTestSealMigrationTransitToShamir_Pre14
+    signature: (t *testing.T, logger hclog.Logger, storage teststorage.ReusableStorage,
+      basePort int)
+  - codegraphId: function:ede151c6274be7b37402e591a9c49599
+    file: third_party/openbao/internal/vault/external_tests/sealmigration/testshared.go
+    kind: function
+    line: 70
+    name: ParamTestSealMigrationShamirToTransit_Pre14
+    signature: (t *testing.T, logger hclog.Logger, storage teststorage.ReusableStorage,
+      basePort int)
+  - codegraphId: function:c87742ce772f5a00a62c340c7ab92ca5
+    file: third_party/openbao/internal/vault/external_tests/sealmigration/testshared.go
+    kind: function
+    line: 93
+    name: ParamTestSealMigrationTransitToShamir_Post14
+    signature: (t *testing.T, logger hclog.Logger, storage teststorage.ReusableStorage,
+      basePort int)
+  - codegraphId: function:f93a5441445832900846fd2657ebe10a
+    file: third_party/openbao/internal/vault/external_tests/sealmigration/testshared.go
+    kind: function
+    line: 127
+    name: ParamTestSealMigrationShamirToTransit_Post14
+    signature: (t *testing.T, logger hclog.Logger, storage teststorage.ReusableStorage,
+      basePort int)
+  - codegraphId: function:17afc0249ee3900e0b5c59e5cf2c9eaa
+    file: third_party/openbao/internal/vault/external_tests/sealmigration/testshared.go
+    kind: function
+    line: 157
+    name: ParamTestSealMigration_TransitToTransit
+    signature: "(t *testing.T, logger hclog.Logger,\n\tstorage teststorage.ReusableStorage,
+      basePort int,\n)"
+  - codegraphId: function:be29784e5299a43e0e6bb142b3f5f08c
+    file: third_party/openbao/internal/vault/external_tests/sealmigration/testshared.go
+    kind: function
+    line: 706
+    name: InitializeTransit
+    signature: "(t *testing.T, logger hclog.Logger, storage teststorage.ReusableStorage,
+      basePort int,\n\ttss *sealhelper.TransitSealServer, sealKeyName string,\n) (*vault.TestCluster,
+      *vault.TestClusterOptions)"
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 6018d144568d06f88ed2d9aa08245c7b8ef5c5a8f965473591b544289a8c29ee
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 1122fe78d953bb8d30346a238f324dd67def10d1b7ce56ef2a13f0f13ee2b8ad

@@ -1,15 +1,144 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: Clock, Clock.NewTicker, Clock.NewTimer, Clock.Now, DefaultClock,
+    DefaultClock.NewTicker, DefaultClock.NewTimer, DefaultClock.Now, EndOfMonth, GetMostRecentContiguousMonths,
+    InRange, IsCurrentMonth, IsMonthStart, IsPreviousMonth, MonthsPreviousTo, ParseTimeFromPath,
+    SkipAtEndOfMonth, StartOfMonth, StartOfNextMonth, StartOfPreviousMonth'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/internal/helper/timeutil/timeutil.go
+  - third_party/openbao/internal/helper/timeutil/timeutil_test.go
+  fingerprint: 30945d33f6e533c62fe5f3bbfd8d13088071466d30b4f35df73d3b8f8fb3c8d5
+  interfaces:
+  - codegraphId: function:8a342434dee3eef6babade7a3ffa7f14
+    file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: function
+    line: 15
+    name: StartOfPreviousMonth
+    signature: (t time.Time) time.Time
+  - codegraphId: function:02497f290f75ec9bbb6e0e61f9d63011
+    file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: function
+    line: 20
+    name: StartOfMonth
+    signature: (t time.Time) time.Time
+  - codegraphId: function:b6cfddec9deb7566c4478880a1043938
+    file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: function
+    line: 25
+    name: StartOfNextMonth
+    signature: (t time.Time) time.Time
+  - codegraphId: function:a1ef9a925404a9eca37fd376ec3a51e1
+    file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: function
+    line: 31
+    name: IsMonthStart
+    signature: (t time.Time) bool
+  - codegraphId: function:06b08bf2207793838eb7695b756cedf5
+    file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: function
+    line: 35
+    name: EndOfMonth
+    signature: (t time.Time) time.Time
+  - codegraphId: function:506bf00be4afc878b3b0c20e453bdc51
+    file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: function
+    line: 46
+    name: IsPreviousMonth
+    signature: (t, toCompare time.Time) bool
+  - codegraphId: function:ce9087cbe40a6073979b964a533554a9
+    file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: function
+    line: 58
+    name: IsCurrentMonth
+    signature: (t, compare time.Time) bool
+  - codegraphId: function:3a4e53e31d269747feee4e945bc56edd
+    file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: function
+    line: 74
+    name: GetMostRecentContiguousMonths
+    signature: (startTimes []time.Time) []time.Time
+  - codegraphId: function:de895aad22e8fcc8ac5b27bf53ff54e4
+    file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: function
+    line: 106
+    name: InRange
+    signature: (t, start, end time.Time) bool
+  - codegraphId: function:ab79f481f32350c2e7914d06df65fbe0
+    file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: function
+    line: 113
+    name: ParseTimeFromPath
+    signature: (path string) (time.Time, error)
+  - codegraphId: function:248e6a9e3ec57bf2f3d75957ebef0c98
+    file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: function
+    line: 130
+    name: MonthsPreviousTo
+    signature: (months int, now time.Time) time.Time
+  - codegraphId: function:89a15b84a2b3c0da6961cc27667a1cf9
+    file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: function
+    line: 136
+    name: SkipAtEndOfMonth
+    signature: (t *testing.T)
+  - codegraphId: interface:32a58940e99c7ba5368e0fdfe3dc9b58
+    file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: interface
+    line: 147
+    name: Clock
+  - codegraphId: method:77ef83354bf833c3ebe5e5f918708f8b
+    file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: method
+    line: 148
+    name: Clock.Now
+    signature: () time.Time
+  - codegraphId: method:c01b7f0947f3726502fe12a4ac674cf8
+    file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: method
+    line: 149
+    name: Clock.NewTicker
+    signature: (time.Duration) *time.Ticker
+  - codegraphId: method:c414f13a290c2842af194674df83e552
+    file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: method
+    line: 150
+    name: Clock.NewTimer
+    signature: (time.Duration) *time.Timer
+  - codegraphId: struct:9f6a33aaff47eef8bfc64d1255b7ec6d
+    file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: struct
+    line: 153
+    name: DefaultClock
+  - codegraphId: method:2610a0507cea94b81aa98d91787eba4a
+    file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: method
+    line: 157
+    name: DefaultClock.Now
+    signature: () time.Time
+  - codegraphId: method:3c865dbc94231867424c334f153d022c
+    file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: method
+    line: 161
+    name: DefaultClock.NewTicker
+    signature: (d time.Duration) *time.Ticker
+  - codegraphId: method:34d7e24feaff9bbec965d8c89b064d04
+    file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: method
+    line: 165
+    name: DefaultClock.NewTimer
+    signature: (d time.Duration) *time.Timer
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: e65c7fb70c1c3161838c5f43088ae1e6ec51931743d61873ea17e7ee5e9846bc
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 30945d33f6e533c62fe5f3bbfd8d13088071466d30b4f35df73d3b8f8fb3c8d5

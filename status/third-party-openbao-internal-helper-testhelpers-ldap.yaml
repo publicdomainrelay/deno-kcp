@@ -1,15 +1,28 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: PrepareTestContainer'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/internal/helper/testhelpers/ldap/ldaphelper.go
+  fingerprint: c757b86a87b9c716b63e647467515fbfa59b338791f67ec77271d1e9128fb86f
+  interfaces:
+  - codegraphId: function:39dc4dc3575e0e09a7e68e2f222352c0
+    file: third_party/openbao/internal/helper/testhelpers/ldap/ldaphelper.go
+    kind: function
+    line: 16
+    name: PrepareTestContainer
+    signature: (t *testing.T, version string) (cleanup func(), cfg *ldaputil.ConfigEntry)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 8d8c67489ad97b965697881d1c7471afd95ca8d53cfc3913a881a9897c606c94
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: c757b86a87b9c716b63e647467515fbfa59b338791f67ec77271d1e9128fb86f

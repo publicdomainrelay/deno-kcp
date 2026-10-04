@@ -1,15 +1,77 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: NewServiceRegistration, retryHandler.Notify, retryHandler.Run,
+    serviceRegistration.NotifyActiveStateChange, serviceRegistration.NotifyInitializedStateChange,
+    serviceRegistration.NotifyPerformanceStandbyStateChange, serviceRegistration.NotifySealedStateChange,
+    serviceRegistration.Run'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/internal/serviceregistration/kubernetes/retry_handler.go
+  - third_party/openbao/internal/serviceregistration/kubernetes/retry_handler_test.go
+  - third_party/openbao/internal/serviceregistration/kubernetes/service_registration.go
+  - third_party/openbao/internal/serviceregistration/kubernetes/service_registration_test.go
+  fingerprint: 16089d5556ec879a96d06b9a641f806fda57b2c7be527ecc1fde385b7b10b998
+  interfaces:
+  - codegraphId: method:928d3c98917dab34063c719eb0159110
+    file: third_party/openbao/internal/serviceregistration/kubernetes/retry_handler.go
+    kind: method
+    line: 48
+    name: retryHandler.Run
+    signature: (shutdownCh <-chan struct{}, wait *sync.WaitGroup)
+  - codegraphId: method:4b1f23f2f0887d041e13b22b0cfac769
+    file: third_party/openbao/internal/serviceregistration/kubernetes/retry_handler.go
+    kind: method
+    line: 106
+    name: retryHandler.Notify
+    signature: (patch *client.Patch)
+  - codegraphId: function:bbf84ead9ca06f06cda8b7776cb9e562
+    file: third_party/openbao/internal/serviceregistration/kubernetes/service_registration.go
+    kind: function
+    line: 29
+    name: NewServiceRegistration
+    signature: (config map[string]string, logger hclog.Logger, state sr.State) (sr.ServiceRegistration,
+      error)
+  - codegraphId: method:db3e2c22d822aa06c246592130d719e7
+    file: third_party/openbao/internal/serviceregistration/kubernetes/service_registration.go
+    kind: method
+    line: 68
+    name: serviceRegistration.Run
+    signature: (shutdownCh <-chan struct{}, wait *sync.WaitGroup, _ string) error
+  - codegraphId: method:7fe76a8fed667f4ffc812b5ca6792954
+    file: third_party/openbao/internal/serviceregistration/kubernetes/service_registration.go
+    kind: method
+    line: 73
+    name: serviceRegistration.NotifyActiveStateChange
+    signature: (isActive bool) error
+  - codegraphId: method:841ce99015784c3428e7be159afd9294
+    file: third_party/openbao/internal/serviceregistration/kubernetes/service_registration.go
+    kind: method
+    line: 82
+    name: serviceRegistration.NotifySealedStateChange
+    signature: (isSealed bool) error
+  - codegraphId: method:cb7fe2225119b3b317fac64c8ba6b0f4
+    file: third_party/openbao/internal/serviceregistration/kubernetes/service_registration.go
+    kind: method
+    line: 91
+    name: serviceRegistration.NotifyPerformanceStandbyStateChange
+    signature: (isStandby bool) error
+  - codegraphId: method:ff4cffb6239d0aa5d138c0f9bd505b32
+    file: third_party/openbao/internal/serviceregistration/kubernetes/service_registration.go
+    kind: method
+    line: 100
+    name: serviceRegistration.NotifyInitializedStateChange
+    signature: (isInitialized bool) error
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: aaaff26ef28d48fb56843ec4ce0d7dc26c903ba16308bbeaa842aceb8b224034
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 16089d5556ec879a96d06b9a641f806fda57b2c7be527ecc1fde385b7b10b998

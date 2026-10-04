@@ -9,5 +9,6 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/internal/helper/systemd/notify.go` file notify.go (third_party/openbao/internal/helper/systemd/notify.go)
+- `function:5a861bf0e5d16ced0557d16459574b49` function Notify (third_party/openbao/internal/helper/systemd/notify.go)
 <!-- SPECD_MANAGED_END -->

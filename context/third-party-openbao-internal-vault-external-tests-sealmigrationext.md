@@ -9,5 +9,5 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/internal/vault/external_tests/sealmigrationext/seal_migration_pre14_test.go` file seal_migration_pre14_test.go (third_party/openbao/internal/vault/external_tests/sealmigrationext/seal_migration_pre14_test.go)
 <!-- SPECD_MANAGED_END -->

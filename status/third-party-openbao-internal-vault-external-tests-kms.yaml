@@ -1,15 +1,101 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: ExercisePKICA, ExercisePKIForKey, ExercisePKIIntermediateCA,
+    ExercisePKIRootCA, ExercisePKIWithTransitKMS, ExerciseTransitEncryptDecrypt, ExerciseTransitForKey,
+    ExerciseTransitKMS, ExerciseTransitSignVerify, ExerciseTransitWithTransitKMS,
+    SetupPKI, SetupTransit'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/internal/vault/external_tests/kms/kms_test.go
+  - third_party/openbao/internal/vault/external_tests/kms/testing.go
+  fingerprint: d317cd2f85d63d3f51ba92a23e6338ccece3aeed8239bd08d665f37868d53186
+  interfaces:
+  - codegraphId: function:b8b8fc44db4b504bf330ecbdf5acfa78
+    file: third_party/openbao/internal/vault/external_tests/kms/testing.go
+    kind: function
+    line: 16
+    name: ExerciseTransitKMS
+    signature: (t *testing.T, client *api.Client)
+  - codegraphId: function:df15032a6d8494078e7470afa5e09cde
+    file: third_party/openbao/internal/vault/external_tests/kms/testing.go
+    kind: function
+    line: 95
+    name: SetupTransit
+    signature: (t *testing.T, client *api.Client)
+  - codegraphId: function:7bcc7c8885e937d749320e92a98f01aa
+    file: third_party/openbao/internal/vault/external_tests/kms/testing.go
+    kind: function
+    line: 102
+    name: ExerciseTransitWithTransitKMS
+    signature: (t *testing.T, client *api.Client)
+  - codegraphId: function:7fd87069f7f62de955ee069151b37731
+    file: third_party/openbao/internal/vault/external_tests/kms/testing.go
+    kind: function
+    line: 130
+    name: ExerciseTransitForKey
+    signature: (t *testing.T, client *api.Client, baseName string, encryptDecrypt
+      bool, signVerify bool)
+  - codegraphId: function:3046d2a4858afebec6428e34d78eebc0
+    file: third_party/openbao/internal/vault/external_tests/kms/testing.go
+    kind: function
+    line: 167
+    name: ExerciseTransitEncryptDecrypt
+    signature: (t *testing.T, client *api.Client, mountName string, keyName string)
+  - codegraphId: function:31b901d631b78a1f1fda76d2be91c7b6
+    file: third_party/openbao/internal/vault/external_tests/kms/testing.go
+    kind: function
+    line: 198
+    name: ExerciseTransitSignVerify
+    signature: (t *testing.T, client *api.Client, mountName string, keyName string)
+  - codegraphId: function:190e0c5e008b566007f49bbd64546906
+    file: third_party/openbao/internal/vault/external_tests/kms/testing.go
+    kind: function
+    line: 231
+    name: SetupPKI
+    signature: (t *testing.T, client *api.Client)
+  - codegraphId: function:eb9d41a27c4d208e2a1660caa228c677
+    file: third_party/openbao/internal/vault/external_tests/kms/testing.go
+    kind: function
+    line: 244
+    name: ExercisePKIWithTransitKMS
+    signature: (t *testing.T, client *api.Client)
+  - codegraphId: function:6c7d8b4d2c30fc31ec00d6d0d3307cb2
+    file: third_party/openbao/internal/vault/external_tests/kms/testing.go
+    kind: function
+    line: 278
+    name: ExercisePKIForKey
+    signature: (t *testing.T, client *api.Client, baseName string)
+  - codegraphId: function:17f8e7ee21f0f651bc7f1594fa263d94
+    file: third_party/openbao/internal/vault/external_tests/kms/testing.go
+    kind: function
+    line: 294
+    name: ExercisePKIRootCA
+    signature: (t *testing.T, client *api.Client, mountName string, keyName string,
+      extKeyRef string)
+  - codegraphId: function:1017e8ef94de38bb38646b55bdd5cdd2
+    file: third_party/openbao/internal/vault/external_tests/kms/testing.go
+    kind: function
+    line: 323
+    name: ExercisePKIIntermediateCA
+    signature: (t *testing.T, client *api.Client, mountName string, keyName string,
+      extKeyRef string)
+  - codegraphId: function:148d1fe5f4fb2681bed177ae23c84730
+    file: third_party/openbao/internal/vault/external_tests/kms/testing.go
+    kind: function
+    line: 414
+    name: ExercisePKICA
+    signature: (t *testing.T, client *api.Client, mountName string, issuerName string)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: bcf7c97d3636657996fa901f1b5a260c3a906ad61b5d45ebd429713b0dd20fd5
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: d317cd2f85d63d3f51ba92a23e6338ccece3aeed8239bd08d665f37868d53186

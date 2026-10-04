@@ -1,15 +1,150 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: CloseRaftStorage, ClusterSetup, ClusterSetupMutator, FileBackendSetup,
+    InmemBackendSetup, InmemLatentBackendSetup, MakeFileBackend, MakeInmemBackend,
+    MakeLatentInmemBackend, MakeRaftBackend, MakeReusableRaftHAStorage, MakeReusableRaftStorage,
+    MakeReusableStorage, PhysicalBackendBundler, RaftBackendSetup, RaftHAFactory,
+    RaftHASetup, ReusableStorage, SharedPhysicalFactory, StorageCleanup'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go
+  - third_party/openbao/internal/helper/testhelpers/teststorage/teststorage_reusable.go
+  fingerprint: 0479d5baa0d02f356cb6d3a228fcd06cd21a96435f433601612613f592c95885
+  interfaces:
+  - codegraphId: function:41bdaf91cb2930eb93f26aa5d9cb7526
+    file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go
+    kind: function
+    line: 32
+    name: MakeInmemBackend
+    signature: (t testing.T, logger hclog.Logger) *vault.PhysicalBackendBundle
+  - codegraphId: function:908eb9993c3603f3a06913bdf4601f69
+    file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go
+    kind: function
+    line: 48
+    name: MakeLatentInmemBackend
+    signature: (t testing.T, logger hclog.Logger) *vault.PhysicalBackendBundle
+  - codegraphId: function:0392aa15916f342ab906dd45903d6d37
+    file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go
+    kind: function
+    line: 59
+    name: MakeFileBackend
+    signature: (t testing.T, logger hclog.Logger) *vault.PhysicalBackendBundle
+  - codegraphId: function:a03b33a34006328260ca7e6bb7bd4e25
+    file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go
+    kind: function
+    line: 89
+    name: MakeRaftBackend
+    signature: (t testing.T, coreIdx int, logger hclog.Logger, extraConf map[string]any)
+      *vault.PhysicalBackendBundle
+  - codegraphId: function:ed0356e5bf6a70fd8cd960a858f078ae
+    file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go
+    kind: function
+    line: 119
+    name: RaftHAFactory
+    signature: (f PhysicalBackendBundler) func(t testing.T, coreIdx int, logger hclog.Logger,
+      conf map[string]any) *vault.PhysicalBackendBundle
+  - codegraphId: type_alias:7bb69129e99b3e62e17da8f7a221fe37
+    file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go
+    kind: type_alias
+    line: 160
+    name: PhysicalBackendBundler
+  - codegraphId: function:6343ba5ae1c857a80657f32ec3e0852e
+    file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go
+    kind: function
+    line: 162
+    name: SharedPhysicalFactory
+    signature: (f PhysicalBackendBundler) func(t testing.T, coreIdx int, logger hclog.Logger,
+      conf map[string]any) *vault.PhysicalBackendBundle
+  - codegraphId: type_alias:f971feb060ced1b4b7930e9c6cc183ea
+    file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go
+    kind: type_alias
+    line: 171
+    name: ClusterSetupMutator
+  - codegraphId: function:b60b3195c6e22c81cbbbb59de547f93c
+    file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go
+    kind: function
+    line: 173
+    name: InmemBackendSetup
+    signature: (conf *vault.CoreConfig, opts *vault.TestClusterOptions)
+  - codegraphId: function:c9ffc8948aab6a365501915d777eb6a5
+    file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go
+    kind: function
+    line: 177
+    name: InmemLatentBackendSetup
+    signature: (conf *vault.CoreConfig, opts *vault.TestClusterOptions)
+  - codegraphId: function:f9b33d00190a95e05df46f6d5393a788
+    file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go
+    kind: function
+    line: 181
+    name: FileBackendSetup
+    signature: (conf *vault.CoreConfig, opts *vault.TestClusterOptions)
+  - codegraphId: function:f3a99ead95bd12abb35a935419bcd5fd
+    file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go
+    kind: function
+    line: 185
+    name: RaftBackendSetup
+    signature: (conf *vault.CoreConfig, opts *vault.TestClusterOptions)
+  - codegraphId: function:74134058ecacf56f02caa5a51d30e7ad
+    file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go
+    kind: function
+    line: 196
+    name: RaftHASetup
+    signature: (conf *vault.CoreConfig, opts *vault.TestClusterOptions, bundler PhysicalBackendBundler)
+  - codegraphId: function:f4fc2a80e200d65b53bcf469e55f9db4
+    file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage.go
+    kind: function
+    line: 201
+    name: ClusterSetup
+    signature: (conf *vault.CoreConfig, opts *vault.TestClusterOptions, setup ClusterSetupMutator)
+      (*vault.CoreConfig, *vault.TestClusterOptions)
+  - codegraphId: struct:cddc3bcf9f24c213abf45f9cb41a38c3
+    file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage_reusable.go
+    kind: struct
+    line: 21
+    name: ReusableStorage
+  - codegraphId: type_alias:6008a90f20ec6333d6d1eb98888d520d
+    file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage_reusable.go
+    kind: type_alias
+    line: 37
+    name: StorageCleanup
+  - codegraphId: function:d786198fb6b186f82b6a98e2f9231d75
+    file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage_reusable.go
+    kind: function
+    line: 41
+    name: MakeReusableStorage
+    signature: (t testing.T, logger hclog.Logger, bundle *vault.PhysicalBackendBundle)
+      (ReusableStorage, StorageCleanup)
+  - codegraphId: function:d877cadc67515c9bfca3c055343b3ee8
+    file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage_reusable.go
+    kind: function
+    line: 75
+    name: MakeReusableRaftStorage
+    signature: (t testing.T, logger hclog.Logger, numCores int, addressProvider raftlib.ServerAddressProvider)
+      ReusableStorage
+  - codegraphId: function:9048813ff6393623d8ab30e39fe98ad6
+    file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage_reusable.go
+    kind: function
+    line: 104
+    name: CloseRaftStorage
+    signature: (t testing.T, cluster *vault.TestCluster, idx int)
+  - codegraphId: function:840743623f522715a45780501fe93c8d
+    file: third_party/openbao/internal/helper/testhelpers/teststorage/teststorage_reusable.go
+    kind: function
+    line: 111
+    name: MakeReusableRaftHAStorage
+    signature: (t testing.T, logger hclog.Logger, numCores int, bundle *vault.PhysicalBackendBundle)
+      (ReusableStorage, StorageCleanup)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: ce60a560975850a99e433b1610e4bc5f41d07172da7443c6c2efe411d74e8793
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 0479d5baa0d02f356cb6d3a228fcd06cd21a96435f433601612613f592c95885

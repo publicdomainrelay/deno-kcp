@@ -9,5 +9,8 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/internal/vault/external_tests/raft/raft.go` file raft.go (third_party/openbao/internal/vault/external_tests/raft/raft.go)
+- `file:third_party/openbao/internal/vault/external_tests/raft/raft_autopilot_test.go` file raft_autopilot_test.go (third_party/openbao/internal/vault/external_tests/raft/raft_autopilot_test.go)
+- `file:third_party/openbao/internal/vault/external_tests/raft/raft_test.go` file raft_test.go (third_party/openbao/internal/vault/external_tests/raft/raft_test.go)
+- `function:3a883b33c1bea1968582334abdc0aae3` function Raft_Configuration_Test (third_party/openbao/internal/vault/external_tests/raft/raft.go)
 <!-- SPECD_MANAGED_END -->

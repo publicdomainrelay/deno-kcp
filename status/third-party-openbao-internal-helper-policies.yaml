@@ -1,15 +1,29 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: EquivalentPolicies'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/internal/helper/policies/policies.go
+  - third_party/openbao/internal/helper/policies/policies_test.go
+  fingerprint: b73478d89edaefbaaf43dca0d0d53a038872f394cfd06e21e128d24c0f508949
+  interfaces:
+  - codegraphId: function:379ad7dcf8d0a770034c5155490d07a1
+    file: third_party/openbao/internal/helper/policies/policies.go
+    kind: function
+    line: 12
+    name: EquivalentPolicies
+    signature: (a, b []string) bool
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 13af15da47c60fa835969b8952b0151f17cf02f0607aae6cdce1e3ac34d45c69
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: b73478d89edaefbaaf43dca0d0d53a038872f394cfd06e21e128d24c0f508949

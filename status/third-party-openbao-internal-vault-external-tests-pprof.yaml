@@ -1,15 +1,35 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: SysPprof_Standby_Test, SysPprof_Test'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/internal/vault/external_tests/pprof/pprof.go
+  - third_party/openbao/internal/vault/external_tests/pprof/pprof_test.go
+  fingerprint: 01490b79855a1a8936f62944f334f6f3f2c616a467525a56cf280b16ac4e0247
+  interfaces:
+  - codegraphId: function:72ef1ad28d2ed5526bdb4e9b55b31211
+    file: third_party/openbao/internal/vault/external_tests/pprof/pprof.go
+    kind: function
+    line: 19
+    name: SysPprof_Test
+    signature: (t *testing.T, cluster testcluster.VaultCluster)
+  - codegraphId: function:a8b945b73826f471cf2d88027c833677
+    file: third_party/openbao/internal/vault/external_tests/pprof/pprof.go
+    kind: function
+    line: 117
+    name: SysPprof_Standby_Test
+    signature: (t *testing.T, cluster testcluster.VaultCluster)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 50696a9ed000c4fedbbc38ec82425559cde02bd81d2617438f73fb64c0df3c18
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 01490b79855a1a8936f62944f334f6f3f2c616a467525a56cf280b16ac4e0247

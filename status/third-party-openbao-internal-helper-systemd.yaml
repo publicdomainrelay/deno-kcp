@@ -1,15 +1,28 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: Notify'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/internal/helper/systemd/notify.go
+  fingerprint: 0a7d52e96959078d1a07d3c1a93725450daef7f0fc73dbe237c1b4fdf7c96a5c
+  interfaces:
+  - codegraphId: function:5a861bf0e5d16ced0557d16459574b49
+    file: third_party/openbao/internal/helper/systemd/notify.go
+    kind: function
+    line: 19
+    name: Notify
+    signature: (state string) (bool, error)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 841977713a43821d3b4044c2a5f00747cc9fda26477e20438eec4c3adc98a1e9
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 0a7d52e96959078d1a07d3c1a93725450daef7f0fc73dbe237c1b4fdf7c96a5c

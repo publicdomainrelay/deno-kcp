@@ -9,5 +9,5 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/internal/serviceregistration/kubernetes/client/cmd/kubeclient/main.go` file main.go (third_party/openbao/internal/serviceregistration/kubernetes/client/cmd/kubeclient/main.go)
 <!-- SPECD_MANAGED_END -->

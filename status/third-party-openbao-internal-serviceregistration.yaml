@@ -1,15 +1,70 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: Factory, ServiceRegistration, ServiceRegistration.NotifyActiveStateChange,
+    ServiceRegistration.NotifyInitializedStateChange, ServiceRegistration.NotifyPerformanceStandbyStateChange,
+    ServiceRegistration.NotifySealedStateChange, ServiceRegistration.Run, State'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/internal/serviceregistration/service_registration.go
+  fingerprint: c442e4b44abc0474c01a44ab4f3aad01177a0387c3e34fc12d754ce3b66c2b59
+  interfaces:
+  - codegraphId: struct:3f95d94681b666eb08dff50caf24570e
+    file: third_party/openbao/internal/serviceregistration/service_registration.go
+    kind: struct
+    line: 23
+    name: State
+  - codegraphId: type_alias:beaf67b38d23b9dd08c5290bb5d1af11
+    file: third_party/openbao/internal/serviceregistration/service_registration.go
+    kind: type_alias
+    line: 32
+    name: Factory
+  - codegraphId: interface:b8412bfbee8a77db8cda0864a01fd4ff
+    file: third_party/openbao/internal/serviceregistration/service_registration.go
+    kind: interface
+    line: 36
+    name: ServiceRegistration
+  - codegraphId: method:55f8ed1a2259bf597809b2c796fa6eeb
+    file: third_party/openbao/internal/serviceregistration/service_registration.go
+    kind: method
+    line: 69
+    name: ServiceRegistration.Run
+    signature: (shutdownCh <-chan struct{}, wait *sync.WaitGroup, redirectAddr string)
+      error
+  - codegraphId: method:fdb03743787e1f720246219e7b5f544d
+    file: third_party/openbao/internal/serviceregistration/service_registration.go
+    kind: method
+    line: 77
+    name: ServiceRegistration.NotifyActiveStateChange
+    signature: (isActive bool) error
+  - codegraphId: method:a44b75080ace3a03cf10f85b54c16012
+    file: third_party/openbao/internal/serviceregistration/service_registration.go
+    kind: method
+    line: 84
+    name: ServiceRegistration.NotifySealedStateChange
+    signature: (isSealed bool) error
+  - codegraphId: method:ccbff5a37fb9d810240f214a3733c3ad
+    file: third_party/openbao/internal/serviceregistration/service_registration.go
+    kind: method
+    line: 91
+    name: ServiceRegistration.NotifyPerformanceStandbyStateChange
+    signature: (isStandby bool) error
+  - codegraphId: method:ae717215e4df0076c74ac2e2a181a570
+    file: third_party/openbao/internal/serviceregistration/service_registration.go
+    kind: method
+    line: 98
+    name: ServiceRegistration.NotifyInitializedStateChange
+    signature: (isInitialized bool) error
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 01b6e11dd5de73eb1c9a80da927f242b88d0cf3b03f3e1928ec64547a5b2f0fc
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: c442e4b44abc0474c01a44ab4f3aad01177a0387c3e34fc12d754ce3b66c2b59

@@ -1,15 +1,317 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: Access, Access.QuotaID, Config, LeaseAction, LeaseAction.String,
+    Manager, Manager.ApplyQuota, Manager.Config, Manager.DeleteQuota, Manager.DetectDeadlocks,
+    Manager.HandleBackendDisabling, Manager.HandleNamespaceDeletion, Manager.HandleRemount,
+    Manager.Invalidate, Manager.LoadConfig, Manager.LoadQuota, Manager.QueryQuota,
+    Manager.QueryResolveRoleQuotas, Manager.QuotaByFactors, Manager.QuotaByID, Manager.QuotaByName,
+    Manager.QuotaNames, Manager.RateLimitAuditLoggingEnabled, Manager.RateLimitPathExempt,
+    Manager.RateLimitResponseHeadersEnabled, Manager.Reset, Manager.SetEnableRateLimitAuditLogging,
+    Manager.SetEnableRateLimitResponseHeaders, Manager.SetQuota, Manager.SetRateLimitExemptPaths,
+    Manager.Setup, NewManager, NewRateLimitQuota, Quota, Quota.Clone, Quota.IsInheritable,
+    Quota.QuotaName, QuotaLeaseInformation, QuotaStoragePath, RateLimitQuota, RateLimitQuota.Clone,
+    RateLimitQuota.IsInheritable, RateLimitQuota.QuotaName, Request, Response, Type,
+    Type.String, access.QuotaID'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/internal/vault/quotas/quotas.go
+  - third_party/openbao/internal/vault/quotas/quotas_rate_limit.go
+  - third_party/openbao/internal/vault/quotas/quotas_rate_limit_test.go
+  - third_party/openbao/internal/vault/quotas/quotas_test.go
+  fingerprint: 824b71848561186067d63fc5d3a1d23bd006d8042fa34a457f26616b6216c74f
+  interfaces:
+  - codegraphId: type_alias:b08f41bcf2bf58c8ef3c82577df07a1c
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: type_alias
+    line: 24
+    name: Type
+  - codegraphId: type_alias:cba292b7229f22fd6fd25e02b615fd46
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: type_alias
+    line: 38
+    name: LeaseAction
+  - codegraphId: method:a9d201befac661a69c7fdf217110386d
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: method
+    line: 41
+    name: LeaseAction.String
+    signature: () string
+  - codegraphId: method:32814d5f932975ee37cfda321e8d95b8
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: method
+    line: 76
+    name: Type.String
+    signature: () string
+  - codegraphId: interface:e266dbf69d4ac222bf687dadffbaa42f
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: interface
+    line: 132
+    name: Access
+  - codegraphId: method:192f69f4eaba60df7f6560c98cb1d092
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: method
+    line: 134
+    name: Access.QuotaID
+    signature: () string
+  - codegraphId: method:27f0d881c669ea2b6d6f0e19af0e3d55
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: method
+    line: 147
+    name: access.QuotaID
+    signature: () string
+  - codegraphId: struct:4bc76bbeaaee8e6dba7dbdc519269617
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: struct
+    line: 153
+    name: Manager
+  - codegraphId: struct:c0a6c0995d3acceff4f387d7ae2e064b
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: struct
+    line: 180
+    name: QuotaLeaseInformation
+  - codegraphId: interface:7e7585dad23c0d68c364c80d6698b10a
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: interface
+    line: 190
+    name: Quota
+  - codegraphId: method:7f7f878d26f33d8bc96ead5f129e0221
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: method
+    line: 198
+    name: Quota.QuotaName
+    signature: () string
+  - codegraphId: method:1f7908361501fd4d496530db73ee485e
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: method
+    line: 201
+    name: Quota.IsInheritable
+    signature: () bool
+  - codegraphId: method:c55f949286b0a87e53f569e3ac02360c
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: method
+    line: 211
+    name: Quota.Clone
+    signature: () Quota
+  - codegraphId: struct:2d6122a7ef8f9a5b01e6187d6a70c0fd
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: struct
+    line: 220
+    name: Response
+  - codegraphId: struct:5a4302c1b207fb70ff9e1274770131a5
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: struct
+    line: 234
+    name: Config
+  - codegraphId: struct:9594830c07145c9bbed56079a8d77e8a
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: struct
+    line: 251
+    name: Request
+  - codegraphId: function:3bc9e607eb7a16b985d7f82a699a5886
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: function
+    line: 274
+    name: NewManager
+    signature: (logger log.Logger, ms *metricsutil.ClusterMetricSink, detectDeadlocks
+      bool) (*Manager, error)
+  - codegraphId: method:bf638c54088bc6262e2aed76b6ac10a2
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: method
+    line: 302
+    name: Manager.SetQuota
+    signature: (ctx context.Context, qType string, quota Quota) error
+  - codegraphId: method:44976361c652e12e6e1fee5ebc749f36
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: method
+    line: 355
+    name: Manager.QuotaNames
+    signature: (qType Type) ([]string, error)
+  - codegraphId: method:be48f82547148750ae4ee3d2d3c2d5f3
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: method
+    line: 377
+    name: Manager.QuotaByID
+    signature: (qType string, id string) (Quota, error)
+  - codegraphId: method:c86ef90ba96d7f49920d4d31f83ef623
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: method
+    line: 395
+    name: Manager.QuotaByName
+    signature: (qType string, name string) (Quota, error)
+  - codegraphId: method:2c83757b5a79968be050786b05670fe8
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: method
+    line: 418
+    name: Manager.QuotaByFactors
+    signature: (ctx context.Context, qType, nsPath, mountPath, pathSuffix, role string)
+      (Quota, error)
+  - codegraphId: method:1da5112b6ebd64a311fa1ef933e7fddb
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: method
+    line: 464
+    name: Manager.QueryQuota
+    signature: (req *Request) (Quota, error)
+  - codegraphId: method:09025260cc516c79f082580f11156d23
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: method
+    line: 596
+    name: Manager.QueryResolveRoleQuotas
+    signature: (req *Request) (bool, error)
+  - codegraphId: method:7be34ff186980b2afbc84e3c823ad56e
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: method
+    line: 626
+    name: Manager.DeleteQuota
+    signature: (ctx context.Context, qType string, name string) error
+  - codegraphId: method:b629803ef457140097c89b3efb6d62f4
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: method
+    line: 660
+    name: Manager.ApplyQuota
+    signature: (ctx context.Context, req *Request) (Response, error)
+  - codegraphId: method:f9239888f983b595326d21505cf80491
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: method
+    line: 679
+    name: Manager.SetEnableRateLimitAuditLogging
+    signature: (val bool)
+  - codegraphId: method:7418e5e959ef5d904f6d78a0bfc3b45d
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: method
+    line: 691
+    name: Manager.SetEnableRateLimitResponseHeaders
+    signature: (val bool)
+  - codegraphId: method:cb783e8155dd305bbfea9ee5229c8710
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: method
+    line: 705
+    name: Manager.SetRateLimitExemptPaths
+    signature: (vals []string)
+  - codegraphId: method:500ac6a4a3a78cded562f9c91b005150
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: method
+    line: 722
+    name: Manager.RateLimitAuditLoggingEnabled
+    signature: () bool
+  - codegraphId: method:19933149ad04d389e6caa100f7215da9
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: method
+    line: 731
+    name: Manager.RateLimitResponseHeadersEnabled
+    signature: () bool
+  - codegraphId: method:8b54eff50e5e03d3214089771328e86e
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: method
+    line: 741
+    name: Manager.RateLimitPathExempt
+    signature: (path string) bool
+  - codegraphId: method:3bb069fa0ea4c484313ac0c5c2ad2e88
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: method
+    line: 753
+    name: Manager.Config
+    signature: () *Config
+  - codegraphId: method:f5d707e5396670f5d2682ec388669191
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: method
+    line: 758
+    name: Manager.Reset
+    signature: () error
+  - codegraphId: method:cf7f686d2dfa1c564bffb7aa7d7b300c
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: method
+    line: 941
+    name: Manager.Invalidate
+    signature: (ctx context.Context, key string) error
+  - codegraphId: method:c9cf9904e263d5ff89ea47ff55050f6d
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: method
+    line: 996
+    name: Manager.LoadConfig
+    signature: (ctx context.Context) (*Config, error)
+  - codegraphId: method:013497d025f117fe4d3a813d236e75ac
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: method
+    line: 1015
+    name: Manager.LoadQuota
+    signature: (ctx context.Context, qType, name string) (Quota, error)
+  - codegraphId: method:79662e1afc452a3e9e2538caffc51845
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: method
+    line: 1042
+    name: Manager.Setup
+    signature: (ctx context.Context, storage logical.Storage) error
+  - codegraphId: function:1e822443d40412d154744c5b32332eda
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: function
+    line: 1133
+    name: QuotaStoragePath
+    signature: (quotaType, name string) string
+  - codegraphId: method:c70a2234c6bdd81db6b24c1879443480
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: method
+    line: 1140
+    name: Manager.HandleRemount
+    signature: (ctx context.Context, from, to namespace.MountPathDetails) error
+  - codegraphId: method:66b1b119e79a1b5ba6f538084e5c4476
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: method
+    line: 1236
+    name: Manager.HandleNamespaceDeletion
+    signature: (ctx context.Context, nsPath string) error
+  - codegraphId: method:b2cee10169fbabe08791515449d8d52a
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: method
+    line: 1257
+    name: Manager.HandleBackendDisabling
+    signature: (ctx context.Context, nsPath, mountPath string) error
+  - codegraphId: method:51fa587878c4d978c636415b5f56acda
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+    kind: method
+    line: 1295
+    name: Manager.DetectDeadlocks
+    signature: () bool
+  - codegraphId: struct:63f533788346571e878c46f017f38560
+    file: third_party/openbao/internal/vault/quotas/quotas_rate_limit.go
+    kind: struct
+    line: 40
+    name: RateLimitQuota
+  - codegraphId: function:d0b2b03b55f13ab460ea4e664ce940f3
+    file: third_party/openbao/internal/vault/quotas/quotas_rate_limit.go
+    kind: function
+    line: 95
+    name: NewRateLimitQuota
+    signature: (name, nsPath, mountPath, pathSuffix, role string, rate float64, interval,
+      block time.Duration, inheritable bool) *RateLimitQuota
+  - codegraphId: method:1889682ba37f711e3025b8b70ff041f5
+    file: third_party/openbao/internal/vault/quotas/quotas_rate_limit.go
+    kind: method
+    line: 118
+    name: RateLimitQuota.Clone
+    signature: () Quota
+  - codegraphId: method:5faea9a09230ae3b432bc3d22e1f7a17
+    file: third_party/openbao/internal/vault/quotas/quotas_rate_limit.go
+    kind: method
+    line: 277
+    name: RateLimitQuota.QuotaName
+    signature: () string
+  - codegraphId: method:6a6445f5fe3ac0b57c1fb2ba82e5012b
+    file: third_party/openbao/internal/vault/quotas/quotas_rate_limit.go
+    kind: method
+    line: 281
+    name: RateLimitQuota.IsInheritable
+    signature: () bool
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: cb5dbdc49259d8f40f4ebc4568b4e73da87b9a8acab74a2cc6d1dd2ac8059e55
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 824b71848561186067d63fc5d3a1d23bd006d8042fa34a457f26616b6216c74f

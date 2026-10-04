@@ -1,15 +1,96 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: Client, Client.GetPod, Client.PatchPod, Client.Shutdown, Config,
+    ErrNotFound, ErrNotFound.Error, Metadata, New, Patch, PatchOperation, Pod, Sanitize'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
+  - third_party/openbao/internal/serviceregistration/kubernetes/client/client_test.go
+  - third_party/openbao/internal/serviceregistration/kubernetes/client/config.go
+  fingerprint: 15001b64f207413a38f4ce7d6be70aada8787a28010011403967d595f83f0b8e
+  interfaces:
+  - codegraphId: struct:4e2e0ec469393f723833e5823590ffbf
+    file: third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
+    kind: struct
+    line: 40
+    name: Client
+  - codegraphId: function:38bb0084dd32c963a07b38054a0bdac6
+    file: third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
+    kind: function
+    line: 48
+    name: New
+    signature: (logger hclog.Logger) (*Client, error)
+  - codegraphId: method:bab3187923123b97927ccf502569a7af
+    file: third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
+    kind: method
+    line: 60
+    name: Client.Shutdown
+    signature: ()
+  - codegraphId: method:d896f3ab4c4c6ecaf45ab152335a5a4d
+    file: third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
+    kind: method
+    line: 65
+    name: Client.GetPod
+    signature: (namespace, podName string) (*Pod, error)
+  - codegraphId: method:8c5bdc4d7ed53254e6df99cb6e4ee0e9
+    file: third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
+    kind: method
+    line: 91
+    name: Client.PatchPod
+    signature: (namespace, podName string, patches ...*Patch) error
+  - codegraphId: struct:cdfabb91b2b8b15f5a4d7abee71b4c05
+    file: third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
+    kind: struct
+    line: 225
+    name: Pod
+  - codegraphId: struct:44cc51bfae8aaef29d4656a45b7a6273
+    file: third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
+    kind: struct
+    line: 229
+    name: Metadata
+  - codegraphId: type_alias:a4a4add93fec47e4f99b7c606e6b0768
+    file: third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
+    kind: type_alias
+    line: 238
+    name: PatchOperation
+  - codegraphId: struct:a088b03521cca1c4d3d2e952e024130a
+    file: third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
+    kind: struct
+    line: 246
+    name: Patch
+  - codegraphId: struct:01b68315a7b0530558da0002b3fc5df5
+    file: third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
+    kind: struct
+    line: 252
+    name: ErrNotFound
+  - codegraphId: method:007cf6996b84c2226351d047c38ee34d
+    file: third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
+    kind: method
+    line: 256
+    name: ErrNotFound.Error
+    signature: () string
+  - codegraphId: function:7cded39025065bccb4b10b4487bbfa8d
+    file: third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
+    kind: function
+    line: 264
+    name: Sanitize
+    signature: (val string) string
+  - codegraphId: struct:74b983625d770afde3cc2330d306d1e0
+    file: third_party/openbao/internal/serviceregistration/kubernetes/client/config.go
+    kind: struct
+    line: 85
+    name: Config
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: de914773b06a96d5fe3042d823ed003f516d4cae90a289931e5c7271014263c4
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 15001b64f207413a38f4ce7d6be70aada8787a28010011403967d595f83f0b8e

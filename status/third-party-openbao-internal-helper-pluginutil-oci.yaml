@@ -1,15 +1,61 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: NewPluginDownloader, PluginDownloader, PluginDownloader.Download,
+    PluginDownloader.IsCached, PluginDownloader.Prune, PluginDownloader.Reconcile'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/internal/helper/pluginutil/oci/downloader.go
+  - third_party/openbao/internal/helper/pluginutil/oci/downloader_test.go
+  fingerprint: f91154d6580eaccc7d2e3f8abc12f1810a20697d10cac656c89a4caf91bf30e9
+  interfaces:
+  - codegraphId: struct:a4123959d4f63cc63d31d23177faf31d
+    file: third_party/openbao/internal/helper/pluginutil/oci/downloader.go
+    kind: struct
+    line: 36
+    name: PluginDownloader
+  - codegraphId: function:83b6010e0b001058041ada9ccf0a7f47
+    file: third_party/openbao/internal/helper/pluginutil/oci/downloader.go
+    kind: function
+    line: 43
+    name: NewPluginDownloader
+    signature: (pluginDirectory string, config *server.Config, logger hclog.Logger)
+      *PluginDownloader
+  - codegraphId: method:814afd6594193d47b551b264302aaf6f
+    file: third_party/openbao/internal/helper/pluginutil/oci/downloader.go
+    kind: method
+    line: 52
+    name: PluginDownloader.Reconcile
+    signature: (ctx context.Context) error
+  - codegraphId: method:364b9a07d9740dfbf70af0bcacda2843
+    file: third_party/openbao/internal/helper/pluginutil/oci/downloader.go
+    kind: method
+    line: 127
+    name: PluginDownloader.IsCached
+    signature: (config *server.PluginConfig) bool
+  - codegraphId: method:0c31963a1d256e47e6fd88c31d7e8ab1
+    file: third_party/openbao/internal/helper/pluginutil/oci/downloader.go
+    kind: method
+    line: 187
+    name: PluginDownloader.Download
+    signature: (ctx context.Context, config *server.PluginConfig, logger hclog.Logger)
+      error
+  - codegraphId: method:4491f433a58e1d354f3dd5795b47073c
+    file: third_party/openbao/internal/helper/pluginutil/oci/downloader.go
+    kind: method
+    line: 398
+    name: PluginDownloader.Prune
+    signature: () error
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 7e7381d2d4fc42498e01ea56df5850d81ed98cf55688fe9031fbf0a2c9744507
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: f91154d6580eaccc7d2e3f8abc12f1810a20697d10cac656c89a4caf91bf30e9

@@ -1,15 +1,28 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: TestLayeredACL'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/internal/vault/policy/policytest/acl.go
+  fingerprint: f4d06b75c7f18bb12517b97bc7f9bc0d2992d34ea44c6ef1b8813e8977ff381f
+  interfaces:
+  - codegraphId: function:c661ac0e792f811fac9344e9db3e2bbf
+    file: third_party/openbao/internal/vault/policy/policytest/acl.go
+    kind: function
+    line: 12
+    name: TestLayeredACL
+    signature: (t *testing.T, acl *policy.ACL, ns *namespace.Namespace)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 74b7f6f8a2a64b711987440ed69e332ca47d67c12a9c7e2d8244bed890efae20
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: f4d06b75c7f18bb12517b97bc7f9bc0d2992d34ea44c6ef1b8813e8977ff381f

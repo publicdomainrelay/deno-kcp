@@ -9,5 +9,5 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/internal/vault/external_tests/metrics/core_metrics_int_test.go` file core_metrics_int_test.go (third_party/openbao/internal/vault/external_tests/metrics/core_metrics_int_test.go)
 <!-- SPECD_MANAGED_END -->

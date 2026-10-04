@@ -9,5 +9,6 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/internal/vault/external_tests/token/batch_token_test.go` file batch_token_test.go (third_party/openbao/internal/vault/external_tests/token/batch_token_test.go)
+- `file:third_party/openbao/internal/vault/external_tests/token/token_test.go` file token_test.go (third_party/openbao/internal/vault/external_tests/token/token_test.go)
 <!-- SPECD_MANAGED_END -->

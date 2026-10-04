@@ -9,5 +9,6 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/internal/vault/external_tests/policy/acl_templating_test.go` file acl_templating_test.go (third_party/openbao/internal/vault/external_tests/policy/acl_templating_test.go)
+- `file:third_party/openbao/internal/vault/external_tests/policy/policy_test.go` file policy_test.go (third_party/openbao/internal/vault/external_tests/policy/policy_test.go)
 <!-- SPECD_MANAGED_END -->

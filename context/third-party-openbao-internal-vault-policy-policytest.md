@@ -9,5 +9,6 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/internal/vault/policy/policytest/acl.go` file acl.go (third_party/openbao/internal/vault/policy/policytest/acl.go)
+- `function:c661ac0e792f811fac9344e9db3e2bbf` function TestLayeredACL (third_party/openbao/internal/vault/policy/policytest/acl.go)
 <!-- SPECD_MANAGED_END -->
