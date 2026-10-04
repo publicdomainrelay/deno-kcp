@@ -73099,8 +73099,63 @@ system_contexts:
   codeRefIndex:
   - file:third_party/openbao/ui/lib/kubernetes/addon/utils/generated-role-rules.js
     generated-role-rules.js@third_party/openbao/ui/lib/kubernetes/addon/utils/generated-role-rules.js
+  - function:1f18191a8684e62b3fa7acaa8801c045 getRules@third_party/openbao/ui/lib/kubernetes/addon/utils/generated-role-rules.js:148
   id: sc.third-party-openbao-ui-lib-kubernetes-addon-utils
+  intent: 'This context exists so the Kubernetes role editor can present a fixed,
+    ordered dropdown of starter rule templates and recover the user''s own rules when
+    none of them match. The module is the single source of those templates: it must
+    keep the six ids and labels stable because the component uses the numeric-string
+    ids as the selected template key, and it must return rule values that compare
+    by reference so `initRoleRules` can recognize a template the user picked but did
+    not edit.'
+  interfaces:
+  - file: third_party/openbao/ui/lib/kubernetes/addon/utils/generated-role-rules.js
+    kind: function
+    name: getRules
+    signature: export const getRules = () => [{ id, label, rules }]
   name: third-party-openbao-ui-lib-kubernetes-addon-utils
+  requirements:
+  - codeRefs:
+    - function:1f18191a8684e62b3fa7acaa8801c045
+    id: r.call-is-side-effect-free
+    level: SHOULD
+    text: getRules() takes no arguments and reads no external state, so repeated calls
+      from `initRoleRules` and `resetRoleRules` each yield a fresh template list whose
+      rules still point at the shared rule constants.
+  - codeRefs:
+    - function:1f18191a8684e62b3fa7acaa8801c045
+    id: r.ids-are-stable-keys
+    level: MUST
+    text: The id values stay the literal strings '1' through '6'. Consumers use them
+      as the dropdown selection key and look a template up by id, so renumbering or
+      adding ids breaks template selection.
+  - codeRefs:
+    - function:1f18191a8684e62b3fa7acaa8801c045
+    id: r.no-template-is-first-and-overwritable
+    level: MUST
+    text: 'The id ''1'' entry is labeled ''No template'' and carries the example rules.
+      It is the fallback slot: when the model''s `generatedRoleRules` matches no template,
+      the consumer assigns it onto the id ''1'' entry, so that entry''s `rules` field
+      must be mutable and must not be a frozen or shared-immutable constant.'
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/kubernetes/addon/utils/generated-role-rules.js
+    - function:1f18191a8684e62b3fa7acaa8801c045
+    id: r.rules-compare-by-identity
+    level: MUST
+    text: Each template's `rules` is a module-level rule value, not a value built
+      fresh on every call. The consumer finds the selected template with `rulesTemplates.find((x)
+      => x.rules === generatedRoleRules)`, so a returned rules value must be reference-equal
+      to the constant it came from for an unedited template to be recognized.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/kubernetes/addon/utils/generated-role-rules.js
+    - function:1f18191a8684e62b3fa7acaa8801c045
+    id: r.six-ordered-templates
+    level: MUST
+    text: 'getRules() returns exactly six template objects in this order, each with
+      string `id` and `label` plus a `rules` value: ''1'' ''No template'', ''2'' ''Read
+      resources in a namespace'', ''3'' ''Edit resources in a namespace'', ''4'' ''Update
+      pods, secrets, configmaps, and endpoints'', ''5'' ''Update services and secrets'',
+      ''6'' ''Use pod security policies''.'
   upstream: self
 - code:
   - third_party/openbao/ui/lib/kubernetes/config/environment.js

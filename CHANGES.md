@@ -5667,6 +5667,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.index-redirects-to-details` (MUST): "The bare role route must not render anything itself: its redirect hook calls transitionTo('vault.cluster.secrets.backend.kubernetes.roles.role.details') on the injected 'host-router' service, so visiting a role lands on the details sub-route."
 - added `r.setupController-calls-super` (MUST): "Each of the details, edit and credentials routes must call super.setupController(controller, resolvedModel) before touching the controller, so base Route behavior is preserved."
 
+### third-party-openbao-ui-lib-kubernetes-addon-utils
+
+- intent: "" -> "This context exists so the Kubernetes role editor can present a fixed, ordered dropdown of starter rule templates and recover the user's own rules when none of them match. The module is the single source of those templates: it must keep the six ids and labels stable because the component uses the numeric-string ids as the selected template key, and it must return rule values that compare by reference so `initRoleRules` can recognize a template the user picked but did not edit."
+- added `r.call-is-side-effect-free` (SHOULD): "getRules() takes no arguments and reads no external state, so repeated calls from `initRoleRules` and `resetRoleRules` each yield a fresh template list whose rules still point at the shared rule constants."
+- added `r.ids-are-stable-keys` (MUST): "The id values stay the literal strings '1' through '6'. Consumers use them as the dropdown selection key and look a template up by id, so renumbering or adding ids breaks template selection."
+- added `r.no-template-is-first-and-overwritable` (MUST): "The id '1' entry is labeled 'No template' and carries the example rules. It is the fallback slot: when the model's `generatedRoleRules` matches no template, the consumer assigns it onto the id '1' entry, so that entry's `rules` field must be mutable and must not be a frozen or shared-immutable constant."
+- added `r.rules-compare-by-identity` (MUST): "Each template's `rules` is a module-level rule value, not a value built fresh on every call. The consumer finds the selected template with `rulesTemplates.find((x) => x.rules === generatedRoleRules)`, so a returned rules value must be reference-equal to the constant it came from for an unedited template to be recognized."
+- added `r.six-ordered-templates` (MUST): "getRules() returns exactly six template objects in this order, each with string `id` and `label` plus a `rules` value: '1' 'No template', '2' 'Read resources in a namespace', '3' 'Edit resources in a namespace', '4' 'Update pods, secrets, configmaps, and endpoints', '5' 'Update services and secrets', '6' 'Use pod security policies'."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -6164,5 +6173,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-kubernetes-addon-routes-c2s-6c1bbe4c3ba9-e33a5585dc1a-a3 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-lib-kubernetes-addon-routes-roles-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-kubernetes-addon-routes-roles-role-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-lib-kubernetes-addon-utils-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-kubernetes-addon-utils-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-kubernetes-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
