@@ -1,15 +1,27 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: PkiTidyIndexController'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/ui/lib/pki/addon/controllers/tidy/index.js
+  fingerprint: 2f9da7d6aa23959a0ebdf379442fa578fdcc7a9939570347f272904367d98436
+  interfaces:
+  - codegraphId: class:a10e46a1c1ea70fb8bd55ac9fe989d4c
+    file: third_party/openbao/ui/lib/pki/addon/controllers/tidy/index.js
+    kind: class
+    line: 13
+    name: PkiTidyIndexController
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: a5a7090eca6b473381bdff866c407ff107207fd06ace3295ae915c58ad362a91
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 2f9da7d6aa23959a0ebdf379442fa578fdcc7a9939570347f272904367d98436

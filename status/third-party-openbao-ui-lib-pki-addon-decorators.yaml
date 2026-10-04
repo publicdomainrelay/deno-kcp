@@ -1,15 +1,34 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: decorator, withConfig'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/ui/lib/pki/addon/decorators/check-config.js
+  fingerprint: 217b58ef55eb47c65a1a05077c81b02b1d927b9e9dcf8155bd5ce451fd8d38b9
+  interfaces:
+  - codegraphId: function:77c6c1fd50a76c505b38f9b6d4154d75
+    file: third_party/openbao/ui/lib/pki/addon/decorators/check-config.js
+    kind: function
+    line: 15
+    name: withConfig
+    signature: ()
+  - codegraphId: function:0c525784d07e38e0a048415378b52427
+    file: third_party/openbao/ui/lib/pki/addon/decorators/check-config.js
+    kind: function
+    line: 16
+    name: decorator
+    signature: (SuperClass)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 6b24eb117d2011cb80e7f478d894be3285954c8324f16922d14c0e4e9c6e0f76
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 217b58ef55eb47c65a1a05077c81b02b1d927b9e9dcf8155bd5ce451fd8d38b9

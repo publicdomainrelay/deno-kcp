@@ -1,15 +1,59 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: PkiConfigurationRoute, PkiOverviewRoute, PkiRolesErrorRoute,
+    PkiRoute, PkiTidyRoute, getCliMessage'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/ui/lib/pki/addon/routes/application.js
+  - third_party/openbao/ui/lib/pki/addon/routes/configuration.js
+  - third_party/openbao/ui/lib/pki/addon/routes/error.js
+  - third_party/openbao/ui/lib/pki/addon/routes/index.js
+  - third_party/openbao/ui/lib/pki/addon/routes/overview.js
+  - third_party/openbao/ui/lib/pki/addon/routes/tidy.js
+  fingerprint: 7a3a51376ee7b2ea24330ee597afd7e1a0337b18bc0f2c35d6ecbab0b6f5dd43
+  interfaces:
+  - codegraphId: class:73b65d59cb55fc22d6ea2af358545a30
+    file: third_party/openbao/ui/lib/pki/addon/routes/application.js
+    kind: class
+    line: 10
+    name: PkiRoute
+  - codegraphId: class:9eaaf31192f8310d2315e052649c8dd4
+    file: third_party/openbao/ui/lib/pki/addon/routes/configuration.js
+    kind: class
+    line: 10
+    name: PkiConfigurationRoute
+  - codegraphId: class:733075519e4c913edd04f4dc054cb60c
+    file: third_party/openbao/ui/lib/pki/addon/routes/error.js
+    kind: class
+    line: 9
+    name: PkiRolesErrorRoute
+  - codegraphId: function:8f85141cd85289b6d132ef68ece56fc9
+    file: third_party/openbao/ui/lib/pki/addon/routes/overview.js
+    kind: function
+    line: 14
+    name: getCliMessage
+    signature: (msg)
+  - codegraphId: class:46486ac4791e331ef34add20f83e3ebd
+    file: third_party/openbao/ui/lib/pki/addon/routes/overview.js
+    kind: class
+    line: 21
+    name: PkiOverviewRoute
+  - codegraphId: class:b35bc86acd26a0eaeeaf52ea82e7862f
+    file: third_party/openbao/ui/lib/pki/addon/routes/tidy.js
+    kind: class
+    line: 7
+    name: PkiTidyRoute
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 5fe08d0ef5ce12048dd77364ec8e44ae860d855d54889853c4670e05d4cce088
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 7a3a51376ee7b2ea24330ee597afd7e1a0337b18bc0f2c35d6ecbab0b6f5dd43

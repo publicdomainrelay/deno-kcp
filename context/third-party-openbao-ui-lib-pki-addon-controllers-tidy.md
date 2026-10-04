@@ -9,5 +9,6 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `class:a10e46a1c1ea70fb8bd55ac9fe989d4c` class PkiTidyIndexController (third_party/openbao/ui/lib/pki/addon/controllers/tidy/index.js)
+- `file:third_party/openbao/ui/lib/pki/addon/controllers/tidy/index.js` file index.js (third_party/openbao/ui/lib/pki/addon/controllers/tidy/index.js)
 <!-- SPECD_MANAGED_END -->

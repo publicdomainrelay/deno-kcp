@@ -9,5 +9,6 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `class:ef19167c27da43e8f24bcbfe5369ae50` class PkiCertificateDetailsRoute (third_party/openbao/ui/lib/pki/addon/routes/certificates/certificate/details.js)
+- `file:third_party/openbao/ui/lib/pki/addon/routes/certificates/certificate/details.js` file details.js (third_party/openbao/ui/lib/pki/addon/routes/certificates/certificate/details.js)
 <!-- SPECD_MANAGED_END -->
