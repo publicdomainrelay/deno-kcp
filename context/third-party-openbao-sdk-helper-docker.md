@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so that OpenBao integration tests can stand up external services (databases, plugins, LDAP, and similar) in Docker and talk to them over the network without hand-rolling Docker client plumbing in each test package. The file centralizes container lifecycle, port/address discovery, in-container command execution, file provisioning, and image building behind one small runner API, so a caller supplies a `RunOptions` describing the image, command, environment, ports and files, and gets back a started service plus the addresses needed to connect to it.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
