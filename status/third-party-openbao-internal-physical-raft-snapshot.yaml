@@ -1,10 +1,8 @@
 conditions:
-- message: 'undeclared: New, NewWithSealer, Parse, Restore, RestoreWithSealer, Sealer,
-    Sealer.Open, Sealer.Seal, Snapshot, Snapshot.Checksum, Snapshot.Close, Snapshot.Index,
-    Snapshot.Read, Snapshot.Size, Verify, Write, WriteToTempFile, WriteToTempFileWithSealer,
-    hashList.Add, hashList.DecodeAndVerify, hashList.Encode'
-  reason: InterfacesMissing
-  status: "False"
+- message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+  reason: InterfacesObserved
+  status: "True"
   type: CodeSynced
 - message: observed facts match the synced fingerprint
   reason: FingerprintEqual
@@ -148,5 +146,5 @@ observed:
     name: WriteToTempFileWithSealer
     signature: (logger hclog.Logger, in io.Reader, metadata *raft.SnapshotMeta, sealer
       Sealer) (*os.File, func(), error)
-realizedSpecHash: 0d5bff442bc2b897176ddc919e7add98ab6cc3fdba98afe136d307e5661ae2b1
+realizedSpecHash: b4aa5c15e7a79d3150527b6a8fd450a72c840b21b13a496956bf62b70ffbabbc
 syncedFingerprint: 5570a8cbf116bf1d7aecd7fde8421177139c42b4076ff5bc7abdabd99afbe482

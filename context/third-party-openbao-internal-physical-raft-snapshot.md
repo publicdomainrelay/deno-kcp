@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the deno-kcp repository can read and write raft snapshots in OpenBao's on-disk archive format without reimplementing the format: archive.go supplies the per-file checksum manifest that guards an extracted snapshot tree, and snapshot.go supplies the sealed, checksummed container that wraps a raft snapshot stream. It is vendored third-party code kept in tree (upstream: self) so the surrounding raft physical backend can call New, Write, Verify, Parse, Restore, and WriteToTempFile directly, and it exists here because the summary and spec must describe that vendored surface exactly as it stands.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

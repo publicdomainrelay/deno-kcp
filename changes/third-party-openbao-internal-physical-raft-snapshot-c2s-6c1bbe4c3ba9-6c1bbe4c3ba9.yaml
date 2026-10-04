@@ -10,5 +10,23 @@ spec:
   systemContext: third-party-openbao-internal-physical-raft-snapshot
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-physical-raft-snapshot
+  agentLog: 'This context covers the third_party/openbao/internal/physical/raft/snapshot
+    package in deno-kcp, a vendored copy of OpenBao''s raft snapshot helper. Two source
+    files carry it: archive.go defines the unexported hashList type that tracks a
+    per-file SHA-256 sum and can encode those sums as a SHA256SUMS-style text file
+    or re-read such a file and verify it against the tracked sums; snapshot.go defines
+    the Snapshot struct (an open temp file plus index and checksum), the Sealer interface
+    with Seal and Open for wrapping and unwrapping snapshot bytes, and the package-level
+    operations New/NewWithSealer, Write, Verify, Parse, Restore/RestoreWithSealer,
+    and WriteToTempFile/WriteToTempFileWithSealer. Paired _test.go files exercise
+    the archive hash list and the snapshot read/write path. The package is the vendored
+    boundary between a raft node and an archive file on disk: Write seals and writes
+    a snapshot with a trailing metadata and checksum trailer, Verify and Parse validate
+    that trailer on the way back in, and Restore hands the recovered bytes to the
+    raft library.'
+  message: wrote 18 requirement(s) and 21 interface(s) for third-party-openbao-internal-physical-raft-snapshot
+  phase: Succeeded
+superseded:
+- message: the agent is summarizing third-party-openbao-internal-physical-raft-snapshot
+  name: third-party-openbao-internal-physical-raft-snapshot-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2
   phase: Running
