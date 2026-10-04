@@ -73203,7 +73203,65 @@ system_contexts:
   codeRefIndex:
   - file:third_party/openbao/ui/lib/open-api-explorer/index.js index.js@third_party/openbao/ui/lib/open-api-explorer/index.js
   id: sc.third-party-openbao-ui-lib-open-api-explorer
+  intent: The context exists so the vendored OpenBao API documentation UI can be built
+    and lazy-loaded as an Ember engine inside the host application. It declares the
+    engine's identity, its build-time Babel transform via ember-auto-import, and the
+    CSS dependency needed by the Swagger UI page, while deliberately deferring JavaScript
+    dependencies to a dynamic `import()` inside the swagger-ui.js component so they
+    are not pulled into vendor.js. The file carries the original HashiCorp MPL-2.0
+    header and an eslint-disable for leaking state in Ember objects, marking it as
+    third-party code imported into this repository rather than code authored here.
   name: third-party-openbao-ui-lib-open-api-explorer
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/open-api-explorer/index.js
+    id: r.babel-auto-import-plugin
+    level: MUST
+    text: The engine's `babel` configuration must list `ember-auto-import/babel-plugin`,
+      resolved through `require.resolve`, as its only Babel plugin, so ember-auto-import
+      rewrites imports in the engine's build.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/open-api-explorer/index.js
+    id: r.engine-export
+    level: MUST
+    text: The module must export a single Ember engine class produced by `EngineAddon.extend`,
+      with the engine `name` set to `open-api-explorer`, so the host application can
+      mount it as a lazy-loaded engine.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/open-api-explorer/index.js
+    id: r.included-excludes-swagger-js
+    level: MUST
+    text: The `included()` hook must not import Swagger UI JavaScript; the comment
+      states the JavaScript dependencies are instead loaded through a dynamic `import()`
+      in the swagger-ui.js component, because importing them here would put them into
+      vendor.js.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/open-api-explorer/index.js
+    id: r.included-imports-swagger-css
+    level: MUST
+    text: The `included()` hook must call `this._super.included` when that parent
+      hook exists, then call `this.import('node_modules/swagger-ui-dist/swagger-ui.css')`,
+      placing the Swagger UI stylesheet in the engine's lazy-loaded CSS bundle rather
+      than the host application's vendor CSS.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/open-api-explorer/index.js
+    id: r.is-developing-addon
+    level: MUST
+    text: '`isDevelopingAddon()` must return `true` for this vendored copy, so the
+      addon is treated as under development within the third-party tree.'
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/open-api-explorer/index.js
+    id: r.lazy-loading-enabled
+    level: MUST
+    text: 'The `lazyLoading` configuration must have `enabled: true`, so the engine''s
+      assets are loaded only when the host routes into the engine.'
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/open-api-explorer/index.js
+    id: r.third-party-provenance
+    level: SHOULD
+    text: 'The file should keep the HashiCorp copyright and `SPDX-License-Identifier:
+      MPL-2.0` header and the `ember/avoid-leaking-state-in-ember-objects` eslint-disable,
+      since it is vendored third-party code and not authored in this repository.'
   upstream: self
 - code:
   - third_party/openbao/ui/lib/open-api-explorer/addon/engine.js
