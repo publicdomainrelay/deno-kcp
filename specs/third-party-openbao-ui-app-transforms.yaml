@@ -7,5 +7,79 @@ metadata:
   name: third-party-openbao-ui-app-transforms
   namespace: default
 spec:
+  intent: These transforms exist so models can declare `DS.attr('array')` and `DS.attr('object')`
+    attributes and get a guaranteed container back from the API payload rather than
+    `null`, a scalar, or a missing value. They normalize untrusted or absent server
+    data into the shape the UI templates expect, on both the read path (`deserialize`)
+    and the write path (`serialize`), so downstream code never has to null-check the
+    attribute. The context exists as the specification for these two normalization
+    rules.
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/app/transforms/array.js
+    id: r.array-deserialize-falls-back-to-empty
+    level: MUST
+    text: The array transform's `deserialize` returns a new empty array when the incoming
+      value is not an array, so a null, undefined, or scalar payload item never reaches
+      the model.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/transforms/array.js
+    id: r.array-deserialize-returns-value-when-array
+    level: MUST
+    text: The array transform's `deserialize` returns the incoming value unchanged
+      when `isArray` reports it is an array.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/transforms/array.js
+    id: r.array-serialize-coerces-same-way
+    level: MUST
+    text: 'The array transform''s `serialize` applies the same rule as `deserialize`:
+      it returns the value when it is an array and an empty array otherwise, so writes
+      never emit a non-array where an array attribute is declared.'
+  - codeRefs:
+    - file:third_party/openbao/ui/app/transforms/array.js
+    id: r.array-transform-registered-for-attr-array
+    level: MUST
+    text: The array transform is exported as the module's default export so Ember
+      Data resolves it for `DS.attr('array')`.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/transforms/array.js
+    - file:third_party/openbao/ui/app/transforms/object.js
+    id: r.both-transforms-derived-from-ember-transform
+    level: MUST
+    text: Both transforms extend Ember Data's `@ember-data/serializer/transform` base
+      and override exactly the `deserialize` and `serialize` hooks, adding no other
+      state or behavior.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/transforms/array.js
+    - file:third_party/openbao/ui/app/transforms/object.js
+    id: r.fallback-values-are-fresh-containers
+    level: SHOULD
+    text: Each fallback returns a newly allocated `[]` or `{}` per call rather than
+      a shared constant, so a mutated fallback in one model cannot leak into another.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/transforms/object.js
+    id: r.object-deserialize-falls-back-to-empty
+    level: MUST
+    text: The object transform's `deserialize` returns a new empty object when `typeOf(value)`
+      is not `'object'`.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/transforms/object.js
+    id: r.object-deserialize-returns-value-when-object
+    level: MUST
+    text: The object transform's `deserialize` returns the incoming value unchanged
+      when `typeOf(value)` equals `'object'`.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/transforms/object.js
+    id: r.object-serialize-coerces-same-way
+    level: MUST
+    text: 'The object transform''s `serialize` applies the same rule as `deserialize`:
+      it returns the value when `typeOf(value)` is `''object''` and an empty object
+      otherwise.'
+  - codeRefs:
+    - file:third_party/openbao/ui/app/transforms/object.js
+    id: r.object-transform-registered-for-attr-object
+    level: MUST
+    text: The object transform is exported as the module's default export so Ember
+      Data resolves it for `DS.attr('object')`.
   upstream: self

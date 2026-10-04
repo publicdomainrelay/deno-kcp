@@ -5298,6 +5298,20 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.store-unload` (MUST): "The store can release cached records without clearing datasets: unloadAll unloads every cached record for a model name and unloadRecord unloads a single record passed to it."
 - added `r.supporting-services` (MUST): "The service layer also registers the remaining application services: authentication, console, CSP event reporting, current cluster, host routing, namespace, permissions, replication mode, secret mount path, path help generated item model and version, each as its own module under app/services so routes can inject them independently."
 
+### third-party-openbao-ui-app-transforms
+
+- intent: "" -> "These transforms exist so models can declare `DS.attr('array')` and `DS.attr('object')` attributes and get a guaranteed container back from the API payload rather than `null`, a scalar, or a missing value. They normalize untrusted or absent server data into the shape the UI templates expect, on both the read path (`deserialize`) and the write path (`serialize`), so downstream code never has to null-check the attribute. The context exists as the specification for these two normalization rules."
+- added `r.array-deserialize-falls-back-to-empty` (MUST): "The array transform's `deserialize` returns a new empty array when the incoming value is not an array, so a null, undefined, or scalar payload item never reaches the model."
+- added `r.array-deserialize-returns-value-when-array` (MUST): "The array transform's `deserialize` returns the incoming value unchanged when `isArray` reports it is an array."
+- added `r.array-serialize-coerces-same-way` (MUST): "The array transform's `serialize` applies the same rule as `deserialize`: it returns the value when it is an array and an empty array otherwise, so writes never emit a non-array where an array attribute is declared."
+- added `r.array-transform-registered-for-attr-array` (MUST): "The array transform is exported as the module's default export so Ember Data resolves it for `DS.attr('array')`."
+- added `r.both-transforms-derived-from-ember-transform` (MUST): "Both transforms extend Ember Data's `@ember-data/serializer/transform` base and override exactly the `deserialize` and `serialize` hooks, adding no other state or behavior."
+- added `r.fallback-values-are-fresh-containers` (SHOULD): "Each fallback returns a newly allocated `[]` or `{}` per call rather than a shared constant, so a mutated fallback in one model cannot leak into another."
+- added `r.object-deserialize-falls-back-to-empty` (MUST): "The object transform's `deserialize` returns a new empty object when `typeOf(value)` is not `'object'`."
+- added `r.object-deserialize-returns-value-when-object` (MUST): "The object transform's `deserialize` returns the incoming value unchanged when `typeOf(value)` equals `'object'`."
+- added `r.object-serialize-coerces-same-way` (MUST): "The object transform's `serialize` applies the same rule as `deserialize`: it returns the value when `typeOf(value)` is `'object'` and an empty object otherwise."
+- added `r.object-transform-registered-for-attr-object` (MUST): "The object transform is exported as the module's default export so Ember Data resolves it for `DS.attr('object')`."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
