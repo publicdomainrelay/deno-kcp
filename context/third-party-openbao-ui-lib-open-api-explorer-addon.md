@@ -9,5 +9,7 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/ui/lib/open-api-explorer/addon/engine.js` file engine.js (third_party/openbao/ui/lib/open-api-explorer/addon/engine.js)
+- `file:third_party/openbao/ui/lib/open-api-explorer/addon/resolver.js` file resolver.js (third_party/openbao/ui/lib/open-api-explorer/addon/resolver.js)
+- `file:third_party/openbao/ui/lib/open-api-explorer/addon/routes.js` file routes.js (third_party/openbao/ui/lib/open-api-explorer/addon/routes.js)
 <!-- SPECD_MANAGED_END -->
