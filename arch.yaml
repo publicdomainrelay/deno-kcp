@@ -66876,6 +66876,9 @@ system_contexts:
   - third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/create.js
   - third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/index.js
   codeRefIndex:
+  - class:2d968cb3f138f4f31ab2e3967a250731 OidcClientsCreateRoute@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/create.js:9
+  - class:3ce6a1eed54513f2c5b2a3bfe2248ddb OidcClientsRoute@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/index.js:8
+  - class:91d9f27e0daca8c8005f1d15f2c4cce0 OidcClientRoute@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/client.js:9
   - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/client.js
     client.js@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/client.js
   - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/create.js
@@ -66883,7 +66886,98 @@ system_contexts:
   - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/index.js
     index.js@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/index.js
   id: sc.third-party-openbao-ui-app-routes-vault-cluster-access-oidc-clients
+  intent: 'These routes exist to give the OIDC clients section of the Vault/OpenBao
+    cluster UI its data-loading layer, separating list, create and single-record views.
+    The index route decides whether the clients feature is usable at all by treating
+    a missing endpoint as an empty list and bouncing the user back to the parent OIDC
+    overview when nothing is configured; the create route supplies an empty record
+    so the form can be submitted without a prior fetch; the detail route resolves
+    one client by name from the URL so its page can render and later save that record.
+    The context is documentation of that routing contract: what each hook returns,
+    which errors are absorbed, and when navigation happens.'
+  interfaces:
+  - file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/client.js
+    kind: class
+    name: OidcClientRoute
+    signature: class OidcClientRoute extends Route
+  - file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/create.js
+    kind: class
+    name: OidcClientsCreateRoute
+    signature: class OidcClientsCreateRoute extends Route
+  - file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/index.js
+    kind: class
+    name: OidcClientsRoute
+    signature: class OidcClientsRoute extends Route
   name: third-party-openbao-ui-app-routes-vault-cluster-access-oidc-clients
+  requirements:
+  - codeRefs:
+    - class:2d968cb3f138f4f31ab2e3967a250731
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/create.js
+    id: r.create-injects-store
+    level: MUST
+    text: OidcClientsCreateRoute injects the Ember store service used to build the
+      empty client record.
+  - codeRefs:
+    - class:2d968cb3f138f4f31ab2e3967a250731
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/create.js
+    id: r.create-returns-new-record
+    level: MUST
+    text: OidcClientsCreateRoute.model returns a new unsaved 'oidc/client' record
+      from store.createRecord and performs no fetch, giving the create form its editable
+      model.
+  - codeRefs:
+    - class:91d9f27e0daca8c8005f1d15f2c4cce0
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/client.js
+    id: r.detail-find-record-by-name
+    level: MUST
+    text: OidcClientRoute.model destructures the name dynamic segment from the route
+      params and returns store.findRecord('oidc/client', name), so the detail page
+      loads exactly the client named in the URL.
+  - codeRefs:
+    - class:91d9f27e0daca8c8005f1d15f2c4cce0
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/client.js
+    id: r.detail-injects-store
+    level: MUST
+    text: OidcClientRoute injects the Ember store service used to look up the single
+      client record.
+  - codeRefs:
+    - class:3ce6a1eed54513f2c5b2a3bfe2248ddb
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/index.js
+    id: r.list-empty-redirects-to-oidc
+    level: MUST
+    text: OidcClientsRoute.afterModel transitions the router to 'vault.cluster.access.oidc'
+      when the resolved model has zero length, so an empty clients list never renders
+      its own page.
+  - codeRefs:
+    - class:3ce6a1eed54513f2c5b2a3bfe2248ddb
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/index.js
+    id: r.list-injects-store-and-router
+    level: MUST
+    text: OidcClientsRoute injects the Ember store service for data access and the
+      router service for the empty-state redirect.
+  - codeRefs:
+    - class:3ce6a1eed54513f2c5b2a3bfe2248ddb
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/index.js
+    id: r.list-query-returns-collection
+    level: MUST
+    text: OidcClientsRoute.model queries the store for all 'oidc/client' records with
+      an empty query object and returns the resulting collection as the route model.
+  - codeRefs:
+    - class:3ce6a1eed54513f2c5b2a3bfe2248ddb
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/index.js
+    id: r.list-swallows-404-as-empty
+    level: MUST
+    text: A query failure whose httpStatus is 404 must be converted to an empty array,
+      while any other error is rethrown unchanged.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/client.js
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/create.js
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/index.js
+    id: r.routes-extend-ember-route
+    level: MUST
+    text: All three classes extend the Ember '@ember/routing/route' default export
+      and obtain services through the '@ember/service' inject alias, and each module
+      keeps the HashiCorp MPL-2.0 copyright header.
   upstream: self
 - code:
   - third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/client/details.js

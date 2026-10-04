@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+These routes exist to give the OIDC clients section of the Vault/OpenBao cluster UI its data-loading layer, separating list, create and single-record views. The index route decides whether the clients feature is usable at all by treating a missing endpoint as an empty list and bouncing the user back to the parent OIDC overview when nothing is configured; the create route supplies an empty record so the form can be submitted without a prior fetch; the detail route resolves one client by name from the URL so its page can render and later save that record. The context is documentation of that routing contract: what each hook returns, which errors are absorbed, and when navigation happens.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

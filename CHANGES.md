@@ -5005,6 +5005,19 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.edit-route-export` (MUST): "The module at third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/assignment/edit.js must export OidcAssignmentEditRoute as its default export, extending the Ember Route base class, so the router can resolve the OIDC assignment edit route by module path."
 - added `r.routes-declare-no-custom-behavior` (MUST): "Both route classes must remain empty of declared members: neither OidcAssignmentDetailsRoute nor OidcAssignmentEditRoute defines a model hook, setupController, actions hash, beforeModel, afterModel or any other own method or property, so all route behavior is inherited from Ember Route and the surrounding route hierarchy."
 
+### third-party-openbao-ui-app-routes-vault-cluster-access-oidc-clients
+
+- intent: "" -> "These routes exist to give the OIDC clients section of the Vault/OpenBao cluster UI its data-loading layer, separating list, create and single-record views. The index route decides whether the clients feature is usable at all by treating a missing endpoint as an empty list and bouncing the user back to the parent OIDC overview when nothing is configured; the create route supplies an empty record so the form can be submitted without a prior fetch; the detail route resolves one client by name from the URL so its page can render and later save that record. The context is documentation of that routing contract: what each hook returns, which errors are absorbed, and when navigation happens."
+- added `r.create-injects-store` (MUST): "OidcClientsCreateRoute injects the Ember store service used to build the empty client record."
+- added `r.create-returns-new-record` (MUST): "OidcClientsCreateRoute.model returns a new unsaved 'oidc/client' record from store.createRecord and performs no fetch, giving the create form its editable model."
+- added `r.detail-find-record-by-name` (MUST): "OidcClientRoute.model destructures the name dynamic segment from the route params and returns store.findRecord('oidc/client', name), so the detail page loads exactly the client named in the URL."
+- added `r.detail-injects-store` (MUST): "OidcClientRoute injects the Ember store service used to look up the single client record."
+- added `r.list-empty-redirects-to-oidc` (MUST): "OidcClientsRoute.afterModel transitions the router to 'vault.cluster.access.oidc' when the resolved model has zero length, so an empty clients list never renders its own page."
+- added `r.list-injects-store-and-router` (MUST): "OidcClientsRoute injects the Ember store service for data access and the router service for the empty-state redirect."
+- added `r.list-query-returns-collection` (MUST): "OidcClientsRoute.model queries the store for all 'oidc/client' records with an empty query object and returns the resulting collection as the route model."
+- added `r.list-swallows-404-as-empty` (MUST): "A query failure whose httpStatus is 404 must be converted to an empty array, while any other error is rethrown unchanged."
+- added `r.routes-extend-ember-route` (MUST): "All three classes extend the Ember '@ember/routing/route' default export and obtain services through the '@ember/service' inject alias, and each module keeps the HashiCorp MPL-2.0 copyright header."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5418,7 +5431,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-routes-vault-cluster-access-oidc-assignments-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-oidc-assignments-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-oidc-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-routes-vault-cluster-access-oidc-clients-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-routes-vault-cluster-access-oidc-clients-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-oidc-clients-client-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
