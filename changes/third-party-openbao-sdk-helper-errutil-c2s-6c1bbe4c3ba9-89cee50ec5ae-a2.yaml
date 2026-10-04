@@ -1,0 +1,31 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-sdk-helper-errutil-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-sdk-helper-errutil
+  toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
+status:
+  agentLog: 'This context is the errutil helper package vendored from the OpenBao
+    SDK at third_party/openbao/sdk/helper/errutil/error.go. It is a single small file
+    that declares two exported error wrapper types, UserError and InternalError. Each
+    type holds exactly one exported string field, Err, and defines Error() string
+    on a value receiver that returns that field unchanged, so both types satisfy the
+    standard error interface. The package adds no constructors, no Unwrap method,
+    no chaining and no formatting; callers compose the message with fmt.Sprintf and
+    assign it to Err in a composite literal. The two types exist to classify fault:
+    UserError marks a bad request from the caller, InternalError marks a failure on
+    the server side. Adjacent vendored code depends on this split, chiefly createCertificate
+    in third_party/openbao/sdk/helper/certutil/helpers.go, which returns errutil.InternalError
+    when GetSubjKeyID fails and returns errutil.UserError when the computed Not Before
+    is after, or equal to, Not After.'
+  message: wrote 7 requirement(s) and 4 interface(s) for third-party-openbao-sdk-helper-errutil
+  phase: Succeeded
+superseded:
+- message: wrote 7 requirement(s) and 4 interface(s) for third-party-openbao-sdk-helper-errutil
+  name: third-party-openbao-sdk-helper-errutil-c2s-6c1bbe4c3ba9-89cee50ec5ae
+  phase: Succeeded
