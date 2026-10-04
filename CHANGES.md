@@ -5762,12 +5762,13 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 
 ### third-party-openbao-ui-lib-pki-addon
 
-- intent: "" -> "This context exists so the PKI addon can be loaded as a lazy, isolated Ember engine inside the wider OpenBao UI host application. Splitting the addon into an engine class plus a separate route map lets the host mount the whole PKI surface under one prefix, hand it only the services it is allowed to use through the explicit dependencies list, and keep its external route references declared rather than discovered at runtime. The context is described here only at its entrypoint level, because the facts available are the engine class definition and the two entry files, not the components or models the addon resolves internally."
-- added `r.engine-extends-ember-engine` (MUST): "PkiEngine MUST be the default export of engine.js and MUST extend Ember's Engine base class, so the host application can mount the PKI addon as an engine."
-- added `r.engine-external-routes` (MUST): "PkiEngine MUST declare dependencies.externalRoutes as secrets, secretsListRootConfiguration and externalMountIssuer, so links from inside the engine to those host routes resolve."
-- added `r.engine-module-prefix-and-resolver` (MUST): "PkiEngine MUST set modulePrefix to the addon module namespace and assign the matching Resolver, so the engine resolves its own components, routes and models from that namespace instead of the host application's."
-- added `r.engine-service-dependencies` (MUST): "PkiEngine MUST declare its injected host services in dependencies.services, listing auth, download, flash-messages, namespace, path-help, host-router, secret-mount-path, store and version; a service used by the addon but absent from this list will not be available to it."
-- added `r.route-map-separate-file` (MUST): "The addon's route map MUST be declared in routes.js, kept separate from the engine class in engine.js, so route changes do not alter the engine's dependency or resolver configuration."
+- intent: "" -> "This context exists so the PKI addon can be mounted as a lazy, isolated Ember engine inside the wider OpenBao UI host application. Separating the engine class in engine.js from the route map in routes.js lets the host mount the whole PKI surface under one prefix, hand the engine only the services it is allowed to inject through the explicit dependencies list, and keep its external route references declared rather than discovered at runtime. The engine fixes exactly three things at load time: the module namespace it resolves from, the Resolver for that namespace, and what it needs from the host."
+- added `r.engine-extends-ember-engine` (MUST): "PkiEngine MUST be the default export of engine.js and MUST extend the Engine base class imported from @ember/engine, so the host application can mount the PKI addon as an engine rather than as a plain application module."
+- added `r.engine-external-routes` (MUST): "PkiEngine MUST declare dependencies.externalRoutes as secrets, secretsListRootConfiguration and externalMountIssuer, so links made from inside the engine to those host application routes resolve instead of failing at transition time."
+- added `r.engine-loads-initializers` (MUST): "engine.js MUST call loadInitializers with PkiEngine and the resolved modulePrefix after the class definition, so the addon's initializers run when the engine is booted by the host."
+- added `r.engine-module-prefix-and-resolver` (MUST): "PkiEngine MUST assign modulePrefix, read from the addon config at ./config/environment, to its modulePrefix property and MUST assign the ember-resolver Resolver to its Resolver property, so the engine looks up its own components, routes and models in the addon namespace instead of the host application's."
+- added `r.engine-service-dependencies` (MUST): "PkiEngine MUST declare dependencies.services as the nine host services auth, download, flash-messages, namespace, path-help, host-router, secret-mount-path, store and version, because a service the addon injects but does not name here is not available to it inside the engine."
+- added `r.route-map-separate-file` (MUST): "The addon's route map MUST be declared in routes.js, kept in a separate file from the engine class in engine.js, so changes to the URL structure do not touch the engine's module prefix, resolver or dependency configuration."
 
 ## Realization
 
@@ -6280,7 +6281,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-open-api-explorer-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-open-api-explorer-config-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-lib-pki-addon-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-pki-addon-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-components-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
