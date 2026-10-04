@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so the OpenBao OCSP helper can be described, depended on, and reasoned about as a bounded unit inside deno-kcp. It captures the public surface a caller needs to perform OCSP revocation checks: client construction and logging, response caching and invalidation, transport construction from verification config, the leaf and peer certificate verification paths, and the bulk chain-wide status query. Separating the single-method clientInterface makes the network dependency injectable for tests, and FailOpenMode makes the failure policy an explicit type rather than an implicit choice.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

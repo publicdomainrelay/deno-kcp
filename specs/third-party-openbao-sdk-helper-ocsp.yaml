@@ -2,10 +2,168 @@ apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
 - file:third_party/openbao/sdk/helper/ocsp/client.go client.go@third_party/openbao/sdk/helper/ocsp/client.go
 - file:third_party/openbao/sdk/helper/ocsp/ocsp_test.go ocsp_test.go@third_party/openbao/sdk/helper/ocsp/ocsp_test.go
+- function:3376a31a266cc7ff397b4ce00f65f5f6 New@third_party/openbao/sdk/helper/ocsp/client.go:715
+- method:14470b7e3d46a4b1a136e9166e919851 Client.Logger@third_party/openbao/sdk/helper/ocsp/client.go:729
+- method:1aeb18c73040fcf1d3bd7c24977c3165 Client.GetAllRevocationStatus@third_party/openbao/sdk/helper/ocsp/client.go:659
+- method:820258d8c6442010c896c9f78025aabd Client.GetRevocationStatus@third_party/openbao/sdk/helper/ocsp/client.go:373
+- method:8e12b6a7ab468ddd6c97d8e76438b2e6 Client.NewTransport@third_party/openbao/sdk/helper/ocsp/client.go:759
+- method:9d62cd6d2fec6a5b8b6df1802d5f4aaa Client.ClearCache@third_party/openbao/sdk/helper/ocsp/client.go:113
+- method:a1ac36723bd07e66be7e1569756399b8 clientInterface.Do@third_party/openbao/sdk/helper/ocsp/client.go:38
+- method:c28076bc66f812643875a6af5c48b2e6 Client.VerifyLeafCertificate@third_party/openbao/sdk/helper/ocsp/client.go:544
+- method:d4594d58e0a8f3a1bba0559752fcb60b Client.VerifyPeerCertificate@third_party/openbao/sdk/helper/ocsp/client.go:566
+- struct:1502cf82ddf1050a7e575c9bca401097 VerifyConfig@third_party/openbao/sdk/helper/ocsp/client.go:535
+- struct:9d7253948a82824679daf26deaa7fccc Client@third_party/openbao/sdk/helper/ocsp/client.go:75
+- type_alias:ea227630d671f16d66b25c32a72387c2 FailOpenMode@third_party/openbao/sdk/helper/ocsp/client.go:33
 kind: SystemContext
 metadata:
   name: third-party-openbao-sdk-helper-ocsp
   namespace: default
 spec:
+  intent: 'The context exists so the OpenBao OCSP helper can be described, depended
+    on, and reasoned about as a bounded unit inside deno-kcp. It captures the public
+    surface a caller needs to perform OCSP revocation checks: client construction
+    and logging, response caching and invalidation, transport construction from verification
+    config, the leaf and peer certificate verification paths, and the bulk chain-wide
+    status query. Separating the single-method clientInterface makes the network dependency
+    injectable for tests, and FailOpenMode makes the failure policy an explicit type
+    rather than an implicit choice.'
+  interfaces:
+  - file: third_party/openbao/sdk/helper/ocsp/client.go
+    kind: struct
+    name: Client
+    signature: type Client struct
+  - file: third_party/openbao/sdk/helper/ocsp/client.go
+    kind: method
+    name: Client.ClearCache
+    signature: func (c *Client) ClearCache()
+  - file: third_party/openbao/sdk/helper/ocsp/client.go
+    kind: method
+    name: Client.GetAllRevocationStatus
+    signature: func (c *Client) GetAllRevocationStatus(ctx context.Context, verifiedChains
+      []*x509.Certificate, conf *VerifyConfig) ([]*ocspStatus, error)
+  - file: third_party/openbao/sdk/helper/ocsp/client.go
+    kind: method
+    name: Client.GetRevocationStatus
+    signature: func (c *Client) GetRevocationStatus(ctx context.Context, subject,
+      issuer *x509.Certificate, conf *VerifyConfig) (*ocspStatus, error)
+  - file: third_party/openbao/sdk/helper/ocsp/client.go
+    kind: method
+    name: Client.Logger
+    signature: func (c *Client) Logger() hclog.Logger
+  - file: third_party/openbao/sdk/helper/ocsp/client.go
+    kind: method
+    name: Client.NewTransport
+    signature: func (c *Client) NewTransport(conf *VerifyConfig) *http.Transport
+  - file: third_party/openbao/sdk/helper/ocsp/client.go
+    kind: method
+    name: Client.VerifyLeafCertificate
+    signature: func (c *Client) VerifyLeafCertificate(ctx context.Context, subject,
+      issuer *x509.Certificate, conf *VerifyConfig) error
+  - file: third_party/openbao/sdk/helper/ocsp/client.go
+    kind: method
+    name: Client.VerifyPeerCertificate
+    signature: func (c *Client) VerifyPeerCertificate(ctx context.Context, verifiedChains
+      [][]*x509.Certificate, conf *VerifyConfig) error
+  - file: third_party/openbao/sdk/helper/ocsp/client.go
+    kind: type_alias
+    name: FailOpenMode
+    signature: type FailOpenMode uint32
+  - file: third_party/openbao/sdk/helper/ocsp/client.go
+    kind: function
+    name: New
+    signature: func New(logFactory func() hclog.Logger, cacheSize int) *Client
+  - file: third_party/openbao/sdk/helper/ocsp/client.go
+    kind: struct
+    name: VerifyConfig
+    signature: type VerifyConfig struct
+  - file: third_party/openbao/sdk/helper/ocsp/client.go
+    kind: method
+    name: clientInterface.Do
+    signature: Do(req *retryablehttp.Request) (*http.Response, error)
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/ocsp/client.go
+    - struct:9d7253948a82824679daf26deaa7fccc
+    id: r.cache-concurrency
+    level: MUST
+    text: Client must guard its LRU two-queue OCSP response cache, keyed by certificate
+      identity, with an RWMutex and must hold the CA root map and x509.CertPool so
+      cached lookups stay safe under concurrent verification.
+  - codeRefs:
+    - function:3376a31a266cc7ff397b4ce00f65f5f6
+    - struct:9d7253948a82824679daf26deaa7fccc
+    id: r.client-construction
+    level: MUST
+    text: New must build and return a *Client from a logger factory function and an
+      integer cache size, so callers control both the logger source and the response
+      cache capacity.
+  - codeRefs:
+    - struct:1502cf82ddf1050a7e575c9bca401097
+    - type_alias:ea227630d671f16d66b25c32a72387c2
+    id: r.fail-open-policy
+    level: SHOULD
+    text: FailOpenMode must remain a distinct uint32 type so the client's behaviour
+      when the OCSP responder is unreachable is an explicit, named policy value rather
+      than a bare boolean or integer.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/ocsp/ocsp_test.go
+    - method:a1ac36723bd07e66be7e1569756399b8
+    id: r.http-seam
+    level: SHOULD
+    text: The package must keep its HTTP dependency behind the single-method clientInterface,
+      whose Do takes a retryablehttp.Request and returns an *http.Response or error,
+      so the transport is substitutable in tests.
+  - codeRefs:
+    - function:3376a31a266cc7ff397b4ce00f65f5f6
+    - method:14470b7e3d46a4b1a136e9166e919851
+    id: r.logger-access
+    level: SHOULD
+    text: Logger must return the hclog.Logger the client was constructed with, so
+      callers and tests can observe the same logger instance the client uses.
+  - codeRefs:
+    - method:9d62cd6d2fec6a5b8b6df1802d5f4aaa
+    id: r.response-cache-invalidation
+    level: MUST
+    text: ClearCache must purge every entry from the client's OCSP response cache,
+      so a caller can force subsequent revocation checks to refetch from the responder.
+  - codeRefs:
+    - method:1aeb18c73040fcf1d3bd7c24977c3165
+    - struct:1502cf82ddf1050a7e575c9bca401097
+    id: r.revocation-status-chain
+    level: MUST
+    text: GetAllRevocationStatus must take a context, a verified certificate chain
+      and a VerifyConfig, and return the ocspStatus for each certificate in the chain,
+      or an error.
+  - codeRefs:
+    - method:820258d8c6442010c896c9f78025aabd
+    - struct:1502cf82ddf1050a7e575c9bca401097
+    id: r.revocation-status-single
+    level: MUST
+    text: GetRevocationStatus must take a context, a subject certificate, an issuer
+      certificate and a VerifyConfig, and return the ocspStatus for that subject or
+      an error.
+  - codeRefs:
+    - method:8e12b6a7ab468ddd6c97d8e76438b2e6
+    - struct:1502cf82ddf1050a7e575c9bca401097
+    id: r.transport-from-config
+    level: MUST
+    text: NewTransport must derive an *http.Transport from a VerifyConfig so the OCSP
+      responder connection inherits the caller's verification settings.
+  - codeRefs:
+    - method:c28076bc66f812643875a6af5c48b2e6
+    - struct:1502cf82ddf1050a7e575c9bca401097
+    id: r.verify-leaf
+    level: MUST
+    text: VerifyLeafCertificate must check the revocation state of a single subject
+      certificate against its issuer under the supplied VerifyConfig and report failure
+      as an error.
+  - codeRefs:
+    - method:d4594d58e0a8f3a1bba0559752fcb60b
+    - struct:1502cf82ddf1050a7e575c9bca401097
+    id: r.verify-peer
+    level: MUST
+    text: VerifyPeerCertificate must accept the context, the verified chains produced
+      during the TLS handshake and a VerifyConfig, and must judge revocation across
+      those chains so it can be used directly as a TLS peer-verification callback.
   upstream: self

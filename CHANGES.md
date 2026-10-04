@@ -3287,6 +3287,21 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.parse-log-format` (MUST): "ParseLogFormat must lower-case and trim the supplied string before matching, so that "" and whitespace-only input yield UnspecifiedFormat with a nil error, "standard" in any case yields StandardFormat, and "json" in any case including surrounding whitespace yields JSONFormat; any other input must yield UnspecifiedFormat together with an error whose message is "unknown log format: <format>" carrying the original, untrimmed argument."
 - added `r.parse-log-format-tested` (SHOULD): "ParseLogFormat's accepted inputs and error text must stay covered by Test_ParseLogFormat in logging_test.go, which asserts the empty string, a single space, "standard", "STANDARD", "json", " json " and "bogus", and must hold both the expected LogFormat and the expected error for each case."
 
+### third-party-openbao-sdk-helper-ocsp
+
+- intent: "" -> "The context exists so the OpenBao OCSP helper can be described, depended on, and reasoned about as a bounded unit inside deno-kcp. It captures the public surface a caller needs to perform OCSP revocation checks: client construction and logging, response caching and invalidation, transport construction from verification config, the leaf and peer certificate verification paths, and the bulk chain-wide status query. Separating the single-method clientInterface makes the network dependency injectable for tests, and FailOpenMode makes the failure policy an explicit type rather than an implicit choice."
+- added `r.cache-concurrency` (MUST): "Client must guard its LRU two-queue OCSP response cache, keyed by certificate identity, with an RWMutex and must hold the CA root map and x509.CertPool so cached lookups stay safe under concurrent verification."
+- added `r.client-construction` (MUST): "New must build and return a *Client from a logger factory function and an integer cache size, so callers control both the logger source and the response cache capacity."
+- added `r.fail-open-policy` (SHOULD): "FailOpenMode must remain a distinct uint32 type so the client's behaviour when the OCSP responder is unreachable is an explicit, named policy value rather than a bare boolean or integer."
+- added `r.http-seam` (SHOULD): "The package must keep its HTTP dependency behind the single-method clientInterface, whose Do takes a retryablehttp.Request and returns an *http.Response or error, so the transport is substitutable in tests."
+- added `r.logger-access` (SHOULD): "Logger must return the hclog.Logger the client was constructed with, so callers and tests can observe the same logger instance the client uses."
+- added `r.response-cache-invalidation` (MUST): "ClearCache must purge every entry from the client's OCSP response cache, so a caller can force subsequent revocation checks to refetch from the responder."
+- added `r.revocation-status-chain` (MUST): "GetAllRevocationStatus must take a context, a verified certificate chain and a VerifyConfig, and return the ocspStatus for each certificate in the chain, or an error."
+- added `r.revocation-status-single` (MUST): "GetRevocationStatus must take a context, a subject certificate, an issuer certificate and a VerifyConfig, and return the ocspStatus for that subject or an error."
+- added `r.transport-from-config` (MUST): "NewTransport must derive an *http.Transport from a VerifyConfig so the OCSP responder connection inherits the caller's verification settings."
+- added `r.verify-leaf` (MUST): "VerifyLeafCertificate must check the revocation state of a single subject certificate against its issuer under the supplied VerifyConfig and report failure as an error."
+- added `r.verify-peer` (MUST): "VerifyPeerCertificate must accept the context, the verified chains produced during the TLS handshake and a VerifyConfig, and must judge revocation across those chains so it can be used directly as a TLS peer-verification callback."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
