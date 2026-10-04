@@ -1,10 +1,50 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
 - file:third_party/openbao/ui/lib/pki/addon/utils/action-params.js action-params.js@third_party/openbao/ui/lib/pki/addon/utils/action-params.js
+- function:a2c20955acafe88071116f40dd7a1c79 keyParamsByType@third_party/openbao/ui/lib/pki/addon/utils/action-params.js:11
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-lib-pki-addon-utils
   namespace: default
 spec:
+  intent: This context exists so the PKI key-parameter naming rules live in one place
+    and can be specified independently of the OpenBao UI code that consumes them.
+    Both the action serializer and the toggle-groups component depend on the same
+    field list, so the function defines the contract for which key attributes exist
+    per key type.
+  interfaces:
+  - file: third_party/openbao/ui/lib/pki/addon/utils/action-params.js
+    kind: function
+    name: keyParamsByType
+    signature: keyParamsByType(type)
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/pki/addon/utils/action-params.js
+    - function:a2c20955acafe88071116f40dd7a1c79
+    id: r.export-key-params-by-type
+    level: MUST
+    text: 'keyParamsByType(type) must return the parameter-name list for the given
+      key type, and the returned array must reflect the branch taken: default keyName/keyType/keyBits,
+      keyRef for ''existing'', keyName/managedKeyName/managedKeyId for ''kms'', and
+      the default list plus privateKeyFormat for ''exported''.'
+  - codeRefs:
+    - function:a2c20955acafe88071116f40dd7a1c79
+    id: r.exported-extends-defaults
+    level: MUST
+    text: The 'exported' type must extend the default field list rather than replace
+      it, so privateKeyFormat appears after keyName, keyType and keyBits.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/pki/addon/utils/action-params.js
+    id: r.pure-export
+    level: SHOULD
+    text: The helper must be a pure named export with no external state or side effects,
+      so callers can invoke it during serialization and field lookup without ordering
+      concerns.
+  - codeRefs:
+    - function:a2c20955acafe88071116f40dd7a1c79
+    id: r.unknown-type-defaults
+    level: MUST
+    text: An unrecognized or absent type must fall through to the default field list
+      keyName, keyType and keyBits without throwing.
   upstream: self

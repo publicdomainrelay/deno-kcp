@@ -6014,6 +6014,14 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.index-route-breadcrumbs` (MUST): "TidyAutoIndexRoute.setupController must call super with the arguments object, then set controller.breadcrumbs to exactly four entries in order: secrets with route 'secrets' and linkExternal true; the secretMountPath.currentPath with route 'overview' and models [currentPath]; 'tidy' with route 'tidy.index' and models [currentPath]; and a final 'auto' leaf carrying no route."
 - added `r.index-route-title` (MUST): "TidyAutoIndexRoute.setupController must set controller.title to secretMountPath.currentPath so the page title tracks the mounted engine path, and the route must inject the store and secretMountPath services while declaring no model of its own."
 
+### third-party-openbao-ui-lib-pki-addon-utils
+
+- intent: "" -> "This context exists so the PKI key-parameter naming rules live in one place and can be specified independently of the OpenBao UI code that consumes them. Both the action serializer and the toggle-groups component depend on the same field list, so the function defines the contract for which key attributes exist per key type."
+- added `r.export-key-params-by-type` (MUST): "keyParamsByType(type) must return the parameter-name list for the given key type, and the returned array must reflect the branch taken: default keyName/keyType/keyBits, keyRef for 'existing', keyName/managedKeyName/managedKeyId for 'kms', and the default list plus privateKeyFormat for 'exported'."
+- added `r.exported-extends-defaults` (MUST): "The 'exported' type must extend the default field list rather than replace it, so privateKeyFormat appears after keyName, keyType and keyBits."
+- added `r.pure-export` (SHOULD): "The helper must be a pure named export with no external state or side effects, so callers can invoke it during serialization and field lookup without ordering concerns."
+- added `r.unknown-type-defaults` (MUST): "An unrecognized or absent type must fall through to the default field list keyName, keyType and keyBits without throwing."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -6558,6 +6566,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-pki-addon-routes-tidy-auto-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-routes-tidy-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-routes-tidy-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-lib-pki-addon-utils-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-pki-addon-utils-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |

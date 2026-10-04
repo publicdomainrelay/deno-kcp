@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the PKI key-parameter naming rules live in one place and can be specified independently of the OpenBao UI code that consumes them. Both the action serializer and the toggle-groups component depend on the same field list, so the function defines the contract for which key attributes exist per key type.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
