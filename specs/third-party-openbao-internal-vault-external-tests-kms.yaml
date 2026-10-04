@@ -2,10 +2,201 @@ apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
 - file:third_party/openbao/internal/vault/external_tests/kms/kms_test.go kms_test.go@third_party/openbao/internal/vault/external_tests/kms/kms_test.go
 - file:third_party/openbao/internal/vault/external_tests/kms/testing.go testing.go@third_party/openbao/internal/vault/external_tests/kms/testing.go
+- function:1017e8ef94de38bb38646b55bdd5cdd2 ExercisePKIIntermediateCA@third_party/openbao/internal/vault/external_tests/kms/testing.go:323
+- function:148d1fe5f4fb2681bed177ae23c84730 ExercisePKICA@third_party/openbao/internal/vault/external_tests/kms/testing.go:414
+- function:17f8e7ee21f0f651bc7f1594fa263d94 ExercisePKIRootCA@third_party/openbao/internal/vault/external_tests/kms/testing.go:294
+- function:190e0c5e008b566007f49bbd64546906 SetupPKI@third_party/openbao/internal/vault/external_tests/kms/testing.go:231
+- function:3046d2a4858afebec6428e34d78eebc0 ExerciseTransitEncryptDecrypt@third_party/openbao/internal/vault/external_tests/kms/testing.go:167
+- function:31b901d631b78a1f1fda76d2be91c7b6 ExerciseTransitSignVerify@third_party/openbao/internal/vault/external_tests/kms/testing.go:198
+- function:6c7d8b4d2c30fc31ec00d6d0d3307cb2 ExercisePKIForKey@third_party/openbao/internal/vault/external_tests/kms/testing.go:278
+- function:7bcc7c8885e937d749320e92a98f01aa ExerciseTransitWithTransitKMS@third_party/openbao/internal/vault/external_tests/kms/testing.go:102
+- function:7fd87069f7f62de955ee069151b37731 ExerciseTransitForKey@third_party/openbao/internal/vault/external_tests/kms/testing.go:130
+- function:b8b8fc44db4b504bf330ecbdf5acfa78 ExerciseTransitKMS@third_party/openbao/internal/vault/external_tests/kms/testing.go:16
+- function:df15032a6d8494078e7470afa5e09cde SetupTransit@third_party/openbao/internal/vault/external_tests/kms/testing.go:95
+- function:eb9d41a27c4d208e2a1660caa228c677 ExercisePKIWithTransitKMS@third_party/openbao/internal/vault/external_tests/kms/testing.go:244
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-vault-external-tests-kms
   namespace: default
 spec:
+  intent: 'The context exists to hold the shared external-test exercise code for OpenBao''s
+    KMS integration, so that both the builtin-transit and external-transit test entrypoints
+    can drive the same transit and PKI scenarios against a real server. It separates
+    the reusable exercise functions from the thin test functions, letting a KMS implementation
+    be validated by mounting transit or PKI, binding keys through the sys/external-keys
+    config and grant API, and exercising encrypt/decrypt and sign/verify or CA issuance
+    over that external key. Its purpose is coverage of the external key workflow:
+    the negative case where a transit external-key write is rejected before a grant,
+    and the positive cases after the grant is written.'
+  interfaces:
+  - file: third_party/openbao/internal/vault/external_tests/kms/testing.go
+    kind: function
+    name: ExercisePKICA
+    signature: func ExercisePKICA(t *testing.T, client *api.Client, mountName string,
+      issuerName string)
+  - file: third_party/openbao/internal/vault/external_tests/kms/testing.go
+    kind: function
+    name: ExercisePKIForKey
+    signature: func ExercisePKIForKey(t *testing.T, client *api.Client, baseName string)
+  - file: third_party/openbao/internal/vault/external_tests/kms/testing.go
+    kind: function
+    name: ExercisePKIIntermediateCA
+    signature: func ExercisePKIIntermediateCA(t *testing.T, client *api.Client, mountName
+      string, keyName string, extKeyRef string)
+  - file: third_party/openbao/internal/vault/external_tests/kms/testing.go
+    kind: function
+    name: ExercisePKIRootCA
+    signature: func ExercisePKIRootCA(t *testing.T, client *api.Client, mountName
+      string, keyName string, extKeyRef string)
+  - file: third_party/openbao/internal/vault/external_tests/kms/testing.go
+    kind: function
+    name: ExercisePKIWithTransitKMS
+    signature: func ExercisePKIWithTransitKMS(t *testing.T, client *api.Client)
+  - file: third_party/openbao/internal/vault/external_tests/kms/testing.go
+    kind: function
+    name: ExerciseTransitEncryptDecrypt
+    signature: func ExerciseTransitEncryptDecrypt(t *testing.T, client *api.Client,
+      mountName string, keyName string)
+  - file: third_party/openbao/internal/vault/external_tests/kms/testing.go
+    kind: function
+    name: ExerciseTransitForKey
+    signature: func ExerciseTransitForKey(t *testing.T, client *api.Client, baseName
+      string, encryptDecrypt bool, signVerify bool)
+  - file: third_party/openbao/internal/vault/external_tests/kms/testing.go
+    kind: function
+    name: ExerciseTransitKMS
+    signature: func ExerciseTransitKMS(t *testing.T, client *api.Client)
+  - file: third_party/openbao/internal/vault/external_tests/kms/testing.go
+    kind: function
+    name: ExerciseTransitSignVerify
+    signature: func ExerciseTransitSignVerify(t *testing.T, client *api.Client, mountName
+      string, keyName string)
+  - file: third_party/openbao/internal/vault/external_tests/kms/testing.go
+    kind: function
+    name: ExerciseTransitWithTransitKMS
+    signature: func ExerciseTransitWithTransitKMS(t *testing.T, client *api.Client)
+  - file: third_party/openbao/internal/vault/external_tests/kms/testing.go
+    kind: function
+    name: SetupPKI
+    signature: func SetupPKI(t *testing.T, client *api.Client)
+  - file: third_party/openbao/internal/vault/external_tests/kms/testing.go
+    kind: function
+    name: SetupTransit
+    signature: func SetupTransit(t *testing.T, client *api.Client)
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/kms/testing.go
+    id: r.exercise-helpers-live-in-testing-file
+    level: MUST
+    text: All exercise and setup helpers are exported from testing.go in the kms external
+      tests package, so other test files in the package reuse them instead of reimplementing
+      the transit and PKI flows.
+  - codeRefs:
+    - function:148d1fe5f4fb2681bed177ae23c84730
+    id: r.pki-ca-exercise
+    level: MUST
+    text: ExercisePKICA exercises CA behaviour on the given PKI mount for the named
+      issuer.
+  - codeRefs:
+    - function:6c7d8b4d2c30fc31ec00d6d0d3307cb2
+    id: r.pki-for-key-runs-ca-exercises
+    level: MUST
+    text: ExercisePKIForKey drives the PKI certificate exercises for a single base
+      name, delegating to the root, intermediate and CA exercise functions so a key
+      backing PKI is validated for certificate issuance.
+  - codeRefs:
+    - function:1017e8ef94de38bb38646b55bdd5cdd2
+    id: r.pki-intermediate-ca-exercise
+    level: MUST
+    text: ExercisePKIIntermediateCA exercises intermediate CA generation and signing
+      on the given PKI mount using the given key name and external key reference.
+  - codeRefs:
+    - function:17f8e7ee21f0f651bc7f1594fa263d94
+    id: r.pki-root-ca-exercise
+    level: MUST
+    text: ExercisePKIRootCA exercises root CA generation on the given PKI mount using
+      the given key name and external key reference.
+  - codeRefs:
+    - function:190e0c5e008b566007f49bbd64546906
+    - function:eb9d41a27c4d208e2a1660caa228c677
+    id: r.pki-with-transit-kms-sign-verify-only
+    level: MUST
+    text: ExercisePKIWithTransitKMS calls SetupPKI, then skips every key type from
+      knownTransitKeyTypes whose SignVerify flag is false; for the remaining types
+      it runs a parallel subtest named after the type that writes a backing key at
+      keys/keys/pki-<type>, writes an external key config at sys/external-keys/configs/kms/keys/pki-<type>
+      with name and version 1, and calls ExercisePKIForKey with the base name.
+  - codeRefs:
+    - function:190e0c5e008b566007f49bbd64546906
+    id: r.setup-pki-mounts-engine
+    level: MUST
+    text: SetupPKI prepares a PKI secrets engine on the client so the PKI exercise
+      functions can issue certificates through it.
+  - codeRefs:
+    - function:df15032a6d8494078e7470afa5e09cde
+    id: r.setup-transit-mounts-engine-at-transit
+    level: MUST
+    text: SetupTransit mounts a secrets engine of type "transit" at the path "transit"
+      through the client's Sys().Mount call and fails the test when the mount returns
+      an error.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/kms/kms_test.go
+    id: r.test-entrypoints-call-transit-kms
+    level: MUST
+    text: The package's Go tests, TestKMS_BuiltinTransit and TestKMS_ExternalTransit
+      in kms_test.go, call ExerciseTransitKMS with a client so both the builtin and
+      external transit KMS configurations are covered.
+  - codeRefs:
+    - function:3046d2a4858afebec6428e34d78eebc0
+    id: r.transit-encrypt-decrypt-exercise
+    level: MUST
+    text: ExerciseTransitEncryptDecrypt exercises encrypt and decrypt round trips
+      against the given mount and key name, taking the client, mount name and key
+      name as its inputs.
+  - codeRefs:
+    - function:7fd87069f7f62de955ee069151b37731
+    id: r.transit-key-requires-grant-before-use
+    level: MUST
+    text: ExerciseTransitForKey writes the transit key at transit/keys/<baseName>
+      with type "external-key" and external_key_ref "kms:<baseName>" and requires
+      that this write fails while no grant exists; it then creates the grant by writing
+      sys/external-keys/configs/kms/keys/<baseName>/grants/transit, requires that
+      write to succeed, and retries the same transit key write requiring success this
+      time.
+  - codeRefs:
+    - function:7fd87069f7f62de955ee069151b37731
+    id: r.transit-key-runs-capability-subtests
+    level: MUST
+    text: ExerciseTransitForKey runs an "encrypt-decrypt" subtest only when the encryptDecrypt
+      flag is set and a "sign-verify" subtest only when the signVerify flag is set;
+      each subtest runs in parallel and invokes the corresponding exercise twice,
+      once against the "keys" mount and once against the "transit" mount, with the
+      base name as the key name.
+  - codeRefs:
+    - function:b8b8fc44db4b504bf330ecbdf5acfa78
+    id: r.transit-kms-entry-runs-both-suites
+    level: MUST
+    text: ExerciseTransitKMS runs two subtests named "transit" and "pki" against the
+      supplied API client, delegating to ExerciseTransitWithTransitKMS and ExercisePKIWithTransitKMS
+      respectively, so a single call covers both the transit-engine and PKI-engine
+      external key flows.
+  - codeRefs:
+    - function:31b901d631b78a1f1fda76d2be91c7b6
+    id: r.transit-sign-verify-exercise
+    level: MUST
+    text: ExerciseTransitSignVerify exercises sign and verify round trips against
+      the given mount and key name, taking the client, mount name and key name as
+      its inputs.
+  - codeRefs:
+    - function:7bcc7c8885e937d749320e92a98f01aa
+    - function:df15032a6d8494078e7470afa5e09cde
+    id: r.transit-with-transit-kms-per-key-type
+    level: MUST
+    text: 'ExerciseTransitWithTransitKMS first calls SetupTransit, then for every
+      key type in knownTransitKeyTypes runs a subtest named after the type: it writes
+      a backing key at keys/keys/transit-<type> with the type, writes an external
+      key config at sys/external-keys/configs/kms/keys/transit-<type> with name and
+      version 1, and then calls ExerciseTransitForKey with the base name and the type''s
+      EncryptDecrypt and SignVerify capabilities.'
   upstream: self
