@@ -4458,6 +4458,19 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.delete-policy-rolls-back-on-error` (MUST): "When destroyRecord rejects, deletePolicy must call this.model.rollbackAttributes() and flash a danger message that names the uppercased policyType and the policy name and appends the failure detail, using the error.errors entries joined with '. ' when that array is present and error.message otherwise."
 - added `r.show-controller-inherits-create` (MUST): "The policy show controller must extend the create controller without adding or overriding any behavior, so the show route inherits the store service and the cleanupModel contract from the create controller."
 
+### third-party-openbao-ui-app-controllers-vault-cluster-secrets
+
+- intent: "" -> "The context exists so the secrets-engine index page can present a filtered, sorted list of mountable secret engines and let the operator hide internal engines, filter by engine type and name, and disable a selected engine. The backend.js controller carries per-route editor state for an individual secrets engine, kept separate from the list-level controller."
+- added `r.backend-editor-state` (MAY): "The single-engine controller defaults preferAdvancedEdit to false and holds no other state, so the backend editor opens in basic edit mode until the operator switches it."
+- added `r.disable-engine-drop-task` (MUST): "The disableEngine dropTask yields engine.destroyRecord(); on success it pushes a success flash message naming the engine type and path, and on error it pushes a danger flash message containing the engine type, path, and the joined err.errors strings. Because it is a dropTask, a second disable request that arrives while one is running is dropped."
+- added `r.displayable-backends-filter` (MUST): "The displayableBackends getter returns model entries that have shouldIncludeInList true and that are either not internal or are internal while showInternalEngines is true; the filter runs inside a Glimmer createCache and the getter reads it with getValue, so the result is recomputed only when model or showInternalEngines changes."
+- added `r.engine-name-option-list` (MUST): "The secretEngineArrayByName getter maps sortedDisplayableBackends to name/id pairs where both name and id come from modelObject.id, so the name filter offers one entry per visible backend."
+- added `r.engine-type-option-list` (MUST): "The secretEngineArrayByType getter maps sortedDisplayableBackends to its engineType values, removes duplicates with a Set, and returns an array of name/id pairs keyed by engine type for the type filter dropdown."
+- added `r.filter-actions-unpack-arrays` (MUST): "The filterEngineType and filterEngineName actions take a single array argument, destructure its first element, and assign it to selectedEngineType and selectedEngineName respectively; both selections default to null so no filter is active on load."
+- added `r.internal-engines-toggle` (MUST): "The toggleShowInternalEngines action sets showInternalEngines to the checked argument, and showInternalEngines defaults to false so internal engines stay hidden until the operator opts in."
+- added `r.sorted-backends-order` (MUST): "The sortedDisplayableBackends getter sorts displayable backends so supported backends come first, then orders by descending isSupportedBackend difference and ascending id, before any filtering is applied."
+- added `r.type-and-name-filter-combination` (MUST): "When selectedEngineType is set, sortedDisplayableBackends matches backend.engineType, or matches backend.id when selectedEngineName is also set; when only selectedEngineName is set it matches backend.id; when neither is set it returns the full sorted list."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4820,5 +4833,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-controllers-vault-cluster-policies-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-policy-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-secrets-backend-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-ui-app-controllers-vault-cluster-secrets-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-secrets-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

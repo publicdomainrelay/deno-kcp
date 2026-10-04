@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so the secrets-engine index page can present a filtered, sorted list of mountable secret engines and let the operator hide internal engines, filter by engine type and name, and disable a selected engine. The backend.js controller carries per-route editor state for an individual secrets engine, kept separate from the list-level controller.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
