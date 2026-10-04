@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The package exists so the rest of OpenBao has one place that decides what a namespace path looks like and one place that carries the current namespace through a call chain. Validation and canonicalization are centralized because a stray slash, a reserved segment such as sys or root, a wildcard or a space would otherwise silently address the wrong namespace, and because the root namespace must be the empty path. Context helpers exist because namespace is per-request data threaded through HTTP handlers, core and mount layers without widening every function signature; the header value is kept separately so the raw client-supplied namespace header survives canonicalization. UUID and ID helpers exist so leases and tokens can be stamped with the namespace that owns them and checked later without a lookup.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

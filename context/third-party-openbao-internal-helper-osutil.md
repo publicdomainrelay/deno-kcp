@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so that callers that must refuse to read secrets from world- or group-writable files, or that must confirm a file is owned by a specific uid, have one audited place to ask. It separates the checks that are meaningful everywhere (mode-bit inspection, digesting, permission comparison) from the ones that need POSIX uid/gid data (fileinfo_unix.go) and the stubs that keep Windows builds compiling, so a security check written once behaves the same wherever it is called.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
