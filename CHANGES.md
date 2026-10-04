@@ -3097,6 +3097,13 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.replication-state-dr-and-performance-strings` (MUST): "GetDRString must collapse the DR flags to a single mode name, preferring bootstrapping over primary over secondary over disabled, and must return "unknown" when none of those DR flags is set; GetPerformanceString must do the same for the performance flags and must return an empty string when no performance flag is set."
 - added `r.replication-state-strings` (MUST): "ReplicationState.StateStrings must return one short tag per set flag, in the fixed order perf-secondary, perf-primary, perf-bootstrapping, perf-disabled, dr-primary, dr-secondary, dr-bootstrapping, dr-disabled, perfstandby, and must return no elements when no flag is set."
 
+### third-party-openbao-sdk-helper-cryptoutil
+
+- intent: "" -> "This context exists to specify the vendored `sdk/helper/cryptoutil` package of the OpenBao SDK as it is copied into the deno-kcp repository under `third_party/openbao`. It is a third-party shim, not first-party code: deno-kcp depends on OpenBao's helper packages, and this one carries the small hashing helper those packages or their consumers need. The context pins the exact contract of the one exported function so that callers elsewhere in the tree can rely on a stable BLAKE2b-256 digest over a string key, and so any future vendoring refresh can be checked against the same behavior."
+- added `r.blake2b256-hash-contract` (MUST): "`Blake2b256Hash` accepts a single `key string` argument and returns a `[]byte` holding the BLAKE2b-256 digest of that string's bytes, computed with an unkeyed hash (`blake2b.New256(nil)`, the error discarded), written via `hf.Write([]byte(key))` and finalized with `hf.Sum(nil)`."
+- added `r.deterministic-output` (MUST): "Hashing is deterministic and pure: the function keeps no state between calls, so the same `key` always yields the same digest bytes, and the package exports no other symbols beyond this function."
+- added `r.digest-transforms-input` (MUST): "The result is never empty and never equals the input text as a string: a passing `TestBlake2b256Hash` calls `Blake2b256Hash("sampletext")` and calls `t.Fatal("failed to hash the text")` when the returned value is the empty string or is `"sampletext"`."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -3318,4 +3325,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-sdk-helper-compressutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-consts-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-consts-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-sdk-helper-cryptoutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-helper-cryptoutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-sdk-helper-cryptoutil-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |

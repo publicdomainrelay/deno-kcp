@@ -45784,8 +45784,48 @@ system_contexts:
   codeRefIndex:
   - file:third_party/openbao/sdk/helper/cryptoutil/cryptoutil.go cryptoutil.go@third_party/openbao/sdk/helper/cryptoutil/cryptoutil.go
   - file:third_party/openbao/sdk/helper/cryptoutil/cryptoutil_test.go cryptoutil_test.go@third_party/openbao/sdk/helper/cryptoutil/cryptoutil_test.go
+  - function:5dc45e55dcc09bc468fec4a497fac126 Blake2b256Hash@third_party/openbao/sdk/helper/cryptoutil/cryptoutil.go:8
   id: sc.third-party-openbao-sdk-helper-cryptoutil
+  intent: 'This context exists to specify the vendored `sdk/helper/cryptoutil` package
+    of the OpenBao SDK as it is copied into the deno-kcp repository under `third_party/openbao`.
+    It is a third-party shim, not first-party code: deno-kcp depends on OpenBao''s
+    helper packages, and this one carries the small hashing helper those packages
+    or their consumers need. The context pins the exact contract of the one exported
+    function so that callers elsewhere in the tree can rely on a stable BLAKE2b-256
+    digest over a string key, and so any future vendoring refresh can be checked against
+    the same behavior.'
+  interfaces:
+  - file: third_party/openbao/sdk/helper/cryptoutil/cryptoutil.go
+    kind: function
+    name: Blake2b256Hash
+    signature: func Blake2b256Hash(key string) []byte
   name: third-party-openbao-sdk-helper-cryptoutil
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/cryptoutil/cryptoutil.go
+    - function:5dc45e55dcc09bc468fec4a497fac126
+    id: r.blake2b256-hash-contract
+    level: MUST
+    text: '`Blake2b256Hash` accepts a single `key string` argument and returns a `[]byte`
+      holding the BLAKE2b-256 digest of that string''s bytes, computed with an unkeyed
+      hash (`blake2b.New256(nil)`, the error discarded), written via `hf.Write([]byte(key))`
+      and finalized with `hf.Sum(nil)`.'
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/cryptoutil/cryptoutil.go
+    id: r.deterministic-output
+    level: MUST
+    text: 'Hashing is deterministic and pure: the function keeps no state between
+      calls, so the same `key` always yields the same digest bytes, and the package
+      exports no other symbols beyond this function.'
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/cryptoutil/cryptoutil_test.go
+    - function:5dc45e55dcc09bc468fec4a497fac126
+    id: r.digest-transforms-input
+    level: MUST
+    text: 'The result is never empty and never equals the input text as a string:
+      a passing `TestBlake2b256Hash` calls `Blake2b256Hash("sampletext")` and calls
+      `t.Fatal("failed to hash the text")` when the returned value is the empty string
+      or is `"sampletext"`.'
   upstream: self
 - code:
   - third_party/openbao/sdk/helper/custommetadata/custom_metadata.go
