@@ -1771,6 +1771,19 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.swap-item` (MUST): "SwapItem removes the item stored under the old ID and stores the supplied item in its place, so a caller can change an item's identity key without leaving the previous entry behind."
 - added `r.test-coverage` (SHOULD): "storagepacker_test.go should exercise the packer's bucket key derivation, get, put, swap and delete paths against a test storage backend so the locking and compression behaviour stays covered."
 
+### third-party-openbao-internal-helper-stubbolt
+
+- intent: "" -> "This context exists so the repository records what the OpenBao third-party stub package guarantees: a compile-time-compatible, runtime-inert stand-in for the bolt and raft-boltdb API surface. It documents the deliberate failures (unimplemented errors) and the one non-failing accessor (Bucket), so callers and tests know the package is for linking and type-checking, not for storage, and so any future replacement or vendoring change is measured against this contract."
+- added `r.begin-ignores-writable-flag-and-fails` (MUST): "DB.Begin accepts the writable flag, ignores it, and returns a nil *Tx together with the unimplemented error, so no transaction can ever be started."
+- added `r.bucket-returns-empty-bucket` (MUST): "Tx.Bucket is the only operation that does not fail: for any bucket name it returns a non-nil pointer to a zero-value Bucket, so callers that nil-check the result take the non-nil branch."
+- added `r.foreach-never-invokes-callback` (MUST): "Bucket.ForEach returns the unimplemented error without invoking the supplied visitor function, so no key or value pair is ever yielded and iteration terminates immediately with an error."
+- added `r.open-ignores-arguments-and-fails` (MUST): "Open discards its path, file mode and Options arguments, opens nothing, and returns a nil *DB together with the unimplemented error."
+- added `r.options-mirrors-bolt-options` (SHOULD): "Options carries a ReadOnly bool and a Timeout time.Duration field so that call sites which set those bolt options continue to compile against the stub even though Open ignores them."
+- added `r.package-declares-bolt-shaped-surface` (MUST): "The package is declared as package bolt and exports the four types Options, DB, Tx and Bucket plus the operations Open, DB.Begin, Tx.Rollback, Tx.Bucket and Bucket.ForEach, so that code written against github.com/boltdb/bolt compiles without that dependency present."
+- added `r.receivers-hold-no-state` (MUST): "DB, Tx and Bucket are empty structs with no fields, so each method's result depends only on which method is called and not on the receiver, and repeated calls on the same or a zero-value receiver behave identically."
+- added `r.rollback-fails` (MUST): "Tx.Rollback returns the unimplemented error and performs no cleanup, because a Tx is never obtained from Begin in the first place."
+- added `r.single-shared-error-value` (MUST): "Every operation that is not implemented returns one shared package-level error value created as errors.New("unimplemented"), so callers can compare against a single error identity rather than per-call errors."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -1873,4 +1886,4 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-helper-random-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-storagepacker-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-storagepacker-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-internal-helper-stubbolt-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-helper-stubbolt-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |

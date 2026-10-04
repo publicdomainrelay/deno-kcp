@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the repository records what the OpenBao third-party stub package guarantees: a compile-time-compatible, runtime-inert stand-in for the bolt and raft-boltdb API surface. It documents the deliberate failures (unimplemented errors) and the one non-failing accessor (Bucket), so callers and tests know the package is for linking and type-checking, not for storage, and so any future replacement or vendoring change is measured against this contract.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
