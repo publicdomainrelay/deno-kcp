@@ -3439,6 +3439,20 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.unexported-fields-skipped` (MUST): "structToMap iterates fields by index and skips any field whose StructField.PkgPath is non-empty, that is, unexported fields never appear in the result regardless of their json tag. A struct with only unexported fields maps to an empty map."
 - added `r.zero-and-anonymous-structs-supported` (SHOULD): "TestMap pins the boundary cases: an empty struct still produces a map containing its exported fields at their zero values, and an anonymous struct literal with fields X and Y maps to keys "X" and "Y", so Map does not depend on a named type."
 
+### third-party-openbao-sdk-helper-template
+
+- intent: "" -> "The context exists so callers in this repository can build and render Go text/templates through a validated, option-driven constructor instead of calling text/template directly. Callers pass a raw template string and any extra template functions as Opt values; the constructor validates the input once, merges a built-in function library, and returns a StringTemplate whose Generate method renders the parsed template against caller data."
+- added `r.constructor-applies-options-with-multierror` (MUST): "NewTemplate applies each supplied Opt in order to the StringTemplate, accumulating every returned error in a multierror and returning the StringTemplate together with the aggregated error when any option fails."
+- added `r.constructor-parses-template` (MUST): "NewTemplate parses the raw template with template.New("template") using Funcs(funcMap) and Option(options...), stores the parsed template on the StringTemplate, and wraps a parse failure as "unable to parse template: %w" while returning an empty StringTemplate."
+- added `r.constructor-requires-template` (MUST): "When the rawTemplate field is still empty after the options run, NewTemplate returns an empty StringTemplate and the error "missing template" instead of parsing."
+- added `r.constructor-seeds-default-funcmap` (MUST): "NewTemplate builds an initial funcMap containing the helper functions random, truncate, truncate_sha256, uppercase, lowercase, replace, sha256, base64, decode_base64, hex, decode_hex, unix_time, unix_time_millis, timestamp, uuid and glob, so callers get these template functions without registering them."
+- added `r.function-option-registers-func` (MUST): "Function(name string, f any) returns an Opt that rejects an empty name with "missing function name" and a nil function with "missing function", and otherwise registers f in the StringTemplate funcMap under name."
+- added `r.generate-executes-template` (MUST): "StringTemplate.Generate accepts arbitrary data, executes the parsed template held by the StringTemplate against that data, and returns the rendered string or the execution error."
+- added `r.opt-mutates-string-template` (MUST): "Opt is defined as func(*StringTemplate) error, so every option mutates the StringTemplate it is given and may report a failure that the constructor aggregates."
+- added `r.option-option-stores-parser-options` (MUST): "Option(opts ...string) returns an Opt that replaces the StringTemplate options slice with the given strings, which the constructor later forwards to text/template's Option method."
+- added `r.template-option-sets-raw-template` (MUST): "Template(rawTemplate string) returns an Opt that stores the raw template string on the StringTemplate field rawTemplate and never returns an error from the closure."
+- added `r.tests-cover-options-and-generation` (SHOULD): "template_test.go exercises generation, bad constructor arguments and template glob behavior, and funcs_test.go exercises the helper functions, so changes to the option set, constructor validation or the function map stay covered."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -3693,5 +3707,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-sdk-helper-stepwise-environments-docker-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-stepwise-environments-docker-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-structtomap-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-sdk-helper-template-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-helper-template-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-testcluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |

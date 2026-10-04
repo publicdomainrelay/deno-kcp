@@ -50579,8 +50579,127 @@ system_contexts:
   - file:third_party/openbao/sdk/helper/template/funcs_test.go funcs_test.go@third_party/openbao/sdk/helper/template/funcs_test.go
   - file:third_party/openbao/sdk/helper/template/template.go template.go@third_party/openbao/sdk/helper/template/template.go
   - file:third_party/openbao/sdk/helper/template/template_test.go template_test.go@third_party/openbao/sdk/helper/template/template_test.go
+  - function:0863ca8e4e59382dff1e3569dfa86150 NewTemplate@third_party/openbao/sdk/helper/template/template.go:129
+  - function:2d65743c2acb10f109a598b1adb2a8aa Function@third_party/openbao/sdk/helper/template/template.go:27
+  - function:633fb385f6c7e3a185e7d7f585882bd4 Option@third_party/openbao/sdk/helper/template/template.go:43
+  - function:e916dee7d7c65ed558f6b04bd9fdd93d Template@third_party/openbao/sdk/helper/template/template.go:18
+  - method:5cec2f37ce542ffbd6260b060201b027 StringTemplate.Generate@third_party/openbao/sdk/helper/template/template.go:178
+  - struct:4578ac9a6509fdb2557a98f75f115a7e StringTemplate@third_party/openbao/sdk/helper/template/template.go:119
+  - type_alias:961b4139fc2c076a3339627c31869405 Opt@third_party/openbao/sdk/helper/template/template.go:16
   id: sc.third-party-openbao-sdk-helper-template
+  intent: The context exists so callers in this repository can build and render Go
+    text/templates through a validated, option-driven constructor instead of calling
+    text/template directly. Callers pass a raw template string and any extra template
+    functions as Opt values; the constructor validates the input once, merges a built-in
+    function library, and returns a StringTemplate whose Generate method renders the
+    parsed template against caller data.
+  interfaces:
+  - file: third_party/openbao/sdk/helper/template/template.go
+    kind: function
+    name: Function
+    signature: func Function(name string, f any) Opt
+  - file: third_party/openbao/sdk/helper/template/template.go
+    kind: function
+    name: NewTemplate
+    signature: func NewTemplate(opts ...Opt) (up StringTemplate, err error)
+  - file: third_party/openbao/sdk/helper/template/template.go
+    kind: type_alias
+    name: Opt
+    signature: type Opt func(*StringTemplate) error
+  - file: third_party/openbao/sdk/helper/template/template.go
+    kind: function
+    name: Option
+    signature: func Option(opts ...string) Opt
+  - file: third_party/openbao/sdk/helper/template/template.go
+    kind: struct
+    name: StringTemplate
+    signature: type StringTemplate struct
+  - file: third_party/openbao/sdk/helper/template/template.go
+    kind: method
+    name: StringTemplate.Generate
+    signature: func (t StringTemplate) Generate(data any) (string, error)
+  - file: third_party/openbao/sdk/helper/template/template.go
+    kind: function
+    name: Template
+    signature: func Template(rawTemplate string) Opt
   name: third-party-openbao-sdk-helper-template
+  requirements:
+  - codeRefs:
+    - function:0863ca8e4e59382dff1e3569dfa86150
+    id: r.constructor-applies-options-with-multierror
+    level: MUST
+    text: NewTemplate applies each supplied Opt in order to the StringTemplate, accumulating
+      every returned error in a multierror and returning the StringTemplate together
+      with the aggregated error when any option fails.
+  - codeRefs:
+    - function:0863ca8e4e59382dff1e3569dfa86150
+    - struct:4578ac9a6509fdb2557a98f75f115a7e
+    id: r.constructor-parses-template
+    level: MUST
+    text: 'NewTemplate parses the raw template with template.New("template") using
+      Funcs(funcMap) and Option(options...), stores the parsed template on the StringTemplate,
+      and wraps a parse failure as "unable to parse template: %w" while returning
+      an empty StringTemplate.'
+  - codeRefs:
+    - function:0863ca8e4e59382dff1e3569dfa86150
+    id: r.constructor-requires-template
+    level: MUST
+    text: When the rawTemplate field is still empty after the options run, NewTemplate
+      returns an empty StringTemplate and the error "missing template" instead of
+      parsing.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/template/funcs.go
+    - function:0863ca8e4e59382dff1e3569dfa86150
+    id: r.constructor-seeds-default-funcmap
+    level: MUST
+    text: NewTemplate builds an initial funcMap containing the helper functions random,
+      truncate, truncate_sha256, uppercase, lowercase, replace, sha256, base64, decode_base64,
+      hex, decode_hex, unix_time, unix_time_millis, timestamp, uuid and glob, so callers
+      get these template functions without registering them.
+  - codeRefs:
+    - function:2d65743c2acb10f109a598b1adb2a8aa
+    id: r.function-option-registers-func
+    level: MUST
+    text: Function(name string, f any) returns an Opt that rejects an empty name with
+      "missing function name" and a nil function with "missing function", and otherwise
+      registers f in the StringTemplate funcMap under name.
+  - codeRefs:
+    - method:5cec2f37ce542ffbd6260b060201b027
+    - struct:4578ac9a6509fdb2557a98f75f115a7e
+    id: r.generate-executes-template
+    level: MUST
+    text: StringTemplate.Generate accepts arbitrary data, executes the parsed template
+      held by the StringTemplate against that data, and returns the rendered string
+      or the execution error.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/template/template.go
+    - type_alias:961b4139fc2c076a3339627c31869405
+    id: r.opt-mutates-string-template
+    level: MUST
+    text: Opt is defined as func(*StringTemplate) error, so every option mutates the
+      StringTemplate it is given and may report a failure that the constructor aggregates.
+  - codeRefs:
+    - function:633fb385f6c7e3a185e7d7f585882bd4
+    id: r.option-option-stores-parser-options
+    level: MUST
+    text: Option(opts ...string) returns an Opt that replaces the StringTemplate options
+      slice with the given strings, which the constructor later forwards to text/template's
+      Option method.
+  - codeRefs:
+    - function:e916dee7d7c65ed558f6b04bd9fdd93d
+    id: r.template-option-sets-raw-template
+    level: MUST
+    text: Template(rawTemplate string) returns an Opt that stores the raw template
+      string on the StringTemplate field rawTemplate and never returns an error from
+      the closure.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/template/funcs_test.go
+    - file:third_party/openbao/sdk/helper/template/template_test.go
+    id: r.tests-cover-options-and-generation
+    level: SHOULD
+    text: template_test.go exercises generation, bad constructor arguments and template
+      glob behavior, and funcs_test.go exercises the helper functions, so changes
+      to the option set, constructor validation or the function map stay covered.
   upstream: self
 - code:
   - third_party/openbao/sdk/helper/testcluster/consts.go

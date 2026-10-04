@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so callers in this repository can build and render Go text/templates through a validated, option-driven constructor instead of calling text/template directly. Callers pass a raw template string and any extra template functions as Opt values; the constructor validates the input once, merges a built-in function library, and returns a StringTemplate whose Generate method renders the parsed template against caller data.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
