@@ -18,4 +18,8 @@ upstream: self
 - `file:third_party/openbao/sdk/database/helper/dbutil/dbutil.go` file dbutil.go (third_party/openbao/sdk/database/helper/dbutil/dbutil.go)
 - `file:third_party/openbao/sdk/database/helper/dbutil/parseurl.go` file parseurl.go (third_party/openbao/sdk/database/helper/dbutil/parseurl.go)
 - `file:third_party/openbao/sdk/database/helper/dbutil/quoteidentifier.go` file quoteidentifier.go (third_party/openbao/sdk/database/helper/dbutil/quoteidentifier.go)
+- `function:226e54f4985dac8b16bce4aecd3fa887` function QuoteIdentifier (third_party/openbao/sdk/database/helper/dbutil/quoteidentifier.go)
+- `function:4894743c645e48dfeae75571355de588` function ParseURL (third_party/openbao/sdk/database/helper/dbutil/parseurl.go)
+- `function:68634ad58e9e60c66e8af6d0e4aefed1` function Unimplemented (third_party/openbao/sdk/database/helper/dbutil/dbutil.go)
+- `function:eb56241dcc57671e9840d5dbe3210b83` function QueryHelper (third_party/openbao/sdk/database/helper/dbutil/dbutil.go)
 <!-- SPECD_MANAGED_END -->

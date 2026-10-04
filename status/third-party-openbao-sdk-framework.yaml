@@ -1,0 +1,661 @@
+conditions:
+- message: 'undeclared: Backend, Backend.Cleanup, Backend.GetRandomReader, Backend.HandleExistenceCheck,
+    Backend.HandleRequest, Backend.Initialize, Backend.InvalidateKey, Backend.Logger,
+    Backend.PluginVersion, Backend.Route, Backend.Secret, Backend.Setup, Backend.SpecialPaths,
+    Backend.System, Backend.Type, CalculateTTL, CleanupFunc, DeleteWAL, DisplayAttributes,
+    ExistenceFunc, FieldData, FieldData.CloneSchema, FieldData.Get, FieldData.GetDefaultOrZero,
+    FieldData.GetFirst, FieldData.GetOk, FieldData.GetOkErr, FieldData.GetTimeWithExplicitDefault,
+    FieldData.GetWithExplicitDefault, FieldData.Validate, FieldData.ValidateRequiredFields,
+    FieldData.ValidateStrict, FieldSchema, FieldSchema.DefaultOrZero, FieldType, FieldType.String,
+    FieldType.Zero, GenericNameRegex, GenericNameWithAtRegex, GetWAL, GlobListFilter,
+    HandlePatchOperation, InitializeFunc, InvalidateFunc, LeaseExtend, ListWAL, MatchAllRegex,
+    NewOASDocument, NewOASDocumentFromMap, NewOASOperation, OASComponents, OASContent,
+    OASDocument, OASDocument.CreateOperationIDs, OASInfo, OASLicense, OASMediaTypeObject,
+    OASOperation, OASParameter, OASPathItem, OASRequestBody, OASResponse, OASSchema,
+    OperationFunc, OperationHandler, OperationHandler.Handler, OperationHandler.Properties,
+    OperationProperties, OptionalGenericNameRegex, OptionalParamRegex, ParseFieldType,
+    PatchPreprocessorFunc, Path, PathAppend, PathMap, PathMap.Delete, PathMap.Get,
+    PathMap.List, PathMap.Paths, PathMap.Put, PathOperation, PathOperation.Handler,
+    PathOperation.Properties, PathStruct, PathStruct.Delete, PathStruct.Get, PathStruct.Paths,
+    PathStruct.Put, PolicyMap, PolicyMap.Policies, PopulateIdentityTemplate, PutWAL,
+    RequestExample, Response, Secret, Secret.HandleRenew, Secret.HandleRevoke, Secret.Renewable,
+    Secret.Response, TestBackendRoutes, ValidateIdentityTemplate, WALEntry, WALRollbackFunc'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/sdk/framework/backend.go
+  - third_party/openbao/sdk/framework/backend_test.go
+  - third_party/openbao/sdk/framework/field_data.go
+  - third_party/openbao/sdk/framework/field_data_test.go
+  - third_party/openbao/sdk/framework/field_type.go
+  - third_party/openbao/sdk/framework/filter.go
+  - third_party/openbao/sdk/framework/identity.go
+  - third_party/openbao/sdk/framework/identity_test.go
+  - third_party/openbao/sdk/framework/lease.go
+  - third_party/openbao/sdk/framework/lease_test.go
+  - third_party/openbao/sdk/framework/openapi.go
+  - third_party/openbao/sdk/framework/openapi_test.go
+  - third_party/openbao/sdk/framework/path.go
+  - third_party/openbao/sdk/framework/path_map.go
+  - third_party/openbao/sdk/framework/path_map_test.go
+  - third_party/openbao/sdk/framework/path_struct.go
+  - third_party/openbao/sdk/framework/path_struct_test.go
+  - third_party/openbao/sdk/framework/path_test.go
+  - third_party/openbao/sdk/framework/policy_map.go
+  - third_party/openbao/sdk/framework/policy_map_test.go
+  - third_party/openbao/sdk/framework/secret.go
+  - third_party/openbao/sdk/framework/secret_test.go
+  - third_party/openbao/sdk/framework/template.go
+  - third_party/openbao/sdk/framework/testing.go
+  - third_party/openbao/sdk/framework/wal.go
+  - third_party/openbao/sdk/framework/wal_test.go
+  fingerprint: 2f6e3e6999b7576aeb77a16f85d51ae6c8c1f6ac23dae2ec9aaf7b01d62ab27f
+  interfaces:
+  - codegraphId: struct:046d89be7988a14d49989b6275c13946
+    file: third_party/openbao/sdk/framework/backend.go
+    kind: struct
+    line: 43
+    name: Backend
+  - codegraphId: type_alias:19b5d74b0d76a9916b16857812a2383c
+    file: third_party/openbao/sdk/framework/backend.go
+    kind: type_alias
+    line: 116
+    name: OperationFunc
+  - codegraphId: type_alias:f558f7e3ee8f515876ff1de886d8e692
+    file: third_party/openbao/sdk/framework/backend.go
+    kind: type_alias
+    line: 119
+    name: ExistenceFunc
+  - codegraphId: type_alias:527535936e2d3a0a5c530ae50c8b7bd4
+    file: third_party/openbao/sdk/framework/backend.go
+    kind: type_alias
+    line: 122
+    name: WALRollbackFunc
+  - codegraphId: type_alias:9a740290cce3c5e09c23d2fe703d27c5
+    file: third_party/openbao/sdk/framework/backend.go
+    kind: type_alias
+    line: 125
+    name: CleanupFunc
+  - codegraphId: type_alias:6519526640ef61ea9902d3035d80e96b
+    file: third_party/openbao/sdk/framework/backend.go
+    kind: type_alias
+    line: 128
+    name: InvalidateFunc
+  - codegraphId: type_alias:1acfb7b2f1369f6f82c4e9c055bfb8e6
+    file: third_party/openbao/sdk/framework/backend.go
+    kind: type_alias
+    line: 132
+    name: InitializeFunc
+  - codegraphId: type_alias:0a5f926cd39070df2e6b094a7afeb37c
+    file: third_party/openbao/sdk/framework/backend.go
+    kind: type_alias
+    line: 136
+    name: PatchPreprocessorFunc
+  - codegraphId: method:8e55eaefd50196fa98908dd1ac839131
+    file: third_party/openbao/sdk/framework/backend.go
+    kind: method
+    line: 139
+    name: Backend.Initialize
+    signature: (ctx context.Context, req *logical.InitializationRequest) error
+  - codegraphId: method:0849067c783a880306c88ea24c0ca2f8
+    file: third_party/openbao/sdk/framework/backend.go
+    kind: method
+    line: 147
+    name: Backend.HandleExistenceCheck
+    signature: (ctx context.Context, req *logical.Request) (checkFound bool, exists
+      bool, err error)
+  - codegraphId: method:4d000e56c49b0a74a8c5fa7ac5acc18c
+    file: third_party/openbao/sdk/framework/backend.go
+    kind: method
+    line: 194
+    name: Backend.HandleRequest
+    signature: (ctx context.Context, req *logical.Request) (*logical.Response, error)
+  - codegraphId: function:78e6b547965e022d718e82362df72f11
+    file: third_party/openbao/sdk/framework/backend.go
+    kind: function
+    line: 324
+    name: HandlePatchOperation
+    signature: (input *FieldData, resource map[string]any, preprocessor PatchPreprocessorFunc)
+      ([]byte, error)
+  - codegraphId: method:fba8990f5a13a69f7f3c1b5dd2da8cac
+    file: third_party/openbao/sdk/framework/backend.go
+    kind: method
+    line: 376
+    name: Backend.SpecialPaths
+    signature: () *logical.Paths
+  - codegraphId: method:b53fa91104f4d17ae2ff4a092e1d3d4b
+    file: third_party/openbao/sdk/framework/backend.go
+    kind: method
+    line: 381
+    name: Backend.Cleanup
+    signature: (ctx context.Context)
+  - codegraphId: method:951bde2f613bae1db766a10294f1ba1f
+    file: third_party/openbao/sdk/framework/backend.go
+    kind: method
+    line: 388
+    name: Backend.InvalidateKey
+    signature: (ctx context.Context, key string)
+  - codegraphId: method:72a6184451cb24c52e1c211ade1e0a28
+    file: third_party/openbao/sdk/framework/backend.go
+    kind: method
+    line: 395
+    name: Backend.Setup
+    signature: (ctx context.Context, config *logical.BackendConfig) error
+  - codegraphId: method:6f98ec55c0eecf632e12f844aea8fc56
+    file: third_party/openbao/sdk/framework/backend.go
+    kind: method
+    line: 402
+    name: Backend.GetRandomReader
+    signature: () io.Reader
+  - codegraphId: method:cdeac5d96f9f67fdf664b59a3a0bef6f
+    file: third_party/openbao/sdk/framework/backend.go
+    kind: method
+    line: 408
+    name: Backend.Logger
+    signature: () log.Logger
+  - codegraphId: method:e6080fa20ecabf9fb22b24bdf26e9ad2
+    file: third_party/openbao/sdk/framework/backend.go
+    kind: method
+    line: 417
+    name: Backend.System
+    signature: () logical.SystemView
+  - codegraphId: method:8dbb332a734d13c2c7c8a6427e070fa5
+    file: third_party/openbao/sdk/framework/backend.go
+    kind: method
+    line: 422
+    name: Backend.Type
+    signature: () logical.BackendType
+  - codegraphId: method:81d72ee3d711ec74249a53124341ab86
+    file: third_party/openbao/sdk/framework/backend.go
+    kind: method
+    line: 427
+    name: Backend.PluginVersion
+    signature: () logical.PluginVersion
+  - codegraphId: method:61ffda091909f4266a0e8630158e919c
+    file: third_party/openbao/sdk/framework/backend.go
+    kind: method
+    line: 434
+    name: Backend.Route
+    signature: (path string) *Path
+  - codegraphId: method:c0e758a1909cca92bdbf5e226212a251
+    file: third_party/openbao/sdk/framework/backend.go
+    kind: method
+    line: 440
+    name: Backend.Secret
+    signature: (k string) *Secret
+  - codegraphId: struct:7e047a43258d6c1e0b1035d0e0359c8f
+    file: third_party/openbao/sdk/framework/backend.go
+    kind: struct
+    line: 682
+    name: FieldSchema
+  - codegraphId: method:6d32781687fbfdef1d96f9619678184f
+    file: third_party/openbao/sdk/framework/backend.go
+    kind: method
+    line: 713
+    name: FieldSchema.DefaultOrZero
+    signature: () any
+  - codegraphId: method:b3394c11e57b663fd83c9f4201329482
+    file: third_party/openbao/sdk/framework/backend.go
+    kind: method
+    line: 732
+    name: FieldType.Zero
+    signature: () any
+  - codegraphId: struct:f12d62b8b9f5345bb3715239122bb712
+    file: third_party/openbao/sdk/framework/field_data.go
+    kind: struct
+    line: 27
+    name: FieldData
+  - codegraphId: method:ce8e60c7e09089be6ef70b5a4684a2b2
+    file: third_party/openbao/sdk/framework/field_data.go
+    kind: method
+    line: 38
+    name: FieldData.CloneSchema
+    signature: () *FieldData
+  - codegraphId: method:0c7624f86becdfaaef55b346bd8c6012
+    file: third_party/openbao/sdk/framework/field_data.go
+    kind: method
+    line: 52
+    name: FieldData.Validate
+    signature: () error
+  - codegraphId: method:562e3910558bc1390750d4d09c84de1e
+    file: third_party/openbao/sdk/framework/field_data.go
+    kind: method
+    line: 86
+    name: FieldData.ValidateStrict
+    signature: () error
+  - codegraphId: method:dfc1754ea84fb26ab65a9da5a1701fa0
+    file: third_party/openbao/sdk/framework/field_data.go
+    kind: method
+    line: 103
+    name: FieldData.ValidateRequiredFields
+    signature: () error
+  - codegraphId: method:ad8d0bbfa19c63914d6318185fd370b2
+    file: third_party/openbao/sdk/framework/field_data.go
+    kind: method
+    line: 124
+    name: FieldData.Get
+    signature: (k string) any
+  - codegraphId: method:ced451fcb6cca683466cc6cab591ce69
+    file: third_party/openbao/sdk/framework/field_data.go
+    kind: method
+    line: 143
+    name: FieldData.GetDefaultOrZero
+    signature: (k string) any
+  - codegraphId: method:2e7f4d928ea6e952f6f0ca474c4c53ec
+    file: third_party/openbao/sdk/framework/field_data.go
+    kind: method
+    line: 156
+    name: FieldData.GetFirst
+    signature: (k ...string) (any, bool)
+  - codegraphId: method:5e7893ce99d080d26de55007fe26f8c2
+    file: third_party/openbao/sdk/framework/field_data.go
+    kind: method
+    line: 169
+    name: FieldData.GetOk
+    signature: (k string) (any, bool)
+  - codegraphId: method:b44fff07724ea9db6ca5a4fcd0a530f3
+    file: third_party/openbao/sdk/framework/field_data.go
+    kind: method
+    line: 191
+    name: FieldData.GetOkErr
+    signature: (k string) (any, bool, error)
+  - codegraphId: method:f9a2a22284007d4e484b22290ea994f1
+    file: third_party/openbao/sdk/framework/field_data.go
+    kind: method
+    line: 495
+    name: FieldData.GetWithExplicitDefault
+    signature: (field string, defaultValue any) any
+  - codegraphId: method:e9138168d90b74779c933d375ec603e6
+    file: third_party/openbao/sdk/framework/field_data.go
+    kind: method
+    line: 503
+    name: FieldData.GetTimeWithExplicitDefault
+    signature: (field string, defaultValue time.Duration) time.Duration
+  - codegraphId: type_alias:5c04d6de929504187477cc56ae7f2280
+    file: third_party/openbao/sdk/framework/field_type.go
+    kind: type_alias
+    line: 9
+    name: FieldType
+  - codegraphId: method:e4c55d146525004c3e11f01c1556a8ba
+    file: third_party/openbao/sdk/framework/field_type.go
+    kind: method
+    line: 77
+    name: FieldType.String
+    signature: () string
+  - codegraphId: function:7cb155705ab33f37dec1f85c9cfb30c3
+    file: third_party/openbao/sdk/framework/field_type.go
+    kind: function
+    line: 115
+    name: ParseFieldType
+    signature: (value string) (FieldType, error)
+  - codegraphId: function:5f111d929f25de87bbc5447daefb0b95
+    file: third_party/openbao/sdk/framework/filter.go
+    kind: function
+    line: 15
+    name: GlobListFilter
+    signature: (fieldName string, callback OperationFunc) OperationFunc
+  - codegraphId: function:82e414d2c78ae16af09375033079b5e3
+    file: third_party/openbao/sdk/framework/identity.go
+    kind: function
+    line: 21
+    name: PopulateIdentityTemplate
+    signature: (tpl string, entityID string, sysView logical.SystemView) (string,
+      error)
+  - codegraphId: function:d0b90263b7114903892f00914d31cfcb
+    file: third_party/openbao/sdk/framework/identity.go
+    kind: function
+    line: 52
+    name: ValidateIdentityTemplate
+    signature: (tpl string) (bool, error)
+  - codegraphId: function:93827947b27e47ac9bf58a0e2838d4c3
+    file: third_party/openbao/sdk/framework/lease.go
+    kind: function
+    line: 19
+    name: LeaseExtend
+    signature: (backendIncrement, backendMax time.Duration, systemView logical.SystemView)
+      OperationFunc
+  - codegraphId: function:46246a69971342055d0735001ad50723
+    file: third_party/openbao/sdk/framework/lease.go
+    kind: function
+    line: 37
+    name: CalculateTTL
+    signature: (sysView logical.SystemView, increment, backendTTL, period, backendMaxTTL,
+      explicitMaxTTL time.Duration, startTime time.Time) (ttl time.Duration, warnings
+      []string, err error)
+  - codegraphId: function:0028be1de12ba6bef00d3e1fb60e4b52
+    file: third_party/openbao/sdk/framework/openapi.go
+    kind: function
+    line: 26
+    name: NewOASDocument
+    signature: (version string) *OASDocument
+  - codegraphId: function:af6e936ef7bef04c1d426ab90b823361
+    file: third_party/openbao/sdk/framework/openapi.go
+    kind: function
+    line: 48
+    name: NewOASDocumentFromMap
+    signature: (input map[string]any) (*OASDocument, error)
+  - codegraphId: struct:40c27eadfb22b660f72bf6346bcdea4d
+    file: third_party/openbao/sdk/framework/openapi.go
+    kind: struct
+    line: 87
+    name: OASDocument
+  - codegraphId: struct:6765f2b23abf2bd24f48bb2d2724cd39
+    file: third_party/openbao/sdk/framework/openapi.go
+    kind: struct
+    line: 94
+    name: OASComponents
+  - codegraphId: struct:c92732e5c869e514755d2e69d16c6596
+    file: third_party/openbao/sdk/framework/openapi.go
+    kind: struct
+    line: 98
+    name: OASInfo
+  - codegraphId: struct:5192ed30a5c8e96ef497588a024ba359
+    file: third_party/openbao/sdk/framework/openapi.go
+    kind: struct
+    line: 105
+    name: OASLicense
+  - codegraphId: struct:3f83c9094005452312ce8f342d54583a
+    file: third_party/openbao/sdk/framework/openapi.go
+    kind: struct
+    line: 110
+    name: OASPathItem
+  - codegraphId: function:bae938f2213cd5d05c587e1b40efd91b
+    file: third_party/openbao/sdk/framework/openapi.go
+    kind: function
+    line: 126
+    name: NewOASOperation
+    signature: () *OASOperation
+  - codegraphId: struct:c115920f73327bc094b88ed603f02748
+    file: third_party/openbao/sdk/framework/openapi.go
+    kind: struct
+    line: 132
+    name: OASOperation
+  - codegraphId: struct:1f3ad3525d23a9e264959154f55dec79
+    file: third_party/openbao/sdk/framework/openapi.go
+    kind: struct
+    line: 143
+    name: OASParameter
+  - codegraphId: struct:5b3252f5fd2ea2a0421d6f9a2352bf0d
+    file: third_party/openbao/sdk/framework/openapi.go
+    kind: struct
+    line: 152
+    name: OASRequestBody
+  - codegraphId: type_alias:49493f0f7cc1fb9853b8ec07b2dc8023
+    file: third_party/openbao/sdk/framework/openapi.go
+    kind: type_alias
+    line: 158
+    name: OASContent
+  - codegraphId: struct:85777efde2dcbaa6a9cc11436bfdf2b5
+    file: third_party/openbao/sdk/framework/openapi.go
+    kind: struct
+    line: 160
+    name: OASMediaTypeObject
+  - codegraphId: struct:24fd2637570269c5ed9fc33a5e3616c1
+    file: third_party/openbao/sdk/framework/openapi.go
+    kind: struct
+    line: 164
+    name: OASSchema
+  - codegraphId: struct:22291ee0749f5f35ef2e301b80a07722
+    file: third_party/openbao/sdk/framework/openapi.go
+    kind: struct
+    line: 188
+    name: OASResponse
+  - codegraphId: method:6b3e61b2f68113c9a21bd771fdcc3d10
+    file: third_party/openbao/sdk/framework/openapi.go
+    kind: method
+    line: 1121
+    name: OASDocument.CreateOperationIDs
+    signature: (context string)
+  - codegraphId: function:33e77a0b87122f030c420983e426f2e9
+    file: third_party/openbao/sdk/framework/path.go
+    kind: function
+    line: 17
+    name: GenericNameRegex
+    signature: (name string) string
+  - codegraphId: function:8465914540267955672f669e8d9dbef2
+    file: third_party/openbao/sdk/framework/path.go
+    kind: function
+    line: 21
+    name: OptionalGenericNameRegex
+    signature: (name string) string
+  - codegraphId: function:97ba9e3269067a0a17fe3af55b2e7bd2
+    file: third_party/openbao/sdk/framework/path.go
+    kind: function
+    line: 27
+    name: GenericNameWithAtRegex
+    signature: (name string) string
+  - codegraphId: function:4f52da51e339e7114337d715edaeb9f7
+    file: third_party/openbao/sdk/framework/path.go
+    kind: function
+    line: 33
+    name: OptionalParamRegex
+    signature: (name string) string
+  - codegraphId: function:0de629d000606114b1ef2e4580e6d5a9
+    file: third_party/openbao/sdk/framework/path.go
+    kind: function
+    line: 39
+    name: MatchAllRegex
+    signature: (name string) string
+  - codegraphId: function:05a495b2d9c18fd5b278b7577edd9569
+    file: third_party/openbao/sdk/framework/path.go
+    kind: function
+    line: 45
+    name: PathAppend
+    signature: (paths ...[]*Path) []*Path
+  - codegraphId: struct:b948ee87a0d5135bae78a695dd180af5
+    file: third_party/openbao/sdk/framework/path.go
+    kind: struct
+    line: 55
+    name: Path
+  - codegraphId: interface:bec23c61feb51a19cac02ea5ec15d026
+    file: third_party/openbao/sdk/framework/path.go
+    kind: interface
+    line: 152
+    name: OperationHandler
+  - codegraphId: method:3c90bd8055bafd921780f31bac6e2914
+    file: third_party/openbao/sdk/framework/path.go
+    kind: method
+    line: 153
+    name: OperationHandler.Handler
+    signature: () OperationFunc
+  - codegraphId: method:17d0557aea6cf1cc4d85cef1f2da72eb
+    file: third_party/openbao/sdk/framework/path.go
+    kind: method
+    line: 154
+    name: OperationHandler.Properties
+    signature: () OperationProperties
+  - codegraphId: struct:2182a73082cf1b32e00a73cbcdc8aec0
+    file: third_party/openbao/sdk/framework/path.go
+    kind: struct
+    line: 160
+    name: OperationProperties
+  - codegraphId: struct:a2b0e667ff07383b6d799d9ffbadac69
+    file: third_party/openbao/sdk/framework/path.go
+    kind: struct
+    line: 215
+    name: DisplayAttributes
+  - codegraphId: struct:2116520920a6a9703dcb1a6231e46ed3
+    file: third_party/openbao/sdk/framework/path.go
+    kind: struct
+    line: 272
+    name: RequestExample
+  - codegraphId: struct:f10869dd096afffe13ce2642af280958
+    file: third_party/openbao/sdk/framework/path.go
+    kind: struct
+    line: 282
+    name: Response
+  - codegraphId: struct:40c50dd7329ec7213a17fb0c3d00c4e3
+    file: third_party/openbao/sdk/framework/path.go
+    kind: struct
+    line: 291
+    name: PathOperation
+  - codegraphId: method:39d3202d080618c9707cfb8074acc4d0
+    file: third_party/openbao/sdk/framework/path.go
+    kind: method
+    line: 304
+    name: PathOperation.Handler
+    signature: () OperationFunc
+  - codegraphId: method:518b1b3e9a5f878b55ea64991e48db75
+    file: third_party/openbao/sdk/framework/path.go
+    kind: method
+    line: 308
+    name: PathOperation.Properties
+    signature: () OperationProperties
+  - codegraphId: struct:1733cd6299ad444f48a453c0024d62b3
+    file: third_party/openbao/sdk/framework/path_map.go
+    kind: struct
+    line: 26
+    name: PathMap
+  - codegraphId: method:f873f45250e10e0f7b6f19ba9479842d
+    file: third_party/openbao/sdk/framework/path_map.go
+    kind: method
+    line: 158
+    name: PathMap.Get
+    signature: (ctx context.Context, s logical.Storage, k string) (map[string]any,
+      error)
+  - codegraphId: method:b5159c7f6d36a9988483871fe7a05bee
+    file: third_party/openbao/sdk/framework/path_map.go
+    kind: method
+    line: 167
+    name: PathMap.Put
+    signature: (ctx context.Context, s logical.Storage, k string, v map[string]any)
+      error
+  - codegraphId: method:1a6987d0b01134fcad2cef5f4282ff97
+    file: third_party/openbao/sdk/framework/path_map.go
+    kind: method
+    line: 176
+    name: PathMap.Delete
+    signature: (ctx context.Context, s logical.Storage, k string) error
+  - codegraphId: method:3bd00eec4941ae599849b34865ff40e2
+    file: third_party/openbao/sdk/framework/path_map.go
+    kind: method
+    line: 185
+    name: PathMap.List
+    signature: (ctx context.Context, s logical.Storage, prefix string) ([]string,
+      error)
+  - codegraphId: method:d6c98bab3ae0c6317dc3d886391f18b8
+    file: third_party/openbao/sdk/framework/path_map.go
+    kind: method
+    line: 200
+    name: PathMap.Paths
+    signature: () []*Path
+  - codegraphId: struct:b521d161bd07bdcc12ddf383ab4772f1
+    file: third_party/openbao/sdk/framework/path_struct.go
+    kind: struct
+    line: 18
+    name: PathStruct
+  - codegraphId: method:dd1d4f072ef5fab5cb6dde5280b8e7dc
+    file: third_party/openbao/sdk/framework/path_struct.go
+    kind: method
+    line: 29
+    name: PathStruct.Get
+    signature: (ctx context.Context, s logical.Storage) (map[string]any, error)
+  - codegraphId: method:d56c0f7d6c029319a7064354b9ff9b21
+    file: third_party/openbao/sdk/framework/path_struct.go
+    kind: method
+    line: 47
+    name: PathStruct.Put
+    signature: (ctx context.Context, s logical.Storage, v map[string]any) error
+  - codegraphId: method:470bda6606470657b10c0b19a7f8e233
+    file: third_party/openbao/sdk/framework/path_struct.go
+    kind: method
+    line: 60
+    name: PathStruct.Delete
+    signature: (ctx context.Context, s logical.Storage) error
+  - codegraphId: method:3e4df317f3f0aacc0eb6dbd673cf136b
+    file: third_party/openbao/sdk/framework/path_struct.go
+    kind: method
+    line: 65
+    name: PathStruct.Paths
+    signature: () []*Path
+  - codegraphId: struct:42c860827bf37a318b3dae262834790e
+    file: third_party/openbao/sdk/framework/policy_map.go
+    kind: struct
+    line: 20
+    name: PolicyMap
+  - codegraphId: method:f4c4e249d9de6545c9ec080076d4b3e7
+    file: third_party/openbao/sdk/framework/policy_map.go
+    kind: method
+    line: 27
+    name: PolicyMap.Policies
+    signature: (ctx context.Context, s logical.Storage, names ...string) ([]string,
+      error)
+  - codegraphId: struct:f667f7143dce728d79ff7d29444f4fd6
+    file: third_party/openbao/sdk/framework/secret.go
+    kind: struct
+    line: 15
+    name: Secret
+  - codegraphId: method:564f24766b134f320b88a43781afb0c3
+    file: third_party/openbao/sdk/framework/secret.go
+    kind: method
+    line: 44
+    name: Secret.Renewable
+    signature: () bool
+  - codegraphId: method:8baeaa250a6ca163a577626c4560715e
+    file: third_party/openbao/sdk/framework/secret.go
+    kind: method
+    line: 48
+    name: Secret.Response
+    signature: "(\n\tdata, internal map[string]any,\n) *logical.Response"
+  - codegraphId: method:4bb16e0761c6a7fc7f76a95567954967
+    file: third_party/openbao/sdk/framework/secret.go
+    kind: method
+    line: 69
+    name: Secret.HandleRenew
+    signature: (ctx context.Context, req *logical.Request) (*logical.Response, error)
+  - codegraphId: method:aba27504927b0d3a3433d8d60908f827
+    file: third_party/openbao/sdk/framework/secret.go
+    kind: method
+    line: 83
+    name: Secret.HandleRevoke
+    signature: (ctx context.Context, req *logical.Request) (*logical.Response, error)
+  - codegraphId: function:023464880305b582c393e68bfa96807d
+    file: third_party/openbao/sdk/framework/testing.go
+    kind: function
+    line: 12
+    name: TestBackendRoutes
+    signature: (t *testing.T, b *Backend, rs []string)
+  - codegraphId: struct:158286e9f505700f38c457cf4c8f9583
+    file: third_party/openbao/sdk/framework/wal.go
+    kind: struct
+    line: 20
+    name: WALEntry
+  - codegraphId: function:c3834b0cf7aafae27971beeea1dbe846
+    file: third_party/openbao/sdk/framework/wal.go
+    kind: function
+    line: 42
+    name: PutWAL
+    signature: (ctx context.Context, s logical.Storage, kind string, data any) (string,
+      error)
+  - codegraphId: function:0c6f85a813572cc33c3f91839c85fcd2
+    file: third_party/openbao/sdk/framework/wal.go
+    kind: function
+    line: 67
+    name: GetWAL
+    signature: (ctx context.Context, s logical.Storage, id string) (*WALEntry, error)
+  - codegraphId: function:6ac2ae45010883122cff7c87f0b3c39a
+    file: third_party/openbao/sdk/framework/wal.go
+    kind: function
+    line: 88
+    name: DeleteWAL
+    signature: (ctx context.Context, s logical.Storage, id string) error
+  - codegraphId: function:aa979bbdc44e7694c80d2d2b93c3640b
+    file: third_party/openbao/sdk/framework/wal.go
+    kind: function
+    line: 93
+    name: ListWAL
+    signature: (ctx context.Context, s logical.Storage) ([]string, error)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 1cb201cba117ec7fe0e2cc0a506d364960245e430ca319c31d5fe46544fb78da
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 2f6e3e6999b7576aeb77a16f85d51ae6c8c1f6ac23dae2ec9aaf7b01d62ab27f
