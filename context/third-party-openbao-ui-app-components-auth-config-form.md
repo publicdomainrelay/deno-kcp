@@ -9,5 +9,7 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `class:60a2d1758a56f82e843525ae8c37ac29` class AuthConfigBase (third_party/openbao/ui/app/components/auth-config-form/config.js)
+- `file:third_party/openbao/ui/app/components/auth-config-form/config.js` file config.js (third_party/openbao/ui/app/components/auth-config-form/config.js)
+- `file:third_party/openbao/ui/app/components/auth-config-form/options.js` file options.js (third_party/openbao/ui/app/components/auth-config-form/options.js)
 <!-- SPECD_MANAGED_END -->
