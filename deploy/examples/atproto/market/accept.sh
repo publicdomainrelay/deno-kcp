@@ -274,10 +274,14 @@ fi
 # The provider proves the service answers on its own cluster-local name: the
 # readiness probe resolves the name through the shim and requests the path, and
 # ready=true is that probe's verdict. The host proves the same listener answers
-# from outside, where the name does not resolve. Every service pod sets
-# SERVICE_TLS true, so the listener the host reaches is the TLS one: the host
-# fetch is https, because an http fetch of a TLS listener is not a check of
-# anything.
+# from outside, where the name does not resolve. Each host check names the scheme
+# the listener actually speaks, and the two are not the same: the bob PDS writes
+# the injected leaf and appends --tls-cert-file and --tls-key-file, so its
+# listener is the TLS one and an http fetch of it is not a check of anything;
+# the bidder declares no such options -- its parser rejects unknown flags -- so
+# it consumes only the trust bundle, listens in plain HTTP, and an https fetch of
+# its plain listener fails the same way round. The provider's readiness probe is
+# the one that does not care, because it tries https and then http.
 ready=$(pod_ready bob pds)
 if [ "$ready" = "true" ]; then
   check "bob pds on its name" PASS "ready=true probe=kcpdns pds.default.bob.svc.kcp.local /xrpc/_health"
@@ -299,11 +303,11 @@ else
   check "bidder on its name" FAIL "ready=${ready:-missing} probe=kcpdns bidder.default.bob.svc.kcp.local /oauth-client-metadata.json"
 fi
 
-code=$(http_code https://127.0.0.1:2586/oauth-client-metadata.json)
+code=$(http_code http://127.0.0.1:2586/oauth-client-metadata.json)
 if [ "$code" = "200" ]; then
-  check "bidder on the host" PASS "GET https://127.0.0.1:2586/oauth-client-metadata.json -> $code"
+  check "bidder on the host" PASS "GET http://127.0.0.1:2586/oauth-client-metadata.json -> $code"
 else
-  check "bidder on the host" FAIL "GET https://127.0.0.1:2586/oauth-client-metadata.json -> $code"
+  check "bidder on the host" FAIL "GET http://127.0.0.1:2586/oauth-client-metadata.json -> $code"
 fi
 
 # A pod that dies after startup passes a single read. Reading the long-running
