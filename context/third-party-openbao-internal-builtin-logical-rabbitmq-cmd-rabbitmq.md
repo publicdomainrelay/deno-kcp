@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists because the RabbitMQ logical backend must be runnable as an out-of-process plugin: the engine logic lives in the rabbitmq package, but something has to expose it over the plugin protocol with the correct TLS handshake and backend factory. main.go is that something — it is the packaging seam, not the engine, and it is the only place where the backend factory, the AutoMTLS-compatible TLS provider, and the operator-facing TLS flags meet.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

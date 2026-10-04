@@ -833,6 +833,14 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.role-lookup` (MUST): "backend.Role fetches the named role from storage and returns a nil entry with no error when the role does not exist, so callers can distinguish a missing role from a storage failure and report it as an unknown role."
 - added `r.username-metadata` (MUST): "UsernameMetadata records the RabbitMQ username created for a credential and is written into the credential's internal data, so lease revocation can look the exact username up in RabbitMQ and delete it."
 
+### third-party-openbao-internal-builtin-logical-rabbitmq-cmd-rabbitmq
+
+- intent: "" -> "This context exists because the RabbitMQ logical backend must be runnable as an out-of-process plugin: the engine logic lives in the rabbitmq package, but something has to expose it over the plugin protocol with the correct TLS handshake and backend factory. main.go is that something — it is the packaging seam, not the engine, and it is the only place where the backend factory, the AutoMTLS-compatible TLS provider, and the operator-facing TLS flags meet."
+- added `r.log-and-exit-on-serve-failure` (MUST): "When plugin.ServeMultiplex returns a non-nil error, main must build an hclog logger, log "plugin shutting down" with the error attached under the "error" key, and call os.Exit(1); a nil error must not reach that path."
+- added `r.parse-tls-flags-from-argv` (MUST): "main must obtain the plugin TLS flag set from api.PluginAPIClientMeta.FlagSet() and parse os.Args[1:] with it before building the TLS provider; the flag set defines ca-cert, ca-path, client-cert, client-key and tls-server-name as strings and tls-skip-verify as a bool, every one of them defaulting to empty, respectively false, when the flag is absent. No flag in this set is backed by an environment variable; the parsed values reach api.PluginAPIClientMeta.GetTLSConfig, which returns a TLSConfig only when at least one of them is non-empty, and nil otherwise."
+- added `r.serve-rabbitmq-backend` (MUST): "main must serve the RabbitMQ logical backend over the plugin multiplex protocol by calling plugin.ServeMultiplex with a ServeOpts whose BackendFactoryFunc is rabbitmq.Factory, so the binary can be registered as a secrets engine plugin."
+- added `r.tls-provider-for-automtls-compat` (MUST): "ServeOpts must set TLSProviderFunc to api.VaultPluginTLSProvider of the TLS config taken from apiClientMeta.GetTLSConfig(), so the plugin keeps backwards compatibility with OpenBao/Vault versions that do not support plugin AutoMTLS."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -852,5 +860,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-builtin-logical-pkiext-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-pkiext-pkiext-binary-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-rabbitmq-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-builtin-logical-rabbitmq-cmd-rabbitmq-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-builtin-logical-rabbitmq-cmd-rabbitmq-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-ssh-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-builtin-logical-ssh-cmd-ssh-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
