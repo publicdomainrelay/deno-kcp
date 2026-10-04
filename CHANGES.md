@@ -4496,7 +4496,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 
 ### third-party-openbao-ui-app-controllers-vault-cluster-settings-auth
 
-- intent: "" -> "This context covers the OpenBao UI auth-settings controllers that manage lifecycle around mounting an auth method and configuring it. configure-section exists to prevent a stale model from leaking across singleton controller instances and to release the Ember Data record from the store once the section is torn down; enable exists to forward a successful auth-method mount to the configuration route using the safe transition helper, so navigation honors permissions and route accessibility."
+- intent: "" -> "This context exists to pin down the lifecycle behavior of the OpenBao UI auth-settings controllers around mounting an auth method and configuring it. The configure-section controller must release its Ember Data record from the store and clear its own model when the section is torn down, because controllers are singletons and a retained model would leak between route visits; the guards ensure records still in flight are never unloaded. The enable controller must forward a successful auth-method mount to the configuration route using the safe transition helper with the injected router, so an unauthorized or inaccessible route is not entered."
 - added `r.cleanup-model-guards` (MUST): "cleanupModel() must return without touching the model when no model is set, or when the model is saving, destroyed, or destroying, so records still in flight are never unloaded."
 - added `r.cleanup-removes-record` (MUST): "cleanupModel() must call removeRecord with the injected store and the model when the model exposes a unloadRecord function, and must not call it otherwise."
 - added `r.cleanup-unsets-singleton-model` (MUST): "cleanupModel() must always set the controller's model to null after the guards pass, because controllers are singletons and a retained model would leak between route visits."
@@ -4868,8 +4868,9 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-controllers-vault-cluster-secrets-backend-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-secrets-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-settings-auth-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-controllers-vault-cluster-settings-auth-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-settings-auth-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-settings-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-settings-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-decorators-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-helpers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-This context covers the OpenBao UI auth-settings controllers that manage lifecycle around mounting an auth method and configuring it. configure-section exists to prevent a stale model from leaking across singleton controller instances and to release the Ember Data record from the store once the section is torn down; enable exists to forward a successful auth-method mount to the configuration route using the safe transition helper, so navigation honors permissions and route accessibility.
+This context exists to pin down the lifecycle behavior of the OpenBao UI auth-settings controllers around mounting an auth method and configuring it. The configure-section controller must release its Ember Data record from the store and clear its own model when the section is torn down, because controllers are singletons and a retained model would leak between route visits; the guards ensure records still in flight are never unloaded. The enable controller must forward a successful auth-method mount to the configuration route using the safe transition helper with the injected router, so an unauthorized or inaccessible route is not entered.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

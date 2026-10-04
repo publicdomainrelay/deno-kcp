@@ -1,0 +1,29 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-ui-app-controllers-vault-cluster-settings-auth-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-ui-app-controllers-vault-cluster-settings-auth
+  toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
+status:
+  agentLog: This context covers two Ember controllers in the OpenBao web UI under
+    the vault cluster settings auth route. third_party/openbao/ui/app/controllers/vault/cluster/settings/auth/configure-section.js
+    extends @ember/controller, injects the store service, and defines cleanupModel(),
+    which guards on an absent model and on the model being saving, destroyed, or destroying,
+    calls removeRecord with the injected store when the model exposes unloadRecord,
+    and then sets the controller's model to null so a singleton controller does not
+    retain a stale record across route visits. third_party/openbao/ui/app/controllers/vault/cluster/settings/auth/enable.js
+    extends @ember/controller, injects the router service, and defines an onMountSuccess(type,
+    path) action that transitions to the vault.cluster.settings.auth.configure route
+    with the mounted method's path through transitionToSafe, so navigation respects
+    permissions and route accessibility.
+  message: wrote 6 requirement(s) and 0 interface(s) for third-party-openbao-ui-app-controllers-vault-cluster-settings-auth
+  phase: Succeeded
+superseded:
+- message: wrote 6 requirement(s) and 0 interface(s) for third-party-openbao-ui-app-controllers-vault-cluster-settings-auth
+  name: third-party-openbao-ui-app-controllers-vault-cluster-settings-auth-c2s-6c1bbe4c3ba9-89cee50ec5ae
+  phase: Succeeded
