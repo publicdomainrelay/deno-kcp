@@ -886,6 +886,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.tls-config-only-when-set` (SHOULD): "The api.TLSConfig handed to the TLS provider should be nil unless at least one of -ca-cert, -ca-path, -client-cert, -client-key, -tls-server-name, or -tls-skip-verify was set, so an unconfigured plugin uses default transport settings."
 - added `r.tls-provider-from-plugin-metadata` (MUST): "main must pass TLSProviderFunc derived from api.VaultPluginTLSProvider(tlsConfig) into ServeOpts, so the plugin keeps backwards compatibility with hosts that do not support plugin AutoMTLS."
 
+### third-party-openbao-internal-builtin-logical-transit-cmd-transit
+
+- intent: "" -> "The context exists so the transit logical backend can be built and run as a standalone multiplexed plugin process rather than being linked into a server. It separates process wiring, argument and TLS handling from the backend logic in the transit package, and it deliberately sets TLSProviderFunc so the plugin keeps backwards compatibility with Vault versions that do not support plugin AutoMTLS."
+- added `r.configuration-surface-is-inherited-flag-set` (MUST): "main defines no flags of its own: the whole configuration surface is the flag set registered by api.PluginAPIClientMeta.FlagSet() and parsed from os.Args[1:], covering the plugin API client address, retry and TLS options (the flags backed by the VAULT_ADDR, VAULT_MAX_RETRIES, VAULT_SKIP_VERIFY, VAULT_CACERT, VAULT_CAPATH, VAULT_CLIENT_CERT, VAULT_CLIENT_KEY and VAULT_TLS_SERVER_NAME environment variables), and when a flag is absent the value registered by that flag set, including its environment lookup, applies."
+- added `r.exits-nonzero-on-serve-failure` (MUST): "When plugin.ServeMultiplex returns an error, main must create an hclog logger, log the failure as "plugin shutting down" with the error attached, and call os.Exit(1)."
+- added `r.parses-plugin-api-client-flags` (MUST): "main must build an api.PluginAPIClientMeta, take its FlagSet and parse os.Args[1:] into it, so plugin API client options reach the process from the command line."
+- added `r.provides-tls-config-to-plugin` (MUST): "main must read the TLS configuration with apiClientMeta.GetTLSConfig() and set it as ServeOpts.TLSProviderFunc through api.VaultPluginTLSProvider, so the plugin keeps backwards compatibility with Vault versions that do not support plugin AutoMTLS."
+- added `r.serves-transit-factory-as-plugin` (MUST): "main must start the transit backend through plugin.ServeMultiplex, passing transit.Factory as BackendFactoryFunc, so the transit logical backend is served as a multiplexed plugin process."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -914,3 +923,4 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-builtin-logical-totp-cmd-totp-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-transit-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-transit-cmd-transit-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-internal-builtin-plugin-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
