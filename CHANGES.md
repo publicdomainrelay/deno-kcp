@@ -2345,7 +2345,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 
 ### third-party-openbao-internal-vault-external-tests-kms
 
-- intent: "" -> "The context exists to hold the shared external-test exercise code for OpenBao's KMS integration, so that both the builtin-transit and external-transit test entrypoints can drive the same transit and PKI scenarios against a real server. It separates the reusable exercise functions from the thin test functions, letting a KMS implementation be validated by mounting transit or PKI, binding keys through the sys/external-keys config and grant API, and exercising encrypt/decrypt and sign/verify or CA issuance over that external key. Its purpose is coverage of the external key workflow: the negative case where a transit external-key write is rejected before a grant, and the positive cases after the grant is written."
+- intent: "" -> "The context exists so that the builtin-transit and external-transit test entrypoints can drive the same transit and PKI scenarios against a real server without duplicating the flow. It separates the reusable exercise functions from the thin test functions, letting a KMS implementation be validated by mounting transit or PKI, binding keys through the sys/external-keys config and grant API, and exercising encrypt/decrypt and sign/verify or CA issuance over that external key. Its purpose is coverage of the external key workflow: the negative case where a transit external-key write is rejected before a grant, and the positive cases after the grant is written."
 - added `r.exercise-helpers-live-in-testing-file` (MUST): "All exercise and setup helpers are exported from testing.go in the kms external tests package, so other test files in the package reuse them instead of reimplementing the transit and PKI flows."
 - added `r.pki-ca-exercise` (MUST): "ExercisePKICA exercises CA behaviour on the given PKI mount for the named issuer."
 - added `r.pki-for-key-runs-ca-exercises` (MUST): "ExercisePKIForKey drives the PKI certificate exercises for a single base name, delegating to the root, intermediate and CA exercise functions so a key backing PKI is validated for certificate issuance."
@@ -2513,5 +2513,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-vault-external-tests-identity-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-identity-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-kms-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-vault-external-tests-kms-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-vault-external-tests-kms-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-kv-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |

@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-The context exists to hold the shared external-test exercise code for OpenBao's KMS integration, so that both the builtin-transit and external-transit test entrypoints can drive the same transit and PKI scenarios against a real server. It separates the reusable exercise functions from the thin test functions, letting a KMS implementation be validated by mounting transit or PKI, binding keys through the sys/external-keys config and grant API, and exercising encrypt/decrypt and sign/verify or CA issuance over that external key. Its purpose is coverage of the external key workflow: the negative case where a transit external-key write is rejected before a grant, and the positive cases after the grant is written.
+The context exists so that the builtin-transit and external-transit test entrypoints can drive the same transit and PKI scenarios against a real server without duplicating the flow. It separates the reusable exercise functions from the thin test functions, letting a KMS implementation be validated by mounting transit or PKI, binding keys through the sys/external-keys config and grant API, and exercising encrypt/decrypt and sign/verify or CA issuance over that external key. Its purpose is coverage of the external key workflow: the negative case where a transit external-key write is rejected before a grant, and the positive cases after the grant is written.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
