@@ -71,14 +71,15 @@ spec:
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/mfa/enforcements/index.js
     id: r.index-sets-controller-model
     level: MUST
-    text: MfaEnforcementsRoute.setupController sets the resolved `model` on the controller
-      so the enforcement list template reads it from the controller.
+    text: MfaEnforcementsRoute.setupController receives the controller and the resolved
+      model and sets that model on the controller, so the enforcement list template
+      reads the list from the controller.
   - codeRefs:
     - class:75cf9590dfb1bbc040d1b61410ea6455
     - class:bfba4f6e717fca795d4881a93d8b0436
     - class:d1209001e9ce4a6fa69925e696609aef
     id: r.routes-inject-store
     level: MUST
-    text: All three route classes inject the Ember Data `store` service and reach
+    text: All three route classes declare the Ember Data `store` service and reach
       the backend only through that injected store.
   upstream: self

@@ -1,0 +1,33 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-ui-app-routes-vault-cluster-access-mfa-enforcements-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-ui-app-routes-vault-cluster-access-mfa-enforcements
+  toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
+status:
+  agentLog: 'Three Ember route classes in the OpenBao UI back the login MFA enforcement
+    screens under vault/cluster/access/mfa/enforcements. MfaEnforcementsRoute (index.js)
+    serves the list: its model hook queries the mfa-login-enforcement record type
+    with an empty query object, catches a 404 rejection and returns an empty array
+    instead of rethrowing, and its setupController assigns the resolved model onto
+    the controller. MfaLoginEnforcementCreateRoute (create.js) serves the create form:
+    its model hook builds and returns a new unsaved mfa-login-enforcement record with
+    no store lookup. MfaLoginEnforcementRoute (enforcement.js) serves the detail screen:
+    its model hook destructures the name route parameter and calls findRecord(''mfa-login-enforcement'',
+    name). All three inject the Ember Data store service and reach the backend only
+    through it.'
+  message: wrote 6 requirement(s) and 3 interface(s) for third-party-openbao-ui-app-routes-vault-cluster-access-mfa-enforcements
+  phase: Succeeded
+superseded:
+- message: wrote 6 requirement(s) and 3 interface(s) for third-party-openbao-ui-app-routes-vault-cluster-access-mfa-enforcements;
+    interface MfaEnforcementsRoute.model is not in the observed facts; dropped; interface
+    MfaEnforcementsRoute.setupController is not in the observed facts; dropped; interface
+    MfaLoginEnforcementCreateRoute.model is not in the observed facts; dropped; interface
+    MfaLoginEnforcementRoute.model is not in the observed facts; dropped
+  name: third-party-openbao-ui-app-routes-vault-cluster-access-mfa-enforcements-c2s-6c1bbe4c3ba9-89cee50ec5ae
+  phase: Succeeded
