@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to keep the OpenBao token behavior verified against a real running core rather than against mocks. The two files are the external, black-box test layer for the token store: they mount real backends, authenticate real clients, and assert on API responses, lease counts, and token counts. Anyone changing token creation, orphan handling, entity binding, identity policy composition, CIDR restrictions, revocation-on-startup behavior, standby invalidation timing, or batch token lifecycle must expect these tests to be the contract that breaks first.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

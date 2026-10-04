@@ -2630,6 +2630,21 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.skip-without-binary` (MUST): "Every test function other than the helpers reads the BAO_BINARY variable through api.ReadBaoVariable and calls t.Skip with the message "only running docker test when $BAO_BINARY present" when that variable is empty, so the suite is a no-op unless a built binary path is supplied."
 - added `r.tls-verification-container` (MUST): "validateTLS builds and runs an Alpine image containing curl with the expected root certificate written to /root.pem, joins it to the cluster's container network, optionally rewrites /etc/resolv.conf with a search domain of dadgarcorp.com and the supplied nameserver, then runs curl --verbose --cacert /root.pem against https://<address>/v1/sys/health and fails the test when the command's non-zero return code disagrees with the expectFail argument."
 
+### third-party-openbao-internal-vault-external-tests-token
+
+- intent: "" -> "This context exists to keep the OpenBao token behavior verified against a real running core rather than against mocks. The two files are the external, black-box test layer for the token store: they mount real backends, authenticate real clients, and assert on API responses, lease counts, and token counts. Anyone changing token creation, orphan handling, entity binding, identity policy composition, CIDR restrictions, revocation-on-startup behavior, standby invalidation timing, or batch token lifecycle must expect these tests to be the contract that breaks first."
+- added `r.batch-parent-lease-revoke` (MUST): "TestBatchToken_ParentLeaseRevoke creates a batch token from a leased parent credential and fails unless revoking the parent lease makes the batch token unusable."
+- added `r.batch-token-basics` (MUST): "TestBatchTokens configures the cluster with the kv leased passthrough logical backend and the approle credential backend, mounts kv, writes a leased secret and a read-only policy, then creates, looks up and renews tokens and asserts the batch token type behavior exposed by consts."
+- added `r.batch-token-roles` (MUST): "TestTokenStore_Roles_Batch covers token roles whose tokens are issued as batch tokens and asserts the resulting token type and role-derived policies."
+- added `r.cidr-blocks` (MUST): "TestTokenStore_CIDRBlocks exercises token creation with bound CIDR blocks and asserts the request from inside and outside the bound ranges succeeds or is denied accordingly."
+- added `r.cluster-harness` (MUST): "Every test builds its own in-memory cluster with vault.NewTestCluster using vaulthttp.Handler and vault.TestClusterOptions, calls cluster.Start(), defers cluster.Cleanup(), and waits for the first core to become active with vault.TestWaitActive before issuing API calls."
+- added `r.identity-policies` (MUST): "TestTokenStore_IdentityPolicies asserts that a token created against an identity receives exactly the expected identity policies, and fails when identity_policies is set on a token that should not carry any."
+- added `r.invalid-entity-id` (MUST): "TestTokenStore_TokenInvalidEntityID mounts the userpass credential backend and fails when a token whose backing entity is invalid is accepted instead of rejected with an error."
+- added `r.orphan-response` (MUST): "TestTokenStore_CreateOrphanResponse creates an orphan token with the default policy and fails unless the returned secret's Auth.Orphan field is true."
+- added `r.package-and-location` (MUST): "Both test files declare package token and live in the directory third_party/openbao/internal/vault/external_tests/token, forming one compiled Go test package of external tests."
+- added `r.revocation-on-startup` (MUST): "TestTokenStore_RevocationOnStartup creates tokens and leases, restarts the core, unseals it, and fails unless the remaining lease count and token count match the expected leftovers after startup revocation."
+- added `r.standby-invalidation` (MUST): "TestTokenStore_StandbyInvalidation creates a token, requires a non-empty client token, then uses require.EventuallyWithT to poll lookup-self and fails unless the reported ttl crosses the cutoff in the expected direction, and likewise for the renewable flag on the other token class."
+
 ### third-party-openbao-internal-vault-external-tests-userpass-binary
 
 - intent: "" -> "This context exists to name and delimit the IP-token-binding external test of the userpass auth method, so that the spec records the file as part of the repository without inventing an API. It is a documentation anchor: the file is a test, it exports no interface, and everything it exercises is reached through helpers defined elsewhere. Keeping it as its own context stops the exported-interface description from being padded with symbols that the observed facts do not support."
@@ -2820,6 +2835,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-vault-external-tests-storage-crosstest-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-storage-crosstest-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-tlslistener-binary-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-vault-external-tests-token-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-vault-external-tests-token-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-userpass-binary-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-workflows-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |

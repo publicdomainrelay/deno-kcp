@@ -10,5 +10,17 @@ spec:
   systemContext: third-party-openbao-internal-vault-external-tests-token
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-vault-external-tests-token
-  phase: Running
+  agentLog: 'This context holds the OpenBao token external test suite, vendored under
+    third_party/openbao/internal/vault/external_tests/token. It is a single Go test
+    package named token made of two files: batch_token_test.go (528 lines) and token_test.go
+    (749 lines). Every test builds an in-memory Vault test cluster with vault.NewTestCluster,
+    vaulthttp.Handler as the handler func and vault.TestClusterOptions, starts it,
+    waits for an active core with vault.TestWaitActive, and defers cluster.Cleanup().
+    Each test then drives the cluster through the OpenBao API client: mounting secrets
+    and auth engines (kv leased passthrough, approle, userpass), writing policies,
+    creating and renewing tokens, and counting leases and tokens across restarts.
+    The tests are integration-level: they exercise token creation, orphan tokens,
+    entity validity, identity policies, CIDR binding, revocation on startup, standby
+    invalidation, and batch tokens including parent lease revocation and token roles.'
+  message: wrote 11 requirement(s) and 0 interface(s) for third-party-openbao-internal-vault-external-tests-token
+  phase: Succeeded

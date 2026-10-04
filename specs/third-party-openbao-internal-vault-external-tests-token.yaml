@@ -8,5 +8,93 @@ metadata:
   name: third-party-openbao-internal-vault-external-tests-token
   namespace: default
 spec:
+  intent: 'This context exists to keep the OpenBao token behavior verified against
+    a real running core rather than against mocks. The two files are the external,
+    black-box test layer for the token store: they mount real backends, authenticate
+    real clients, and assert on API responses, lease counts, and token counts. Anyone
+    changing token creation, orphan handling, entity binding, identity policy composition,
+    CIDR restrictions, revocation-on-startup behavior, standby invalidation timing,
+    or batch token lifecycle must expect these tests to be the contract that breaks
+    first.'
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/token/batch_token_test.go
+    id: r.batch-parent-lease-revoke
+    level: MUST
+    text: TestBatchToken_ParentLeaseRevoke creates a batch token from a leased parent
+      credential and fails unless revoking the parent lease makes the batch token
+      unusable.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/token/batch_token_test.go
+    id: r.batch-token-basics
+    level: MUST
+    text: TestBatchTokens configures the cluster with the kv leased passthrough logical
+      backend and the approle credential backend, mounts kv, writes a leased secret
+      and a read-only policy, then creates, looks up and renews tokens and asserts
+      the batch token type behavior exposed by consts.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/token/batch_token_test.go
+    id: r.batch-token-roles
+    level: MUST
+    text: TestTokenStore_Roles_Batch covers token roles whose tokens are issued as
+      batch tokens and asserts the resulting token type and role-derived policies.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/token/token_test.go
+    id: r.cidr-blocks
+    level: MUST
+    text: TestTokenStore_CIDRBlocks exercises token creation with bound CIDR blocks
+      and asserts the request from inside and outside the bound ranges succeeds or
+      is denied accordingly.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/token/batch_token_test.go
+    - file:third_party/openbao/internal/vault/external_tests/token/token_test.go
+    id: r.cluster-harness
+    level: MUST
+    text: Every test builds its own in-memory cluster with vault.NewTestCluster using
+      vaulthttp.Handler and vault.TestClusterOptions, calls cluster.Start(), defers
+      cluster.Cleanup(), and waits for the first core to become active with vault.TestWaitActive
+      before issuing API calls.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/token/token_test.go
+    id: r.identity-policies
+    level: MUST
+    text: TestTokenStore_IdentityPolicies asserts that a token created against an
+      identity receives exactly the expected identity policies, and fails when identity_policies
+      is set on a token that should not carry any.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/token/token_test.go
+    id: r.invalid-entity-id
+    level: MUST
+    text: TestTokenStore_TokenInvalidEntityID mounts the userpass credential backend
+      and fails when a token whose backing entity is invalid is accepted instead of
+      rejected with an error.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/token/token_test.go
+    id: r.orphan-response
+    level: MUST
+    text: TestTokenStore_CreateOrphanResponse creates an orphan token with the default
+      policy and fails unless the returned secret's Auth.Orphan field is true.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/token/batch_token_test.go
+    - file:third_party/openbao/internal/vault/external_tests/token/token_test.go
+    id: r.package-and-location
+    level: MUST
+    text: Both test files declare package token and live in the directory third_party/openbao/internal/vault/external_tests/token,
+      forming one compiled Go test package of external tests.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/token/token_test.go
+    id: r.revocation-on-startup
+    level: MUST
+    text: TestTokenStore_RevocationOnStartup creates tokens and leases, restarts the
+      core, unseals it, and fails unless the remaining lease count and token count
+      match the expected leftovers after startup revocation.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/token/token_test.go
+    id: r.standby-invalidation
+    level: MUST
+    text: TestTokenStore_StandbyInvalidation creates a token, requires a non-empty
+      client token, then uses require.EventuallyWithT to poll lookup-self and fails
+      unless the reported ttl crosses the cutoff in the expected direction, and likewise
+      for the renewable flag on the other token class.
   upstream: self
