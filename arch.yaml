@@ -59035,11 +59035,194 @@ system_contexts:
   - third_party/openbao/ui/app/components/keymgmt/key-edit.js
   - third_party/openbao/ui/app/components/keymgmt/provider-edit.js
   codeRefIndex:
+  - class:c3fc7c3dd4ec847d66cb46c8395558b3 KeymgmtDistribute@third_party/openbao/ui/app/components/keymgmt/distribute.js:39
+  - class:d539ad26851c107dd667ccacbad500a1 KeymgmtProviderEdit@third_party/openbao/ui/app/components/keymgmt/provider-edit.js:27
+  - class:f91c7ad1845695dc8fa2f8638afd6710 KeymgmtKeyEdit@third_party/openbao/ui/app/components/keymgmt/key-edit.js:29
   - file:third_party/openbao/ui/app/components/keymgmt/distribute.js distribute.js@third_party/openbao/ui/app/components/keymgmt/distribute.js
   - file:third_party/openbao/ui/app/components/keymgmt/key-edit.js key-edit.js@third_party/openbao/ui/app/components/keymgmt/key-edit.js
   - file:third_party/openbao/ui/app/components/keymgmt/provider-edit.js provider-edit.js@third_party/openbao/ui/app/components/keymgmt/provider-edit.js
   id: sc.third-party-openbao-ui-app-components-keymgmt
+  intent: 'The context exists to pin down the behaviour of the keymgmt provider/key
+    administration surface of the vendored OpenBao UI so changes to it can be checked
+    against a written contract. It matters because these components carry the non-obvious
+    domain rules: which key types each KMS provider accepts, which operations each
+    provider/key-type pairing exposes, when the distribute form must be blocked, and
+    how store adapters (distribute, removeFromProvider, rotateKey) and route transitions
+    are expected to sequence. It is a third-party subtree, so the spec describes the
+    code as observed rather than prescribing a preferred design.'
+  interfaces:
+  - file: third_party/openbao/ui/app/components/keymgmt/distribute.js
+    kind: class
+    name: KeymgmtDistribute
+    signature: class KeymgmtDistribute extends Component
+  - file: third_party/openbao/ui/app/components/keymgmt/key-edit.js
+    kind: class
+    name: KeymgmtKeyEdit
+    signature: class KeymgmtKeyEdit extends Component
+  - file: third_party/openbao/ui/app/components/keymgmt/provider-edit.js
+    kind: class
+    name: KeymgmtProviderEdit
+    signature: class KeymgmtProviderEdit extends Component
   name: third-party-openbao-ui-app-components-keymgmt
+  requirements:
+  - codeRefs:
+    - class:c3fc7c3dd4ec847d66cb46c8395558b3
+    id: r.distribute-create-flow
+    level: MUST
+    text: KeymgmtDistribute.createDistribution prevents the default event, flashes
+      a danger message listing key, provider and operations as all required when formatData
+      yields null, saves keyModel first when the key is new (flashing danger with
+      the create error and aborting on failure), then calls distributeKey and finally
+      re-queries the keymgmt/key record so distribution info is reloaded.
+  - codeRefs:
+    - class:c3fc7c3dd4ec847d66cb46c8395558b3
+    id: r.distribute-disable-operations
+    level: MUST
+    text: KeymgmtDistribute.disableOperations is truthy when validMatchError is set,
+      when formData.provider is empty, when formData.key is empty, or when an unsaved
+      new key has no type, so the operation checkboxes stay disabled until a compatible
+      key/provider pairing is complete.
+  - codeRefs:
+    - class:c3fc7c3dd4ec847d66cb46c8395558b3
+    id: r.distribute-field-handlers
+    level: MUST
+    text: KeymgmtDistribute.handleProvider accepts either an array selection (taking
+      its first element) or a bare string for the no-list-permissions fallback, sets
+      formData.provider and refetches the provider type; handleKeySelect clears formData.key
+      and destroys a locally created record when the selection is emptied; handleKeyType
+      writes the selected value onto keyModel.type; handleOperation appends or removes
+      the checkbox id from a copied operations array.
+  - codeRefs:
+    - class:c3fc7c3dd4ec847d66cb46c8395558b3
+    id: r.distribute-format-data
+    level: MUST
+    text: KeymgmtDistribute.formatData returns null unless key, provider and a non-empty
+      operations array are all present, and otherwise returns the payload { key, provider,
+      purpose, protection } where purpose is the operations joined with commas, matching
+      the shape the distribution endpoint expects.
+  - codeRefs:
+    - class:c3fc7c3dd4ec847d66cb46c8395558b3
+    id: r.distribute-key-adapter-call
+    level: MUST
+    text: KeymgmtDistribute.distributeKey resolves the keymgmt/key adapter and calls
+      adapter.distribute(backend, provider, key, { purpose, protection }); on success
+      it flashes a success message naming the key and provider, clears the keymgmt/key
+      dataset, refetches the provider record's keys at its current page (default 1),
+      and invokes the @onClose argument, while on failure it stores the error on formErrors.
+  - codeRefs:
+    - class:c3fc7c3dd4ec847d66cb46c8395558b3
+    id: r.distribute-key-and-provider-lookup
+    level: SHOULD
+    text: KeymgmtDistribute.getKeyInfo queries the keymgmt/key record with recordOnly
+      true and swallows lookup errors so the API can still report type mismatches,
+      creating an unsaved record and setting isNewKey when told the key is new; getProviderType
+      queries the keymgmt/provider record, sets providerType to its provider field,
+      and sets an empty providerType when no id is given, swallowing query errors.
+  - codeRefs:
+    - class:c3fc7c3dd4ec847d66cb46c8395558b3
+    id: r.distribute-operation-set
+    level: MUST
+    text: KeymgmtDistribute.operations returns encrypt/decrypt for an awskms provider;
+      for gcpckms returns encrypt/decrypt for aes256-gcm96, decrypt/sign for rsa-2048/rsa-3072/rsa-4096,
+      sign for ecdsa-p256/ecdsa-p384, and the full set encrypt/decrypt/sign/verify/wrap/unwrap
+      for any other or unset key type; and returns that same full set for every other
+      provider type.
+  - codeRefs:
+    - class:c3fc7c3dd4ec847d66cb46c8395558b3
+    - file:third_party/openbao/ui/app/components/keymgmt/distribute.js
+    id: r.distribute-type-compatibility
+    level: MUST
+    text: KeymgmtDistribute.validMatchError returns null while either providerType
+      or keyModel.type is unset, returns null when VALID_TYPES_BY_PROVIDER[providerType]
+      contains keyModel.type, and otherwise returns an error keyed on 'key' when the
+      @provider argument is supplied (field hidden) or keyed on 'provider' when it
+      is not, with the trailing 'or change the key type' clause added only when @key
+      is absent.
+  - codeRefs:
+    - class:f91c7ad1845695dc8fa2f8638afd6710
+    id: r.key-edit-delete
+    level: MUST
+    text: KeymgmtKeyEdit.deleteKey destroys the model record and then transitions
+      to the secrets backend list-root route using the model's backend, flashing a
+      danger message if the destroy rejects.
+  - codeRefs:
+    - class:f91c7ad1845695dc8fa2f8638afd6710
+    id: r.key-edit-delete-modal
+    level: SHOULD
+    text: KeymgmtKeyEdit.toggleModal sets the tracked isDeleteModalOpen flag to the
+      boolean it is given, so the delete confirmation modal is controlled by the caller
+      rather than internal state transitions.
+  - codeRefs:
+    - class:f91c7ad1845695dc8fa2f8638afd6710
+    - file:third_party/openbao/ui/app/components/keymgmt/key-edit.js
+    id: r.key-edit-mode-flags
+    level: MUST
+    text: KeymgmtKeyEdit.mode defaults to 'show' when @mode is absent, isMutable is
+      true only for 'create' or 'edit', and isCreating is true only for 'create',
+      so the component's mutable view is driven entirely by the passed-in mode.
+  - codeRefs:
+    - class:f91c7ad1845695dc8fa2f8638afd6710
+    id: r.key-edit-remove-from-provider
+    level: MUST
+    text: KeymgmtKeyEdit.removeKey calls the keymgmt/key adapter's removeFromProvider
+      with the model, reloads the model, and flashes a success message confirming
+      the key was removed from the provider, flashing a danger message on failure.
+  - codeRefs:
+    - class:f91c7ad1845695dc8fa2f8638afd6710
+    id: r.key-edit-rotate
+    level: MUST
+    text: KeymgmtKeyEdit.rotateKey calls the keymgmt/key adapter's rotateKey with
+      the model's backend and name, flashes a success message naming the rotated connection
+      on resolution and a danger message on rejection.
+  - codeRefs:
+    - class:f91c7ad1845695dc8fa2f8638afd6710
+    id: r.key-edit-save
+    level: MUST
+    text: KeymgmtKeyEdit.saveKey prevents the default event, saves the model, then
+      transitions to the secrets backend show route with the model name; on failure
+      it flashes a danger message built by joining API error strings with '. ', and
+      when the error carries no errors array it still navigates to the show route
+      because the failure is partial.
+  - codeRefs:
+    - class:d539ad26851c107dd667ccacbad500a1
+    id: r.provider-edit-delete
+    level: MUST
+    text: KeymgmtProviderEdit.onDelete destroys the provider model and then transitions
+      to the root argument's path with the root model and query param tab='provider';
+      onDeleteKey destroys the passed key model and removes it from the provider model's
+      keys collection; both flash a danger message built from joined error strings
+      on failure.
+  - codeRefs:
+    - class:d539ad26851c107dd667ccacbad500a1
+    id: r.provider-edit-fetch-keys
+    level: MUST
+    text: KeymgmtProviderEdit.fetchKeys takes a page argument defaulting to 1, calls
+      model.fetchKeys with that page, and flashes a danger message built from the
+      joined error strings when the call rejects.
+  - codeRefs:
+    - class:d539ad26851c107dd667ccacbad500a1
+    id: r.provider-edit-mode-flags
+    level: MUST
+    text: KeymgmtProviderEdit.isShowing is true when mode is 'show', isCreating is
+      true when mode is 'create', and viewingKeys is true when the tab argument is
+      'keys', so details and keys views are selected from the passed arguments.
+  - codeRefs:
+    - class:d539ad26851c107dd667ccacbad500a1
+    id: r.provider-edit-save
+    level: MUST
+    text: KeymgmtProviderEdit.onSave prevents the default event, awaits model.validate();
+      when valid it clears modelValidations and performs saveTask, otherwise it stores
+      the returned validation state on modelValidations; saveTask saves the model
+      and transitions to the secrets backend show route with the model id and query
+      param itemType='provider', flashing a danger message on failure.
+  - codeRefs:
+    - class:d539ad26851c107dd667ccacbad500a1
+    - file:third_party/openbao/ui/app/components/keymgmt/provider-edit.js
+    id: r.provider-edit-show-fetch
+    level: MUST
+    text: KeymgmtProviderEdit performs fetchKeys in its constructor when the mode
+      argument is 'show', so the key count shown on the details tab and the key list
+      on the keys tab are populated on render.
   upstream: self
 - code:
   - third_party/openbao/ui/app/components/mfa/method-form.js
