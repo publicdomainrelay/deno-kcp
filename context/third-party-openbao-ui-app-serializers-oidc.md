@@ -1,0 +1,28 @@
+# Context: third-party-openbao-ui-app-serializers-oidc
+
+Repository: `deno-kcp`
+
+_(empty: write what this context is for)_
+
+_Write the prose above and the fields in the spec block. `codeRefs` and the resolved references below are maintained by the tool; an edit there is lost._
+
+## spec
+
+```yaml spec
+upstream: self
+```
+
+<!-- SPECD_MANAGED_BEGIN -->
+## Resolved code references
+
+- `class:335ce3d18d9109295d314eec8a9ec48a` class OidcClientSerializer (third_party/openbao/ui/app/serializers/oidc/client.js)
+- `class:390ba76e8ca0104a18fa597df8bfaf1c` class OidcKeySerializer (third_party/openbao/ui/app/serializers/oidc/key.js)
+- `class:436fd8e63b5de854d1735c297f2e19c9` class OidcAssignmentSerializer (third_party/openbao/ui/app/serializers/oidc/assignment.js)
+- `class:a400db6099abad63dbcd66f5f6446c2f` class OidcScopeSerializer (third_party/openbao/ui/app/serializers/oidc/scope.js)
+- `class:babc6ff432ad43bc649bc4e09e7193c0` class OidcProviderSerializer (third_party/openbao/ui/app/serializers/oidc/provider.js)
+- `file:third_party/openbao/ui/app/serializers/oidc/assignment.js` file assignment.js (third_party/openbao/ui/app/serializers/oidc/assignment.js)
+- `file:third_party/openbao/ui/app/serializers/oidc/client.js` file client.js (third_party/openbao/ui/app/serializers/oidc/client.js)
+- `file:third_party/openbao/ui/app/serializers/oidc/key.js` file key.js (third_party/openbao/ui/app/serializers/oidc/key.js)
+- `file:third_party/openbao/ui/app/serializers/oidc/provider.js` file provider.js (third_party/openbao/ui/app/serializers/oidc/provider.js)
+- `file:third_party/openbao/ui/app/serializers/oidc/scope.js` file scope.js (third_party/openbao/ui/app/serializers/oidc/scope.js)
+<!-- SPECD_MANAGED_END -->
