@@ -59894,9 +59894,68 @@ system_contexts:
 - code:
   - third_party/openbao/ui/app/components/sidebar/header/home-link.ts
   codeRefIndex:
+  - class:bd5ab7677744ea05dd0bc6953d747b4f SidebarHeaderHomeLinkComponent@third_party/openbao/ui/app/components/sidebar/header/home-link.ts:15
   - file:third_party/openbao/ui/app/components/sidebar/header/home-link.ts home-link.ts@third_party/openbao/ui/app/components/sidebar/header/home-link.ts
+  - interface:314e7aaffd44b5b7980edc80757e7370 SidebarHeaderHomeLinkSignature@third_party/openbao/ui/app/components/sidebar/header/home-link.ts:9
+  - method:ff7641a0943490c30b273bf834f1cdf2 SidebarHeaderHomeLinkComponent.ariaLabel@third_party/openbao/ui/app/components/sidebar/header/home-link.ts:21
   id: sc.third-party-openbao-ui-app-components-sidebar-header
+  intent: 'This context documents the third-party OpenBao web UI sidebar header component
+    that renders the home (logo) link''s accessible label. It exists so that the vendored
+    UI code keeps an explicit, checkable contract: the component takes exactly one
+    typed argument, ariaLabel, and guards it with an assertion instead of silently
+    rendering a link with no accessible name. The context is a small unit of the larger
+    deno-kcp repository that vendors OpenBao''s UI, and it is spec''d in its own right
+    so changes to the argument shape, the assertion message, or the getter''s behavior
+    stay visible rather than being lost inside the vendored tree.'
+  interfaces:
+  - file: third_party/openbao/ui/app/components/sidebar/header/home-link.ts
+    kind: class
+    name: SidebarHeaderHomeLinkComponent
+    signature: export default class SidebarHeaderHomeLinkComponent extends Component<SidebarHeaderHomeLinkSignature>
+  - file: third_party/openbao/ui/app/components/sidebar/header/home-link.ts
+    kind: method
+    name: SidebarHeaderHomeLinkComponent.ariaLabel
+    signature: 'get ariaLabel(): string'
+  - file: third_party/openbao/ui/app/components/sidebar/header/home-link.ts
+    kind: interface
+    name: SidebarHeaderHomeLinkSignature
+    signature: 'interface SidebarHeaderHomeLinkSignature { Args: { ariaLabel: string
+      } }'
   name: third-party-openbao-ui-app-components-sidebar-header
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/app/components/sidebar/header/home-link.ts
+    - method:ff7641a0943490c30b273bf834f1cdf2
+    id: r.aria-label-getter-asserts-defined
+    level: MUST
+    text: The ariaLabel getter must destructure ariaLabel from this.args and assert,
+      with the message '@ariaLabel for "Sidebar::Header::HomeLink" ("Logo") must have
+      a valid value', that the value is not undefined, so a missing argument fails
+      rather than producing a link with an empty accessible name.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/components/sidebar/header/home-link.ts
+    - method:ff7641a0943490c30b273bf834f1cdf2
+    id: r.aria-label-getter-returns-arg
+    level: MUST
+    text: When the assertion passes, the ariaLabel getter must return the caller-supplied
+      ariaLabel value unchanged, so the accessible name of the sidebar header home
+      link is exactly what the caller passed.
+  - codeRefs:
+    - class:bd5ab7677744ea05dd0bc6953d747b4f
+    - file:third_party/openbao/ui/app/components/sidebar/header/home-link.ts
+    - interface:314e7aaffd44b5b7980edc80757e7370
+    id: r.component-typed-by-signature
+    level: MUST
+    text: The default-exported component class must be parameterized by SidebarHeaderHomeLinkSignature,
+      so the args the class reads are type-checked against the declared signature.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/components/sidebar/header/home-link.ts
+    - interface:314e7aaffd44b5b7980edc80757e7370
+    id: r.signature-declares-aria-label-arg
+    level: MUST
+    text: The component's signature interface must declare a single Args member holding
+      one field, ariaLabel, typed as string, so callers know the component accepts
+      exactly that argument and nothing else is required.
   upstream: self
 - code:
   - third_party/openbao/ui/app/components/sidebar/nav/cluster.js

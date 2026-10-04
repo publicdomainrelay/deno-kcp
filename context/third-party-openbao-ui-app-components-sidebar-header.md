@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context documents the third-party OpenBao web UI sidebar header component that renders the home (logo) link's accessible label. It exists so that the vendored UI code keeps an explicit, checkable contract: the component takes exactly one typed argument, ariaLabel, and guards it with an assertion instead of silently rendering a link with no accessible name. The context is a small unit of the larger deno-kcp repository that vendors OpenBao's UI, and it is spec'd in its own right so changes to the argument shape, the assertion message, or the getter's behavior stay visible rather than being lost inside the vendored tree.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

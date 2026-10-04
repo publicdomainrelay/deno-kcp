@@ -4151,6 +4151,14 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.transition-to-route` (MUST): "transitionToRoute forwards its arguments to transitionToSafe together with the injected router, so route changes from the user menu go through the safe transition helper instead of the router directly."
 - added `r.user-menu-services-and-state` (MUST): "SidebarUserMenuComponent extends Component, injects the auth, currentCluster and router services, and holds a tracked fakeRenew flag whose default value is false."
 
+### third-party-openbao-ui-app-components-sidebar-header
+
+- intent: "" -> "This context documents the third-party OpenBao web UI sidebar header component that renders the home (logo) link's accessible label. It exists so that the vendored UI code keeps an explicit, checkable contract: the component takes exactly one typed argument, ariaLabel, and guards it with an assertion instead of silently rendering a link with no accessible name. The context is a small unit of the larger deno-kcp repository that vendors OpenBao's UI, and it is spec'd in its own right so changes to the argument shape, the assertion message, or the getter's behavior stay visible rather than being lost inside the vendored tree."
+- added `r.aria-label-getter-asserts-defined` (MUST): "The ariaLabel getter must destructure ariaLabel from this.args and assert, with the message '@ariaLabel for "Sidebar::Header::HomeLink" ("Logo") must have a valid value', that the value is not undefined, so a missing argument fails rather than producing a link with an empty accessible name."
+- added `r.aria-label-getter-returns-arg` (MUST): "When the assertion passes, the ariaLabel getter must return the caller-supplied ariaLabel value unchanged, so the accessible name of the sidebar header home link is exactly what the caller passed."
+- added `r.component-typed-by-signature` (MUST): "The default-exported component class must be parameterized by SidebarHeaderHomeLinkSignature, so the args the class reads are type-checked against the declared signature."
+- added `r.signature-declares-aria-label-arg` (MUST): "The component's signature interface must declare a single Args member holding one field, ariaLabel, typed as string, so callers know the component accepts exactly that argument and nothing else is required."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4472,5 +4480,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-components-secret-list-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-components-sidebar-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-components-sidebar-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-ui-app-components-sidebar-header-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-components-sidebar-header-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
