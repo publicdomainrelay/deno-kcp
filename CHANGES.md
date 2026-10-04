@@ -1030,7 +1030,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 
 ### third-party-openbao-internal-command-agent-template
 
-- intent: "" -> "This context exists to specify the template-rendering server that the OpenBao agent uses to run the internal Consul Template runner: it accepts the agent's template configurations and an incoming Vault token channel, restarts the runner when a new token arrives, retries with backoff on runner errors, and terminates early once all templates are rendered when exit-after-auth is configured. The spec records the construction, configuration surface and lifecycle guarantees of that server so the behaviour can be preserved."
+- intent: "" -> "This context specifies the template-rendering server that the OpenBao agent uses to run the internal Consul Template runner: it accepts the agent's template configurations and an incoming Vault token channel, restarts the runner when a new token arrives, retries with backoff on runner errors, and terminates early once all templates are rendered when exit-after-auth is configured. The spec records the construction, configuration surface and lifecycle guarantees of that server so the behaviour can be preserved."
 - added `r.backoff-defaults` (MUST): "Server.Run must default minBackoff to 1s and maxBackoff to 5m when either is not positive, and must return the error "min backoff is larger than max backoff" when minBackoff exceeds maxBackoff."
 - added `r.backoff-policy` (MUST): "Server.Run must use an exponential backoff with multiplier 2 and randomization factor 0.25 between minBackoff and maxBackoff, and must substitute a stop backoff when AgentConfig.TemplateConfig.ExitOnRetryFailure is set so that a runner error is returned as "template server: <err>" instead of retried."
 - added `r.config-surface` (MUST): "ServerConfig must carry Logger, AgentConfig, ExitAfterAuth, Namespace, MaxBackoff, MinBackoff, LogLevel and LogWriter, where LogLevel and LogWriter exist so the internal runner's own logger matches the agent log level and writes to the same io.Writer, because that runner's logger cannot be set externally."
@@ -1100,7 +1100,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-command-agent-exec-test-app-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agent-internal-ctmanager-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agent-template-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-command-agent-template-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-command-agent-template-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agentproxyshared-auth-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-internal-command-agentproxyshared-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |

@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-This context exists to specify the template-rendering server that the OpenBao agent uses to run the internal Consul Template runner: it accepts the agent's template configurations and an incoming Vault token channel, restarts the runner when a new token arrives, retries with backoff on runner errors, and terminates early once all templates are rendered when exit-after-auth is configured. The spec records the construction, configuration surface and lifecycle guarantees of that server so the behaviour can be preserved.
+This context specifies the template-rendering server that the OpenBao agent uses to run the internal Consul Template runner: it accepts the agent's template configurations and an incoming Vault token channel, restarts the runner when a new token arrives, retries with backoff on runner errors, and terminates early once all templates are rendered when exit-after-auth is configured. The spec records the construction, configuration surface and lifecycle guarantees of that server so the behaviour can be preserved.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
