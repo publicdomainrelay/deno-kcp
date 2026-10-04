@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+Exists so that the repository can compile against and link the OpenBao/Vault plugin protocol without depending on an external module path for the SDK. It provides the full server and client halves of the go-plugin gRPC contract for logical backends, plus the storage, system-view and logger brokers that a backend needs, and the serve helpers that a plugin binary's main function calls. Consumers inside this repository use it to build, dispense and host logical backends.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
