@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the vendored OpenBao identity UI components are described as a coherent unit rather than nine unrelated files. It pins down the shared contract that the popup subclasses inherit, the modes and routes the entity/group edit form supports, and the parameters the lookup component sends to the identity adapter, so that any future change to the vendored tree, or any replacement of it, can be checked against the behavior the code actually has today.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
