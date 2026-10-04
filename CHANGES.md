@@ -4140,6 +4140,17 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.rotate-role-cred` (MUST): "rotateRoleCred(id) must read the backend from the current item, obtain the 'database/credential' adapter from the store, call rotateRoleCredentials with the backend and id, flash the success message `Success: Credentials for ${id} role were rotated` when the promise resolves, and flash the rejection's errors as a danger message when it fails."
 - added `r.rotate-root-cred` (MUST): "rotateRootCred(id) must read the backend from the current item, obtain the 'database/connection' adapter from the store, call rotateRootCredentials with the backend and id, flash the success message `Success: ${id} connection was rotated` when the promise resolves, and flash the rejection's errors as a danger message when it fails."
 
+### third-party-openbao-ui-app-components-sidebar
+
+- intent: "" -> "The context exists to record the sidebar's observable behavior as a specification rather than as source: which services each component depends on, what the derived getters return, and what the token renewal and revocation actions do step by step. It gives a stable reference for the nav frame's cluster wiring and the user menu's session lifecycle, so changes to the surrounding UI can be checked against what these components must still do."
+- added `r.has-entity-id` (MUST): "hasEntityId returns a boolean coercion of auth.authData.entity_id, so it is true only when the current auth data carries an entity_id; root users have no entity_id and therefore get false, which is the condition the MFA end user setup relies on."
+- added `r.is-renewing` (MUST): "isRenewing is true when the local fakeRenew flag is set or when auth.isRenewing is true, so the menu shows a renewing state both during the artificial delay and during a real renewal."
+- added `r.nav-component-services` (MUST): "SidebarNavComponent extends the Ember Component base and injects the currentCluster and console services and the vault.cluster controller, so the sidebar nav frame reads cluster state through those injected services rather than constructing them."
+- added `r.renew-token` (MUST): "renewToken sets fakeRenew to true, then schedules a deferred callback that calls auth.renew(); when that promise resolves it resets fakeRenew to the value of auth.isRenewing."
+- added `r.revoke-token` (MUST): "revokeToken calls auth.revokeCurrentToken() and, once that promise resolves, transitions to the 'vault.cluster.logout' route."
+- added `r.transition-to-route` (MUST): "transitionToRoute forwards its arguments to transitionToSafe together with the injected router, so route changes from the user menu go through the safe transition helper instead of the router directly."
+- added `r.user-menu-services-and-state` (MUST): "SidebarUserMenuComponent extends Component, injects the auth, currentCluster and router services, and holds a tracked fakeRenew flag whose default value is false."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4459,6 +4470,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-components-mount-backend-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-components-oidc-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-components-secret-list-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-components-sidebar-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-components-sidebar-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-components-sidebar-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-components-sidebar-header-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

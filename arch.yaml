@@ -59811,10 +59811,85 @@ system_contexts:
   - third_party/openbao/ui/app/components/sidebar/frame.js
   - third_party/openbao/ui/app/components/sidebar/user-menu.js
   codeRefIndex:
+  - class:3d04d5c2c8f3f0bc3c70f321ecb092b9 SidebarNavComponent@third_party/openbao/ui/app/components/sidebar/frame.js:5
+  - class:45d38975528bc831bbb74c8d52dd671a SidebarUserMenuComponent@third_party/openbao/ui/app/components/sidebar/user-menu.js:8
   - file:third_party/openbao/ui/app/components/sidebar/frame.js frame.js@third_party/openbao/ui/app/components/sidebar/frame.js
   - file:third_party/openbao/ui/app/components/sidebar/user-menu.js user-menu.js@third_party/openbao/ui/app/components/sidebar/user-menu.js
   id: sc.third-party-openbao-ui-app-components-sidebar
+  intent: 'The context exists to record the sidebar''s observable behavior as a specification
+    rather than as source: which services each component depends on, what the derived
+    getters return, and what the token renewal and revocation actions do step by step.
+    It gives a stable reference for the nav frame''s cluster wiring and the user menu''s
+    session lifecycle, so changes to the surrounding UI can be checked against what
+    these components must still do.'
+  interfaces:
+  - file: third_party/openbao/ui/app/components/sidebar/frame.js
+    kind: class
+    name: SidebarNavComponent
+    signature: class SidebarNavComponent extends Component
+  - file: third_party/openbao/ui/app/components/sidebar/user-menu.js
+    kind: class
+    name: SidebarUserMenuComponent
+    signature: class SidebarUserMenuComponent extends Component
   name: third-party-openbao-ui-app-components-sidebar
+  requirements:
+  - codeRefs:
+    - class:45d38975528bc831bbb74c8d52dd671a
+    - file:third_party/openbao/ui/app/components/sidebar/user-menu.js
+    id: r.has-entity-id
+    level: MUST
+    text: hasEntityId returns a boolean coercion of auth.authData.entity_id, so it
+      is true only when the current auth data carries an entity_id; root users have
+      no entity_id and therefore get false, which is the condition the MFA end user
+      setup relies on.
+  - codeRefs:
+    - class:45d38975528bc831bbb74c8d52dd671a
+    - file:third_party/openbao/ui/app/components/sidebar/user-menu.js
+    id: r.is-renewing
+    level: MUST
+    text: isRenewing is true when the local fakeRenew flag is set or when auth.isRenewing
+      is true, so the menu shows a renewing state both during the artificial delay
+      and during a real renewal.
+  - codeRefs:
+    - class:3d04d5c2c8f3f0bc3c70f321ecb092b9
+    - file:third_party/openbao/ui/app/components/sidebar/frame.js
+    id: r.nav-component-services
+    level: MUST
+    text: SidebarNavComponent extends the Ember Component base and injects the currentCluster
+      and console services and the vault.cluster controller, so the sidebar nav frame
+      reads cluster state through those injected services rather than constructing
+      them.
+  - codeRefs:
+    - class:45d38975528bc831bbb74c8d52dd671a
+    - file:third_party/openbao/ui/app/components/sidebar/user-menu.js
+    id: r.renew-token
+    level: MUST
+    text: renewToken sets fakeRenew to true, then schedules a deferred callback that
+      calls auth.renew(); when that promise resolves it resets fakeRenew to the value
+      of auth.isRenewing.
+  - codeRefs:
+    - class:45d38975528bc831bbb74c8d52dd671a
+    - file:third_party/openbao/ui/app/components/sidebar/user-menu.js
+    id: r.revoke-token
+    level: MUST
+    text: revokeToken calls auth.revokeCurrentToken() and, once that promise resolves,
+      transitions to the 'vault.cluster.logout' route.
+  - codeRefs:
+    - class:45d38975528bc831bbb74c8d52dd671a
+    - file:third_party/openbao/ui/app/components/sidebar/user-menu.js
+    id: r.transition-to-route
+    level: MUST
+    text: transitionToRoute forwards its arguments to transitionToSafe together with
+      the injected router, so route changes from the user menu go through the safe
+      transition helper instead of the router directly.
+  - codeRefs:
+    - class:45d38975528bc831bbb74c8d52dd671a
+    - file:third_party/openbao/ui/app/components/sidebar/user-menu.js
+    id: r.user-menu-services-and-state
+    level: MUST
+    text: SidebarUserMenuComponent extends Component, injects the auth, currentCluster
+      and router services, and holds a tracked fakeRenew flag whose default value
+      is false.
   upstream: self
 - code:
   - third_party/openbao/ui/app/components/sidebar/header/home-link.ts

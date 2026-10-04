@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists to record the sidebar's observable behavior as a specification rather than as source: which services each component depends on, what the derived getters return, and what the token renewal and revocation actions do step by step. It gives a stable reference for the nav frame's cluster wiring and the user menu's session lifecycle, so changes to the surrounding UI can be checked against what these components must still do.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
