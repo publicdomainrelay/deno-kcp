@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists to specify the storagepacker helper as a self-contained unit inside third_party/openbao: its public API surface (StoragePacker methods, NewStoragePacker, and the generated Item and Bucket protobuf types), the bucket-key derivation rule, the locking discipline around bucket reads and writes, and the decompress/unmarshal path that every accessor shares. Downstream OpenBao identity code (entity, group and local alias packers) depends on this contract.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
