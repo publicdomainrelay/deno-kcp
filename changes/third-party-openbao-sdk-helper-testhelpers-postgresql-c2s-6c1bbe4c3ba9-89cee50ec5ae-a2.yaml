@@ -1,0 +1,30 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-sdk-helper-testhelpers-postgresql-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-sdk-helper-testhelpers-postgresql
+  toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
+status:
+  agentLog: Package postgresql in third_party/openbao/sdk/helper/testhelpers/postgresql
+    postgresqlhelper.go wraps the OpenBao sdk docker service runner into reusable
+    PostgreSQL test fixtures. It starts containers from the mirrored postgres image
+    (or the bitnami/postgresql-repmgr image), maps 5432/tcp, and returns a cleanup
+    function plus connection URL; a PG_URL environment variable short-circuits container
+    startup entirely. Variants cover a plain server, a no-wait server for retry tests,
+    a custom password, a container seeded with a vaultadmin superuser for rotate-root
+    tests, and a repmgr server wired to a pre-created multihost network. On top of
+    that it adds a Cluster abstraction that builds a primary with a replication init
+    script and WAL settings, clones replicas via pg_basebackup against named physical
+    replication slots, promotes a node with pg_promote, removes the primary for failover
+    tests, and cleans everything up nil-safely.
+  message: wrote 20 requirement(s) and 23 interface(s) for third-party-openbao-sdk-helper-testhelpers-postgresql
+  phase: Succeeded
+superseded:
+- message: wrote 20 requirement(s) and 23 interface(s) for third-party-openbao-sdk-helper-testhelpers-postgresql
+  name: third-party-openbao-sdk-helper-testhelpers-postgresql-c2s-6c1bbe4c3ba9-89cee50ec5ae
+  phase: Succeeded

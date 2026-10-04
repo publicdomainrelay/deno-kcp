@@ -3559,6 +3559,16 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.token-fields-canonical-set` (MUST): "TokenFields returns the canonical map of token field names to framework.FieldSchema values for the fields carried by TokenParams, and that map is the single source used when a role's field set is populated."
 - added `r.upgrade-value-migrates-key` (SHOULD): "UpgradeValue moves a value supplied under a deprecated field key onto its replacement key, comparing the old and new values from the field data and returning an error instead of accepting a migration that cannot be resolved."
 
+### third-party-openbao-sdk-helper-useragent
+
+- intent: "" -> "The package exists so that OpenBao API clients and external plugins identify themselves consistently and machine-parsably in the User-Agent header. PluginString gives plugin processes a way to advertise the host Vault version and their own plugin name without hand-formatting the header, while String serves callers that only need the generic agent string. Keeping the format in one place makes the emitted header uniform across components."
+- added `r.pluginstring-comment-parts-order` (MUST): "PluginString must assemble the parenthesized comment list in the order project URL marker prefixed with '+', then the plugin name when pluginName is not empty, then the runtime version, then any caller comments, and must join those parts with the separator '; '."
+- added `r.pluginstring-nil-env-empty` (MUST): "PluginString must return the empty string when the passed logical.PluginEnvironment is nil, so a plugin without host environment information emits no agent header instead of a malformed one."
+- added `r.pluginstring-output-shape` (MUST): "PluginString must render the final result as the token 'Vault/', the resolved version, a space, and the joined comment list enclosed in parentheses, matching the shape the test file asserts, for example 'Vault/1.2.3 (+https://vault-test.com; azure-auth; go5.0; pid-abcdefg)'."
+- added `r.pluginstring-version-suffixes` (MUST): "PluginString must take the agent version from the environment's VaultVersion and append the prerelease value joined with '-' when VaultVersionPrerelease is not empty and the metadata value joined with '+' when VaultVersionMetadata is not empty, so prerelease and build metadata survive into the header."
+- added `r.string-builds-agent-from-comments` (MUST): "String must build and return a User-Agent string from the variadic comment parts supplied by the caller, joining those parts with the package's own project URL marker and runtime version so every caller emits the same base format."
+- added `r.tests-cover-pluginstring` (SHOULD): "The package's tests should pin PluginString behaviour by overriding the project URL and runtime version package variables and asserting the returned agent for the nil environment, no-plugin-name, plugin-name, and extra-comment cases."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -3818,7 +3828,9 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-sdk-helper-testcluster-docker-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-testhelpers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-testhelpers-postgresql-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-sdk-helper-testhelpers-postgresql-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-helper-testhelpers-postgresql-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-testhelpers-schema-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-tokenutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-sdk-helper-useragent-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-helper-useragent-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-sdk-helper-wrapping-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-helper-xor-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
