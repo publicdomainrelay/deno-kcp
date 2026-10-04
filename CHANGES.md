@@ -2976,6 +2976,22 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.quoteidentifier-safe-quoting` (MUST): "QuoteIdentifier must return its input wrapped in double quotes with every embedded double quote doubled, and must truncate the name at the first NUL byte so a NUL cannot terminate the identifier early; a name with no embedded quote or NUL is simply wrapped in double quotes."
 - added `r.unimplemented-returns-grpc-status` (MUST): "Unimplemented must return a gRPC status error carrying the codes.Unimplemented code and the message "Not yet implemented", so database plugin stubs can signal an unimplemented operation without importing gRPC status machinery themselves."
 
+### third-party-openbao-sdk-helper-authmetadata
+
+- intent: "" -> "This context documents the vendored OpenBao SDK helper that implements the `auth_metadata` behavior shared by auth plugins: it maps the plugin-declared default and available metadata field names into a framework field schema with a generated human-readable description, parses and validates the user's comma-separated selection on config write, stores it in JSON under the `auth_metadata` key, and applies the selected metadata to the returned `logical.Auth` and its alias at login. It exists so plugins can support metadata selection with consistent validation, storage shape, and default-handling semantics instead of reimplementing it per backend."
+- added `r.auth-metadata-read` (MUST): "Handler.AuthMetadata returns the explicitly stored authMetadata list when set, and otherwise returns Fields.Default, so config reads report the effective metadata even when nothing was stored."
+- added `r.description-generated` (SHOULD): "The generated description names the field's purpose, lists the Default fields when non-empty, lists the AvailableToAdd fields when non-empty, and states that leaving the field unedited includes the defaults, that explicitly setting it empty overrides the defaults and includes no metadata, and that explicit fields are sent comma-separated."
+- added `r.field-schema-shape` (MUST): "FieldSchema returns a framework.FieldSchema of TypeCommaStringSlice whose Default is []string{"default"}, whose DisplayAttributes use fields.FieldName with the example value "field1,field2", and whose Description is the generated verbose help text."
+- added `r.fields-declare-schema` (MUST): "Fields declares the plugin's user-facing metadata field name (FieldName), the fields included by Default, and the AvailableToAdd fields a user may additionally request; Fields.all concatenates Default with AvailableToAdd as the set of permitted field names."
+- added `r.handler-construction` (MUST): "NewHandler returns a Handler holding the given Fields reference, with the explicit authMetadata list left nil so the configuration is treated as unconfigured/default."
+- added `r.json-round-trip` (MUST): "Handler marshals only the explicit authMetadata list under the JSON key "auth_metadata" (nil stays nil) and unmarshals that same key back into authMetadata, returning the underlying JSON error unchanged on failure."
+- added `r.parse-auth-metadata` (MUST): "Handler.ParseAuthMetadata reads Fields.FieldName from the framework.FieldData; when the key is absent it does nothing and returns nil, when the value is not a []string it returns an error naming the unexpected type, and otherwise it de-duplicates the selection before validating and storing it."
+- added `r.parse-default-alone` (MUST): "When the sole selected field is "default", ParseAuthMetadata sets authMetadata to nil and returns nil, so the default set is not persisted and a later change to Fields.Default needs no storage migration."
+- added `r.parse-reject-default-mixed` (MUST): "ParseAuthMetadata returns an error stating that "default" cannot be used in combination with other fields when the selection contains "default" alongside any other field."
+- added `r.parse-reject-unavailable` (MUST): "ParseAuthMetadata returns an error listing the unavailable selection and the permitted field list when the selected fields are not a subset of Fields.all(), and only stores the selection on the Handler when validation succeeds."
+- added `r.populate-desired-metadata` (MUST): "Handler.PopulateDesiredMetadata returns an error when auth is nil, otherwise it initializes auth.Metadata, auth.Alias, and auth.Alias.Metadata when nil, chooses Fields.Default or the explicit authMetadata as the fields to include, and copies each available field with a non-empty value into both auth.Metadata and auth.Alias.Metadata only when that field is in the include list."
+- added `r.tests-cover-helper` (SHOULD): "Unit tests cover field schema generation, metadata read, parse, populate, and JSON round-trip behavior, and acceptance tests exercise the helper through sample config and login framework paths that decode stored config and populate login metadata."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -3188,4 +3204,4 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-sdk-database-helper-credsutil-c2s-6c1bbe4c3ba9-3749680f0640 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-database-helper-dbutil-c2s-6c1bbe4c3ba9-3749680f0640 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-framework-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-sdk-helper-authmetadata-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-helper-authmetadata-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

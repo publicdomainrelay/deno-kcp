@@ -43584,8 +43584,165 @@ system_contexts:
   - file:third_party/openbao/sdk/helper/authmetadata/auth_metadata.go auth_metadata.go@third_party/openbao/sdk/helper/authmetadata/auth_metadata.go
   - file:third_party/openbao/sdk/helper/authmetadata/auth_metadata_acc_test.go auth_metadata_acc_test.go@third_party/openbao/sdk/helper/authmetadata/auth_metadata_acc_test.go
   - file:third_party/openbao/sdk/helper/authmetadata/auth_metadata_test.go auth_metadata_test.go@third_party/openbao/sdk/helper/authmetadata/auth_metadata_test.go
+  - function:30b0c154e218ad7c1bd02ebc48afd5c9 FieldSchema@third_party/openbao/sdk/helper/authmetadata/auth_metadata.go:60
+  - function:bc6902ea102d64111fba38c639b8301c NewHandler@third_party/openbao/sdk/helper/authmetadata/auth_metadata.go:72
+  - method:129c61fefb3740eaa68437caa931bea9 Handler.ParseAuthMetadata@third_party/openbao/sdk/helper/authmetadata/auth_metadata.go:104
+  - method:242451869589bb34c0f150484bf2a0ab Handler.MarshalJSON@third_party/openbao/sdk/helper/authmetadata/auth_metadata.go:171
+  - method:5c35d0a8f670260ae20b2a71225a7bb1 Handler.UnmarshalJSON@third_party/openbao/sdk/helper/authmetadata/auth_metadata.go:179
+  - method:bb360504c48177a70bfc7ce835507980 Handler.PopulateDesiredMetadata@third_party/openbao/sdk/helper/authmetadata/auth_metadata.go:141
+  - method:dfcfa3376c23b36f74b2eb2b9df67ff1 Handler.AuthMetadata@third_party/openbao/sdk/helper/authmetadata/auth_metadata.go:93
+  - struct:7debbf9b5d3b0882f2f62603687cb674 Handler@third_party/openbao/sdk/helper/authmetadata/auth_metadata.go:78
+  - struct:9fcedc2c86951fa69c9add75e0d29bfa Fields@third_party/openbao/sdk/helper/authmetadata/auth_metadata.go:36
   id: sc.third-party-openbao-sdk-helper-authmetadata
+  intent: 'This context documents the vendored OpenBao SDK helper that implements
+    the `auth_metadata` behavior shared by auth plugins: it maps the plugin-declared
+    default and available metadata field names into a framework field schema with
+    a generated human-readable description, parses and validates the user''s comma-separated
+    selection on config write, stores it in JSON under the `auth_metadata` key, and
+    applies the selected metadata to the returned `logical.Auth` and its alias at
+    login. It exists so plugins can support metadata selection with consistent validation,
+    storage shape, and default-handling semantics instead of reimplementing it per
+    backend.'
+  interfaces:
+  - file: third_party/openbao/sdk/helper/authmetadata/auth_metadata.go
+    kind: function
+    name: FieldSchema
+    signature: func FieldSchema(fields *Fields) *framework.FieldSchema
+  - file: third_party/openbao/sdk/helper/authmetadata/auth_metadata.go
+    kind: struct
+    name: Fields
+    signature: type Fields struct { FieldName string; Default []string; AvailableToAdd
+      []string }
+  - file: third_party/openbao/sdk/helper/authmetadata/auth_metadata.go
+    kind: struct
+    name: Handler
+    signature: type Handler struct { authMetadata []string; fields *Fields }
+  - file: third_party/openbao/sdk/helper/authmetadata/auth_metadata.go
+    kind: method
+    name: Handler.AuthMetadata
+    signature: func (h *Handler) AuthMetadata() []string
+  - file: third_party/openbao/sdk/helper/authmetadata/auth_metadata.go
+    kind: method
+    name: Handler.MarshalJSON
+    signature: func (h *Handler) MarshalJSON() ([]byte, error)
+  - file: third_party/openbao/sdk/helper/authmetadata/auth_metadata.go
+    kind: method
+    name: Handler.ParseAuthMetadata
+    signature: func (h *Handler) ParseAuthMetadata(data *framework.FieldData) error
+  - file: third_party/openbao/sdk/helper/authmetadata/auth_metadata.go
+    kind: method
+    name: Handler.PopulateDesiredMetadata
+    signature: func (h *Handler) PopulateDesiredMetadata(auth *logical.Auth, available
+      map[string]string) error
+  - file: third_party/openbao/sdk/helper/authmetadata/auth_metadata.go
+    kind: method
+    name: Handler.UnmarshalJSON
+    signature: func (h *Handler) UnmarshalJSON(data []byte) error
+  - file: third_party/openbao/sdk/helper/authmetadata/auth_metadata.go
+    kind: function
+    name: NewHandler
+    signature: func NewHandler(fields *Fields) *Handler
   name: third-party-openbao-sdk-helper-authmetadata
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/authmetadata/auth_metadata.go
+    - method:dfcfa3376c23b36f74b2eb2b9df67ff1
+    id: r.auth-metadata-read
+    level: MUST
+    text: Handler.AuthMetadata returns the explicitly stored authMetadata list when
+      set, and otherwise returns Fields.Default, so config reads report the effective
+      metadata even when nothing was stored.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/authmetadata/auth_metadata.go
+    id: r.description-generated
+    level: SHOULD
+    text: The generated description names the field's purpose, lists the Default fields
+      when non-empty, lists the AvailableToAdd fields when non-empty, and states that
+      leaving the field unedited includes the defaults, that explicitly setting it
+      empty overrides the defaults and includes no metadata, and that explicit fields
+      are sent comma-separated.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/authmetadata/auth_metadata.go
+    - function:30b0c154e218ad7c1bd02ebc48afd5c9
+    id: r.field-schema-shape
+    level: MUST
+    text: FieldSchema returns a framework.FieldSchema of TypeCommaStringSlice whose
+      Default is []string{"default"}, whose DisplayAttributes use fields.FieldName
+      with the example value "field1,field2", and whose Description is the generated
+      verbose help text.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/authmetadata/auth_metadata.go
+    - struct:9fcedc2c86951fa69c9add75e0d29bfa
+    id: r.fields-declare-schema
+    level: MUST
+    text: Fields declares the plugin's user-facing metadata field name (FieldName),
+      the fields included by Default, and the AvailableToAdd fields a user may additionally
+      request; Fields.all concatenates Default with AvailableToAdd as the set of permitted
+      field names.
+  - codeRefs:
+    - function:bc6902ea102d64111fba38c639b8301c
+    - struct:7debbf9b5d3b0882f2f62603687cb674
+    id: r.handler-construction
+    level: MUST
+    text: NewHandler returns a Handler holding the given Fields reference, with the
+      explicit authMetadata list left nil so the configuration is treated as unconfigured/default.
+  - codeRefs:
+    - method:242451869589bb34c0f150484bf2a0ab
+    - method:5c35d0a8f670260ae20b2a71225a7bb1
+    id: r.json-round-trip
+    level: MUST
+    text: Handler marshals only the explicit authMetadata list under the JSON key
+      "auth_metadata" (nil stays nil) and unmarshals that same key back into authMetadata,
+      returning the underlying JSON error unchanged on failure.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/authmetadata/auth_metadata.go
+    - method:129c61fefb3740eaa68437caa931bea9
+    id: r.parse-auth-metadata
+    level: MUST
+    text: Handler.ParseAuthMetadata reads Fields.FieldName from the framework.FieldData;
+      when the key is absent it does nothing and returns nil, when the value is not
+      a []string it returns an error naming the unexpected type, and otherwise it
+      de-duplicates the selection before validating and storing it.
+  - codeRefs:
+    - method:129c61fefb3740eaa68437caa931bea9
+    id: r.parse-default-alone
+    level: MUST
+    text: When the sole selected field is "default", ParseAuthMetadata sets authMetadata
+      to nil and returns nil, so the default set is not persisted and a later change
+      to Fields.Default needs no storage migration.
+  - codeRefs:
+    - method:129c61fefb3740eaa68437caa931bea9
+    id: r.parse-reject-default-mixed
+    level: MUST
+    text: ParseAuthMetadata returns an error stating that "default" cannot be used
+      in combination with other fields when the selection contains "default" alongside
+      any other field.
+  - codeRefs:
+    - method:129c61fefb3740eaa68437caa931bea9
+    id: r.parse-reject-unavailable
+    level: MUST
+    text: ParseAuthMetadata returns an error listing the unavailable selection and
+      the permitted field list when the selected fields are not a subset of Fields.all(),
+      and only stores the selection on the Handler when validation succeeds.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/authmetadata/auth_metadata.go
+    - method:bb360504c48177a70bfc7ce835507980
+    id: r.populate-desired-metadata
+    level: MUST
+    text: Handler.PopulateDesiredMetadata returns an error when auth is nil, otherwise
+      it initializes auth.Metadata, auth.Alias, and auth.Alias.Metadata when nil,
+      chooses Fields.Default or the explicit authMetadata as the fields to include,
+      and copies each available field with a non-empty value into both auth.Metadata
+      and auth.Alias.Metadata only when that field is in the include list.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/authmetadata/auth_metadata_acc_test.go
+    - file:third_party/openbao/sdk/helper/authmetadata/auth_metadata_test.go
+    id: r.tests-cover-helper
+    level: SHOULD
+    text: Unit tests cover field schema generation, metadata read, parse, populate,
+      and JSON round-trip behavior, and acceptance tests exercise the helper through
+      sample config and login framework paths that decode stored config and populate
+      login metadata.
   upstream: self
 - code:
   - third_party/openbao/sdk/helper/cel/helpers.go

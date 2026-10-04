@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context documents the vendored OpenBao SDK helper that implements the `auth_metadata` behavior shared by auth plugins: it maps the plugin-declared default and available metadata field names into a framework field schema with a generated human-readable description, parses and validates the user's comma-separated selection on config write, stores it in JSON under the `auth_metadata` key, and applies the selected metadata to the returned `logical.Auth` and its alias at login. It exists so plugins can support metadata selection with consistent validation, storage shape, and default-handling semantics instead of reimplementing it per backend.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
