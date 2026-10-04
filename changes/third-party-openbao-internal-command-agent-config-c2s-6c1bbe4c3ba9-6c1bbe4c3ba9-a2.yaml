@@ -1,0 +1,31 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-internal-command-agent-config-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-internal-command-agent-config
+  toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+status:
+  agentLog: 'This context is the OpenBao agent configuration package, third_party/openbao/internal/command/agent/config.
+    config.go defines the Config struct (config.go:36) together with the smaller HCL
+    blocks it holds — Retry, Vault, APIProxy, Cache, AutoAuth, Method, Sink, TemplateConfig
+    and ExecConfig — plus the transportDialer interface with Dial and DialContext,
+    the NewConfig constructor, and the Config methods Prune, Merge, IsDefaultListerDefined,
+    ValidateConfig and the unexported validateEnvTemplateConfig. Loading is split
+    into three entry points: LoadConfig dispatches on the path shape, LoadConfigDir
+    folds every file in a directory into one Config by merge, and LoadConfigFile reads
+    and decodes a single HCL file while recording found and unused keys. Prune then
+    strips RawConfig, unused keys and CustomResponseHeaders so a loaded config carries
+    no parse bookkeeping. config_test.go drives these loaders with table-driven cases
+    over the cache, listener, auto-auth, vault, retry and templating blocks, pruning
+    each parsed config before comparing it.'
+  message: wrote 12 requirement(s) and 20 interface(s) for third-party-openbao-internal-command-agent-config
+  phase: Succeeded
+superseded:
+- message: wrote 12 requirement(s) and 20 interface(s) for third-party-openbao-internal-command-agent-config
+  name: third-party-openbao-internal-command-agent-config-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9
+  phase: Succeeded

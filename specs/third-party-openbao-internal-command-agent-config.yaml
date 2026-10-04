@@ -27,12 +27,13 @@ metadata:
   name: third-party-openbao-internal-command-agent-config
   namespace: default
 spec:
-  intent: 'This context exists so the OpenBao agent can be configured from files:
-    it owns the schema of the agent configuration, the parsing of HCL config files
-    and directories, the merge of several sources into one effective Config, validation
-    of the result, and cleanup of parse bookkeeping before the config is used or printed.
-    It is the config layer of third_party/openbao that the agent command depends on,
-    and its behaviour is pinned by config_test.go.'
+  intent: This context exists so the OpenBao agent can be configured from files. It
+    owns the schema of the agent configuration, the parsing of HCL config files and
+    directories, the merge of several sources into one effective Config, validation
+    of the result, and the cleanup of parse bookkeeping before the config is used
+    or printed. It is the config layer of third_party/openbao that the agent command
+    depends on, and its behaviour is pinned by config_test.go, so schema, loader and
+    merge changes cannot land unnoticed.
   interfaces:
   - file: third_party/openbao/internal/command/agent/config/config.go
     kind: struct
@@ -119,10 +120,10 @@ spec:
     - struct:e690bcb76158075ce108dc746d196ce1
     id: r.config-schema-blocks
     level: MUST
-    text: 'Config is the decoded agent configuration: Retry, Vault, APIProxy, Cache,
-      AutoAuth, Method, Sink, TemplateConfig and ExecConfig are the HCL blocks LoadConfigFile
-      decodes into it, so the loader''s field names and block names stay in step with
-      the schema.'
+    text: 'Config is the decoded agent configuration: its Retry, Vault, APIProxy,
+      Cache, AutoAuth, Method, Sink, TemplateConfig and ExecConfig fields are the
+      HCL blocks LoadConfigFile decodes into it, so each block struct''s field names
+      and the HCL block names stay in step with the schema.'
   - codeRefs:
     - method:159bd10ec29b623bd2509959fbb3378d
     id: r.is-default-lister-defined
@@ -152,23 +153,25 @@ spec:
     id: r.load-config-file-hcl
     level: MUST
     text: LoadConfigFile reads one file, parses its HCL body into a *Config, records
-      which keys were found and which were unused, and returns an error when the file
-      cannot be read or decoded.
+      which keys were found and which were unused on the returned Config, and returns
+      an error when the file cannot be read or decoded.
   - codeRefs:
     - file:third_party/openbao/internal/command/agent/config/config_test.go
     - method:2de5b2addd58dfa33ca845032bbc3fda
     id: r.loader-behaviour-tested
     level: SHOULD
     text: config_test.go should keep covering LoadConfigFile and LoadConfigDir across
-      the cache, listener, auto-auth, vault, retry and templating blocks, pruning
-      the parsed config before comparing it, so schema and loader changes are caught.
+      the cache, listener, auto-auth, vault, retry and templating blocks, calling
+      Prune on the parsed config before comparing it, so schema and loader changes
+      are caught.
   - codeRefs:
     - file:third_party/openbao/internal/command/agent/config/config.go
     - method:14758788adb7aaacf8bc499df1e36609
     id: r.merge-overlay
     level: MUST
     text: Config.Merge takes a second Config and returns the receiver with the second
-      config's set values applied on top, leaving unset fields at their existing values.
+      config's set values applied on top, leaving fields the second config did not
+      set at their existing values.
   - codeRefs:
     - function:294cb86e42204c2b1e779df712442e7c
     - struct:ac66f17e5f4fabf2cf84d94fb54cb5ec
@@ -184,7 +187,7 @@ spec:
     text: Config.Prune clears RawConfig, Profiling.UnusedKeys, Telemetry.UnusedKeys
       and CustomResponseHeaders on every listener, and nils FoundKeys and UnusedKeys
       on the config and on the telemetry block, so a loaded config carries no raw
-      input or unused-key bookkeeping.
+      input or unused-key bookkeeping when it is inspected or printed.
   - codeRefs:
     - struct:ddbfb0c13f698324033d443acb021af5
     id: r.retry-num-retries
@@ -206,6 +209,6 @@ spec:
     id: r.validate-config
     level: MUST
     text: Config.ValidateConfig returns an error when the assembled config is not
-      usable, including checks around the default lister and the env template configuration,
-      so a bad config fails before the agent starts.
+      usable, including checks that consult IsDefaultListerDefined and the env template
+      configuration, so a bad config fails before the agent starts.
   upstream: self

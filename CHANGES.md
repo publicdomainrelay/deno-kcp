@@ -968,19 +968,19 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 
 ### third-party-openbao-internal-command-agent-config
 
-- intent: "" -> "This context exists so the OpenBao agent can be configured from files: it owns the schema of the agent configuration, the parsing of HCL config files and directories, the merge of several sources into one effective Config, validation of the result, and cleanup of parse bookkeeping before the config is used or printed. It is the config layer of third_party/openbao that the agent command depends on, and its behaviour is pinned by config_test.go."
-- added `r.config-schema-blocks` (MUST): "Config is the decoded agent configuration: Retry, Vault, APIProxy, Cache, AutoAuth, Method, Sink, TemplateConfig and ExecConfig are the HCL blocks LoadConfigFile decodes into it, so the loader's field names and block names stay in step with the schema."
+- intent: "" -> "This context exists so the OpenBao agent can be configured from files. It owns the schema of the agent configuration, the parsing of HCL config files and directories, the merge of several sources into one effective Config, validation of the result, and the cleanup of parse bookkeeping before the config is used or printed. It is the config layer of third_party/openbao that the agent command depends on, and its behaviour is pinned by config_test.go, so schema, loader and merge changes cannot land unnoticed."
+- added `r.config-schema-blocks` (MUST): "Config is the decoded agent configuration: its Retry, Vault, APIProxy, Cache, AutoAuth, Method, Sink, TemplateConfig and ExecConfig fields are the HCL blocks LoadConfigFile decodes into it, so each block struct's field names and the HCL block names stay in step with the schema."
 - added `r.is-default-lister-defined` (MUST): "Config.IsDefaultListerDefined reports whether the config defines a listener at the default address, which drives the listener-related validation and defaults."
 - added `r.load-config-dir-merge` (MUST): "LoadConfigDir reads every configuration file in the directory and folds them into a single Config by merging, so later files override earlier ones instead of replacing the whole config."
 - added `r.load-config-dispatch` (MUST): "LoadConfig takes a path and returns a *Config plus error; when the path names a directory it delegates to LoadConfigDir, otherwise it delegates to LoadConfigFile, so callers get one entry point for either source shape."
-- added `r.load-config-file-hcl` (MUST): "LoadConfigFile reads one file, parses its HCL body into a *Config, records which keys were found and which were unused, and returns an error when the file cannot be read or decoded."
-- added `r.loader-behaviour-tested` (SHOULD): "config_test.go should keep covering LoadConfigFile and LoadConfigDir across the cache, listener, auto-auth, vault, retry and templating blocks, pruning the parsed config before comparing it, so schema and loader changes are caught."
-- added `r.merge-overlay` (MUST): "Config.Merge takes a second Config and returns the receiver with the second config's set values applied on top, leaving unset fields at their existing values."
+- added `r.load-config-file-hcl` (MUST): "LoadConfigFile reads one file, parses its HCL body into a *Config, records which keys were found and which were unused on the returned Config, and returns an error when the file cannot be read or decoded."
+- added `r.loader-behaviour-tested` (SHOULD): "config_test.go should keep covering LoadConfigFile and LoadConfigDir across the cache, listener, auto-auth, vault, retry and templating blocks, calling Prune on the parsed config before comparing it, so schema and loader changes are caught."
+- added `r.merge-overlay` (MUST): "Config.Merge takes a second Config and returns the receiver with the second config's set values applied on top, leaving fields the second config did not set at their existing values."
 - added `r.new-config-defaults` (MUST): "NewConfig returns a *Config pre-populated with the default agent settings, so callers have a base to merge parsed files onto."
-- added `r.prune-clears-parse-bookkeeping` (MUST): "Config.Prune clears RawConfig, Profiling.UnusedKeys, Telemetry.UnusedKeys and CustomResponseHeaders on every listener, and nils FoundKeys and UnusedKeys on the config and on the telemetry block, so a loaded config carries no raw input or unused-key bookkeeping."
+- added `r.prune-clears-parse-bookkeeping` (MUST): "Config.Prune clears RawConfig, Profiling.UnusedKeys, Telemetry.UnusedKeys and CustomResponseHeaders on every listener, and nils FoundKeys and UnusedKeys on the config and on the telemetry block, so a loaded config carries no raw input or unused-key bookkeeping when it is inspected or printed."
 - added `r.retry-num-retries` (MUST): "Retry carries a single NumRetries int decoded from the HCL key "num_retries", giving the Vault block its retry count."
 - added `r.transport-dialer-contract` (MUST): "The transportDialer interface requires Dial(network, address string) (net.Conn, error) and DialContext(ctx context.Context, network, address string) (net.Conn, error), matching net.Dialer, so the config can accept any dialer with the standard net signatures."
-- added `r.validate-config` (MUST): "Config.ValidateConfig returns an error when the assembled config is not usable, including checks around the default lister and the env template configuration, so a bad config fails before the agent starts."
+- added `r.validate-config` (MUST): "Config.ValidateConfig returns an error when the assembled config is not usable, including checks that consult IsDefaultListerDefined and the env template configuration, so a bad config fails before the agent starts."
 
 ### third-party-openbao-internal-command-agent-exec
 
@@ -1034,7 +1034,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-builtin-plugin-v5-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agent-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agent-config-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-command-agent-config-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-command-agent-config-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agent-exec-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agent-exec-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-internal-command-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
