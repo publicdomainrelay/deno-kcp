@@ -780,6 +780,14 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.serve-pki-backend-as-plugin` (MUST): "main must register pki.Factory as the BackendFactoryFunc of plugin.ServeOpts and hand that opts value to plugin.ServeMultiplex, so the process serves the PKI logical backend over the plugin protocol."
 - added `r.tls-provider-for-backwards-compatibility` (MUST): "main must build the TLS configuration with api.PluginAPIClientMeta.GetTLSConfig, wrap it with api.VaultPluginTLSProvider, and set the result as ServeOpts.TLSProviderFunc so the plugin keeps working with server versions that do not support plugin AutoMTLS."
 
+### third-party-openbao-internal-builtin-logical-pkiext
+
+- intent: "" -> "This context exists so the PKI extension package can turn a stream of docker container log output into per-line callbacks during tests. The container log writer in this package duplicates the LogConsumerWriter type that also exists in the sdk/helper/docker and sdk/helper/testcluster/docker packages, differing only in that its callback field is exported as Consumer rather than unexported. The context documents that helper and the test files that depend on the pkiext package's test scaffolding, so that changes to log handling or to the pkiext test helpers keep the observed behaviour intact."
+- added `r.exported-consumer-field` (MUST): "The pkiext LogConsumerWriter must expose its per-line callback as an exported Consumer field, unlike the sdk copies of the same type whose callback field is unexported, so that callers outside the package can construct the writer by setting the callback directly."
+- added `r.log-consumer-writer-line-splitting` (MUST): "LogConsumerWriter must satisfy io.Writer: its Write method must scan the received byte slice as newline-separated lines using a bufio.Scanner over a bytes.Reader, invoke the recipient's Consumer callback once per scanned line with the line text, and return the full length of the input slice with a nil error so callers see the whole buffer as consumed."
+- added `r.pkiext-test-files` (MAY): "The pkiext package may keep nginx_test.go and zlint_test.go as test files alongside test_helpers.go, so that PKI extension behaviour is exercised in the same package as the log-consumer test helper."
+- added `r.scanner-buffer-bounds` (MUST): "The scanner used by LogConsumerWriter.Write must be given an initial buffer of 64*1024 bytes with bufio.MaxScanTokenSize as the maximum token size, so that long log lines are accepted up to that ceiling instead of failing on the scanner default."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -797,3 +805,4 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-builtin-logical-pki-cmd-pki-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-pki-dnstest-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-pkiext-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-internal-builtin-logical-pkiext-pkiext-binary-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec |  |  | 0 | - |

@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the PKI extension package can turn a stream of docker container log output into per-line callbacks during tests. The container log writer in this package duplicates the LogConsumerWriter type that also exists in the sdk/helper/docker and sdk/helper/testcluster/docker packages, differing only in that its callback field is exported as Consumer rather than unexported. The context documents that helper and the test files that depend on the pkiext package's test scaffolding, so that changes to log handling or to the pkiext test helpers keep the observed behaviour intact.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
