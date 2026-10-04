@@ -4997,6 +4997,14 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.single-model-type` (MUST): "All three routes must address the same Ember Data model type, the string `'oidc/assignment'`, for the detail, list, and create cases."
 - added `r.store-service-injection` (MUST): "Each of the three routes must inject the Ember Data store as `this.store` and use only that service for record lookup, query, and creation, keeping the routes free of direct backend calls."
 
+### third-party-openbao-ui-app-routes-vault-cluster-access-oidc-assignments-assignment
+
+- intent: "" -> "This context exists so the specification records the OIDC assignment detail and edit route entry points exactly as they are: two named Ember Route subclasses that act as routing anchors and carry no custom logic. It is documented because downstream tooling and readers need to know that these route modules are intentionally empty — any expectation of model fetching or redirect behavior must be satisfied by the parent route hierarchy, mixins or the router map, not by these files."
+- added `r.details-and-edit-are-distinct-entry-points` (SHOULD): "The details and edit modules should stay separate default-exported classes in separate files under the assignment directory, so the router keeps two distinct named entry points for viewing and editing an OIDC assignment rather than collapsing them into one route."
+- added `r.details-route-export` (MUST): "The module at third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/assignment/details.js must export OidcAssignmentDetailsRoute as its default export, extending the Ember Route base class, so the router can resolve the OIDC assignment details route by module path."
+- added `r.edit-route-export` (MUST): "The module at third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/assignment/edit.js must export OidcAssignmentEditRoute as its default export, extending the Ember Route base class, so the router can resolve the OIDC assignment edit route by module path."
+- added `r.routes-declare-no-custom-behavior` (MUST): "Both route classes must remain empty of declared members: neither OidcAssignmentDetailsRoute nor OidcAssignmentEditRoute defines a model hook, setupController, actions hash, beforeModel, afterModel or any other own method or property, so all route behavior is inherited from Ember Route and the surrounding route hierarchy."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5406,9 +5414,10 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-routes-vault-cluster-access-mfa-methods-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-mfa-methods-method-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-namespaces-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-routes-vault-cluster-access-oidc-assignments-assignment-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-routes-vault-cluster-access-oidc-assignments-assignment-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-oidc-assignments-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-oidc-assignments-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-oidc-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-routes-vault-cluster-access-oidc-clients-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the specification records the OIDC assignment detail and edit route entry points exactly as they are: two named Ember Route subclasses that act as routing anchors and carry no custom logic. It is documented because downstream tooling and readers need to know that these route modules are intentionally empty — any expectation of model fetching or redirect behavior must be satisfied by the parent route hierarchy, mixins or the router map, not by these files.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
