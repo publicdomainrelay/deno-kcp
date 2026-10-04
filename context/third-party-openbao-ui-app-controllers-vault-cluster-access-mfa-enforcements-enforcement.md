@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to specify the behavior of the MFA login enforcement detail/index controller in Openbao's UI: how it tracks the selected tab, how it renders and dismisses the delete confirmation, and what the delete action must do on success and on failure. The spec pins the deletion flow, the fallback error state, and the post-delete navigation target so the controller can be read, reimplemented, or refactored without re-deriving its contract from the Ember source.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

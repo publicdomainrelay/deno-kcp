@@ -61145,10 +61145,64 @@ system_contexts:
 - code:
   - third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/enforcements/enforcement/index.js
   codeRefIndex:
+  - class:2b291d0b6786c867cac27571154f533f MfaLoginEnforcementIndexController@third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/enforcements/enforcement/index.js:12
   - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/enforcements/enforcement/index.js
     index.js@third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/enforcements/enforcement/index.js
   id: sc.third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-enforcements-enforcement
+  intent: 'This context exists to specify the behavior of the MFA login enforcement
+    detail/index controller in Openbao''s UI: how it tracks the selected tab, how
+    it renders and dismisses the delete confirmation, and what the delete action must
+    do on success and on failure. The spec pins the deletion flow, the fallback error
+    state, and the post-delete navigation target so the controller can be read, reimplemented,
+    or refactored without re-deriving its contract from the Ember source.'
+  interfaces:
+  - file: third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/enforcements/enforcement/index.js
+    kind: class
+    name: MfaLoginEnforcementIndexController
+    signature: export default class MfaLoginEnforcementIndexController extends Controller
   name: third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-enforcements-enforcement
+  requirements:
+  - codeRefs:
+    - class:2b291d0b6786c867cac27571154f533f
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/enforcements/enforcement/index.js
+    id: r.delete-confirmation-state
+    level: MUST
+    text: Delete confirmation visibility is held in the tracked boolean showDeleteConfirmation,
+      defaulting to false, and any failure from the delete action is retained in the
+      tracked deleteError property for display.
+  - codeRefs:
+    - class:2b291d0b6786c867cac27571154f533f
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/enforcements/enforcement/index.js
+    id: r.delete-failure-path
+    level: MUST
+    text: If destroyRecord rejects, the delete action catches the error and assigns
+      it to deleteError rather than propagating it, so the confirmation state and
+      navigation are left untouched on failure.
+  - codeRefs:
+    - class:2b291d0b6786c867cac27571154f533f
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/enforcements/enforcement/index.js
+    id: r.delete-success-path
+    level: MUST
+    text: The delete action awaits this.model.destroyRecord(); on success it sets
+      showDeleteConfirmation back to false, emits the success flash message 'MFA login
+      enforcement deleted successfully' through the flashMessages service, and calls
+      transitionToSafe(this.router, 'vault.cluster.access.mfa.enforcements') to leave
+      the deleted enforcement's page.
+  - codeRefs:
+    - class:2b291d0b6786c867cac27571154f533f
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/enforcements/enforcement/index.js
+    id: r.service-injection
+    level: MUST
+    text: The controller injects the router and flashMessages services so the delete
+      action can navigate with transitionToSafe and report success to the user.
+  - codeRefs:
+    - class:2b291d0b6786c867cac27571154f533f
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/enforcements/enforcement/index.js
+    id: r.tab-query-param
+    level: MUST
+    text: The controller declares queryParams as ['tab'] so the active tab is driven
+      by the URL query string, and the tab property starts at 'targets' when the query
+      parameter is absent.
   upstream: self
 - code:
   - third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/create.js

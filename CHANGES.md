@@ -4327,6 +4327,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.page-defaults-to-one` (MUST): "The page property must be initialized to the number 1, so a request with no page query parameter shows the first page of the MFA enforcement list rather than an empty or undefined page."
 - added `r.page-is-query-param` (MUST): "The controller must declare queryParams as an array containing the single element 'page', so the current page is bound to a 'page' query parameter in the browser URL and is preserved across reload and back navigation."
 
+### third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-enforcements-enforcement
+
+- intent: "" -> "This context exists to specify the behavior of the MFA login enforcement detail/index controller in Openbao's UI: how it tracks the selected tab, how it renders and dismisses the delete confirmation, and what the delete action must do on success and on failure. The spec pins the deletion flow, the fallback error state, and the post-delete navigation target so the controller can be read, reimplemented, or refactored without re-deriving its contract from the Ember source."
+- added `r.delete-confirmation-state` (MUST): "Delete confirmation visibility is held in the tracked boolean showDeleteConfirmation, defaulting to false, and any failure from the delete action is retained in the tracked deleteError property for display."
+- added `r.delete-failure-path` (MUST): "If destroyRecord rejects, the delete action catches the error and assigns it to deleteError rather than propagating it, so the confirmation state and navigation are left untouched on failure."
+- added `r.delete-success-path` (MUST): "The delete action awaits this.model.destroyRecord(); on success it sets showDeleteConfirmation back to false, emits the success flash message 'MFA login enforcement deleted successfully' through the flashMessages service, and calls transitionToSafe(this.router, 'vault.cluster.access.mfa.enforcements') to leave the deleted enforcement's page."
+- added `r.service-injection` (MUST): "The controller injects the router and flashMessages services so the delete action can navigate with transitionToSafe and report success to the user."
+- added `r.tab-query-param` (MUST): "The controller declares queryParams as ['tab'] so the active tab is driven by the URL query string, and the tab property starts at 'targets' when the query parameter is absent."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4668,7 +4677,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-controllers-vault-cluster-access-method-item-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-enforcements-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-enforcements-enforcement-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-enforcements-enforcement-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-methods-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
