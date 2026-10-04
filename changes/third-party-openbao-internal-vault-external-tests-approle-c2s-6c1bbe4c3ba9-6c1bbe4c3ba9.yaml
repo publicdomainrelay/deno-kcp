@@ -10,5 +10,24 @@ spec:
   systemContext: third-party-openbao-internal-vault-external-tests-approle
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-vault-external-tests-approle
-  phase: Running
+  agentLog: 'This context is the Go package `approle` under `third_party/openbao/internal/vault/external_tests/approle`
+    in the deno-kcp repository. It holds external, black-box tests that boot a full
+    in-process OpenBao test cluster (`vault.NewTestCluster` with `vaulthttp.Handler`)
+    and drive the built-in AppRole credential backend over the HTTP API through `cores[0].Client`
+    with the cluster root token. `alias_name_panic_test.go` defines `TestAppRole_AliasNameFromLoginRequest_Panic`,
+    which enables the `approle` auth method and posts a login with a non-string `role_id`
+    (a JSON object) and an empty `secret_id`; it asserts that the call returns an
+    error and that the error text does not contain `INTERNAL_ERROR`, guarding against
+    a server-side panic being surfaced as an internal error. `wrapped_secretid_test.go`
+    defines `TestApproleSecretId_Wrapped` and `TestApproleSecretId_NotWrapped`. Both
+    create a role `test-role-1` and issue a secret-id. The wrapped variant forces
+    response wrapping to `5m` via `client.SetWrappingLookupFunc`, then unwraps the
+    wrapping token and requires `WrapInfo.WrappedAccessor` to equal the unwrapped
+    `secret_id_accessor`. The non-wrapped variant restores `api.DefaultWrappingLookupFunc`
+    and requires `WrapInfo.WrappedAccessor` to be empty. Both wrapped-secretid tests
+    configure `CoreConfig` with `DisableCache: true` and a null logger.'
+  message: wrote 6 requirement(s) and 0 interface(s) for third-party-openbao-internal-vault-external-tests-approle;
+    interface TestAppRole_AliasNameFromLoginRequest_Panic is not in the observed facts;
+    dropped; interface TestApproleSecretId_Wrapped is not in the observed facts; dropped;
+    interface TestApproleSecretId_NotWrapped is not in the observed facts; dropped
+  phase: Succeeded
