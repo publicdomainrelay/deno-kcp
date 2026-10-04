@@ -71449,7 +71449,192 @@ system_contexts:
   - file:third_party/openbao/ui/lib/core/app/components/ttl-picker.js ttl-picker.js@third_party/openbao/ui/lib/core/app/components/ttl-picker.js
   - file:third_party/openbao/ui/lib/core/app/components/vault-logo-spinner.js vault-logo-spinner.js@third_party/openbao/ui/lib/core/app/components/vault-logo-spinner.js
   id: sc.third-party-openbao-ui-lib-core-app-components
+  intent: 'This context exists so the host OpenBao UI application, and any code that
+    resolves components out of app/components, can reach the addon''s component implementations
+    through app-local paths. Each file is a thin forwarding module rather than an
+    implementation: it pins the public name of a component (the file basename, which
+    drives Ember''s component resolution) to the addon module that actually implements
+    it, keeping the vendored third_party tree free of duplicated component source
+    while preserving the standard app/components lookup path. The spec records that
+    forwarding contract, the licence header convention, and the one deliberate name
+    divergence, so edits to this directory do not silently break resolution or drop
+    attribution.'
   name: third-party-openbao-ui-lib-core-app-components
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/app/components/alert-banner.js
+    - file:third_party/openbao/ui/lib/core/app/components/alert-inline.js
+    - file:third_party/openbao/ui/lib/core/app/components/alert-popup.js
+    id: r.alert-family
+    level: MUST
+    text: 'The three alert surfaces stay separate modules forwarding distinct addon
+      components: alert-banner.js for banner alerts, alert-inline.js for inline alerts
+      and alert-popup.js for popup alerts, so a consumer picks the presentation by
+      file name alone.'
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/app/components/icon.js
+    - file:third_party/openbao/ui/lib/core/app/components/ttl-picker.js
+    - file:third_party/openbao/ui/lib/core/app/components/vault-logo-spinner.js
+    id: r.basename-matches-target
+    level: MUST
+    text: The imported module name equals the file basename, so resolving a component
+      by its file name reaches the matching `core/components/<basename>` addon module;
+      vault-logo-spinner.js is the single deliberate divergence and forwards `core/components/openbao-logo-spinner`.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/app/components/info-table-item-array.js
+    - file:third_party/openbao/ui/lib/core/app/components/info-table-row.js
+    - file:third_party/openbao/ui/lib/core/app/components/info-table.js
+    - file:third_party/openbao/ui/lib/core/app/components/key-value-header.js
+    - file:third_party/openbao/ui/lib/core/app/components/overview-card.js
+    - file:third_party/openbao/ui/lib/core/app/components/read-more.js
+    - file:third_party/openbao/ui/lib/core/app/components/stat-text.js
+    id: r.data-display
+    level: MUST
+    text: 'Read-only data presentation modules stay one per shape: info-table.js,
+      info-table-row.js, info-table-item-array.js, key-value-header.js, stat-text.js,
+      read-more.js and overview-card.js forward their addon counterparts.'
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/app/components/alert-banner.js
+    - file:third_party/openbao/ui/lib/core/app/components/form-field.js
+    - file:third_party/openbao/ui/lib/core/app/components/json-editor.js
+    - file:third_party/openbao/ui/lib/core/app/components/modal.js
+    - file:third_party/openbao/ui/lib/core/app/components/shamir-flow.js
+    - file:third_party/openbao/ui/lib/core/app/components/toolbar.js
+    id: r.default-reexport-only
+    level: MUST
+    text: 'Every module in this directory is a shim, not an implementation: it contains
+      a single `export { default } from ''core/components/<name>''` statement that
+      forwards the addon component as the module default, and defines no local class,
+      template, mixin or helper.'
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/app/components/edit-form.js
+    - file:third_party/openbao/ui/lib/core/app/components/field-group-show.js
+    - file:third_party/openbao/ui/lib/core/app/components/form-error.js
+    - file:third_party/openbao/ui/lib/core/app/components/form-field-groups-loop.js
+    - file:third_party/openbao/ui/lib/core/app/components/form-field-groups.js
+    - file:third_party/openbao/ui/lib/core/app/components/form-field-label.js
+    - file:third_party/openbao/ui/lib/core/app/components/form-field.js
+    - file:third_party/openbao/ui/lib/core/app/components/form-save-buttons.js
+    - file:third_party/openbao/ui/lib/core/app/components/readonly-form-field.js
+    id: r.form-components
+    level: MUST
+    text: 'The form layer forwards one module per form concern: form-field.js, form-field-label.js,
+      form-field-groups.js, form-field-groups-loop.js, form-error.js, form-save-buttons.js,
+      edit-form.js, readonly-form-field.js and field-group-show.js each forward their
+      addon counterpart so form rendering can be composed from named pieces.'
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/app/components/autocomplete-input.js
+    - file:third_party/openbao/ui/lib/core/app/components/input-search.js
+    - file:third_party/openbao/ui/lib/core/app/components/json-editor.js
+    - file:third_party/openbao/ui/lib/core/app/components/kv-object-editor.js
+    - file:third_party/openbao/ui/lib/core/app/components/masked-input.js
+    - file:third_party/openbao/ui/lib/core/app/components/navigate-input.js
+    - file:third_party/openbao/ui/lib/core/app/components/object-list-input.js
+    - file:third_party/openbao/ui/lib/core/app/components/string-list.js
+    - file:third_party/openbao/ui/lib/core/app/components/text-file.js
+    - file:third_party/openbao/ui/lib/core/app/components/ttl-picker.js
+    id: r.input-components
+    level: MUST
+    text: 'Input and editor modules forward their addon counterparts individually:
+      masked-input.js, input-search.js, navigate-input.js, autocomplete-input.js,
+      json-editor.js, kv-object-editor.js, object-list-input.js, string-list.js, text-file.js
+      and ttl-picker.js each expose one input affordance under its own file name.'
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/app/components/alert-banner.js
+    - file:third_party/openbao/ui/lib/core/app/components/alert-popup.js
+    - file:third_party/openbao/ui/lib/core/app/components/page-header-level.js
+    id: r.license-header
+    level: MUST
+    text: 'Each forwarding module opens with the HashiCorp copyright and `SPDX-License-Identifier:
+      MPL-2.0` comment block; alert-popup.js and page-header-level.js are the only
+      two modules that omit the header and consist solely of the export statement,
+      so any new shim in this directory must add the header.'
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/app/components/linked-block.js
+    - file:third_party/openbao/ui/lib/core/app/components/list-item.js
+    - file:third_party/openbao/ui/lib/core/app/components/list-pagination.js
+    - file:third_party/openbao/ui/lib/core/app/components/list-view.js
+    - file:third_party/openbao/ui/lib/core/app/components/page-header-level.js
+    - file:third_party/openbao/ui/lib/core/app/components/page-header.js
+    - file:third_party/openbao/ui/lib/core/app/components/secret-list-header-tab.js
+    - file:third_party/openbao/ui/lib/core/app/components/secret-list-header.js
+    - file:third_party/openbao/ui/lib/core/app/components/toolbar-actions.js
+    - file:third_party/openbao/ui/lib/core/app/components/toolbar-filters.js
+    - file:third_party/openbao/ui/lib/core/app/components/toolbar-link.js
+    - file:third_party/openbao/ui/lib/core/app/components/toolbar.js
+    id: r.navigation-and-lists
+    level: MUST
+    text: 'Navigation and list chrome is forwarded as separate modules so pages compose
+      them independently: page-header.js, page-header-level.js, toolbar.js, toolbar-actions.js,
+      toolbar-filters.js, toolbar-link.js, list-view.js, list-item.js, list-pagination.js,
+      linked-block.js, secret-list-header.js and secret-list-header-tab.js.'
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/app/components/alert-banner.js
+    - file:third_party/openbao/ui/lib/core/app/components/page-header-level.js
+    - file:third_party/openbao/ui/lib/core/app/components/vault-logo-spinner.js
+    id: r.no-behaviour-added
+    level: MUST
+    text: 'A forwarding module adds no behaviour of its own: it must not re-write,
+      wrap, rename or re-export the component''s named exports, so the runtime contract
+      a consumer sees is exactly the addon component''s contract and a change in this
+      directory can only affect module resolution, never component semantics.'
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/app/components/confirm-action.js
+    - file:third_party/openbao/ui/lib/core/app/components/confirm.js
+    - file:third_party/openbao/ui/lib/core/app/components/confirmation-modal.js
+    - file:third_party/openbao/ui/lib/core/app/components/menu-loader.js
+    - file:third_party/openbao/ui/lib/core/app/components/modal.js
+    - file:third_party/openbao/ui/lib/core/app/components/popup-menu.js
+    - file:third_party/openbao/ui/lib/core/app/components/shamir-flow.js
+    - file:third_party/openbao/ui/lib/core/app/components/shamir-modal-flow.js
+    id: r.overlays-and-flows
+    level: MUST
+    text: 'Confirmation and multi-step flows are forwarded by role: modal.js for the
+      base overlay, confirm.js, confirm-action.js and confirmation-modal.js for confirmation,
+      popup-menu.js and menu-loader.js for menus, and shamir-flow.js plus shamir-modal-flow.js
+      for the Shamir unseal flow in inline and modal form.'
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/app/components/chevron.js
+    - file:third_party/openbao/ui/lib/core/app/components/doc-link.js
+    - file:third_party/openbao/ui/lib/core/app/components/download-button.js
+    - file:third_party/openbao/ui/lib/core/app/components/empty-state.js
+    - file:third_party/openbao/ui/lib/core/app/components/external-link.js
+    - file:third_party/openbao/ui/lib/core/app/components/icon.js
+    - file:third_party/openbao/ui/lib/core/app/components/info-tooltip.js
+    - file:third_party/openbao/ui/lib/core/app/components/layout-loading.js
+    - file:third_party/openbao/ui/lib/core/app/components/message-error.js
+    - file:third_party/openbao/ui/lib/core/app/components/namespace-reminder.js
+    - file:third_party/openbao/ui/lib/core/app/components/tool-tip.js
+    - file:third_party/openbao/ui/lib/core/app/components/vault-logo-spinner.js
+    id: r.primitive-and-status-modules
+    level: SHOULD
+    text: 'Small primitives and status surfaces keep dedicated modules so they can
+      be dropped into any template: icon.js, chevron.js, tool-tip.js, info-tooltip.js,
+      doc-link.js, external-link.js, download-button.js, empty-state.js, message-error.js,
+      layout-loading.js, namespace-reminder.js and vault-logo-spinner.js each forward
+      one addon component.'
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/app/components/search-select-placeholder.js
+    - file:third_party/openbao/ui/lib/core/app/components/search-select-with-modal.js
+    - file:third_party/openbao/ui/lib/core/app/components/search-select.js
+    id: r.search-select-family
+    level: MUST
+    text: 'The search-and-select family is forwarded as three cooperating modules:
+      search-select.js for the base control, search-select-with-modal.js for the modal
+      variant and search-select-placeholder.js for the empty-state placeholder.'
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/app/components/box-radio.js
+    - file:third_party/openbao/ui/lib/core/app/components/checkbox-grid.js
+    - file:third_party/openbao/ui/lib/core/app/components/radio-button.js
+    - file:third_party/openbao/ui/lib/core/app/components/radio-card.js
+    - file:third_party/openbao/ui/lib/core/app/components/select.js
+    - file:third_party/openbao/ui/lib/core/app/components/toggle-button.js
+    - file:third_party/openbao/ui/lib/core/app/components/toggle.js
+    id: r.selection-controls
+    level: MUST
+    text: 'Each selection control keeps its own module so its visual form is chosen
+      at the call site: checkbox-grid.js, box-radio.js, radio-button.js, radio-card.js,
+      toggle.js, toggle-button.js and select.js forward seven distinct addon components.'
   upstream: self
 - code:
   - third_party/openbao/ui/lib/core/app/components/confirm/message.js

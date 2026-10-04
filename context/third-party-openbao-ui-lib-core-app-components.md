@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the host OpenBao UI application, and any code that resolves components out of app/components, can reach the addon's component implementations through app-local paths. Each file is a thin forwarding module rather than an implementation: it pins the public name of a component (the file basename, which drives Ember's component resolution) to the addon module that actually implements it, keeping the vendored third_party tree free of duplicated component source while preserving the standard app/components lookup path. The spec records that forwarding contract, the licence header convention, and the one deliberate name divergence, so edits to this directory do not silently break resolution or drop attribution.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
