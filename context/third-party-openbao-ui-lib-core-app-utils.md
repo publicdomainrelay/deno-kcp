@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to record the app/utils re-export shims for base64 and timestamp helpers in the vendored OpenBao UI core library, so that consumers reading the app/utils path know the real implementations live in core/utils and that these files are pass-throughs with no added behavior.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

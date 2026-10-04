@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the OpenBao UI core addon can expose its helper set to the host app's resolver: the app/helpers directory must re-export, under the app-namespace paths Ember looks up, the helpers that are implemented once in the core addon. The spec records that contract together with the observable behaviour of each re-exported helper, so that a change to a shim (a dropped named export, a renamed module path) or to the underlying formatting, state-mapping, route-matching, sanitizing or flash-message logic is detectable as a spec violation.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
