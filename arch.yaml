@@ -57292,7 +57292,89 @@ system_contexts:
   - file:third_party/openbao/ui/app/adapters/identity/group-alias.js group-alias.js@third_party/openbao/ui/app/adapters/identity/group-alias.js
   - file:third_party/openbao/ui/app/adapters/identity/group.js group.js@third_party/openbao/ui/app/adapters/identity/group.js
   id: sc.third-party-openbao-ui-app-adapters-identity
+  intent: This context documents the identity adapter layer of the vendored OpenBao
+    web UI, the boundary that maps Ember Data model operations for entities, entity
+    aliases, groups, group aliases and entity merges onto the identity secrets engine
+    HTTP API. It exists so the URL construction, list/query handling, lookup endpoints
+    and merge response rewriting can be specified and checked without reading the
+    Ember source, and so downstream work that touches identity models knows exactly
+    which request shapes the adapters emit.
   name: third-party-openbao-ui-app-adapters-identity
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/app/adapters/identity/entity-alias.js
+    - file:third_party/openbao/ui/app/adapters/identity/group-alias.js
+    id: r.alias-adapters-inherit-base
+    level: SHOULD
+    text: The entity-alias and group-alias adapters MUST extend the identity base
+      adapter without overriding any hook, so their URL shapes are exactly the base
+      adapter's and they stay in step with it.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/adapters/identity/base.js
+    id: r.base-namespace-v1
+    level: MUST
+    text: The identity base adapter MUST declare namespace 'v1', so every inherited
+      request is sent under the /v1 API prefix.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/adapters/identity/base.js
+    id: r.build-url-id-suffix
+    level: MUST
+    text: The identity base adapter MUST override buildURL so that, for every request
+      type except createRecord, the model name passed to the superclass is suffixed
+      with '/id' (producing paths such as identity/entity/id), while createRecord
+      requests delegate to the superclass unchanged.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/adapters/identity/entity.js
+    id: r.entity-lookup
+    level: MUST
+    text: The entity adapter MUST provide a lookup method that POSTs the given data
+      to /${urlPrefix}/identity/lookup/entity, returning undefined when the response
+      is falsy (an unsuccessful lookup is a 204) and otherwise normalizing the response
+      with the identity/entity serializer and pushing it into the store before returning
+      the raw response.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/adapters/identity/entity-merge.js
+    id: r.entity-merge-create-result
+    level: MUST
+    text: The entity-merge adapter MUST override createRecord to chain on the superclass
+      call and resolve with an object whose id is the snapshot attribute toEntityId,
+      so the caller can redirect to the surviving entity after a merge.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/adapters/identity/entity-merge.js
+    id: r.entity-merge-hardcoded-url
+    level: MUST
+    text: The entity-merge adapter MUST override buildURL to discard the incoming
+      model name and pass 'identity/entity/merge' to the superclass, so merge requests
+      always target that fixed path regardless of the calling model.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/adapters/identity/group.js
+    id: r.group-lookup
+    level: MUST
+    text: The group adapter MUST provide a lookup method that POSTs the given data
+      to /${urlPrefix}/identity/lookup/group, returning undefined when the response
+      is falsy (an unsuccessful lookup is a 204) and otherwise normalizing the response
+      with the identity/group serializer and pushing it into the store before returning
+      the raw response.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/adapters/identity/base.js
+    id: r.path-for-type-passthrough
+    level: MUST
+    text: The identity base adapter MUST return the model type argument unchanged
+      from pathForType, so URL segments keep the raw Ember model names instead of
+      being pluralized or dasherized.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/adapters/identity/base.js
+    id: r.query-issues-get
+    level: MUST
+    text: The identity base adapter MUST override query to issue a GET request to
+      buildURL with a null id for the queried model name, rather than letting Ember
+      Data perform the default query request.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/adapters/identity/base.js
+    id: r.query-list-true
+    level: MUST
+    text: The identity base adapter MUST override urlForQuery to append '?list=true'
+      to the superclass URL, so identity queries hit the LIST variant of the endpoint.
   upstream: self
 - code:
   - third_party/openbao/ui/app/adapters/keymgmt/key.js

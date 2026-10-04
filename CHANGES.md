@@ -3881,6 +3881,20 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.role-url-shape` (MUST): "The role adapter must map role type 'static' to the 'static-roles' path segment and every other type, including the default, to 'roles', giving <base>/<backend>/<segment> for a list and <base>/<backend>/<segment>/<id> for a single role."
 - added `r.role-write-status` (MUST): "Creating and updating a role must POST serializer output to the type-appropriate role URL and return a payload carrying the name as id, since the engine may answer 204 to a non-DELETE write."
 
+### third-party-openbao-ui-app-adapters-identity
+
+- intent: "" -> "This context documents the identity adapter layer of the vendored OpenBao web UI, the boundary that maps Ember Data model operations for entities, entity aliases, groups, group aliases and entity merges onto the identity secrets engine HTTP API. It exists so the URL construction, list/query handling, lookup endpoints and merge response rewriting can be specified and checked without reading the Ember source, and so downstream work that touches identity models knows exactly which request shapes the adapters emit."
+- added `r.alias-adapters-inherit-base` (SHOULD): "The entity-alias and group-alias adapters MUST extend the identity base adapter without overriding any hook, so their URL shapes are exactly the base adapter's and they stay in step with it."
+- added `r.base-namespace-v1` (MUST): "The identity base adapter MUST declare namespace 'v1', so every inherited request is sent under the /v1 API prefix."
+- added `r.build-url-id-suffix` (MUST): "The identity base adapter MUST override buildURL so that, for every request type except createRecord, the model name passed to the superclass is suffixed with '/id' (producing paths such as identity/entity/id), while createRecord requests delegate to the superclass unchanged."
+- added `r.entity-lookup` (MUST): "The entity adapter MUST provide a lookup method that POSTs the given data to /${urlPrefix}/identity/lookup/entity, returning undefined when the response is falsy (an unsuccessful lookup is a 204) and otherwise normalizing the response with the identity/entity serializer and pushing it into the store before returning the raw response."
+- added `r.entity-merge-create-result` (MUST): "The entity-merge adapter MUST override createRecord to chain on the superclass call and resolve with an object whose id is the snapshot attribute toEntityId, so the caller can redirect to the surviving entity after a merge."
+- added `r.entity-merge-hardcoded-url` (MUST): "The entity-merge adapter MUST override buildURL to discard the incoming model name and pass 'identity/entity/merge' to the superclass, so merge requests always target that fixed path regardless of the calling model."
+- added `r.group-lookup` (MUST): "The group adapter MUST provide a lookup method that POSTs the given data to /${urlPrefix}/identity/lookup/group, returning undefined when the response is falsy (an unsuccessful lookup is a 204) and otherwise normalizing the response with the identity/group serializer and pushing it into the store before returning the raw response."
+- added `r.path-for-type-passthrough` (MUST): "The identity base adapter MUST return the model type argument unchanged from pathForType, so URL segments keep the raw Ember model names instead of being pluralized or dasherized."
+- added `r.query-issues-get` (MUST): "The identity base adapter MUST override query to issue a GET request to buildURL with a null id for the queried model name, rather than letting Ember Data perform the default query request."
+- added `r.query-list-true` (MUST): "The identity base adapter MUST override urlForQuery to append '?list=true' to the superclass URL, so identity queries hit the LIST variant of the endpoint."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4168,6 +4182,8 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-adapters-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-adapters-clients-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-adapters-database-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-adapters-identity-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-adapters-identity-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-adapters-identity-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-adapters-keymgmt-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

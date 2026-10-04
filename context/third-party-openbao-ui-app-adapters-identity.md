@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context documents the identity adapter layer of the vendored OpenBao web UI, the boundary that maps Ember Data model operations for entities, entity aliases, groups, group aliases and entity merges onto the identity secrets engine HTTP API. It exists so the URL construction, list/query handling, lookup endpoints and merge response rewriting can be specified and checked without reading the Ember source, and so downstream work that touches identity models knows exactly which request shapes the adapters emit.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
