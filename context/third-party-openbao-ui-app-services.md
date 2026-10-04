@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists to describe the shared behavior that every route and component in the OpenBao UI inherits from injected services, so a reader can reason about path normalization, downloads, flash messaging, and the client-side query cache without reading each template or route. It documents the contract of the service layer: what each exported function and service method accepts, what side effects it has on the browser, and what state it keeps between queries.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

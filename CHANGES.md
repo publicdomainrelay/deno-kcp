@@ -5283,6 +5283,21 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.rgp-serializer-extends-policy` (MUST): "The RGP policy serializer module default-exports a subclass of the serializer from ../policy, created by PolicySerializer.extend() with no additional properties or methods, so RGP policies are serialized exactly as the base policy serializer does."
 - added `r.shared-base-serializer-reuse` (MUST): "Each of the three policy serializers must import the base serializer from the relative path ../policy rather than restating serialization logic, so the three types stay behaviourally identical and any change to the base propagates to all of them."
 
+### third-party-openbao-ui-app-services
+
+- intent: "" -> "The context exists to describe the shared behavior that every route and component in the OpenBao UI inherits from injected services, so a reader can reason about path normalization, downloads, flash messaging, and the client-side query cache without reading each template or route. It documents the contract of the service layer: what each exported function and service method accepts, what side effects it has on the browser, and what state it keeps between queries."
+- added `r.download-extension-helpers` (MUST): "DownloadService exposes extension-specific conveniences that delegate to download: csv passes csv, pem passes pem, and miscExtension passes a caller-supplied extension, so callers never build the extension string or MIME type themselves."
+- added `r.download-filename-mime` (MUST): "DownloadService.download builds the downloaded filename by replacing runs of whitespace with hyphens and appending the extension; when the supplied filename is empty it falls back to vault-data- followed by the current time in ISO 8601 form and the extension. It resolves the MIME type from the extension map and falls back to text/plain for unknown extensions."
+- added `r.download-side-effect` (MUST): "DownloadService.download performs the download through the browser DOM: it creates a File from the content with the resolved MIME type, creates an anchor element, sets its download and object URL href, appends it to the document body, clicks it, revokes the object URL and removes the element, then returns the formatted filename."
+- added `r.flash-messages-service` (SHOULD): "FlashMessageService is the application's flash message service, extending the FlashMessages base class so components and routes can inject it under the standard service name."
+- added `r.path-normalization` (MUST): "Path helpers normalize operator input: sanitizePath removes surrounding whitespace and strips all leading and trailing slashes from a path, and ensureTrailingSlash appends a trailing slash to a path whose last segment ends in a word character."
+- added `r.store-dataset-lifecycle` (MUST): "The store caches query results as datasets keyed by model name and query: storeDataset records a response for a model and query, optionally as an array, getDataset reads it back, clearDataset drops every dataset for a model name, and clearAllDatasets drops all cached datasets at once."
+- added `r.store-lazy-caches` (MUST): "The store keeps a per-model lazy cache map that is created on first access; setLazyCacheForModel writes a value under a model name and key, getLazyCacheForModel reads it back, lazyCacheForModel returns the whole cache for a model, and lazyCaches exposes the collection of all of them."
+- added `r.store-model-name-key` (MUST): "The store normalizes a model name before use as a cache dimension and derives a cache key from a query object, so that equivalent model and query inputs address the same cached dataset entry."
+- added `r.store-pagination-query` (MUST): "The store runs paginated queries per model type, fetching a page for a model name and query and assembling the response from cached or freshly fetched records, with a filter step that narrows a dataset by the given filter."
+- added `r.store-unload` (MUST): "The store can release cached records without clearing datasets: unloadAll unloads every cached record for a model name and unloadRecord unloads a single record passed to it."
+- added `r.supporting-services` (MUST): "The service layer also registers the remaining application services: authentication, console, CSP event reporting, current cluster, host routing, namespace, permissions, replication mode, secret mount path, path help generated item model and version, each as its own module under app/services so routes can inject them independently."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5733,5 +5748,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-serializers-pki-certificate-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Failed |  | 0 | - |
 | third-party-openbao-ui-app-serializers-pki-certificate-c2s-6c1bbe4c3ba9-89cee50ec5ae-a3 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-serializers-policy-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-services-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-services-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
