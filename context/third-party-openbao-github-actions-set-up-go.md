@@ -2,13 +2,101 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to pin down the contract of the vendored OpenBao workflow helper that sets up Go with a shared module cache, so the surrounding repository can rely on its inputs, outputs, cache key derivation, and cache-miss behavior without re-reading the YAML. It records the deliberate caching decisions encoded in the file: caching is left to this action rather than to actions/setup-go, the cache is cross-OS and lookup-only when no-restore is set, and no partial restore keys are used because GitHub caps repository caches at 10 GB and the same cache budget also holds Go test timing results.
 
 _Write the prose above and the fields in the spec block. `codeRefs` and the resolved references below are maintained by the tool; an edit there is lost._
 
 ## spec
 
 ```yaml spec
+requirements:
+- codeRefs:
+  - file:third_party/openbao/.github/actions/set-up-go/action.yml
+  id: r.accept-no-restore-input
+  level: MUST
+  text: The action must declare a boolean input named no-restore, described as whether
+    to restore the Go module cache on a cache hit, with default false.
+- codeRefs:
+  - file:third_party/openbao/.github/actions/set-up-go/action.yml
+  id: r.cache-budget-rationale
+  level: SHOULD
+  text: The caching strategy should stay within GitHub's 10 GB per-repository cache
+    limit, which this repository also spends on Go test timing results, so the exact-key,
+    no-partial-restore approach is preserved to keep upload time, download time, and
+    storage size minimal.
+- codeRefs:
+  - file:third_party/openbao/.github/actions/set-up-go/action.yml
+  id: r.cache-uses-exact-key
+  level: MUST
+  text: The actions/cache step must use path ${{ steps.metadata.outputs.cache-path
+    }} and key ${{ steps.metadata.outputs.cache-key }} and must not specify any partial
+    restore keys.
+- codeRefs:
+  - file:third_party/openbao/.github/actions/set-up-go/action.yml
+  id: r.composite-run-surface
+  level: MUST
+  text: The action must run using composite and order its steps as go-version, actions/setup-go,
+    metadata, cache-modules, then the conditional module download, with shell bash
+    on every run step.
+- codeRefs:
+  - file:third_party/openbao/.github/actions/set-up-go/action.yml
+  id: r.cross-os-cache-archive
+  level: MUST
+  text: The actions/cache step, pinned at v6.1.0, must set enableCrossOsArchive to
+    true.
+- codeRefs:
+  - file:third_party/openbao/.github/actions/set-up-go/action.yml
+  id: r.derive-go-version-from-file
+  level: MUST
+  text: The go-version step must run bash that reads ./.go-version and writes its
+    contents to the go-version step output via $GITHUB_OUTPUT, and actions/setup-go
+    must receive that value as go-version rather than a hard-coded version.
+- codeRefs:
+  - file:third_party/openbao/.github/actions/set-up-go/action.yml
+  id: r.disable-setup-go-caching
+  level: MUST
+  text: The actions/setup-go step, pinned at v7.0.0, must be invoked with cache set
+    to false because the action uses its own caching strategy.
+- codeRefs:
+  - file:third_party/openbao/.github/actions/set-up-go/action.yml
+  id: r.download-modules-on-cache-miss
+  level: MUST
+  text: 'A step named Download go modules, guarded by if: steps.cache-modules.outputs.cache-hit
+    != ''true'' and running bash, must iterate over every file named go.mod found
+    under the tree and, in each containing directory via pushd/popd, run go list ./...,
+    go list -test ./..., and go mod download.'
+- codeRefs:
+  - file:third_party/openbao/.github/actions/set-up-go/action.yml
+  id: r.export-cache-key-output
+  level: MUST
+  text: The action must publish a cache-key output, described as the Go modules cache
+    key, whose value is ${{ steps.metadata.outputs.cache-key }}.
+- codeRefs:
+  - file:third_party/openbao/.github/actions/set-up-go/action.yml
+  id: r.export-cache-path-output
+  level: MUST
+  text: The action must publish a cache-path output, described as the GOMODCACHE path,
+    whose value is ${{ steps.metadata.outputs.cache-path }}.
+- codeRefs:
+  - file:third_party/openbao/.github/actions/set-up-go/action.yml
+  id: r.export-go-version-output
+  level: MUST
+  text: The action must publish a go-version output, described as the version of Go
+    in the .go-version file, whose value is ${{ steps.go-version.outputs.go-version
+    }}.
+- codeRefs:
+  - file:third_party/openbao/.github/actions/set-up-go/action.yml
+  id: r.lookup-only-bound-to-input
+  level: MUST
+  text: The actions/cache step must set lookup-only to ${{ inputs.no-restore }} so
+    a cache hit can be detected without restoring when requested.
+- codeRefs:
+  - file:third_party/openbao/.github/actions/set-up-go/action.yml
+  id: r.metadata-outputs-path-and-key
+  level: MUST
+  text: The metadata bash step must write cache-path as the result of go env GOMODCACHE
+    and cache-key as the literal prefix go-modules- immediately followed by ${{ hashFiles('**/go.sum')
+    }} into $GITHUB_OUTPUT.
 upstream: self
 ```
 
