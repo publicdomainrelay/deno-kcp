@@ -30596,8 +30596,121 @@ system_contexts:
   - file:third_party/openbao/internal/physical/raft/varint.go varint.go@third_party/openbao/internal/physical/raft/varint.go
   - file:third_party/openbao/internal/physical/raft/vars_32bit.go vars_32bit.go@third_party/openbao/internal/physical/raft/vars_32bit.go
   - file:third_party/openbao/internal/physical/raft/vars_64bit.go vars_64bit.go@third_party/openbao/internal/physical/raft/vars_64bit.go
+  - function:d69e06476c768295cc387a93f789e216 NewFSM@third_party/openbao/internal/physical/raft/fsm.go:144
+  - function:da25f1ac82ba779c3c3b51e39206e270 FsmTxnCommitIndexTracker@third_party/openbao/internal/physical/raft/transaction.go:735
   id: sc.third-party-openbao-internal-physical-raft
+  intent: 'This context exists so the Raft physical storage package of the vendored
+    OpenBao code has a written specification of its FSM and log-application contract:
+    what an applied entry means, how transaction errors travel back through the log,
+    how the Bolt-backed FSM is opened, how apply delay is injected for tests, and
+    which size limits reject an entry before it is proposed. It anchors those rules
+    to the concrete files and functions that implement them so later edits to deno-kcp''s
+    third_party subtree can be checked against behaviour rather than against memory
+    of upstream OpenBao.'
+  interfaces:
+  - file: third_party/openbao/internal/physical/raft/fsm.go
+    kind: struct
+    name: FSMEntry
+    signature: type FSMEntry struct
+  - file: third_party/openbao/internal/physical/raft/fsm.go
+    kind: method
+    name: FSMEntry.AsTxError
+    signature: func (f *FSMEntry) AsTxError() error
+  - file: third_party/openbao/internal/physical/raft/fsm.go
+    kind: method
+    name: FSMEntry.IsTxError
+    signature: func (f *FSMEntry) IsTxError() bool
+  - file: third_party/openbao/internal/physical/raft/fsm.go
+    kind: method
+    name: FSMEntry.String
+    signature: func (f *FSMEntry) String() string
+  - file: third_party/openbao/internal/physical/raft/transaction.go
+    kind: function
+    name: FsmTxnCommitIndexTracker
+    signature: func FsmTxnCommitIndexTracker() *fsmTxnCommitIndexTracker
+  - file: third_party/openbao/internal/physical/raft/fsm.go
+    kind: function
+    name: NewFSM
+    signature: func NewFSM(path string, localID string, logger log.Logger) (*FSM,
+      error)
+  - file: third_party/openbao/internal/physical/raft/fsm.go
+    kind: method
+    name: RaftBackend.SetFSMDelay
+    signature: func (r *RaftBackend) SetFSMDelay(delay time.Duration)
   name: third-party-openbao-internal-physical-raft
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/physical/raft/raft.go
+    - function:da25f1ac82ba779c3c3b51e39206e270
+    id: r.apply-log-caps-lowest-active-index
+    level: MUST
+    text: applyLog must take the lowest active index from the command when set, otherwise
+      from the FSM transaction tracker, and cap it with the raft applied index so
+      transactions started concurrently are not missed, writing the capped value back
+      onto the command before marshalling.
+  - codeRefs:
+    - file:third_party/openbao/internal/physical/raft/raft.go
+    id: r.apply-log-chunks-large-commands
+    level: MUST
+    text: applyLog must apply commands whose marshalled size is at or below raftchunking.ChunkSize
+      directly through raft.Apply, and route larger commands through the chunking
+      path, so oversized values still replicate.
+  - codeRefs:
+    - file:third_party/openbao/internal/physical/raft/raft.go
+    id: r.apply-log-enforces-size-limits
+    level: MUST
+    text: applyLog must reject a non-transaction command larger than maxEntrySize
+      and a transaction larger than maxTransactionSize, both with an error carrying
+      physical.ErrValueTooLarge plus the observed and maximum byte counts, and must
+      record the entry size as a raft-storage/entry_size metric sample.
+  - codeRefs:
+    - file:third_party/openbao/internal/physical/raft/fsm.go
+    id: r.fsm-delay-injection
+    level: SHOULD
+    text: SetFSMDelay must install an FSM apply callback that sleeps for the given
+      duration, giving tests a way to slow FSM application without changing apply
+      logic.
+  - codeRefs:
+    - file:third_party/openbao/internal/physical/raft/fsm.go
+    id: r.fsm-entry-describes-key-and-value
+    level: MUST
+    text: 'An FSMEntry must render itself as "Key: %s. Value: %s", where Key is printed
+      as-is and Value is printed hex encoded, so applied entries can be logged readably.'
+  - codeRefs:
+    - file:third_party/openbao/internal/physical/raft/fsm.go
+    - file:third_party/openbao/internal/physical/raft/raft.go
+    id: r.fsm-entry-identifies-transaction-errors
+    level: MUST
+    text: An FSMEntry must be recognisable as a transaction error marker by comparing
+      its Key against the reserved fsmEntryTxErrorKey, so applyLog can distinguish
+      a failed transaction result from ordinary data.
+  - codeRefs:
+    - file:third_party/openbao/internal/physical/raft/fsm.go
+    id: r.fsm-entry-reconstructs-transaction-error
+    level: MUST
+    text: AsTxError must rebuild the original error from the entry Value by splitting
+      once on physical.ErrTransactionCommitFailure and rejoining the two halves around
+      that sentinel with %w, and must return the whole value as a plain error when
+      the sentinel does not appear, so callers can still match the commit failure
+      with errors.Is.
+  - codeRefs:
+    - file:third_party/openbao/internal/physical/raft/fsm.go
+    - function:d69e06476c768295cc387a93f789e216
+    id: r.new-fsm-opens-bolt-and-wires-chunking
+    level: MUST
+    text: NewFSM must build an FSM with the given path, logger and localID, default
+      desiredSuffrage to "voter", install a chunking batching FSM backed by an FSMChunkStorage
+      whose context is context.Background, seed fastTxnTracker from FsmTxnCommitIndexTracker,
+      and under f.l open the Bolt database at the databaseFilename joined to path,
+      returning a wrapped "failed to open bolt file" error on failure.
+  - codeRefs:
+    - file:third_party/openbao/internal/physical/raft/transaction.go
+    - function:da25f1ac82ba779c3c3b51e39206e270
+    id: r.transaction-index-tracker-initialised
+    level: MUST
+    text: FsmTxnCommitIndexTracker must return a tracker whose source index and index
+      modified maps are pre-sized from physical.DefaultParallelTransactions, so fast
+      transaction commit tracking starts with the expected concurrency budget.
   upstream: self
 - code:
   - third_party/openbao/internal/physical/raft/snapshot/archive.go

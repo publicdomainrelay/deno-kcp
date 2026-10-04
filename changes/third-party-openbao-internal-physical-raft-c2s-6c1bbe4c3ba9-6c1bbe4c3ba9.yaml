@@ -10,5 +10,18 @@ spec:
   systemContext: third-party-openbao-internal-physical-raft
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-physical-raft
-  phase: Running
+  agentLog: 'This context covers the Raft physical backend under third_party/openbao/internal/physical/raft.
+    The observed facts centre on the FSM layer: FSMEntry wraps a single key/value
+    pair produced by log application, with String, IsTxError and AsTxError describing
+    and reconstructing transaction errors, NewFSM which opens the Bolt database file,
+    wires a chunking batching FSM over FSMChunkStorage and seeds a fast transaction
+    commit index tracker, RaftBackend.SetFSMDelay which installs an apply callback
+    that sleeps for a configurable duration, and RaftBackend.applyLog which caps the
+    lowest active index against the applied index, enforces maxEntrySize and maxTransactionSize
+    limits with physical.ErrValueTooLarge, and chunks large commands through raftchunking.
+    FsmTxnCommitIndexTracker builds the index maps sized from physical.DefaultParallelTransactions.
+    The package also carries snapshot, stream layer, autopilot, transaction, varint
+    and platform-specific (32-bit, 64-bit, Linux) files that the code graph links
+    but whose bodies are outside the observed facts.'
+  message: wrote 9 requirement(s) and 7 interface(s) for third-party-openbao-internal-physical-raft
+  phase: Succeeded

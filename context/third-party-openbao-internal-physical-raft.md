@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the Raft physical storage package of the vendored OpenBao code has a written specification of its FSM and log-application contract: what an applied entry means, how transaction errors travel back through the log, how the Bolt-backed FSM is opened, how apply delay is injected for tests, and which size limits reject an entry before it is proposed. It anchors those rules to the concrete files and functions that implement them so later edits to deno-kcp's third_party subtree can be checked against behaviour rather than against memory of upstream OpenBao.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

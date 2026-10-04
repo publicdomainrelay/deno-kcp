@@ -2084,6 +2084,19 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.transaction-open` (MUST): "PostgreSQLBackend opens a read-write SQL transaction through BeginTx and a read-only one through BeginReadOnlyTx, each returning a physical.Transaction backed by PostgreSQLBackendTransaction over the same database client."
 - added `r.transaction-operations` (MUST): "PostgreSQLBackendTransaction applies Put, Delete, Get, List and ListPage on the open transaction, so reads see the transaction's own uncommitted writes and all statements run on one connection."
 
+### third-party-openbao-internal-physical-raft
+
+- intent: "" -> "This context exists so the Raft physical storage package of the vendored OpenBao code has a written specification of its FSM and log-application contract: what an applied entry means, how transaction errors travel back through the log, how the Bolt-backed FSM is opened, how apply delay is injected for tests, and which size limits reject an entry before it is proposed. It anchors those rules to the concrete files and functions that implement them so later edits to deno-kcp's third_party subtree can be checked against behaviour rather than against memory of upstream OpenBao."
+- added `r.apply-log-caps-lowest-active-index` (MUST): "applyLog must take the lowest active index from the command when set, otherwise from the FSM transaction tracker, and cap it with the raft applied index so transactions started concurrently are not missed, writing the capped value back onto the command before marshalling."
+- added `r.apply-log-chunks-large-commands` (MUST): "applyLog must apply commands whose marshalled size is at or below raftchunking.ChunkSize directly through raft.Apply, and route larger commands through the chunking path, so oversized values still replicate."
+- added `r.apply-log-enforces-size-limits` (MUST): "applyLog must reject a non-transaction command larger than maxEntrySize and a transaction larger than maxTransactionSize, both with an error carrying physical.ErrValueTooLarge plus the observed and maximum byte counts, and must record the entry size as a raft-storage/entry_size metric sample."
+- added `r.fsm-delay-injection` (SHOULD): "SetFSMDelay must install an FSM apply callback that sleeps for the given duration, giving tests a way to slow FSM application without changing apply logic."
+- added `r.fsm-entry-describes-key-and-value` (MUST): "An FSMEntry must render itself as "Key: %s. Value: %s", where Key is printed as-is and Value is printed hex encoded, so applied entries can be logged readably."
+- added `r.fsm-entry-identifies-transaction-errors` (MUST): "An FSMEntry must be recognisable as a transaction error marker by comparing its Key against the reserved fsmEntryTxErrorKey, so applyLog can distinguish a failed transaction result from ordinary data."
+- added `r.fsm-entry-reconstructs-transaction-error` (MUST): "AsTxError must rebuild the original error from the entry Value by splitting once on physical.ErrTransactionCommitFailure and rejoining the two halves around that sentinel with %w, and must return the whole value as a plain error when the sentinel does not appear, so callers can still match the commit failure with errors.Is."
+- added `r.new-fsm-opens-bolt-and-wires-chunking` (MUST): "NewFSM must build an FSM with the given path, logger and localID, default desiredSuffrage to "voter", install a chunking batching FSM backed by an FSMChunkStorage whose context is context.Background, seed fastTxnTracker from FsmTxnCommitIndexTracker, and under f.l open the Bolt database at the databaseFilename joined to path, returning a wrapped "failed to open bolt file" error on failure."
+- added `r.transaction-index-tracker-initialised` (MUST): "FsmTxnCommitIndexTracker must return a tracker whose source index and index modified maps are pre-sized from physical.DefaultParallelTransactions, so fast transaction commit tracking starts with the expected concurrency budget."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -2214,5 +2227,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-physical-inmem-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-physical-pebbledb-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-physical-postgresql-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-physical-raft-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-physical-raft-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-physical-raft-snapshot-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
