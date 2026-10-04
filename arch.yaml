@@ -54165,14 +54165,14 @@ system_contexts:
   - struct:efc12d86c49e3285916bf6e41a1d988b TransactionalInmemBackend@third_party/openbao/sdk/physical/inmem/inmem.go:54
   - struct:f0f24e705179292bd318eb8daf67f1e0 InmemOp@third_party/openbao/sdk/physical/inmem/inmem.go:100
   id: sc.third-party-openbao-sdk-physical-inmem
-  intent: This context exists to specify the in-memory implementation of the physical
-    storage interface that the OpenBao SDK exposes for tests and for embedders that
-    need a throwaway backend. It must provide the full physical.Backend contract (Put,
-    Get, Delete, List, ListPage), optional transactional semantics through TransactionalInmemBackend
-    and InmemBackendTransaction, deterministic failure injection so callers can exercise
-    error paths, and an HA layer (InmemHABackend and InmemLock) that simulates lock
-    contention in process. Read it when reasoning about what an in-memory backend
-    guarantees, how transactions stage and commit writes, or how the HA lock map behaves.
+  intent: 'This context specifies the in-memory physical backend that the OpenBao
+    SDK ships for tests and for embedders that need a throwaway store. It exists so
+    readers can tell exactly what the backend guarantees: the synchronized map behind
+    the physical.Backend contract, the delibrate failure injection used to exercise
+    error paths, the transaction overlay that stages writes until Commit, and the
+    in-process HA lock map that simulates lock contention without a real cluster.
+    Read it before relying on in-memory durability, transaction isolation, or HA lock
+    behavior.'
   interfaces:
   - file: third_party/openbao/sdk/physical/inmem/inmem.go
     kind: struct
@@ -54381,7 +54381,7 @@ system_contexts:
     text: 'InmemBackend must satisfy physical.Backend: Put, Get, Delete and List operate
       on an internally synchronized map, and each exported operation must delegate
       to its Internal counterpart (PutInternal, GetInternal, DeleteInternal, ListInternal)
-      so that tests and callers can bypass the failure switches.'
+      so tests and callers can bypass the failure switches.'
   - codeRefs:
     - function:92955b55e1abdc8afbaa395116e4e364
     - function:c019f4a22f383dc72eccdef8d9c0f0f2
@@ -54413,7 +54413,7 @@ system_contexts:
     text: InmemHABackend must embed the in-memory backend, implement LockWith to hand
       out an InmemLock for a key and value, implement HookInvalidate to register a
       physical.InvalidateFunc, and report lock count and HA state through LockMapSize
-      and HAEnabled.
+      and HAEnabled; NewInmemHA must build this backend.
   - codeRefs:
     - method:616da0007e46a4628fdb7f765fb27c67
     - method:d5e0cabb4753f261dcbcad8dd0676c07
@@ -54448,7 +54448,12 @@ system_contexts:
     text: InmemBackend.ListPage and the internal ListPaginatedInternal must return
       keys under prefix in sorted order, skipping keys at or before the after cursor
       and returning at most limit keys when limit is positive.
-  - id: r.test-coverage
+  - codeRefs:
+    - file:third_party/openbao/sdk/physical/inmem/cache_test.go
+    - file:third_party/openbao/sdk/physical/inmem/inmem_ha_test.go
+    - file:third_party/openbao/sdk/physical/inmem/inmem_test.go
+    - file:third_party/openbao/sdk/physical/inmem/physical_view_test.go
+    id: r.test-coverage
     level: SHOULD
     text: The package tests must exercise the plain backend, the HA backend and the
       cache and view layers, covering CRUD, paginated listing, failure injection and
