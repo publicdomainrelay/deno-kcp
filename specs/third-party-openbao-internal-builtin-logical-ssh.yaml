@@ -38,13 +38,13 @@ metadata:
   name: third-party-openbao-internal-builtin-logical-ssh
   namespace: default
 spec:
-  intent: The context exists so the repository can carry a vendored copy of the OpenBao
-    SSH secrets engine rather than depend on an external module. It defines the engine's
+  intent: The context exists so the repository carries a vendored copy of the OpenBao
+    SSH secrets engine instead of depending on an external module. It fixes the engine's
     factory entry point, its storage layout and migrations, and the wire-level path
     handlers that make up its API surface. The specification records which paths the
-    engine must register, how CA and issuer key material is stored and imported, and
-    how OTP credentials are salted and generated, so the vendored code can be reasoned
-    about and modified in place.
+    backend must register, how CA and issuer key material is stored and imported,
+    and how OTP credentials are salted and generated, so the vendored code can be
+    reasoned about and modified in place without re-reading upstream.
   interfaces:
   - file: third_party/openbao/internal/builtin/logical/ssh/backend.go
     kind: function
@@ -82,7 +82,7 @@ spec:
     - function:037f39ba0ac57e174e05ae9374e76e10
     id: r.backend-construction
     level: MUST
-    text: Backend builds the SSH secrets engine from the config, returning the concrete
+    text: Backend builds the SSH secrets engine from the config and returns the concrete
       *backend, and that backend registers the engine's path set and its storage helpers.
   - codeRefs:
     - file:third_party/openbao/internal/builtin/logical/ssh/backend_test.go
@@ -186,8 +186,9 @@ spec:
     - method:b711565dc7aa5d7abd2bc98af43d3910
     id: r.salt-accessor
     level: MUST
-    text: backend.Salt returns the salt.Salt bound to the context, and is the salting
-      function used by the OTP credential flow.
+    text: backend.Salt returns the salt.Salt bound to the backend, building it once
+      through salt.NewSalt with SHA256Hash and DefaultLocation when it is absent,
+      and it is the salting function used by the OTP credential flow.
   - codeRefs:
     - file:third_party/openbao/internal/builtin/logical/ssh/util.go
     id: r.shared-helpers

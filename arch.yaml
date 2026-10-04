@@ -12602,13 +12602,13 @@ system_contexts:
   - method:dd56bad67918a3338d35147c3aaac35d backend.GenerateOTPCredential@third_party/openbao/internal/builtin/logical/ssh/path_creds_create.go:188
   - method:fe22f086c35e63161dcc4274917101f5 backend.GenerateSaltedOTP@third_party/openbao/internal/builtin/logical/ssh/path_creds_create.go:174
   id: sc.third-party-openbao-internal-builtin-logical-ssh
-  intent: The context exists so the repository can carry a vendored copy of the OpenBao
-    SSH secrets engine rather than depend on an external module. It defines the engine's
+  intent: The context exists so the repository carries a vendored copy of the OpenBao
+    SSH secrets engine instead of depending on an external module. It fixes the engine's
     factory entry point, its storage layout and migrations, and the wire-level path
     handlers that make up its API surface. The specification records which paths the
-    engine must register, how CA and issuer key material is stored and imported, and
-    how OTP credentials are salted and generated, so the vendored code can be reasoned
-    about and modified in place.
+    backend must register, how CA and issuer key material is stored and imported,
+    and how OTP credentials are salted and generated, so the vendored code can be
+    reasoned about and modified in place without re-reading upstream.
   interfaces:
   - file: third_party/openbao/internal/builtin/logical/ssh/backend.go
     kind: function
@@ -12646,7 +12646,7 @@ system_contexts:
     - function:037f39ba0ac57e174e05ae9374e76e10
     id: r.backend-construction
     level: MUST
-    text: Backend builds the SSH secrets engine from the config, returning the concrete
+    text: Backend builds the SSH secrets engine from the config and returns the concrete
       *backend, and that backend registers the engine's path set and its storage helpers.
   - codeRefs:
     - file:third_party/openbao/internal/builtin/logical/ssh/backend_test.go
@@ -12750,8 +12750,9 @@ system_contexts:
     - method:b711565dc7aa5d7abd2bc98af43d3910
     id: r.salt-accessor
     level: MUST
-    text: backend.Salt returns the salt.Salt bound to the context, and is the salting
-      function used by the OTP credential flow.
+    text: backend.Salt returns the salt.Salt bound to the backend, building it once
+      through salt.NewSalt with SHA256Hash and DefaultLocation when it is absent,
+      and it is the salting function used by the OTP credential flow.
   - codeRefs:
     - file:third_party/openbao/internal/builtin/logical/ssh/util.go
     id: r.shared-helpers
@@ -12781,7 +12782,49 @@ system_contexts:
   codeRefIndex:
   - file:third_party/openbao/internal/builtin/logical/ssh/cmd/ssh/main.go main.go@third_party/openbao/internal/builtin/logical/ssh/cmd/ssh/main.go
   id: sc.third-party-openbao-internal-builtin-logical-ssh-cmd-ssh
+  intent: 'The file exists so the SSH logical backend can be built and run as a separate
+    OpenBao/Vault plugin process, negotiated over the plugin protocol rather than
+    compiled into the server. Its purpose is to wire the three pieces a plugin binary
+    needs: the SSH backend factory, the TLS material supplied by the host through
+    command-line flags, and the multiplexed plugin server, while keeping the legacy
+    `TLSProviderFunc` path so the plugin still works with host versions that do not
+    support plugin AutoMTLS.'
   name: third-party-openbao-internal-builtin-logical-ssh-cmd-ssh
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/ssh/cmd/ssh/main.go
+    id: r.configuration-surface
+    level: MUST
+    text: The entrypoint's configuration surface is the flag set returned by `api.PluginAPIClientMeta.FlagSet()`,
+      parsed from `os.Args[1:]` with `flag.ContinueOnError`; no environment variable
+      backs these flags. The flags are `-ca-cert` (string, default empty), `-ca-path`
+      (string, default empty), `-client-cert` (string, default empty), `-client-key`
+      (string, default empty), `-tls-server-name` (string, default empty), and `-tls-skip-verify`
+      (bool, default false). When every flag keeps its default, `GetTLSConfig` returns
+      nil and no custom TLS configuration is applied.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/ssh/cmd/ssh/main.go
+    id: r.exit-on-serve-failure
+    level: MUST
+    text: If `plugin.ServeMultiplex` returns an error, `main` must log it at error
+      level under the message `plugin shutting down` with the error attached, using
+      a freshly constructed `hclog` logger, and must terminate the process with exit
+      status 1.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/ssh/cmd/ssh/main.go
+    id: r.legacy-tls-provider
+    level: MUST
+    text: '`main` must build the plugin TLS provider from the parsed flag values via
+      `apiClientMeta.GetTLSConfig()` passed to `api.VaultPluginTLSProvider`, and must
+      set the result as `ServeOpts.TLSProviderFunc`, so the plugin maintains backwards
+      compatibility with host versions that do not support plugin AutoMTLS.'
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/ssh/cmd/ssh/main.go
+    id: r.serve-ssh-backend-as-plugin
+    level: MUST
+    text: '`main` must serve the SSH logical backend by calling `plugin.ServeMultiplex`
+      with `BackendFactoryFunc` set to `ssh.Factory`, so the backend is constructed
+      by the SSH package''s factory when the host requests it.'
   upstream: self
 - code:
   - third_party/openbao/internal/builtin/logical/totp/backend.go

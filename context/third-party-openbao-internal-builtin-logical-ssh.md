@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-The context exists so the repository can carry a vendored copy of the OpenBao SSH secrets engine rather than depend on an external module. It defines the engine's factory entry point, its storage layout and migrations, and the wire-level path handlers that make up its API surface. The specification records which paths the engine must register, how CA and issuer key material is stored and imported, and how OTP credentials are salted and generated, so the vendored code can be reasoned about and modified in place.
+The context exists so the repository carries a vendored copy of the OpenBao SSH secrets engine instead of depending on an external module. It fixes the engine's factory entry point, its storage layout and migrations, and the wire-level path handlers that make up its API surface. The specification records which paths the backend must register, how CA and issuer key material is stored and imported, and how OTP credentials are salted and generated, so the vendored code can be reasoned about and modified in place without re-reading upstream.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
