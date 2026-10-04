@@ -4674,6 +4674,24 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.merge-is-transient` (MAY): "The entity merge model may be used purely as a transient form object, since it defines only the three merge inputs and no relationships, timestamps or capability flags."
 - added `r.timestamps-readonly` (SHOULD): "Across the identity models the server-owned fields — `creationTime`, `lastUpdateTime`, `mountPath`, `mountType`, and the entity's `groupIds`, `directGroupIds` and `inheritedGroupIds` — are marked `readOnly` so the UI never submits them, and `metadata` consistently uses the kv editor while `policies` uses the yield editor as a section header."
 
+### third-party-openbao-ui-app-models-keymgmt
+
+- intent: "" -> "The context exists so the key-management screens of the OpenBao UI have a described data layer: one model that represents an individual key together with its version history and permission-gated actions, and one model that represents a key provider (Azure Key Vault, AWS KMS, Google Cloud KMS) together with its credentials and the keys it holds. Both models exist to give templates a uniform source for form fields, path construction and capability checks instead of hard-coding those details in routes and components."
+- added `r.key-api-paths` (MUST): "KeymgmtKeyModel builds its API paths from the model identity through keyPath, keysPath and keyProvidersPath, so routes and adapters address a key and the key-to-provider relation without constructing URL strings themselves."
+- added `r.key-attributes` (MUST): "KeymgmtKeyModel declares the attributes of a single key: name, backend, type, deletionAllowed, latestVersion, minEnabledVersion, versions, created, lastRotated, provider, distribution and icon, so templates read key state from the model rather than the raw API payload."
+- added `r.key-capabilities` (MUST): "KeymgmtKeyModel gates key actions on server-supplied capabilities: canCreate, canDelete, canEdit, canRead, canList and canListProviders each report the matching permission, and deletionAllowed further qualifies whether the key may be removed."
+- added `r.key-form-fields` (MUST): "KeymgmtKeyModel supplies separate field lists for the create, update and show views through createFields, updateFields and showFields, plus distFields for the distribution portion, so each view renders only the fields it needs."
+- added `r.key-type-options` (SHOULD): "KeymgmtKeyModel exposes the selectable key types through keyTypeOptions, so the create and update forms offer the supported key type choices instead of a free-form value."
+- added `r.key-version-state` (MUST): "KeymgmtKeyModel reports whether the key has any versions through hasVersions, and exposes latestVersion and minEnabledVersion as the version bounds used by the UI alongside the versions collection."
+- added `r.provider-api-paths` (MUST): "KeymgmtProviderModel builds its API paths through providerPath, providersPath and providerKeysPath, and identifies itself with the provider type and the provider id prefix, so provider and provider-key requests are addressed from the model."
+- added `r.provider-attributes` (MUST): "KeymgmtProviderModel extends the shared UI Model and declares the provider attributes backend, name, provider and keyCollection, carrying the labels and help text shown when a provider is created, with name and keyCollection documented as not editable after creation."
+- added `r.provider-capabilities` (MUST): "KeymgmtProviderModel gates provider actions on server-supplied capabilities: canCreate, canDelete, canEdit, canRead, canList, canListKeys and canCreateKeys each report the matching permission, so the UI hides provider and provider-key actions the caller may not perform."
+- added `r.provider-credential-fields` (MUST): "KeymgmtProviderModel derives its credential form from the provider type: credentialProps yields the credential properties for the selected provider and credentialFields turns them into form fields, with createFields supplying the field list for provider creation."
+- added `r.provider-fetch-keys` (MUST): "KeymgmtProviderModel.fetchKeys(page) loads the keys that belong to the provider into the tracked keys array, so the provider view can show and count its keys."
+- added `r.provider-show-fields` (MUST): "KeymgmtProviderModel.showFields expands the name and keyCollection attributes and inserts a block-type row for the provider type that renders typeName together with icon, and reports the number of keys held as a count of keys or key, falling back to None or a permission notice when the key list cannot be read."
+- added `r.provider-tracked-state` (MUST): "KeymgmtProviderModel tracks a keys array and a credentials value, where credentials is never returned by the API and is set only while creating or editing a provider, and keys holds the provider key collection under the provider id prefix."
+- added `r.provider-type-presentation` (MUST): "KeymgmtProviderModel maps the provider type value to its presentation: icon resolves azurekeyvault, awskms and gcpckms to the matching service icon, and typeName resolves the same values to the human-readable service names Azure Key Vault, AWS Key Management Service and Google Cloud Key Management Service."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5059,4 +5077,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-models-identity-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-models-keymgmt-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-models-kubernetes-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-models-oidc-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Pending |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

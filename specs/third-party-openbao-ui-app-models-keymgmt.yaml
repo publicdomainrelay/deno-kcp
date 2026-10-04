@@ -1,5 +1,7 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
+- class:1ba43a2c63c7bda832babbbb2347a2b7 KeymgmtKeyModel@third_party/openbao/ui/app/models/keymgmt/key.js:19
+- class:4d48baaa68ed5eee3e223da214246bb9 KeymgmtProviderModel@third_party/openbao/ui/app/models/keymgmt/provider.js:46
 - file:third_party/openbao/ui/app/models/keymgmt/key.js key.js@third_party/openbao/ui/app/models/keymgmt/key.js
 - file:third_party/openbao/ui/app/models/keymgmt/provider.js provider.js@third_party/openbao/ui/app/models/keymgmt/provider.js
 kind: SystemContext
@@ -7,5 +9,140 @@ metadata:
   name: third-party-openbao-ui-app-models-keymgmt
   namespace: default
 spec:
+  intent: 'The context exists so the key-management screens of the OpenBao UI have
+    a described data layer: one model that represents an individual key together with
+    its version history and permission-gated actions, and one model that represents
+    a key provider (Azure Key Vault, AWS KMS, Google Cloud KMS) together with its
+    credentials and the keys it holds. Both models exist to give templates a uniform
+    source for form fields, path construction and capability checks instead of hard-coding
+    those details in routes and components.'
+  interfaces:
+  - file: third_party/openbao/ui/app/models/keymgmt/key.js
+    kind: class
+    name: KeymgmtKeyModel
+    signature: KeymgmtKeyModel()
+  - file: third_party/openbao/ui/app/models/keymgmt/provider.js
+    kind: class
+    name: KeymgmtProviderModel
+    signature: KeymgmtProviderModel()
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - class:1ba43a2c63c7bda832babbbb2347a2b7
+    - file:third_party/openbao/ui/app/models/keymgmt/key.js
+    id: r.key-api-paths
+    level: MUST
+    text: KeymgmtKeyModel builds its API paths from the model identity through keyPath,
+      keysPath and keyProvidersPath, so routes and adapters address a key and the
+      key-to-provider relation without constructing URL strings themselves.
+  - codeRefs:
+    - class:1ba43a2c63c7bda832babbbb2347a2b7
+    - file:third_party/openbao/ui/app/models/keymgmt/key.js
+    id: r.key-attributes
+    level: MUST
+    text: 'KeymgmtKeyModel declares the attributes of a single key: name, backend,
+      type, deletionAllowed, latestVersion, minEnabledVersion, versions, created,
+      lastRotated, provider, distribution and icon, so templates read key state from
+      the model rather than the raw API payload.'
+  - codeRefs:
+    - class:1ba43a2c63c7bda832babbbb2347a2b7
+    - file:third_party/openbao/ui/app/models/keymgmt/key.js
+    id: r.key-capabilities
+    level: MUST
+    text: 'KeymgmtKeyModel gates key actions on server-supplied capabilities: canCreate,
+      canDelete, canEdit, canRead, canList and canListProviders each report the matching
+      permission, and deletionAllowed further qualifies whether the key may be removed.'
+  - codeRefs:
+    - class:1ba43a2c63c7bda832babbbb2347a2b7
+    - file:third_party/openbao/ui/app/models/keymgmt/key.js
+    id: r.key-form-fields
+    level: MUST
+    text: KeymgmtKeyModel supplies separate field lists for the create, update and
+      show views through createFields, updateFields and showFields, plus distFields
+      for the distribution portion, so each view renders only the fields it needs.
+  - codeRefs:
+    - class:1ba43a2c63c7bda832babbbb2347a2b7
+    - file:third_party/openbao/ui/app/models/keymgmt/key.js
+    id: r.key-type-options
+    level: SHOULD
+    text: KeymgmtKeyModel exposes the selectable key types through keyTypeOptions,
+      so the create and update forms offer the supported key type choices instead
+      of a free-form value.
+  - codeRefs:
+    - class:1ba43a2c63c7bda832babbbb2347a2b7
+    - file:third_party/openbao/ui/app/models/keymgmt/key.js
+    id: r.key-version-state
+    level: MUST
+    text: KeymgmtKeyModel reports whether the key has any versions through hasVersions,
+      and exposes latestVersion and minEnabledVersion as the version bounds used by
+      the UI alongside the versions collection.
+  - codeRefs:
+    - class:4d48baaa68ed5eee3e223da214246bb9
+    - file:third_party/openbao/ui/app/models/keymgmt/provider.js
+    id: r.provider-api-paths
+    level: MUST
+    text: KeymgmtProviderModel builds its API paths through providerPath, providersPath
+      and providerKeysPath, and identifies itself with the provider type and the provider
+      id prefix, so provider and provider-key requests are addressed from the model.
+  - codeRefs:
+    - class:4d48baaa68ed5eee3e223da214246bb9
+    - file:third_party/openbao/ui/app/models/keymgmt/provider.js
+    id: r.provider-attributes
+    level: MUST
+    text: KeymgmtProviderModel extends the shared UI Model and declares the provider
+      attributes backend, name, provider and keyCollection, carrying the labels and
+      help text shown when a provider is created, with name and keyCollection documented
+      as not editable after creation.
+  - codeRefs:
+    - class:4d48baaa68ed5eee3e223da214246bb9
+    - file:third_party/openbao/ui/app/models/keymgmt/provider.js
+    id: r.provider-capabilities
+    level: MUST
+    text: 'KeymgmtProviderModel gates provider actions on server-supplied capabilities:
+      canCreate, canDelete, canEdit, canRead, canList, canListKeys and canCreateKeys
+      each report the matching permission, so the UI hides provider and provider-key
+      actions the caller may not perform.'
+  - codeRefs:
+    - class:4d48baaa68ed5eee3e223da214246bb9
+    - file:third_party/openbao/ui/app/models/keymgmt/provider.js
+    id: r.provider-credential-fields
+    level: MUST
+    text: 'KeymgmtProviderModel derives its credential form from the provider type:
+      credentialProps yields the credential properties for the selected provider and
+      credentialFields turns them into form fields, with createFields supplying the
+      field list for provider creation.'
+  - codeRefs:
+    - class:4d48baaa68ed5eee3e223da214246bb9
+    - file:third_party/openbao/ui/app/models/keymgmt/provider.js
+    id: r.provider-fetch-keys
+    level: MUST
+    text: KeymgmtProviderModel.fetchKeys(page) loads the keys that belong to the provider
+      into the tracked keys array, so the provider view can show and count its keys.
+  - codeRefs:
+    - class:4d48baaa68ed5eee3e223da214246bb9
+    - file:third_party/openbao/ui/app/models/keymgmt/provider.js
+    id: r.provider-show-fields
+    level: MUST
+    text: KeymgmtProviderModel.showFields expands the name and keyCollection attributes
+      and inserts a block-type row for the provider type that renders typeName together
+      with icon, and reports the number of keys held as a count of keys or key, falling
+      back to None or a permission notice when the key list cannot be read.
+  - codeRefs:
+    - class:4d48baaa68ed5eee3e223da214246bb9
+    - file:third_party/openbao/ui/app/models/keymgmt/provider.js
+    id: r.provider-tracked-state
+    level: MUST
+    text: KeymgmtProviderModel tracks a keys array and a credentials value, where
+      credentials is never returned by the API and is set only while creating or editing
+      a provider, and keys holds the provider key collection under the provider id
+      prefix.
+  - codeRefs:
+    - class:4d48baaa68ed5eee3e223da214246bb9
+    - file:third_party/openbao/ui/app/models/keymgmt/provider.js
+    id: r.provider-type-presentation
+    level: MUST
+    text: 'KeymgmtProviderModel maps the provider type value to its presentation:
+      icon resolves azurekeyvault, awskms and gcpckms to the matching service icon,
+      and typeName resolves the same values to the human-readable service names Azure
+      Key Vault, AWS Key Management Service and Google Cloud Key Management Service.'
   upstream: self

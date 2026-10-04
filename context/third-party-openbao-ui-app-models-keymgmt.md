@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so the key-management screens of the OpenBao UI have a described data layer: one model that represents an individual key together with its version history and permission-gated actions, and one model that represents a key provider (Azure Key Vault, AWS KMS, Google Cloud KMS) together with its credentials and the keys it holds. Both models exist to give templates a uniform source for form fields, path construction and capability checks instead of hard-coding those details in routes and components.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
