@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-The context exists to pin down the behaviour of the OpenBao UI console component layer so that the vendored third-party UI is described by the code that is actually present rather than by assumption. It records which modules make up the console, what the one observed export does to its input, and which integration test covers it, so later work on the vendored tree can tell deliberate behaviour from accidental behaviour before changing anything.
+This context pins down the behaviour of the OpenBao UI console component layer so that the vendored third-party UI is described by the code that is actually present rather than by assumption. It records which modules make up the console, what the one observed export does to its input, and which test covers it, so later work on the vendored tree can separate deliberate behaviour from accidental behaviour before changing anything.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

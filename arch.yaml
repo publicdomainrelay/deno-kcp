@@ -58832,12 +58832,12 @@ system_contexts:
   - file:third_party/openbao/ui/app/components/console/ui-panel.js ui-panel.js@third_party/openbao/ui/app/components/console/ui-panel.js
   - function:1773dcc409cb53c5ac648ea78b8777b8 stringifyObjectValues@third_party/openbao/ui/app/components/console/log-object.js:11
   id: sc.third-party-openbao-ui-app-components-console
-  intent: The context exists to pin down the behaviour of the OpenBao UI console component
+  intent: This context pins down the behaviour of the OpenBao UI console component
     layer so that the vendored third-party UI is described by the code that is actually
     present rather than by assumption. It records which modules make up the console,
-    what the one observed export does to its input, and which integration test covers
-    it, so later work on the vendored tree can tell deliberate behaviour from accidental
-    behaviour before changing anything.
+    what the one observed export does to its input, and which test covers it, so later
+    work on the vendored tree can separate deliberate behaviour from accidental behaviour
+    before changing anything.
   interfaces:
   - file: third_party/openbao/ui/app/components/console/log-object.js
     kind: function
@@ -58859,12 +58859,13 @@ system_contexts:
       log-json.js, log-list.js, log-object.js, log-text.js, output-log.js and ui-panel.js,
       each responsible for its named part of rendering the console and its log output.
   - codeRefs:
+    - file:third_party/openbao/ui/app/components/console/log-object.js
     - function:1773dcc409cb53c5ac648ea78b8777b8
     id: r.in-place-mutation
     level: MUST
-    text: stringifyObjectValues MUST mutate the caller's data object in place and
-      MUST NOT return a new object; the stringified values are assigned back onto
-      the same keys.
+    text: 'stringifyObjectValues MUST mutate the caller''s data object in place and
+      MUST NOT return a new object: each converted value is assigned back onto the
+      same key of the same object, and the function returns nothing.'
   - codeRefs:
     - file:third_party/openbao/ui/app/components/console/log-object.js
     - function:1773dcc409cb53c5ac648ea78b8777b8
@@ -58890,8 +58891,9 @@ system_contexts:
     id: r.stringify-object-values
     level: MUST
     text: log-object.js MUST export stringifyObjectValues(data). It iterates the own
-      enumerable keys of data, and for each key replaces the value with JSON.stringify(value)
-      when typeof value is not 'string', leaving string values untouched.
+      enumerable keys of data with Object.keys, and for each key replaces the value
+      with JSON.stringify(value) when typeof value is not 'string', leaving string
+      values untouched.
   - codeRefs:
     - file:third_party/openbao/ui/app/components/console/command-input.js
     - file:third_party/openbao/ui/app/components/console/output-log.js

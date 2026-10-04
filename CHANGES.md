@@ -4028,12 +4028,12 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 
 ### third-party-openbao-ui-app-components-console
 
-- intent: "" -> "The context exists to pin down the behaviour of the OpenBao UI console component layer so that the vendored third-party UI is described by the code that is actually present rather than by assumption. It records which modules make up the console, what the one observed export does to its input, and which integration test covers it, so later work on the vendored tree can tell deliberate behaviour from accidental behaviour before changing anything."
+- intent: "" -> "This context pins down the behaviour of the OpenBao UI console component layer so that the vendored third-party UI is described by the code that is actually present rather than by assumption. It records which modules make up the console, what the one observed export does to its input, and which test covers it, so later work on the vendored tree can separate deliberate behaviour from accidental behaviour before changing anything."
 - added `r.console-module-set` (MUST): "The console component directory MUST contain the seven modules command-input.js, log-json.js, log-list.js, log-object.js, log-text.js, output-log.js and ui-panel.js, each responsible for its named part of rendering the console and its log output."
-- added `r.in-place-mutation` (MUST): "stringifyObjectValues MUST mutate the caller's data object in place and MUST NOT return a new object; the stringified values are assigned back onto the same keys."
+- added `r.in-place-mutation` (MUST): "stringifyObjectValues MUST mutate the caller's data object in place and MUST NOT return a new object: each converted value is assigned back onto the same key of the same object, and the function returns nothing."
 - added `r.log-object-calls-helper` (SHOULD): "log-object.js SHOULD use stringifyObjectValues on the log data it renders, so that non-string values reaching the object log view are shown as JSON text instead of raw objects."
 - added `r.output-log-appends` (MAY): "output-log.js MAY render the accumulated console output, with the per-type log components (log-json, log-list, log-object, log-text) handling the individual entries that the output log collects."
-- added `r.stringify-object-values` (MUST): "log-object.js MUST export stringifyObjectValues(data). It iterates the own enumerable keys of data, and for each key replaces the value with JSON.stringify(value) when typeof value is not 'string', leaving string values untouched."
+- added `r.stringify-object-values` (MUST): "log-object.js MUST export stringifyObjectValues(data). It iterates the own enumerable keys of data with Object.keys, and for each key replaces the value with JSON.stringify(value) when typeof value is not 'string', leaving string values untouched."
 - added `r.ui-panel-contains` (MAY): "ui-panel.js MAY act as the container that holds command-input.js and output-log.js together in the console panel."
 
 ## Realization
@@ -4345,5 +4345,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-components-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-components-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-components-console-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-components-console-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-components-console-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
