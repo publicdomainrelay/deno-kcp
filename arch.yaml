@@ -73203,14 +73203,20 @@ system_contexts:
   codeRefIndex:
   - file:third_party/openbao/ui/lib/open-api-explorer/index.js index.js@third_party/openbao/ui/lib/open-api-explorer/index.js
   id: sc.third-party-openbao-ui-lib-open-api-explorer
-  intent: The context exists so the vendored OpenBao API documentation UI can be built
-    and lazy-loaded as an Ember engine inside the host application. It declares the
-    engine's identity, its build-time Babel transform via ember-auto-import, and the
-    CSS dependency needed by the Swagger UI page, while deliberately deferring JavaScript
-    dependencies to a dynamic `import()` inside the swagger-ui.js component so they
-    are not pulled into vendor.js. The file carries the original HashiCorp MPL-2.0
-    header and an eslint-disable for leaking state in Ember objects, marking it as
-    third-party code imported into this repository rather than code authored here.
+  intent: 'The context exists so the vendored OpenBao API documentation UI can be
+    built and mounted as a lazy-loaded Ember engine inside the host application. It
+    pins the engine''s identity and the build configuration the engine depends on:
+    the ember-auto-import Babel transform that rewrites imports during the engine''s
+    build, the Swagger UI stylesheet import that places that CSS into the engine''s
+    own lazy-loaded bundle rather than the host application''s vendor CSS, and the
+    `lazyLoading.enabled` switch that keeps the engine''s assets off the initial payload
+    until a host route enters it. It also records a deliberate omission: Swagger UI
+    JavaScript is not imported in the `included()` hook because doing so would put
+    those dependencies into `vendor.js`; the JavaScript is lazy-loaded instead through
+    a dynamic `import()` in the swagger-ui.js component. Because the file is vendored
+    third-party code rather than code authored in this repository, the context also
+    preserves its HashiCorp MPL-2.0 provenance header and the eslint-disable that
+    exempts Ember object state initialization from the host lint rules.'
   name: third-party-openbao-ui-lib-open-api-explorer
   requirements:
   - codeRefs:
@@ -73224,23 +73230,23 @@ system_contexts:
     - file:third_party/openbao/ui/lib/open-api-explorer/index.js
     id: r.engine-export
     level: MUST
-    text: The module must export a single Ember engine class produced by `EngineAddon.extend`,
-      with the engine `name` set to `open-api-explorer`, so the host application can
-      mount it as a lazy-loaded engine.
+    text: The module must export a single Ember engine class produced by `EngineAddon.extend`
+      (from `ember-engines/lib/engine-addon`), with the engine `name` set to `open-api-explorer`,
+      so the host application can mount it as a lazy-loaded engine.
   - codeRefs:
     - file:third_party/openbao/ui/lib/open-api-explorer/index.js
     id: r.included-excludes-swagger-js
     level: MUST
     text: The `included()` hook must not import Swagger UI JavaScript; the comment
-      states the JavaScript dependencies are instead loaded through a dynamic `import()`
-      in the swagger-ui.js component, because importing them here would put them into
-      vendor.js.
+      in the hook states that importing the JS dependencies here leads to their inclusion
+      in `vendor.js`, so they are instead lazy-loaded through a dynamic `import()`
+      in the swagger-ui.js component.
   - codeRefs:
     - file:third_party/openbao/ui/lib/open-api-explorer/index.js
     id: r.included-imports-swagger-css
     level: MUST
-    text: The `included()` hook must call `this._super.included` when that parent
-      hook exists, then call `this.import('node_modules/swagger-ui-dist/swagger-ui.css')`,
+    text: The `included()` hook must call `this._super.included` (applied to `this`
+      with `arguments`) when that parent hook exists, then call `this.import('node_modules/swagger-ui-dist/swagger-ui.css')`,
       placing the Swagger UI stylesheet in the engine's lazy-loaded CSS bundle rather
       than the host application's vendor CSS.
   - codeRefs:
