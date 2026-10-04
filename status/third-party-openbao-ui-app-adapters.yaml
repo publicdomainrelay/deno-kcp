@@ -1,15 +1,77 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: KeymgmtKeyAdapter, MfaMethodAdapter, MfaSetupAdapter, NamedPathAdapter,
+    NamespaceAdapter'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/ui/app/adapters/application.js
+  - third_party/openbao/ui/app/adapters/auth-method.js
+  - third_party/openbao/ui/app/adapters/aws-credential.js
+  - third_party/openbao/ui/app/adapters/capabilities.js
+  - third_party/openbao/ui/app/adapters/cluster.js
+  - third_party/openbao/ui/app/adapters/console.js
+  - third_party/openbao/ui/app/adapters/generated-item-list.js
+  - third_party/openbao/ui/app/adapters/lease.js
+  - third_party/openbao/ui/app/adapters/mfa-login-enforcement.js
+  - third_party/openbao/ui/app/adapters/mfa-method.js
+  - third_party/openbao/ui/app/adapters/mfa-setup.js
+  - third_party/openbao/ui/app/adapters/named-path.js
+  - third_party/openbao/ui/app/adapters/namespace.js
+  - third_party/openbao/ui/app/adapters/node.js
+  - third_party/openbao/ui/app/adapters/permissions.js
+  - third_party/openbao/ui/app/adapters/policy.js
+  - third_party/openbao/ui/app/adapters/raft-join.js
+  - third_party/openbao/ui/app/adapters/role-aws.js
+  - third_party/openbao/ui/app/adapters/role-jwt.js
+  - third_party/openbao/ui/app/adapters/role-ssh.js
+  - third_party/openbao/ui/app/adapters/secret-engine.js
+  - third_party/openbao/ui/app/adapters/secret-v2-version.js
+  - third_party/openbao/ui/app/adapters/secret-v2.js
+  - third_party/openbao/ui/app/adapters/secret.js
+  - third_party/openbao/ui/app/adapters/server.js
+  - third_party/openbao/ui/app/adapters/ssh-otp-credential.js
+  - third_party/openbao/ui/app/adapters/ssh-sign.js
+  - third_party/openbao/ui/app/adapters/ssh.js
+  - third_party/openbao/ui/app/adapters/tools.js
+  - third_party/openbao/ui/app/adapters/transit-key.js
+  fingerprint: 064305c9c99fc3296a6c1cfb65ef4deb17226c1d95a3aa8f78c120d148a8c0ae
+  interfaces:
+  - codegraphId: class:9af0b9aa7c59b049942568160f238647
+    file: third_party/openbao/ui/app/adapters/mfa-login-enforcement.js
+    kind: class
+    line: 8
+    name: KeymgmtKeyAdapter
+  - codegraphId: class:ef171d6401e73ade3c85cb1d64da5da2
+    file: third_party/openbao/ui/app/adapters/mfa-method.js
+    kind: class
+    line: 8
+    name: MfaMethodAdapter
+  - codegraphId: class:ad7d2caad4e670533a67733f34b30743
+    file: third_party/openbao/ui/app/adapters/mfa-setup.js
+    kind: class
+    line: 8
+    name: MfaSetupAdapter
+  - codegraphId: class:6b10cfbc89c71d4a5b55c8bd178c37a5
+    file: third_party/openbao/ui/app/adapters/named-path.js
+    kind: class
+    line: 12
+    name: NamedPathAdapter
+  - codegraphId: class:27606a943785b17d2d3432ad7b9aedd5
+    file: third_party/openbao/ui/app/adapters/namespace.js
+    kind: class
+    line: 8
+    name: NamespaceAdapter
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: f117c898984457aa1c427d28714d2d15f2b5ad2b7f035dd2cea31114fbbf55a0
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 064305c9c99fc3296a6c1cfb65ef4deb17226c1d95a3aa8f78c120d148a8c0ae
