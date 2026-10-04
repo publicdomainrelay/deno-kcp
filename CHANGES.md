@@ -2019,6 +2019,20 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.ui-asset-wrapper` (SHOULD): "UIAssetWrapper serves the web UI file set; its Open method returns an http.File for a requested asset name, backed by embedded assets when the embed build tag is on and by assets_stub.go otherwise."
 - added `r.wrap-http-server-handler` (MUST): "WrapHttpServerHandler takes an http.Handler plus a listener configuration and returns the handler to serve, applying the listener-derived wrapping (transport, TLS, proxy and similar concerns) that the configured listener requires."
 
+### third-party-openbao-internal-physical-inmem
+
+- intent: "" -> "This context exists so the deno-kcp repository carries a self-contained, dependency-free physical storage backend for OpenBao tests and local runs, without touching a real disk or network store. It is the transactional and HA-capable in-memory implementation: tests can inject failures per operation, drive transactions and roll them back, and take advisory locks that simulate HA leader election, all with deterministic in-process state. Read it to learn what guarantees the in-memory backend offers before you rely on it as a stand-in for a durable backend, and to see exactly which failure and locking knobs tests can turn."
+- added `r.backend-inmem-store` (MUST): "InmemBackend stores physical entries in an in-memory map guarded by an RWMutex and serves the physical.Backend operations Put, Get, Delete, List and ListPage; Get on a missing key returns a nil entry, and List returns the keys under a prefix."
+- added `r.constructor-split` (MUST): "NewDirectInmem returns a physical.Backend that is a plain InmemBackend with no transaction support, while NewInmem returns a physical.Backend backed by TransactionalInmemBackend, so callers choose whether transactional semantics are available."
+- added `r.failure-injection` (MUST): "FailPut, FailGet, FailDelete and FailList flip a per-operation failure flag so the matching call returns an error instead of touching the store, letting tests exercise error paths deterministically."
+- added `r.ha-backend` (MUST): "NewInmemHA returns a physical.Backend whose InmemHABackend embeds InmemBackend for storage and additionally implements the HA surface: LockWith hands out an advisory lock, LockMapSize reports how many locks are held, HookInvalidate registers an invalidation callback, and HAEnabled reports true."
+- added `r.ha-put-delete-invalidate` (MUST): "InmemHABackend.Put stores the entry and InmemHABackend.Delete removes the key, each delegating to the embedded in-memory backend and then notifying the registered invalidation hook for that key so lock holders learn their state changed."
+- added `r.list-page-ordering` (MUST): "ListPage returns the sorted keys under a prefix that fall after the given after key, truncated to limit entries, so callers can walk a keyspace in stable pages."
+- added `r.lock-semantics` (MUST): "InmemLock.Lock acquires the named lock and returns a channel closed when the lock is lost, blocking until acquisition or until stopCh closes; Unlock releases the lock and removes it from the lock map; Value reports whether the lock is currently held and the value it was acquired with."
+- added `r.op-name` (MUST): "OpName maps each in-memory operation constant (put, delete, list, list-page, get, begin-tx, begin-ro-tx, commit-tx, rollback-tx) to its lowercase name and returns "unknown" for any other value, and InmemOp carries the operation type, transaction type, arguments and results of a single traced operation."
+- added `r.tests-cover-backend` (SHOULD): "The package tests exercise the in-memory backend behaviours, the HA locking behaviours and the physical view over the backend, so changes to storage, transaction and lock semantics are caught by go test."
+- added `r.transactions` (MUST): "TransactionalInmemBackend.BeginTx and BeginReadOnlyTx return an InmemBackendTransaction that stages writes against the parent store; Commit applies the staged operations and Rollback discards them without changing the store."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -2145,4 +2159,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-http-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-physical-crosstest-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Failed |  | 0 | - |
 | third-party-openbao-internal-physical-crosstest-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-internal-physical-inmem-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-physical-inmem-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-internal-physical-inmem-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Running |  | 0 | - |

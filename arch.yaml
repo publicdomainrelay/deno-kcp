@@ -29587,8 +29587,302 @@ system_contexts:
   - file:third_party/openbao/internal/physical/inmem/inmem_ha_test.go inmem_ha_test.go@third_party/openbao/internal/physical/inmem/inmem_ha_test.go
   - file:third_party/openbao/internal/physical/inmem/inmem_test.go inmem_test.go@third_party/openbao/internal/physical/inmem/inmem_test.go
   - file:third_party/openbao/internal/physical/inmem/physical_view_test.go physical_view_test.go@third_party/openbao/internal/physical/inmem/physical_view_test.go
+  - function:01e86591f7c08850e492d37a5e08dd52 NewDirectInmem@third_party/openbao/internal/physical/inmem/inmem.go:115
+  - function:3d2e06bf2d872877c88d4efd08239508 OpName@third_party/openbao/internal/physical/inmem/inmem.go:68
+  - function:4c046da44025634cd7e25283ce278dcc NewInmem@third_party/openbao/internal/physical/inmem/inmem.go:146
+  - function:b235eded961c4abe0863e2855edea225 NewInmemHA@third_party/openbao/internal/physical/inmem/inmem_ha.go:26
+  - method:09f4611c045b886c99193978e5fffc60 TransactionalInmemBackend.BeginReadOnlyTx@third_party/openbao/internal/physical/inmem/inmem.go:237
+  - method:187ff6f6b3a871a5185e2aa1b6cd94b8 InmemLock.Value@third_party/openbao/internal/physical/inmem/inmem_ha.go:150
+  - method:1e31f66440b30209f4f5a9e6726329ce InmemBackend.Put@third_party/openbao/internal/physical/inmem/inmem.go:162
+  - method:305ccbdfd456a4b1edc8fab49f0be2ec InmemHABackend.LockWith@third_party/openbao/internal/physical/inmem/inmem_ha.go:43
+  - method:3c04295126306cdfd876bc07e3908a2e InmemBackend.Get@third_party/openbao/internal/physical/inmem/inmem.go:179
+  - method:43c21050c4a345d827af6367dc7a44cf InmemBackend.List@third_party/openbao/internal/physical/inmem/inmem.go:214
+  - method:499e07b68ff4edbe764e64d9fcb1f28b InmemLock.Lock@third_party/openbao/internal/physical/inmem/inmem_ha.go:82
+  - method:4ead8adefd1962fb73444884ef8bc234 InmemBackend.FailGet@third_party/openbao/internal/physical/inmem/inmem.go:191
+  - method:5038c7c5d7c5db20d739315dc4cd59f1 InmemBackend.ListPage@third_party/openbao/internal/physical/inmem/inmem.go:221
+  - method:599cf2c9ab84549195412caf4c4bb3a8 InmemBackendTransaction.Rollback@third_party/openbao/internal/physical/inmem/inmem.go:278
+  - method:620d69cb359873a4adafa368fcd4ab69 InmemBackend.FailPut@third_party/openbao/internal/physical/inmem/inmem.go:174
+  - method:72fb45d6d398553c65fc86ed64c4007c InmemHABackend.HookInvalidate@third_party/openbao/internal/physical/inmem/inmem_ha.go:52
+  - method:7b7b36e795b1775fa162674183f074b1 InmemHABackend.Delete@third_party/openbao/internal/physical/inmem/inmem_ha.go:176
+  - method:7c18f4d6c4f9da42655ac6302f0f3e75 InmemLock.Unlock@third_party/openbao/internal/physical/inmem/inmem_ha.go:131
+  - method:8d276904195680b59b907b4fad500fcc InmemHABackend.HAEnabled@third_party/openbao/internal/physical/inmem/inmem_ha.go:67
+  - method:aebafecb8fd45638f9e01ac42bcb48e6 InmemBackend.FailDelete@third_party/openbao/internal/physical/inmem/inmem.go:208
+  - method:ba9e633c846c0ed09e884c1d09bb6648 InmemBackend.Delete@third_party/openbao/internal/physical/inmem/inmem.go:196
+  - method:bdd3cf66911c67d4a387fc651363cbf5 InmemBackend.FailList@third_party/openbao/internal/physical/inmem/inmem.go:233
+  - method:ccae56ea1b2267afd14f3f6b8e9882d0 InmemHABackend.LockMapSize@third_party/openbao/internal/physical/inmem/inmem_ha.go:61
+  - method:d85856c01a2035e79927288ebd527cd5 TransactionalInmemBackend.BeginTx@third_party/openbao/internal/physical/inmem/inmem.go:246
+  - method:e0db7897f317070fb2c3a4b7c30828e5 InmemHABackend.Put@third_party/openbao/internal/physical/inmem/inmem_ha.go:167
+  - method:e411a886bada2ea8e9ea5fa106f9bc23 InmemBackendTransaction.Commit@third_party/openbao/internal/physical/inmem/inmem.go:274
+  - struct:1d80bbbee5698efde6ed532fa3090786 InmemOp@third_party/openbao/internal/physical/inmem/inmem.go:93
+  - struct:2d6b4ee3aec00b51abb859f5c1e03bed InmemBackend@third_party/openbao/internal/physical/inmem/inmem.go:35
+  - struct:4347fdb9d9109c660bbfc2ea4ab407f0 InmemBackendTransaction@third_party/openbao/internal/physical/inmem/inmem.go:108
+  - struct:5d362beb6e121438856c6710c4b52f89 InmemLock@third_party/openbao/internal/physical/inmem/inmem_ha.go:72
+  - struct:679b872bd8d4cddf89e45879d844de42 InmemHABackend@third_party/openbao/internal/physical/inmem/inmem_ha.go:15
+  - struct:df217a5c171aa38af804e782d2d8a41a TransactionalInmemBackend@third_party/openbao/internal/physical/inmem/inmem.go:49
   id: sc.third-party-openbao-internal-physical-inmem
+  intent: 'This context exists so the deno-kcp repository carries a self-contained,
+    dependency-free physical storage backend for OpenBao tests and local runs, without
+    touching a real disk or network store. It is the transactional and HA-capable
+    in-memory implementation: tests can inject failures per operation, drive transactions
+    and roll them back, and take advisory locks that simulate HA leader election,
+    all with deterministic in-process state. Read it to learn what guarantees the
+    in-memory backend offers before you rely on it as a stand-in for a durable backend,
+    and to see exactly which failure and locking knobs tests can turn.'
+  interfaces:
+  - file: third_party/openbao/internal/physical/inmem/inmem.go
+    kind: struct
+    name: InmemBackend
+    signature: type InmemBackend struct
+  - file: third_party/openbao/internal/physical/inmem/inmem.go
+    kind: method
+    name: InmemBackend.Delete
+    signature: func (b *InmemBackend) Delete(ctx context.Context, key string) error
+  - file: third_party/openbao/internal/physical/inmem/inmem.go
+    kind: method
+    name: InmemBackend.FailDelete
+    signature: func (b *InmemBackend) FailDelete(fail bool)
+  - file: third_party/openbao/internal/physical/inmem/inmem.go
+    kind: method
+    name: InmemBackend.FailGet
+    signature: func (b *InmemBackend) FailGet(fail bool)
+  - file: third_party/openbao/internal/physical/inmem/inmem.go
+    kind: method
+    name: InmemBackend.FailList
+    signature: func (b *InmemBackend) FailList(fail bool)
+  - file: third_party/openbao/internal/physical/inmem/inmem.go
+    kind: method
+    name: InmemBackend.FailPut
+    signature: func (b *InmemBackend) FailPut(fail bool)
+  - file: third_party/openbao/internal/physical/inmem/inmem.go
+    kind: method
+    name: InmemBackend.Get
+    signature: func (b *InmemBackend) Get(ctx context.Context, key string) (*physical.Entry,
+      error)
+  - file: third_party/openbao/internal/physical/inmem/inmem.go
+    kind: method
+    name: InmemBackend.List
+    signature: func (b *InmemBackend) List(ctx context.Context, prefix string) ([]string,
+      error)
+  - file: third_party/openbao/internal/physical/inmem/inmem.go
+    kind: method
+    name: InmemBackend.ListPage
+    signature: func (b *InmemBackend) ListPage(ctx context.Context, prefix string,
+      after string, limit int) ([]string, error)
+  - file: third_party/openbao/internal/physical/inmem/inmem.go
+    kind: method
+    name: InmemBackend.Put
+    signature: func (b *InmemBackend) Put(ctx context.Context, entry *physical.Entry)
+      error
+  - file: third_party/openbao/internal/physical/inmem/inmem.go
+    kind: struct
+    name: InmemBackendTransaction
+    signature: type InmemBackendTransaction struct
+  - file: third_party/openbao/internal/physical/inmem/inmem.go
+    kind: method
+    name: InmemBackendTransaction.Commit
+    signature: func (t *InmemBackendTransaction) Commit(ctx context.Context) error
+  - file: third_party/openbao/internal/physical/inmem/inmem.go
+    kind: method
+    name: InmemBackendTransaction.Rollback
+    signature: func (t *InmemBackendTransaction) Rollback(ctx context.Context) error
+  - file: third_party/openbao/internal/physical/inmem/inmem_ha.go
+    kind: struct
+    name: InmemHABackend
+    signature: type InmemHABackend struct
+  - file: third_party/openbao/internal/physical/inmem/inmem_ha.go
+    kind: method
+    name: InmemHABackend.Delete
+    signature: func (b *InmemHABackend) Delete(ctx context.Context, key string) error
+  - file: third_party/openbao/internal/physical/inmem/inmem_ha.go
+    kind: method
+    name: InmemHABackend.HAEnabled
+    signature: func (b *InmemHABackend) HAEnabled() bool
+  - file: third_party/openbao/internal/physical/inmem/inmem_ha.go
+    kind: method
+    name: InmemHABackend.HookInvalidate
+    signature: func (b *InmemHABackend) HookInvalidate(hook physical.InvalidateFunc)
+  - file: third_party/openbao/internal/physical/inmem/inmem_ha.go
+    kind: method
+    name: InmemHABackend.LockMapSize
+    signature: func (b *InmemHABackend) LockMapSize() int
+  - file: third_party/openbao/internal/physical/inmem/inmem_ha.go
+    kind: method
+    name: InmemHABackend.LockWith
+    signature: func (b *InmemHABackend) LockWith(key, value string) (physical.Lock,
+      error)
+  - file: third_party/openbao/internal/physical/inmem/inmem_ha.go
+    kind: method
+    name: InmemHABackend.Put
+    signature: func (b *InmemHABackend) Put(ctx context.Context, entry *physical.Entry)
+      error
+  - file: third_party/openbao/internal/physical/inmem/inmem_ha.go
+    kind: struct
+    name: InmemLock
+    signature: type InmemLock struct
+  - file: third_party/openbao/internal/physical/inmem/inmem_ha.go
+    kind: method
+    name: InmemLock.Lock
+    signature: func (l *InmemLock) Lock(stopCh <-chan struct{}) (<-chan struct{},
+      error)
+  - file: third_party/openbao/internal/physical/inmem/inmem_ha.go
+    kind: method
+    name: InmemLock.Unlock
+    signature: func (l *InmemLock) Unlock() error
+  - file: third_party/openbao/internal/physical/inmem/inmem_ha.go
+    kind: method
+    name: InmemLock.Value
+    signature: func (l *InmemLock) Value() (bool, string, error)
+  - file: third_party/openbao/internal/physical/inmem/inmem.go
+    kind: struct
+    name: InmemOp
+    signature: type InmemOp struct
+  - file: third_party/openbao/internal/physical/inmem/inmem.go
+    kind: function
+    name: NewDirectInmem
+    signature: func NewDirectInmem(conf map[string]string, logger log.Logger) (physical.Backend,
+      error)
+  - file: third_party/openbao/internal/physical/inmem/inmem.go
+    kind: function
+    name: NewInmem
+    signature: func NewInmem(conf map[string]string, logger log.Logger) (physical.Backend,
+      error)
+  - file: third_party/openbao/internal/physical/inmem/inmem_ha.go
+    kind: function
+    name: NewInmemHA
+    signature: func NewInmemHA(_ map[string]string, logger log.Logger) (physical.Backend,
+      error)
+  - file: third_party/openbao/internal/physical/inmem/inmem.go
+    kind: function
+    name: OpName
+    signature: func OpName(op int) string
+  - file: third_party/openbao/internal/physical/inmem/inmem.go
+    kind: struct
+    name: TransactionalInmemBackend
+    signature: type TransactionalInmemBackend struct
+  - file: third_party/openbao/internal/physical/inmem/inmem.go
+    kind: method
+    name: TransactionalInmemBackend.BeginReadOnlyTx
+    signature: func (b *TransactionalInmemBackend) BeginReadOnlyTx(ctx context.Context)
+      (physical.Transaction, error)
+  - file: third_party/openbao/internal/physical/inmem/inmem.go
+    kind: method
+    name: TransactionalInmemBackend.BeginTx
+    signature: func (b *TransactionalInmemBackend) BeginTx(ctx context.Context) (physical.Transaction,
+      error)
   name: third-party-openbao-internal-physical-inmem
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/physical/inmem/inmem.go
+    - method:1e31f66440b30209f4f5a9e6726329ce
+    - method:3c04295126306cdfd876bc07e3908a2e
+    - method:43c21050c4a345d827af6367dc7a44cf
+    - method:5038c7c5d7c5db20d739315dc4cd59f1
+    - method:ba9e633c846c0ed09e884c1d09bb6648
+    - struct:2d6b4ee3aec00b51abb859f5c1e03bed
+    id: r.backend-inmem-store
+    level: MUST
+    text: InmemBackend stores physical entries in an in-memory map guarded by an RWMutex
+      and serves the physical.Backend operations Put, Get, Delete, List and ListPage;
+      Get on a missing key returns a nil entry, and List returns the keys under a
+      prefix.
+  - codeRefs:
+    - file:third_party/openbao/internal/physical/inmem/inmem.go
+    - function:01e86591f7c08850e492d37a5e08dd52
+    - function:4c046da44025634cd7e25283ce278dcc
+    - struct:df217a5c171aa38af804e782d2d8a41a
+    id: r.constructor-split
+    level: MUST
+    text: NewDirectInmem returns a physical.Backend that is a plain InmemBackend with
+      no transaction support, while NewInmem returns a physical.Backend backed by
+      TransactionalInmemBackend, so callers choose whether transactional semantics
+      are available.
+  - codeRefs:
+    - file:third_party/openbao/internal/physical/inmem/inmem.go
+    - method:4ead8adefd1962fb73444884ef8bc234
+    - method:620d69cb359873a4adafa368fcd4ab69
+    - method:aebafecb8fd45638f9e01ac42bcb48e6
+    - method:bdd3cf66911c67d4a387fc651363cbf5
+    id: r.failure-injection
+    level: MUST
+    text: FailPut, FailGet, FailDelete and FailList flip a per-operation failure flag
+      so the matching call returns an error instead of touching the store, letting
+      tests exercise error paths deterministically.
+  - codeRefs:
+    - file:third_party/openbao/internal/physical/inmem/inmem_ha.go
+    - function:b235eded961c4abe0863e2855edea225
+    - method:305ccbdfd456a4b1edc8fab49f0be2ec
+    - method:72fb45d6d398553c65fc86ed64c4007c
+    - method:8d276904195680b59b907b4fad500fcc
+    - method:ccae56ea1b2267afd14f3f6b8e9882d0
+    - struct:679b872bd8d4cddf89e45879d844de42
+    id: r.ha-backend
+    level: MUST
+    text: 'NewInmemHA returns a physical.Backend whose InmemHABackend embeds InmemBackend
+      for storage and additionally implements the HA surface: LockWith hands out an
+      advisory lock, LockMapSize reports how many locks are held, HookInvalidate registers
+      an invalidation callback, and HAEnabled reports true.'
+  - codeRefs:
+    - file:third_party/openbao/internal/physical/inmem/inmem_ha.go
+    - method:72fb45d6d398553c65fc86ed64c4007c
+    - method:7b7b36e795b1775fa162674183f074b1
+    - method:e0db7897f317070fb2c3a4b7c30828e5
+    id: r.ha-put-delete-invalidate
+    level: MUST
+    text: InmemHABackend.Put stores the entry and InmemHABackend.Delete removes the
+      key, each delegating to the embedded in-memory backend and then notifying the
+      registered invalidation hook for that key so lock holders learn their state
+      changed.
+  - codeRefs:
+    - file:third_party/openbao/internal/physical/inmem/inmem.go
+    - method:5038c7c5d7c5db20d739315dc4cd59f1
+    id: r.list-page-ordering
+    level: MUST
+    text: ListPage returns the sorted keys under a prefix that fall after the given
+      after key, truncated to limit entries, so callers can walk a keyspace in stable
+      pages.
+  - codeRefs:
+    - file:third_party/openbao/internal/physical/inmem/inmem_ha.go
+    - method:187ff6f6b3a871a5185e2aa1b6cd94b8
+    - method:499e07b68ff4edbe764e64d9fcb1f28b
+    - method:7c18f4d6c4f9da42655ac6302f0f3e75
+    - struct:5d362beb6e121438856c6710c4b52f89
+    id: r.lock-semantics
+    level: MUST
+    text: InmemLock.Lock acquires the named lock and returns a channel closed when
+      the lock is lost, blocking until acquisition or until stopCh closes; Unlock
+      releases the lock and removes it from the lock map; Value reports whether the
+      lock is currently held and the value it was acquired with.
+  - codeRefs:
+    - file:third_party/openbao/internal/physical/inmem/inmem.go
+    - function:3d2e06bf2d872877c88d4efd08239508
+    - struct:1d80bbbee5698efde6ed532fa3090786
+    id: r.op-name
+    level: MUST
+    text: OpName maps each in-memory operation constant (put, delete, list, list-page,
+      get, begin-tx, begin-ro-tx, commit-tx, rollback-tx) to its lowercase name and
+      returns "unknown" for any other value, and InmemOp carries the operation type,
+      transaction type, arguments and results of a single traced operation.
+  - codeRefs:
+    - file:third_party/openbao/internal/physical/inmem/inmem_ha_test.go
+    - file:third_party/openbao/internal/physical/inmem/inmem_test.go
+    - file:third_party/openbao/internal/physical/inmem/physical_view_test.go
+    id: r.tests-cover-backend
+    level: SHOULD
+    text: The package tests exercise the in-memory backend behaviours, the HA locking
+      behaviours and the physical view over the backend, so changes to storage, transaction
+      and lock semantics are caught by go test.
+  - codeRefs:
+    - file:third_party/openbao/internal/physical/inmem/inmem.go
+    - method:09f4611c045b886c99193978e5fffc60
+    - method:599cf2c9ab84549195412caf4c4bb3a8
+    - method:d85856c01a2035e79927288ebd527cd5
+    - method:e411a886bada2ea8e9ea5fa106f9bc23
+    - struct:4347fdb9d9109c660bbfc2ea4ab407f0
+    id: r.transactions
+    level: MUST
+    text: TransactionalInmemBackend.BeginTx and BeginReadOnlyTx return an InmemBackendTransaction
+      that stages writes against the parent store; Commit applies the staged operations
+      and Rollback discards them without changing the store.
   upstream: self
 - code:
   - third_party/openbao/internal/physical/pebbledb/pebbledb.go
