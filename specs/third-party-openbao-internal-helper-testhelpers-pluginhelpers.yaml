@@ -2,10 +2,112 @@ apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
 - file:third_party/openbao/internal/helper/testhelpers/pluginhelpers/pluginhelpers.go
   pluginhelpers.go@third_party/openbao/internal/helper/testhelpers/pluginhelpers/pluginhelpers.go
+- function:252e9ed92417656777ddce9af6febb09 CompilePlugin@third_party/openbao/internal/helper/testhelpers/pluginhelpers/pluginhelpers.go:65
+- function:7b6bbdabd3585e5219119d1bfb6f4e93 GetPlugin@third_party/openbao/internal/helper/testhelpers/pluginhelpers/pluginhelpers.go:34
+- struct:b88f26fa4c69a7e4fbf4a8b72c73413d TestPlugin@third_party/openbao/internal/helper/testhelpers/pluginhelpers/pluginhelpers.go:26
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-helper-testhelpers-pluginhelpers
   namespace: default
 spec:
+  intent: This context exists so that OpenBao tests can mount and register real plugin
+    binaries without hand-building them per test. Tests declare which plugin type
+    they need; the helper resolves the builtin implementation, compiles it once per
+    (name, type, version) into a caller-chosen directory, and hands back the metadata
+    — file name and SHA-256 — that Vault's plugin registration API requires. The cache
+    and the lock exist because compiling the same plugin repeatedly across a test
+    run is slow, and the directory walk exists so the helper works whether the test
+    process starts in the repository root or a nested package directory.
+  interfaces:
+  - file: third_party/openbao/internal/helper/testhelpers/pluginhelpers/pluginhelpers.go
+    kind: function
+    name: CompilePlugin
+    signature: func CompilePlugin(t testing.T, typ consts.PluginType, pluginVersion
+      string, pluginDir string) TestPlugin
+  - file: third_party/openbao/internal/helper/testhelpers/pluginhelpers/pluginhelpers.go
+    kind: function
+    name: GetPlugin
+    signature: func GetPlugin(t testing.T, typ consts.PluginType) (string, string,
+      string, string)
+  - file: third_party/openbao/internal/helper/testhelpers/pluginhelpers/pluginhelpers.go
+    kind: struct
+    name: TestPlugin
+    signature: type TestPlugin struct { Name string; Typ consts.PluginType; Version
+      string; FileName string; Sha256 string }
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - function:252e9ed92417656777ddce9af6febb09
+    id: r.compile-plugin-materialize-binary
+    level: MUST
+    text: CompilePlugin must read the built binary into testPluginCache under the
+      cache key, and if the file at pluginPath does not exist on disk it must write
+      the cached bytes there with file mode 0o755; a Stat error other than not-exist,
+      a read error or a write error must fail the test.
+  - codeRefs:
+    - function:252e9ed92417656777ddce9af6febb09
+    id: r.compile-plugin-serialized-cache
+    level: MUST
+    text: CompilePlugin must hold testPluginCacheLock for the whole of its body, and
+      must key testPluginCache on the triple "pluginName pluginType pluginVersion";
+      when the key is present the cached binary bytes are reused and `go build` is
+      not run again.
+  - codeRefs:
+    - function:252e9ed92417656777ddce9af6febb09
+    id: r.compile-plugin-version-ldflags
+    level: MUST
+    text: When pluginVersion is not the empty string, CompilePlugin must append "-"
+      plus the version to the output path and must build without ldflags; when pluginVersion
+      is not empty it must pass -ldflags "-X <pluginVersionLocation>=<pluginVersion>"
+      to `go build`. The command line is `go build [-ldflags ...] -o <pluginPath>
+      <pluginMain>`, and a non-zero exit must fail the test with the combined build
+      output.
+  - codeRefs:
+    - function:252e9ed92417656777ddce9af6febb09
+    id: r.compile-plugin-working-directory
+    level: MUST
+    text: CompilePlugin must locate the repository root by repeatedly calling os.Getwd
+      and os.Chdir("..") until a `builtin` entry exists in the current directory,
+      failing the test on any Getwd or Chdir error, so that the build runs with the
+      root as cmd.Dir regardless of the directory the test started in.
+  - codeRefs:
+    - function:7b6bbdabd3585e5219119d1bfb6f4e93
+    id: r.plugin-type-resolution
+    level: MUST
+    text: 'GetPlugin resolves a consts.PluginType to the concrete builtin plugin that
+      represents it and returns four strings in order: plugin name, short plugin type,
+      main package path, and the Go import path of the plugin''s self-reported version
+      variable. PluginTypeCredential resolves to approle with name vault-plugin-auth-approle,
+      main path builtin/credential/approle/cmd/approle/main.go and version location
+      github.com/openbao/openbao/v2/internal/builtin/credential/approle.ReportedVersion.
+      PluginTypeSecrets resolves to kv with name vault-plugin-secrets-kv, main path
+      builtin/logical/kv/cmd/kv/main.go and version location github.com/openbao/openbao/v2/internal/builtin/logical/kv.ReportedVersion.
+      PluginTypeDatabase resolves to postgresql with name vault-plugin-database-postgresql,
+      main path builtin/database/postgresql/postgresql-database-plugin/main.go and
+      version location github.com/openbao/openbao/v2/internal/builtin/database/postgresql.ReportedVersion.'
+  - codeRefs:
+    - function:252e9ed92417656777ddce9af6febb09
+    - struct:b88f26fa4c69a7e4fbf4a8b72c73413d
+    id: r.test-plugin-hash-result
+    level: MUST
+    text: CompilePlugin must return a TestPlugin whose Name is the resolved plugin
+      name, Typ is the requested plugin type, Version is the requested plugin version,
+      FileName is path.Base of the built plugin path, and Sha256 is the SHA-256 of
+      the plugin bytes formatted as lowercase hexadecimal.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/testhelpers/pluginhelpers/pluginhelpers.go
+    - struct:b88f26fa4c69a7e4fbf4a8b72c73413d
+    id: r.test-plugin-record
+    level: MUST
+    text: TestPlugin must carry exactly the fields Name (string), Typ (consts.PluginType),
+      Version (string), FileName (string) and Sha256 (string), so that callers and
+      the core/external plugin tests can register the compiled binary by its file
+      name and checksum.
+  - codeRefs:
+    - function:7b6bbdabd3585e5219119d1bfb6f4e93
+    id: r.unknown-type-fatal
+    level: MUST
+    text: Any consts.PluginType outside the three known cases must fail the test immediately
+      by calling t.Fatal with the plugin type's string form, rather than returning
+      zero values.
   upstream: self

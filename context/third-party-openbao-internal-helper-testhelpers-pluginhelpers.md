@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so that OpenBao tests can mount and register real plugin binaries without hand-building them per test. Tests declare which plugin type they need; the helper resolves the builtin implementation, compiles it once per (name, type, version) into a caller-chosen directory, and hands back the metadata — file name and SHA-256 — that Vault's plugin registration API requires. The cache and the lock exist because compiling the same plugin repeatedly across a test run is slow, and the directory walk exists so the helper works whether the test process starts in the repository root or a nested package directory.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
