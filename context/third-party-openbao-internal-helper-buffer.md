@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the OpenBao code that needs to seek and close a stream can do so even when the caller supplies a plain io.Reader. It hides the buffering cost behind one constructor, lets already-seekable or already-closable readers pass through without a copy, and keeps the Close contract uniform through a no-op implementation for readers that were never closable.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

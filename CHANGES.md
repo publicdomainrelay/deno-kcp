@@ -1369,6 +1369,16 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.tbtot-returns-testinginterface-t` (MUST): "TBtoT must accept any testing.TB and return a testinginterface.T obtained by wrapping the argument in a tbWrapper value, so callers can pass standard test handles to interfaces typed on testinginterface.T."
 - added `r.wrapper-embeds-testing-tb` (MUST): "tbWrapper must embed testing.TB, so all testing.TB methods other than the overridden Parallel are promoted to the wrapper unchanged and the wrapper satisfies testinginterface.T."
 
+### third-party-openbao-internal-helper-buffer
+
+- intent: "" -> "This context exists so the OpenBao code that needs to seek and close a stream can do so even when the caller supplies a plain io.Reader. It hides the buffering cost behind one constructor, lets already-seekable or already-closable readers pass through without a copy, and keeps the Close contract uniform through a no-op implementation for readers that were never closable."
+- added `r.buffer-fallback` (MUST): "When the input is neither an io.ReadSeekCloser nor an io.ReadSeeker, NewSeekableReader reads the input to exhaustion with io.ReadAll and returns a nopSeekableReader over a bytes.Reader built from that data."
+- added `r.close-is-noop` (MUST): "nopSeekableReader.Close always returns nil and never closes or mutates the embedded reader, so callers can close a buffered or seek-only reader without disturbing the underlying source."
+- added `r.close-source-on-buffer` (MUST): "In the buffering fallback, if the original reader also implements io.Closer, NewSeekableReader closes it after the successful read; a close error is returned to the caller together with a nil reader."
+- added `r.pass-through-readseekcloser` (MUST): "NewSeekableReader returns the original reader unchanged, without copying or wrapping, when the input already implements io.ReadSeekCloser."
+- added `r.read-error-propagates` (MUST): "NewSeekableReader returns a nil reader and the underlying error when io.ReadAll fails, and does not close the source reader in that case."
+- added `r.wrap-readseeker` (MUST): "When the input implements io.ReadSeeker but not io.ReadSeekCloser, NewSeekableReader returns a nopSeekableReader value embedding that seeker, so seeking is delegated to the original and closing becomes a no-op."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -1437,3 +1447,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-command-token-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-benchhelpers-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-buffer-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-internal-helper-builtinplugins-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-helper-configutil-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
