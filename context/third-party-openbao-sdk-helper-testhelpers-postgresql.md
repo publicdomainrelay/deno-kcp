@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so database plugin tests in OpenBao can obtain a real PostgreSQL instance, or a replication cluster, without hand-rolling Docker plumbing. It wraps sdk/helper/docker into reusable fixtures: container startup with readiness probing, a variant that skips readiness probing so retry logic in the container handler can be exercised, credential variants, a repmgr variant for multi-node replication tests, and a Cluster type that models primary/replica topology with slot-based base backup, promotion, and primary removal for failover tests.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
