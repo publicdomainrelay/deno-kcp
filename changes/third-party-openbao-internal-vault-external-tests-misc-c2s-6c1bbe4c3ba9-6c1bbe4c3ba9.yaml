@@ -10,5 +10,24 @@ spec:
   systemContext: third-party-openbao-internal-vault-external-tests-misc
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-vault-external-tests-misc
-  phase: Running
+  agentLog: 'This context covers the package-level external test suite in `third_party/openbao/internal/vault/external_tests/misc`,
+    made up of two Go test files in package `misc`. `recover_from_panic_test.go` holds
+    `TestRecoverFromPanic`, a regression test for openbao PR 6920: it builds a single-core
+    `vault.TestCluster` with the `noop` logical backend registered through `backend.NoopBackendFactory`,
+    `EnableRaw` set, and the `vaulthttp.Handler`, mounts a `noop` mount through the
+    API client, issues a `Read` of `noop/panic` to force the backend to panic, asserts
+    an error is returned, and then calls `cluster.EnsureCoresSealed(t)` — the call
+    that would deadlock in the original bug. `recovery_test.go` holds `TestRecovery`,
+    a three-phase test over a shared `inmem.NewInmemHA` physical backend: it seeds
+    `secret/foo`, records the secret mount UUID and a created namespace UUID, seals
+    the cluster and captures the barrier keys; it then restarts the cluster in recovery
+    mode with `SkipInit` and a `RecoveryToken` handler property, checks that garbage
+    and empty tokens get 403 on `sys/raw/logical/<uuid>` listings, generates a recovery
+    operation token, checks a second generate-root fails, uses the recovery token
+    to list and delete the raw logical entry, and verifies the namespace entry under
+    `sys/raw/namespaces/`; finally it restarts in regular mode with the saved barrier
+    keys and confirms the `secret/` mount is empty.'
+  message: wrote 9 requirement(s) and 0 interface(s) for third-party-openbao-internal-vault-external-tests-misc;
+    interface TestRecoverFromPanic is not in the observed facts; dropped; interface
+    TestRecovery is not in the observed facts; dropped
+  phase: Succeeded

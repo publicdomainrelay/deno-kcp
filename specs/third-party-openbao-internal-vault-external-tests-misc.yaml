@@ -8,5 +8,89 @@ metadata:
   name: third-party-openbao-internal-vault-external-tests-misc
   namespace: default
 spec:
+  intent: 'This context exists to specify the recovery-mode and panic-recovery external
+    tests of the OpenBao `misc` test package, which exercise the server-level behavior
+    of raw storage access under a recovery operation token and the ability of the
+    cluster to seal cleanly after a logical backend panics. It pins the observable
+    contract those tests assert: what a recovery-mode cluster must reject, what a
+    recovery token must grant, what survives a seal/unseal round trip, and that a
+    panicking backend must not deadlock core shutdown. It is a specification of existing
+    test code, not of new code.'
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/misc/recover_from_panic_test.go
+    id: r.noop-panic-mount-and-read
+    level: MUST
+    text: TestRecoverFromPanic must build a CoreConfig whose LogicalBackends map registers
+      "noop" to backend.NoopBackendFactory and sets EnableRaw true, start a TestCluster
+      with vaulthttp.Handler, mount a logical mount of type "noop" through core.Client.Sys().Mount,
+      and then issue client.Logical().Read("noop/panic"), which must return a non-nil
+      error.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/misc/recovery_test.go
+    id: r.recovery-mode-token-gating
+    level: MUST
+    text: In recovery mode (CoreConfig.RecoveryMode true, TestClusterOptions.SkipInit
+      true, handler properties RecoveryMode true and a RecoveryToken atomic.Value
+      pointer), listing sys/raw/logical/<secretUUID> must fail with an error containing
+      "403" both when the client token is "garbage" and when it is empty, and must
+      still fail with "403" after a recovery operation token has been generated but
+      before the client adopts it.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/misc/recovery_test.go
+    id: r.recovery-raw-logical-mutation
+    level: MUST
+    text: With the generated recovery token set on the client, TestRecovery must successfully
+      list sys/raw/logical/<secretUUID> and see keys equal to []any{"foo"}, and must
+      successfully delete sys/raw/logical/<secretUUID>/foo through client.Logical().Delete.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/misc/recovery_test.go
+    id: r.recovery-raw-namespace-entry
+    level: MUST
+    text: TestRecovery must list sys/raw/namespaces/<nsUUID> with the recovery token
+      and require the returned data to contain a "keys" entry whose values include
+      "core/".
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/misc/recovery_test.go
+    id: r.recovery-root-generation-single-use
+    level: MUST
+    text: TestRecovery must generate a recovery operation token with testhelpers.GenerateRoot(t,
+      cluster, testhelpers.GenerateRecovery) and must confirm that a second call through
+      testhelpers.GenerateRootWithError with the same mode fails with the message
+      "attempted to generate recovery operation token when already unsealed".
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/misc/recovery_test.go
+    id: r.recovery-roundtrip-persistence
+    level: MUST
+    text: The final phase of TestRecovery must restart the cluster against the same
+      inmem HA backend with recovery mode off, SkipInit true and the previously captured
+      barrier keys, unseal with testhelpers.EnsureCoresUnsealed, wait for active,
+      list secret/ using the original root token, and fail if the listing returns
+      any data other than nil, proving the raw delete performed in recovery mode persisted.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/misc/recovery_test.go
+    id: r.recovery-seed-state
+    level: MUST
+    text: 'TestRecovery must use a single inmem.NewInmemHA physical backend shared
+      across all three phases, write map[string]any{"bar": 1.0} to secret/foo, assert
+      that listing secret/ returns exactly the key "foo", capture the UUID of the
+      secret/ mount and the UUID of a namespace created with Sys().CreateNamespace("ns1",
+      nil), then seal the cores and save cluster.BarrierKeys for the later phases.'
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/misc/recovery_test.go
+    id: r.recovery-token-cleared-between-phases
+    level: SHOULD
+    text: Each phase of TestRecovery should construct its own TestCluster with NumCores
+      1 and defer cluster.Cleanup, and should call cluster.EnsureCoresSealed before
+      moving to the next phase, so the recovery and regular clusters never hold the
+      storage backend open at the same time.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/misc/recover_from_panic_test.go
+    id: r.seal-after-panic-no-deadlock
+    level: MUST
+    text: After the panicking read, TestRecoverFromPanic must wait for the core to
+      become active with vault.TestWaitActive and then call cluster.EnsureCoresSealed(t),
+      so a regression in panic recovery that prevents the core from sealing causes
+      the test to deadlock rather than pass.
   upstream: self

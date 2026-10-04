@@ -10,5 +10,17 @@ spec:
   systemContext: third-party-openbao-internal-vault-external-tests-misc-misc-binary
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-vault-external-tests-misc-misc-binary
-  phase: Running
+  agentLog: This context covers a single Go test file, third_party/openbao/internal/vault/external_tests/misc/misc_binary/recovery_test.go,
+    in package misc. It contains TestRecovery_Docker, a Docker-backed acceptance test
+    for OpenBao recovery mode. The test reads the BAO_BINARY environment variable
+    and skips when it is empty, builds a one-node DockerClusterOptions with image
+    quay.io/openbao/openbao:latest and log level TRACE, mounts a kv-v1 secrets engine
+    at secret/, writes and lists a secret, then restarts the node and confirms the
+    secret survives. It then restarts the node with the -recovery argument, generates
+    a recovery operation token, verifies a second generate-root fails, lists and deletes
+    sys/raw/logical/<mount UUID>/foo through the raw storage endpoint, and finally
+    restarts in normal mode to confirm the deletion persists. There are no exported
+    symbols or reusable interfaces; the file is a self-contained test harness.
+  message: wrote 10 requirement(s) and 0 interface(s) for third-party-openbao-internal-vault-external-tests-misc-misc-binary;
+    interface TestRecovery_Docker is not in the observed facts; dropped
+  phase: Succeeded

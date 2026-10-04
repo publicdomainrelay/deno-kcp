@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to specify the recovery-mode and panic-recovery external tests of the OpenBao `misc` test package, which exercise the server-level behavior of raw storage access under a recovery operation token and the ability of the cluster to seal cleanly after a logical backend panics. It pins the observable contract those tests assert: what a recovery-mode cluster must reject, what a recovery token must grant, what survives a seal/unseal round trip, and that a panicking backend must not deadlock core shutdown. It is a specification of existing test code, not of new code.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
