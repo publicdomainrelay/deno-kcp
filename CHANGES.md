@@ -1460,10 +1460,10 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 
 ### third-party-openbao-internal-helper-flag-slice
 
-- intent: "" -> "The package exists so CLI commands can accept a flag that may appear more than once, each occurrence contributing one more string to an ordered collection. It is a Leaf helper in the vendored third-party tree, depending only on the standard library strings package, and it is consumed by the OpenBao command layer rather than by this repository's own code."
+- intent: "" -> "The package exists so a CLI command can accept a flag that appears more than once, with each occurrence contributing one more string to an ordered list. It is a leaf helper in the vendored third-party tree, depending only on the standard library strings package for joining. It exists because the standard flag package has no built-in repeated string flag, and the OpenBao command layer needs the raw values in the order they were given."
 - added `r.both-methods-on-pointer-receiver` (MUST): "Both String and Set must be declared on a pointer receiver to StringFlag, so appending in Set mutates the caller's slice and the type satisfies the flag.Value interface when registered by address."
-- added `r.set-appends-value` (MUST): "StringFlag.Set must append the received value to the slice through the pointer receiver, so successive calls grow the collection instead of overwriting it, and it must return a nil error on every call because no input is rejected."
-- added `r.string-flag-is-string-slice` (MUST): "StringFlag must be defined as a named type whose underlying type is a slice of strings, so a repeated flag accumulates an ordered list of the values passed on the command line."
+- added `r.set-appends-value` (MUST): "StringFlag.Set must append the received value to the slice through the pointer receiver, so successive calls grow the collection instead of overwriting the previous entry, and it must return a nil error on every call because no input is rejected."
+- added `r.string-flag-is-string-slice` (MUST): "StringFlag must be defined as a named type whose underlying type is a slice of strings, so a repeated flag accumulates an ordered list of the values passed on the command line rather than a single value."
 - added `r.string-joins-with-comma` (MUST): "StringFlag.String must return the elements of the slice joined with a single comma and no surrounding spaces, giving the flag package a stable textual rendering of the accumulated values."
 - added `r.tests-cover-behaviour` (SHOULD): "The package's behaviour should stay covered by the accompanying test file, which exercises the flag slice helper alongside the implementation."
 
@@ -1542,5 +1542,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-helper-fairshare-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-flag-kv-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-flag-slice-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-helper-flag-slice-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-helper-flag-slice-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-forwarding-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-helper-homedir-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |

@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-The package exists so CLI commands can accept a flag that may appear more than once, each occurrence contributing one more string to an ordered collection. It is a Leaf helper in the vendored third-party tree, depending only on the standard library strings package, and it is consumed by the OpenBao command layer rather than by this repository's own code.
+The package exists so a CLI command can accept a flag that appears more than once, with each occurrence contributing one more string to an ordered list. It is a leaf helper in the vendored third-party tree, depending only on the standard library strings package for joining. It exists because the standard flag package has no built-in repeated string flag, and the OpenBao command layer needs the raw values in the order they were given.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
