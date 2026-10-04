@@ -9,5 +9,6 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/ui/app/controllers/application.js` file application.js (third_party/openbao/ui/app/controllers/application.js)
+- `file:third_party/openbao/ui/app/controllers/vault.js` file vault.js (third_party/openbao/ui/app/controllers/vault.js)
 <!-- SPECD_MANAGED_END -->

@@ -9,5 +9,5 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/ui/app/config/environment.d.ts` file environment.d.ts (third_party/openbao/ui/app/config/environment.d.ts)
 <!-- SPECD_MANAGED_END -->
