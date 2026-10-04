@@ -9,5 +9,7 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `class:c54f0a4df0f27bc8cff3a755b9e76744` class PkiEngine (third_party/openbao/ui/lib/pki/addon/engine.js)
+- `file:third_party/openbao/ui/lib/pki/addon/engine.js` file engine.js (third_party/openbao/ui/lib/pki/addon/engine.js)
+- `file:third_party/openbao/ui/lib/pki/addon/routes.js` file routes.js (third_party/openbao/ui/lib/pki/addon/routes.js)
 <!-- SPECD_MANAGED_END -->
