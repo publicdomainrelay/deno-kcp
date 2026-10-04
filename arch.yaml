@@ -2116,7 +2116,7 @@ system_contexts:
   - method:84d4636db1ea631ee61b88e98f741d27 Reconciler.Reconcile@internal/policyworkflowpod/policyworkflowpod.go:55
   depends_on:
   - sc.api-v1alpha1
-  id: sc.internal-policyworkflowpod
+  id: sc.kind.policyworkflowpod
   intent: This context exists so the PolicyWorkflowPod decider has a describable contract
     separate from the provider that calls it. The provider owns the watch loop and
     status writes; this package owns only the decision, which makes the phase transitions,
@@ -2165,6 +2165,7 @@ system_contexts:
     signature: func RunTTL(pod *v1alpha1.PolicyWorkflowPod, providerDefault *int64)
       *int64
   name: internal-policyworkflowpod
+  orchestrator: sc.deno-kcp-provider
   requirements:
   - codeRefs:
     - function:bbc6e4753713c4d1d1079ae7e84ed8fa
@@ -2290,7 +2291,7 @@ system_contexts:
   - type_alias:9dfd60ec68bf9ea12c085e274c36feb8 RunState@internal/policyworkflowrun/policyworkflowrun.go:18
   depends_on:
   - sc.api-v1alpha1
-  id: sc.internal-policyworkflowrun
+  id: sc.kind.policyworkflowrun
   intent: This context exists so the PolicyWorkflowRun state machine is testable and
     separable from the Kubernetes client. Reconcile only reads the observed world
     and writes a Result, so callers translate Op verbs, status fields and flags into
@@ -2349,6 +2350,7 @@ system_contexts:
     name: RunState
     signature: type RunState string
   name: internal-policyworkflowrun
+  orchestrator: sc.deno-kcp-provider
   requirements:
   - codeRefs:
     - method:76266912e5bed07cf34b1126aad5c33b
@@ -2631,7 +2633,7 @@ system_contexts:
   - sc.internal-policyworkflowpod
   - sc.internal-policyworkflowrun
   - sc.internal-trigger
-  id: sc.internal-provider
+  id: sc.test.provider-live-cluster
   intent: 'This context exists to hold the provider-side controller logic of deno-kcp
     as a single describable unit: the reconcile engines and their per-kind reconcile
     files, the Reader/Runtime/TokenMinter port interfaces the engines depend on, the
@@ -3144,6 +3146,10 @@ system_contexts:
     name: summaryObserver.Observe
     signature: (float64)
   name: internal-provider
+  orchestrator: orch.test-live
+  overlay:
+  - ov.test-cluster
+  - ov.test-provider-live-install
   requirements:
   - codeRefs:
     - file:internal/provider/admission.go
@@ -3360,7 +3366,7 @@ system_contexts:
       Read, ReadRun, ListRuns, ListRunsForJob, ReadPod, ReadJob, ReadTrigger, ReadOpenBao,
       ReadEngine, ReadWorkflowPod, ListWorkflowRuns and ListWorkflowRunsForPod, and
       Provider.RunWatch must drive it.
-  upstream: self
+  upstream: up.kcp
 - code:
   - internal/trigger/trigger.go
   - internal/trigger/trigger_test.go
@@ -3377,7 +3383,7 @@ system_contexts:
   - type_alias:ea5d49f390b7f0cb47a28a95e8f58b81 Op@internal/trigger/trigger.go:33
   depends_on:
   - sc.api-v1alpha1
-  id: sc.internal-trigger
+  id: sc.kind.runtrigger
   intent: 'This context is the trigger decider, the piece of the deno-kcp control
     plane that turns a finished policy workflow run into a deno job. It exists so
     the RunTrigger reconciliation decision is testable and side-effect free: the reconciler
@@ -3425,6 +3431,7 @@ system_contexts:
     signature: type RunObservation struct { Name string; Phase v1alpha1.PolicyWorkflowPhase;
       Outputs map[string]string }
   name: internal-trigger
+  orchestrator: sc.deno-kcp-provider
   requirements:
   - codeRefs:
     - struct:a3fbb6626d9d915cb17e70f240a59a55
@@ -3531,7 +3538,7 @@ system_contexts:
   - sc.api-v1alpha1
   - sc.internal-livegate
   - sc.internal-provider
-  id: sc.test-integration
+  id: sc.test.integration-cluster
   intent: This context exists to hold the one test package that proves deno-kcp works
     against real infrastructure and against the checked-in examples. It separates
     what can be verified from the repository alone (offline_test.go, examples.go)
@@ -3834,6 +3841,22 @@ system_contexts:
     name: withOpenBao
     signature: func withOpenBao(vault baoServer) func(*liveCluster)
   name: test-integration
+  orchestrator: orch.test-integration
+  overlay:
+  - ov.runtime-rbac
+  - ov.test-cluster
+  - ov.test-integration-install
+  - sc.demo.native-fire
+  - sc.demo.on-policy-allow
+  - sc.demo.open-policy-pod
+  - sc.demo.policy-engine
+  - sc.example.deno-job
+  - sc.example.deno-pod
+  - sc.example.deno-run
+  - sc.example.openbao
+  - sc.example.openbao-tls-pod
+  - sc.internal-baoembed-cmd-baoembed
+  - sc.test.direct-run
   requirements:
   - codeRefs:
     - file:test/integration/fixture_test.go
@@ -3943,7 +3966,7 @@ system_contexts:
     level: MUST
     text: TestMain reaps every child process the fixture spawned (killSpawned, process.kill)
       so a failing live run does not leave kcp, kine or bao behind.
-  upstream: self
+  upstream: up.kcp
 - code:
   - third_party/openbao/.golangci.deprecations.yml
   - third_party/openbao/.golangci.yml

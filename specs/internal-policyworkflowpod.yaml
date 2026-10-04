@@ -11,6 +11,91 @@ metadata:
   name: internal-policyworkflowpod
   namespace: default
 spec:
+  arch:
+    code:
+    - file:internal/policyworkflowpod/policyworkflowpod.go
+    - file:internal/policyworkflowpod/policyworkflowpod_test.go
+    form: list
+    id: sc.kind.policyworkflowpod
+    kind: node
+    node:
+      axis: long_running
+      code:
+        logic: internal/policyworkflowpod
+        registry: internal/provider/registry_workflowpod.go
+      context: tb.provider-workspace
+      id: sc.kind.policyworkflowpod
+      orchestrator: sc.deno-kcp-provider
+      overlay: []
+      upstream:
+        api:
+          export: denoruntime
+          group: deno.computer
+          kind: PolicyWorkflowPod
+          resource: policyworkflowpods
+          schema: v1alpha1-5.policyworkflowpods.deno.computer
+          scope: Namespaced
+          short: pwpod
+          version: v1alpha1
+        condition_facts:
+          Ready:
+            by: internal/policyworkflowpod/policyworkflowpod.go:Reconcile
+            false_reasons:
+            - EngineNotReady
+            true_reasons:
+            - Ready
+        conditions:
+        - Ready
+        field_types:
+          args: map[string]string
+          concurrencyPolicy: type.ConcurrencyPolicy
+          conditions: type.conditions
+          inputs: map[string]string
+          workflow: runtime.RawExtension
+        manifest: deploy/policyworkflowpod-apiresourceschema.yaml
+        phases:
+        - Pending
+        - Running
+        - Failed
+        refs:
+          policyEngine: sc.kind.policyengine
+        spec:
+        - workflow
+        - inputs
+        - args
+        - perspective
+        - selfDid
+        - policyEngine
+        - concurrencyPolicy
+        - maxConcurrent
+        - runTTLSecondsAfterFinished
+        status:
+        - phase
+        - endpoint
+        - active
+        - conditions
+        status_facts:
+          active:
+            by: internal/policyworkflowpod/policyworkflowpod.go:Reconcile
+            decides: none
+            when: on_every_pass
+          conditions:
+            by: internal/policyworkflowpod/policyworkflowpod.go:Reconcile
+            decides: Ready
+            when: on_every_pass
+          endpoint:
+            by: internal/policyworkflowpod/policyworkflowpod.go:Reconcile
+            decides: Ready
+            when: on_ready
+          phase:
+            by: internal/policyworkflowpod/policyworkflowpod.go:Reconcile
+            decides: self
+            when: on_every_pass
+        types: api/v1alpha1/types_policyworkflowpod.go
+    orchestrator: sc.deno-kcp-provider
+    parent: sc.deno-kcp
+    section: system_contexts
+    slot: overlay[3]
   dependsOn:
   - sc.api-v1alpha1
   intent: This context exists so the PolicyWorkflowPod decider has a describable contract
@@ -60,6 +145,7 @@ spec:
     name: RunTTL
     signature: func RunTTL(pod *v1alpha1.PolicyWorkflowPod, providerDefault *int64)
       *int64
+  orchestrator: sc.deno-kcp-provider
   repository: deno-kcp
   requirements:
   - codeRefs:

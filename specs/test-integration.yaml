@@ -11,6 +11,117 @@ metadata:
   name: test-integration
   namespace: default
 spec:
+  arch:
+    code:
+    - file:test/integration/bao_test.go
+    - file:test/integration/examples.go
+    - file:test/integration/fixture_test.go
+    - file:test/integration/live_test.go
+    - file:test/integration/offline_test.go
+    - file:test/integration/openbao_live_test.go
+    form: list
+    id: sc.test.integration-cluster
+    kind: node
+    node:
+      code:
+        bao: test/integration/bao_test.go
+        examples: test/integration/examples.go
+        fixture: test/integration/fixture_test.go
+        offline: test/integration/offline_test.go
+        tests:
+        - test/integration/live_test.go
+        - test/integration/openbao_live_test.go
+      context: tb.host
+      harness:
+      - drives:
+        - deploy/examples
+        - deploy/policyworkflowrun-apiexport.yaml
+        - deploy/denoruntime-apiexport.yaml
+        file: test/integration/offline_test.go
+        funcs:
+        - TestEveryExampleDecodesFromDisk
+        - TestExampleInventoryMatchesDisk
+        - TestExamplesAreWiredToEachOther
+        - TestExamplesFitTheInstalledSchemas
+        - TestAPIExportsNameDeclaredSchemas
+      - creates:
+        - sc.demo.policy-engine
+        - sc.demo.open-policy-pod
+        - sc.demo.on-policy-allow
+        - sc.demo.native-fire
+        - sc.test.direct-run
+        - sc.example.deno-run
+        - sc.example.deno-job
+        - sc.example.deno-pod
+        drives:
+        - deploy/examples/policyengine.yaml
+        - deploy/examples/policyworkflowpod.yaml
+        - deploy/examples/runtrigger.yaml
+        - deploy/examples/native-fire-pod.yaml
+        - deploy/examples/policy-workflow-run.yaml
+        - deploy/examples/deno-run.yaml
+        - deploy/examples/deno-job.yaml
+        - deploy/examples/deno-pod.yaml
+        file: test/integration/live_test.go
+        funcs:
+        - TestExampleChainOnRealKCP
+        - TestDirectRunAndReadersOnRealKCP
+      - creates:
+        - sc.example.openbao
+        - sc.example.openbao-tls-pod
+        drives:
+        - deploy/examples/openbao.yaml
+        - deploy/examples/openbao-tls-pod.yaml
+        file: test/integration/openbao_live_test.go
+        funcs:
+        - TestOpenBaoAuthorityIssuesTheCertificateADenoPodServesWith
+        - TestOpenBaoOverTLSIssuesTheCertificateADenoPodServesWith
+        - TestANamespaceWithoutAnOpenBaoObjectGetsNoCertificate
+      - file: test/integration/fixture_test.go
+        role: 'startCluster: kine, kcp, the in-process provider, the workspace bootstrap
+          and the typed reads'
+      - file: test/integration/bao_test.go
+        role: builds and starts the pinned embedded OpenBao, returning its address,
+          root token and CA
+      - file: test/integration/examples.go
+        role: the example inventory table and the decode and repo-root helpers
+      id: sc.test.integration-cluster
+      orchestrator: orch.test-integration
+      overlay:
+      - ov.test-cluster
+      - ov.test-integration-install
+      - ov.runtime-rbac
+      - sc.openbao-embedded
+      - sc.demo.policy-engine
+      - sc.demo.open-policy-pod
+      - sc.demo.native-fire
+      - sc.demo.on-policy-allow
+      - sc.test.direct-run
+      - sc.example.deno-run
+      - sc.example.deno-job
+      - sc.example.deno-pod
+      - sc.example.openbao
+      - sc.example.openbao-tls-pod
+      upstream: sc.deno-kcp
+    orchestrator: orch.test-integration
+    overlay:
+    - ov.runtime-rbac
+    - ov.test-cluster
+    - ov.test-integration-install
+    - sc.demo.native-fire
+    - sc.demo.on-policy-allow
+    - sc.demo.open-policy-pod
+    - sc.demo.policy-engine
+    - sc.example.deno-job
+    - sc.example.deno-pod
+    - sc.example.deno-run
+    - sc.example.openbao
+    - sc.example.openbao-tls-pod
+    - sc.openbao-embedded
+    - sc.test.direct-run
+    position: 5
+    section: system_contexts
+    upstream: sc.deno-kcp
   dependsOn:
   - sc.api-v1alpha1
   - sc.internal-livegate
@@ -316,6 +427,22 @@ spec:
     kind: function
     name: withOpenBao
     signature: func withOpenBao(vault baoServer) func(*liveCluster)
+  orchestrator: orch.test-integration
+  overlay:
+  - ov.runtime-rbac
+  - ov.test-cluster
+  - ov.test-integration-install
+  - sc.demo.native-fire
+  - sc.demo.on-policy-allow
+  - sc.demo.open-policy-pod
+  - sc.demo.policy-engine
+  - sc.example.deno-job
+  - sc.example.deno-pod
+  - sc.example.deno-run
+  - sc.example.openbao
+  - sc.example.openbao-tls-pod
+  - sc.internal-baoembed-cmd-baoembed
+  - sc.test.direct-run
   repository: deno-kcp
   requirements:
   - codeRefs:
@@ -426,4 +553,4 @@ spec:
     level: MUST
     text: TestMain reaps every child process the fixture spawned (killSpawned, process.kill)
       so a failing live run does not leave kcp, kine or bao behind.
-  upstream: self
+  upstream: up.kcp

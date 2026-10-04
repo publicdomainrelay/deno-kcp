@@ -110,6 +110,95 @@ metadata:
   name: internal-provider
   namespace: default
 spec:
+  arch:
+    code:
+    - file:internal/provider/live_denojob_drain_test.go
+    - file:internal/provider/live_denoruntime_test.go
+    - file:internal/provider/live_helpers_test.go
+    - file:internal/provider/live_maxconcurrent_test.go
+    - file:internal/provider/live_native_admission_test.go
+    - file:internal/provider/live_ttl_test.go
+    - file:internal/provider/main_test.go
+    form: list
+    id: sc.test.provider-live-cluster
+    kind: node
+    node:
+      code:
+        helpers: internal/provider/live_helpers_test.go
+        reaper: internal/provider/main_test.go
+        tests:
+        - internal/provider/live_denoruntime_test.go
+        - internal/provider/live_maxconcurrent_test.go
+        - internal/provider/live_native_admission_test.go
+        - internal/provider/live_denojob_drain_test.go
+        - internal/provider/live_ttl_test.go
+      context: tb.host
+      harness:
+      - file: internal/provider/live_helpers_test.go
+        role: kubectl apply helpers and the API installation every live harness in
+          the package uses
+      - file: internal/provider/main_test.go
+        role: reaps every spawned process group on exit and on SIGINT or SIGTERM
+      - creates:
+        - sc.kind.policyworkflowpod
+        - sc.kind.runtrigger
+        - sc.kind.denopod
+        - sc.kind.policyworkflowrun
+        - sc.kind.denojob
+        - sc.kind.denorun
+        drives:
+        - deploy/examples/policyengine.yaml
+        - deploy/examples/policyworkflowpod.yaml
+        - deploy/examples/runtrigger.yaml
+        - deploy/examples/native-fire-pod.yaml
+        file: internal/provider/live_denoruntime_test.go
+        funcs:
+        - TestTheFullDenoRuntimeLifecycleOnRealKCP
+      - creates:
+        - sc.kind.policyworkflowpod
+        - sc.kind.policyworkflowrun
+        drives:
+        - deploy/examples/policyengine.yaml
+        file: internal/provider/live_maxconcurrent_test.go
+        funcs:
+        - TestMaxConcurrentRunAdmissionOnRealKCP
+      - creates:
+        - sc.kind.policyworkflowpod
+        - sc.kind.denopod
+        - sc.kind.policyworkflowrun
+        drives:
+        - deploy/examples/policyengine.yaml
+        - deploy/examples/native-fire-pod.yaml
+        file: internal/provider/live_native_admission_test.go
+        funcs:
+        - TestNativeAdmissionAndQueueDrainOnRealKCP
+      - creates:
+        - sc.kind.denojob
+        - sc.kind.denorun
+        file: internal/provider/live_denojob_drain_test.go
+        funcs:
+        - TestDenoJobAllowDrainOnRealKCP
+      - creates:
+        - sc.kind.policyworkflowpod
+        - sc.kind.policyworkflowrun
+        drives:
+        - deploy/examples/policyengine.yaml
+        file: internal/provider/live_ttl_test.go
+        funcs:
+        - TestPodRunTTLReapsTheRunOnRealKCP
+      id: sc.test.provider-live-cluster
+      orchestrator: orch.test-live
+      overlay:
+      - ov.test-cluster
+      - ov.test-provider-live-install
+      upstream: sc.deno-kcp
+    orchestrator: orch.test-live
+    overlay:
+    - ov.test-cluster
+    - ov.test-provider-live-install
+    position: 6
+    section: system_contexts
+    upstream: sc.deno-kcp
   dependsOn:
   - sc.api-v1alpha1
   - sc.internal-denojob
@@ -631,6 +720,10 @@ spec:
     kind: method
     name: summaryObserver.Observe
     signature: (float64)
+  orchestrator: orch.test-live
+  overlay:
+  - ov.test-cluster
+  - ov.test-provider-live-install
   repository: deno-kcp
   requirements:
   - codeRefs:
@@ -848,4 +941,4 @@ spec:
       Read, ReadRun, ListRuns, ListRunsForJob, ReadPod, ReadJob, ReadTrigger, ReadOpenBao,
       ReadEngine, ReadWorkflowPod, ListWorkflowRuns and ListWorkflowRunsForPod, and
       Provider.RunWatch must drive it.
-  upstream: self
+  upstream: up.kcp
