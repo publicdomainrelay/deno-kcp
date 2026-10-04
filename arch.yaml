@@ -1739,7 +1739,103 @@ system_contexts:
   - internal/policyengine/policyengine.go
   - internal/policyengine/policyengine_test.go
   id: sc.internal-policyengine
+  intent: This context exists to keep PolicyEngine lifecycle policy separate from
+    the machinery that carries it out. The provider observes runs and probes, fills
+    in an Observed value, and hands it to the policyengine Reconciler; the Reconciler
+    answers with a Result describing the engine's phase, any requeue delay, the run
+    ID, and the ops to apply. Because the decider touches no cluster state directly,
+    engine behaviour such as default restart, Never restart, and liveness-driven restart
+    can be exercised in unit tests against plain structs instead of a live API server,
+    and the same shape is shared with the sibling denopod, denorun, denojob and trigger
+    deciders.
+  interfaces:
+  - file: internal/policyengine/policyengine.go
+    kind: struct
+    name: ExecutionObservation
+    signature: type ExecutionObservation struct { RunID string; State ExecutionState;
+      Message string }
+  - file: internal/policyengine/policyengine.go
+    kind: type_alias
+    name: ExecutionState
+    signature: type ExecutionState string
+  - file: internal/policyengine/policyengine.go
+    kind: function
+    name: New
+    signature: func New(opts Options) *Reconciler
+  - file: internal/policyengine/policyengine.go
+    kind: struct
+    name: Observed
+    signature: type Observed struct { Engine v1alpha1.PolicyEngine; Execution *ExecutionObservation;
+      ReadinessPassed *bool; LivenessFailed bool; Endpoint string; Now time.Time }
+  - file: internal/policyengine/policyengine.go
+    kind: type_alias
+    name: Op
+    signature: type Op
+  - file: internal/policyengine/policyengine.go
+    kind: struct
+    name: Options
+    signature: type Options struct
+  - file: internal/policyengine/policyengine.go
+    kind: struct
+    name: Reconciler
+    signature: type Reconciler struct
+  - file: internal/policyengine/policyengine.go
+    kind: method
+    name: Reconciler.Reconcile
+    signature: func (r *Reconciler) Reconcile(ctx context.Context, o Observed) (Result,
+      error)
+  - file: internal/policyengine/policyengine.go
+    kind: struct
+    name: Result
+    signature: type Result struct { Phase v1alpha1.PolicyEnginePhase; RunID string;
+      Ops []Op; RequeueAfter time.Duration }
   name: internal-policyengine
+  requirements:
+  - id: r.engine-behaviour-is-unit-tested
+    level: SHOULD
+    text: Engine policy outcomes such as readiness reporting, restart-on-exit by default,
+      and the Never restart policy failing on a non-zero exit should stay covered
+      by tests that drive the decider through Observed values.
+  - codeRefs:
+    - struct:51a6de2d483d5be40201c7de454f6cd7
+    - type_alias:c2475e9a59e50fceb012111299966c7a
+    id: r.execution-observation-identifies-run-and-state
+    level: MUST
+    text: ExecutionObservation must identify the run by RunID, report its ExecutionState,
+      and carry a human-readable Message; it is present only when the engine has a
+      run to observe.
+  - codeRefs:
+    - function:26e6969406488bfc97e9ed77febe4974
+    - struct:c5868ebca402d6036b8a7d908bf1a8ba
+    id: r.new-builds-reconciler-from-options
+    level: MUST
+    text: New must construct a Reconciler from an Options value, so the decider's
+      dependencies and tunables are supplied at build time rather than read from package
+      globals.
+  - codeRefs:
+    - struct:7b1226e6c85673295723299601dd8674
+    id: r.observed-carries-engine-and-execution
+    level: MUST
+    text: Observed must carry the v1alpha1.PolicyEngine under reconciliation, an optional
+      ExecutionObservation of the current run, the readiness and liveness probe outcome,
+      the engine endpoint, and the observation time Now.
+  - codeRefs:
+    - struct:bea3d6cd026242f0ba9701845a99d9ef
+    - type_alias:43971b7fe73a576e55a3463fe8f33daf
+    id: r.ops-name-the-actions-the-provider-applies
+    level: MUST
+    text: A Result must express the changes the decider wants as Op values, so the
+      provider can switch on them and drive the engine runner without the decider
+      naming any runner method directly.
+  - codeRefs:
+    - method:cf15bd5457ef89fffc8abf3947dbb830
+    - struct:2c2a9e18bb5ac0b6ffbbc8977980dbed
+    id: r.reconcile-is-a-pure-decision
+    level: MUST
+    text: Reconciler.Reconcile must decide engine behaviour only from the Observed
+      snapshot it is given and return the Result it wants applied; it must not perform
+      cluster, runner or probe I/O itself, leaving the returned Ops for the provider
+      to execute.
   upstream: self
 - code:
   - internal/policyworkflowpod/policyworkflowpod.go

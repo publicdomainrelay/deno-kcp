@@ -10,5 +10,18 @@ spec:
   systemContext: internal-policyengine
   toCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
 status:
-  message: the agent is summarizing internal-policyengine
-  phase: Running
+  agentLog: 'internal/policyengine holds the decision half of PolicyEngine reconciliation
+    in deno-kcp. Its Reconciler is constructed by New from an Options value and exposes
+    one entry point, Reconcile, which takes a context and an Observed snapshot and
+    returns a Result plus an error. Observed carries the v1alpha1.PolicyEngine, an
+    optional ExecutionObservation (RunID, State, Message), a ReadinessPassed pointer,
+    a LivenessFailed flag, an Endpoint string and the observation time Now. ExecutionState
+    is a string alias naming how the engine''s run is doing, and Op is the alias for
+    the operations a Result asks the provider to perform, such as stopping the engine.
+    The package performs no I/O of its own: it is a pure decider, and the provider''s
+    reconcileEngine builds the Observed, calls Reconcile, and then executes each returned
+    Op against the runner. policyengine_test.go covers readiness reporting, restart
+    on exit by default, and the Never restart policy.'
+  message: wrote 6 requirement(s) and 9 interface(s) for internal-policyengine; dropped
+    7 unresolved code ref(s)
+  phase: Succeeded
