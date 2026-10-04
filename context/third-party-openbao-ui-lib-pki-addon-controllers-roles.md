@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists to capture the contract of the PKI roles index controller: a route-scoped Ember controller whose only responsibility is to hand templates the mount point of the PKI engine the roles list belongs to. It is a small, single-purpose read-only surface — the list itself, filtering, and role data come from the route and model, while this controller only answers "which mount is this?" so links and API paths can be built relative to the correct engine.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

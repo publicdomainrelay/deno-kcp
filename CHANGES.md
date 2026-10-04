@@ -5833,6 +5833,12 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.controller-default-export` (MUST): "The file default-exports PkiKeysIndexController, a subclass of Ember's Controller, so the PKI keys index route resolves it as its controller."
 - added `r.mount-point-from-owner` (MUST): "PkiKeysIndexController exposes a mountPoint getter that resolves the mount point by calling getOwner(this).mountPoint, so consumers read the PKI engine mount path from the controller instead of passing it in."
 
+### third-party-openbao-ui-lib-pki-addon-controllers-roles
+
+- intent: "" -> "The context exists to capture the contract of the PKI roles index controller: a route-scoped Ember controller whose only responsibility is to hand templates the mount point of the PKI engine the roles list belongs to. It is a small, single-purpose read-only surface — the list itself, filtering, and role data come from the route and model, while this controller only answers "which mount is this?" so links and API paths can be built relative to the correct engine."
+- added `r.default-export-controller-class` (MUST): "The module third_party/openbao/ui/lib/pki/addon/controllers/roles/index.js must default-export a single class PkiRolesIndexController that extends Ember's Controller, so the roles index route resolves it as its controller."
+- added `r.mount-point-getter` (MUST): "PkiRolesIndexController must expose a getter mountPoint that obtains the controller's owner via getOwner(this) and returns that owner's mountPoint property, so consumers read the PKI engine mount path without the controller storing any mount state of its own."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -6351,6 +6357,8 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-pki-addon-controllers-certificates-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-controllers-issuers-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-controllers-keys-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-lib-pki-addon-controllers-roles-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-pki-addon-controllers-roles-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-lib-pki-addon-controllers-roles-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-pki-addon-controllers-roles-role-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
