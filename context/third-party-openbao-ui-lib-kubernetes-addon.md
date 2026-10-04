@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists to record the structure and wiring of the vendored OpenBao Kubernetes UI addon so that changes to it, or dependencies on its engine name, routes and injected services, are grounded in what the code actually declares. It matters because the addon is loaded as an Ember engine with a fixed module prefix and a fixed set of service and external-route dependencies, and any host application integration depends on those exact names.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

@@ -5558,6 +5558,23 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.vendored-license-header` (MUST): "The file must retain the HashiCorp copyright notice and the SPDX-License-Identifier MPL-2.0 header, because this is vendored third-party code and the license attribution must not be stripped."
 - added `r.write-gitkeep-after-build` (MUST): "After the UI build completes, the addon must synchronously write an empty .gitkeep file into the build result directory, so that the gitignored output folder structure survives into a published or packaged build."
 
+### third-party-openbao-ui-lib-kubernetes
+
+- intent: "" -> "This context exists to record the contract of the Kubernetes UI engine's index module: which engine name it registers, how it configures lazy loading, and how it answers the development-mode hook. It exists so that changes to the engine registration surface of the Kubernetes UI addon can be detected and checked against the expected bundling behavior, independent of the rest of the vendored OpenBao UI tree."
+- added `r.developing-addon-true` (MUST): "The isDevelopingAddon hook defined in the engine definition returns true, so Ember treats the Kubernetes UI addon as under development and skips the production packaging path."
+- added `r.engine-name-kubernetes` (MUST): "The engine definition passed to buildEngine carries the name 'kubernetes', which fixes the engine identity used by the host application when mounting or resolving it."
+- added `r.export-built-kubernetes-engine` (MUST): "The module exports the value returned by buildEngine from ember-engines/lib/engine-addon, so the Kubernetes UI is registered as an Ember engine rather than a plain addon."
+- added `r.lazy-loading-disabled` (MUST): "The engine definition sets lazyLoading.enabled to false, so the Kubernetes engine is bundled with the host application instead of being loaded on demand."
+- added `r.third-party-license-header` (SHOULD): "The file keeps its HashiCorp copyright and MPL-2.0 SPDX license header at the top, preserving the upstream licensing provenance of the vendored file."
+
+### third-party-openbao-ui-lib-kubernetes-addon
+
+- intent: "" -> "The context exists to record the structure and wiring of the vendored OpenBao Kubernetes UI addon so that changes to it, or dependencies on its engine name, routes and injected services, are grounded in what the code actually declares. It matters because the addon is loaded as an Ember engine with a fixed module prefix and a fixed set of service and external-route dependencies, and any host application integration depends on those exact names."
+- added `r.engine-class` (MUST): "The addon MUST export a default KubernetesEngine class that extends Ember's Engine, setting modulePrefix from the module prefix of the environment config, Resolver to the Ember resolver, and a dependencies object listing the injected services host-router, store, secret-mount-path and flash-messages plus the external route secrets."
+- added `r.initializers` (MUST): "The engine module MUST call loadInitializers with KubernetesEngine and the module prefix so the engine's initializers are registered under the same prefix the class declares."
+- added `r.role-name-param` (SHOULD): "The role route SHOULD keep its dynamic segment as /:name so role details, edit and credentials routes are addressed by Kubernetes role name."
+- added `r.route-map` (MUST): "The addon MUST export a default route map built by ember-engines buildRoutes declaring the top-level routes overview, roles, configure and configuration, where roles contains a create route and a role route at path /:name whose nested routes are details, edit and credentials."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -6041,4 +6058,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-css-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-keep-gitkeep-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-kubernetes-addon-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-lib-kubernetes-addon-components-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-kubernetes-addon-components-page-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-lib-kubernetes-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

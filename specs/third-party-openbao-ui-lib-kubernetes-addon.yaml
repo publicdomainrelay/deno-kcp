@@ -1,5 +1,6 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
+- class:be97ad9bca27f8aa6c2b71e7e60c37a7 KubernetesEngine@third_party/openbao/ui/lib/kubernetes/addon/engine.js:15
 - file:third_party/openbao/ui/lib/kubernetes/addon/engine.js engine.js@third_party/openbao/ui/lib/kubernetes/addon/engine.js
 - file:third_party/openbao/ui/lib/kubernetes/addon/routes.js routes.js@third_party/openbao/ui/lib/kubernetes/addon/routes.js
 kind: SystemContext
@@ -7,5 +8,49 @@ metadata:
   name: third-party-openbao-ui-lib-kubernetes-addon
   namespace: default
 spec:
+  intent: The context exists to record the structure and wiring of the vendored OpenBao
+    Kubernetes UI addon so that changes to it, or dependencies on its engine name,
+    routes and injected services, are grounded in what the code actually declares.
+    It matters because the addon is loaded as an Ember engine with a fixed module
+    prefix and a fixed set of service and external-route dependencies, and any host
+    application integration depends on those exact names.
+  interfaces:
+  - file: third_party/openbao/ui/lib/kubernetes/addon/engine.js
+    kind: class
+    name: KubernetesEngine
+    signature: export default class KubernetesEngine extends Engine
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - class:be97ad9bca27f8aa6c2b71e7e60c37a7
+    - file:third_party/openbao/ui/lib/kubernetes/addon/engine.js
+    id: r.engine-class
+    level: MUST
+    text: The addon MUST export a default KubernetesEngine class that extends Ember's
+      Engine, setting modulePrefix from the module prefix of the environment config,
+      Resolver to the Ember resolver, and a dependencies object listing the injected
+      services host-router, store, secret-mount-path and flash-messages plus the external
+      route secrets.
+  - codeRefs:
+    - class:be97ad9bca27f8aa6c2b71e7e60c37a7
+    - file:third_party/openbao/ui/lib/kubernetes/addon/engine.js
+    id: r.initializers
+    level: MUST
+    text: The engine module MUST call loadInitializers with KubernetesEngine and the
+      module prefix so the engine's initializers are registered under the same prefix
+      the class declares.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/kubernetes/addon/routes.js
+    id: r.role-name-param
+    level: SHOULD
+    text: The role route SHOULD keep its dynamic segment as /:name so role details,
+      edit and credentials routes are addressed by Kubernetes role name.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/kubernetes/addon/routes.js
+    id: r.route-map
+    level: MUST
+    text: The addon MUST export a default route map built by ember-engines buildRoutes
+      declaring the top-level routes overview, roles, configure and configuration,
+      where roles contains a create route and a role route at path /:name whose nested
+      routes are details, edit and credentials.
   upstream: self

@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to record the contract of the Kubernetes UI engine's index module: which engine name it registers, how it configures lazy loading, and how it answers the development-mode hook. It exists so that changes to the engine registration surface of the Kubernetes UI addon can be detected and checked against the expected bundling behavior, independent of the rest of the vendored OpenBao UI tree.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

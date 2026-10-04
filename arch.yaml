@@ -72220,16 +72220,100 @@ system_contexts:
   codeRefIndex:
   - file:third_party/openbao/ui/lib/kubernetes/index.js index.js@third_party/openbao/ui/lib/kubernetes/index.js
   id: sc.third-party-openbao-ui-lib-kubernetes
+  intent: 'This context exists to record the contract of the Kubernetes UI engine''s
+    index module: which engine name it registers, how it configures lazy loading,
+    and how it answers the development-mode hook. It exists so that changes to the
+    engine registration surface of the Kubernetes UI addon can be detected and checked
+    against the expected bundling behavior, independent of the rest of the vendored
+    OpenBao UI tree.'
   name: third-party-openbao-ui-lib-kubernetes
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/kubernetes/index.js
+    id: r.developing-addon-true
+    level: MUST
+    text: The isDevelopingAddon hook defined in the engine definition returns true,
+      so Ember treats the Kubernetes UI addon as under development and skips the production
+      packaging path.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/kubernetes/index.js
+    id: r.engine-name-kubernetes
+    level: MUST
+    text: The engine definition passed to buildEngine carries the name 'kubernetes',
+      which fixes the engine identity used by the host application when mounting or
+      resolving it.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/kubernetes/index.js
+    id: r.export-built-kubernetes-engine
+    level: MUST
+    text: The module exports the value returned by buildEngine from ember-engines/lib/engine-addon,
+      so the Kubernetes UI is registered as an Ember engine rather than a plain addon.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/kubernetes/index.js
+    id: r.lazy-loading-disabled
+    level: MUST
+    text: The engine definition sets lazyLoading.enabled to false, so the Kubernetes
+      engine is bundled with the host application instead of being loaded on demand.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/kubernetes/index.js
+    id: r.third-party-license-header
+    level: SHOULD
+    text: The file keeps its HashiCorp copyright and MPL-2.0 SPDX license header at
+      the top, preserving the upstream licensing provenance of the vendored file.
   upstream: self
 - code:
   - third_party/openbao/ui/lib/kubernetes/addon/engine.js
   - third_party/openbao/ui/lib/kubernetes/addon/routes.js
   codeRefIndex:
+  - class:be97ad9bca27f8aa6c2b71e7e60c37a7 KubernetesEngine@third_party/openbao/ui/lib/kubernetes/addon/engine.js:15
   - file:third_party/openbao/ui/lib/kubernetes/addon/engine.js engine.js@third_party/openbao/ui/lib/kubernetes/addon/engine.js
   - file:third_party/openbao/ui/lib/kubernetes/addon/routes.js routes.js@third_party/openbao/ui/lib/kubernetes/addon/routes.js
   id: sc.third-party-openbao-ui-lib-kubernetes-addon
+  intent: The context exists to record the structure and wiring of the vendored OpenBao
+    Kubernetes UI addon so that changes to it, or dependencies on its engine name,
+    routes and injected services, are grounded in what the code actually declares.
+    It matters because the addon is loaded as an Ember engine with a fixed module
+    prefix and a fixed set of service and external-route dependencies, and any host
+    application integration depends on those exact names.
+  interfaces:
+  - file: third_party/openbao/ui/lib/kubernetes/addon/engine.js
+    kind: class
+    name: KubernetesEngine
+    signature: export default class KubernetesEngine extends Engine
   name: third-party-openbao-ui-lib-kubernetes-addon
+  requirements:
+  - codeRefs:
+    - class:be97ad9bca27f8aa6c2b71e7e60c37a7
+    - file:third_party/openbao/ui/lib/kubernetes/addon/engine.js
+    id: r.engine-class
+    level: MUST
+    text: The addon MUST export a default KubernetesEngine class that extends Ember's
+      Engine, setting modulePrefix from the module prefix of the environment config,
+      Resolver to the Ember resolver, and a dependencies object listing the injected
+      services host-router, store, secret-mount-path and flash-messages plus the external
+      route secrets.
+  - codeRefs:
+    - class:be97ad9bca27f8aa6c2b71e7e60c37a7
+    - file:third_party/openbao/ui/lib/kubernetes/addon/engine.js
+    id: r.initializers
+    level: MUST
+    text: The engine module MUST call loadInitializers with KubernetesEngine and the
+      module prefix so the engine's initializers are registered under the same prefix
+      the class declares.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/kubernetes/addon/routes.js
+    id: r.role-name-param
+    level: SHOULD
+    text: The role route SHOULD keep its dynamic segment as /:name so role details,
+      edit and credentials routes are addressed by Kubernetes role name.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/kubernetes/addon/routes.js
+    id: r.route-map
+    level: MUST
+    text: The addon MUST export a default route map built by ember-engines buildRoutes
+      declaring the top-level routes overview, roles, configure and configuration,
+      where roles contains a create route and a role route at path /:name whose nested
+      routes are details, edit and credentials.
   upstream: self
 - code:
   - third_party/openbao/ui/lib/kubernetes/addon/components/tab-page-header.js
