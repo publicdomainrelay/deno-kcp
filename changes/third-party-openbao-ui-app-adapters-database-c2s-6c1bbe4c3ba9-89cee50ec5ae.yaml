@@ -10,5 +10,38 @@ spec:
   systemContext: third-party-openbao-ui-app-adapters-database
   toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
 status:
-  message: the agent is summarizing third-party-openbao-ui-app-adapters-database
-  phase: Running
+  agentLog: 'This context covers the three Ember Data adapters that the OpenBao/Vault
+    web UI uses to talk to the database secrets engine: connection.js, credential.js
+    and role.js, all under third_party/openbao/ui/app/adapters/database/. Each adapter
+    extends the shared ApplicationAdapter from the parent directory and overrides
+    namespace to ''v1'', then builds request URLs by hand from the backend mount path.
+    The connection adapter manages the connection configuration endpoint, exposes
+    rotate-root and reset actions, and lists configuration entries with a list=true
+    query parameter. The credential adapter reads static and dynamic credentials for
+    a role and rotates role credentials, merging the two credential types when the
+    caller does not state which one is wanted. The role adapter lists, reads, creates,
+    updates and deletes both dynamic and static roles, and keeps the parent connection''s
+    allowed_roles list in sync when a role is created or deleted. Together they are
+    the client half of the database secrets engine API surface.'
+  message: wrote 19 requirement(s) and 0 interface(s) for third-party-openbao-ui-app-adapters-database;
+    interface urlFor is not in the observed facts; dropped; interface optionsForQuery
+    is not in the observed facts; dropped; interface fetchByQuery is not in the observed
+    facts; dropped; interface query is not in the observed facts; dropped; interface
+    queryRecord is not in the observed facts; dropped; interface createRecord is not
+    in the observed facts; dropped; interface updateRecord is not in the observed
+    facts; dropped; interface deleteRecord is not in the observed facts; dropped;
+    interface rotateRootCredentials is not in the observed facts; dropped; interface
+    resetConnection is not in the observed facts; dropped; interface _staticCreds
+    is not in the observed facts; dropped; interface _dynamicCreds is not in the observed
+    facts; dropped; interface fetchByQuery is not in the observed facts; dropped;
+    interface queryRecord is not in the observed facts; dropped; interface rotateRoleCredentials
+    is not in the observed facts; dropped; interface pathForType is not in the observed
+    facts; dropped; interface urlFor is not in the observed facts; dropped; interface
+    staticRoles is not in the observed facts; dropped; interface dynamicRoles is not
+    in the observed facts; dropped; interface optionsForQuery is not in the observed
+    facts; dropped; interface queryRecord is not in the observed facts; dropped; interface
+    query is not in the observed facts; dropped; interface _updateAllowedRoles is
+    not in the observed facts; dropped; interface createRecord is not in the observed
+    facts; dropped; interface deleteRecord is not in the observed facts; dropped;
+    interface updateRecord is not in the observed facts; dropped
+  phase: Succeeded

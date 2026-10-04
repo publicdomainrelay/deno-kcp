@@ -3858,6 +3858,29 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.client-adapters-directory-layout` (SHOULD): "The client adapters for these endpoints should stay grouped under third_party/openbao/ui/app/adapters/clients, one adapter per file, with the activity adapter in activity.js and the version-history adapter in version-history.js; config.js belongs to the same directory."
 - added `r.version-history-find-all-endpoint` (MUST): "VersionHistoryAdapter.findAll must issue an HTTP GET through `this.ajax` to `this.buildURL()` concatenated with `/version-history`, pass the query data `{ list: true }`, and resolve with the response body exactly as received, without adding or renaming fields."
 
+### third-party-openbao-ui-app-adapters-database
+
+- intent: "" -> "These adapters exist so the OpenBao UI can present and edit database secrets engine state (connections, roles and generated credentials) through the standard Ember Data store API instead of raw fetch calls. They exist as a separate context because each adapter encodes a distinct piece of the database engine's URL and error semantics: the connection adapter owns the /config endpoint plus the rotate-root and reset sub-resources, the credential adapter owns /creds and /static-creds and has to reconcile the ambiguity between dynamic and static credential roles, and the role adapter owns /roles and /static-roles and must keep the allowed_roles back-reference on the owning connection consistent on create and delete. The context is the boundary where Ember Data conventions meet the database engine's HTTP API."
+- added `r.connection-delete` (MUST): "Deleting a connection must issue a DELETE against the config URL for the backend and id taken from the snapshot."
+- added `r.connection-fetch-annotates-response` (MUST): "After fetching a connection, the adapter must copy the backend onto the response and, when an id was supplied, set the response id to that id, so the store record carries the mount path it came from."
+- added `r.connection-list-query` (MUST): "When the connection adapter fetches without an id, it must send a 'list' query parameter set to true so the engine returns the key list rather than a single configuration record."
+- added `r.connection-query-passthrough` (MUST): "Both query and queryRecord on the connection adapter must route through the same fetchByQuery helper so list and single-record reads share identical URL and annotation behavior."
+- added `r.connection-root-and-reset` (MUST): "The connection adapter must expose rotateRootCredentials(backend, id) and resetConnection(backend, id), each issuing a POST to the rotate-root and reset URLs respectively."
+- added `r.connection-url-shape` (MUST): "The connection adapter must build URLs of the form <base>/<backend>/config when no id is given and <base>/<backend>/config/<id> when an id is given, and must special-case type 'ROTATE' to <base>/<backend>/rotate-root/<id> and type 'RESET' to <base>/<backend>/reset/<id>."
+- added `r.connection-write-status` (MUST): "Creating and updating a connection must POST serialized attributes to the config URL, and because the engine may answer 204 the adapter must synthesize a payload containing the name id and the serialized data instead of returning an empty body. Update must delegate to create."
+- added `r.credential-endpoints` (MUST): "The credential adapter must read static credentials from <base>/<backend>/static-creds/<secret> and dynamic credentials from <base>/<backend>/creds/<secret>, URL-encoding both the backend and the secret, and must tag each response with roleType 'static' or 'dynamic' respectively."
+- added `r.credential-error-selection` (MUST): "If both credential requests reject, the adapter must rethrow the rejection carrying the higher httpStatus; when the statuses are not comparable it must fall back to the static request's reason."
+- added `r.credential-rotate` (MUST): "The credential adapter must expose rotateRoleCredentials(backend, id), issuing a POST to <base>/<backend>/rotate-role/<id> with both path segments URL-encoded."
+- added `r.credential-type-dispatch` (MUST): "When the caller supplies query.roleType 'static' or 'dynamic' the credential adapter must issue only that one request; when the role type is absent it must request both in parallel and resolve to whichever returned a value."
+- added `r.namespace-v1` (MUST): "Every adapter in this context extends the shared ApplicationAdapter and sets namespace to 'v1', so all request URLs it builds are rooted at the v1 API prefix."
+- added `r.role-allowed-roles-sync` (MUST): "Creating a role must add the role name to the allowed_roles of its owning database connection and save that connection before the role POST; deleting a role must remove the role name from allowed_roles before the role DELETE. A failure to update allowed_roles on create must surface as the error 'Could not update allowed roles for selected database. Check the OpenBao logs for details'."
+- added `r.role-list-query-param` (MUST): "Role list requests must send the 'list' query parameter set to true when no id is supplied, matching the connection adapter's list convention."
+- added `r.role-path-for-type-asserts` (MUST): "The role adapter must override pathForType to fail an assertion, because role URLs are generated from the role type instead of the model name."
+- added `r.role-query-list` (MUST): "A list query must request both static and dynamic roles, throw when both reject, and otherwise return both key sets concatenated into data.keys while also keeping the separate staticRoles and dynamicRoles arrays and the backend on the response, because role names are distinct across the two types and each list may individually fail."
+- added `r.role-query-single` (MUST): "A single-role query must return the request annotated with its type, backend and id; when query.type is absent the adapter must request both static and dynamic roles and use the one that returned a value, merging its data into a response that records the resolved type."
+- added `r.role-url-shape` (MUST): "The role adapter must map role type 'static' to the 'static-roles' path segment and every other type, including the default, to 'roles', giving <base>/<backend>/<segment> for a list and <base>/<backend>/<segment>/<id> for a single role."
+- added `r.role-write-status` (MUST): "Creating and updating a role must POST serializer output to the type-appropriate role URL and return a payload carrying the name as id, since the engine may answer 204 to a non-DELETE write."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4144,7 +4167,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-adapters-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-adapters-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-adapters-clients-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-adapters-database-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-adapters-database-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-adapters-identity-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
