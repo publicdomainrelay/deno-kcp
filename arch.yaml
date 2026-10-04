@@ -7053,7 +7053,80 @@ system_contexts:
 - code:
   - third_party/openbao/internal/builtin/credential/kubernetes/integrationtest/integration_test.go
   id: sc.third-party-openbao-internal-builtin-credential-kubernetes-integrationtest
+  intent: This context exists to verify, end to end against a real Kubernetes cluster,
+    that the OpenBao Kubernetes credential backend authenticates projected service-account
+    JWTs correctly and rejects the cases it should. It is an opt-in integration harness
+    rather than library code, requiring INTEGRATION_TESTS to be set plus a cluster
+    with a test namespace, a deployed Vault/OpenBao reachable via port forward, and
+    a test-token-reviewer-account service account with TokenReview access. Its reason
+    to exist is to exercise the login path and the boundary behaviors — token reviewer
+    configuration, namespace label selectors, unauthorized service accounts, and audience
+    binding — that unit tests cannot reproduce without a live API server.
   name: third-party-openbao-internal-builtin-credential-kubernetes-integrationtest
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/credential/kubernetes/integrationtest/integration_test.go
+    id: r.audience-validation-matrix
+    level: MUST
+    text: Audience validation must be covered by a table-driven test pairing configured
+      audience values (default, "a", unset) with tokens minted for default, "a", and
+      "b" audiences, asserting success or a 403 error for each combination.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/credential/kubernetes/integrationtest/integration_test.go
+    id: r.forbidden-error-shape
+    level: MUST
+    text: Rejected logins must surface as an *api.ResponseError with StatusCode 403,
+      tested for a bad token reviewer JWT, an unauthorized service account, a mismatching
+      namespace selector, and non-matching audiences.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/credential/kubernetes/integrationtest/integration_test.go
+    id: r.gated-by-env-var
+    level: MUST
+    text: The integration test package must run its tests only when the INTEGRATION_TESTS
+      environment variable is non-empty; otherwise TestMain must return without invoking
+      m.Run.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/credential/kubernetes/integrationtest/integration_test.go
+    id: r.kubernetes-dev-mount-setup
+    level: MUST
+    text: setupKubernetesAuth must enable the kubernetes-dev auth method at sys/auth/kubernetes,
+      write auth/kubernetes/config and auth/kubernetes/role/test-role, and return
+      a cleanup that deletes the mount.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/credential/kubernetes/integrationtest/integration_test.go
+    id: r.namespace-label-selector
+    level: MUST
+    text: A role using bound_service_account_namespace_selector must permit login
+      when the selector labels match the namespace and must reject login with HTTP
+      403 when they do not.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/credential/kubernetes/integrationtest/integration_test.go
+    id: r.override-configuration
+    level: SHOULD
+    text: setupKubernetesAuth should accept optional mount and role configuration
+      overrides that replace the default kubernetes_host and bound service account
+      name/namespace settings when non-empty.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/credential/kubernetes/integrationtest/integration_test.go
+    id: r.port-forward-to-api
+    level: MUST
+    text: Before running tests, the harness must set up Kubernetes port forwarding
+      to the vault-0 pod in the test namespace and export BAO_ADDR pointing at the
+      resulting local port with BAO_TOKEN set to root.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/credential/kubernetes/integrationtest/integration_test.go
+    id: r.successful-login
+    level: MUST
+    text: A login to auth/kubernetes/login with role test-role and a token for a bound
+      service account must succeed, both with the default mount configuration and
+      with an explicit token_reviewer_jwt.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/credential/kubernetes/integrationtest/integration_test.go
+    id: r.token-minting
+    level: MUST
+    text: Test tokens must be minted through the Kubernetes TokenRequest API for a
+      named service account in the test namespace, returning the token from the response
+      status.
   upstream: self
 - code:
   - third_party/openbao/internal/builtin/credential/kubernetes/integrationtest/k8s/client.go
