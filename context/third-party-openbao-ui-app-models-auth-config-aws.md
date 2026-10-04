@@ -9,5 +9,8 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/ui/app/models/auth-config/aws/client.js` file client.js (third_party/openbao/ui/app/models/auth-config/aws/client.js)
+- `file:third_party/openbao/ui/app/models/auth-config/aws/identity-accesslist.js` file identity-accesslist.js (third_party/openbao/ui/app/models/auth-config/aws/identity-accesslist.js)
+- `file:third_party/openbao/ui/app/models/auth-config/aws/roletag-denylist.js` file roletag-denylist.js (third_party/openbao/ui/app/models/auth-config/aws/roletag-denylist.js)
+- `file:third_party/openbao/ui/app/models/auth-config/aws/tidy.js` file tidy.js (third_party/openbao/ui/app/models/auth-config/aws/tidy.js)
 <!-- SPECD_MANAGED_END -->
