@@ -10,5 +10,12 @@ spec:
   systemContext: third-party-openbao-internal-command-agentproxyshared-auth-token-file
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-command-agentproxyshared-auth-token-file
-  phase: Running
+  agentLog: The token-file auth method is one of the agent's auth backends in the
+    vendored OpenBao tree. It reads a Vault/OpenBao token from a file on disk and
+    presents it to the server's `auth/token/lookup-self` endpoint, caching the last
+    non-empty token it read so a transient read failure or an empty file does not
+    immediately break the running agent. The constructor validates the plugin configuration
+    and errors out on anything malformed; the credential-watching and shutdown hooks
+    are deliberate no-ops because a static token file needs no renewal loop.
+  message: wrote 6 requirement(s) and 5 interface(s) for third-party-openbao-internal-command-agentproxyshared-auth-token-file
+  phase: Succeeded
