@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the agent proxy can authenticate to OpenBao using TLS client certificates instead of a renewable token. The cert method only supplies the login path and optional certificate-role name; the actual client certificate is presented by the TLS layer, so the method has no credential lifecycle to manage, which is why NewCreds returns nil and CredSuccess and Shutdown do nothing. The constructor exists to validate and default the operator-supplied config map before the agent starts.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

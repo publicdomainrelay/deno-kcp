@@ -3,10 +3,122 @@ codeRefIndex:
 - file:third_party/openbao/internal/command/agentproxyshared/auth/cert/cert.go cert.go@third_party/openbao/internal/command/agentproxyshared/auth/cert/cert.go
 - file:third_party/openbao/internal/command/agentproxyshared/auth/cert/cert_test.go
   cert_test.go@third_party/openbao/internal/command/agentproxyshared/auth/cert/cert_test.go
+- function:72c0b4a6fb15e6576d02c8b829aa8eee NewCertAuthMethod@third_party/openbao/internal/command/agentproxyshared/auth/cert/cert.go:34
+- method:1e8a9476171783802a48d8ae2a820e70 certMethod.Shutdown@third_party/openbao/internal/command/agentproxyshared/auth/cert/cert.go:111
+- method:74691b628a048e5ca411f2fa36bec155 certMethod.AuthClient@third_party/openbao/internal/command/agentproxyshared/auth/cert/cert.go:116
+- method:7751c7f52375b2b2f7cf5af5395cb14d certMethod.Authenticate@third_party/openbao/internal/command/agentproxyshared/auth/cert/cert.go:93
+- method:f2f59a52905ef7981a48da042ea46b1c certMethod.NewCreds@third_party/openbao/internal/command/agentproxyshared/auth/cert/cert.go:105
+- method:f4018509912bf7d804f7eb0bb134b395 certMethod.CredSuccess@third_party/openbao/internal/command/agentproxyshared/auth/cert/cert.go:109
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-command-agentproxyshared-auth-cert
   namespace: default
 spec:
+  intent: This context exists so the agent proxy can authenticate to OpenBao using
+    TLS client certificates instead of a renewable token. The cert method only supplies
+    the login path and optional certificate-role name; the actual client certificate
+    is presented by the TLS layer, so the method has no credential lifecycle to manage,
+    which is why NewCreds returns nil and CredSuccess and Shutdown do nothing. The
+    constructor exists to validate and default the operator-supplied config map before
+    the agent starts.
+  interfaces:
+  - file: third_party/openbao/internal/command/agentproxyshared/auth/cert/cert.go
+    kind: function
+    name: NewCertAuthMethod
+    signature: func NewCertAuthMethod(conf *auth.AuthConfig) (auth.AuthMethod, error)
+  - file: third_party/openbao/internal/command/agentproxyshared/auth/cert/cert.go
+    kind: method
+    name: certMethod.AuthClient
+    signature: func (c *certMethod) AuthClient(client *api.Client) (*api.Client, error)
+  - file: third_party/openbao/internal/command/agentproxyshared/auth/cert/cert.go
+    kind: method
+    name: certMethod.Authenticate
+    signature: func (c *certMethod) Authenticate(_ context.Context, client *api.Client)
+      (string, http.Header, map[string]any, error)
+  - file: third_party/openbao/internal/command/agentproxyshared/auth/cert/cert.go
+    kind: method
+    name: certMethod.CredSuccess
+    signature: func (c *certMethod) CredSuccess()
+  - file: third_party/openbao/internal/command/agentproxyshared/auth/cert/cert.go
+    kind: method
+    name: certMethod.NewCreds
+    signature: func (c *certMethod) NewCreds() chan struct{}
+  - file: third_party/openbao/internal/command/agentproxyshared/auth/cert/cert.go
+    kind: method
+    name: certMethod.Shutdown
+    signature: func (c *certMethod) Shutdown()
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/auth/cert/cert.go
+    - method:1e8a9476171783802a48d8ae2a820e70
+    - method:74691b628a048e5ca411f2fa36bec155
+    id: r.auth-method-conformance
+    level: MUST
+    text: certMethod satisfies the auth.AuthMethod interface, providing Shutdown with
+      no arguments and no return values, and AuthClient that takes an *api.Client
+      and returns an *api.Client together with an error so the agent can obtain a
+      client configured for certificate authentication.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/auth/cert/cert.go
+    - method:7751c7f52375b2b2f7cf5af5395cb14d
+    id: r.authenticate-login-path
+    level: MUST
+    text: certMethod.Authenticate traces the beginning of authentication and returns
+      the path formed as "<mountPath>/login" with a nil http.Header, a non-nil auth
+      map, and a nil error; the auth map carries the key name only when the configured
+      name is not empty.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/auth/cert/cert.go
+    - function:72c0b4a6fb15e6576d02c8b829aa8eee
+    id: r.constructor-populates-method
+    level: MUST
+    text: NewCertAuthMethod copies the logger and mount path from the auth config
+      onto the returned certMethod, so the method logs through the configured logger
+      and authenticates against the configured mount.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/auth/cert/cert_test.go
+    id: r.constructor-tested
+    level: SHOULD
+    text: 'Tests cover the constructor and the client paths: TestCertAuthMethod_Authenticate,
+      TestCertAuthMethod_AuthClient_withoutCerts, TestCertAuthMethod_AuthClient_withCerts
+      and TestCertAuthMethod_AuthClient_withCertsReload all build the method through
+      NewCertAuthMethod so the config parsing and the certificate/no-certificate branches
+      stay exercised.'
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/auth/cert/cert.go
+    - method:f2f59a52905ef7981a48da042ea46b1c
+    - method:f4018509912bf7d804f7eb0bb134b395
+    id: r.no-credential-renewal
+    level: MUST
+    text: certMethod.NewCreds returns a nil channel and certMethod.CredSuccess is
+      a no-op, because TLS client certificates carry no renewable credential for the
+      agent to watch.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/auth/cert/cert.go
+    - function:72c0b4a6fb15e6576d02c8b829aa8eee
+    id: r.optional-name-default
+    level: MUST
+    text: NewCertAuthMethod treats the config key name as optional, defaulting it
+      to the empty string when the key is absent or the config map is nil, and returns
+      the error "could not convert 'name' config value to string" when the key is
+      present but not a string.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/auth/cert/cert.go
+    - function:72c0b4a6fb15e6576d02c8b829aa8eee
+    id: r.reject-nil-config
+    level: MUST
+    text: NewCertAuthMethod returns a nil auth.AuthMethod and the error "empty config"
+      when the supplied *auth.AuthConfig is nil.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/auth/cert/cert.go
+    - function:72c0b4a6fb15e6576d02c8b829aa8eee
+    id: r.typed-config-keys
+    level: MUST
+    text: NewCertAuthMethod accepts the optional keys ca_cert (string), client_cert
+      (string), client_key (string) and reload (bool), leaving each unset when absent
+      and returning the matching conversion error ("could not convert 'ca_cert' config
+      value to string", "could not convert 'cert_file' config value to string", "could
+      not convert 'cert_key' config value to string", "could not convert 'reload'
+      config value to bool") when a present key holds the wrong type.
   upstream: self
