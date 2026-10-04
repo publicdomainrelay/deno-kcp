@@ -29573,7 +29573,109 @@ system_contexts:
   codeRefIndex:
   - file:third_party/openbao/internal/physical/crosstest/cross_test.go cross_test.go@third_party/openbao/internal/physical/crosstest/cross_test.go
   id: sc.third-party-openbao-internal-physical-crosstest
+  intent: 'This context exists so that every physical storage backend OpenBao ships
+    can be held to one shared behavioral contract instead of being trusted individually.
+    The layered comment at the top of the file states the intent explicitly: the storage
+    stack composes a low-level backend, a cache, an encoding validation layer, barrier
+    encryption, storage views and barrier views, and differences between these layers
+    — or between backends under the same layer — produce subtle correctness bugs.
+    The cross-test framework therefore instantiates the same backend types and the
+    same cache/encoding/transaction compositions, drives identical read/write/list/transaction
+    sequences at all of them, and fails when their observable results diverge, so
+    that composition and stacking can be changed with confidence.'
   name: third-party-openbao-internal-physical-crosstest
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/physical/crosstest/cross_test.go
+    id: r.backend-matrix
+    level: MUST
+    text: allPhysical must construct a named map of every physical backend variant
+      under test — raft (plain, and one already inside a transaction), file (created
+      in a temp dir by getFile), in-memory with transactions disabled, transactional
+      in-memory, and one transaction started from it, plus PostgreSQL from the test
+      helper — and return it together with a cleanup function that the caller defers,
+      alongside composed stacks that layer physical.NewCache and physical.NewStorageEncoding
+      over raft, file, in-memory and PostgreSQL, and stacks where a transaction is
+      begun on the underlying backend, on the cache, or on the encoding layer before
+      the next layer is applied.
+  - codeRefs:
+    - file:third_party/openbao/internal/physical/crosstest/cross_test.go
+    id: r.clearview-benchmark
+    level: SHOULD
+    text: BenchmarkClearView must benchmark logical.ClearViewWithoutPagination and
+      logical.ClearViewWithPagination over both a logical.InmemStorage and a raft-backed
+      logical.NewLogicalStorage, populating each with b.N random entries before b.ResetTimer,
+      asserting logical.CountKeys reports b.N entries before the clear and zero entries
+      after it, and skipping the setup cost from the measured time.
+  - codeRefs:
+    - file:third_party/openbao/internal/physical/crosstest/cross_test.go
+    id: r.compare-helpers
+    level: MUST
+    text: The allDo* helpers must perform one operation (List, ListPage, Delete, Put,
+      Get, BeginTx, BeginReadOnlyTx, Commit, Rollback) across all backends and return
+      per-backend results and errors, and the allDoSame* helpers must compare those
+      results for equality across backends — using deep.Equal for entries and lists
+      — and fail the test when a backend diverges or when the observed error presence
+      does not match the shouldError expectation.
+  - codeRefs:
+    - file:third_party/openbao/internal/physical/crosstest/cross_test.go
+    id: r.parallel-entrypoints
+    level: MUST
+    text: The test entrypoints Test_ExerciseBackends, Test_RandomOpsBackends, Test_RandomOpsTransactionalBackends
+      and Test_ExerciseTransactionalBackends must each call t.Parallel() so the backend
+      matrices run concurrently, and the operation-count and ops-log-file paths used
+      by the random-op tests must come from the package constants numOps, numTxOps,
+      opsLogFile and txOpsLogFile rather than being inlined at the call site.
+  - codeRefs:
+    - file:third_party/openbao/internal/physical/crosstest/cross_test.go
+    id: r.random-data
+    level: MUST
+    text: randomData must write count entries into a logical.Storage under the given
+      prefix, each key formed as prefix-index, each value a string of exactly size
+      bytes built by repeating a digit, and must call t.Fatal when a Put returns an
+      error.
+  - codeRefs:
+    - file:third_party/openbao/internal/physical/crosstest/cross_test.go
+    id: r.random-ops
+    level: MUST
+    text: getRandomOps must generate pseudo-random operation sequences from inmem.InmemOp
+      — numOps operations (1000) for non-transactional runs, numTxOps operations (1000)
+      with a transaction limit of 10 for transactional runs — and executeRandomOps
+      and executeRandomTransactionalOps must replay those sequences against the respective
+      backend maps to exercise interleaved read/write/transaction behavior.
+  - codeRefs:
+    - file:third_party/openbao/internal/physical/crosstest/cross_test.go
+    id: r.rollback-after-exercise
+    level: MUST
+    text: Test_ExerciseBackends must, after exercising the backends, roll back every
+      backend that implements physical.Transaction, because the test wrote to the
+      same storage areas from several places and the writes cannot be committed.
+  - codeRefs:
+    - file:third_party/openbao/internal/physical/crosstest/cross_test.go
+    id: r.shared-semantics
+    level: MUST
+    text: 'exerciseBackends must issue the same sequence of Put, Get, Delete, List
+      and paginated List (ListPage) operations against every backend in the map and
+      assert that all backends agree: it compares returned *physical.Entry values
+      and key lists with deep.Equal, and routes each operation through the allDo*
+      helpers so a per-backend error map is produced rather than stopping at the first
+      failing backend.'
+  - codeRefs:
+    - file:third_party/openbao/internal/physical/crosstest/cross_test.go
+    id: r.transaction-lifecycle
+    level: MUST
+    text: Test_ExerciseTransactionalBackends must begin a read-write transaction and
+      a read-only transaction on every transactional backend, exercise each, roll
+      them all back, then begin a fresh read-write transaction per backend, exercise
+      it, and commit it, before finally running exerciseTransactions over the backends.
+  - codeRefs:
+    - file:third_party/openbao/internal/physical/crosstest/cross_test.go
+    id: r.transactional-backend-matrix
+    level: MUST
+    text: allTransactionalPhysical must return a map of physical.TransactionalBackend
+      implementations, including transactional in-memory, PostgreSQL, and the raft,
+      cache and storage-encoding compositions that support transactions, so the transactional
+      tests run against every backend that can begin a transaction.
   upstream: self
 - code:
   - third_party/openbao/internal/physical/inmem/inmem.go
@@ -29626,7 +29728,7 @@ system_contexts:
     in-memory implementation: tests can inject failures per operation, drive transactions
     and roll them back, and take advisory locks that simulate HA leader election,
     all with deterministic in-process state. Read it to learn what guarantees the
-    in-memory backend offers before you rely on it as a stand-in for a durable backend,
+    in-memory backend offers before relying on it as a stand-in for a durable backend,
     and to see exactly which failure and locking knobs tests can turn.'
   interfaces:
   - file: third_party/openbao/internal/physical/inmem/inmem.go

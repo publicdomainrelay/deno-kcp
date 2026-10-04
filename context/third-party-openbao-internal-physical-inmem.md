@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-This context exists so the deno-kcp repository carries a self-contained, dependency-free physical storage backend for OpenBao tests and local runs, without touching a real disk or network store. It is the transactional and HA-capable in-memory implementation: tests can inject failures per operation, drive transactions and roll them back, and take advisory locks that simulate HA leader election, all with deterministic in-process state. Read it to learn what guarantees the in-memory backend offers before you rely on it as a stand-in for a durable backend, and to see exactly which failure and locking knobs tests can turn.
+This context exists so the deno-kcp repository carries a self-contained, dependency-free physical storage backend for OpenBao tests and local runs, without touching a real disk or network store. It is the transactional and HA-capable in-memory implementation: tests can inject failures per operation, drive transactions and roll them back, and take advisory locks that simulate HA leader election, all with deterministic in-process state. Read it to learn what guarantees the in-memory backend offers before relying on it as a stand-in for a durable backend, and to see exactly which failure and locking knobs tests can turn.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
