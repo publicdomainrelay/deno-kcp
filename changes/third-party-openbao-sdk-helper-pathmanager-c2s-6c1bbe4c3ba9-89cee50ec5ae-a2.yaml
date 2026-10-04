@@ -1,0 +1,29 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-sdk-helper-pathmanager-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-sdk-helper-pathmanager
+  toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
+status:
+  agentLog: This context is the vendored OpenBao SDK pathmanager package under third_party/openbao/sdk/helper/pathmanager.
+    It holds one exported type, PathManager, which stores a set of path prefixes in
+    a radix tree guarded by an embedded RWMutex, and the constructor New that returns
+    an empty manager. AddPaths and RemovePaths mutate the tree inside a single transaction
+    and commit it, skipping zero-length entries, cutting a leading "!" as the exception
+    marker, and trimming a trailing "*" while leaving any trailing slash untouched
+    so a path that fully names a file stays distinct from a directory prefix. RemovePathPrefix
+    deletes every entry under a prefix. Readers are Len, Paths, HasPath, HasExactPath
+    and HasPathSegments, covering counting, listing, prefix matching and whole-segment
+    matching. A companion test file exercises construction, add and list, remove,
+    prefix removal and the three match modes.
+  message: wrote 13 requirement(s) and 10 interface(s) for third-party-openbao-sdk-helper-pathmanager
+  phase: Succeeded
+superseded:
+- message: wrote 13 requirement(s) and 10 interface(s) for third-party-openbao-sdk-helper-pathmanager
+  name: third-party-openbao-sdk-helper-pathmanager-c2s-6c1bbe4c3ba9-89cee50ec5ae
+  phase: Succeeded

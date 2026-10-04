@@ -3304,7 +3304,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 
 ### third-party-openbao-sdk-helper-pathmanager
 
-- intent: "" -> "The context exists to pin down the vendored pathmanager helper that deno-kcp inherits from the OpenBao SDK, so the prefix-set semantics (exception markers, trailing-star trimming, trailing-slash preservation, tree transactions) are stated as testable requirements rather than left implicit in a git sub-tree. It describes the code as it stands so later changes to the vendored copy can be checked against the behaviour the rest of the tree relies on."
+- intent: "" -> "The context pins down the vendored pathmanager helper that deno-kcp inherits from the OpenBao SDK, so the prefix-set semantics (exception markers, trailing-star trimming, trailing-slash preservation, tree transactions) are stated as testable requirements rather than left implicit in a git sub-tree. It records the code as it stands, so later changes to the vendored copy can be checked against the behaviour the rest of the tree relies on."
 - added `r.add-paths` (MUST): "AddPaths inserts each supplied path into the radix tree inside a single transaction and commits it, and it skips entries whose length is zero."
 - added `r.concurrent-access` (MUST): "Every exported method of PathManager guards the shared radix tree with the embedded RWMutex, taking a write lock for mutations and a read lock for queries, so concurrent callers do not race."
 - added `r.constructor` (MUST): "New returns a *PathManager with an empty path set, ready for concurrent use."
@@ -3583,5 +3583,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-sdk-helper-logging-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-ocsp-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-pathmanager-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-sdk-helper-pathmanager-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-helper-pathmanager-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-pluginutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-sdk-helper-policyutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-helper-roottoken-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
