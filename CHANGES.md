@@ -3809,6 +3809,26 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.deprecation-workflow-module-present` (SHOULD): "The app directory must ship a deprecation-workflow module at third_party/openbao/ui/app/deprecation-workflow.js so Ember deprecation handling is configured in the build rather than scattered through feature code."
 - added `r.router-reads-config` (MUST): "third_party/openbao/ui/app/router.js must export a default Router subclass (codegraph class Router) that takes its location and rootURL from the application config, so the running UI honours the configured locationType and the base URL the app is served under."
 
+### third-party-openbao-ui-app-adapters
+
+- intent: "" -> "The context exists so that the adapter contract of the OpenBao UI is written down: which URL each adapter builds, which HTTP verb it uses, what it returns when the server sends an empty body, and which client-side guards the adapters enforce before a request leaves the browser. It is the reference for anyone changing how the UI talks to the server, or for anyone porting these models to another client."
+- added `r.adapters-cover-domain-resources` (SHOULD): "The directory keeps one adapter module per server resource family, covering auth methods, AWS and SSH credentials and roles, capabilities, cluster and server state, console, generated item lists, leases, nodes, permissions, policies, raft join, secret engines, KV v1 and v2 secrets and versions, SSH signing and OTP, tools, and transit keys, so each model type resolves to a dedicated adapter."
+- added `r.adapters-extend-application-adapter` (MUST): "Every adapter in this directory extends ApplicationAdapter from application.js, so all of them inherit urlPrefix, buildURL and the ajax request helper instead of calling the network directly."
+- added `r.keymgmt-mfa-login-enforcement-save` (MUST): "The KeymgmtKeyAdapter defined in mfa-login-enforcement.js returns namespace and pathForType, saves create and update through the shared _saveRecord helper, and answers query by delegating to the same record lookup, so login-enforcement records are read and written through one named endpoint."
+- added `r.mfa-method-create-or-update` (MUST): "MfaMethodAdapter routes both create and update through createOrUpdate over its custom buildURL, and sends deletes to the URL produced by urlForDeleteRecord, so MFA method writes use one combined path instead of the default record URLs."
+- added `r.mfa-setup-admin-destroy` (MUST): "MfaSetupAdapter.adminDestroy POSTs the given data to `/v1/identity/mfa/method/totp/admin-destroy`, so destroying a TOTP method for another identity is sent as a POST to the admin endpoint."
+- added `r.mfa-setup-current-token-generate` (MUST): "MfaSetupAdapter.currentTokenGenerate POSTs the given data to `/v1/identity/mfa/method/totp/generate` and returns the ajax promise, so TOTP enrollment for the current token does not go through Ember Data record plumbing."
+- added `r.named-path-duplicate-name-guard` (MUST): "NamedPathAdapter.createRecord throws `A record already exists with the name: ${name}` when store.peekRecord finds a record of the same model type and name, and only calls _saveRecord when no such record exists, so a create never silently overwrites an existing named record."
+- added `r.named-path-find-record-name-backfill` (SHOULD): "NamedPathAdapter.findRecord backfills resp.data.name with the id supplied to findRecord when the response omits a name, so Ember Data does not reject a record pushed without an id."
+- added `r.named-path-namespace-and-method` (MUST): "NamedPathAdapter fixes namespace to 'v1' and saveMethod to 'POST', and subclasses that need PUT override saveMethod rather than reimplementing the save path."
+- added `r.named-path-save-record` (MUST): "NamedPathAdapter._saveRecord serializes the snapshot through the model serializer, sends the result to urlForUpdateRecord with the record name as id and saveMethod as verb, and resolves with the serialized data because the server response body is empty."
+- added `r.named-path-update-same-endpoint` (MUST): "NamedPathAdapter.updateRecord delegates to the same _saveRecord path as create, because create and update share one endpoint and one verb."
+- added `r.namespace-create-record-id` (MUST): "NamespaceAdapter creates a record with the namespace path taken from snapshot.attr('path') as both the URL id and the id of the returned payload object, because the create response carries no identifier of its own."
+- added `r.namespace-find-all-namespace-option` (MUST): "NamespaceAdapter.findAll forwards snapshot.adapterOptions.namespace to the request when that option is defined, and otherwise falls back to the superclass findAll."
+- added `r.namespace-find-all-url` (MUST): "NamespaceAdapter.urlForFindAll returns `/${urlPrefix}/internal/ui/namespaces` when snapshot.adapterOptions.forUser is set, and `/${urlPrefix}/namespaces?list=true` otherwise, so user-scoped scope listing uses the internal endpoint while the ordinary listing uses the LIST query form."
+- added `r.namespace-path-for-type` (MUST): "NamespaceAdapter.pathForType returns 'namespaces', so model URLs for namespaces are built under the namespaces path segment."
+- added `r.namespace-query-list` (MUST): "NamespaceAdapter.query issues a GET to `/${urlPrefix}/namespaces?list=true` with no filter argument, so a namespace query always returns the full list."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4090,6 +4110,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-tools-semgrep-ci-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-tools-semgrep-ci-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-adapters-auth-config-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-ui-app-adapters-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-adapters-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-adapters-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

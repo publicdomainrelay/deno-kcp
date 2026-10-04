@@ -56665,6 +56665,11 @@ system_contexts:
   - third_party/openbao/ui/app/adapters/tools.js
   - third_party/openbao/ui/app/adapters/transit-key.js
   codeRefIndex:
+  - class:27606a943785b17d2d3432ad7b9aedd5 NamespaceAdapter@third_party/openbao/ui/app/adapters/namespace.js:8
+  - class:6b10cfbc89c71d4a5b55c8bd178c37a5 NamedPathAdapter@third_party/openbao/ui/app/adapters/named-path.js:12
+  - class:9af0b9aa7c59b049942568160f238647 KeymgmtKeyAdapter@third_party/openbao/ui/app/adapters/mfa-login-enforcement.js:8
+  - class:ad7d2caad4e670533a67733f34b30743 MfaSetupAdapter@third_party/openbao/ui/app/adapters/mfa-setup.js:8
+  - class:ef171d6401e73ade3c85cb1d64da5da2 MfaMethodAdapter@third_party/openbao/ui/app/adapters/mfa-method.js:8
   - file:third_party/openbao/ui/app/adapters/application.js application.js@third_party/openbao/ui/app/adapters/application.js
   - file:third_party/openbao/ui/app/adapters/auth-method.js auth-method.js@third_party/openbao/ui/app/adapters/auth-method.js
   - file:third_party/openbao/ui/app/adapters/aws-credential.js aws-credential.js@third_party/openbao/ui/app/adapters/aws-credential.js
@@ -56696,7 +56701,162 @@ system_contexts:
   - file:third_party/openbao/ui/app/adapters/tools.js tools.js@third_party/openbao/ui/app/adapters/tools.js
   - file:third_party/openbao/ui/app/adapters/transit-key.js transit-key.js@third_party/openbao/ui/app/adapters/transit-key.js
   id: sc.third-party-openbao-ui-app-adapters
+  intent: 'The context exists so that the adapter contract of the OpenBao UI is written
+    down: which URL each adapter builds, which HTTP verb it uses, what it returns
+    when the server sends an empty body, and which client-side guards the adapters
+    enforce before a request leaves the browser. It is the reference for anyone changing
+    how the UI talks to the server, or for anyone porting these models to another
+    client.'
+  interfaces:
+  - file: third_party/openbao/ui/app/adapters/mfa-login-enforcement.js
+    kind: class
+    name: KeymgmtKeyAdapter
+    signature: class KeymgmtKeyAdapter extends ApplicationAdapter
+  - file: third_party/openbao/ui/app/adapters/mfa-method.js
+    kind: class
+    name: MfaMethodAdapter
+    signature: class MfaMethodAdapter extends ApplicationAdapter
+  - file: third_party/openbao/ui/app/adapters/mfa-setup.js
+    kind: class
+    name: MfaSetupAdapter
+    signature: class MfaSetupAdapter extends ApplicationAdapter
+  - file: third_party/openbao/ui/app/adapters/named-path.js
+    kind: class
+    name: NamedPathAdapter
+    signature: class NamedPathAdapter extends ApplicationAdapter
+  - file: third_party/openbao/ui/app/adapters/namespace.js
+    kind: class
+    name: NamespaceAdapter
+    signature: class NamespaceAdapter extends ApplicationAdapter
   name: third-party-openbao-ui-app-adapters
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/app/adapters/auth-method.js
+    - file:third_party/openbao/ui/app/adapters/capabilities.js
+    - file:third_party/openbao/ui/app/adapters/lease.js
+    - file:third_party/openbao/ui/app/adapters/policy.js
+    - file:third_party/openbao/ui/app/adapters/secret-engine.js
+    - file:third_party/openbao/ui/app/adapters/secret-v2.js
+    - file:third_party/openbao/ui/app/adapters/transit-key.js
+    id: r.adapters-cover-domain-resources
+    level: SHOULD
+    text: The directory keeps one adapter module per server resource family, covering
+      auth methods, AWS and SSH credentials and roles, capabilities, cluster and server
+      state, console, generated item lists, leases, nodes, permissions, policies,
+      raft join, secret engines, KV v1 and v2 secrets and versions, SSH signing and
+      OTP, tools, and transit keys, so each model type resolves to a dedicated adapter.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/adapters/application.js
+    - file:third_party/openbao/ui/app/adapters/namespace.js
+    id: r.adapters-extend-application-adapter
+    level: MUST
+    text: Every adapter in this directory extends ApplicationAdapter from application.js,
+      so all of them inherit urlPrefix, buildURL and the ajax request helper instead
+      of calling the network directly.
+  - codeRefs:
+    - class:9af0b9aa7c59b049942568160f238647
+    - file:third_party/openbao/ui/app/adapters/mfa-login-enforcement.js
+    id: r.keymgmt-mfa-login-enforcement-save
+    level: MUST
+    text: The KeymgmtKeyAdapter defined in mfa-login-enforcement.js returns namespace
+      and pathForType, saves create and update through the shared _saveRecord helper,
+      and answers query by delegating to the same record lookup, so login-enforcement
+      records are read and written through one named endpoint.
+  - codeRefs:
+    - class:ef171d6401e73ade3c85cb1d64da5da2
+    - file:third_party/openbao/ui/app/adapters/mfa-method.js
+    id: r.mfa-method-create-or-update
+    level: MUST
+    text: MfaMethodAdapter routes both create and update through createOrUpdate over
+      its custom buildURL, and sends deletes to the URL produced by urlForDeleteRecord,
+      so MFA method writes use one combined path instead of the default record URLs.
+  - codeRefs:
+    - class:ad7d2caad4e670533a67733f34b30743
+    id: r.mfa-setup-admin-destroy
+    level: MUST
+    text: MfaSetupAdapter.adminDestroy POSTs the given data to `/v1/identity/mfa/method/totp/admin-destroy`,
+      so destroying a TOTP method for another identity is sent as a POST to the admin
+      endpoint.
+  - codeRefs:
+    - class:ad7d2caad4e670533a67733f34b30743
+    - file:third_party/openbao/ui/app/adapters/mfa-setup.js
+    id: r.mfa-setup-current-token-generate
+    level: MUST
+    text: MfaSetupAdapter.currentTokenGenerate POSTs the given data to `/v1/identity/mfa/method/totp/generate`
+      and returns the ajax promise, so TOTP enrollment for the current token does
+      not go through Ember Data record plumbing.
+  - codeRefs:
+    - class:6b10cfbc89c71d4a5b55c8bd178c37a5
+    - file:third_party/openbao/ui/app/adapters/named-path.js
+    id: r.named-path-duplicate-name-guard
+    level: MUST
+    text: 'NamedPathAdapter.createRecord throws `A record already exists with the
+      name: ${name}` when store.peekRecord finds a record of the same model type and
+      name, and only calls _saveRecord when no such record exists, so a create never
+      silently overwrites an existing named record.'
+  - codeRefs:
+    - class:6b10cfbc89c71d4a5b55c8bd178c37a5
+    id: r.named-path-find-record-name-backfill
+    level: SHOULD
+    text: NamedPathAdapter.findRecord backfills resp.data.name with the id supplied
+      to findRecord when the response omits a name, so Ember Data does not reject
+      a record pushed without an id.
+  - codeRefs:
+    - class:6b10cfbc89c71d4a5b55c8bd178c37a5
+    - file:third_party/openbao/ui/app/adapters/named-path.js
+    id: r.named-path-namespace-and-method
+    level: MUST
+    text: NamedPathAdapter fixes namespace to 'v1' and saveMethod to 'POST', and subclasses
+      that need PUT override saveMethod rather than reimplementing the save path.
+  - codeRefs:
+    - class:6b10cfbc89c71d4a5b55c8bd178c37a5
+    id: r.named-path-save-record
+    level: MUST
+    text: NamedPathAdapter._saveRecord serializes the snapshot through the model serializer,
+      sends the result to urlForUpdateRecord with the record name as id and saveMethod
+      as verb, and resolves with the serialized data because the server response body
+      is empty.
+  - codeRefs:
+    - class:6b10cfbc89c71d4a5b55c8bd178c37a5
+    id: r.named-path-update-same-endpoint
+    level: MUST
+    text: NamedPathAdapter.updateRecord delegates to the same _saveRecord path as
+      create, because create and update share one endpoint and one verb.
+  - codeRefs:
+    - class:27606a943785b17d2d3432ad7b9aedd5
+    id: r.namespace-create-record-id
+    level: MUST
+    text: NamespaceAdapter creates a record with the namespace path taken from snapshot.attr('path')
+      as both the URL id and the id of the returned payload object, because the create
+      response carries no identifier of its own.
+  - codeRefs:
+    - class:27606a943785b17d2d3432ad7b9aedd5
+    id: r.namespace-find-all-namespace-option
+    level: MUST
+    text: NamespaceAdapter.findAll forwards snapshot.adapterOptions.namespace to the
+      request when that option is defined, and otherwise falls back to the superclass
+      findAll.
+  - codeRefs:
+    - class:27606a943785b17d2d3432ad7b9aedd5
+    - file:third_party/openbao/ui/app/adapters/namespace.js
+    id: r.namespace-find-all-url
+    level: MUST
+    text: NamespaceAdapter.urlForFindAll returns `/${urlPrefix}/internal/ui/namespaces`
+      when snapshot.adapterOptions.forUser is set, and `/${urlPrefix}/namespaces?list=true`
+      otherwise, so user-scoped scope listing uses the internal endpoint while the
+      ordinary listing uses the LIST query form.
+  - codeRefs:
+    - class:27606a943785b17d2d3432ad7b9aedd5
+    id: r.namespace-path-for-type
+    level: MUST
+    text: NamespaceAdapter.pathForType returns 'namespaces', so model URLs for namespaces
+      are built under the namespaces path segment.
+  - codeRefs:
+    - class:27606a943785b17d2d3432ad7b9aedd5
+    id: r.namespace-query-list
+    level: MUST
+    text: NamespaceAdapter.query issues a GET to `/${urlPrefix}/namespaces?list=true`
+      with no filter argument, so a namespace query always returns the full list.
   upstream: self
 - code:
   - third_party/openbao/ui/app/adapters/auth-config/_base.js

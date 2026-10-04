@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so that the adapter contract of the OpenBao UI is written down: which URL each adapter builds, which HTTP verb it uses, what it returns when the server sends an empty body, and which client-side guards the adapters enforce before a request leaves the browser. It is the reference for anyone changing how the UI talks to the server, or for anyone porting these models to another client.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
