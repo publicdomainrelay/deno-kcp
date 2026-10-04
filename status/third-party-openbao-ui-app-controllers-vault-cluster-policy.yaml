@@ -1,15 +1,29 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: PolicyEditController'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/ui/app/controllers/vault/cluster/policy/create.js
+  - third_party/openbao/ui/app/controllers/vault/cluster/policy/edit.js
+  - third_party/openbao/ui/app/controllers/vault/cluster/policy/show.js
+  fingerprint: ad59af8e4072d58c309081f6e1b622b51de94acc56364c1545369a997b6d59c7
+  interfaces:
+  - codegraphId: class:b6199ded53e7c771c2e355a09af4bba3
+    file: third_party/openbao/ui/app/controllers/vault/cluster/policy/edit.js
+    kind: class
+    line: 11
+    name: PolicyEditController
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 78e68fed20b7010824d7c0c0db6b786408f7d097e45318b26174175520aba77b
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: ad59af8e4072d58c309081f6e1b622b51de94acc56364c1545369a997b6d59c7

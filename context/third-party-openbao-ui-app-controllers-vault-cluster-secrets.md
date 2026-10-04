@@ -9,5 +9,7 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `class:21d0b621a698e03c7df822b3b38419f5` class VaultClusterSecretsBackendController (third_party/openbao/ui/app/controllers/vault/cluster/secrets/backends.js)
+- `file:third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend.js` file backend.js (third_party/openbao/ui/app/controllers/vault/cluster/secrets/backend.js)
+- `file:third_party/openbao/ui/app/controllers/vault/cluster/secrets/backends.js` file backends.js (third_party/openbao/ui/app/controllers/vault/cluster/secrets/backends.js)
 <!-- SPECD_MANAGED_END -->
