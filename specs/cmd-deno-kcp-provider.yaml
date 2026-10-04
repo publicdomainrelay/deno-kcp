@@ -1,9 +1,13 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+codeRefIndex:
+- file:cmd/deno-kcp-provider/main.go main.go@cmd/deno-kcp-provider/main.go
 kind: SystemContext
 metadata:
   name: cmd-deno-kcp-provider
   namespace: default
 spec:
+  dependsOn:
+  - sc.internal-provider
   intent: 'This context exists to be the process entrypoint for the deno-kcp provider
     controller. Everything it does is wiring: turn command line flags and environment
     variables into a config, refuse to start without a kubeconfig, build the registry,

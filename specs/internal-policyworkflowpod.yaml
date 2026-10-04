@@ -1,9 +1,18 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+codeRefIndex:
+- file:internal/policyworkflowpod/policyworkflowpod.go policyworkflowpod.go@internal/policyworkflowpod/policyworkflowpod.go
+- file:internal/policyworkflowpod/policyworkflowpod_test.go policyworkflowpod_test.go@internal/policyworkflowpod/policyworkflowpod_test.go
+- function:02acf20c6ae76f4247f2782b39f9905d New@internal/policyworkflowpod/policyworkflowpod.go:48
+- function:bbc6e4753713c4d1d1079ae7e84ed8fa Capacity@internal/policyworkflowpod/policyworkflowpod.go:98
+- function:d4ae60590520385e8ca42957d1cb728f RunTTL@internal/policyworkflowpod/policyworkflowpod.go:108
+- method:84d4636db1ea631ee61b88e98f741d27 Reconciler.Reconcile@internal/policyworkflowpod/policyworkflowpod.go:55
 kind: SystemContext
 metadata:
   name: internal-policyworkflowpod
   namespace: default
 spec:
+  dependsOn:
+  - sc.api-v1alpha1
   intent: This context exists so the PolicyWorkflowPod decider has a describable contract
     separate from the provider that calls it. The provider owns the watch loop and
     status writes; this package owns only the decision, which makes the phase transitions,

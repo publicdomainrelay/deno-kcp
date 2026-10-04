@@ -1,39 +1,15 @@
 conditions:
-- message: 'undeclared: MfaLoginEnforcementCreateRoute, MfaMethodRoute, MfaMethodsRoute'
-  reason: InterfacesMissing
-  status: "False"
+- message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+  reason: InterfacesObserved
+  status: "True"
   type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+- message: no synced fingerprint has been recorded yet
+  reason: NotSyncedYet
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed:
-  files:
-  - third_party/openbao/ui/app/routes/vault/cluster/access/mfa/methods/create.js
-  - third_party/openbao/ui/app/routes/vault/cluster/access/mfa/methods/index.js
-  - third_party/openbao/ui/app/routes/vault/cluster/access/mfa/methods/method.js
-  fingerprint: 0dab62fe7e56e303ff458845e4fdd1a9577f4d6339fba87120761dc606ab646d
-  interfaces:
-  - codegraphId: class:6454548d1b147ac2baaed64eaadef437
-    file: third_party/openbao/ui/app/routes/vault/cluster/access/mfa/methods/create.js
-    kind: class
-    line: 8
-    name: MfaLoginEnforcementCreateRoute
-  - codegraphId: class:0129648ecf0331d7c7a9ba3e6bcb1cff
-    file: third_party/openbao/ui/app/routes/vault/cluster/access/mfa/methods/index.js
-    kind: class
-    line: 9
-    name: MfaMethodsRoute
-  - codegraphId: class:2a3554ca939b5f822ca112217a178343
-    file: third_party/openbao/ui/app/routes/vault/cluster/access/mfa/methods/method.js
-    kind: class
-    line: 10
-    name: MfaMethodRoute
-observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-realizedSpecHash: f01b8c13a40cfa22029ac44de3d2bf78816b0e2053173f01ccdd0142937c8889
-syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-syncedFingerprint: 0dab62fe7e56e303ff458845e4fdd1a9577f4d6339fba87120761dc606ab646d
+observed: {}

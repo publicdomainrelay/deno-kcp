@@ -1,48 +1,15 @@
 conditions:
-- message: 'undeclared: ParseURL, QueryHelper, QuoteIdentifier, Unimplemented'
-  reason: InterfacesMissing
-  status: "False"
+- message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+  reason: InterfacesObserved
+  status: "True"
   type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+- message: no synced fingerprint has been recorded yet
+  reason: NotSyncedYet
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed:
-  files:
-  - third_party/openbao/sdk/database/helper/dbutil/dbutil.go
-  - third_party/openbao/sdk/database/helper/dbutil/parseurl.go
-  - third_party/openbao/sdk/database/helper/dbutil/quoteidentifier.go
-  fingerprint: 2baad9c89987c282d37c3fbd86b9416b0cab60792f32c1f1edfbc7cc20faba8b
-  interfaces:
-  - codegraphId: function:eb56241dcc57671e9840d5dbe3210b83
-    file: third_party/openbao/sdk/database/helper/dbutil/dbutil.go
-    kind: function
-    line: 21
-    name: QueryHelper
-    signature: (tpl string, data map[string]string) string
-  - codegraphId: function:68634ad58e9e60c66e8af6d0e4aefed1
-    file: third_party/openbao/sdk/database/helper/dbutil/dbutil.go
-    kind: function
-    line: 30
-    name: Unimplemented
-    signature: () error
-  - codegraphId: function:4894743c645e48dfeae75571355de588
-    file: third_party/openbao/sdk/database/helper/dbutil/parseurl.go
-    kind: function
-    line: 55
-    name: ParseURL
-    signature: (url string) (string, error)
-  - codegraphId: function:226e54f4985dac8b16bce4aecd3fa887
-    file: third_party/openbao/sdk/database/helper/dbutil/quoteidentifier.go
-    kind: function
-    line: 39
-    name: QuoteIdentifier
-    signature: (name string) string
-observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-realizedSpecHash: 3e63e70c6acc46c364e456d923e55f063c9622f46ed149f40ca5c7dc0611195b
-syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-syncedFingerprint: 2baad9c89987c282d37c3fbd86b9416b0cab60792f32c1f1edfbc7cc20faba8b
+observed: {}

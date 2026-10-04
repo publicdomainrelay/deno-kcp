@@ -4,45 +4,7 @@ Repository: `deno-kcp`
 
 This context exists to capture the process-level bootstrap that turns the JWT/OIDC credential backend into a runnable OpenBao/Vault plugin binary. It is deliberately thin: it owns flag parsing, TLS config derivation, and the `plugin.ServeMultiplex` wiring, while all backend behavior lives in the jwtauth package imported as `jwtauth`. It must stay correct because it is the only path by which the JWT backend is mounted as an external plugin, and the explicit `TLSProviderFunc` exists purely to keep older Vault versions without AutoMTLS working.
 
-_Write the prose above and the fields in the spec block. `codeRefs` and the resolved references below are maintained by the tool; an edit there is lost._
-
-## spec
-
-```yaml spec
-requirements:
-- codeRefs:
-  - file:third_party/openbao/internal/builtin/credential/jwt/cmd/jwt/main.go
-  id: r.exit-nonzero-on-error
-  level: MUST
-  text: A failure from flag parsing or from `plugin.ServeMultiplex` MUST be reported
-    with `log.Println` and MUST terminate the process with `os.Exit(1)`.
-- codeRefs:
-  - file:third_party/openbao/internal/builtin/credential/jwt/cmd/jwt/main.go
-  id: r.flag-parse-from-args
-  level: MUST
-  text: The entry point MUST construct an `api.PluginAPIClientMeta`, take its `FlagSet()`,
-    and parse `os.Args[1:]` through that flag set.
-- codeRefs:
-  - file:third_party/openbao/internal/builtin/credential/jwt/cmd/jwt/main.go
-  id: r.no-exported-api
-  level: SHOULD
-  text: The package SHOULD remain a `main` package that exposes only the executable
-    entry point, exporting no identifiers for other packages to import.
-- codeRefs:
-  - file:third_party/openbao/internal/builtin/credential/jwt/cmd/jwt/main.go
-  id: r.serve-jwt-factory-multiplex
-  level: MUST
-  text: The entry point MUST serve the JWT credential backend through `plugin.ServeMultiplex`
-    with `BackendFactoryFunc` set to `jwtauth.Factory`, the factory of `github.com/openbao/openbao/v2/internal/builtin/credential/jwt`.
-- codeRefs:
-  - file:third_party/openbao/internal/builtin/credential/jwt/cmd/jwt/main.go
-  id: r.tls-provider-for-backcompat
-  level: MUST
-  text: The entry point MUST set `TLSProviderFunc` on the serve options to `api.VaultPluginTLSProvider`
-    of the config returned by `apiClientMeta.GetTLSConfig()`, so the plugin keeps
-    backwards compatibility with Vault versions that do not support plugin AutoMTLS.
-upstream: self
-```
+_The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references

@@ -1,44 +1,15 @@
 conditions:
-- message: 'undeclared: DecodeToken, EncodeToken, GenerateOTP'
-  reason: InterfacesMissing
-  status: "False"
+- message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+  reason: InterfacesObserved
+  status: "True"
   type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+- message: no synced fingerprint has been recorded yet
+  reason: NotSyncedYet
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed:
-  files:
-  - third_party/openbao/sdk/helper/roottoken/decode.go
-  - third_party/openbao/sdk/helper/roottoken/encode.go
-  - third_party/openbao/sdk/helper/roottoken/encode_test.go
-  - third_party/openbao/sdk/helper/roottoken/otp.go
-  - third_party/openbao/sdk/helper/roottoken/otp_test.go
-  fingerprint: 8155f1dc8401ec0bf7f846e51c7f237c1013ee3f0bbbb34dbb54b270b3ecbbff
-  interfaces:
-  - codegraphId: function:3518a32961e678d229a118dd1bcdc667
-    file: third_party/openbao/sdk/helper/roottoken/decode.go
-    kind: function
-    line: 17
-    name: DecodeToken
-    signature: (encoded, otp string, otpLength int) (string, error)
-  - codegraphId: function:9dc914afacd1073fb8322590bd01f546
-    file: third_party/openbao/sdk/helper/roottoken/encode.go
-    kind: function
-    line: 16
-    name: EncodeToken
-    signature: (token, otp string) (string, error)
-  - codegraphId: function:79af08be4993a48058794aa0eb6cb360
-    file: third_party/openbao/sdk/helper/roottoken/otp.go
-    kind: function
-    line: 20
-    name: GenerateOTP
-    signature: (otpLength int) (string, error)
-observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-realizedSpecHash: 5090957fe76ea22dc673c99e869c24a75d0e8567c8eba9bce5576c2c7ef255f0
-syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-syncedFingerprint: 8155f1dc8401ec0bf7f846e51c7f237c1013ee3f0bbbb34dbb54b270b3ecbbff
+observed: {}

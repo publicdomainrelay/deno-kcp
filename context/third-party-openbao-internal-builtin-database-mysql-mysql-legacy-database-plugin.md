@@ -4,45 +4,7 @@ Repository: `deno-kcp`
 
 This context exists to pin down the behaviour of the legacy MySQL database plugin binary inside the vendored third-party OpenBao code, so that the plugin's construction path, username template choice, and RPC serving contract are described rather than inferred. It anchors one file and one function, and it records that the legacy plugin deliberately uses DefaultLegacyUserNameTemplate and dbplugin.Serve, which distinguishes it from the non-legacy MySQL plugin that uses DefaultUserNameTemplate and dbplugin.ServeMultiplex. It is a description of third-party code that is depended on, not code owned by this repository.
 
-_Write the prose above and the fields in the spec block. `codeRefs` and the resolved references below are maintained by the tool; an edit there is lost._
-
-## spec
-
-```yaml spec
-interfaces:
-- file: third_party/openbao/internal/builtin/database/mysql/mysql-legacy-database-plugin/main.go
-  kind: function
-  name: Run
-  signature: func Run() error
-requirements:
-- codeRefs:
-  - function:351b9cf78c3672814bcb525f1d453382
-  id: r.constructor-error-propagates
-  level: MUST
-  text: Run returns the error from the MySQL constructor immediately when construction
-    fails, and does not call dbplugin.Serve in that case.
-- codeRefs:
-  - file:third_party/openbao/internal/builtin/database/mysql/mysql-legacy-database-plugin/main.go
-  - function:351b9cf78c3672814bcb525f1d453382
-  id: r.legacy-mysql-plugin-serves-rpc
-  level: MUST
-  text: Run constructs a MySQL database object from mysql.New(mysql.DefaultLegacyUserNameTemplate)
-    and serves it as a dbplugin.Database through dbplugin.Serve, so the legacy username
-    template is the one the plugin runs with.
-- codeRefs:
-  - file:third_party/openbao/internal/builtin/database/mysql/mysql-legacy-database-plugin/main.go
-  id: r.main-invokes-run
-  level: MUST
-  text: The main function in this file is the caller of Run; the plugin binary has
-    no other entrypoint into the database logic.
-- codeRefs:
-  - function:351b9cf78c3672814bcb525f1d453382
-  id: r.run-returns-nil-on-success
-  level: MUST
-  text: Run returns nil after the plugin server has been served, so a successful invocation
-    reports no error to its caller.
-upstream: self
-```
+_The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references

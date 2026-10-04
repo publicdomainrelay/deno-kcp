@@ -4,52 +4,7 @@ Repository: `deno-kcp`
 
 This context exists so the MySQL database backend can be shipped and executed as a separate process that OpenBao talks to over the dbplugin RPC protocol. The main.go entrypoint isolates only the composition step: construct the MySQL plugin with the standard (non-legacy) username template and register it with ServeMultiplex. Keeping this as its own binary lets the MySQL engine be built, versioned, and mounted independently of the OpenBao server binary, with the legacy username template variant living in a sibling plugin directory.
 
-_Write the prose above and the fields in the spec block. `codeRefs` and the resolved references below are maintained by the tool; an edit there is lost._
-
-## spec
-
-```yaml spec
-interfaces:
-- file: third_party/openbao/internal/builtin/database/mysql/mysql-database-plugin/main.go
-  kind: function
-  name: Run
-  signature: func Run() error
-requirements:
-- codeRefs:
-  - file:third_party/openbao/internal/builtin/database/mysql/mysql-database-plugin/main.go
-  - function:be112b15322625e038097c496588868a
-  id: r.run-constructs-mysql-plugin
-  level: MUST
-  text: Run must construct the MySQL database plugin by calling mysql.New with mysql.DefaultUserNameTemplate
-    as the username template argument.
-- codeRefs:
-  - file:third_party/openbao/internal/builtin/database/mysql/mysql-database-plugin/main.go
-  id: r.run-invoked-from-main
-  level: MUST
-  text: The package main function in this file must invoke Run as the plugin process
-    entrypoint.
-- codeRefs:
-  - file:third_party/openbao/internal/builtin/database/mysql/mysql-database-plugin/main.go
-  - function:be112b15322625e038097c496588868a
-  id: r.run-returns-nil
-  level: MUST
-  text: Run must return a nil error after ServeMultiplex is registered.
-- codeRefs:
-  - file:third_party/openbao/internal/builtin/database/mysql/mysql-database-plugin/main.go
-  - function:be112b15322625e038097c496588868a
-  id: r.run-serves-multiplex
-  level: MUST
-  text: Run must pass the constructed MySQL plugin factory to dbplugin.ServeMultiplex
-    so the plugin serves the multiplexed database RPC interface.
-- codeRefs:
-  - file:third_party/openbao/internal/builtin/database/mysql/mysql-database-plugin/main.go
-  - function:be112b15322625e038097c496588868a
-  id: r.standard-username-template-only
-  level: SHOULD
-  text: This plugin variant should use mysql.DefaultUserNameTemplate; the legacy template
-    variant belongs to the separate mysql-legacy-database-plugin binary.
-upstream: self
-```
+_The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references

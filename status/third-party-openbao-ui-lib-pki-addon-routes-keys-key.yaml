@@ -1,33 +1,15 @@
 conditions:
-- message: 'undeclared: PkiKeyDetailsRoute, PkiKeyEditRoute'
-  reason: InterfacesMissing
-  status: "False"
+- message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+  reason: InterfacesObserved
+  status: "True"
   type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+- message: no synced fingerprint has been recorded yet
+  reason: NotSyncedYet
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed:
-  files:
-  - third_party/openbao/ui/lib/pki/addon/routes/keys/key/details.js
-  - third_party/openbao/ui/lib/pki/addon/routes/keys/key/edit.js
-  fingerprint: e074c668e3780244958e0c0e9eaf8082ba37fdd0d676858fdde6873b632f4ec8
-  interfaces:
-  - codegraphId: class:4932e12b5fa3c670ed5f83fe9260caa6
-    file: third_party/openbao/ui/lib/pki/addon/routes/keys/key/details.js
-    kind: class
-    line: 9
-    name: PkiKeyDetailsRoute
-  - codegraphId: class:7eab7a696dab841ab9d925a60df1b7d9
-    file: third_party/openbao/ui/lib/pki/addon/routes/keys/key/edit.js
-    kind: class
-    line: 11
-    name: PkiKeyEditRoute
-observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-realizedSpecHash: 55c58ecfed6894934b998d4ce1ea4c28773e01e54f2cb1050d0c06e00589429a
-syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-syncedFingerprint: e074c668e3780244958e0c0e9eaf8082ba37fdd0d676858fdde6873b632f4ec8
+observed: {}

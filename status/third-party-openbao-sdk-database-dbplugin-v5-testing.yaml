@@ -1,61 +1,15 @@
 conditions:
-- message: 'undeclared: AssertClose, AssertDeleteUser, AssertInitialize, AssertInitializeCircleCiTest,
-    AssertNewUser, AssertUpdateUser'
-  reason: InterfacesMissing
-  status: "False"
+- message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+  reason: InterfacesObserved
+  status: "True"
   type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+- message: no synced fingerprint has been recorded yet
+  reason: NotSyncedYet
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed:
-  files:
-  - third_party/openbao/sdk/database/dbplugin/v5/testing/test_helpers.go
-  fingerprint: cc1231b3fbac1aa0f15bef2d5eb1a2498727f2e97fdc8947245d3a1951520d8d
-  interfaces:
-  - codegraphId: function:f1eb72494032d79525938cd66f4ab59f
-    file: third_party/openbao/sdk/database/dbplugin/v5/testing/test_helpers.go
-    kind: function
-    line: 35
-    name: AssertInitializeCircleCiTest
-    signature: (t *testing.T, db dbplugin.Database, req dbplugin.InitializeRequest)
-      dbplugin.InitializeResponse
-  - codegraphId: function:b7cdaca22eb7cb0148a67ae9be570b8a
-    file: third_party/openbao/sdk/database/dbplugin/v5/testing/test_helpers.go
-    kind: function
-    line: 58
-    name: AssertInitialize
-    signature: (t *testing.T, db dbplugin.Database, req dbplugin.InitializeRequest)
-      dbplugin.InitializeResponse
-  - codegraphId: function:f455d988032eff37176187ea4d763a66
-    file: third_party/openbao/sdk/database/dbplugin/v5/testing/test_helpers.go
-    kind: function
-    line: 74
-    name: AssertNewUser
-    signature: (t *testing.T, db dbplugin.Database, req dbplugin.NewUserRequest) dbplugin.NewUserResponse
-  - codegraphId: function:20e77e5d3904c33a46e120a90d9b164b
-    file: third_party/openbao/sdk/database/dbplugin/v5/testing/test_helpers.go
-    kind: function
-    line: 91
-    name: AssertUpdateUser
-    signature: (t *testing.T, db dbplugin.Database, req dbplugin.UpdateUserRequest)
-  - codegraphId: function:07cf3ec50df686d409d95e2a75722836
-    file: third_party/openbao/sdk/database/dbplugin/v5/testing/test_helpers.go
-    kind: function
-    line: 103
-    name: AssertDeleteUser
-    signature: (t *testing.T, db dbplugin.Database, req dbplugin.DeleteUserRequest)
-  - codegraphId: function:43efeb0b2256e05b2d09adcc53efcdea
-    file: third_party/openbao/sdk/database/dbplugin/v5/testing/test_helpers.go
-    kind: function
-    line: 115
-    name: AssertClose
-    signature: (t *testing.T, db dbplugin.Database)
-observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-realizedSpecHash: 0765df51b9824b2322d67c02e3a7fecdea6ab3b464d8c89ab443f25ad391772e
-syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-syncedFingerprint: cc1231b3fbac1aa0f15bef2d5eb1a2498727f2e97fdc8947245d3a1951520d8d
+observed: {}

@@ -1,4 +1,81 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+codeRefIndex:
+- file:third_party/openbao/internal/builtin/logical/pki/acme_authorizations.go acme_authorizations.go@third_party/openbao/internal/builtin/logical/pki/acme_authorizations.go
+- file:third_party/openbao/internal/builtin/logical/pki/acme_challenge_engine.go acme_challenge_engine.go@third_party/openbao/internal/builtin/logical/pki/acme_challenge_engine.go
+- file:third_party/openbao/internal/builtin/logical/pki/acme_challenges.go acme_challenges.go@third_party/openbao/internal/builtin/logical/pki/acme_challenges.go
+- file:third_party/openbao/internal/builtin/logical/pki/acme_challenges_test.go acme_challenges_test.go@third_party/openbao/internal/builtin/logical/pki/acme_challenges_test.go
+- file:third_party/openbao/internal/builtin/logical/pki/acme_eab_policy.go acme_eab_policy.go@third_party/openbao/internal/builtin/logical/pki/acme_eab_policy.go
+- file:third_party/openbao/internal/builtin/logical/pki/acme_errors.go acme_errors.go@third_party/openbao/internal/builtin/logical/pki/acme_errors.go
+- file:third_party/openbao/internal/builtin/logical/pki/acme_helpers_test.go acme_helpers_test.go@third_party/openbao/internal/builtin/logical/pki/acme_helpers_test.go
+- file:third_party/openbao/internal/builtin/logical/pki/acme_jws.go acme_jws.go@third_party/openbao/internal/builtin/logical/pki/acme_jws.go
+- file:third_party/openbao/internal/builtin/logical/pki/acme_state.go acme_state.go@third_party/openbao/internal/builtin/logical/pki/acme_state.go
+- file:third_party/openbao/internal/builtin/logical/pki/acme_state_test.go acme_state_test.go@third_party/openbao/internal/builtin/logical/pki/acme_state_test.go
+- file:third_party/openbao/internal/builtin/logical/pki/acme_wrappers.go acme_wrappers.go@third_party/openbao/internal/builtin/logical/pki/acme_wrappers.go
+- file:third_party/openbao/internal/builtin/logical/pki/acme_wrappers_test.go acme_wrappers_test.go@third_party/openbao/internal/builtin/logical/pki/acme_wrappers_test.go
+- file:third_party/openbao/internal/builtin/logical/pki/backend.go backend.go@third_party/openbao/internal/builtin/logical/pki/backend.go
+- file:third_party/openbao/internal/builtin/logical/pki/backend_test.go backend_test.go@third_party/openbao/internal/builtin/logical/pki/backend_test.go
+- file:third_party/openbao/internal/builtin/logical/pki/ca_test.go ca_test.go@third_party/openbao/internal/builtin/logical/pki/ca_test.go
+- file:third_party/openbao/internal/builtin/logical/pki/ca_util.go ca_util.go@third_party/openbao/internal/builtin/logical/pki/ca_util.go
+- file:third_party/openbao/internal/builtin/logical/pki/cert_template.pb.go cert_template.pb.go@third_party/openbao/internal/builtin/logical/pki/cert_template.pb.go
+- file:third_party/openbao/internal/builtin/logical/pki/cert_util.go cert_util.go@third_party/openbao/internal/builtin/logical/pki/cert_util.go
+- file:third_party/openbao/internal/builtin/logical/pki/cert_util_test.go cert_util_test.go@third_party/openbao/internal/builtin/logical/pki/cert_util_test.go
+- file:third_party/openbao/internal/builtin/logical/pki/chain_test.go chain_test.go@third_party/openbao/internal/builtin/logical/pki/chain_test.go
+- file:third_party/openbao/internal/builtin/logical/pki/chain_util.go chain_util.go@third_party/openbao/internal/builtin/logical/pki/chain_util.go
+- file:third_party/openbao/internal/builtin/logical/pki/config_util.go config_util.go@third_party/openbao/internal/builtin/logical/pki/config_util.go
+- file:third_party/openbao/internal/builtin/logical/pki/crl_test.go crl_test.go@third_party/openbao/internal/builtin/logical/pki/crl_test.go
+- file:third_party/openbao/internal/builtin/logical/pki/crl_util.go crl_util.go@third_party/openbao/internal/builtin/logical/pki/crl_util.go
+- file:third_party/openbao/internal/builtin/logical/pki/fields.go fields.go@third_party/openbao/internal/builtin/logical/pki/fields.go
+- file:third_party/openbao/internal/builtin/logical/pki/integration_test.go integration_test.go@third_party/openbao/internal/builtin/logical/pki/integration_test.go
+- file:third_party/openbao/internal/builtin/logical/pki/key_util.go key_util.go@third_party/openbao/internal/builtin/logical/pki/key_util.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_acme_account.go path_acme_account.go@third_party/openbao/internal/builtin/logical/pki/path_acme_account.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_acme_authorizations.go
+  path_acme_authorizations.go@third_party/openbao/internal/builtin/logical/pki/path_acme_authorizations.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_acme_challenges.go path_acme_challenges.go@third_party/openbao/internal/builtin/logical/pki/path_acme_challenges.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_acme_directory.go path_acme_directory.go@third_party/openbao/internal/builtin/logical/pki/path_acme_directory.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_acme_eab.go path_acme_eab.go@third_party/openbao/internal/builtin/logical/pki/path_acme_eab.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_acme_nonce.go path_acme_nonce.go@third_party/openbao/internal/builtin/logical/pki/path_acme_nonce.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_acme_order.go path_acme_order.go@third_party/openbao/internal/builtin/logical/pki/path_acme_order.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_acme_order_test.go path_acme_order_test.go@third_party/openbao/internal/builtin/logical/pki/path_acme_order_test.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_acme_revoke.go path_acme_revoke.go@third_party/openbao/internal/builtin/logical/pki/path_acme_revoke.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_acme_test.go path_acme_test.go@third_party/openbao/internal/builtin/logical/pki/path_acme_test.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_cel.go path_cel.go@third_party/openbao/internal/builtin/logical/pki/path_cel.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_cel_test.go path_cel_test.go@third_party/openbao/internal/builtin/logical/pki/path_cel_test.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_config_acme.go path_config_acme.go@third_party/openbao/internal/builtin/logical/pki/path_config_acme.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_config_acme_test.go path_config_acme_test.go@third_party/openbao/internal/builtin/logical/pki/path_config_acme_test.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_config_ca.go path_config_ca.go@third_party/openbao/internal/builtin/logical/pki/path_config_ca.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_config_cluster.go path_config_cluster.go@third_party/openbao/internal/builtin/logical/pki/path_config_cluster.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_config_crl.go path_config_crl.go@third_party/openbao/internal/builtin/logical/pki/path_config_crl.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_config_urls.go path_config_urls.go@third_party/openbao/internal/builtin/logical/pki/path_config_urls.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_fetch.go path_fetch.go@third_party/openbao/internal/builtin/logical/pki/path_fetch.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_fetch_issuers.go path_fetch_issuers.go@third_party/openbao/internal/builtin/logical/pki/path_fetch_issuers.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_fetch_keys.go path_fetch_keys.go@third_party/openbao/internal/builtin/logical/pki/path_fetch_keys.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_fetch_test.go path_fetch_test.go@third_party/openbao/internal/builtin/logical/pki/path_fetch_test.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_intermediate.go path_intermediate.go@third_party/openbao/internal/builtin/logical/pki/path_intermediate.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_issue_sign.go path_issue_sign.go@third_party/openbao/internal/builtin/logical/pki/path_issue_sign.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_issue_sign_test.go path_issue_sign_test.go@third_party/openbao/internal/builtin/logical/pki/path_issue_sign_test.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_manage_issuers.go path_manage_issuers.go@third_party/openbao/internal/builtin/logical/pki/path_manage_issuers.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_manage_keys.go path_manage_keys.go@third_party/openbao/internal/builtin/logical/pki/path_manage_keys.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_manage_keys_test.go path_manage_keys_test.go@third_party/openbao/internal/builtin/logical/pki/path_manage_keys_test.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_ocsp.go path_ocsp.go@third_party/openbao/internal/builtin/logical/pki/path_ocsp.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_ocsp_test.go path_ocsp_test.go@third_party/openbao/internal/builtin/logical/pki/path_ocsp_test.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_resign_crls.go path_resign_crls.go@third_party/openbao/internal/builtin/logical/pki/path_resign_crls.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_resign_crls_test.go path_resign_crls_test.go@third_party/openbao/internal/builtin/logical/pki/path_resign_crls_test.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_revoke.go path_revoke.go@third_party/openbao/internal/builtin/logical/pki/path_revoke.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_roles.go path_roles.go@third_party/openbao/internal/builtin/logical/pki/path_roles.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_roles_test.go path_roles_test.go@third_party/openbao/internal/builtin/logical/pki/path_roles_test.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_root.go path_root.go@third_party/openbao/internal/builtin/logical/pki/path_root.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_sign_issuers.go path_sign_issuers.go@third_party/openbao/internal/builtin/logical/pki/path_sign_issuers.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_tidy.go path_tidy.go@third_party/openbao/internal/builtin/logical/pki/path_tidy.go
+- file:third_party/openbao/internal/builtin/logical/pki/path_tidy_test.go path_tidy_test.go@third_party/openbao/internal/builtin/logical/pki/path_tidy_test.go
+- file:third_party/openbao/internal/builtin/logical/pki/secret_certs.go secret_certs.go@third_party/openbao/internal/builtin/logical/pki/secret_certs.go
+- file:third_party/openbao/internal/builtin/logical/pki/storage.go storage.go@third_party/openbao/internal/builtin/logical/pki/storage.go
+- file:third_party/openbao/internal/builtin/logical/pki/storage_migrations.go storage_migrations.go@third_party/openbao/internal/builtin/logical/pki/storage_migrations.go
+- file:third_party/openbao/internal/builtin/logical/pki/storage_migrations_test.go
+  storage_migrations_test.go@third_party/openbao/internal/builtin/logical/pki/storage_migrations_test.go
+- file:third_party/openbao/internal/builtin/logical/pki/storage_test.go storage_test.go@third_party/openbao/internal/builtin/logical/pki/storage_test.go
+- file:third_party/openbao/internal/builtin/logical/pki/test_helpers.go test_helpers.go@third_party/openbao/internal/builtin/logical/pki/test_helpers.go
+- file:third_party/openbao/internal/builtin/logical/pki/translate_cert.go translate_cert.go@third_party/openbao/internal/builtin/logical/pki/translate_cert.go
+- file:third_party/openbao/internal/builtin/logical/pki/util.go util.go@third_party/openbao/internal/builtin/logical/pki/util.go
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-builtin-logical-pki

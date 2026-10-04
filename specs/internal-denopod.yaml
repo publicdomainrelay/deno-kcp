@@ -1,9 +1,21 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+codeRefIndex:
+- file:internal/denopod/denopod.go denopod.go@internal/denopod/denopod.go
+- file:internal/denopod/denopod_test.go denopod_test.go@internal/denopod/denopod_test.go
+- function:3f0c5153e0db566485eab480379f957d New@internal/denopod/denopod.go:98
+- method:73925188636ee222feadc0ef8ca57514 Reconciler.Reconcile@internal/denopod/denopod.go:105
+- struct:0ffa826db7f6371892be099973c54fbd ExecutionObservation@internal/denopod/denopod.go:24
+- struct:4c5bf8db95a5eabcdd5969ee40a83886 Observed@internal/denopod/denopod.go:36
+- struct:aff6e789cdee650936e8e9c4badaedd7 Result@internal/denopod/denopod.go:60
+- type_alias:26dc5a9867b60f56e7de57f597ef8248 ExecutionState@internal/denopod/denopod.go:16
+- type_alias:a490e5e249e0847d63dd37e654172f27 Op@internal/denopod/denopod.go:48
 kind: SystemContext
 metadata:
   name: internal-denopod
   namespace: default
 spec:
+  dependsOn:
+  - sc.api-v1alpha1
   intent: This context exists so the DenoPod lifecycle can be specified and tested
     without a Kubernetes client or a live deno process. Reconcile is the single decision
     point that turns an observed pod plus its execution observation into a target

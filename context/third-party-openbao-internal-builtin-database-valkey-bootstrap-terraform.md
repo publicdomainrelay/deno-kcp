@@ -4,61 +4,7 @@ Repository: `deno-kcp`
 
 This context exists to stand up a disposable, reproducible Valkey instance for the OpenBao internal builtin database/valkey plugin tests, and to publish the connection settings those tests read from the environment. Terraform owns the lifecycle: apply starts the container and regenerates the environment file, destroy tears the container down, so the test fixture is created and removed by the same tooling that runs everything else.
 
-_Write the prose above and the fields in the spec block. `codeRefs` and the resolved references below are maintained by the tool; an edit there is lost._
-
-## spec
-
-```yaml spec
-requirements:
-- codeRefs:
-  - file:third_party/openbao/internal/builtin/database/valkey/bootstrap/terraform/redis.tf
-  id: r.apply-brings-compose-up
-  level: MUST
-  text: redis.tf must define a null_resource whose local-exec provisioner runs on
-    create and issues docker-compose -f ./docker-compose.yml down followed by docker-compose
-    -f ./docker-compose.yml up -d.
-- codeRefs:
-  - file:third_party/openbao/internal/builtin/database/valkey/bootstrap/terraform/docker-compose.yml
-  id: r.compose-runs-valkey
-  level: MUST
-  text: docker-compose.yml must define a valkey service using image valkey/valkey-stack-server:latest
-    in container valkey, on the valkey bridge network, restarting always, with the
-    valkey-server command that sets the requirepass default-pa55w0rd and the user
-    us4rn4m3 with password user-pa55w0rd holding ~* allcommands.
-- codeRefs:
-  - file:third_party/openbao/internal/builtin/database/valkey/bootstrap/terraform/redis.tf
-  id: r.destroy-brings-compose-down
-  level: MUST
-  text: redis.tf must define a second null_resource whose local-exec provisioner runs
-    on destroy and issues docker-compose -f ./docker-compose.yml down.
-- codeRefs:
-  - file:third_party/openbao/internal/builtin/database/valkey/bootstrap/terraform/redis.tf
-  id: r.emit-test-environment-file
-  level: MUST
-  text: redis.tf must write local_environment_setup.sh exporting TEST_VALKEY_HOST=localhost,
-    TEST_VALKEY_PORT=6379, TEST_VALKEY_USERNAME=us4rn4m3 and TEST_VALKEY_PASSWORD=user-pa55w0rd,
-    matching the credentials configured in the compose command.
-- codeRefs:
-  - file:third_party/openbao/internal/builtin/database/valkey/bootstrap/terraform/docker-compose.yml
-  id: r.persist-data-volume
-  level: SHOULD
-  text: The valkey service should mount ./data/valkey at /data, with the valkey_data
-    named volume declared at the top level of the compose file.
-- codeRefs:
-  - file:third_party/openbao/internal/builtin/database/valkey/bootstrap/terraform/docker-compose.yml
-  id: r.publish-port-6379
-  level: MUST
-  text: The valkey service must publish container port 6379 on host port 6379 so tests
-    running on localhost can reach it.
-- codeRefs:
-  - file:third_party/openbao/internal/builtin/database/valkey/bootstrap/terraform/redis.tf
-  id: r.reapply-picks-up-compose-changes
-  level: MUST
-  text: Both null_resource blocks must trigger on a timestamp, always_run = timestamp(),
-    so repeated terraform apply runs re-execute the compose commands and pick up docker-compose.yml
-    changes.
-upstream: self
-```
+_The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references

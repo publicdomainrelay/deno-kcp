@@ -1,9 +1,125 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+codeRefIndex:
+- file:internal/provider/admission.go admission.go@internal/provider/admission.go
+- file:internal/provider/admission_test.go admission_test.go@internal/provider/admission_test.go
+- file:internal/provider/cluster_path.go cluster_path.go@internal/provider/cluster_path.go
+- file:internal/provider/driver.go driver.go@internal/provider/driver.go
+- file:internal/provider/live_denojob_drain_test.go live_denojob_drain_test.go@internal/provider/live_denojob_drain_test.go
+- file:internal/provider/live_denoruntime_test.go live_denoruntime_test.go@internal/provider/live_denoruntime_test.go
+- file:internal/provider/live_helpers_test.go live_helpers_test.go@internal/provider/live_helpers_test.go
+- file:internal/provider/live_maxconcurrent_test.go live_maxconcurrent_test.go@internal/provider/live_maxconcurrent_test.go
+- file:internal/provider/live_native_admission_test.go live_native_admission_test.go@internal/provider/live_native_admission_test.go
+- file:internal/provider/live_ttl_test.go live_ttl_test.go@internal/provider/live_ttl_test.go
+- file:internal/provider/main_test.go main_test.go@internal/provider/main_test.go
+- file:internal/provider/metrics.go metrics.go@internal/provider/metrics.go
+- file:internal/provider/metrics_test.go metrics_test.go@internal/provider/metrics_test.go
+- file:internal/provider/provider.go provider.go@internal/provider/provider.go
+- file:internal/provider/provider_runtime.go provider_runtime.go@internal/provider/provider_runtime.go
+- file:internal/provider/provider_runtime_test.go provider_runtime_test.go@internal/provider/provider_runtime_test.go
+- file:internal/provider/provider_test.go provider_test.go@internal/provider/provider_test.go
+- file:internal/provider/reconcile_engine.go reconcile_engine.go@internal/provider/reconcile_engine.go
+- file:internal/provider/reconcile_job.go reconcile_job.go@internal/provider/reconcile_job.go
+- file:internal/provider/reconcile_openbao.go reconcile_openbao.go@internal/provider/reconcile_openbao.go
+- file:internal/provider/reconcile_openbao_test.go reconcile_openbao_test.go@internal/provider/reconcile_openbao_test.go
+- file:internal/provider/reconcile_pod.go reconcile_pod.go@internal/provider/reconcile_pod.go
+- file:internal/provider/reconcile_run.go reconcile_run.go@internal/provider/reconcile_run.go
+- file:internal/provider/reconcile_trigger.go reconcile_trigger.go@internal/provider/reconcile_trigger.go
+- file:internal/provider/reconcile_workflowpod.go reconcile_workflowpod.go@internal/provider/reconcile_workflowpod.go
+- file:internal/provider/registry.go registry.go@internal/provider/registry.go
+- file:internal/provider/registry_engine.go registry_engine.go@internal/provider/registry_engine.go
+- file:internal/provider/registry_job.go registry_job.go@internal/provider/registry_job.go
+- file:internal/provider/registry_openbao.go registry_openbao.go@internal/provider/registry_openbao.go
+- file:internal/provider/registry_pod.go registry_pod.go@internal/provider/registry_pod.go
+- file:internal/provider/registry_run.go registry_run.go@internal/provider/registry_run.go
+- file:internal/provider/registry_runtime.go registry_runtime.go@internal/provider/registry_runtime.go
+- file:internal/provider/registry_test.go registry_test.go@internal/provider/registry_test.go
+- file:internal/provider/registry_trigger.go registry_trigger.go@internal/provider/registry_trigger.go
+- file:internal/provider/registry_workflowpod.go registry_workflowpod.go@internal/provider/registry_workflowpod.go
+- file:internal/provider/run_refs.go run_refs.go@internal/provider/run_refs.go
+- file:internal/provider/run_refs_test.go run_refs_test.go@internal/provider/run_refs_test.go
+- file:internal/provider/service_dns.go service_dns.go@internal/provider/service_dns.go
+- file:internal/provider/service_dns_inject_test.go service_dns_inject_test.go@internal/provider/service_dns_inject_test.go
+- file:internal/provider/watch.go watch.go@internal/provider/watch.go
+- file:internal/provider/watch_cache.go watch_cache.go@internal/provider/watch_cache.go
+- file:internal/provider/watch_test.go watch_test.go@internal/provider/watch_test.go
+- function:d8299700880b325d38c3aa20aa84ac24 NewRegistry@internal/provider/registry.go:48
+- function:f4e5cfdbb89305e5310f8800b3c5e307 New@internal/provider/provider.go:203
+- interface:4823d030f55cc3629f5f52b93b924b77 Reader@internal/provider/provider.go:52
+- interface:79e02cbf716ad7f732147264ef6ffc96 Instances@internal/provider/provider.go:40
+- interface:c7e3ce30c0c4b864a4256ae1255ecf6f Runtime@internal/provider/provider_runtime.go:20
+- interface:d81c0020017b8c1b77c14748b34a1695 TokenMinter@internal/provider/provider_runtime.go:70
+- method:0336e9c05327f7b15cb6ddb11d9ecda3 Registry.Read@internal/provider/registry.go:91
+- method:04c9c12ef6ee491671f3ef14f8486cee Runtime.WriteRunStatus@internal/provider/provider_runtime.go:25
+- method:08cbdd1a97d2aeb9d9187918def0a3ff TokenMinter.MintServiceAccountToken@internal/provider/provider_runtime.go:71
+- method:0a1baf118dfd1184e6e20c9bc6c2149d Runtime.WriteEngineStatus@internal/provider/provider_runtime.go:57
+- method:0c338b727be3207f28cbf878427e832a cacheReader.Read@internal/provider/watch_cache.go:115
+- method:0f7acc2d0feaf48c63fed92350649ba4 Runtime.WriteTriggerStatus@internal/provider/provider_runtime.go:45
+- method:1711073a6a2c66ef8dbc0850814be58e Registry.ClusterPath@internal/provider/cluster_path.go:16
+- method:17d9aa5639d88e18ced092858a5abe2c Reader.ReadPod@internal/provider/provider.go:59
+- method:212b93b0660339a29ad743c47c0a2f5c Reader.ReadJob@internal/provider/provider.go:61
+- method:2188f1b23ffddba57fd070190f3dfab1 Provider.ActiveRuns@internal/provider/run_refs.go:51
+- method:23233a41823fe7b5628f032a2767752f Provider.MaxActiveRuns@internal/provider/run_refs.go:55
+- method:233229f09be3f2275ac69f207bb6268b cacheReader.ListRunsForJob@internal/provider/watch_cache.go:127
+- method:23fc06d135fb3a4b8a0273710865368f Registry.RemoveRunFinalizerKnown@internal/provider/registry_run.go:38
+- method:2493a2c710828f8b4fe3808ad1408907 jobRunLister.ListRunsForJob@internal/provider/provider.go:386
+- method:2fd4bea770ce6a63d90f4daec420b54e Reader.ReadOpenBao@internal/provider/provider.go:67
+- method:307b5bfc55c641acbb8ada3045f9d25c Reader.ReadTrigger@internal/provider/provider.go:63
+- method:3fdfde3c1a480d83c360edc8c048bc7b cacheReader.ListWorkflowRunsForPod@internal/provider/watch_cache.go:191
+- method:40c76b6ba2cb4f1a4bf8529657373b18 podWorkflowRunLister.ListWorkflowRunsForPod@internal/provider/provider.go:464
+- method:41cf2306d6452e1d718d6ef94ff97566 Reader.ReadWorkflowPod@internal/provider/provider.go:69
+- method:478c272d9a449a55c6ed18fadd0618d4 Reader.ListRuns@internal/provider/provider.go:57
+- method:4ca472be4f4fd37e73d3fb239a03dbec Registry.WriteStatus@internal/provider/registry.go:95
+- method:6105d5fa8fec2e32966496e6bf32e4b3 Runtime.DeleteRun@internal/provider/provider_runtime.go:27
+- method:6991aa64677e82d8faedb257a0a4dac9 Instances.WriteStatus@internal/provider/provider.go:43
+- method:7177e5fd2c4cb312cc5bffedc7bb8225 Instances.RemoveFinalizer@internal/provider/provider.go:47
+- method:73dfeb14f71c1a7d5e2ee751c233cbf1 Registry.CreateWorkflowRun@internal/provider/registry.go:111
+- method:770a1f486fcb2d924b16f1423b6a6f45 Instances.Delete@internal/provider/provider.go:45
+- method:783d67229120389163d8738cc3d1a3ec summaryObserver.Observe@internal/provider/metrics.go:31
+- method:83f50090d7ebe3148f7aa5e0db332b4d Provider.Reconciles@internal/provider/provider.go:341
+- method:8acde20985786551e6319db9f3851eb0 Runtime.CreateRun@internal/provider/provider_runtime.go:23
+- method:8ccafd0b3f41743e3ad8ab9b9c96bae0 Runtime.CreateWorkflowRun@internal/provider/provider_runtime.go:67
+- method:9630ebc295fc1d2ed8be58298913156a Registry.MintServiceAccountToken@internal/provider/registry_runtime.go:10
+- method:990b41bd5a2ffe1389dc5d05ce1da085 Reader.Read@internal/provider/provider.go:53
+- method:9c58b2e5cdc887157dd853e80e10a086 runFinalizerRemover.RemoveRunFinalizerKnown@internal/provider/reconcile_run.go:157
+- method:a07bdbb2bda3bec3a983caa0cbe3f545 admissionSource.Capacity@internal/provider/admission.go:101
+- method:a6a75598b35908e08153f182c3febf00 Provider.RunStarts@internal/provider/run_refs.go:59
+- method:aacfccc54b2b56d00fcf7852988d658c Runtime.WriteWorkflowPodStatus@internal/provider/provider_runtime.go:63
+- method:b27c6b3d66fe2bf13cb22e4df562eac1 Runtime.WriteOpenBaoStatus@internal/provider/provider_runtime.go:49
+- method:b57ea92a3ea6bd92ab5c167ae09dbd8e Registry.ListWorkflowRuns@internal/provider/registry.go:115
+- method:bedc23e806b40419ad4ae31c624ffdf9 Provider.Close@internal/provider/provider.go:330
+- method:d01339d025223140bb9535dcbac67476 Registry.Delete@internal/provider/registry.go:103
+- method:d08efa306908e97a03fc66d8df7d9706 Reader.ReadRun@internal/provider/provider.go:55
+- method:d176f51800814ad517e2c40e2c2e0ee7 Reader.ReadEngine@internal/provider/provider.go:65
+- method:d362b34ab599ab6e512bda32f222f3e6 Registry.RemoveFinalizer@internal/provider/registry.go:107
+- method:d43625922ebf891922c49f440fefca1e Runtime.WriteOpenBaoFinalizer@internal/provider/provider_runtime.go:51
+- method:d49d27ff9e2c256263815edfc2d08750 Runtime.CreatePod@internal/provider/provider_runtime.go:31
+- method:db20977428ee57d0ef1f56f51ca0243e Reader.ListWorkflowRuns@internal/provider/provider.go:71
+- method:dbb9820bfd360e31ac1295c45d8f0cd5 Instances.Read@internal/provider/provider.go:41
+- method:dedfd34a67b569d3bd5df1bbfd2d518e admissionSource.Parent@internal/provider/admission.go:67
+- method:ea1c6b0ecc9e6f6856824a87e673b682 Runtime.CreateJob@internal/provider/provider_runtime.go:39
+- method:ea874e105ac66c1a2a0d988371fa3509 admissionSource.Runs@internal/provider/admission.go:85
+- method:f34958b11727b06606bdafed3381d854 Provider.RunWatch@internal/provider/watch.go:88
+- method:fec4d29b214cd73931b1d89410112759 cacheReader.ListWorkflowRuns@internal/provider/watch_cache.go:168
+- struct:01896200f64256e833b4818f731d0300 RegistryOptions@internal/provider/registry.go:20
+- struct:616ab943fe3365809df93a906c1942bc Options@internal/provider/provider.go:76
+- struct:cd6145b620673d1d890a45c3b08eaaf5 Pass@internal/provider/provider.go:197
+- struct:d27a8fecd6ae256e43a6e3e8a3089705 Provider@internal/provider/provider.go:150
+- struct:eafb527137f9ed90cec30417e467987b Registry@internal/provider/registry.go:28
 kind: SystemContext
 metadata:
   name: internal-provider
   namespace: default
 spec:
+  dependsOn:
+  - sc.api-v1alpha1
+  - sc.internal-denojob
+  - sc.internal-denopod
+  - sc.internal-denorun
+  - sc.internal-livegate
+  - sc.internal-policyengine
+  - sc.internal-policyworkflowpod
+  - sc.internal-policyworkflowrun
+  - sc.internal-trigger
   intent: 'This context exists to hold the provider-side controller logic of deno-kcp
     as a single describable unit: the reconcile engines and their per-kind reconcile
     files, the Reader/Runtime/TokenMinter port interfaces the engines depend on, the

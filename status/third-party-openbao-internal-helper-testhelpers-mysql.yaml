@@ -1,39 +1,15 @@
 conditions:
-- message: 'undeclared: Config, PrepareTestContainer, TestCredsExist'
-  reason: InterfacesMissing
-  status: "False"
+- message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+  reason: InterfacesObserved
+  status: "True"
   type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+- message: no synced fingerprint has been recorded yet
+  reason: NotSyncedYet
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed:
-  files:
-  - third_party/openbao/internal/helper/testhelpers/mysql/mysqlhelper.go
-  fingerprint: 8e264fc8e6f970df3e348903c8f2a7715611dd877f9d77f860b0f2c7de5e5aff
-  interfaces:
-  - codegraphId: struct:f5374581f30f9f80a49e719a95f6d25f
-    file: third_party/openbao/internal/helper/testhelpers/mysql/mysqlhelper.go
-    kind: struct
-    line: 17
-    name: Config
-  - codegraphId: function:5bb34b89c4a7b9aafbb8201734a768a5
-    file: third_party/openbao/internal/helper/testhelpers/mysql/mysqlhelper.go
-    kind: function
-    line: 24
-    name: PrepareTestContainer
-    signature: (t *testing.T, legacy bool, pw string) (func(), string)
-  - codegraphId: function:49b703949fe78718321a963bd7dc8e5f
-    file: third_party/openbao/internal/helper/testhelpers/mysql/mysqlhelper.go
-    kind: function
-    line: 65
-    name: TestCredsExist
-    signature: (t testing.TB, connURL, username, password string) error
-observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-realizedSpecHash: 577f4bacf8409750f75f84668de591ccccddc437bdb9a3a723b8f9a897b496c0
-syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-syncedFingerprint: 8e264fc8e6f970df3e348903c8f2a7715611dd877f9d77f860b0f2c7de5e5aff
+observed: {}
