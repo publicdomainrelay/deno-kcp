@@ -62447,8 +62447,120 @@ system_contexts:
   - file:third_party/openbao/ui/app/decorators/model-expanded-attributes.js model-expanded-attributes.js@third_party/openbao/ui/app/decorators/model-expanded-attributes.js
   - file:third_party/openbao/ui/app/decorators/model-form-fields.js model-form-fields.js@third_party/openbao/ui/app/decorators/model-form-fields.js
   - file:third_party/openbao/ui/app/decorators/model-validations.js model-validations.js@third_party/openbao/ui/app/decorators/model-validations.js
+  - function:00795d06d3612390aeda0a208077b716 decorator@third_party/openbao/ui/app/decorators/model-expanded-attributes.js:22
+  - function:078310696418233c794effc6cf398319 withFormFields@third_party/openbao/ui/app/decorators/model-form-fields.js:19
+  - function:326f30a1b627a85d702c7982e0cef873 withExpandedAttributes@third_party/openbao/ui/app/decorators/model-expanded-attributes.js:21
+  - function:b62719b170881ccf45b15dcef4a3b508 withModelValidations@third_party/openbao/ui/app/decorators/model-validations.js:74
   id: sc.third-party-openbao-ui-app-decorators
+  intent: This context exists so the spec records the extension points the OpenBao
+    UI uses to dress ember-data models with form and validation metadata. Consumers
+    decorate model classes (namespace, secret-engine, pki tidy, kubernetes config
+    and role, pki certificate and issuer models, and others) to get expanded attribute
+    descriptors, grouped form fields, and declarative validation, without hand-writing
+    that plumbing per model. The decorators are the contract between the model layer
+    and the form rendering layer, so their guard behaviour, caching, key naming and
+    validation result shape must stay stable.
+  interfaces:
+  - file: third_party/openbao/ui/app/decorators/model-expanded-attributes.js
+    kind: function
+    name: decorator
+    signature: decorator(SuperClass)
+  - file: third_party/openbao/ui/app/decorators/model-expanded-attributes.js
+    kind: function
+    name: withExpandedAttributes
+    signature: withExpandedAttributes()
+  - file: third_party/openbao/ui/app/decorators/model-form-fields.js
+    kind: function
+    name: withFormFields
+    signature: withFormFields(propertyNames, groupPropertyNames)
+  - file: third_party/openbao/ui/app/decorators/model-validations.js
+    kind: function
+    name: withModelValidations
+    signature: withModelValidations(validations)
   name: third-party-openbao-ui-app-decorators
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/app/decorators/model-validations.js
+    - function:b62719b170881ccf45b15dcef4a3b508
+    id: r.error-count-message
+    level: SHOULD
+    text: 'generateErrorCountMessage(errorCount) returns null when the count is below
+      1 and otherwise returns a count-aware sentence: ''There is an error with this
+      form.'' for a single error and ''There are N errors with this form.'' for more
+      than one.'
+  - codeRefs:
+    - file:third_party/openbao/ui/app/decorators/model-expanded-attributes.js
+    - function:00795d06d3612390aeda0a208077b716
+    id: r.expanded-attributes-all-by-key
+    level: MUST
+    text: 'The returned ModelExpandedAttrs subclass exposes a cached allByKey getter:
+      it computes the map once, stores it on _allByKey, seeds it with expandAttributeMeta
+      of the attribute names from the store schema definition service for this.constructor.modelName,
+      then walks eachRelationship and, for belongsTo relationships only, adds each
+      related attribute under the key `${name}.${attr.name}` with options.fieldValue
+      set to `${name}.${attr.fieldValue || attr.name}` so FormField updates the correct
+      nested path.'
+  - codeRefs:
+    - file:third_party/openbao/ui/app/decorators/model-expanded-attributes.js
+    - function:00795d06d3612390aeda0a208077b716
+    id: r.expanded-attributes-expand-groups
+    level: MUST
+    text: _expandGroups(groups) throws Error('_expandGroups expects an array of objects')
+      when passed a non-array; otherwise it maps each single-entry object to a one-key
+      object whose value is the list of allByKey entries named by the group's field
+      list, and asserts that every named field was found so missing fields fail loudly.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/decorators/model-expanded-attributes.js
+    - function:00795d06d3612390aeda0a208077b716
+    - function:326f30a1b627a85d702c7982e0cef873
+    id: r.expanded-attributes-model-guard
+    level: MUST
+    text: withExpandedAttributes returns a class decorator that first checks the target
+      with Object.prototype.isPrototypeOf.call(Model, SuperClass); when the target
+      is not an ember-data Model it logs an error to the console and returns the original
+      SuperClass unchanged, so the decorator never applies to a non-Model class.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/decorators/model-form-fields.js
+    - function:078310696418233c794effc6cf398319
+    id: r.form-fields-derivation
+    level: MUST
+    text: withFormFields(propertyNames, groupPropertyNames) returns a decorator that
+      guards for an ember-data Model, and its ModelFormFields constructor sets this.formFields
+      from expandAttributeMeta(this, propertyNames) only when propertyNames is given,
+      sets this.formFieldGroups from fieldToAttrs(this, groupPropertyNames) only when
+      groupPropertyNames is given, and always sets this.allFields from expandAttributeMeta
+      over the attribute names returned by the store schema definition service for
+      this.constructor.modelName.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/decorators/model-validations.js
+    - function:b62719b170881ccf45b15dcef4a3b508
+    id: r.validations-object-required
+    level: MUST
+    text: withModelValidations(validations) returns a ModelValidations subclass whose
+      constructor throws Error('Validations object must be provided to constructor
+      for setup') when validations is falsy or not an object, and otherwise stores
+      it on this._validations; the subclass also declares a static _validations field.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/decorators/model-validations.js
+    - function:b62719b170881ccf45b15dcef4a3b508
+    id: r.validations-result-shape
+    level: MUST
+    text: 'validate() keeps per-property state objects shaped { errors, warnings,
+      isValid }, pushes a failed rule''s message (resolving it as message(this) when
+      it is a function) into warnings when rule.level is ''warn'' and into errors
+      otherwise, and returns { isValid, state, invalidFormMessage: this.generateErrorCountMessage(errorCount)
+      } where isValid is false as soon as any error is recorded.'
+  - codeRefs:
+    - file:third_party/openbao/ui/app/decorators/model-validations.js
+    - function:b62719b170881ccf45b15dcef4a3b508
+    id: r.validations-rule-resolution
+    level: MUST
+    text: validate() requires each property's rules to be an array, logging an error
+      and skipping the key otherwise; per rule it uses rule.validator when it is a
+      function, otherwise the validators utility entry named by rule.type, logging
+      an error and skipping when neither is found; it invokes a custom validator as
+      validator(this) and a built-in as validator(get(this, key), options), where
+      the key may use dot notation for nested properties.
   upstream: self
 - code:
   - third_party/openbao/ui/app/helpers/-date-base.js

@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the spec records the extension points the OpenBao UI uses to dress ember-data models with form and validation metadata. Consumers decorate model classes (namespace, secret-engine, pki tidy, kubernetes config and role, pki certificate and issuer models, and others) to get expanded attribute descriptors, grouped form fields, and declarative validation, without hand-writing that plumbing per model. The decorators are the contract between the model layer and the form rendering layer, so their guard behaviour, caching, key naming and validation result shape must stay stable.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
