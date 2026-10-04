@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so the OIDC provider detail page can resolve and display the clients that the provider is allowed to serve, and so its details and edit sub-pages are routable. The clients route bridges the parent provider route's allowedClientIds to the oidc/client store query, which is what populates the clients list in the UI, while the details and edit routes declare the two other tabs of the same provider page without adding behavior of their own.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

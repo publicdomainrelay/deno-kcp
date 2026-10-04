@@ -5058,6 +5058,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.resolve-by-name` (MUST): "OidcProviderRoute.model must read the name value from its route params and return store.findRecord('oidc/provider', name), so the single-provider route loads the record identified by the URL's name segment."
 - added `r.store-injection` (MUST): "Each of the three route classes must inject the Ember Data store service and perform all model loading through this.store, keeping data access in the route rather than the template."
 
+### third-party-openbao-ui-app-routes-vault-cluster-access-oidc-providers-provider
+
+- intent: "" -> "The context exists so the OIDC provider detail page can resolve and display the clients that the provider is allowed to serve, and so its details and edit sub-pages are routable. The clients route bridges the parent provider route's allowedClientIds to the oidc/client store query, which is what populates the clients list in the UI, while the details and edit routes declare the two other tabs of the same provider page without adding behavior of their own."
+- added `r.clients-controller-provider-name` (MUST): "OidcProviderClientsRoute.setupController must call super.setupController with the controller and model, then set the controller's providerName property from name in the params of the 'vault.cluster.access.oidc.providers.provider' route, so the clients view can show which provider it belongs to."
+- added `r.clients-model-query` (MUST): "OidcProviderClientsRoute.model must read the parent 'vault.cluster.access.oidc.providers.provider' model, take its allowedClientIds property, and return the result of store.query('oidc/client', { paramKey: 'client_id', filterFor: allowedClientIds }), so the clients list is limited to the client IDs the provider allows."
+- added `r.clients-store-injected` (MUST): "OidcProviderClientsRoute must inject the Ember data store as the service named store, because the model hook queries 'oidc/client' through it rather than through an explicit import."
+- added `r.details-passthrough-route` (MUST): "OidcProviderDetailsRoute must remain an empty Route subclass that adds no model or setup hook, so the details tab renders from the parent provider route's model without its own data fetch."
+- added `r.edit-passthrough-route` (MUST): "OidcProviderEditRoute must remain an empty Route subclass that adds no model or setup hook, so the edit tab renders from the parent provider route's model and leaves saving to the provider controller and adapter."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |

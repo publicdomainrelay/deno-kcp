@@ -67329,6 +67329,9 @@ system_contexts:
   - third_party/openbao/ui/app/routes/vault/cluster/access/oidc/providers/provider/details.js
   - third_party/openbao/ui/app/routes/vault/cluster/access/oidc/providers/provider/edit.js
   codeRefIndex:
+  - class:02a0be079c8f4ccb8d0be061596b9389 OidcProviderEditRoute@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/providers/provider/edit.js:8
+  - class:116536b2b31847055cf83f89f3855b39 OidcProviderClientsRoute@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/providers/provider/clients.js:9
+  - class:fad001fea8f402e1ac986c7ce606393b OidcProviderDetailsRoute@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/providers/provider/details.js:8
   - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/providers/provider/clients.js
     clients.js@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/providers/provider/clients.js
   - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/providers/provider/details.js
@@ -67336,7 +67339,69 @@ system_contexts:
   - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/providers/provider/edit.js
     edit.js@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/providers/provider/edit.js
   id: sc.third-party-openbao-ui-app-routes-vault-cluster-access-oidc-providers-provider
+  intent: The context exists so the OIDC provider detail page can resolve and display
+    the clients that the provider is allowed to serve, and so its details and edit
+    sub-pages are routable. The clients route bridges the parent provider route's
+    allowedClientIds to the oidc/client store query, which is what populates the clients
+    list in the UI, while the details and edit routes declare the two other tabs of
+    the same provider page without adding behavior of their own.
+  interfaces:
+  - file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/providers/provider/clients.js
+    kind: class
+    name: OidcProviderClientsRoute
+    signature: class OidcProviderClientsRoute extends Route
+  - file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/providers/provider/details.js
+    kind: class
+    name: OidcProviderDetailsRoute
+    signature: class OidcProviderDetailsRoute extends Route
+  - file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/providers/provider/edit.js
+    kind: class
+    name: OidcProviderEditRoute
+    signature: class OidcProviderEditRoute extends Route
   name: third-party-openbao-ui-app-routes-vault-cluster-access-oidc-providers-provider
+  requirements:
+  - codeRefs:
+    - class:116536b2b31847055cf83f89f3855b39
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/providers/provider/clients.js
+    id: r.clients-controller-provider-name
+    level: MUST
+    text: OidcProviderClientsRoute.setupController must call super.setupController
+      with the controller and model, then set the controller's providerName property
+      from name in the params of the 'vault.cluster.access.oidc.providers.provider'
+      route, so the clients view can show which provider it belongs to.
+  - codeRefs:
+    - class:116536b2b31847055cf83f89f3855b39
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/providers/provider/clients.js
+    id: r.clients-model-query
+    level: MUST
+    text: 'OidcProviderClientsRoute.model must read the parent ''vault.cluster.access.oidc.providers.provider''
+      model, take its allowedClientIds property, and return the result of store.query(''oidc/client'',
+      { paramKey: ''client_id'', filterFor: allowedClientIds }), so the clients list
+      is limited to the client IDs the provider allows.'
+  - codeRefs:
+    - class:116536b2b31847055cf83f89f3855b39
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/providers/provider/clients.js
+    id: r.clients-store-injected
+    level: MUST
+    text: OidcProviderClientsRoute must inject the Ember data store as the service
+      named store, because the model hook queries 'oidc/client' through it rather
+      than through an explicit import.
+  - codeRefs:
+    - class:fad001fea8f402e1ac986c7ce606393b
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/providers/provider/details.js
+    id: r.details-passthrough-route
+    level: MUST
+    text: OidcProviderDetailsRoute must remain an empty Route subclass that adds no
+      model or setup hook, so the details tab renders from the parent provider route's
+      model without its own data fetch.
+  - codeRefs:
+    - class:02a0be079c8f4ccb8d0be061596b9389
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/providers/provider/edit.js
+    id: r.edit-passthrough-route
+    level: MUST
+    text: OidcProviderEditRoute must remain an empty Route subclass that adds no model
+      or setup hook, so the edit tab renders from the parent provider route's model
+      and leaves saving to the provider controller and adapter.
   upstream: self
 - code:
   - third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/create.js
