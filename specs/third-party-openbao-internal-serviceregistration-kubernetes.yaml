@@ -8,10 +8,140 @@ codeRefIndex:
   service_registration.go@third_party/openbao/internal/serviceregistration/kubernetes/service_registration.go
 - file:third_party/openbao/internal/serviceregistration/kubernetes/service_registration_test.go
   service_registration_test.go@third_party/openbao/internal/serviceregistration/kubernetes/service_registration_test.go
+- function:bbf84ead9ca06f06cda8b7776cb9e562 NewServiceRegistration@third_party/openbao/internal/serviceregistration/kubernetes/service_registration.go:29
+- method:4b1f23f2f0887d041e13b22b0cfac769 retryHandler.Notify@third_party/openbao/internal/serviceregistration/kubernetes/retry_handler.go:106
+- method:7fe76a8fed667f4ffc812b5ca6792954 serviceRegistration.NotifyActiveStateChange@third_party/openbao/internal/serviceregistration/kubernetes/service_registration.go:73
+- method:841ce99015784c3428e7be159afd9294 serviceRegistration.NotifySealedStateChange@third_party/openbao/internal/serviceregistration/kubernetes/service_registration.go:82
+- method:928d3c98917dab34063c719eb0159110 retryHandler.Run@third_party/openbao/internal/serviceregistration/kubernetes/retry_handler.go:48
+- method:cb7fe2225119b3b317fac64c8ba6b0f4 serviceRegistration.NotifyPerformanceStandbyStateChange@third_party/openbao/internal/serviceregistration/kubernetes/service_registration.go:91
+- method:db3e2c22d822aa06c246592130d719e7 serviceRegistration.Run@third_party/openbao/internal/serviceregistration/kubernetes/service_registration.go:68
+- method:ff4cffb6239d0aa5d138c0f9bd505b32 serviceRegistration.NotifyInitializedStateChange@third_party/openbao/internal/serviceregistration/kubernetes/service_registration.go:100
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-serviceregistration-kubernetes
   namespace: default
 spec:
+  intent: This context exists to describe the Kubernetes service registration implementation
+    that OpenBao uses to publish pod state as labels on its own pod, and the retry
+    layer that keeps those label patches applied when the Kubernetes API is transiently
+    unavailable. It is documented so the construction path, the state notification
+    surface and the retry semantics are explicit rather than inferred from the surrounding
+    command code that calls them.
+  interfaces:
+  - file: third_party/openbao/internal/serviceregistration/kubernetes/service_registration.go
+    kind: function
+    name: NewServiceRegistration
+    signature: func NewServiceRegistration(config map[string]string, logger hclog.Logger,
+      state sr.State) (sr.ServiceRegistration, error)
+  - file: third_party/openbao/internal/serviceregistration/kubernetes/retry_handler.go
+    kind: method
+    name: retryHandler.Notify
+    signature: func (r *retryHandler) Notify(patch *client.Patch)
+  - file: third_party/openbao/internal/serviceregistration/kubernetes/retry_handler.go
+    kind: method
+    name: retryHandler.Run
+    signature: func (r *retryHandler) Run(shutdownCh <-chan struct{}, wait *sync.WaitGroup)
+  - file: third_party/openbao/internal/serviceregistration/kubernetes/service_registration.go
+    kind: method
+    name: serviceRegistration.NotifyActiveStateChange
+    signature: func (r *serviceRegistration) NotifyActiveStateChange(isActive bool)
+      error
+  - file: third_party/openbao/internal/serviceregistration/kubernetes/service_registration.go
+    kind: method
+    name: serviceRegistration.NotifyInitializedStateChange
+    signature: func (r *serviceRegistration) NotifyInitializedStateChange(isInitialized
+      bool) error
+  - file: third_party/openbao/internal/serviceregistration/kubernetes/service_registration.go
+    kind: method
+    name: serviceRegistration.NotifyPerformanceStandbyStateChange
+    signature: func (r *serviceRegistration) NotifyPerformanceStandbyStateChange(isStandby
+      bool) error
+  - file: third_party/openbao/internal/serviceregistration/kubernetes/service_registration.go
+    kind: method
+    name: serviceRegistration.NotifySealedStateChange
+    signature: func (r *serviceRegistration) NotifySealedStateChange(isSealed bool)
+      error
+  - file: third_party/openbao/internal/serviceregistration/kubernetes/service_registration.go
+    kind: method
+    name: serviceRegistration.Run
+    signature: func (r *serviceRegistration) Run(shutdownCh <-chan struct{}, wait
+      *sync.WaitGroup, _ string) error
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/serviceregistration/kubernetes/service_registration.go
+    - function:bbf84ead9ca06f06cda8b7776cb9e562
+    id: r.construct-from-required-fields
+    level: MUST
+    text: NewServiceRegistration must read the Kubernetes namespace and pod name from
+      the config map through getRequiredField, returning the error and no registration
+      when either required field is missing; it must then construct a client, and
+      it must sanitize state.VaultVersion before use because the version string can
+      contain characters such as "+" that the Kubernetes API rejects.
+  - codeRefs:
+    - method:7fe76a8fed667f4ffc812b5ca6792954
+    - method:841ce99015784c3428e7be159afd9294
+    - method:cb7fe2225119b3b317fac64c8ba6b0f4
+    - method:ff4cffb6239d0aa5d138c0f9bd505b32
+    id: r.notify-maps-state-to-label-patch
+    level: MUST
+    text: Each notification method must translate its boolean into a client.Patch
+      with a Replace operation, the label path for its own state label, and the boolean
+      formatted as a string, then pass that patch to the retry handler and return
+      nil.
+  - codeRefs:
+    - file:third_party/openbao/internal/serviceregistration/kubernetes/service_registration.go
+    - function:bbf84ead9ca06f06cda8b7776cb9e562
+    id: r.registration-owns-retry-handler
+    level: MUST
+    text: The returned serviceRegistration must hold the logger, namespace and pod
+      name plus a retryHandler seeded with the same logger, namespace and pod name,
+      the sanitized initial state, an initialized empty patch map and the created
+      client, so that later notifications reuse one retry state.
+  - codeRefs:
+    - file:third_party/openbao/internal/serviceregistration/kubernetes/retry_handler_test.go
+    - file:third_party/openbao/internal/serviceregistration/kubernetes/service_registration_test.go
+    id: r.retry-behaviour-tested
+    level: SHOULD
+    text: The package should keep the retry handler covered by tests for the simple
+      retry path, patch accumulation, races and deadlocks, and Kubernetes API connectivity
+      problems during both the initial state and later notifications, and keep the
+      service registration covered by its own test.
+  - codeRefs:
+    - file:third_party/openbao/internal/serviceregistration/kubernetes/retry_handler.go
+    - method:4b1f23f2f0887d041e13b22b0cfac769
+    - method:928d3c98917dab34063c719eb0159110
+    id: r.retry-handler-synchronized
+    level: MUST
+    text: The retry handler must guard initialStateSet and patchesToRetry with a mutex,
+      because setInitialState and Notify can run concurrently, while the logger, namespace,
+      pod name and client are never mutated and need no lock.
+  - codeRefs:
+    - file:third_party/openbao/internal/serviceregistration/kubernetes/retry_handler.go
+    - method:4b1f23f2f0887d041e13b22b0cfac769
+    id: r.retry-notify-queues-until-initial-state
+    level: MUST
+    text: retryHandler.Notify must take the mutex, and when no initial state has been
+      set it must warn and store the patch in patchesToRetry instead of sending it,
+      so a late-arriving initial state cannot overwrite a newer notification; once
+      the initial state is set it must attempt PatchPod and store the patch in patchesToRetry
+      for retry when the call fails.
+  - codeRefs:
+    - file:third_party/openbao/internal/serviceregistration/kubernetes/retry_handler.go
+    - method:928d3c98917dab34063c719eb0159110
+    id: r.retry-run-sets-initial-state-first
+    level: MUST
+    text: retryHandler.Run must call setInitialState before starting its goroutine,
+      then register the work on the wait group so the call does not block; the goroutine
+      must run a run.Group with one actor that waits on the shutdown channel and one
+      that runs the periodic state update, and the second actor's interrupt function
+      must shut the client down.
+  - codeRefs:
+    - file:third_party/openbao/internal/serviceregistration/kubernetes/service_registration.go
+    - method:db3e2c22d822aa06c246592130d719e7
+    id: r.run-delegates-to-retry-handler
+    level: MUST
+    text: serviceRegistration.Run must accept the shutdown channel, the wait group
+      and a string argument that it ignores, and it must delegate to the retry handler
+      so retries start without blocking the caller.
   upstream: self

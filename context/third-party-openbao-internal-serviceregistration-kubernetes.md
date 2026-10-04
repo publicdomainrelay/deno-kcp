@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to describe the Kubernetes service registration implementation that OpenBao uses to publish pod state as labels on its own pod, and the retry layer that keeps those label patches applied when the Kubernetes API is transiently unavailable. It is documented so the construction path, the state notification surface and the retry semantics are explicit rather than inferred from the surrounding command code that calls them.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
