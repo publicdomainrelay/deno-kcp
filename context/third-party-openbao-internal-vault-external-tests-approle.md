@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to pin down the externally observable behavior of the AppRole credential backend when mounted in a real OpenBao server: that malformed login payloads fail cleanly instead of triggering an internal error, and that response-wrapped secret-id reads expose the same accessor as the unwrapped secret. It is a regression surface for the AppRole auth method's login decoding and for secret-id wrapping metadata, exercised end to end through the HTTP API rather than through unit-level handler calls.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

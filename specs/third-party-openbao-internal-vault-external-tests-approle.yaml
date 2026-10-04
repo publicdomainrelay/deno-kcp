@@ -9,5 +9,63 @@ metadata:
   name: third-party-openbao-internal-vault-external-tests-approle
   namespace: default
 spec:
+  intent: 'This context exists to pin down the externally observable behavior of the
+    AppRole credential backend when mounted in a real OpenBao server: that malformed
+    login payloads fail cleanly instead of triggering an internal error, and that
+    response-wrapped secret-id reads expose the same accessor as the unwrapped secret.
+    It is a regression surface for the AppRole auth method''s login decoding and for
+    secret-id wrapping metadata, exercised end to end through the HTTP API rather
+    than through unit-level handler calls.'
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/approle/alias_name_panic_test.go
+    id: r.alias-name-non-string-no-internal-error
+    level: MUST
+    text: A login request to `auth/approle/login` whose `role_id` is a JSON object
+      (not a string) and whose `secret_id` is empty MUST return an error from the
+      API client, and the error message MUST NOT contain the substring `INTERNAL_ERROR`;
+      this guards the alias-name handling path against a panic that would be reported
+      as an internal error.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/approle/alias_name_panic_test.go
+    - file:third_party/openbao/internal/vault/external_tests/approle/wrapped_secretid_test.go
+    id: r.in-process-cluster-with-approle-backend
+    level: MUST
+    text: 'Every test in the package MUST mount the built-in AppRole factory by setting
+      `CredentialBackends` to `{"approle": credAppRole.Factory}` on `vault.CoreConfig`,
+      start a `vault.NewTestCluster` with `vaulthttp.Handler`, wait for an active
+      core with `vault.TestWaitActive`, and enable the auth method at path `approle`
+      with type `approle` using the cluster root token before exercising it.'
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/approle/wrapped_secretid_test.go
+    id: r.teardown-and-role-setup
+    level: MUST
+    text: Each test MUST clean up the started cluster with a deferred `cluster.Cleanup()`,
+      and the wrapped-secretid tests MUST first create role `test-role-1` at `auth/approle/role/test-role-1`
+      with name `test-role-1` and fail if that write returns an error.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/approle/wrapped_secretid_test.go
+    id: r.unwrapped-secret-id-no-accessor
+    level: MUST
+    text: 'Under the default wrapping lookup function, writing an empty payload to
+      `auth/approle/role/test-role-1/secret-id` MUST succeed and the response MUST
+      NOT carry a wrapping accessor: `WrapInfo` is either nil or has an empty `WrappedAccessor`,
+      and a non-empty accessor is a test failure.'
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/approle/wrapped_secretid_test.go
+    id: r.wrapped-secret-id-accessor-match
+    level: MUST
+    text: When the client wrapping lookup function returns `5m`, writing an empty
+      payload to `auth/approle/role/test-role-1/secret-id` MUST succeed and return
+      wrap info, and after the wrapping token is unwrapped the `WrapInfo.WrappedAccessor`
+      from the wrapped response MUST equal the unwrapped response's `secret_id_accessor`
+      value.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/approle/wrapped_secretid_test.go
+    id: r.wrapped-tests-disable-cache
+    level: SHOULD
+    text: 'The wrapped and non-wrapped secret-id tests SHOULD configure the core with
+      `DisableCache: true` and a null logger so that the wrapping accessor comparison
+      is not masked by caching of the underlying core state.'
   upstream: self
