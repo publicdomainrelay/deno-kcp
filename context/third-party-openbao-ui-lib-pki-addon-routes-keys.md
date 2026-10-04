@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so that the key-management pages of the vendored OpenBao PKI UI addon have a written contract for their data loading and navigation state. It records which Ember model hook fetches or instantiates what, which store query options each route passes, how a 404 on the key list is tolerated versus how other errors propagate, and what breadcrumb trail and empty-state message each route installs on its controller, so the behaviour can be checked without re-reading the four small route files.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

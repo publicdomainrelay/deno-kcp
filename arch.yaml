@@ -75804,12 +75804,130 @@ system_contexts:
   - third_party/openbao/ui/lib/pki/addon/routes/keys/index.js
   - third_party/openbao/ui/lib/pki/addon/routes/keys/key.js
   codeRefIndex:
+  - class:4eba34bb416d84110ce26b87da1bbd25 PkiKeysImportRoute@third_party/openbao/ui/lib/pki/addon/routes/keys/import.js:11
+  - class:73e01ac26d48967ac2bdf15106dea6d0 PkiKeysCreateRoute@third_party/openbao/ui/lib/pki/addon/routes/keys/create.js:11
+  - class:e21e36f661b11fbe5464cb8d4e66462f PkiKeysIndexRoute@third_party/openbao/ui/lib/pki/addon/routes/keys/index.js:13
+  - class:fd3b3170391f9e34d1a50faeefded6d8 PkiKeyRoute@third_party/openbao/ui/lib/pki/addon/routes/keys/key.js:9
   - file:third_party/openbao/ui/lib/pki/addon/routes/keys/create.js create.js@third_party/openbao/ui/lib/pki/addon/routes/keys/create.js
   - file:third_party/openbao/ui/lib/pki/addon/routes/keys/import.js import.js@third_party/openbao/ui/lib/pki/addon/routes/keys/import.js
   - file:third_party/openbao/ui/lib/pki/addon/routes/keys/index.js index.js@third_party/openbao/ui/lib/pki/addon/routes/keys/index.js
   - file:third_party/openbao/ui/lib/pki/addon/routes/keys/key.js key.js@third_party/openbao/ui/lib/pki/addon/routes/keys/key.js
   id: sc.third-party-openbao-ui-lib-pki-addon-routes-keys
+  intent: This context exists so that the key-management pages of the vendored OpenBao
+    PKI UI addon have a written contract for their data loading and navigation state.
+    It records which Ember model hook fetches or instantiates what, which store query
+    options each route passes, how a 404 on the key list is tolerated versus how other
+    errors propagate, and what breadcrumb trail and empty-state message each route
+    installs on its controller, so the behaviour can be checked without re-reading
+    the four small route files.
+  interfaces:
+  - file: third_party/openbao/ui/lib/pki/addon/routes/keys/key.js
+    kind: class
+    name: PkiKeyRoute
+    signature: class PkiKeyRoute extends Route
+  - file: third_party/openbao/ui/lib/pki/addon/routes/keys/create.js
+    kind: class
+    name: PkiKeysCreateRoute
+    signature: class PkiKeysCreateRoute extends Route
+  - file: third_party/openbao/ui/lib/pki/addon/routes/keys/import.js
+    kind: class
+    name: PkiKeysImportRoute
+    signature: class PkiKeysImportRoute extends Route
+  - file: third_party/openbao/ui/lib/pki/addon/routes/keys/index.js
+    kind: class
+    name: PkiKeysIndexRoute
+    signature: class PkiKeysIndexRoute extends Route
   name: third-party-openbao-ui-lib-pki-addon-routes-keys
+  requirements:
+  - codeRefs:
+    - class:73e01ac26d48967ac2bdf15106dea6d0
+    - file:third_party/openbao/ui/lib/pki/addon/routes/keys/create.js
+    id: r.create-model-new-record
+    level: MUST
+    text: PkiKeysCreateRoute.model creates a new, unsaved pki/key record with store.createRecord
+      and returns it, so the generate form edits an empty key model that has no backend
+      or id yet.
+  - codeRefs:
+    - class:4eba34bb416d84110ce26b87da1bbd25
+    - class:73e01ac26d48967ac2bdf15106dea6d0
+    id: r.form-route-breadcrumbs
+    level: MUST
+    text: setupController on PkiKeysCreateRoute and PkiKeysImportRoute calls super
+      and then assigns controller.breadcrumbs to the trail secrets, the current mount
+      path linked to the overview route, the keys index linked with the mount path
+      as model, and a final unlinked crumb that reads 'generate' on the create route
+      and 'import' on the import route.
+  - codeRefs:
+    - class:4eba34bb416d84110ce26b87da1bbd25
+    - file:third_party/openbao/ui/lib/pki/addon/routes/keys/import.js
+    id: r.import-model-new-record
+    level: MUST
+    text: PkiKeysImportRoute.model creates a new, unsaved pki/key record with store.createRecord
+      and returns it, identically to the create route, so the import form starts from
+      the same blank model.
+  - codeRefs:
+    - class:e21e36f661b11fbe5464cb8d4e66462f
+    - file:third_party/openbao/ui/lib/pki/addon/routes/keys/index.js
+    id: r.index-404-tolerated
+    level: MUST
+    text: 'The key list query in PkiKeysIndexRoute queries ''pki/key'' with the current
+      mount path as backend and catches the error: an HTTP 404 resolves to an empty
+      array so an unconfigured or empty mount renders as no keys, while any other
+      status is rethrown.'
+  - codeRefs:
+    - class:e21e36f661b11fbe5464cb8d4e66462f
+    - file:third_party/openbao/ui/lib/pki/addon/routes/keys/index.js
+    id: r.index-config-decorator
+    level: MUST
+    text: PkiKeysIndexRoute is decorated with withConfig so the route gains the shouldPromptConfig
+      flag that its hasConfig model value reads.
+  - codeRefs:
+    - class:e21e36f661b11fbe5464cb8d4e66462f
+    - file:third_party/openbao/ui/lib/pki/addon/routes/keys/index.js
+    id: r.index-controller-state
+    level: MUST
+    text: PkiKeysIndexRoute.setupController calls super, sets the controller breadcrumbs
+      trail to secrets, the current mount path linked to overview, and the keys index
+      linked with the mount path as model, and assigns controller.notConfiguredMessage
+      the PKI_DEFAULT_EMPTY_STATE_MSG constant so the empty state explains that PKI
+      is not configured.
+  - codeRefs:
+    - class:e21e36f661b11fbe5464cb8d4e66462f
+    - file:third_party/openbao/ui/lib/pki/addon/routes/keys/index.js
+    id: r.index-model-hash
+    level: MUST
+    text: PkiKeysIndexRoute.model returns an RSVP hash of hasConfig, taken from the
+      config decorator's shouldPromptConfig flag, parentModel, taken from modelFor('keys'),
+      and keyModels, the key list query result, so the template receives configuration
+      state, the parent model and the keys together.
+  - codeRefs:
+    - class:fd3b3170391f9e34d1a50faeefded6d8
+    - file:third_party/openbao/ui/lib/pki/addon/routes/keys/key.js
+    id: r.key-detail-by-id
+    level: MUST
+    text: 'PkiKeyRoute.model reads key_id from paramsFor(''keys/key'') and returns
+      store.queryRecord(''pki/key'', { backend: secretMountPath.currentPath, id: key_id
+      }), so the detail route loads exactly the key named in the URL within the current
+      mount.'
+  - codeRefs:
+    - class:fd3b3170391f9e34d1a50faeefded6d8
+    - file:third_party/openbao/ui/lib/pki/addon/routes/keys/key.js
+    id: r.key-detail-no-breadcrumbs
+    level: SHOULD
+    text: PkiKeyRoute defines only a model hook and no setupController, so the key
+      detail route relies on the parent keys route for its controller state rather
+      than installing its own breadcrumbs.
+  - codeRefs:
+    - class:4eba34bb416d84110ce26b87da1bbd25
+    - class:73e01ac26d48967ac2bdf15106dea6d0
+    - class:e21e36f661b11fbe5464cb8d4e66462f
+    - class:fd3b3170391f9e34d1a50faeefded6d8
+    id: r.mount-path-as-backend
+    level: MUST
+    text: Every route in this section injects the secretMountPath and store services
+      and passes secretMountPath.currentPath as the backend option of every pki/key
+      store call, so key operations always address the secrets mount the user is currently
+      viewing.
   upstream: self
 - code:
   - third_party/openbao/ui/lib/pki/addon/routes/keys/key/details.js
