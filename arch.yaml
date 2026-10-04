@@ -66749,6 +66749,19 @@ system_contexts:
     keyed by assignment name. Splitting the three entry points keeps the list, create,
     and edit navigation paths independent while sharing the same Ember Data model
     type and store service.'
+  interfaces:
+  - file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/assignment.js
+    kind: class
+    name: OidcAssignmentRoute
+    signature: class OidcAssignmentRoute extends Route
+  - file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/create.js
+    kind: class
+    name: OidcAssignmentsCreateRoute
+    signature: class OidcAssignmentsCreateRoute extends Route
+  - file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/index.js
+    kind: class
+    name: OidcAssignmentsRoute
+    signature: class OidcAssignmentsRoute extends Route
   name: third-party-openbao-ui-app-routes-vault-cluster-access-oidc-assignments
   requirements:
   - codeRefs:
@@ -66789,7 +66802,7 @@ system_contexts:
     - class:98ee8460e12232222fe272cf52448086
     id: r.store-service-injection
     level: MUST
-    text: Each of the three routes must inject the Ember Data store as `this.store`
+    text: Each of the three routes must inject the Ember Data store service as `this.store`
       and use only that service for record lookup, query, and creation, keeping the
       routes free of direct backend calls.
   upstream: self

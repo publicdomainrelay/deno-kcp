@@ -4995,7 +4995,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.assignments-create-unsaved-record` (MUST): "The assignment creation route must return a new unsaved record from `this.store.createRecord('oidc/assignment')`, so the create view edits a local record that is not persisted until saved."
 - added `r.assignments-list-query-tolerates-404` (MUST): "The assignments list route must load its model with `this.store.query('oidc/assignment', {})` and, when the request rejects with `err.httpStatus === 404`, must resolve to an empty array instead; any other rejection must be rethrown so it surfaces as a route error."
 - added `r.single-model-type` (MUST): "All three routes must address the same Ember Data model type, the string `'oidc/assignment'`, for the detail, list, and create cases."
-- added `r.store-service-injection` (MUST): "Each of the three routes must inject the Ember Data store as `this.store` and use only that service for record lookup, query, and creation, keeping the routes free of direct backend calls."
+- added `r.store-service-injection` (MUST): "Each of the three routes must inject the Ember Data store service as `this.store` and use only that service for record lookup, query, and creation, keeping the routes free of direct backend calls."
 
 ### third-party-openbao-ui-app-routes-vault-cluster-access-oidc-assignments-assignment
 
@@ -5419,5 +5419,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-routes-vault-cluster-access-oidc-assignments-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-oidc-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-oidc-clients-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-routes-vault-cluster-access-oidc-clients-client-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
