@@ -69620,8 +69620,312 @@ system_contexts:
   - file:third_party/openbao/ui/app/utils/transition-to-safe.js transition-to-safe.js@third_party/openbao/ui/app/utils/transition-to-safe.js
   - file:third_party/openbao/ui/app/utils/trim-right.js trim-right.js@third_party/openbao/ui/app/utils/trim-right.js
   - file:third_party/openbao/ui/app/utils/validators.js validators.js@third_party/openbao/ui/app/utils/validators.js
+  - function:04f293c49707860280893034cfdcd21e fetch@third_party/openbao/ui/app/utils/identity-manager.js:21
+  - function:08b85d12e27e0cd527a6b2d602744466 verifySignature@third_party/openbao/ui/app/utils/parse-pki-cert.js:145
+  - function:0eca6522c784d158b377a6e4bc8bc8d0 length@third_party/openbao/ui/app/utils/validators.js:10
+  - function:15b1a43020beb3f7390db80d3a4061a8 verifyCertificates@third_party/openbao/ui/app/utils/parse-pki-cert.js:129
+  - function:30601f42ea8c56d1c6bf4285b95edf0a combineFieldGroups@third_party/openbao/ui/app/utils/openapi-to-attrs.js:127
+  - function:32f082cb51e6ea89da173b21d432ea1f combineAttributes@third_party/openbao/ui/app/utils/openapi-to-attrs.js:86
+  - function:349c825a055c66a24286e8ab31e4a17f parseSubject@third_party/openbao/ui/app/utils/parse-pki-cert.js:177
+  - function:3f97fdca9b7bf66311776a7c97ee9549 parsePkiCert@third_party/openbao/ui/app/utils/parse-pki-cert.js:73
+  - function:45f7d6491a0f3af04540c8cc86c9bf72 expandAttributeMeta@third_party/openbao/ui/app/utils/field-to-attrs.js:42
+  - function:494cd295d11f9ce4ef8dfd5ee83f3f5f removeRecord@third_party/openbao/ui/app/utils/remove-record.js:7
+  - function:4fa67a6818963040d872ce5eced51a19 parseExtensions@third_party/openbao/ui/app/utils/parse-pki-cert.js:200
+  - function:5ac34804edca019cd501d3ebfe6aeae1 getRoleFields@third_party/openbao/ui/app/utils/database-helpers.js:145
+  - function:5f71d2bfce38727b37bb9a8148f57fb7 reset@third_party/openbao/ui/app/utils/identity-manager.js:50
+  - function:6fe0e41ce28211d1bdd82a0e40a02f21 containsWhiteSpace@third_party/openbao/ui/app/utils/validators.js:28
+  - function:72c2304960e573edc027e1c1696eaf2f sortObjects@third_party/openbao/ui/app/utils/sort-objects.js:1
+  - function:73666475181da1980aa531f1d36f3309 presence@third_party/openbao/ui/app/utils/validators.js:8
+  - function:7ce16f3cf708b3787d6227b2a6aae881 formatValues@third_party/openbao/ui/app/utils/parse-pki-cert.js:82
+  - function:7d2d955782cd48e8ade24ed208f72589 apiPath@third_party/openbao/ui/app/utils/api-path.js:16
+  - function:7f437a930c1dea4d6b312f402241387a jsonToCertObject@third_party/openbao/ui/app/utils/parse-pki-cert.js:32
+  - function:884b35553d676a5f79ae63820af76a2a constructor@third_party/openbao/ui/app/utils/identity-manager.js:10
+  - function:bcdbb6f463754d5d2ff94ccbbe4be833 getStatementFields@third_party/openbao/ui/app/utils/database-helpers.js:136
+  - function:c32be011d4fd7e47d263d7452435fb9e transitionToSafe@third_party/openbao/ui/app/utils/transition-to-safe.js:8
+  - function:c37c36edd74a2a2dc59a53b59a08e17a camelizeKeys@third_party/openbao/ui/app/utils/camelize-object-keys.js:7
+  - function:cd4cf3eb7b66424157a4ce68a854e309 number@third_party/openbao/ui/app/utils/validators.js:22
+  - function:dc1c1c5726d78a78748181ad6fab9cd7 parseCertificate@third_party/openbao/ui/app/utils/parse-pki-cert.js:39
+  - function:e0f44690a9983db13bccb7fde78fe7a3 combineFields@third_party/openbao/ui/app/utils/openapi-to-attrs.js:117
+  - function:f2759c60c203d141e518b99207d822fb set@third_party/openbao/ui/app/utils/identity-manager.js:38
+  - function:f2f0e75971b05d26ed7cf9cfcca934bb expandOpenApiProps@third_party/openbao/ui/app/utils/openapi-to-attrs.js:9
   id: sc.third-party-openbao-ui-app-utils
+  intent: This context exists to describe the shared helpers that the OpenBao UI depends
+    on, so that their contracts are pinned independently of the components that call
+    them. It matters because these helpers define cross-cutting behavior — how API
+    paths are built from tagged templates, how server snake_case keys become camelCase,
+    which database fields are valid for a role type, how PKI certificates are parsed
+    and chain-verified, and what counts as a valid form value — and any change here
+    ripples into many screens. The spec records the observed signatures and the concrete
+    behavior each helper guarantees.
+  interfaces:
+  - file: third_party/openbao/ui/app/utils/api-path.js
+    kind: function
+    name: apiPath
+    signature: apiPath(strings, ...keys)
+  - file: third_party/openbao/ui/app/utils/camelize-object-keys.js
+    kind: function
+    name: camelizeKeys
+    signature: camelizeKeys(object)
+  - file: third_party/openbao/ui/app/utils/openapi-to-attrs.js
+    kind: function
+    name: combineAttributes
+    signature: combineAttributes(oldAttrs, newProps)
+  - file: third_party/openbao/ui/app/utils/openapi-to-attrs.js
+    kind: function
+    name: combineFieldGroups
+    signature: combineFieldGroups(currentGroups, newFields, excludedFields)
+  - file: third_party/openbao/ui/app/utils/openapi-to-attrs.js
+    kind: function
+    name: combineFields
+    signature: combineFields(currentFields, newFields, excludedFields)
+  - file: third_party/openbao/ui/app/utils/identity-manager.js
+    kind: function
+    name: constructor
+    signature: constructor()
+  - file: third_party/openbao/ui/app/utils/validators.js
+    kind: function
+    name: containsWhiteSpace
+    signature: containsWhiteSpace(value)
+  - file: third_party/openbao/ui/app/utils/field-to-attrs.js
+    kind: function
+    name: expandAttributeMeta
+    signature: expandAttributeMeta(modelClass, attributeNames)
+  - file: third_party/openbao/ui/app/utils/openapi-to-attrs.js
+    kind: function
+    name: expandOpenApiProps
+    signature: expandOpenApiProps(props)
+  - file: third_party/openbao/ui/app/utils/identity-manager.js
+    kind: function
+    name: fetch
+    signature: fetch()
+  - file: third_party/openbao/ui/app/utils/parse-pki-cert.js
+    kind: function
+    name: formatValues
+    signature: formatValues(subject, extension)
+  - file: third_party/openbao/ui/app/utils/database-helpers.js
+    kind: function
+    name: getRoleFields
+    signature: getRoleFields(type)
+  - file: third_party/openbao/ui/app/utils/database-helpers.js
+    kind: function
+    name: getStatementFields
+    signature: getStatementFields(type, plugin)
+  - file: third_party/openbao/ui/app/utils/parse-pki-cert.js
+    kind: function
+    name: jsonToCertObject
+    signature: jsonToCertObject(jsonString)
+  - file: third_party/openbao/ui/app/utils/validators.js
+    kind: function
+    name: length
+    signature: length(value, { nullable = false, min, max } = {})
+  - file: third_party/openbao/ui/app/utils/validators.js
+    kind: function
+    name: number
+    signature: number(value, { nullable = false } = {})
+  - file: third_party/openbao/ui/app/utils/parse-pki-cert.js
+    kind: function
+    name: parseCertificate
+    signature: parseCertificate(certificateContent)
+  - file: third_party/openbao/ui/app/utils/parse-pki-cert.js
+    kind: function
+    name: parseExtensions
+    signature: parseExtensions(extensions)
+  - file: third_party/openbao/ui/app/utils/parse-pki-cert.js
+    kind: function
+    name: parsePkiCert
+    signature: parsePkiCert(model)
+  - file: third_party/openbao/ui/app/utils/parse-pki-cert.js
+    kind: function
+    name: parseSubject
+    signature: parseSubject(subject)
+  - file: third_party/openbao/ui/app/utils/validators.js
+    kind: function
+    name: presence
+    signature: presence(value)
+  - file: third_party/openbao/ui/app/utils/remove-record.js
+    kind: function
+    name: removeRecord
+    signature: removeRecord(store, record)
+  - file: third_party/openbao/ui/app/utils/identity-manager.js
+    kind: function
+    name: reset
+    signature: reset()
+  - file: third_party/openbao/ui/app/utils/identity-manager.js
+    kind: function
+    name: set
+    signature: set(id)
+  - file: third_party/openbao/ui/app/utils/sort-objects.js
+    kind: function
+    name: sortObjects
+    signature: sortObjects(array, key)
+  - file: third_party/openbao/ui/app/utils/transition-to-safe.js
+    kind: function
+    name: transitionToSafe
+    signature: transitionToSafe(router, ...args)
+  - file: third_party/openbao/ui/app/utils/parse-pki-cert.js
+    kind: function
+    name: verifyCertificates
+    signature: verifyCertificates(certA, certB, leaf)
+  - file: third_party/openbao/ui/app/utils/parse-pki-cert.js
+    kind: function
+    name: verifySignature
+    signature: verifySignature(parent, child)
   name: third-party-openbao-ui-app-utils
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/app/utils/api-path.js
+    - function:7d2d955782cd48e8ade24ed208f72589
+    id: r.api-path-template
+    level: MUST
+    text: apiPath is a tagged template helper. It closes over the literal strings
+      and the interpolated keys, and returns a function that takes a data object,
+      substitutes data[key] for each key in order between the literal segments, and
+      joins the result into one path string. If the data object lacks keys, it asserts
+      that Object.keys(data).length is at least keys.length so that a missing key
+      fails loudly instead of producing an undefined segment.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/utils/camelize-object-keys.js
+    - function:c37c36edd74a2a2dc59a53b59a08e17a
+    id: r.camelize-keys
+    level: MUST
+    text: camelizeKeys takes an object and returns a new object in which every own
+      enumerable key is replaced by its camelized form while the value is carried
+      over unchanged. The input object is not mutated.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/utils/database-helpers.js
+    - function:5ac34804edca019cd501d3ebfe6aeae1
+    - function:bcdbb6f463754d5d2ff94ccbbe4be833
+    id: r.database-field-lookup
+    level: MUST
+    text: database-helpers.js exposes the valid field lists for database roles and
+      statements. getStatementFields returns null when no type is given; otherwise
+      it returns the plugin-specific entry from STATEMENT_FIELDS[type] when that plugin
+      key exists, and falls back to the type's default entry. getRoleFields returns
+      null when no type is given, otherwise ROLE_FIELDS[type]. Both are used to filter
+      the attributes a role form shows.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/utils/api-path.js
+    - file:third_party/openbao/ui/app/utils/camelize-object-keys.js
+    - file:third_party/openbao/ui/app/utils/openapi-to-attrs.js
+    id: r.default-export-shape
+    level: SHOULD
+    text: Helpers consumed as single callables by the app — apiPath, camelizeKeys,
+      removeRecord, sortObjects, transitionToSafe and the validators — keep their
+      existing export shape so importing modules do not need to change, while the
+      database and OpenAPI helpers continue to be named exports alongside their field
+      tables.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/utils/field-to-attrs.js
+    - function:45f7d6491a0f3af04540c8cc86c9bf72
+    id: r.expand-attribute-meta
+    level: MUST
+    text: expandAttributeMeta takes a model class and a list of attribute names and
+      returns expanded attribute metadata for those names, so callers get the full
+      attribute descriptors rather than bare names.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/utils/identity-manager.js
+    - function:04f293c49707860280893034cfdcd21e
+    - function:5f71d2bfce38727b37bb9a8148f57fb7
+    - function:884b35553d676a5f79ae63820af76a2a
+    - function:f2759c60c203d141e518b99207d822fb
+    id: r.identity-manager
+    level: MUST
+    text: identity-manager.js provides an object that stores a selected identity id.
+      Its constructor initializes the stored value, fetch reads the identity back
+      from persistence, set(id) writes the given id as the current identity, and reset
+      clears the stored identity. The manager is the single place the UI reads and
+      writes the active identity so that other modules observe the same value.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/utils/openapi-to-attrs.js
+    - function:30601f42ea8c56d1c6bf4285b95edf0a
+    - function:32f082cb51e6ea89da173b21d432ea1f
+    - function:e0f44690a9983db13bccb7fde78fe7a3
+    - function:f2f0e75971b05d26ed7cf9cfcca934bb
+    id: r.openapi-to-attrs
+    level: MUST
+    text: openapi-to-attrs.js converts OpenAPI property definitions into form attribute
+      metadata. expandOpenApiProps(props) turns a props map into attribute descriptors;
+      combineAttributes(oldAttrs, newProps) merges newly derived properties into an
+      existing attribute list; combineFields(currentFields, newFields, excludedFields)
+      appends new fields to the current field list while skipping any name present
+      in excludedFields; combineFieldGroups(currentGroups, newFields, excludedFields)
+      does the same at the level of named field groups. The excluded list is what
+      keeps already-rendered or server-owned fields out of a generated form.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/utils/parse-pki-cert.js
+    - function:08b85d12e27e0cd527a6b2d602744466
+    - function:15b1a43020beb3f7390db80d3a4061a8
+    - function:349c825a055c66a24286e8ab31e4a17f
+    - function:3f97fdca9b7bf66311776a7c97ee9549
+    - function:4fa67a6818963040d872ce5eced51a19
+    - function:7ce16f3cf708b3787d6227b2a6aae881
+    - function:7f437a930c1dea4d6b312f402241387a
+    - function:dc1c1c5726d78a78748181ad6fab9cd7
+    id: r.parse-pki-cert
+    level: MUST
+    text: parse-pki-cert.js turns certificate material into structured objects and
+      checks chains. jsonToCertObject(jsonString) parses a JSON string into a cert
+      object; parseCertificate(certificateContent) parses PEM/DER content into the
+      object the UI renders, including a parsing_errors array that callers surface
+      to the user; parsePkiCert(model) derives the cert object from a model record;
+      formatValues(subject, extension) formats a subject and an extension for display;
+      verifyCertificates(certA, certB, leaf) checks that the certificates belong to
+      one chain; verifySignature(parent, child) checks that the parent signed the
+      child; parseSubject(subject) and parseExtensions(extensions) break those fields
+      into their display parts. A verification failure must be reported as a boolean
+      or error result rather than silently accepted.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/utils/remove-record.js
+    - function:494cd295d11f9ce4ef8dfd5ee83f3f5f
+    id: r.remove-record
+    level: MUST
+    text: removeRecord(store, record) removes the given record from the given store,
+      so callers deleting a record do not need to reach into store internals themselves.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/utils/clamp.js
+    - file:third_party/openbao/ui/app/utils/error-message.js
+    - file:third_party/openbao/ui/app/utils/parse-pki-cert-oids.js
+    - file:third_party/openbao/ui/app/utils/path-encoding-helpers.js
+    - file:third_party/openbao/ui/app/utils/trim-right.js
+    id: r.small-string-helpers
+    level: SHOULD
+    text: 'clamp.js, error-message.js, parse-pki-cert-oids.js, path-encoding-helpers.js
+      and trim-right.js each stay single-purpose modules: clamping a numeric value
+      into a range, extracting a readable message from an error object, mapping PKI
+      certificate OID constants to display labels, encoding path segments for API
+      URLs, and trimming trailing characters from a string. They must not take on
+      wider responsibilities.'
+  - codeRefs:
+    - file:third_party/openbao/ui/app/utils/sort-objects.js
+    - function:72c2304960e573edc027e1c1696eaf2f
+    id: r.sort-objects
+    level: MUST
+    text: sortObjects(array, key) returns the array ordered by the given key, used
+      to present lists in a stable, human-readable order instead of server order.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/utils/transition-to-safe.js
+    - function:c32be011d4fd7e47d263d7452435fb9e
+    id: r.transition-to-safe
+    level: MUST
+    text: transitionToSafe(router, ...args) performs a router transition while guarding
+      against the Ember transition-aborted error, so a superseded or aborted navigation
+      does not surface as an application error. Additional arguments are forwarded
+      to the underlying transition call.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/utils/validators.js
+    - function:0eca6522c784d158b377a6e4bc8bc8d0
+    - function:6fe0e41ce28211d1bdd82a0e40a02f21
+    - function:73666475181da1980aa531f1d36f3309
+    - function:cd4cf3eb7b66424157a4ce68a854e309
+    id: r.validators
+    level: MUST
+    text: validators.js supplies form value validators. presence(value) checks that
+      a value is non-empty; length(value, { nullable = false, min, max }) checks the
+      value's length against the optional min and max bounds, treating null as acceptable
+      only when nullable is true; number(value, { nullable = false }) checks that
+      the value is numeric, again accepting null only when nullable is true; containsWhiteSpace(value)
+      reports whether the value contains whitespace. Defaults are nullable false for
+      both options objects.
   upstream: self
 - code:
   - third_party/openbao/ui/config/content-security-policy.js
