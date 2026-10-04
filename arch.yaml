@@ -36537,8 +36537,128 @@ system_contexts:
     seal_migration_test.go@third_party/openbao/internal/vault/external_tests/sealmigration/seal_migration_test.go
   - file:third_party/openbao/internal/vault/external_tests/sealmigration/testshared.go
     testshared.go@third_party/openbao/internal/vault/external_tests/sealmigration/testshared.go
+  - function:17afc0249ee3900e0b5c59e5cf2c9eaa ParamTestSealMigration_TransitToTransit@third_party/openbao/internal/vault/external_tests/sealmigration/testshared.go:157
+  - function:40d8d4cf39f7e9a7ce033ff593e61364 ParamTestSealMigrationTransitToShamir_Pre14@third_party/openbao/internal/vault/external_tests/sealmigration/testshared.go:39
+  - function:be29784e5299a43e0e6bb142b3f5f08c InitializeTransit@third_party/openbao/internal/vault/external_tests/sealmigration/testshared.go:706
+  - function:c87742ce772f5a00a62c340c7ab92ca5 ParamTestSealMigrationTransitToShamir_Post14@third_party/openbao/internal/vault/external_tests/sealmigration/testshared.go:93
+  - function:ede151c6274be7b37402e591a9c49599 ParamTestSealMigrationShamirToTransit_Pre14@third_party/openbao/internal/vault/external_tests/sealmigration/testshared.go:70
+  - function:f93a5441445832900846fd2657ebe10a ParamTestSealMigrationShamirToTransit_Post14@third_party/openbao/internal/vault/external_tests/sealmigration/testshared.go:127
   id: sc.third-party-openbao-internal-vault-external-tests-sealmigration
+  intent: The package exists so OpenBao's seal-migration behavior can be exercised
+    end to end against real test clusters. Each ParamTest* function is a scenario
+    that a caller's test file invokes, parameterized by logger, reusable storage and
+    a base port, so the same migration logic runs over different storage backends.
+    The pre-1.4 and post-1.4 variants exist because the migration protocol changed
+    at that version, and the transit-to-transit variant covers moving between two
+    transit seals.
+  interfaces:
+  - file: third_party/openbao/internal/vault/external_tests/sealmigration/testshared.go
+    kind: function
+    name: InitializeTransit
+    signature: func InitializeTransit(t *testing.T, logger hclog.Logger, storage teststorage.ReusableStorage,
+      basePort int, tss *sealhelper.TransitSealServer, sealKeyName string) (*vault.TestCluster,
+      *vault.TestClusterOptions)
+  - file: third_party/openbao/internal/vault/external_tests/sealmigration/testshared.go
+    kind: function
+    name: ParamTestSealMigrationShamirToTransit_Post14
+    signature: func ParamTestSealMigrationShamirToTransit_Post14(t *testing.T, logger
+      hclog.Logger, storage teststorage.ReusableStorage, basePort int)
+  - file: third_party/openbao/internal/vault/external_tests/sealmigration/testshared.go
+    kind: function
+    name: ParamTestSealMigrationShamirToTransit_Pre14
+    signature: func ParamTestSealMigrationShamirToTransit_Pre14(t *testing.T, logger
+      hclog.Logger, storage teststorage.ReusableStorage, basePort int)
+  - file: third_party/openbao/internal/vault/external_tests/sealmigration/testshared.go
+    kind: function
+    name: ParamTestSealMigrationTransitToShamir_Post14
+    signature: func ParamTestSealMigrationTransitToShamir_Post14(t *testing.T, logger
+      hclog.Logger, storage teststorage.ReusableStorage, basePort int)
+  - file: third_party/openbao/internal/vault/external_tests/sealmigration/testshared.go
+    kind: function
+    name: ParamTestSealMigrationTransitToShamir_Pre14
+    signature: func ParamTestSealMigrationTransitToShamir_Pre14(t *testing.T, logger
+      hclog.Logger, storage teststorage.ReusableStorage, basePort int)
+  - file: third_party/openbao/internal/vault/external_tests/sealmigration/testshared.go
+    kind: function
+    name: ParamTestSealMigration_TransitToTransit
+    signature: func ParamTestSealMigration_TransitToTransit(t *testing.T, logger hclog.Logger,
+      storage teststorage.ReusableStorage, basePort int)
   name: third-party-openbao-internal-vault-external-tests-sealmigration
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/sealmigration/testshared.go
+    - function:be29784e5299a43e0e6bb142b3f5f08c
+    id: r.initialize-transit
+    level: MUST
+    text: InitializeTransit must build a test cluster whose seal is a transit seal
+      backed by the given TransitSealServer and seal key name, and must return both
+      the started cluster and the TestClusterOptions used to create it so callers
+      can reach the seal and unwrap seal functions.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/sealmigration/testshared.go
+    id: r.parameterized-scenarios
+    level: MUST
+    text: Every ParamTest* scenario must accept the same parameter set — *testing.T,
+      hclog.Logger, teststorage.ReusableStorage and an int base port — so a caller
+      can run each scenario against any reusable storage backend with its own logger
+      and port.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/sealmigration/testshared.go
+    - function:f93a5441445832900846fd2657ebe10a
+    id: r.shamir-to-transit-post14
+    level: MUST
+    text: ParamTestSealMigrationShamirToTransit_Post14 must initialize a shamir cluster,
+      start a transit server with key transit-seal-key-1, replace opts.SealFunc with
+      one that builds a seal from that transit server, run the post-1.4 migration
+      with the barrier keys as recovery keys, validate that the seal configuration
+      is transit, then run the cluster in autoseal mode.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/sealmigration/testshared.go
+    - function:ede151c6274be7b37402e591a9c49599
+    id: r.shamir-to-transit-pre14
+    level: MUST
+    text: ParamTestSealMigrationShamirToTransit_Pre14 must initialize a cluster with
+      shamir, capture root token and barrier keys, start a transit seal server holding
+      key transit-seal-key-1, run the pre-1.4 shamir-to-transit migration where the
+      barrier keys become recovery keys, then run the cluster in autoseal mode with
+      the returned seal function.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/sealmigration/seal_migration_pre14_test.go
+    - file:third_party/openbao/internal/vault/external_tests/sealmigration/seal_migration_test.go
+    id: r.test-files-invoke-shared-scenarios
+    level: SHOULD
+    text: The package's test files should invoke the shared parameterized scenarios
+      rather than reimplementing migration steps, with seal_migration_pre14_test.go
+      covering the pre-1.4 path and seal_migration_test.go covering the post-1.4 and
+      transit-to-transit paths.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/sealmigration/testshared.go
+    - function:c87742ce772f5a00a62c340c7ab92ca5
+    id: r.transit-to-shamir-post14
+    level: MUST
+    text: ParamTestSealMigrationTransitToShamir_Post14 must initialize a transit-sealed
+      cluster, move the existing SealFunc into UnwrapSealFunc and set SealFunc to
+      return nil, run the post-1.4 migration with the recovery keys, validate that
+      the resulting seal configuration is shamir, then stop the transit server and
+      run the cluster with shamir.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/sealmigration/testshared.go
+    - function:40d8d4cf39f7e9a7ce033ff593e61364
+    id: r.transit-to-shamir-pre14
+    level: MUST
+    text: ParamTestSealMigrationTransitToShamir_Pre14 must start a transit seal server,
+      create the key named transit-seal-key, initialize a cluster sealed with transit,
+      ensure its cores are sealed, run the pre-1.4 transit-to-shamir migration, then
+      stop the transit server and run the cluster with shamir using the former recovery
+      keys as barrier keys.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/sealmigration/testshared.go
+    - function:17afc0249ee3900e0b5c59e5cf2c9eaa
+    id: r.transit-to-transit
+    level: MUST
+    text: ParamTestSealMigration_TransitToTransit must exercise a seal migration from
+      one transit seal to another, taking the logger, reusable storage and base port
+      a caller supplies.
   upstream: self
 - code:
   - third_party/openbao/internal/vault/external_tests/sealmigrationext/seal_migration_pre14_test.go

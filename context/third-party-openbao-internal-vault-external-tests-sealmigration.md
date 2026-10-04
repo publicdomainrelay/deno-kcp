@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The package exists so OpenBao's seal-migration behavior can be exercised end to end against real test clusters. Each ParamTest* function is a scenario that a caller's test file invokes, parameterized by logger, reusable storage and a base port, so the same migration logic runs over different storage backends. The pre-1.4 and post-1.4 variants exist because the migration protocol changed at that version, and the transit-to-transit variant covers moving between two transit seals.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
