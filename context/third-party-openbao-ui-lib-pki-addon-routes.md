@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to describe the routing layer of the vendored OpenBao PKI addon, so that changes to the deno-kcp host application can reason about how PKI screens are entered, what data each route loads before rendering, and what navigation and breadcrumb contract the addon expects from its host. It documents the route classes and the one exported helper rather than the templates or components they feed, and it pins the service dependencies (secretMountPath, store) and the check-config decorator behavior that the routes rely on.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

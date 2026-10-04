@@ -5874,6 +5874,17 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.transition-to-returns-event-handler` (MUST): "TransitionToHelper, an Ember Helper subclass, declares router as an injected service bound to host-router, and compute takes the params to forward and returns a function that accepts an optional event."
 - added `r.transition-to-suppresses-default-only-when-possible` (MUST): "The returned handler calls preventDefault only when the event argument is not undefined and its preventDefault member is a function, so a missing event or an event without preventDefault is passed over without a type error."
 
+### third-party-openbao-ui-lib-pki-addon-routes
+
+- intent: "" -> "This context exists to describe the routing layer of the vendored OpenBao PKI addon, so that changes to the deno-kcp host application can reason about how PKI screens are entered, what data each route loads before rendering, and what navigation and breadcrumb contract the addon expects from its host. It documents the route classes and the one exported helper rather than the templates or components they feed, and it pins the service dependencies (secretMountPath, store) and the check-config decorator behavior that the routes rely on."
+- added `r.application-route-loads-mount-path` (MUST): "PkiRoute in application.js must expose a secretMountPath property and a beforeModel hook, and must carry a pathHelp property, so every child route can resolve the current PKI engine mount path before rendering."
+- added `r.configuration-route-model` (MUST): "PkiConfigurationRoute must inject the store service and implement a model hook that returns the data the configuration screen renders."
+- added `r.error-route-controller-chrome` (MUST): "PkiRolesErrorRoute must read the secretMountPath service and, in setupController, set the controller's breadcrumbs to secrets and the current mount path, set tabs for Overview, Roles, Issuers, Keys, Certificates, Tidy and Configuration, and set the title to the current mount path."
+- added `r.index-route-redirects` (MUST): "The index route must define a PkiRoute class that declares a 'host-router' property and a redirect hook, so a request to the bare PKI path is forwarded to the host router instead of rendering an empty page."
+- added `r.overview-route-model-and-controller` (MUST): "PkiOverviewRoute must build the overview model and populate its controller in setupController, and the module must export getCliMessage, which returns the default empty-state message alone when given no message and otherwise appends the names of existing items with a CLI instruction to manage them until an issuer is configured."
+- added `r.routes-share-mount-path-service` (SHOULD): "Routes that need the engine identity should read it from the secretMountPath service rather than from route params, so breadcrumb and model URLs stay consistent with the host application's current mount."
+- added `r.tidy-route-model-hash` (MUST): "PkiTidyRoute must inject the store service and, in its model hook, resolve the parent 'application' model as the engine and return a hash of hasConfig (from the check-config shouldPromptConfig flag), the engine, and the engine's 'pki/tidy' auto-tidy record."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
