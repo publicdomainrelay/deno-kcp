@@ -1,0 +1,38 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-ui-app-adapters-pki-config-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-ui-app-adapters-pki-config
+  toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
+status:
+  agentLog: 'Five Ember Data adapter modules under third_party/openbao/ui/app/adapters/pki/config
+    implement the PKI configuration read/write HTTP surface for the OpenBao web UI.
+    base.js defines PkiConfigBaseAdapter, which extends the UI ApplicationAdapter,
+    sets namespace ''v1'', and implements both request paths: findRecord(store, type,
+    backend) issues an HTTP GET to this._url(backend) and unwraps the response body''s
+    data property, while updateRecord(store, type, snapshot) serializes the snapshot
+    and issues an HTTP POST of that payload as data to this._url(snapshot.record.id),
+    so the record id supplies the backend mount path. acme.js, cluster.js, crl.js
+    and urls.js each declare a subclass that re-declares namespace ''v1'' and overrides
+    only _url(backend), returning this.buildURL() joined with the encodePath-encoded
+    backend mount and one fixed segment: /config/acme, /config/cluster, /config/crl
+    and /config/urls respectively. Path encoding comes from vault/utils/path-encoding-helpers
+    rather than hand-rolled escaping.'
+  message: wrote 6 requirement(s) and 5 interface(s) for third-party-openbao-ui-app-adapters-pki-config
+  phase: Succeeded
+superseded:
+- message: wrote 6 requirement(s) and 5 interface(s) for third-party-openbao-ui-app-adapters-pki-config;
+    interface PkiConfigBaseAdapter.findRecord is not in the observed facts; dropped;
+    interface PkiConfigBaseAdapter.updateRecord is not in the observed facts; dropped;
+    interface PkiConfigBaseAdapter.namespace is not in the observed facts; dropped;
+    interface PkiConfigAcmeAdapter._url is not in the observed facts; dropped; interface
+    PkiConfigClusterAdapter._url is not in the observed facts; dropped; interface
+    PkiConfigCrlAdapter._url is not in the observed facts; dropped; interface PkiConfigUrlsAdapter._url
+    is not in the observed facts; dropped
+  name: third-party-openbao-ui-app-adapters-pki-config-c2s-6c1bbe4c3ba9-89cee50ec5ae
+  phase: Succeeded
