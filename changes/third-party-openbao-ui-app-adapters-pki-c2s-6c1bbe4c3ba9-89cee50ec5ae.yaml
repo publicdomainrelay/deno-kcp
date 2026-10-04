@@ -10,5 +10,40 @@ spec:
   systemContext: third-party-openbao-ui-app-adapters-pki
   toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
 status:
-  message: the agent is summarizing third-party-openbao-ui-app-adapters-pki
-  phase: Running
+  agentLog: 'Ember Data adapters for the OpenBao PKI secrets engine live in third_party/openbao/ui/app/adapters/pki/.
+    Seven files each export one default adapter class: PkiActionAdapter (action.js),
+    PkiIssuerAdapter (issuer.js), PkiKeyAdapter (key.js), PkiRoleAdapter (role.js),
+    PkiSignIntermediateAdapter (sign-intermediate.js), and PkiTidyAdapter (tidy.js),
+    plus a cert.js adapter. Every adapter observed extends ApplicationAdapter and
+    sets namespace = ''v1'', so all requests are built under the /v1 API prefix by
+    this.buildURL(). The action adapter maps an adapterOptions.actionType plus optional
+    issuerRef, mount and useIssuer flags onto generation, import, sign-intermediate
+    and rotate-root endpoints. The key adapter lists and mutates keys under <backend>/keys
+    and <backend>/key/<id>, generating or importing on create and posting key_name
+    on update. The tidy adapter separates manual tidy records (POST <backend>/tidy,
+    never update) from auto-tidy config (POST/GET <backend>/config/auto-tidy, never
+    create), throwing when a model arrives on the wrong path. The issuer adapter reads
+    and writes issuer records, resolves backend from the snapshot, and exposes deleteAllIssuers.
+    All backend and mount path segments are passed through encodePath before being
+    interpolated into URLs.'
+  message: wrote 14 requirement(s) and 6 interface(s) for third-party-openbao-ui-app-adapters-pki;
+    interface PkiActionAdapter.urlForCreateRecord is not in the observed facts; dropped;
+    interface PkiActionAdapter.createRecord is not in the observed facts; dropped;
+    interface PkiIssuerAdapter._getBackend is not in the observed facts; dropped;
+    interface PkiIssuerAdapter.optionsForQuery is not in the observed facts; dropped;
+    interface PkiIssuerAdapter.urlForQuery is not in the observed facts; dropped;
+    interface PkiIssuerAdapter.getIssuerMetadata is not in the observed facts; dropped;
+    interface PkiIssuerAdapter.updateRecord is not in the observed facts; dropped;
+    interface PkiIssuerAdapter.query is not in the observed facts; dropped; interface
+    PkiIssuerAdapter.queryRecord is not in the observed facts; dropped; interface
+    PkiIssuerAdapter.deleteAllIssuers is not in the observed facts; dropped; interface
+    PkiKeyAdapter._baseUrl is not in the observed facts; dropped; interface PkiKeyAdapter.createRecord
+    is not in the observed facts; dropped; interface PkiKeyAdapter.updateRecord is
+    not in the observed facts; dropped; interface PkiKeyAdapter.query is not in the
+    observed facts; dropped; interface PkiKeyAdapter.queryRecord is not in the observed
+    facts; dropped; interface PkiKeyAdapter.deleteRecord is not in the observed facts;
+    dropped; interface PkiTidyAdapter._baseUrl is not in the observed facts; dropped;
+    interface PkiTidyAdapter.createRecord is not in the observed facts; dropped; interface
+    PkiTidyAdapter.updateRecord is not in the observed facts; dropped; interface PkiTidyAdapter.findRecord
+    is not in the observed facts; dropped
+  phase: Succeeded
