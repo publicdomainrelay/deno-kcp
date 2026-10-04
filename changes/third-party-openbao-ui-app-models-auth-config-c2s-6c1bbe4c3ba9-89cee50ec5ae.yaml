@@ -10,5 +10,24 @@ spec:
   systemContext: third-party-openbao-ui-app-models-auth-config
   toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
 status:
-  message: the agent is summarizing third-party-openbao-ui-app-models-auth-config
-  phase: Running
+  agentLog: 'Nine Ember Data model modules under third_party/openbao/ui/app/models/auth-config/,
+    one per OpenBao auth method: approle.js, azure.js, cert.js, jwt.js, kubernetes.js,
+    ldap.js, oidc.js, radius.js, userpass.js. Every module default-exports a model
+    class obtained by extending the shared base model from ../auth-config. approle.js,
+    cert.js and userpass.js carry no members of their own (AuthConfig.extend({})),
+    and oidc.js declares nothing at all, re-exporting jwt.js with `export { default
+    } from ''./jwt''` so the OIDC auth method reuses the JWT model. azure, jwt, kubernetes,
+    ldap and radius set `useOpenAPI: true`, declare their method-specific attributes
+    with @ember-data/model attr() and @ember/object computed, and define a `fieldGroups`
+    computed property that lays those attributes out into UI field groups and passes
+    the result to fieldToAttrs. Each of those fieldGroups observes `newFields` and,
+    when it is populated, folds the server-supplied OpenAPI fields into the declared
+    groups with combineFieldGroups(groups, this.newFields, []). jwt.js additionally
+    observes constructor.modelName and derives its options group label from the model
+    name, so its re-exporting oidc sibling renders the label OIDC Options rather than
+    JWT Options. Attribute metadata (label, helpText, editType of file or stringArray)
+    drives the form rendering: file-picker fields such as azure/jwt certificate material
+    and kubernetes CA cert, and string-array fields such as jwtValidationPubkeys and
+    pemKeys.'
+  message: wrote 10 requirement(s) and 0 interface(s) for third-party-openbao-ui-app-models-auth-config
+  phase: Succeeded

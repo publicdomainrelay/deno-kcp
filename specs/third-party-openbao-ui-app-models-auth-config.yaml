@@ -14,5 +14,125 @@ metadata:
   name: third-party-openbao-ui-app-models-auth-config
   namespace: default
 spec:
+  intent: 'This context exists because the OpenBao web UI must present a configuration
+    form per auth method, and each form''s shape is data-driven rather than hardcoded
+    in templates. These nine modules are the client-side description of the approle,
+    azure, cert, jwt/oidc, kubernetes, ldap, radius and userpass auth-method configs:
+    they bind each method''s backend fields to Ember Data attributes, group them into
+    the sections the user sees, decorate them with labels, help text and edit types,
+    and let fields the UI does not know about statically arrive at runtime from the
+    server''s OpenAPI schema through useOpenAPI and combineFieldGroups. The context
+    is the per-method extension layer that sits on top of the shared auth-config base
+    model; anything about ordering, sectioning, or control type of one method''s settings
+    is decided here.'
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/app/models/auth-config/azure.js
+    id: r.azure-fields-and-groups
+    level: MUST
+    text: The Azure model declares string attributes tenantId (label 'Tenant ID',
+      help about the Azure Active Directory organization), resource (help about the
+      registered application URL), clientId (label 'Client ID') and clientSecret (help
+      about querying the Azure APIs), plus googleCertsEndpoint with no label or help.
+      Its fieldGroups put tenantId and resource in the default group and clientId
+      and clientSecret in an 'Azure Options' group. googleCertsEndpoint belongs to
+      no group and is therefore not rendered by the static layout.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/models/auth-config/azure.js
+    - file:third_party/openbao/ui/app/models/auth-config/jwt.js
+    - file:third_party/openbao/ui/app/models/auth-config/kubernetes.js
+    - file:third_party/openbao/ui/app/models/auth-config/ldap.js
+    - file:third_party/openbao/ui/app/models/auth-config/radius.js
+    id: r.field-groups-merge-new-fields
+    level: MUST
+    text: The declaring models expose `fieldGroups` as an @ember/object computed property
+      that observes `newFields`. The body builds the method's declared group list,
+      and when `this.newFields` is truthy replaces that list with `combineFieldGroups(groups,
+      this.newFields, [])` before returning `fieldToAttrs(this, groups)`. With no
+      newFields the declared groups are rendered unchanged, in their declared order.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/models/auth-config/jwt.js
+    id: r.jwt-fields
+    level: MUST
+    text: The JWT model declares oidcDiscoveryUrl (labeled OIDC discovery URL, help
+      states the base URL without the .well-known/openid-configuration component and
+      that it cannot be used with jwt_validation_pubkeys), oidcClientId, oidcClientSecret,
+      oidcDiscoveryCaPem with editType 'file' and help about using it to validate
+      the discovery URL, jwtValidationPubkeys with editType 'stringArray', jwtSupportedAlgs,
+      and boundIssuer (help about matching the iss claim in a JWT).
+  - codeRefs:
+    - file:third_party/openbao/ui/app/models/auth-config/jwt.js
+    - file:third_party/openbao/ui/app/models/auth-config/oidc.js
+    id: r.jwt-group-label-follows-model-name
+    level: MUST
+    text: The JWT model's fieldGroups also observes `constructor.modelName`, uppercases
+      the second '/'-separated segment of that name and uses it to label the options
+      group as `<TYPE> Options`. Consequently the OIDC auth method, which reuses this
+      model, presents that group as 'OIDC Options' while a JWT config presents 'JWT
+      Options'. The default group holds oidcDiscoveryUrl and defaultRole; the options
+      group holds oidcClientId, oidcClientSecret, oidcDiscoveryCaPem, jwtValidationPubkeys,
+      jwtSupportedAlgs and boundIssuer.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/models/auth-config/kubernetes.js
+    id: r.kubernetes-fields-and-groups
+    level: MUST
+    text: The Kubernetes model declares kubernetesHost (help constrains it to a host
+      string, host:port pair or Kubernetes API base URL), kubernetesCaCert with editType
+      'file' (PEM CA cert for the TLS client), tokenReviewerJwt (service account JWT
+      for the TokenReview API, falling back to the login JWT) and pemKeys with editType
+      'stringArray'. Its default group holds kubernetesHost and kubernetesCaCert;
+      a 'Kubernetes Options' group holds tokenReviewerJwt and pemKeys.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/models/auth-config/ldap.js
+    id: r.ldap-groups-and-shared-base-fields
+    level: MUST
+    text: 'The LDAP model declares only `certificate` with label ''Certificate'' and
+      editType ''file''; every other LDAP setting it lays out (url, starttls, insecureTls,
+      discoverdn, denyNullBind, tlsMinVersion, tlsMaxVersion, clientTlsCert, clientTlsKey,
+      userattr, upndomain, anonymousGroupSearch, binddn, userdn, bindpass, userfilter,
+      groupfilter, groupattr, groupdn, useTokenGroups) comes from the base auth-config
+      model or from OpenAPI newFields. Its groups are: default holding url; ''LDAP
+      Options'' holding the TLS and general options plus certificate; ''Customize
+      User Search'' holding binddn, userdn, bindpass, userfilter; ''Customize Group
+      Membership Search'' holding groupfilter, groupattr, groupdn, useTokenGroups.'
+  - codeRefs:
+    - file:third_party/openbao/ui/app/models/auth-config/approle.js
+    - file:third_party/openbao/ui/app/models/auth-config/cert.js
+    - file:third_party/openbao/ui/app/models/auth-config/userpass.js
+    id: r.module-per-auth-method
+    level: MUST
+    text: Each auth-config module default-exports one Ember model for a single auth
+      method, built by extending the shared base model from ../auth-config. approle.js,
+      cert.js and userpass.js extend it with an empty object and add no attributes,
+      no fieldGroups and no flags of their own.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/models/auth-config/jwt.js
+    - file:third_party/openbao/ui/app/models/auth-config/oidc.js
+    id: r.oidc-reuses-jwt-model
+    level: MUST
+    text: oidc.js declares no model of its own. It re-exports the JWT auth-config
+      model with `export { default } from './jwt'`, so the OIDC auth method uses exactly
+      the JWT field set and field grouping, and any change to jwt.js changes OIDC
+      configuration too.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/models/auth-config/radius.js
+    id: r.radius-fields-and-groups
+    level: MUST
+    text: The RADIUS model declares string attributes host and secret and places both
+      in the default field group. Its 'RADIUS Options' group holds port, nasPort,
+      nasIdentifier, dialTimeout and unregisteredUserPolicies, which are supplied
+      from the base model or OpenAPI newFields rather than declared here.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/models/auth-config/azure.js
+    - file:third_party/openbao/ui/app/models/auth-config/jwt.js
+    - file:third_party/openbao/ui/app/models/auth-config/kubernetes.js
+    - file:third_party/openbao/ui/app/models/auth-config/ldap.js
+    - file:third_party/openbao/ui/app/models/auth-config/radius.js
+    id: r.use-openapi-on-declaring-models
+    level: MUST
+    text: 'Every model that declares its own attributes (azure, jwt, kubernetes, ldap,
+      radius) sets `useOpenAPI: true` so the UI merges server-described OpenAPI fields
+      for that auth method into the config form alongside the statically declared
+      fields.'
   upstream: self
