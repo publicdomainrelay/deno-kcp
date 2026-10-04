@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so the OpenBao UI console and capability wiring keep one shared, testable implementation instead of logic duplicated inside components. console-helpers.ts turns a typed command line into a method, path, flags and data, executes it against injected command functions, and renders the result or error for the console panel; parseCommand is the single gate that rejects unsupported verbs. capabilities.js lets models declare capability-backed relationships declaratively and then resolves them during JSON:API deserialization. The utility files exist to serve those flows and the wider UI: tokenizing arguments, mapping keys to browser keycodes, editing secret key/value pairs, building path trees for secret listings, naming routes, and persisting tokens and other state across local storage, memory storage and a token-specific store.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
