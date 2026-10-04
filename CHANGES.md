@@ -1937,6 +1937,24 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.new-transit-seal-server-starts-cluster` (MUST): "NewTransitSealServer must build a CoreConfig whose LogicalBackends registers the transit factory, build TestClusterOptions with one core, the http handler and a vault logger named after t.Name() plus the transit-seal<idx> suffix, apply the in-memory storage backend setup, create and start the cluster, and then mount a transit secrets engine at path "transit" through the first core's Sys().Mount, calling t.Fatal on a mount failure."
 - added `r.transit-seal-server-embeds-cluster` (MUST): "TransitSealServer must embed a *vault.TestCluster so that callers can reach the cluster's Cores, client and CACertPEMFile through the helper; the constructor returns a TransitSealServer built from the started cluster."
 
+### third-party-openbao-internal-helper-timeutil
+
+- intent: "" -> "This context exists because the upstream OpenBao codebase needs a single, dependency-free place to do month arithmetic and time comparison, and to abstract the wall clock behind an interface so time-dependent code is testable. It is vendored into this repository as third-party code, so the spec records the behavior that the rest of the tree depends on rather than behavior we would design anew."
+- added `r.clock-interface` (MUST): "Clock abstracts the passage of time behind three methods: Now returns the current time, NewTicker returns a *time.Ticker firing every given duration, and NewTimer returns a *time.Timer firing once after the given duration. Code that needs to react to time takes a Clock so tests can substitute a controllable implementation."
+- added `r.default-clock` (MUST): "DefaultClock is the production Clock implementation and satisfies the interface by delegating each method to the standard library: Now returns time.Now(), NewTicker returns time.NewTicker for the duration, and NewTimer returns time.NewTimer for the duration."
+- added `r.end-of-month` (MUST): "EndOfMonth returns the last instant of t's month, so that a range built from StartOfMonth and EndOfMonth covers the whole month."
+- added `r.get-most-recent-contiguous-months` (MUST): "GetMostRecentContiguousMonths takes start times ordered newest first and returns the longest leading run of contiguous months. It returns the input unchanged when there are fewer than two entries; it returns only the first entry when that entry is not a month start, since the newest segment then covers less than one full month; it stops at the first entry that is not a month start or whose month is not the previous month of its predecessor. When the loop stops mid-list, the stopping entry is still appended if snapping it to its month start yields the previous month of the last accepted entry, so a segment that begins mid-month is kept."
+- added `r.in-range` (MUST): "InRange reports whether t lies within the interval bounded by start and end, used to filter points to a window such as one month."
+- added `r.is-current-month` (MUST): "IsCurrentMonth reports whether t and compare fall in the same calendar month and year, regardless of their day or clock time."
+- added `r.is-month-start` (MUST): "IsMonthStart reports whether t is exactly the start of its month, defined as t.Equal(StartOfMonth(t)); any nonzero day, hour, minute, second or nanosecond makes it false."
+- added `r.is-previous-month` (MUST): "IsPreviousMonth reports whether t falls inside the calendar month immediately before the month that contains toCompare; it is true when t equals that previous month's start and also when t is strictly after the previous month's start and strictly before toCompare's month start, so the whole previous month is covered."
+- added `r.months-previous-to` (MUST): "MonthsPreviousTo returns the start of the month that lies the given number of whole months before the month containing now, used to compute the oldest month a caller wants to read."
+- added `r.parse-time-from-path` (MUST): "ParseTimeFromPath extracts a timestamp from a path string and returns the parsed time plus an error when the path carries no parseable time."
+- added `r.skip-at-end-of-month` (SHOULD): "SkipAtEndOfMonth is a test helper that skips the calling test with t.Skip when the current date is at the end of the month, so month-boundary tests do not run at a time that would make them flaky. It takes a *testing.T and lives beside the production helpers rather than in a _test file."
+- added `r.start-of-month` (MUST): "StartOfMonth returns the first instant of t's month, at 00:00:00.000000000 in t's own location, discarding t's day, clock and monotonic reading."
+- added `r.start-of-next-month` (MUST): "StartOfNextMonth returns the first instant of the month after t's month, at midnight in t's location, computed as the month start plus AddDate(0, 1, 0)."
+- added `r.start-of-previous-month` (MUST): "StartOfPreviousMonth returns the first instant of the month before t's month, at midnight in t's location, computed by snapping t to its month start and subtracting one month with AddDate(0, -1, 0) so month lengths and leap years stay correct."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -2053,4 +2071,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-helper-testhelpers-pluginhelpers-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-testhelpers-seal-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-testhelpers-teststorage-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-internal-helper-timeutil-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-helper-timeutil-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-internal-helper-timeutil-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Running |  | 0 | - |

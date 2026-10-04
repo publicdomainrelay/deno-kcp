@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists because the upstream OpenBao codebase needs a single, dependency-free place to do month arithmetic and time comparison, and to abstract the wall clock behind an interface so time-dependent code is testable. It is vendored into this repository as third-party code, so the spec records the behavior that the rest of the tree depends on rather than behavior we would design anew.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

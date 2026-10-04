@@ -2,10 +2,245 @@ apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
 - file:third_party/openbao/internal/helper/timeutil/timeutil.go timeutil.go@third_party/openbao/internal/helper/timeutil/timeutil.go
 - file:third_party/openbao/internal/helper/timeutil/timeutil_test.go timeutil_test.go@third_party/openbao/internal/helper/timeutil/timeutil_test.go
+- function:02497f290f75ec9bbb6e0e61f9d63011 StartOfMonth@third_party/openbao/internal/helper/timeutil/timeutil.go:20
+- function:06b08bf2207793838eb7695b756cedf5 EndOfMonth@third_party/openbao/internal/helper/timeutil/timeutil.go:35
+- function:248e6a9e3ec57bf2f3d75957ebef0c98 MonthsPreviousTo@third_party/openbao/internal/helper/timeutil/timeutil.go:130
+- function:3a4e53e31d269747feee4e945bc56edd GetMostRecentContiguousMonths@third_party/openbao/internal/helper/timeutil/timeutil.go:74
+- function:506bf00be4afc878b3b0c20e453bdc51 IsPreviousMonth@third_party/openbao/internal/helper/timeutil/timeutil.go:46
+- function:89a15b84a2b3c0da6961cc27667a1cf9 SkipAtEndOfMonth@third_party/openbao/internal/helper/timeutil/timeutil.go:136
+- function:8a342434dee3eef6babade7a3ffa7f14 StartOfPreviousMonth@third_party/openbao/internal/helper/timeutil/timeutil.go:15
+- function:a1ef9a925404a9eca37fd376ec3a51e1 IsMonthStart@third_party/openbao/internal/helper/timeutil/timeutil.go:31
+- function:ab79f481f32350c2e7914d06df65fbe0 ParseTimeFromPath@third_party/openbao/internal/helper/timeutil/timeutil.go:113
+- function:b6cfddec9deb7566c4478880a1043938 StartOfNextMonth@third_party/openbao/internal/helper/timeutil/timeutil.go:25
+- function:ce9087cbe40a6073979b964a533554a9 IsCurrentMonth@third_party/openbao/internal/helper/timeutil/timeutil.go:58
+- function:de895aad22e8fcc8ac5b27bf53ff54e4 InRange@third_party/openbao/internal/helper/timeutil/timeutil.go:106
+- interface:32a58940e99c7ba5368e0fdfe3dc9b58 Clock@third_party/openbao/internal/helper/timeutil/timeutil.go:147
+- method:2610a0507cea94b81aa98d91787eba4a DefaultClock.Now@third_party/openbao/internal/helper/timeutil/timeutil.go:157
+- method:34d7e24feaff9bbec965d8c89b064d04 DefaultClock.NewTimer@third_party/openbao/internal/helper/timeutil/timeutil.go:165
+- method:3c865dbc94231867424c334f153d022c DefaultClock.NewTicker@third_party/openbao/internal/helper/timeutil/timeutil.go:161
+- method:77ef83354bf833c3ebe5e5f918708f8b Clock.Now@third_party/openbao/internal/helper/timeutil/timeutil.go:148
+- method:c01b7f0947f3726502fe12a4ac674cf8 Clock.NewTicker@third_party/openbao/internal/helper/timeutil/timeutil.go:149
+- method:c414f13a290c2842af194674df83e552 Clock.NewTimer@third_party/openbao/internal/helper/timeutil/timeutil.go:150
+- struct:9f6a33aaff47eef8bfc64d1255b7ec6d DefaultClock@third_party/openbao/internal/helper/timeutil/timeutil.go:153
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-helper-timeutil
   namespace: default
 spec:
+  intent: This context exists because the upstream OpenBao codebase needs a single,
+    dependency-free place to do month arithmetic and time comparison, and to abstract
+    the wall clock behind an interface so time-dependent code is testable. It is vendored
+    into this repository as third-party code, so the spec records the behavior that
+    the rest of the tree depends on rather than behavior we would design anew.
+  interfaces:
+  - file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: interface
+    name: Clock
+    signature: type Clock interface
+  - file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: method
+    name: Clock.NewTicker
+    signature: func (Clock) NewTicker(time.Duration) *time.Ticker
+  - file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: method
+    name: Clock.NewTimer
+    signature: func (Clock) NewTimer(time.Duration) *time.Timer
+  - file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: method
+    name: Clock.Now
+    signature: func (Clock) Now() time.Time
+  - file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: struct
+    name: DefaultClock
+    signature: type DefaultClock struct{}
+  - file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: method
+    name: DefaultClock.NewTicker
+    signature: func (DefaultClock) NewTicker(d time.Duration) *time.Ticker
+  - file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: method
+    name: DefaultClock.NewTimer
+    signature: func (DefaultClock) NewTimer(d time.Duration) *time.Timer
+  - file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: method
+    name: DefaultClock.Now
+    signature: func (DefaultClock) Now() time.Time
+  - file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: function
+    name: EndOfMonth
+    signature: func EndOfMonth(t time.Time) time.Time
+  - file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: function
+    name: GetMostRecentContiguousMonths
+    signature: func GetMostRecentContiguousMonths(startTimes []time.Time) []time.Time
+  - file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: function
+    name: InRange
+    signature: func InRange(t, start, end time.Time) bool
+  - file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: function
+    name: IsCurrentMonth
+    signature: func IsCurrentMonth(t, compare time.Time) bool
+  - file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: function
+    name: IsMonthStart
+    signature: func IsMonthStart(t time.Time) bool
+  - file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: function
+    name: IsPreviousMonth
+    signature: func IsPreviousMonth(t, toCompare time.Time) bool
+  - file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: function
+    name: MonthsPreviousTo
+    signature: func MonthsPreviousTo(months int, now time.Time) time.Time
+  - file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: function
+    name: ParseTimeFromPath
+    signature: func ParseTimeFromPath(path string) (time.Time, error)
+  - file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: function
+    name: SkipAtEndOfMonth
+    signature: func SkipAtEndOfMonth(t *testing.T)
+  - file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: function
+    name: StartOfMonth
+    signature: func StartOfMonth(t time.Time) time.Time
+  - file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: function
+    name: StartOfNextMonth
+    signature: func StartOfNextMonth(t time.Time) time.Time
+  - file: third_party/openbao/internal/helper/timeutil/timeutil.go
+    kind: function
+    name: StartOfPreviousMonth
+    signature: func StartOfPreviousMonth(t time.Time) time.Time
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/timeutil/timeutil.go
+    - interface:32a58940e99c7ba5368e0fdfe3dc9b58
+    - method:77ef83354bf833c3ebe5e5f918708f8b
+    - method:c01b7f0947f3726502fe12a4ac674cf8
+    - method:c414f13a290c2842af194674df83e552
+    id: r.clock-interface
+    level: MUST
+    text: 'Clock abstracts the passage of time behind three methods: Now returns the
+      current time, NewTicker returns a *time.Ticker firing every given duration,
+      and NewTimer returns a *time.Timer firing once after the given duration. Code
+      that needs to react to time takes a Clock so tests can substitute a controllable
+      implementation.'
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/timeutil/timeutil.go
+    - method:2610a0507cea94b81aa98d91787eba4a
+    - method:34d7e24feaff9bbec965d8c89b064d04
+    - method:3c865dbc94231867424c334f153d022c
+    - struct:9f6a33aaff47eef8bfc64d1255b7ec6d
+    id: r.default-clock
+    level: MUST
+    text: 'DefaultClock is the production Clock implementation and satisfies the interface
+      by delegating each method to the standard library: Now returns time.Now(), NewTicker
+      returns time.NewTicker for the duration, and NewTimer returns time.NewTimer
+      for the duration.'
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/timeutil/timeutil.go
+    - function:06b08bf2207793838eb7695b756cedf5
+    id: r.end-of-month
+    level: MUST
+    text: EndOfMonth returns the last instant of t's month, so that a range built
+      from StartOfMonth and EndOfMonth covers the whole month.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/timeutil/timeutil.go
+    - function:3a4e53e31d269747feee4e945bc56edd
+    - function:506bf00be4afc878b3b0c20e453bdc51
+    - function:a1ef9a925404a9eca37fd376ec3a51e1
+    id: r.get-most-recent-contiguous-months
+    level: MUST
+    text: GetMostRecentContiguousMonths takes start times ordered newest first and
+      returns the longest leading run of contiguous months. It returns the input unchanged
+      when there are fewer than two entries; it returns only the first entry when
+      that entry is not a month start, since the newest segment then covers less than
+      one full month; it stops at the first entry that is not a month start or whose
+      month is not the previous month of its predecessor. When the loop stops mid-list,
+      the stopping entry is still appended if snapping it to its month start yields
+      the previous month of the last accepted entry, so a segment that begins mid-month
+      is kept.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/timeutil/timeutil.go
+    - function:de895aad22e8fcc8ac5b27bf53ff54e4
+    id: r.in-range
+    level: MUST
+    text: InRange reports whether t lies within the interval bounded by start and
+      end, used to filter points to a window such as one month.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/timeutil/timeutil.go
+    - function:ce9087cbe40a6073979b964a533554a9
+    id: r.is-current-month
+    level: MUST
+    text: IsCurrentMonth reports whether t and compare fall in the same calendar month
+      and year, regardless of their day or clock time.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/timeutil/timeutil.go
+    - function:02497f290f75ec9bbb6e0e61f9d63011
+    - function:a1ef9a925404a9eca37fd376ec3a51e1
+    id: r.is-month-start
+    level: MUST
+    text: IsMonthStart reports whether t is exactly the start of its month, defined
+      as t.Equal(StartOfMonth(t)); any nonzero day, hour, minute, second or nanosecond
+      makes it false.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/timeutil/timeutil.go
+    - function:506bf00be4afc878b3b0c20e453bdc51
+    id: r.is-previous-month
+    level: MUST
+    text: IsPreviousMonth reports whether t falls inside the calendar month immediately
+      before the month that contains toCompare; it is true when t equals that previous
+      month's start and also when t is strictly after the previous month's start and
+      strictly before toCompare's month start, so the whole previous month is covered.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/timeutil/timeutil.go
+    - function:248e6a9e3ec57bf2f3d75957ebef0c98
+    id: r.months-previous-to
+    level: MUST
+    text: MonthsPreviousTo returns the start of the month that lies the given number
+      of whole months before the month containing now, used to compute the oldest
+      month a caller wants to read.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/timeutil/timeutil.go
+    - function:ab79f481f32350c2e7914d06df65fbe0
+    id: r.parse-time-from-path
+    level: MUST
+    text: ParseTimeFromPath extracts a timestamp from a path string and returns the
+      parsed time plus an error when the path carries no parseable time.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/timeutil/timeutil.go
+    - file:third_party/openbao/internal/helper/timeutil/timeutil_test.go
+    - function:89a15b84a2b3c0da6961cc27667a1cf9
+    id: r.skip-at-end-of-month
+    level: SHOULD
+    text: SkipAtEndOfMonth is a test helper that skips the calling test with t.Skip
+      when the current date is at the end of the month, so month-boundary tests do
+      not run at a time that would make them flaky. It takes a *testing.T and lives
+      beside the production helpers rather than in a _test file.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/timeutil/timeutil.go
+    - function:02497f290f75ec9bbb6e0e61f9d63011
+    id: r.start-of-month
+    level: MUST
+    text: StartOfMonth returns the first instant of t's month, at 00:00:00.000000000
+      in t's own location, discarding t's day, clock and monotonic reading.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/timeutil/timeutil.go
+    - function:b6cfddec9deb7566c4478880a1043938
+    id: r.start-of-next-month
+    level: MUST
+    text: StartOfNextMonth returns the first instant of the month after t's month,
+      at midnight in t's location, computed as the month start plus AddDate(0, 1,
+      0).
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/timeutil/timeutil.go
+    - function:8a342434dee3eef6babade7a3ffa7f14
+    id: r.start-of-previous-month
+    level: MUST
+    text: StartOfPreviousMonth returns the first instant of the month before t's month,
+      at midnight in t's location, computed by snapping t to its month start and subtracting
+      one month with AddDate(0, -1, 0) so month lengths and leap years stay correct.
   upstream: self
