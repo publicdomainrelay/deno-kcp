@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so the post-mount redirect logic and the cluster-settings controller actions can be described and depended on without re-reading the JavaScript. It fixes the contract between the secret-engine metadata (SUPPORTED_BACKENDS and allEngines()) and the routes the UI transitions to, plus the side effects the configure and seal actions must produce, so that changes to engine metadata or route names can be checked against these requirements.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

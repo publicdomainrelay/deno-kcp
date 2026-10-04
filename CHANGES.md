@@ -4480,6 +4480,20 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.metadata-refresh-action` (MUST): "MetadataController.refreshModel is an Ember @action that sends the refreshModel message to its route, so the metadata view can reload its model without a full transition."
 - added `r.root-variant-pairing` (SHOULD): "Each -root controller must pair with its non-root sibling of the same screen name (actions, create, credentials, edit, list, show, sign), with the root variant carrying the backend-level breadcrumb and the non-root variant carrying the item-level screen state."
 
+### third-party-openbao-ui-app-controllers-vault-cluster-settings
+
+- intent: "" -> "The context exists so the post-mount redirect logic and the cluster-settings controller actions can be described and depended on without re-reading the JavaScript. It fixes the contract between the secret-engine metadata (SUPPORTED_BACKENDS and allEngines()) and the routes the UI transitions to, plus the side effects the configure and seal actions must produce, so that changes to engine metadata or route names can be checked against these requirements."
+- added `r.configure-default-attrs` (MUST): "The configure controller must initialize and be able to restore a fixed set of config attributes — configured, iamEndpoint, stsEndpoint, accessKey, secretKey and region — with configured defaulting to false and region defaulting to the empty string, and it must expose tab as a query parameter defaulting to the empty string."
+- added `r.configure-save-guard` (MUST): "The configure-backend save action must set the loading flag, and must abort without calling the model when every supplied data value is absent according to isPresent; the loading flag is cleared in a finally block so a failed save still unlocks the form."
+- added `r.configure-save-persist` (MUST): "A successful save must persist through the model's save with adapterOptions carrying the adapterMethod and data, then roll back attributes and reset the config attributes to their defaults, and report success through a flash message."
+- added `r.configure-ssh-ca` (MUST): "The saveConfig action must treat a model of type ssh specially: it calls saveCA with the delete flag, refreshes the route on success, sets configured to the negation of the delete flag, and emits a success or danger flash message, joining error.errors with '. ' when the rejection carries an errors array."
+- added `r.engine-route-lookup` (MUST): "For a supported backend, the controller must look up the engine entry in allEngines() by matching the type field, and must tolerate a missing entry by using optional access before reading its route fields."
+- added `r.engine-route-precedence` (MUST): "When the matched engine exposes an engineRoute, the controller must transition to the dynamic route vault.cluster.secrets.backend.<engineRoute> with the mount path; otherwise it must transition to vault.cluster.secrets.backend.index with the path and the engine's routeQueryParams, defaulting to an empty query-param object when the engine has none."
+- added `r.mount-success-redirect` (MUST): "After a successful mount, the mount controller must resolve a target route from the mounted engine type and path and perform the navigation through the shared transitionToSafe helper rather than calling the router directly, and must return that helper's result so the caller can await the redirect."
+- added `r.seal-action` (MUST): "The seal action must call the cluster adapter's seal method, and on success mark the leader node sealed, delete the current authentication token, and transition with transitionToSafe to vault.cluster.unseal, returning the resulting promise chain."
+- added `r.supported-backend-branch` (MUST): "The redirect decision must first test the mounted type against the SUPPORTED_BACKENDS list produced by the supportedSecretBackends() helper; the constant is computed once at module load, not per invocation."
+- added `r.unsupported-backend-fallback` (MUST): "For a type not present in SUPPORTED_BACKENDS, the controller must redirect to the generic vault.cluster.secrets.backends list route without passing the mount path."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4845,4 +4859,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-controllers-vault-cluster-secrets-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-settings-auth-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-settings-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-settings-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

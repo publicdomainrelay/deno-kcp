@@ -62274,13 +62274,109 @@ system_contexts:
   - third_party/openbao/ui/app/controllers/vault/cluster/settings/mount-secret-backend.js
   - third_party/openbao/ui/app/controllers/vault/cluster/settings/seal.js
   codeRefIndex:
+  - class:5b643ccbcf3ba0528f60d3055990a81c MountSecretBackendController@third_party/openbao/ui/app/controllers/vault/cluster/settings/mount-secret-backend.js:15
   - file:third_party/openbao/ui/app/controllers/vault/cluster/settings/configure-secret-backend.js
     configure-secret-backend.js@third_party/openbao/ui/app/controllers/vault/cluster/settings/configure-secret-backend.js
   - file:third_party/openbao/ui/app/controllers/vault/cluster/settings/mount-secret-backend.js
     mount-secret-backend.js@third_party/openbao/ui/app/controllers/vault/cluster/settings/mount-secret-backend.js
   - file:third_party/openbao/ui/app/controllers/vault/cluster/settings/seal.js seal.js@third_party/openbao/ui/app/controllers/vault/cluster/settings/seal.js
   id: sc.third-party-openbao-ui-app-controllers-vault-cluster-settings
+  intent: The context exists so the post-mount redirect logic and the cluster-settings
+    controller actions can be described and depended on without re-reading the JavaScript.
+    It fixes the contract between the secret-engine metadata (SUPPORTED_BACKENDS and
+    allEngines()) and the routes the UI transitions to, plus the side effects the
+    configure and seal actions must produce, so that changes to engine metadata or
+    route names can be checked against these requirements.
+  interfaces:
+  - file: third_party/openbao/ui/app/controllers/vault/cluster/settings/mount-secret-backend.js
+    kind: class
+    name: MountSecretBackendController
+    signature: MountSecretBackendController()
   name: third-party-openbao-ui-app-controllers-vault-cluster-settings
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/settings/configure-secret-backend.js
+    id: r.configure-default-attrs
+    level: MUST
+    text: The configure controller must initialize and be able to restore a fixed
+      set of config attributes — configured, iamEndpoint, stsEndpoint, accessKey,
+      secretKey and region — with configured defaulting to false and region defaulting
+      to the empty string, and it must expose tab as a query parameter defaulting
+      to the empty string.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/settings/configure-secret-backend.js
+    id: r.configure-save-guard
+    level: MUST
+    text: The configure-backend save action must set the loading flag, and must abort
+      without calling the model when every supplied data value is absent according
+      to isPresent; the loading flag is cleared in a finally block so a failed save
+      still unlocks the form.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/settings/configure-secret-backend.js
+    id: r.configure-save-persist
+    level: MUST
+    text: A successful save must persist through the model's save with adapterOptions
+      carrying the adapterMethod and data, then roll back attributes and reset the
+      config attributes to their defaults, and report success through a flash message.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/settings/configure-secret-backend.js
+    id: r.configure-ssh-ca
+    level: MUST
+    text: 'The saveConfig action must treat a model of type ssh specially: it calls
+      saveCA with the delete flag, refreshes the route on success, sets configured
+      to the negation of the delete flag, and emits a success or danger flash message,
+      joining error.errors with ''. '' when the rejection carries an errors array.'
+  - codeRefs:
+    - class:5b643ccbcf3ba0528f60d3055990a81c
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/settings/mount-secret-backend.js
+    id: r.engine-route-lookup
+    level: MUST
+    text: For a supported backend, the controller must look up the engine entry in
+      allEngines() by matching the type field, and must tolerate a missing entry by
+      using optional access before reading its route fields.
+  - codeRefs:
+    - class:5b643ccbcf3ba0528f60d3055990a81c
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/settings/mount-secret-backend.js
+    id: r.engine-route-precedence
+    level: MUST
+    text: When the matched engine exposes an engineRoute, the controller must transition
+      to the dynamic route vault.cluster.secrets.backend.<engineRoute> with the mount
+      path; otherwise it must transition to vault.cluster.secrets.backend.index with
+      the path and the engine's routeQueryParams, defaulting to an empty query-param
+      object when the engine has none.
+  - codeRefs:
+    - class:5b643ccbcf3ba0528f60d3055990a81c
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/settings/mount-secret-backend.js
+    id: r.mount-success-redirect
+    level: MUST
+    text: After a successful mount, the mount controller must resolve a target route
+      from the mounted engine type and path and perform the navigation through the
+      shared transitionToSafe helper rather than calling the router directly, and
+      must return that helper's result so the caller can await the redirect.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/settings/seal.js
+    id: r.seal-action
+    level: MUST
+    text: The seal action must call the cluster adapter's seal method, and on success
+      mark the leader node sealed, delete the current authentication token, and transition
+      with transitionToSafe to vault.cluster.unseal, returning the resulting promise
+      chain.
+  - codeRefs:
+    - class:5b643ccbcf3ba0528f60d3055990a81c
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/settings/mount-secret-backend.js
+    id: r.supported-backend-branch
+    level: MUST
+    text: The redirect decision must first test the mounted type against the SUPPORTED_BACKENDS
+      list produced by the supportedSecretBackends() helper; the constant is computed
+      once at module load, not per invocation.
+  - codeRefs:
+    - class:5b643ccbcf3ba0528f60d3055990a81c
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/settings/mount-secret-backend.js
+    id: r.unsupported-backend-fallback
+    level: MUST
+    text: For a type not present in SUPPORTED_BACKENDS, the controller must redirect
+      to the generic vault.cluster.secrets.backends list route without passing the
+      mount path.
   upstream: self
 - code:
   - third_party/openbao/ui/app/controllers/vault/cluster/settings/auth/configure-section.js
