@@ -5758,7 +5758,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.engine-name-pki` (MUST): "The engine addon definition must set name to the string 'pki', which is the identifier the host application mounts and resolves the engine under."
 - added `r.lazy-loading-disabled` (MUST): "The engine must disable lazy loading by setting lazyLoading.enabled to false, so the PKI UI assets are emitted into the main build instead of being fetched as a separate bundle on route entry."
 - added `r.mpl-2.0-header` (MUST): "The file must retain the HashiCorp copyright notice and the SPDX-License-Identifier: MPL-2.0 header comment, because this is vendored upstream code redistributed under the Mozilla Public License 2.0."
-- added `r.pki-engine-addon` (MUST): "The module must export an Ember engine addon built by calling buildEngine, so the PKI UI is consumed as an engine rather than a plain addon."
+- added `r.pki-engine-addon` (MUST): "The module must export an Ember engine addon built by calling buildEngine imported from ember-engines/lib/engine-addon, so the PKI UI is consumed as an engine rather than a plain addon."
 
 ### third-party-openbao-ui-lib-pki-addon
 
@@ -6281,5 +6281,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-open-api-explorer-config-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-pki-addon-components-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
