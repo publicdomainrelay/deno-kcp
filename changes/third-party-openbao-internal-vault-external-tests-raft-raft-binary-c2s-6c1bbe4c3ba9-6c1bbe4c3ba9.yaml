@@ -10,5 +10,15 @@ spec:
   systemContext: third-party-openbao-internal-vault-external-tests-raft-raft-binary
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-vault-external-tests-raft-raft-binary
-  phase: Running
+  agentLog: 'This context is a single Go test file in the vendored OpenBao tree, third_party/openbao/internal/vault/external_tests/raft/raft_binary/raft_test.go.
+    It holds one test, TestRaft_Configuration_Docker, which is the docker-container
+    variant of the raft configuration test: it builds docker.DockerClusterOptions
+    pointing at quay.io/openbao/openbao:latest, substitutes the binary named by the
+    BAO_BINARY environment variable, starts a test docker cluster through docker.NewTestDockerCluster,
+    and delegates the actual assertions to rafttest.Raft_Configuration_Test. The test
+    skips when BAO_BINARY is empty, then runs the shared raft configuration test once
+    on the initial cluster, adds a node with cluster.AddNode, and runs the same shared
+    test again on the grown cluster.'
+  message: wrote 4 requirement(s) and 0 interface(s) for third-party-openbao-internal-vault-external-tests-raft-raft-binary;
+    interface TestRaft_Configuration_Docker is not in the observed facts; dropped
+  phase: Succeeded
