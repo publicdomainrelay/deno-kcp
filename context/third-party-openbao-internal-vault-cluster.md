@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context documents the transport seam that lets OpenBao run its cluster traffic either over real TCP/TLS or entirely in memory. It exists so that the cluster Listener, its ALPN-based client/handler registries, and both NetworkLayer implementations are described by the code as it stands, giving a fixed contract for the TLS certificate lookups, connection handoff, address advertisement, and the in-memory fault-injection knobs that tests depend on.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

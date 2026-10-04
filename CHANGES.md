@@ -2216,6 +2216,26 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.system-lease-ttl-defaults` (MUST): "Noop.System must return a logical.StaticSystemView with DefaultLeaseTTLVal and MaxLeaseTTLVal taken from the fields of the same name when those are positive, and otherwise from the 24-hour default and the 32-day maximum."
 - added `r.type-defaults-to-logical` (MUST): "Noop.Type must return logical.TypeLogical when BackendType is logical.TypeUnknown, and otherwise return the BackendType field verbatim."
 
+### third-party-openbao-internal-vault-cluster
+
+- intent: "" -> "This context documents the transport seam that lets OpenBao run its cluster traffic either over real TCP/TLS or entirely in memory. It exists so that the cluster Listener, its ALPN-based client/handler registries, and both NetworkLayer implementations are described by the code as it stands, giving a fixed contract for the TLS certificate lookups, connection handoff, address advertisement, and the in-memory fault-injection knobs that tests depend on."
+- added `r.cluster-hook-surface` (MUST): "ClusterHook is the surface a cluster exposes to the rest of the server: it adds and removes Clients and Handlers by ALPN, builds a TLS config, reports its address, and yields a per-ALPN context dialer function."
+- added `r.delayed-reads` (MUST): "delayedConn and delayedReader simulate slow links: SetDelay stores a duration on the wrapped connection, and Read sleeps for that delay before delegating the read to the underlying connection, so latency-sensitive paths can be exercised without real network delay."
+- added `r.inmem-cluster` (MUST): "NewInmemLayerCluster builds a named cluster of the requested number of nodes and wires every node to every other node; ConnectCluster joins two clusters by connecting all of their layers; Layers exposes the cluster's layers as a NetworkLayerSet; and the cluster-level SetConnectionCh, SetReaderDelay, and SetForceTimeout apply the corresponding fault to every node."
+- added `r.inmem-fault-injection` (MUST): "InmemLayer injects transport faults: SetReaderDelay makes reads on its connections wait the given delay, SetForceTimeout makes connections sourced from a given address fail with a deadline error, and SetConnectionCh delivers a ConnectionInfo on the supplied channel whenever a new connection appears."
+- added `r.inmem-layer` (MUST): "NewInmemLayer creates an in-memory NetworkLayer bound to the given address with no real sockets: DialContext resolves the address against connected layers and completes an in-process TLS client handshake, Listeners returns an inmemListener, and Addrs reports the in-memory address."
+- added `r.inmem-topology` (MUST): "InmemLayer.Connect links one in-memory layer to a remote one so dials between them resolve, Disconnect removes a single peer link by address, and DisconnectAll removes every peer link, which lets tests build and tear down cluster topologies."
+- added `r.listener-address` (MUST): "Listener reports its bound address through Addr and all layer addresses through Addrs, and SetAdvertiseAddr overrides the address advertised to peers, returning an error when the advertised address cannot be accepted."
+- added `r.listener-alpn-registry` (MUST): "Listener keeps clients and handlers keyed by ALPN protocol: AddClient and RemoveClient register or drop the Client used when dialing that protocol, AddHandler and StopHandler register or drop the Handler that serves it, and Handler returns the registered Handler plus a boolean saying whether the protocol is known."
+- added `r.listener-construction` (MUST): "NewListener binds a Listener to a NetworkLayer, taking the TLS cipher suites, a logger, and an idle timeout, and returns the Listener that will serve that layer."
+- added `r.listener-run-handoff` (MUST): "Listener.Run accepts connections from the network layer, performs the TLS handshake, selects the Handler for the negotiated ALPN protocol, and hands the connection to it via Handler.Handoff; Listeners already registered for a protocol stop serving when StopHandler is called, and Stop shuts the Listener down."
+- added `r.listener-tls-config` (MUST): "Listener.TLSConfig builds the tls.Config for accepted connections, resolving the server certificate through the Handler's ServerLookup and the client CA pool through Handler.CALookup, and GetContextDialerFunc returns a dial function that dials the named ALPN protocol using the Client's ServerName and CACert for verification."
+- added `r.netaddr` (MUST): "NetAddr is the cluster's own net.Addr: it carries a network name and an address string and implements Network and String so listeners can report non-socket endpoints."
+- added `r.network-layer-contract` (MUST): "NetworkLayer is the transport contract: it reports its addresses via Addrs, its listeners via Listeners, opens a TLS connection to an address via DialContext, and releases resources via Close. TCPLayer and InmemLayer both satisfy it."
+- added `r.network-layer-set` (MUST): "NetworkLayerSet groups several NetworkLayer values and exposes them through Layers, so a cluster-wide operation can be applied to every layer at once."
+- added `r.network-listener-deadline` (MUST): "NetworkListener extends a net.Listener with SetDeadline, so the Listener can bound how long an accept or TLS handshake may block."
+- added `r.tcp-layer` (MUST): "NewTCPLayer creates the socket-backed NetworkLayer from a list of TCP addresses: Addrs and Listeners report the bound TCP endpoints, DialContext opens a TLS connection over TCP to the requested address, and Close releases the listeners."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -2359,3 +2379,4 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-vault-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-cluster-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-internal-vault-diagnose-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Pending |  | 0 | - |
