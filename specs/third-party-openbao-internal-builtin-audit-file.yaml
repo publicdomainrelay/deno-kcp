@@ -4,5 +4,165 @@ metadata:
   name: third-party-openbao-internal-builtin-audit-file
   namespace: default
 spec:
+  intent: This context exists so that the file audit device can be reasoned about
+    and changed without reading the whole vendored OpenBao tree. It records the contract
+    Factory must honor when it turns operator configuration into a running backend,
+    the file-mode and format validation rules that guard audit log creation, and the
+    audit.Backend methods Backend exposes. The companion test file pins the observable
+    behavior of the file-mode handling, so the spec must describe that validation
+    as it is actually implemented rather than as a cleaner design.
+  interfaces:
+  - file: third_party/openbao/internal/builtin/audit/file/backend.go
+    kind: struct
+    name: Backend
+    signature: type Backend struct
+  - file: third_party/openbao/internal/builtin/audit/file/backend.go
+    kind: method
+    name: Backend.GetHash
+    signature: func (b *Backend) GetHash(ctx context.Context, data string) (string,
+      error)
+  - file: third_party/openbao/internal/builtin/audit/file/backend.go
+    kind: method
+    name: Backend.Invalidate
+    signature: func (b *Backend) Invalidate(_ context.Context)
+  - file: third_party/openbao/internal/builtin/audit/file/backend.go
+    kind: method
+    name: Backend.LogRequest
+    signature: func (b *Backend) LogRequest(ctx context.Context, in *logical.LogInput)
+      error
+  - file: third_party/openbao/internal/builtin/audit/file/backend.go
+    kind: method
+    name: Backend.LogResponse
+    signature: func (b *Backend) LogResponse(ctx context.Context, in *logical.LogInput)
+      error
+  - file: third_party/openbao/internal/builtin/audit/file/backend.go
+    kind: method
+    name: Backend.LogTestMessage
+    signature: func (b *Backend) LogTestMessage(ctx context.Context, in *logical.LogInput,
+      config map[string]string) error
+  - file: third_party/openbao/internal/builtin/audit/file/backend.go
+    kind: method
+    name: Backend.Reload
+    signature: func (b *Backend) Reload(_ context.Context) error
+  - file: third_party/openbao/internal/builtin/audit/file/backend.go
+    kind: method
+    name: Backend.Salt
+    signature: func (b *Backend) Salt(ctx context.Context) (*salt.Salt, error)
+  - file: third_party/openbao/internal/builtin/audit/file/backend.go
+    kind: function
+    name: Factory
+    signature: func Factory(ctx context.Context, conf *audit.BackendConfig) (audit.Backend,
+      error)
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - method:30d039106baf5b0a2b030a69c7c29738
+    - method:438657ef874a844cf73f07789ad57d46
+    - method:50b06add913bdcb63f4528e9cc84aedf
+    - method:56c35816515d1fa3d4063f64ffbf2452
+    - method:733a08994d5c610fb8b4dfb7ded80a9d
+    - method:98bc68d8572bdd0a3f936e204dc1e9c1
+    - method:ff1ccf33ac4896d41b106ed0196442c9
+    - struct:42847894a256e32dfab52f2167e89a54
+    id: r.backend-satisfies-audit-interface
+    level: MUST
+    text: Backend must satisfy the audit.Backend interface by providing Salt, GetHash,
+      LogRequest, LogResponse, LogTestMessage, Reload and Invalidate.
+  - codeRefs:
+    - function:3085f49aa218cfa27d80e9c0431694b3
+    id: r.bool-options-parsed
+    level: MUST
+    text: Factory parses hmac_accessor (default true), log_raw (default false) and
+      elide_list_responses (default false) with strconv.ParseBool and returns the
+      parse error on failure.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/audit/file/backend.go
+    - function:3085f49aa218cfa27d80e9c0431694b3
+    id: r.eager-open-sanity-check
+    level: MUST
+    text: 'Factory opens the target file during construction, except when the path
+      is stdout or discard, and wraps the failure as "sanity check failed; unable
+      to open %q for writing: %w".'
+  - codeRefs:
+    - function:3085f49aa218cfa27d80e9c0431694b3
+    id: r.factory-requires-salt
+    level: MUST
+    text: Factory returns an error "nil salt config" when conf.SaltConfig is nil and
+      "nil salt view" when conf.SaltView is nil.
+  - codeRefs:
+    - function:3085f49aa218cfa27d80e9c0431694b3
+    id: r.format-json-only
+    level: MUST
+    text: Factory defaults format to "json", rejects "jsonx" with the removed-formatting
+      error, and rejects any other value with "unknown format type %q".
+  - codeRefs:
+    - function:3085f49aa218cfa27d80e9c0431694b3
+    - method:30d039106baf5b0a2b030a69c7c29738
+    id: r.formatter-writer-wiring
+    level: MUST
+    text: Factory installs an audit.JSONFormatWriter on b.formatter with Prefix taken
+      from conf.Config["prefix"] and SaltFunc set to b.Salt.
+  - codeRefs:
+    - method:ff1ccf33ac4896d41b106ed0196442c9
+    id: r.get-hash
+    level: MUST
+    text: Backend.GetHash returns the HMAC hash of the given data string using the
+      loaded salt, or an error when no salt is available.
+  - codeRefs:
+    - method:50b06add913bdcb63f4528e9cc84aedf
+    - method:98bc68d8572bdd0a3f936e204dc1e9c1
+    id: r.log-request-response
+    level: MUST
+    text: Backend.LogRequest formats the incoming logical.LogInput and writes it to
+      the configured path, and Backend.LogResponse does the same for responses, both
+      returning formatting or write errors.
+  - codeRefs:
+    - method:733a08994d5c610fb8b4dfb7ded80a9d
+    id: r.log-test-message
+    level: MUST
+    text: Backend.LogTestMessage takes an extra config map so an audit device can
+      be verified without persisting a real audit entry.
+  - codeRefs:
+    - function:3085f49aa218cfa27d80e9c0431694b3
+    id: r.mode-handling
+    level: MUST
+    text: Factory defaults the file mode to 0o600; mode 0o000 stat-ings the path (unless
+      it is stdout or discard) and leaves the existing file mode untouched; any other
+      value must be a regular file mode and has its executable bits cleared with mode
+      &^= 0o111 as mitigation for CVE-2025-6000.
+  - codeRefs:
+    - function:3085f49aa218cfa27d80e9c0431694b3
+    id: r.path-from-config
+    level: MUST
+    text: Factory resolves the output path from conf.Config["file_path"], falling
+      back to conf.Config["path"], and errors with "file_path is required" when neither
+      key is present.
+  - codeRefs:
+    - method:438657ef874a844cf73f07789ad57d46
+    - method:56c35816515d1fa3d4063f64ffbf2452
+    id: r.reload-reopen
+    level: MUST
+    text: Backend.Reload takes a context and re-opens the log file, and Backend.Invalidate
+      takes a context and drops the open handle so a deleted file is recreated on
+      the next write.
+  - codeRefs:
+    - method:30d039106baf5b0a2b030a69c7c29738
+    id: r.salt-available
+    level: MUST
+    text: Backend.Salt returns the cached salt.Salt, loading it via salt.NewSalt(ctx,
+      b.saltView, b.saltConfig) under a mutex on first use, and caches nil plus the
+      error when loading fails.
+  - codeRefs:
+    - function:3085f49aa218cfa27d80e9c0431694b3
+    id: r.stdout-discard-normalized
+    level: MUST
+    text: Factory normalizes the path case-insensitively so that "stdout" and "discard"
+      become the lowercase sentinels used by the rest of the backend.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/audit/file/backend_test.go
+    id: r.tests-cover-file-mode
+    level: SHOULD
+    text: The test file should keep covering new-file mode, existing-file mode, mode
+      0000, executable mode rejection and irregular mode rejection, plus the request
+      benchmark.
   upstream: self
