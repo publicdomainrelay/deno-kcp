@@ -12,5 +12,62 @@ metadata:
   name: third-party-openbao-ui-app-adapters-auth-config
   namespace: default
 spec:
+  intent: 'The context exists to describe the auth-method configuration adapter layer
+    of the vendored OpenBao UI: one shared base adapter that owns URL construction,
+    path derivation and backend-id bookkeeping, plus per-auth-method subclasses that
+    exist only so Ember can resolve a distinct adapter per model type. It is documented
+    here so that changes to auth-config request routing or to any individual auth
+    method''s adapter can be reasoned about against the shared contract rather than
+    file by file.'
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/app/adapters/auth-config/_base.js
+    id: r.auth-config-namespace
+    level: MUST
+    text: The shared auth-config adapter declares the API namespace `/v1/auth`, so
+      every request it issues is rooted under that prefix.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/adapters/auth-config/_base.js
+    id: r.aws-only-type-path
+    level: SHOULD
+    text: Only AWS auth models carry a per-type config sub-path, because AWS exposes
+      several config endpoints; all other auth methods share the single `<backendId>/config`
+      endpoint of the base adapter.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/adapters/auth-config/_base.js
+    id: r.build-url-backend-config
+    level: MUST
+    text: '`buildURL` resolves the backend id from the record id when present and
+      otherwise from the record''s `belongsTo(''backend'')` relationship, then builds
+      `<namespace>/<backendId>/config`; only when the model name contains `aws` does
+      it append `pathForType(modelName)` to that URL.'
+  - codeRefs:
+    - file:third_party/openbao/ui/app/adapters/auth-config/_base.js
+    id: r.create-update-return-backend-id
+    level: MUST
+    text: '`createRecord` and `updateRecord` delegate to the superclass implementation
+      and then resolve with `{ id }`, where `id` is the owning backend''s id taken
+      from `snapshot.belongsTo(''backend'')`, so callers receive the backend id rather
+      than the server payload.'
+  - codeRefs:
+    - file:third_party/openbao/ui/app/adapters/auth-config/_base.js
+    id: r.path-for-type-last-segment
+    level: MUST
+    text: '`pathForType` reduces the model type to its last `/`-separated segment,
+      so namespaced model names resolve to the trailing type name; the two list-tidy
+      types `identity-accesslist` and `roletag-denylist` are special-cased to `tidy/<type>`
+      instead.'
+  - codeRefs:
+    - file:third_party/openbao/ui/app/adapters/auth-config/azure.js
+    - file:third_party/openbao/ui/app/adapters/auth-config/jwt.js
+    - file:third_party/openbao/ui/app/adapters/auth-config/kubernetes.js
+    - file:third_party/openbao/ui/app/adapters/auth-config/ldap.js
+    - file:third_party/openbao/ui/app/adapters/auth-config/oidc.js
+    - file:third_party/openbao/ui/app/adapters/auth-config/radius.js
+    id: r.per-method-subclass-inheritance
+    level: MUST
+    text: The azure, jwt, kubernetes, ldap, oidc and radius adapters each export `AuthConfig.extend()`
+      with no property overrides, so all six inherit the base namespace, path derivation,
+      URL building and create/update behavior unchanged.
   upstream: self

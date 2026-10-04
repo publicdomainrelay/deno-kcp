@@ -3829,6 +3829,16 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.namespace-path-for-type` (MUST): "NamespaceAdapter.pathForType returns 'namespaces', so model URLs for namespaces are built under the namespaces path segment."
 - added `r.namespace-query-list` (MUST): "NamespaceAdapter.query issues a GET to `/${urlPrefix}/namespaces?list=true` with no filter argument, so a namespace query always returns the full list."
 
+### third-party-openbao-ui-app-adapters-auth-config
+
+- intent: "" -> "The context exists to describe the auth-method configuration adapter layer of the vendored OpenBao UI: one shared base adapter that owns URL construction, path derivation and backend-id bookkeeping, plus per-auth-method subclasses that exist only so Ember can resolve a distinct adapter per model type. It is documented here so that changes to auth-config request routing or to any individual auth method's adapter can be reasoned about against the shared contract rather than file by file."
+- added `r.auth-config-namespace` (MUST): "The shared auth-config adapter declares the API namespace `/v1/auth`, so every request it issues is rooted under that prefix."
+- added `r.aws-only-type-path` (SHOULD): "Only AWS auth models carry a per-type config sub-path, because AWS exposes several config endpoints; all other auth methods share the single `<backendId>/config` endpoint of the base adapter."
+- added `r.build-url-backend-config` (MUST): "`buildURL` resolves the backend id from the record id when present and otherwise from the record's `belongsTo('backend')` relationship, then builds `<namespace>/<backendId>/config`; only when the model name contains `aws` does it append `pathForType(modelName)` to that URL."
+- added `r.create-update-return-backend-id` (MUST): "`createRecord` and `updateRecord` delegate to the superclass implementation and then resolve with `{ id }`, where `id` is the owning backend's id taken from `snapshot.belongsTo('backend')`, so callers receive the backend id rather than the server payload."
+- added `r.path-for-type-last-segment` (MUST): "`pathForType` reduces the model type to its last `/`-separated segment, so namespaced model names resolve to the trailing type name; the two list-tidy types `identity-accesslist` and `roletag-denylist` are special-cased to `tidy/<type>` instead."
+- added `r.per-method-subclass-inheritance` (MUST): "The azure, jwt, kubernetes, ldap, oidc and radius adapters each export `AuthConfig.extend()` with no property overrides, so all six inherit the base namespace, path derivation, URL building and create/update behavior unchanged."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4109,7 +4119,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-tools-semgrep-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-tools-semgrep-ci-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-tools-semgrep-ci-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-adapters-auth-config-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-adapters-auth-config-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-adapters-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-adapters-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
