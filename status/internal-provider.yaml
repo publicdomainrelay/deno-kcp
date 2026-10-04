@@ -1,5 +1,7 @@
 conditions:
-- message: 'missing: admissionSource, summaryObserver'
+- message: 'missing: admissionSource, summaryObserver; unresolved: r.watch-cache-serves-reader:
+    method:0c338b727be3207f28cbf878427e832a, r.watch-cache-serves-reader: method:233229f09be3f2275ac69f207bb6268b,
+    r.watch-cache-serves-reader: method:fec4d29b214cd73931b1d89410112759'
   reason: InterfacesMissing
   status: "False"
   type: CodeSynced
@@ -55,7 +57,7 @@ observed:
   - internal/provider/watch.go
   - internal/provider/watch_cache.go
   - internal/provider/watch_test.go
-  fingerprint: d8fab230a0bcac1073be293ec25ef7e4f1455af65b7937ba71707b357dd52f32
+  fingerprint: 6199c3cfaf7872064b2519374d6a9c456fa6d496583ee43c7a5856fecd485b7e
   interfaces:
   - codegraphId: method:dedfd34a67b569d3bd5df1bbfd2d518e
     file: internal/provider/admission.go
@@ -693,71 +695,71 @@ observed:
     line: 88
     name: Provider.RunWatch
     signature: (ctx context.Context) error
-  - codegraphId: method:0c338b727be3207f28cbf878427e832a
-    file: internal/provider/watch_cache.go
-    kind: method
-    line: 115
-    name: cacheReader.Read
-    signature: (_ context.Context, ref Ref) (*v1alpha1.PolicyWorkflowRun, error)
-  - codegraphId: method:39357fde02deb917a6d729cd64103e58
+  - codegraphId: method:d18cfa0162398c2bb71b13ca89ce8271
     file: internal/provider/watch_cache.go
     kind: method
     line: 119
-    name: cacheReader.ReadRun
-    signature: (_ context.Context, ref Ref) (*v1alpha1.DenoRun, error)
-  - codegraphId: method:d3b126aa7c393857fc52b276be2775e8
+    name: cacheReader.Read
+    signature: (_ context.Context, ref Ref) (*v1alpha1.PolicyWorkflowRun, error)
+  - codegraphId: method:354b5a4cce215f70910835b0c56b7c08
     file: internal/provider/watch_cache.go
     kind: method
     line: 123
-    name: cacheReader.ListRuns
-    signature: (_ context.Context, logicalCluster string) ([]v1alpha1.DenoRun, error)
-  - codegraphId: method:233229f09be3f2275ac69f207bb6268b
+    name: cacheReader.ReadRun
+    signature: (_ context.Context, ref Ref) (*v1alpha1.DenoRun, error)
+  - codegraphId: method:577acdc88d488ab7b6ab58d5f53ff590
     file: internal/provider/watch_cache.go
     kind: method
     line: 127
+    name: cacheReader.ListRuns
+    signature: (_ context.Context, logicalCluster string) ([]v1alpha1.DenoRun, error)
+  - codegraphId: method:c54420f630808c44db4b8ac3735eba01
+    file: internal/provider/watch_cache.go
+    kind: method
+    line: 131
     name: cacheReader.ListRunsForJob
     signature: (_ context.Context, logicalCluster, namespace, jobName string) ([]v1alpha1.DenoRun,
       error)
-  - codegraphId: method:4234fcb2deb93cd1d3ffff30a08e9bac
+  - codegraphId: method:b8bc5db24ac7be6dc4a79300732cb0bd
     file: internal/provider/watch_cache.go
     kind: method
-    line: 144
+    line: 146
     name: cacheReader.ReadPod
     signature: (_ context.Context, ref Ref) (*v1alpha1.DenoPod, error)
-  - codegraphId: method:bc5ee52232736b9e76295ebe1658d03a
+  - codegraphId: method:a44c40c719bb9557fdf42c9737d55181
     file: internal/provider/watch_cache.go
     kind: method
-    line: 148
+    line: 150
     name: cacheReader.ReadJob
     signature: (_ context.Context, ref Ref) (*v1alpha1.DenoJob, error)
-  - codegraphId: method:b9504aa99cdd8e93e139e86c24b33700
+  - codegraphId: method:4e2054df47f1ac0664e39452fbb38a21
     file: internal/provider/watch_cache.go
     kind: method
-    line: 152
+    line: 154
     name: cacheReader.ReadTrigger
     signature: (_ context.Context, ref Ref) (*v1alpha1.RunTrigger, error)
-  - codegraphId: method:156f2b8e2e488a6f619076e2b3281489
+  - codegraphId: method:9e3f47eca7d461ed66a3a13fa28dedf9
     file: internal/provider/watch_cache.go
     kind: method
-    line: 156
+    line: 158
     name: cacheReader.ReadOpenBao
     signature: (_ context.Context, ref Ref) (*v1alpha1.OpenBao, error)
-  - codegraphId: method:63085a4016a0611c83abdda86074ad51
+  - codegraphId: method:a2a6bb549c3e73e7f851c9d0a766bc46
     file: internal/provider/watch_cache.go
     kind: method
-    line: 160
+    line: 162
     name: cacheReader.ReadEngine
     signature: (_ context.Context, ref Ref) (*v1alpha1.PolicyEngine, error)
-  - codegraphId: method:1bd007e7df0c379bccb2c4e5927b024d
+  - codegraphId: method:7ba1be0afd6d75db961ea7b626155b8a
     file: internal/provider/watch_cache.go
     kind: method
-    line: 164
+    line: 166
     name: cacheReader.ReadWorkflowPod
     signature: (_ context.Context, ref Ref) (*v1alpha1.PolicyWorkflowPod, error)
-  - codegraphId: method:fec4d29b214cd73931b1d89410112759
+  - codegraphId: method:f555a3f51638d7247d34e5ec9fa0aafa
     file: internal/provider/watch_cache.go
     kind: method
-    line: 168
+    line: 170
     name: cacheReader.ListWorkflowRuns
     signature: (_ context.Context, logicalCluster string) ([]v1alpha1.PolicyWorkflowRun,
       error)
@@ -768,5 +770,7 @@ observed:
     name: cacheReader.ListWorkflowRunsForPod
     signature: (_ context.Context, logicalCluster, namespace, podName string) ([]v1alpha1.PolicyWorkflowRun,
       error)
-realizedSpecHash: d585aa61493e88ee63a2972d73d25ab44a8456ae3c4e4e6590bb5c8f09f8de4c
-syncedFingerprint: d8fab230a0bcac1073be293ec25ef7e4f1455af65b7937ba71707b357dd52f32
+observedCommit: 3749680f064033dbfd6d5f458b665486a0779efc
+realizedSpecHash: 5c4b091d79b5f25241dbed814199a53274a9f2b7d0337b1340744dbe8de32ed8
+syncedCommit: 3749680f064033dbfd6d5f458b665486a0779efc
+syncedFingerprint: 6199c3cfaf7872064b2519374d6a9c456fa6d496583ee43c7a5856fecd485b7e
