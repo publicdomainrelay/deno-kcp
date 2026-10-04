@@ -1,0 +1,217 @@
+conditions:
+- message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+  reason: InterfacesObserved
+  status: "True"
+  type: CodeSynced
+- message: no synced fingerprint has been recorded yet
+  reason: NotSyncedYet
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/command/agentproxyshared/cache/api_proxy.go
+  - third_party/openbao/internal/command/agentproxyshared/cache/api_proxy_test.go
+  - third_party/openbao/internal/command/agentproxyshared/cache/cache_test.go
+  - third_party/openbao/internal/command/agentproxyshared/cache/handler.go
+  - third_party/openbao/internal/command/agentproxyshared/cache/lease_cache.go
+  - third_party/openbao/internal/command/agentproxyshared/cache/lease_cache_test.go
+  - third_party/openbao/internal/command/agentproxyshared/cache/listener.go
+  - third_party/openbao/internal/command/agentproxyshared/cache/listener_test.go
+  - third_party/openbao/internal/command/agentproxyshared/cache/proxy.go
+  - third_party/openbao/internal/command/agentproxyshared/cache/testing.go
+  fingerprint: 234958670685136197aab5d2fbeaabcddcbf526cfb11b0eb2e4dae603645fbcd
+  interfaces:
+  - codegraphId: struct:71206f4260b7c0740a7b5274d0137482
+    file: third_party/openbao/internal/command/agentproxyshared/cache/api_proxy.go
+    kind: struct
+    line: 17
+    name: APIProxy
+  - codegraphId: struct:64c3ca80392f178b7b9e63336363a071
+    file: third_party/openbao/internal/command/agentproxyshared/cache/api_proxy.go
+    kind: struct
+    line: 26
+    name: APIProxyConfig
+  - codegraphId: function:61da32d59d1876de30750dc2b8ef71cb
+    file: third_party/openbao/internal/command/agentproxyshared/cache/api_proxy.go
+    kind: function
+    line: 37
+    name: NewAPIProxy
+    signature: (config *APIProxyConfig) (Proxier, error)
+  - codegraphId: method:bc251d186b496bc9f4f8985663659102
+    file: third_party/openbao/internal/command/agentproxyshared/cache/api_proxy.go
+    kind: method
+    line: 49
+    name: APIProxy.Send
+    signature: (ctx context.Context, req *SendRequest) (*SendResponse, error)
+  - codegraphId: function:f1d3ae36f34877a17d3cb0f6ca86a806
+    file: third_party/openbao/internal/command/agentproxyshared/cache/handler.go
+    kind: function
+    line: 25
+    name: ProxyHandler
+    signature: (ctx context.Context, logger hclog.Logger, proxier Proxier, inmemSink
+      sink.Sink, proxyVaultToken bool) http.Handler
+  - codegraphId: struct:bee91e04aef303ad1a5b51866eb68823
+    file: third_party/openbao/internal/command/agentproxyshared/cache/lease_cache.go
+    kind: struct
+    line: 78
+    name: LeaseCache
+  - codegraphId: struct:9143649ff40bd03257d57780ef07a3db
+    file: third_party/openbao/internal/command/agentproxyshared/cache/lease_cache.go
+    kind: struct
+    line: 103
+    name: LeaseCacheConfig
+  - codegraphId: function:3ba9a60a8e419435a75f9021654ae94b
+    file: third_party/openbao/internal/command/agentproxyshared/cache/lease_cache.go
+    kind: function
+    line: 129
+    name: NewLeaseCache
+    signature: (conf *LeaseCacheConfig) (*LeaseCache, error)
+  - codegraphId: method:4a536980b121b274b6f9d2986b0498f4
+    file: third_party/openbao/internal/command/agentproxyshared/cache/lease_cache.go
+    kind: method
+    line: 164
+    name: LeaseCache.SetShuttingDown
+    signature: (in bool)
+  - codegraphId: method:c871dd4238246c098b6f7ee62180f629
+    file: third_party/openbao/internal/command/agentproxyshared/cache/lease_cache.go
+    kind: method
+    line: 170
+    name: LeaseCache.SetPersistentStorage
+    signature: (storageIn *cacheboltdb.BoltStorage)
+  - codegraphId: method:364f71fd5698665d24456387697a4f56
+    file: third_party/openbao/internal/command/agentproxyshared/cache/lease_cache.go
+    kind: method
+    line: 176
+    name: LeaseCache.PersistentStorage
+    signature: () *cacheboltdb.BoltStorage
+  - codegraphId: method:bc8c62bda0b52028e90875ca129e4a4f
+    file: third_party/openbao/internal/command/agentproxyshared/cache/lease_cache.go
+    kind: method
+    line: 220
+    name: LeaseCache.Send
+    signature: (ctx context.Context, req *SendRequest) (*SendResponse, error)
+  - codegraphId: method:2f668cb9c6e9d5d886d9578ca327b6ca
+    file: third_party/openbao/internal/command/agentproxyshared/cache/lease_cache.go
+    kind: method
+    line: 584
+    name: LeaseCache.HandleCacheClear
+    signature: (ctx context.Context) http.Handler
+  - codegraphId: method:7a0834e74012cfdbf5dc1e53d3b28f90
+    file: third_party/openbao/internal/command/agentproxyshared/cache/lease_cache.go
+    kind: method
+    line: 940
+    name: LeaseCache.Set
+    signature: (ctx context.Context, index *cachememdb.Index) error
+  - codegraphId: method:8e9496434f57eac64a19d4af20b14795
+    file: third_party/openbao/internal/command/agentproxyshared/cache/lease_cache.go
+    kind: method
+    line: 962
+    name: LeaseCache.Evict
+    signature: (index *cachememdb.Index) error
+  - codegraphId: method:d255a5ce2644390517f61e30993d649a
+    file: third_party/openbao/internal/command/agentproxyshared/cache/lease_cache.go
+    kind: method
+    line: 978
+    name: LeaseCache.Flush
+    signature: () error
+  - codegraphId: method:56c8c42ddf9d4760b9b507484a2fdd29
+    file: third_party/openbao/internal/command/agentproxyshared/cache/lease_cache.go
+    kind: method
+    line: 994
+    name: LeaseCache.Restore
+    signature: (ctx context.Context, storage *cacheboltdb.BoltStorage) error
+  - codegraphId: method:496e34e748f8a4229e4c5331cadd644d
+    file: third_party/openbao/internal/command/agentproxyshared/cache/lease_cache.go
+    kind: method
+    line: 1198
+    name: LeaseCache.RegisterAutoAuthToken
+    signature: (token string) error
+  - codegraphId: struct:222f85cecb09886cfd7361ac8fdbaa58
+    file: third_party/openbao/internal/command/agentproxyshared/cache/listener.go
+    kind: struct
+    line: 19
+    name: ListenerBundle
+  - codegraphId: function:066c605bd6c667b70919d2eda8f85cc7
+    file: third_party/openbao/internal/command/agentproxyshared/cache/listener.go
+    kind: function
+    line: 26
+    name: StartListener
+    signature: (lnConfig *configutil.Listener, logger hclog.Logger) (*ListenerBundle,
+      error)
+  - codegraphId: struct:416f160565b75ca927b9a8e36d0e2885
+    file: third_party/openbao/internal/command/agentproxyshared/cache/proxy.go
+    kind: struct
+    line: 17
+    name: SendRequest
+  - codegraphId: struct:d59c403f865347a2ace07e80ecde86c1
+    file: third_party/openbao/internal/command/agentproxyshared/cache/proxy.go
+    kind: struct
+    line: 27
+    name: SendResponse
+  - codegraphId: struct:61462adc6d54d695c8ca3ff258d691cc
+    file: third_party/openbao/internal/command/agentproxyshared/cache/proxy.go
+    kind: struct
+    line: 39
+    name: CacheMeta
+  - codegraphId: interface:3f99f353c860aac9aee1e27f73bc3d1f
+    file: third_party/openbao/internal/command/agentproxyshared/cache/proxy.go
+    kind: interface
+    line: 47
+    name: Proxier
+  - codegraphId: method:0ed25ce68f40e2ae40e2f92048b8e3a9
+    file: third_party/openbao/internal/command/agentproxyshared/cache/proxy.go
+    kind: method
+    line: 48
+    name: Proxier.Send
+    signature: (ctx context.Context, req *SendRequest) (*SendResponse, error)
+  - codegraphId: function:d57ef6e3217c3f808459e2842d0ccc2d
+    file: third_party/openbao/internal/command/agentproxyshared/cache/proxy.go
+    kind: function
+    line: 53
+    name: NewSendResponse
+    signature: (apiResponse *api.Response, responseBody []byte) (*SendResponse, error)
+  - codegraphId: function:6eb376e38d7382717ba68c6c77a986c9
+    file: third_party/openbao/internal/command/agentproxyshared/cache/testing.go
+    kind: function
+    line: 30
+    name: NewMockProxier
+    signature: (responses []*SendResponse) *mockProxier
+  - codegraphId: method:d13c8469f09338bf6f418c467acbd39d
+    file: third_party/openbao/internal/command/agentproxyshared/cache/testing.go
+    kind: method
+    line: 36
+    name: mockProxier.Send
+    signature: (ctx context.Context, req *SendRequest) (*SendResponse, error)
+  - codegraphId: method:4896fbe21f146c34696c144198741f67
+    file: third_party/openbao/internal/command/agentproxyshared/cache/testing.go
+    kind: method
+    line: 47
+    name: mockProxier.ResponseIndex
+    signature: () int
+  - codegraphId: method:8b6939d4b3c2cc7219f9d32d2e199324
+    file: third_party/openbao/internal/command/agentproxyshared/cache/testing.go
+    kind: method
+    line: 80
+    name: mockTokenVerifierProxier.Send
+    signature: (ctx context.Context, req *SendRequest) (*SendResponse, error)
+  - codegraphId: method:7fe2b11ccf35ad5e4244a767541e3b35
+    file: third_party/openbao/internal/command/agentproxyshared/cache/testing.go
+    kind: method
+    line: 88
+    name: mockTokenVerifierProxier.GetCurrentRequestToken
+    signature: () string
+  - codegraphId: method:e2ec35611b55f1b7fd75bf5326a89404
+    file: third_party/openbao/internal/command/agentproxyshared/cache/testing.go
+    kind: method
+    line: 97
+    name: mockDelayProxier.Send
+    signature: (ctx context.Context, req *SendRequest) (*SendResponse, error)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 4bdaf353ae635ab6d5d94697fd234d621eec9c00b19bc3cfc202807eac6d0837
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 234958670685136197aab5d2fbeaabcddcbf526cfb11b0eb2e4dae603645fbcd

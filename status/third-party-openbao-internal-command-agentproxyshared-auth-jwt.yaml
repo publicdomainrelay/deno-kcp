@@ -1,0 +1,55 @@
+conditions:
+- message: 'undeclared: NewJWTAuthMethod, jwtMethod.Authenticate, jwtMethod.CredSuccess,
+    jwtMethod.NewCreds, jwtMethod.Shutdown'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/command/agentproxyshared/auth/jwt/jwt.go
+  - third_party/openbao/internal/command/agentproxyshared/auth/jwt/jwt_test.go
+  fingerprint: 434c3d4608d39e9e2edba2769c277993df6cb9efbb7c10cc46905ed082584447
+  interfaces:
+  - codegraphId: function:5309b89ba07996090ade8f15667301c7
+    file: third_party/openbao/internal/command/agentproxyshared/auth/jwt/jwt.go
+    kind: function
+    line: 43
+    name: NewJWTAuthMethod
+    signature: (conf *auth.AuthConfig) (auth.AuthMethod, error)
+  - codegraphId: method:80be1d87e70084dc2be8fac52ffd9036
+    file: third_party/openbao/internal/command/agentproxyshared/auth/jwt/jwt.go
+    kind: method
+    line: 131
+    name: jwtMethod.Authenticate
+    signature: (_ context.Context, _ *api.Client) (string, http.Header, map[string]any,
+      error)
+  - codegraphId: method:448def8af0745a4758db8c0228a618b1
+    file: third_party/openbao/internal/command/agentproxyshared/auth/jwt/jwt.go
+    kind: method
+    line: 147
+    name: jwtMethod.NewCreds
+    signature: () chan struct{}
+  - codegraphId: method:564d5539ce5d0b556518bc2a4bac0ead
+    file: third_party/openbao/internal/command/agentproxyshared/auth/jwt/jwt.go
+    kind: method
+    line: 151
+    name: jwtMethod.CredSuccess
+    signature: ()
+  - codegraphId: method:efcbcd483e832be4936a32b3df90e691
+    file: third_party/openbao/internal/command/agentproxyshared/auth/jwt/jwt.go
+    kind: method
+    line: 157
+    name: jwtMethod.Shutdown
+    signature: ()
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 8fcd37a0e742534c0b023a41f4904e984cf38e65608a171ecb9880a437888ce7
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 434c3d4608d39e9e2edba2769c277993df6cb9efbb7c10cc46905ed082584447

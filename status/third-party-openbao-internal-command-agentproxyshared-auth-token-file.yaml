@@ -1,0 +1,55 @@
+conditions:
+- message: 'undeclared: NewTokenFileAuthMethod, tokenFileMethod.Authenticate, tokenFileMethod.CredSuccess,
+    tokenFileMethod.NewCreds, tokenFileMethod.Shutdown'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/command/agentproxyshared/auth/token-file/token_file.go
+  - third_party/openbao/internal/command/agentproxyshared/auth/token-file/token_file_test.go
+  fingerprint: f6e4eec1eaad1152c16e3a6d15190e9b05b6585fe8e79608d6e365980cae90c5
+  interfaces:
+  - codegraphId: function:d24c73ee7eaff01d93be82b24abde9fe
+    file: third_party/openbao/internal/command/agentproxyshared/auth/token-file/token_file.go
+    kind: function
+    line: 27
+    name: NewTokenFileAuthMethod
+    signature: (conf *auth.AuthConfig) (auth.AuthMethod, error)
+  - codegraphId: method:52f55ad01b0a1ebc69331855c31658cc
+    file: third_party/openbao/internal/command/agentproxyshared/auth/token-file/token_file.go
+    kind: method
+    line: 55
+    name: tokenFileMethod.Authenticate
+    signature: (_ context.Context, client *api.Client) (string, http.Header, map[string]any,
+      error)
+  - codegraphId: method:a2082400b947908a7d6ed3021eb187b7
+    file: third_party/openbao/internal/command/agentproxyshared/auth/token-file/token_file.go
+    kind: method
+    line: 78
+    name: tokenFileMethod.NewCreds
+    signature: () chan struct{}
+  - codegraphId: method:fbfd5d5c4f474ff71ee6fd810ca16d3c
+    file: third_party/openbao/internal/command/agentproxyshared/auth/token-file/token_file.go
+    kind: method
+    line: 82
+    name: tokenFileMethod.CredSuccess
+    signature: ()
+  - codegraphId: method:7a5b310b87c2220fa7bd24f3f18adbd7
+    file: third_party/openbao/internal/command/agentproxyshared/auth/token-file/token_file.go
+    kind: method
+    line: 85
+    name: tokenFileMethod.Shutdown
+    signature: ()
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 2504628e2b74933fedda858015857862dc81fda42740c12633f0061a6a1e4373
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: f6e4eec1eaad1152c16e3a6d15190e9b05b6585fe8e79608d6e365980cae90c5

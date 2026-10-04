@@ -1,0 +1,55 @@
+conditions:
+- message: 'undeclared: NewKubernetesAuthMethod, kubernetesMethod.Authenticate, kubernetesMethod.CredSuccess,
+    kubernetesMethod.NewCreds, kubernetesMethod.Shutdown'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go
+  - third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes_test.go
+  fingerprint: 9d0082b14a5ae80bdff25c4428a28dbd6fa7b6118c6de9b2a4070af4e782142c
+  interfaces:
+  - codegraphId: function:662cee05789c54192c8afe7da9a01545
+    file: third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go
+    kind: function
+    line: 40
+    name: NewKubernetesAuthMethod
+    signature: (conf *auth.AuthConfig) (auth.AuthMethod, error)
+  - codegraphId: method:f80a23c01970f9ec5b0b63d5aadc409f
+    file: third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go
+    kind: method
+    line: 77
+    name: kubernetesMethod.Authenticate
+    signature: (ctx context.Context, client *api.Client) (string, http.Header, map[string]any,
+      error)
+  - codegraphId: method:f25ad26825ee628d87faab8aef7dfac3
+    file: third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go
+    kind: method
+    line: 91
+    name: kubernetesMethod.NewCreds
+    signature: () chan struct{}
+  - codegraphId: method:803ebafa8f0153e48e3b463bf0a8d692
+    file: third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go
+    kind: method
+    line: 95
+    name: kubernetesMethod.CredSuccess
+    signature: ()
+  - codegraphId: method:f92c67aafe17516364b2ccda9028bc4f
+    file: third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go
+    kind: method
+    line: 98
+    name: kubernetesMethod.Shutdown
+    signature: ()
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 19a851eb55cc91daac770f72a5e66f8286e06571e86c012a8240aad04a847816
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 9d0082b14a5ae80bdff25c4428a28dbd6fa7b6118c6de9b2a4070af4e782142c
