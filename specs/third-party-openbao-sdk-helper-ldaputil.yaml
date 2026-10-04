@@ -6,10 +6,317 @@ codeRefIndex:
 - file:third_party/openbao/sdk/helper/ldaputil/config_test.go config_test.go@third_party/openbao/sdk/helper/ldaputil/config_test.go
 - file:third_party/openbao/sdk/helper/ldaputil/connection.go connection.go@third_party/openbao/sdk/helper/ldaputil/connection.go
 - file:third_party/openbao/sdk/helper/ldaputil/ldap.go ldap.go@third_party/openbao/sdk/helper/ldaputil/ldap.go
+- function:36af85f1faca3106c10bcbe63baabcb4 NewLDAP@third_party/openbao/sdk/helper/ldaputil/ldap.go:10
+- function:80731a2c0c1e7ab58d52503166aebd35 NewConfigEntry@third_party/openbao/sdk/helper/ldaputil/config.go:265
+- function:887541decbc45fcf241c29b15de11095 ConfigFields@third_party/openbao/sdk/helper/ldaputil/config.go:30
+- function:b6dd5dc7a40159995f200a94ff42c126 EscapeLDAPValue@third_party/openbao/sdk/helper/ldaputil/client.go:611
+- interface:305a06cf4b4e6a8215f5ba864f6edebb LDAP@third_party/openbao/sdk/helper/ldaputil/ldap.go:16
+- interface:3b9af4bf8f5fb1ffb79bdadbdf666ebf Connection@third_party/openbao/sdk/helper/ldaputil/connection.go:15
+- interface:a2452b5b2d859deb8f9ae9a730534a93 PagingConnection@third_party/openbao/sdk/helper/ldaputil/connection.go:27
+- method:09ff0b981e1cb1cea7a369416931c805 ldapIfc.DialURL@third_party/openbao/sdk/helper/ldaputil/ldap.go:22
+- method:13e5a4ed7a1476b08ab8fc6083ff13f8 Client.DialLDAP@third_party/openbao/sdk/helper/ldaputil/client.go:33
+- method:21e588180474cf39cb119930c9353df4 Connection.Del@third_party/openbao/sdk/helper/ldaputil/connection.go:20
+- method:26e80762b82df4bc2b84d56fb4f06ac4 Connection.Search@third_party/openbao/sdk/helper/ldaputil/connection.go:21
+- method:30d830fe5b12b3ebc3e6a1da6346f1a6 Connection.Modify@third_party/openbao/sdk/helper/ldaputil/connection.go:19
+- method:4974672a9c0f670414bba0a3ce8a1d78 Client.GetUserBindDN@third_party/openbao/sdk/helper/ldaputil/client.go:168
+- method:4b7bb073b0fe37555621258624ca1062 PagingConnection.SearchWithPaging@third_party/openbao/sdk/helper/ldaputil/connection.go:29
+- method:50ef833814a8dabc06e632a3e5520a03 ConfigEntry.Map@third_party/openbao/sdk/helper/ldaputil/config.go:475
+- method:73039199f4b528a6dc4ee9b21ace966f Client.GetUserAliasAttributeValue@third_party/openbao/sdk/helper/ldaputil/client.go:253
+- method:7ddf3fecbc3bc265b95d08515a70134a Client.GetUserDN@third_party/openbao/sdk/helper/ldaputil/client.go:291
+- method:81e6b6dc4b5cd16eabf93d22cdaf9fa2 Client.GetLdapGroups@third_party/openbao/sdk/helper/ldaputil/client.go:557
+- method:83e99d613179b279236ca011cca396eb LDAP.DialURL@third_party/openbao/sdk/helper/ldaputil/ldap.go:17
+- method:86e35fc5ffc9501363670e480892cd59 Connection.Close@third_party/openbao/sdk/helper/ldaputil/connection.go:17
+- method:a21256d96530b8c261860357747b8fc9 Client.RenderUserSearchFilter@third_party/openbao/sdk/helper/ldaputil/client.go:196
+- method:c09f1b82ba8f22cd8e96623e4eac6651 Connection.SetTimeout@third_party/openbao/sdk/helper/ldaputil/connection.go:23
+- method:c5eeb84dc923c83b6bb08b6d719ef3f9 Connection.UnauthenticatedBind@third_party/openbao/sdk/helper/ldaputil/connection.go:24
+- method:c90a5834a68fe430bbed15f903bc19a6 Connection.StartTLS@third_party/openbao/sdk/helper/ldaputil/connection.go:22
+- method:d0dca584e5f2e58e6cc07e885514bfee ConfigEntry.PasswordlessMap@third_party/openbao/sdk/helper/ldaputil/config.go:481
+- method:d5623f1b5a339b843f12796d7ff416e3 Connection.Add@third_party/openbao/sdk/helper/ldaputil/connection.go:18
+- method:d5ea325c6f77b97d44cdeb7075403ec8 Connection.Bind@third_party/openbao/sdk/helper/ldaputil/connection.go:16
+- method:dc530a868c994b2a4de5c18323eb280f ConfigEntry.Validate@third_party/openbao/sdk/helper/ldaputil/config.go:528
+- struct:d9a5b1056a138af3f4885e847fcc87e0 ConfigEntry@third_party/openbao/sdk/helper/ldaputil/config.go:439
 kind: SystemContext
 metadata:
   name: third-party-openbao-sdk-helper-ldaputil
   namespace: default
 spec:
+  intent: 'This context exists so the repository can vendor and use OpenBao''s LDAP
+    helper as a third-party dependency: it fixes the shape of the LDAP client, the
+    connection abstraction and the configuration entry so that any code in deno-kcp
+    that authenticates users or resolves groups against an LDAP directory can call
+    the same functions with the same signatures, and so the escaping and filter-rendering
+    behavior that guards against LDAP injection stays exactly as upstream defines
+    it.'
+  interfaces:
+  - file: third_party/openbao/sdk/helper/ldaputil/client.go
+    kind: struct
+    name: Client
+    signature: type Client struct
+  - file: third_party/openbao/sdk/helper/ldaputil/client.go
+    kind: method
+    name: Client.DialLDAP
+    signature: func (c *Client) DialLDAP(cfg *ConfigEntry) (Connection, error)
+  - file: third_party/openbao/sdk/helper/ldaputil/client.go
+    kind: method
+    name: Client.GetLdapGroups
+    signature: func (c *Client) GetLdapGroups(cfg *ConfigEntry, conn Connection, userDN
+      string, username string) ([]string, error)
+  - file: third_party/openbao/sdk/helper/ldaputil/client.go
+    kind: method
+    name: Client.GetUserAliasAttributeValue
+    signature: func (c *Client) GetUserAliasAttributeValue(cfg *ConfigEntry, conn
+      Connection, username string) (string, error)
+  - file: third_party/openbao/sdk/helper/ldaputil/client.go
+    kind: method
+    name: Client.GetUserBindDN
+    signature: func (c *Client) GetUserBindDN(cfg *ConfigEntry, conn Connection, username
+      string) (string, error)
+  - file: third_party/openbao/sdk/helper/ldaputil/client.go
+    kind: method
+    name: Client.GetUserDN
+    signature: func (c *Client) GetUserDN(cfg *ConfigEntry, conn Connection, bindDN,
+      username string) (string, error)
+  - file: third_party/openbao/sdk/helper/ldaputil/client.go
+    kind: method
+    name: Client.RenderUserSearchFilter
+    signature: func (c *Client) RenderUserSearchFilter(cfg *ConfigEntry, username
+      string) (string, error)
+  - file: third_party/openbao/sdk/helper/ldaputil/config.go
+    kind: struct
+    name: ConfigEntry
+    signature: type ConfigEntry struct
+  - file: third_party/openbao/sdk/helper/ldaputil/config.go
+    kind: method
+    name: ConfigEntry.Map
+    signature: func (c *ConfigEntry) Map() map[string]any
+  - file: third_party/openbao/sdk/helper/ldaputil/config.go
+    kind: method
+    name: ConfigEntry.PasswordlessMap
+    signature: func (c *ConfigEntry) PasswordlessMap() map[string]any
+  - file: third_party/openbao/sdk/helper/ldaputil/config.go
+    kind: method
+    name: ConfigEntry.Validate
+    signature: func (c *ConfigEntry) Validate() error
+  - file: third_party/openbao/sdk/helper/ldaputil/config.go
+    kind: function
+    name: ConfigFields
+    signature: func ConfigFields() map[string]*framework.FieldSchema
+  - file: third_party/openbao/sdk/helper/ldaputil/connection.go
+    kind: interface
+    name: Connection
+    signature: type Connection interface
+  - file: third_party/openbao/sdk/helper/ldaputil/connection.go
+    kind: method
+    name: Connection.Add
+    signature: func (c Connection) Add(addRequest *ldap.AddRequest) error
+  - file: third_party/openbao/sdk/helper/ldaputil/connection.go
+    kind: method
+    name: Connection.Bind
+    signature: func (c Connection) Bind(username, password string) error
+  - file: third_party/openbao/sdk/helper/ldaputil/connection.go
+    kind: method
+    name: Connection.Close
+    signature: func (c Connection) Close() error
+  - file: third_party/openbao/sdk/helper/ldaputil/connection.go
+    kind: method
+    name: Connection.Del
+    signature: func (c Connection) Del(delRequest *ldap.DelRequest) error
+  - file: third_party/openbao/sdk/helper/ldaputil/connection.go
+    kind: method
+    name: Connection.Modify
+    signature: func (c Connection) Modify(modifyRequest *ldap.ModifyRequest) error
+  - file: third_party/openbao/sdk/helper/ldaputil/connection.go
+    kind: method
+    name: Connection.Search
+    signature: func (c Connection) Search(searchRequest *ldap.SearchRequest) (*ldap.SearchResult,
+      error)
+  - file: third_party/openbao/sdk/helper/ldaputil/connection.go
+    kind: method
+    name: Connection.SetTimeout
+    signature: func (c Connection) SetTimeout(timeout time.Duration)
+  - file: third_party/openbao/sdk/helper/ldaputil/connection.go
+    kind: method
+    name: Connection.StartTLS
+    signature: func (c Connection) StartTLS(config *tls.Config) error
+  - file: third_party/openbao/sdk/helper/ldaputil/connection.go
+    kind: method
+    name: Connection.UnauthenticatedBind
+    signature: func (c Connection) UnauthenticatedBind(username string) error
+  - file: third_party/openbao/sdk/helper/ldaputil/client.go
+    kind: function
+    name: EscapeLDAPValue
+    signature: func EscapeLDAPValue(input string) string
+  - file: third_party/openbao/sdk/helper/ldaputil/ldap.go
+    kind: interface
+    name: LDAP
+    signature: type LDAP interface
+  - file: third_party/openbao/sdk/helper/ldaputil/ldap.go
+    kind: method
+    name: LDAP.DialURL
+    signature: func (l LDAP) DialURL(addr string, opts ...ldap.DialOpt) (Connection,
+      error)
+  - file: third_party/openbao/sdk/helper/ldaputil/config.go
+    kind: function
+    name: NewConfigEntry
+    signature: func NewConfigEntry(existing *ConfigEntry, d *framework.FieldData)
+      (*ConfigEntry, error)
+  - file: third_party/openbao/sdk/helper/ldaputil/ldap.go
+    kind: function
+    name: NewLDAP
+    signature: func NewLDAP() LDAP
+  - file: third_party/openbao/sdk/helper/ldaputil/connection.go
+    kind: interface
+    name: PagingConnection
+    signature: type PagingConnection interface
+  - file: third_party/openbao/sdk/helper/ldaputil/connection.go
+    kind: method
+    name: PagingConnection.SearchWithPaging
+    signature: func (c PagingConnection) SearchWithPaging(searchRequest *ldap.SearchRequest,
+      pagingSize uint32) (*ldap.SearchResult, error)
+  - file: third_party/openbao/sdk/helper/ldaputil/ldap.go
+    kind: method
+    name: ldapIfc.DialURL
+    signature: func (l ldapIfc) DialURL(addr string, opts ...ldap.DialOpt) (Connection,
+      error)
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - function:b6dd5dc7a40159995f200a94ff42c126
+    - method:4974672a9c0f670414bba0a3ce8a1d78
+    id: r.bind-dn-resolution
+    level: MUST
+    text: GetUserBindDN must search the directory for the user when cfg.DiscoverDN
+      is set or when both cfg.BindDN and cfg.BindPassword are non-empty, and must
+      reject a search that returns anything other than exactly one entry with the
+      error "LDAP search for binddn 0 or not unique". When no search runs it must
+      build the DN from the template, using "<escaped username>@<UPNDomain>" if cfg.UPNDomain
+      is set and "<UserAttr>=<escaped username>,<UserDN>" otherwise, and it must escape
+      the username with EscapeLDAPValue in both templates.
+  - codeRefs:
+    - function:80731a2c0c1e7ab58d52503166aebd35
+    - struct:d9a5b1056a138af3f4885e847fcc87e0
+    id: r.config-entry-construction
+    level: MUST
+    text: NewConfigEntry must build a ConfigEntry from the incoming field data, layering
+      it over the existing entry when one is supplied so unspecified fields keep their
+      previous values, and return an error when the resulting entry does not validate.
+  - codeRefs:
+    - method:50ef833814a8dabc06e632a3e5520a03
+    - method:d0dca584e5f2e58e6cc07e885514bfee
+    id: r.config-entry-map
+    level: MUST
+    text: ConfigEntry.Map must return the full configuration as a key-value map suitable
+      for storage and API responses, and ConfigEntry.PasswordlessMap must return the
+      same view with the bind password omitted, so read paths never leak the secret.
+  - codeRefs:
+    - method:4974672a9c0f670414bba0a3ce8a1d78
+    - method:dc530a868c994b2a4de5c18323eb280f
+    id: r.config-entry-validate
+    level: MUST
+    text: ConfigEntry.Validate must reject an LDAP configuration whose fields are
+      mutually inconsistent, in particular the combinations that decide whether the
+      bind DN is discovered or composed, and must stay consistent with the branching
+      that GetUserBindDN and makeLdapSearchRequest implement.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/ldaputil/config.go
+    - function:887541decbc45fcf241c29b15de11095
+    id: r.config-fields-schema
+    level: MUST
+    text: ConfigFields must return the map of framework field schemas that describes
+      every tunable of an LDAP configuration, so the API layer can render and validate
+      the configuration form from one authoritative definition.
+  - codeRefs:
+    - interface:3b9af4bf8f5fb1ffb79bdadbdf666ebf
+    - method:21e588180474cf39cb119930c9353df4
+    - method:26e80762b82df4bc2b84d56fb4f06ac4
+    - method:30d830fe5b12b3ebc3e6a1da6346f1a6
+    - method:86e35fc5ffc9501363670e480892cd59
+    - method:c09f1b82ba8f22cd8e96623e4eac6651
+    - method:c5eeb84dc923c83b6bb08b6d719ef3f9
+    - method:c90a5834a68fe430bbed15f903bc19a6
+    - method:d5623f1b5a339b843f12796d7ff416e3
+    - method:d5ea325c6f77b97d44cdeb7075403ec8
+    id: r.connection-abstraction
+    level: MUST
+    text: The Connection interface must expose Bind, UnauthenticatedBind, Close, Add,
+      Modify, Del, Search, StartTLS and SetTimeout over the go-ldap request and result
+      types, so every directory operation the helper performs goes through one swappable
+      seam rather than a concrete driver handle.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/ldaputil/client.go
+    - method:13e5a4ed7a1476b08ab8fc6083ff13f8
+    id: r.dial-ldap-multiple-urls
+    level: MUST
+    text: DialLDAP must split cfg.Url on commas and try each entry in turn, parsing
+      it as a URL and dialing it, accepting only the ldap and ldaps schemes, defaulting
+      the port to 389 for ldap and 636 for ldaps, applying StartTLS with the derived
+      TLS config when cfg.StartTLS is set for ldap, applying DialWithTLSConfig for
+      ldaps, respecting cfg.ConnectionTimeout as the dialer timeout, returning the
+      first connection that succeeds while logging the accumulated errors at debug
+      level, and failing with a multierror when every candidate URL fails. When cfg.RequestTimeout
+      is greater than zero it must set that timeout on the returned connection.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/ldaputil/client.go
+    - function:b6dd5dc7a40159995f200a94ff42c126
+    id: r.escape-ldap-value
+    level: MUST
+    text: EscapeLDAPValue must escape a raw string for safe inclusion as an LDAP attribute
+      value, neutralizing the RFC 4514 special characters so a caller-supplied username
+      cannot break out of the DN or filter it is embedded in.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/ldaputil/client.go
+    - method:81e6b6dc4b5cd16eabf93d22cdaf9fa2
+    id: r.group-membership-search
+    level: MUST
+    text: GetLdapGroups must search the directory over the given connection for the
+      groups that a user belongs to and return them as a slice of group names, using
+      the user DN and the username to build the membership query.
+  - codeRefs:
+    - function:36af85f1faca3106c10bcbe63baabcb4
+    - interface:305a06cf4b4e6a8215f5ba864f6edebb
+    - method:09ff0b981e1cb1cea7a369416931c805
+    - method:83e99d613179b279236ca011cca396eb
+    id: r.ldap-dialer-factory
+    level: MUST
+    text: NewLDAP must return an LDAP implementation backed by the concrete go-ldap
+      dialer, and the LDAP interface must expose DialURL taking an address and variadic
+      dial options and returning a Connection, so production code and tests can substitute
+      the dialer.
+  - codeRefs:
+    - interface:a2452b5b2d859deb8f9ae9a730534a93
+    - method:4b7bb073b0fe37555621258624ca1062
+    id: r.paging-search
+    level: MUST
+    text: PagingConnection must extend the search surface with SearchWithPaging, taking
+      a search request and a paging size and returning the assembled result, so callers
+      that expect large result sets can page instead of truncating at the server limit.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/ldaputil/client.go
+    - method:73039199f4b528a6dc4ee9b21ace966f
+    id: r.user-alias-attribute-lookup
+    level: MUST
+    text: GetUserAliasAttributeValue must resolve the configured alias attribute for
+      a user over the given connection, returning the attribute value only when the
+      directory yields it, so the caller can key the user on an attribute other than
+      the DN.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/ldaputil/client.go
+    - method:7ddf3fecbc3bc265b95d08515a70134a
+    id: r.user-dn-lookup
+    level: MUST
+    text: GetUserDN must derive the distinguished name of a user from the configuration,
+      the supplied bind DN and the username, searching the directory when the configuration
+      requires it and otherwise composing the DN, so callers get one canonical DN
+      string.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/ldaputil/client.go
+    - method:a21256d96530b8c261860357747b8fc9
+    id: r.user-search-filter-rendering
+    level: MUST
+    text: RenderUserSearchFilter must default cfg.UserFilter to "({{.UserAttr}}={{.Username}})"
+      when it is empty, compile it as a Go text/template, and return a template compilation
+      error wrapped as an LDAP search failure. It must escape the user attribute and
+      the username with ldap.EscapeFilter per RFC 4515 before substitution, and when
+      cfg.UPNDomain is set it must force the template's UserAttr to userPrincipalName
+      and substitute the username as "<escaped username>@<UPNDomain>".
   upstream: self

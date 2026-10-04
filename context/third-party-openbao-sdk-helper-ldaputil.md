@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the repository can vendor and use OpenBao's LDAP helper as a third-party dependency: it fixes the shape of the LDAP client, the connection abstraction and the configuration entry so that any code in deno-kcp that authenticates users or resolves groups against an LDAP directory can call the same functions with the same signatures, and so the escaping and filter-rendering behavior that guards against LDAP injection stays exactly as upstream defines it.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
