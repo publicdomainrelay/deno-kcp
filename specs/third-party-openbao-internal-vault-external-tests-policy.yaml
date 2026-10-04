@@ -14,9 +14,9 @@ spec:
     what a login or renewal response must report for token, identity, and combined
     policy sets; how pagination_limit and required_parameters on an ACL path constrain
     list and scan operations; when identity template values resolve versus deny; and
-    how policy data propagates to a standby core when the cache is disabled. A block
-    of LDAP-auth tests is commented out because it depends on an LDAP plugin and container,
-    so the remaining tests use userpass and the built-in KV backend only.'
+    how policy data propagates to a standby core when the cache is disabled. The LDAP-auth
+    block stays commented out because it needs an LDAP plugin and container, so the
+    remaining tests use userpass and the built-in KV backend only.'
   repository: deno-kcp
   requirements:
   - codeRefs:
@@ -25,7 +25,7 @@ spec:
     level: MUST
     text: A policy that references a non-existent group through a name template MUST
       NOT prevent the other paths in the token's policy set from working. Installing
-      badPolicy1 (which templates identity.groups.names.foobar.name) MUST leave every
+      badPolicy1, which templates identity.groups.names.foobar.name, MUST leave every
       other templated path behaving exactly as it did before, so only the unresolvable-template
       path is affected.
   - codeRefs:
@@ -60,8 +60,8 @@ spec:
     - file:third_party/openbao/internal/vault/external_tests/policy/acl_templating_test.go
     id: r.invalid-metadata-rejected
     level: MUST
-    text: Entity metadata whose value contains template-breaking characters (a wildcard)
-      MUST make every templated path in the policy fail, and rewriting the same policy
+    text: Entity metadata whose value contains template-breaking characters, a wildcard,
+      MUST make every templated path in the policy fail. Rewriting the same policy
       with allow_wildcards_in_identity_templates and allow_slashes_in_identity_templates
       both true MUST restore access without changing the metadata.
   - codeRefs:
@@ -80,7 +80,8 @@ spec:
       a raw list returns 100 keys when the path is unpaginated or at most 10 when
       paginated and errors when the path is not raw-listable, that a list page of
       75 errors when the path is paginated and otherwise returns exactly 75 keys,
-      and that a list page of 10 always succeeds with at most 10 keys.
+      and that a list page of 10 always succeeds with at most 10 keys. The limited
+      and raw arguments decide which of these assertions apply.
   - codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/policy/policy_test.go
     id: r.policy-pagination-limits
@@ -108,5 +109,5 @@ spec:
       logging in. The login response MUST report Auth.TokenPolicies equal to the token
       policies with "default" prepended, Auth.IdentityPolicies equal to the configured
       identity policies, and Auth.Policies equal to the concatenation of both. After
-      a renew through auth/token/renew MUST report the same three sets unchanged.
+      a renew through auth/token/renew the same three sets MUST be reported unchanged.
   upstream: self

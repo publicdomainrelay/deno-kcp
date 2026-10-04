@@ -1,0 +1,38 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-internal-vault-external-tests-policy-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-internal-vault-external-tests-policy
+  toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+status:
+  agentLog: This context is the OpenBao external policy test package at third_party/openbao/internal/vault/external_tests/policy.
+    Two black-box acceptance test files drive a real in-memory Vault core over the
+    HTTP API through api.Client instead of calling internal policy functions. policy_test.go
+    holds TestPolicy_TokenRenewal, which runs four table cases over the userpass auth
+    backend and asserts that login and renew responses report Auth.TokenPolicies with
+    "default" prepended, Auth.IdentityPolicies from the bound entity, and Auth.Policies
+    as the concatenation of both; TestPolicy_PaginationLimit, which mounts a versioned
+    KV backend and writes a policy whose kv/metadata sub-paths vary pagination_limit
+    and required_parameters, then checks raw list, limit=max, limit=0, limit=-1 and
+    scan behaviour through the testPagination helper; and TestPolicyStore_DisabledCacheInvalidation,
+    which builds a two-core cluster with DisableCache true, creates a namespace, writes
+    a read-only policy on the active core, and polls the standby core's GetPolicy
+    for up to 10 seconds. acl_templating_test.go holds TestPolicyTemplating, which
+    builds an entity named entity_name with metadata, a group group_name, an empty
+    group foobar, and a userpass alias testuser, then checks which identity-templated
+    paths resolve, how an unresolvable group template stays isolated to its own path,
+    how later group membership flips a denied path to allowed, and how wildcard-bearing
+    metadata breaks all templated paths until allow_wildcards_in_identity_templates
+    and allow_slashes_in_identity_templates are set. Two LDAP-backed tests sit commented
+    out so the package builds without an LDAP plugin or container.
+  message: wrote 9 requirement(s) and 0 interface(s) for third-party-openbao-internal-vault-external-tests-policy
+  phase: Succeeded
+superseded:
+- message: wrote 9 requirement(s) and 0 interface(s) for third-party-openbao-internal-vault-external-tests-policy
+  name: third-party-openbao-internal-vault-external-tests-policy-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9
+  phase: Succeeded
