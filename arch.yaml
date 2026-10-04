@@ -72318,10 +72318,50 @@ system_contexts:
 - code:
   - third_party/openbao/ui/lib/kubernetes/addon/components/tab-page-header.js
   codeRefIndex:
+  - class:93c349010e8be9f7f1b9baab11fdffc4 TabPageHeaderComponent@third_party/openbao/ui/lib/kubernetes/addon/components/tab-page-header.js:3
   - file:third_party/openbao/ui/lib/kubernetes/addon/components/tab-page-header.js
     tab-page-header.js@third_party/openbao/ui/lib/kubernetes/addon/components/tab-page-header.js
   id: sc.third-party-openbao-ui-lib-kubernetes-addon-components
+  intent: This context exists to fix the contract of the tab page header component
+    for the Kubernetes secrets engine in the vendored OpenBao UI. Consumers of the
+    component, and anything that replaces or regenerates this vendored file, need
+    to know that the component contributes exactly one URL mapping and that the list
+    route it points at is the Kubernetes roles list route. It is recorded as a spec
+    so that a future change to this file, or a port of the OpenBao UI into this repository,
+    can be checked against the same single observable behavior instead of being re-derived
+    from the vendored source.
+  interfaces:
+  - file: third_party/openbao/ui/lib/kubernetes/addon/components/tab-page-header.js
+    kind: class
+    name: TabPageHeaderComponent
+    signature: export default class TabPageHeaderComponent extends Component
   name: third-party-openbao-ui-lib-kubernetes-addon-components
+  requirements:
+  - codeRefs:
+    - class:93c349010e8be9f7f1b9baab11fdffc4
+    - file:third_party/openbao/ui/lib/kubernetes/addon/components/tab-page-header.js
+    id: r.default-export-class
+    level: MUST
+    text: The module third_party/openbao/ui/lib/kubernetes/addon/components/tab-page-header.js
+      must default-export the class TabPageHeaderComponent, which extends the Ember
+      Component base class, so that the addon resolver can load the component by name.
+  - codeRefs:
+    - class:93c349010e8be9f7f1b9baab11fdffc4
+    - file:third_party/openbao/ui/lib/kubernetes/addon/components/tab-page-header.js
+    id: r.urls-is-getter
+    level: SHOULD
+    text: urls should stay a getter rather than a stored field, so that every read
+      recomputes and returns the same fresh literal object and callers cannot mutate
+      shared state across instances.
+  - codeRefs:
+    - class:93c349010e8be9f7f1b9baab11fdffc4
+    - file:third_party/openbao/ui/lib/kubernetes/addon/components/tab-page-header.js
+    id: r.urls-list-route
+    level: MUST
+    text: Reading the urls property of a TabPageHeaderComponent instance must return
+      an object whose list key holds the route name string 'vault.cluster.secrets.backend.kubernetes.roles',
+      so that link targets built from this component resolve to the Kubernetes secrets
+      engine roles list route.
   upstream: self
 - code:
   - third_party/openbao/ui/lib/kubernetes/addon/components/page/configure.js

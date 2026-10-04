@@ -5575,6 +5575,13 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.role-name-param` (SHOULD): "The role route SHOULD keep its dynamic segment as /:name so role details, edit and credentials routes are addressed by Kubernetes role name."
 - added `r.route-map` (MUST): "The addon MUST export a default route map built by ember-engines buildRoutes declaring the top-level routes overview, roles, configure and configuration, where roles contains a create route and a role route at path /:name whose nested routes are details, edit and credentials."
 
+### third-party-openbao-ui-lib-kubernetes-addon-components
+
+- intent: "" -> "This context exists to fix the contract of the tab page header component for the Kubernetes secrets engine in the vendored OpenBao UI. Consumers of the component, and anything that replaces or regenerates this vendored file, need to know that the component contributes exactly one URL mapping and that the list route it points at is the Kubernetes roles list route. It is recorded as a spec so that a future change to this file, or a port of the OpenBao UI into this repository, can be checked against the same single observable behavior instead of being re-derived from the vendored source."
+- added `r.default-export-class` (MUST): "The module third_party/openbao/ui/lib/kubernetes/addon/components/tab-page-header.js must default-export the class TabPageHeaderComponent, which extends the Ember Component base class, so that the addon resolver can load the component by name."
+- added `r.urls-is-getter` (SHOULD): "urls should stay a getter rather than a stored field, so that every read recomputes and returns the same fresh literal object and callers cannot mutate shared state across instances."
+- added `r.urls-list-route` (MUST): "Reading the urls property of a TabPageHeaderComponent instance must return an object whose list key holds the route name string 'vault.cluster.secrets.backend.kubernetes.roles', so that link targets built from this component resolve to the Kubernetes secrets engine roles list route."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -6058,6 +6065,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-css-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-keep-gitkeep-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-kubernetes-addon-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-lib-kubernetes-addon-components-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-kubernetes-addon-components-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-kubernetes-addon-components-page-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-lib-kubernetes-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
