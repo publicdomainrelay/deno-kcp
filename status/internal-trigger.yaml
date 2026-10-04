@@ -1,19 +1,66 @@
 conditions:
-- message: 'missing: New, Observed, Op, Options, Reconciler, Reconciler.Reconcile,
-    Result, RunObservation; unresolved: r.carry-status: struct:a3fbb6626d9d915cb17e70f240a59a55,
-    r.clock-default: function:f347057cde00720e2ba57c3dd951470c, r.clock-default: struct:ce2bb0551ed1ce86badc642077aab120,
-    r.create-job-once: method:5926281263a64123a37f6099290debee, r.create-job-once:
-    type_alias:ea5d49f390b7f0cb47a28a95e8f58b81, r.decider-only: struct:9094b81797efe240a545142966b526c0,
-    r.match-gate: struct:128da6e45c96bafe5081998013f47ffe, r.no-run-pending: struct:dc3e99d1633068172953c5024a851849'
-  reason: InterfacesMissing
-  status: "False"
+- message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+  reason: InterfacesObserved
+  status: "True"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - internal/trigger/trigger.go
+  - internal/trigger/trigger_test.go
+  fingerprint: acd447f4a0a415cfef06702f976b824f3a6056e0c8033973ef43b564d7b0818c
+  interfaces:
+  - codegraphId: struct:128da6e45c96bafe5081998013f47ffe
+    file: internal/trigger/trigger.go
+    kind: struct
+    line: 15
+    name: RunObservation
+  - codegraphId: struct:dc3e99d1633068172953c5024a851849
+    file: internal/trigger/trigger.go
+    kind: struct
+    line: 23
+    name: Observed
+  - codegraphId: type_alias:ea5d49f390b7f0cb47a28a95e8f58b81
+    file: internal/trigger/trigger.go
+    kind: type_alias
+    line: 33
+    name: Op
+  - codegraphId: struct:a3fbb6626d9d915cb17e70f240a59a55
+    file: internal/trigger/trigger.go
+    kind: struct
+    line: 41
+    name: Result
+  - codegraphId: struct:ce2bb0551ed1ce86badc642077aab120
+    file: internal/trigger/trigger.go
+    kind: struct
+    line: 57
+    name: Options
+  - codegraphId: struct:9094b81797efe240a545142966b526c0
+    file: internal/trigger/trigger.go
+    kind: struct
+    line: 61
+    name: Reconciler
+  - codegraphId: function:f347057cde00720e2ba57c3dd951470c
+    file: internal/trigger/trigger.go
+    kind: function
+    line: 65
+    name: New
+    signature: (opts Options) *Reconciler
+  - codegraphId: method:5926281263a64123a37f6099290debee
+    file: internal/trigger/trigger.go
+    kind: method
+    line: 73
+    name: Reconciler.Reconcile
+    signature: (ctx context.Context, o Observed) (Result, error)
+observedCommit: a41ca4aea50b664f834bef53dc6e569d2a8feac3
+realizedSpecHash: ff8b3e9956615a4ba90d99dc756aefcd4ed5a7de7cd4de631474a5c67925934f
+syncedCommit: a41ca4aea50b664f834bef53dc6e569d2a8feac3
+syncedFingerprint: acd447f4a0a415cfef06702f976b824f3a6056e0c8033973ef43b564d7b0818c

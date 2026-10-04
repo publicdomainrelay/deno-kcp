@@ -1959,7 +1959,10 @@ system_contexts:
       cluster, runner or probe I/O itself, leaving the returned Ops for the provider
       to execute.
   upstream: self
-- id: sc.internal-policyworkflowpod
+- code:
+  - internal/policyworkflowpod/policyworkflowpod.go
+  - internal/policyworkflowpod/policyworkflowpod_test.go
+  id: sc.internal-policyworkflowpod
   intent: This context exists so the PolicyWorkflowPod decider has a describable contract
     separate from the provider that calls it. The provider owns the watch loop and
     status writes; this package owns only the decision, which makes the phase transitions,
@@ -2116,7 +2119,10 @@ system_contexts:
     text: RunTTL returns a pointer to a copy of the resolved value, never a pointer
       into the pod spec.
   upstream: self
-- id: sc.internal-policyworkflowrun
+- code:
+  - internal/policyworkflowrun/policyworkflowrun.go
+  - internal/policyworkflowrun/policyworkflowrun_test.go
+  id: sc.internal-policyworkflowrun
   intent: This context exists so the PolicyWorkflowRun state machine is testable and
     separable from the Kubernetes client. Reconcile only reads the observed world
     and writes a Result, so callers translate Op verbs, status fields and flags into
@@ -2298,7 +2304,50 @@ system_contexts:
       requeue for the remaining time; with no TTL or no completion time it returns
       unchanged.'
   upstream: self
-- id: sc.internal-provider
+- code:
+  - internal/provider/admission.go
+  - internal/provider/admission_test.go
+  - internal/provider/cluster_path.go
+  - internal/provider/driver.go
+  - internal/provider/live_denojob_drain_test.go
+  - internal/provider/live_denoruntime_test.go
+  - internal/provider/live_helpers_test.go
+  - internal/provider/live_maxconcurrent_test.go
+  - internal/provider/live_native_admission_test.go
+  - internal/provider/live_ttl_test.go
+  - internal/provider/main_test.go
+  - internal/provider/metrics.go
+  - internal/provider/metrics_test.go
+  - internal/provider/provider.go
+  - internal/provider/provider_runtime.go
+  - internal/provider/provider_runtime_test.go
+  - internal/provider/provider_test.go
+  - internal/provider/reconcile_engine.go
+  - internal/provider/reconcile_job.go
+  - internal/provider/reconcile_openbao.go
+  - internal/provider/reconcile_openbao_test.go
+  - internal/provider/reconcile_pod.go
+  - internal/provider/reconcile_run.go
+  - internal/provider/reconcile_trigger.go
+  - internal/provider/reconcile_workflowpod.go
+  - internal/provider/registry.go
+  - internal/provider/registry_engine.go
+  - internal/provider/registry_job.go
+  - internal/provider/registry_openbao.go
+  - internal/provider/registry_pod.go
+  - internal/provider/registry_run.go
+  - internal/provider/registry_runtime.go
+  - internal/provider/registry_test.go
+  - internal/provider/registry_trigger.go
+  - internal/provider/registry_workflowpod.go
+  - internal/provider/run_refs.go
+  - internal/provider/run_refs_test.go
+  - internal/provider/service_dns.go
+  - internal/provider/service_dns_inject_test.go
+  - internal/provider/watch.go
+  - internal/provider/watch_cache.go
+  - internal/provider/watch_test.go
+  id: sc.internal-provider
   intent: 'This context exists to hold the provider-side controller logic of deno-kcp
     as a single describable unit: the reconcile engines and their per-kind reconcile
     files, the Reader/Runtime/TokenMinter port interfaces the engines depend on, the
@@ -3028,7 +3077,10 @@ system_contexts:
       ReadEngine, ReadWorkflowPod, ListWorkflowRuns and ListWorkflowRunsForPod, and
       Provider.RunWatch must drive it.
   upstream: self
-- id: sc.internal-trigger
+- code:
+  - internal/trigger/trigger.go
+  - internal/trigger/trigger_test.go
+  id: sc.internal-trigger
   intent: 'This context is the trigger decider, the piece of the deno-kcp control
     plane that turns a finished policy workflow run into a deno job. It exists so
     the RunTrigger reconciliation decision is testable and side-effect free: the reconciler
@@ -3164,7 +3216,14 @@ system_contexts:
     text: A run in any other (non-terminal) phase yields phase Pending with a condition
       saying the run has not finished.
   upstream: self
-- id: sc.test-integration
+- code:
+  - test/integration/bao_test.go
+  - test/integration/examples.go
+  - test/integration/fixture_test.go
+  - test/integration/live_test.go
+  - test/integration/offline_test.go
+  - test/integration/openbao_live_test.go
+  id: sc.test-integration
   intent: This context exists to hold the one test package that proves deno-kcp works
     against real infrastructure and against the checked-in examples. It separates
     what can be verified from the repository alone (offline_test.go, examples.go)

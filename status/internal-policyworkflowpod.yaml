@@ -1,19 +1,68 @@
 conditions:
-- message: 'missing: Capacity, New, Observed, Options, Reconciler, Reconciler.Reconcile,
-    Result, RunTTL; unresolved: r.capacity-allow-bounded: function:bbc6e4753713c4d1d1079ae7e84ed8fa,
-    r.deletion-timestamp-returns-carried-status: method:84d4636db1ea631ee61b88e98f741d27,
-    r.pending-when-engine-not-ready: file:internal/policyworkflowpod/policyworkflowpod.go,
-    r.reconcile-defaults-now: function:02acf20c6ae76f4247f2782b39f9905d, r.runttl-negative-or-nil-is-nil:
-    function:d4ae60590520385e8ca42957d1cb728f'
-  reason: InterfacesMissing
-  status: "False"
+- message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+  reason: InterfacesObserved
+  status: "True"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - internal/policyworkflowpod/policyworkflowpod.go
+  - internal/policyworkflowpod/policyworkflowpod_test.go
+  fingerprint: b718e634e81c9e90a82319184bd668a8ee239ab6f402704b3011dc38643bcd87
+  interfaces:
+  - codegraphId: struct:842e356a5ebdd4a78ce7849f4fada513
+    file: internal/policyworkflowpod/policyworkflowpod.go
+    kind: struct
+    line: 16
+    name: Observed
+  - codegraphId: struct:8ded0e2d592b1dadd943f5bc7a97eb7f
+    file: internal/policyworkflowpod/policyworkflowpod.go
+    kind: struct
+    line: 28
+    name: Result
+  - codegraphId: struct:8099607c30978aaddc31c1f6fe9b615e
+    file: internal/policyworkflowpod/policyworkflowpod.go
+    kind: struct
+    line: 40
+    name: Options
+  - codegraphId: struct:5aa211d3d5b215af5fa46eca88c2f0c0
+    file: internal/policyworkflowpod/policyworkflowpod.go
+    kind: struct
+    line: 44
+    name: Reconciler
+  - codegraphId: function:02acf20c6ae76f4247f2782b39f9905d
+    file: internal/policyworkflowpod/policyworkflowpod.go
+    kind: function
+    line: 48
+    name: New
+    signature: (opts Options) *Reconciler
+  - codegraphId: method:84d4636db1ea631ee61b88e98f741d27
+    file: internal/policyworkflowpod/policyworkflowpod.go
+    kind: method
+    line: 55
+    name: Reconciler.Reconcile
+    signature: (ctx context.Context, o Observed) (Result, error)
+  - codegraphId: function:bbc6e4753713c4d1d1079ae7e84ed8fa
+    file: internal/policyworkflowpod/policyworkflowpod.go
+    kind: function
+    line: 98
+    name: Capacity
+    signature: (policy v1alpha1.ConcurrencyPolicy, maxConcurrent *int32) (int32, bool)
+  - codegraphId: function:d4ae60590520385e8ca42957d1cb728f
+    file: internal/policyworkflowpod/policyworkflowpod.go
+    kind: function
+    line: 108
+    name: RunTTL
+    signature: (pod *v1alpha1.PolicyWorkflowPod, providerDefault *int64) *int64
+observedCommit: a41ca4aea50b664f834bef53dc6e569d2a8feac3
+realizedSpecHash: 773a94a3dcfb7e2e57ae3c34061ad728b1c7e281d3ad2ce35e217bb6f4c45018
+syncedCommit: a41ca4aea50b664f834bef53dc6e569d2a8feac3
+syncedFingerprint: b718e634e81c9e90a82319184bd668a8ee239ab6f402704b3011dc38643bcd87
