@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so the repository carries a self-contained, buildable copy of the OpenBao PostgreSQL storage driver rather than importing it from an external module. It records the backend's configuration entry point, its physical.Backend read and write surface, its transaction surface, its HA lock surface, and its replication-index semantics, plus the test helpers the package's test file depends on. Describing it here lets other parts of the repository see exactly which storage guarantees the vendored driver offers without reading the vendored source.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

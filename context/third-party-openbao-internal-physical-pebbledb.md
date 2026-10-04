@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the OpenBao physical storage layer has a PebbleDB-backed implementation with real interactive transactions. The package adapts Pebble's non-interactive, snapshot-based API to the physical.Backend and physical.TransactionalBackend contracts, including the conflict detection and rollback semantics those contracts promise. It exists because Pebble offers no check-and-set primitive of its own; rather than taking a global write lock, the code tracks each transaction's reads, writes and list results and invalidates on conflicts, so parallel writers can proceed until an actual overlap is proven.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
