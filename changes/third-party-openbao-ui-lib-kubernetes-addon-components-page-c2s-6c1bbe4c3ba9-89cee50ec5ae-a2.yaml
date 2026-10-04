@@ -1,0 +1,54 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-ui-lib-kubernetes-addon-components-page-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-ui-lib-kubernetes-addon-components-page
+  toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
+status:
+  agentLog: 'This context covers four Ember page components of the OpenBao Kubernetes
+    secrets-engine addon, each in its own file under third_party/openbao/ui/lib/kubernetes/addon/components/page/.
+    ConfigurePageComponent owns the engine configuration form: its constructor seeds
+    tracked inferredState to ''success'' only when the config model is not new and
+    disableLocalCaJwt is falsy, an isDisabled getter gates the save button on that
+    inference state and on whether the save or fetchInferred task is running, onRadioSelect
+    writes the chosen value to model.disableLocalCaJwt and resets inferredState to
+    null, fetchInferred calls store.adapterFor(''kubernetes/config'').checkConfigVars
+    with the model backend and records ''success'' or ''error'', and a save task confirms
+    on first invocation for an existing model, runs model.validate(), stores invalid
+    state in modelValidations with the invalid form message in alert, and on success
+    persists the model before leaving via the host router. OverviewPageComponent builds
+    tracked roleOptions in its constructor from args.roles as name/id pairs, tracks
+    selectedRole through selectRole, and transitions the host router to the credentials
+    route for that role. CredentialsPageComponent holds the request form state (ttl,
+    clusterRoleBinding, kubernetesNamespace, credentials, error) with actions for
+    namespace input, ttl update, fetch and cancel plus a leaseExpiry getter. RolesPageComponent
+    exposes the owner mount point through a getter and deletes a role record, splicing
+    it out of args.roles and reporting success or failure through the flash messages
+    service. All four inject the ''host-router'' service as the navigation mechanism.'
+  message: wrote 13 requirement(s) and 4 interface(s) for third-party-openbao-ui-lib-kubernetes-addon-components-page;
+    interface ConfigurePageComponent.isDisabled is not in the observed facts; dropped;
+    interface ConfigurePageComponent.leave is not in the observed facts; dropped;
+    interface ConfigurePageComponent.onRadioSelect is not in the observed facts; dropped;
+    interface ConfigurePageComponent.fetchInferred is not in the observed facts; dropped;
+    interface ConfigurePageComponent.save is not in the observed facts; dropped; interface
+    ConfigurePageComponent.cancel is not in the observed facts; dropped; interface
+    CredentialsPageComponent.leaseExpiry is not in the observed facts; dropped; interface
+    CredentialsPageComponent.cancel is not in the observed facts; dropped; interface
+    CredentialsPageComponent.setKubernetesNamespace is not in the observed facts;
+    dropped; interface CredentialsPageComponent.updateTtl is not in the observed facts;
+    dropped; interface CredentialsPageComponent.fetchCredentials is not in the observed
+    facts; dropped; interface OverviewPageComponent.selectRole is not in the observed
+    facts; dropped; interface OverviewPageComponent.generateCredential is not in the
+    observed facts; dropped; interface RolesPageComponent.mountPoint is not in the
+    observed facts; dropped; interface RolesPageComponent.onDelete is not in the observed
+    facts; dropped; the spec already said this
+  phase: Succeeded
+superseded:
+- message: wrote 13 requirement(s) and 4 interface(s) for third-party-openbao-ui-lib-kubernetes-addon-components-page
+  name: third-party-openbao-ui-lib-kubernetes-addon-components-page-c2s-6c1bbe4c3ba9-89cee50ec5ae
+  phase: Succeeded
