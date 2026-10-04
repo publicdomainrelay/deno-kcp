@@ -1,10 +1,159 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
 - file:third_party/openbao/sdk/helper/tokenutil/tokenutil.go tokenutil.go@third_party/openbao/sdk/helper/tokenutil/tokenutil.go
+- function:1b40e1a36a07cf64c5f3dbdeb3f856de AddTokenFields@third_party/openbao/sdk/helper/tokenutil/tokenutil.go:57
+- function:61f5a7fa8bc8c46425642e61e90091b8 DeprecationText@third_party/openbao/sdk/helper/tokenutil/tokenutil.go:318
+- function:acfa7994320318ddae640f74d7b476f5 AddTokenFieldsWithAllowList@third_party/openbao/sdk/helper/tokenutil/tokenutil.go:64
+- function:e67f3eba917ac1e12eddf119f0f044b4 UpgradeValue@third_party/openbao/sdk/helper/tokenutil/tokenutil.go:414
+- function:f80007a81d4998ff0ed84126ab931633 TokenFields@third_party/openbao/sdk/helper/tokenutil/tokenutil.go:78
+- method:5979538a3f71abbacbfdba613ca6df38 TokenParams.ParseTokenFields@third_party/openbao/sdk/helper/tokenutil/tokenutil.go:176
+- method:779a064d3b7059f2933f94733f478e1e TokenParams.PopulateTokenAuth@third_party/openbao/sdk/helper/tokenutil/tokenutil.go:287
+- method:8f535ceaabc0ca5ca2d1bcf7aab4f0d0 TokenParams.PopulateTokenData@third_party/openbao/sdk/helper/tokenutil/tokenutil.go:265
+- struct:49538ef1c2da53f5510e63c5a6268a83 TokenParams@third_party/openbao/sdk/helper/tokenutil/tokenutil.go:21
 kind: SystemContext
 metadata:
   name: third-party-openbao-sdk-helper-tokenutil
   namespace: default
 spec:
+  intent: The package exists so that every OpenBao auth and secrets backend describes
+    token issuance parameters in one place instead of repeating the field schema,
+    parsing, and response marshalling for each role. TokenFields supplies the canonical
+    field set, AddTokenFields installs it into a role's field map, ParseTokenFields
+    turns a request's field data into a TokenParams, and PopulateTokenData plus PopulateTokenAuth
+    push those parameters back out to API responses and issued tokens. DeprecationText
+    and UpgradeValue exist so older renamed token fields keep working while callers
+    move to the current key names.
+  interfaces:
+  - file: third_party/openbao/sdk/helper/tokenutil/tokenutil.go
+    kind: function
+    name: AddTokenFields
+    signature: func AddTokenFields(m map[string]*framework.FieldSchema)
+  - file: third_party/openbao/sdk/helper/tokenutil/tokenutil.go
+    kind: function
+    name: AddTokenFieldsWithAllowList
+    signature: func AddTokenFieldsWithAllowList(m map[string]*framework.FieldSchema,
+      allowed []string)
+  - file: third_party/openbao/sdk/helper/tokenutil/tokenutil.go
+    kind: function
+    name: DeprecationText
+    signature: func DeprecationText(param string) string
+  - file: third_party/openbao/sdk/helper/tokenutil/tokenutil.go
+    kind: function
+    name: TokenFields
+    signature: func TokenFields() map[string]*framework.FieldSchema
+  - file: third_party/openbao/sdk/helper/tokenutil/tokenutil.go
+    kind: struct
+    name: TokenParams
+    signature: type TokenParams struct
+  - file: third_party/openbao/sdk/helper/tokenutil/tokenutil.go
+    kind: method
+    name: TokenParams.ParseTokenFields
+    signature: func (t *TokenParams) ParseTokenFields(req *logical.Request, d *framework.FieldData)
+      error
+  - file: third_party/openbao/sdk/helper/tokenutil/tokenutil.go
+    kind: method
+    name: TokenParams.PopulateTokenAuth
+    signature: func (t *TokenParams) PopulateTokenAuth(auth *logical.Auth, req *logical.Request)
+      error
+  - file: third_party/openbao/sdk/helper/tokenutil/tokenutil.go
+    kind: method
+    name: TokenParams.PopulateTokenData
+    signature: func (t *TokenParams) PopulateTokenData(m map[string]any)
+  - file: third_party/openbao/sdk/helper/tokenutil/tokenutil.go
+    kind: function
+    name: UpgradeValue
+    signature: func UpgradeValue(d *framework.FieldData, oldKey, newKey string, oldVal,
+      newVal any) error
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/tokenutil/tokenutil.go
+    - function:1b40e1a36a07cf64c5f3dbdeb3f856de
+    id: r.add-token-fields-delegates
+    level: MUST
+    text: AddTokenFields adds the full set of token fields to an existing role's field
+      map by delegating to AddTokenFieldsWithAllowList with a nil allow list, so that
+      no field is filtered out.
+  - codeRefs:
+    - function:acfa7994320318ddae640f74d7b476f5
+    - function:f80007a81d4998ff0ed84126ab931633
+    id: r.allow-list-restricts-fields
+    level: MUST
+    text: AddTokenFieldsWithAllowList iterates the map from TokenFields and, when
+      the allow list is non-empty, skips every field whose key is not contained in
+      the allow list, so a caller can restrict the installed set to avoid conflicts.
+  - codeRefs:
+    - function:61f5a7fa8bc8c46425642e61e90091b8
+    id: r.deprecation-text-per-param
+    level: SHOULD
+    text: DeprecationText returns the deprecation sentence a caller attaches to a
+      warning for the named token parameter, giving the reader the replacement key
+      to use.
+  - codeRefs:
+    - function:acfa7994320318ddae640f74d7b476f5
+    id: r.no-silent-overwrite
+    level: MUST
+    text: AddTokenFieldsWithAllowList panics when the destination map already contains
+      a key it is about to install, rather than overwriting the existing field schema.
+  - codeRefs:
+    - method:5979538a3f71abbacbfdba613ca6df38
+    - struct:49538ef1c2da53f5510e63c5a6268a83
+    id: r.parse-absent-fields-left-alone
+    level: MUST
+    text: ParseTokenFields reads each token_* key through the framework field data
+      and only assigns the matching TokenParams field when the key is present, so
+      absent keys leave the receiver's existing value unchanged.
+  - codeRefs:
+    - method:5979538a3f71abbacbfdba613ca6df38
+    id: r.parse-bound-cidrs
+    level: MUST
+    text: ParseTokenFields parses the token_bound_cidrs string list into sockaddr
+      marshallers and returns the parse error unchanged when the addresses are not
+      valid.
+  - codeRefs:
+    - method:5979538a3f71abbacbfdba613ca6df38
+    id: r.parse-validates-values
+    level: MUST
+    text: ParseTokenFields converts token_explicit_max_ttl, token_max_ttl and token_period
+      from seconds and rejects a negative token_max_ttl or token_period with an error,
+      and it maps token_type of empty string or "default" to the default token type,
+      "service" to service, "batch" to batch, returning an error for any other value.
+  - codeRefs:
+    - method:779a064d3b7059f2933f94733f478e1e
+    - struct:49538ef1c2da53f5510e63c5a6268a83
+    id: r.populate-token-auth
+    level: MUST
+    text: PopulateTokenAuth copies the receiver's token parameters onto the supplied
+      logical.Auth for the request, so an issued token inherits the role's TTL, period,
+      policies, CIDRs, uses and type settings.
+  - codeRefs:
+    - method:8f535ceaabc0ca5ca2d1bcf7aab4f0d0
+    id: r.populate-token-data-empty-slices
+    level: MUST
+    text: PopulateTokenData replaces a nil or empty token policies or token bound
+      CIDRs list with an empty []string so that responses serialize as an empty list
+      instead of null.
+  - codeRefs:
+    - method:8f535ceaabc0ca5ca2d1bcf7aab4f0d0
+    id: r.populate-token-data-shape
+    level: MUST
+    text: PopulateTokenData writes every token field into the supplied map, encoding
+      token_explicit_max_ttl, token_max_ttl, token_period and token_ttl as int64 whole
+      seconds, token_type as its string form, and storing the raw num-uses, no-default-policy
+      and strictly-bind-ip values.
+  - codeRefs:
+    - function:f80007a81d4998ff0ed84126ab931633
+    - struct:49538ef1c2da53f5510e63c5a6268a83
+    id: r.token-fields-canonical-set
+    level: MUST
+    text: TokenFields returns the canonical map of token field names to framework.FieldSchema
+      values for the fields carried by TokenParams, and that map is the single source
+      used when a role's field set is populated.
+  - codeRefs:
+    - function:e67f3eba917ac1e12eddf119f0f044b4
+    id: r.upgrade-value-migrates-key
+    level: SHOULD
+    text: UpgradeValue moves a value supplied under a deprecated field key onto its
+      replacement key, comparing the old and new values from the field data and returning
+      an error instead of accepting a migration that cannot be resolved.
   upstream: self

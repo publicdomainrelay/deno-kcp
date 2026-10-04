@@ -3543,6 +3543,22 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.validate-response-delegates` (MUST): "ValidateResponse must accept a possibly nil logical.Response and forward its Data map to ValidateResponseData, passing nil data when the response itself is nil, so that a missing response is validated as empty rather than skipped."
 - added `r.validating-callback-shape` (MUST): "ResponseValidatingCallback must return a function with the backend operation handler signature func(logical.Backend, *logical.Request, *logical.Response) that validates a response produced during a test against the schema, so it can be substituted for a normal operation callback."
 
+### third-party-openbao-sdk-helper-tokenutil
+
+- intent: "" -> "The package exists so that every OpenBao auth and secrets backend describes token issuance parameters in one place instead of repeating the field schema, parsing, and response marshalling for each role. TokenFields supplies the canonical field set, AddTokenFields installs it into a role's field map, ParseTokenFields turns a request's field data into a TokenParams, and PopulateTokenData plus PopulateTokenAuth push those parameters back out to API responses and issued tokens. DeprecationText and UpgradeValue exist so older renamed token fields keep working while callers move to the current key names."
+- added `r.add-token-fields-delegates` (MUST): "AddTokenFields adds the full set of token fields to an existing role's field map by delegating to AddTokenFieldsWithAllowList with a nil allow list, so that no field is filtered out."
+- added `r.allow-list-restricts-fields` (MUST): "AddTokenFieldsWithAllowList iterates the map from TokenFields and, when the allow list is non-empty, skips every field whose key is not contained in the allow list, so a caller can restrict the installed set to avoid conflicts."
+- added `r.deprecation-text-per-param` (SHOULD): "DeprecationText returns the deprecation sentence a caller attaches to a warning for the named token parameter, giving the reader the replacement key to use."
+- added `r.no-silent-overwrite` (MUST): "AddTokenFieldsWithAllowList panics when the destination map already contains a key it is about to install, rather than overwriting the existing field schema."
+- added `r.parse-absent-fields-left-alone` (MUST): "ParseTokenFields reads each token_* key through the framework field data and only assigns the matching TokenParams field when the key is present, so absent keys leave the receiver's existing value unchanged."
+- added `r.parse-bound-cidrs` (MUST): "ParseTokenFields parses the token_bound_cidrs string list into sockaddr marshallers and returns the parse error unchanged when the addresses are not valid."
+- added `r.parse-validates-values` (MUST): "ParseTokenFields converts token_explicit_max_ttl, token_max_ttl and token_period from seconds and rejects a negative token_max_ttl or token_period with an error, and it maps token_type of empty string or "default" to the default token type, "service" to service, "batch" to batch, returning an error for any other value."
+- added `r.populate-token-auth` (MUST): "PopulateTokenAuth copies the receiver's token parameters onto the supplied logical.Auth for the request, so an issued token inherits the role's TTL, period, policies, CIDRs, uses and type settings."
+- added `r.populate-token-data-empty-slices` (MUST): "PopulateTokenData replaces a nil or empty token policies or token bound CIDRs list with an empty []string so that responses serialize as an empty list instead of null."
+- added `r.populate-token-data-shape` (MUST): "PopulateTokenData writes every token field into the supplied map, encoding token_explicit_max_ttl, token_max_ttl, token_period and token_ttl as int64 whole seconds, token_type as its string form, and storing the raw num-uses, no-default-policy and strictly-bind-ip values."
+- added `r.token-fields-canonical-set` (MUST): "TokenFields returns the canonical map of token field names to framework.FieldSchema values for the fields carried by TokenParams, and that map is the single source used when a role's field set is populated."
+- added `r.upgrade-value-migrates-key` (SHOULD): "UpgradeValue moves a value supplied under a deprecated field key onto its replacement key, comparing the old and new values from the field data and returning an error instead of accepting a migration that cannot be resolved."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |

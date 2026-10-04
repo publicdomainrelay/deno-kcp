@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The package exists so that every OpenBao auth and secrets backend describes token issuance parameters in one place instead of repeating the field schema, parsing, and response marshalling for each role. TokenFields supplies the canonical field set, AddTokenFields installs it into a role's field map, ParseTokenFields turns a request's field data into a TokenParams, and PopulateTokenData plus PopulateTokenAuth push those parameters back out to API responses and issued tokens. DeprecationText and UpgradeValue exist so older renamed token fields keep working while callers move to the current key names.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
