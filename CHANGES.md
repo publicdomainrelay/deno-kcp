@@ -1494,6 +1494,18 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.untouched-paths` (MUST): "Expand() return the input path unchanged, with no error, when the path is empty or does not begin with `~`."
 - added `r.user-specific-rejected` (MUST): "Expand() return an error with the text "cannot expand user-specific home directory" when the path begins with `~` followed by a character other than `/` or `\`."
 
+### third-party-openbao-internal-helper-hostutil
+
+- intent: "" -> "The context exists to describe the host information collection helper that Vault/OpenBao diagnostics rely on to report the machine environment. It exists so that a reader or a regenerator knows exactly which entry points the package exports, what each one returns, how collection failures are represented and accumulated, and how the package degrades on unsupported platforms, without having to re-read the vendored third-party source."
+- added `r.collect-host-info` (MUST): "CollectHostInfo must build a HostInfo stamped with the current time in UTC and fill its Host, Memory, Disk, CPU, and CPUTimes fields by calling CollectHostInfoStat, CollectHostMemory, disk.PartitionsWithContext, cpu.InfoWithContext, and cpu.TimesWithContext respectively. A failure in any one source must not abort the others: the failure is appended to a multierror wrapped in a HostInfoError labelled with the category name ("host", "memory", "disk", "cpu", "cpu_times"), the corresponding field is left unset, and the partially filled HostInfo is still returned alongside the aggregated error."
+- added `r.collect-host-info-stat` (MUST): "CollectHostInfoStat must be exported as the standalone entry point that returns a HostInfoStat describing the general host, so callers that need only host metadata can obtain it without running the full collection."
+- added `r.collect-host-memory` (MUST): "CollectHostMemory must read virtual memory through mem.VirtualMemoryWithContext and return a VirtualMemoryStat populated field by field from the gopsutil result, including total, available, used, used percent, free, the BSD active/inactive/wired/laundry values, the Linux buffer/cache/slab/swap/hugepage values, and commit limits. It must return the underlying error unchanged with a nil result when the read fails."
+- added `r.disk-per-partition-errors` (MUST): "When collecting disk usage, CollectHostInfo must enumerate partitions, then query usage per mountpoint, skipping a partition whose usage query fails and recording that failure under a HostInfoError labelled "disk.<index>" so the remaining partitions still contribute to the returned Disk slice."
+- added `r.host-info-error` (MUST): "HostInfoError must carry a Type naming the category that failed together with the wrapped Err, implement the error interface so Error() reports the failure, and implement WrappedErrors returning the wrapped error as a single-element slice so hashcorp/go-multierror can unwrap it when the aggregated error is printed."
+- added `r.json-tags` (MUST): "HostInfo, HostInfoStat, and VirtualMemoryStat must keep the JSON struct tags recorded on their fields (timestamp, cpu, cpu_times, disk, host, memory, and the per-metric tags such as total, available, used, usedPercent, free) so the collected host information serializes with stable key names."
+- added `r.openbsd-unsupported` (MUST): "On OpenBSD the package must compile against a platform-specific file that replaces CollectHostInfo and CollectHostMemory with stubs returning a nil result and the error "host info not supported on this platform", so the unsupported platform still satisfies the same exported signatures."
+- added `r.test-coverage` (SHOULD): "hostinfo_test.go must exercise CollectHostInfo so the collection path, including its error aggregation, is covered by the package tests."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -1573,5 +1585,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-helper-forwarding-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-homedir-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-hostutil-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Failed |  | 0 | - |
-| third-party-openbao-internal-helper-hostutil-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-helper-hostutil-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-identity-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |

@@ -10,8 +10,21 @@ spec:
   systemContext: third-party-openbao-internal-helper-hostutil
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-helper-hostutil
-  phase: Running
+  agentLog: 'This context covers the hostutil helper package vendored from OpenBao
+    under third_party/openbao/internal/helper/hostutil. It collects machine-level
+    facts about the host a process runs on: CPU identity and times, disk partition
+    usage, general host metadata (hostname, platform, uptime, kernel), and virtual
+    memory statistics. Collection is split into a top-level aggregator, CollectHostInfo,
+    and two narrower entry points, CollectHostInfoStat and CollectHostMemory, which
+    other callers can use when they only need one slice of the information. The aggregator
+    gathers each category independently so one failing source does not abort the whole
+    collection; it records the failures as typed HostInfoError values labelled by
+    category and returns them together through a multierror. Collected values are
+    returned in structs that mirror the gopsutil shapes and carry the JSON tags used
+    when the information is serialized into diagnostics output. A build-tagged OpenBSD
+    file replaces the collectors with stubs that report the platform as unsupported.'
+  message: wrote 8 requirement(s) and 9 interface(s) for third-party-openbao-internal-helper-hostutil
+  phase: Succeeded
 superseded:
 - message: |-
     ...third_party/openbao/internal/helper/hostutil/hostinfo_openbsd.go"

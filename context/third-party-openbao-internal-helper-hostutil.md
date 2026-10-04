@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists to describe the host information collection helper that Vault/OpenBao diagnostics rely on to report the machine environment. It exists so that a reader or a regenerator knows exactly which entry points the package exports, what each one returns, how collection failures are represented and accumulated, and how the package degrades on unsupported platforms, without having to re-read the vendored third-party source.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
