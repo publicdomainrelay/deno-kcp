@@ -1,0 +1,31 @@
+# Context: third-party-openbao-internal-builtin-database-influxdb
+
+Repository: `deno-kcp`
+
+_(empty: write what this context is for)_
+
+_Write the prose above and the fields in the spec block. `codeRefs` and the resolved references below are maintained by the tool; an edit there is lost._
+
+## spec
+
+```yaml spec
+upstream: self
+```
+
+<!-- SPECD_MANAGED_BEGIN -->
+## Resolved code references
+
+- `file:third_party/openbao/internal/builtin/database/influxdb/connection_producer.go` file connection_producer.go (third_party/openbao/internal/builtin/database/influxdb/connection_producer.go)
+- `file:third_party/openbao/internal/builtin/database/influxdb/influxdb.go` file influxdb.go (third_party/openbao/internal/builtin/database/influxdb/influxdb.go)
+- `file:third_party/openbao/internal/builtin/database/influxdb/influxdb_test.go` file influxdb_test.go (third_party/openbao/internal/builtin/database/influxdb/influxdb_test.go)
+- `function:c1484f85f39f628d19195cc28565bce5` function New (third_party/openbao/internal/builtin/database/influxdb/influxdb.go)
+- `method:3cc3f29e393367b29390c3c1bfabca54` method influxdbConnectionProducer.Connection (third_party/openbao/internal/builtin/database/influxdb/connection_producer.go)
+- `method:4b45f855fd127fbc969c645b15707c76` method Influxdb.Initialize (third_party/openbao/internal/builtin/database/influxdb/influxdb.go)
+- `method:905d8c8e90a01bace90902617d440b03` method Influxdb.DeleteUser (third_party/openbao/internal/builtin/database/influxdb/influxdb.go)
+- `method:cfbba024b2a25d90ac816d96b59ba6b4` method Influxdb.UpdateUser (third_party/openbao/internal/builtin/database/influxdb/influxdb.go)
+- `method:e391d167b34e53753dc09bbe81074f3c` method influxdbConnectionProducer.Close (third_party/openbao/internal/builtin/database/influxdb/connection_producer.go)
+- `method:e71af09f65386ef024c2e6e63e055684` method influxdbConnectionProducer.Initialize (third_party/openbao/internal/builtin/database/influxdb/connection_producer.go)
+- `method:f4c9593b085943a1ed3692b16c0041d3` method Influxdb.Type (third_party/openbao/internal/builtin/database/influxdb/influxdb.go)
+- `method:fb96838d44355cb6541ae53ec7b80b92` method Influxdb.NewUser (third_party/openbao/internal/builtin/database/influxdb/influxdb.go)
+- `struct:c02eba0c9ce1c52ce8f9e4effa345749` struct Influxdb (third_party/openbao/internal/builtin/database/influxdb/influxdb.go)
+<!-- SPECD_MANAGED_END -->
