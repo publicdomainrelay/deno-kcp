@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so deno-kcp can issue, sign and parse X.509 certificates and CSRs without reimplementing the OpenBao/Vault PKI core. It provides the reusable bundle model and the deterministic, injectable seams (RandomSource and KeyGenerator variants) that let callers supply their own entropy reader or key generator, which is what makes the package testable and usable for external key material. The spec below pins the exported surface and the invariants that surface must keep so downstream PKI code can depend on it.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
