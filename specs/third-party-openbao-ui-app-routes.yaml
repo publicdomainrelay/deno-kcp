@@ -8,5 +8,82 @@ metadata:
   name: third-party-openbao-ui-app-routes
   namespace: default
 spec:
+  intent: The context documents the routing entry layer of the vendored OpenBao web
+    UI so that its behaviour — global scroll reset, error-transition URL recovery,
+    OIDC callback detection, version fetching, single-cluster bootstrapping and index
+    redirect — is specified rather than only readable in source. It exists to keep
+    the vendored third_party UI's route contract explicit for anyone auditing or porting
+    this UI, especially the hardcoded single-cluster assumption and the '/ui' rootURL
+    trimming in error handling.
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/application.js
+    id: r.application-root-route
+    level: MUST
+    text: The application route must inject the 'router' and 'namespace' services
+      and extend Ember's Route, serving as the root route for the UI.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/application.js
+    id: r.error-history-push
+    level: MUST
+    text: When errorURL is non-null, the error action must update the location bar
+      by calling router.location.setURL(errorURL), and must return true to mark the
+      error as handled.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/application.js
+    id: r.error-namespace-sync
+    level: MUST
+    text: When the failed transition carries queryParams, the error action must set
+      the vault.cluster controller's namespaceQueryParam to queryParams.namespace,
+      defaulting to the empty string when namespace is absent.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/application.js
+    id: r.error-url-reconstruction
+    level: MUST
+    text: 'The application route''s error action must determine the failed transition
+      URL: it uses transition.intent.url when present, and otherwise generates it
+      with router.urlFor(name, ...contexts, { queryParams }); if URL generation throws,
+      errorURL is set to null.'
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/application.js
+    id: r.error-url-root-prefix-trim
+    level: MUST
+    text: When a non-null error URL is produced, the error action must remove the
+      leading '/ui' segment so the value is the Ember-routeable URL, then assign it
+      to error.errorURL.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/loading.js
+    id: r.loading-oidc-callback-flag
+    level: MUST
+    text: The loading route's setupController override must call the super implementation
+      and set isCallback on the controller to whether location.pathname contains the
+      substring 'oidc/callback'.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault.js
+    id: r.vault-fetch-version
+    level: MUST
+    text: The vault route's beforeModel hook must return the promise from the injected
+      'version' service's fetchVersion call, so the transition waits for version data.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault.js
+    id: r.vault-index-redirect
+    level: MUST
+    text: The vault route's redirect hook must transition to vault.cluster using the
+      model's first cluster name when the model has exactly one cluster and the transition's
+      targetName is 'vault.index'.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault.js
+    id: r.vault-single-cluster-fixture
+    level: MUST
+    text: The vault route's model hook must push one hardcoded cluster record into
+      the injected store — id '1', type 'cluster', attributes.name 'vault' — and resolve
+      with store.peekAll('cluster') after a delay of 300 ms, or 0 ms when Ember.testing
+      is true.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/application.js
+    id: r.will-transition-scroll-reset
+    level: MUST
+    text: On every route transition the application route's willTransition action
+      must scroll the window to position (0, 0).
   upstream: self

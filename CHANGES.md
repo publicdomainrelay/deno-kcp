@@ -4777,6 +4777,20 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.rgp-enforcement-level-values` (MUST): "The RGP model exposes an enforcementLevel string attribute whose permitted values are exactly advisory, soft-mandatory and hard-mandatory."
 - added `r.rgp-model-extends-base-policy` (MUST): "The RGP policy model extends the shared base policy model from ../policy."
 
+### third-party-openbao-ui-app-routes
+
+- intent: "" -> "The context documents the routing entry layer of the vendored OpenBao web UI so that its behaviour — global scroll reset, error-transition URL recovery, OIDC callback detection, version fetching, single-cluster bootstrapping and index redirect — is specified rather than only readable in source. It exists to keep the vendored third_party UI's route contract explicit for anyone auditing or porting this UI, especially the hardcoded single-cluster assumption and the '/ui' rootURL trimming in error handling."
+- added `r.application-root-route` (MUST): "The application route must inject the 'router' and 'namespace' services and extend Ember's Route, serving as the root route for the UI."
+- added `r.error-history-push` (MUST): "When errorURL is non-null, the error action must update the location bar by calling router.location.setURL(errorURL), and must return true to mark the error as handled."
+- added `r.error-namespace-sync` (MUST): "When the failed transition carries queryParams, the error action must set the vault.cluster controller's namespaceQueryParam to queryParams.namespace, defaulting to the empty string when namespace is absent."
+- added `r.error-url-reconstruction` (MUST): "The application route's error action must determine the failed transition URL: it uses transition.intent.url when present, and otherwise generates it with router.urlFor(name, ...contexts, { queryParams }); if URL generation throws, errorURL is set to null."
+- added `r.error-url-root-prefix-trim` (MUST): "When a non-null error URL is produced, the error action must remove the leading '/ui' segment so the value is the Ember-routeable URL, then assign it to error.errorURL."
+- added `r.loading-oidc-callback-flag` (MUST): "The loading route's setupController override must call the super implementation and set isCallback on the controller to whether location.pathname contains the substring 'oidc/callback'."
+- added `r.vault-fetch-version` (MUST): "The vault route's beforeModel hook must return the promise from the injected 'version' service's fetchVersion call, so the transition waits for version data."
+- added `r.vault-index-redirect` (MUST): "The vault route's redirect hook must transition to vault.cluster using the model's first cluster name when the model has exactly one cluster and the transition's targetName is 'vault.index'."
+- added `r.vault-single-cluster-fixture` (MUST): "The vault route's model hook must push one hardcoded cluster record into the injected store — id '1', type 'cluster', attributes.name 'vault' — and resolve with store.peekAll('cluster') after a delay of 300 ms, or 0 ms when Ember.testing is true."
+- added `r.will-transition-scroll-reset` (MUST): "On every route transition the application route's willTransition action must scroll the window to position (0, 0)."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5168,6 +5182,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-models-pki-config-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-models-policy-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-models-policy-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-routes-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-routes-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
