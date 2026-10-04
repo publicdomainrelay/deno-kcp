@@ -7,5 +7,107 @@ metadata:
   name: third-party-openbao-internal-vault-external-tests-storage-crosstest
   namespace: default
 spec:
+  intent: 'This context exists to pin down the behavioural contract that OpenBao''s
+    logical.Storage implementations must satisfy collectively. The file is a conformance
+    harness: any backend registered in allLogical or allTransactionalLogical must
+    be indistinguishable from its peers under the same operation stream, so adding
+    a new storage backend means adding it to these maps and letting the shared assertions
+    prove parity. It documents the edge cases the project cares about — storage-root
+    listing, prefix versus exact-key deletion, nil versus empty list results, write
+    ordering, pagination with after and limit, and transactional conflict detection
+    — as executable assertions rather than prose.'
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/storage/crosstest/cross_test.go
+    id: r.backend-parity
+    level: MUST
+    text: Every backend in the map passed to exerciseBackends must return identical
+      values for the same Get, Put, Delete, List and ListPage call, and deep.Equal
+      differences must fail the test with a message naming the two backends and the
+      differing items.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/storage/crosstest/cross_test.go
+    id: r.backend-sets
+    level: MUST
+    text: allLogical must supply map entries named pure-raft, raft, raft-in-tx, file,
+      inmem, inmem-via-wrapper, txinmem-via-wrapper and psql, begun via logical.NewLogicalStorage
+      over the corresponding physical backend, and allTransactionalLogical must supply
+      raft, txinmem, inmem+sv, inmem+aes+sv, inmem+aes+bv, inmem+cache+encoding+aes+bv
+      and raft+cache+encoding+aes+bv.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/storage/crosstest/cross_test.go
+    id: r.error-parity
+    level: MUST
+    text: When shouldError is false each backend must return no error and when true
+      each must return an error; the allDoSame* wrappers assert this per backend name
+      before comparing results.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/storage/crosstest/cross_test.go
+    id: r.listpage-semantics
+    level: MUST
+    text: ListPage must return at most limit entries sorted lexicographically past
+      after, with limit of zero or a negative integer meaning unlimited; after need
+      not exist; an after value beyond all keys returns nothing; and pagination must
+      be tested exhaustively for ten sequentially created key-N entries.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/storage/crosstest/cross_test.go
+    id: r.nil-empty-list-equal
+    level: MUST
+    text: A nil list result and an empty list result must be treated as equal; the
+      list and list-page comparisons skip the deep.Equal check when both expected
+      and actual have length zero, because the file backend returns an empty slice
+      where other backends return nil.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/storage/crosstest/cross_test.go
+    id: r.parallel-and-cleanup
+    level: MUST
+    text: Each top-level test must call t.Parallel, must defer the cleanup returned
+      with the backend set, and must roll back every transaction-backed entry after
+      exercising it so the shared raft and postgres resources are left usable.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/storage/crosstest/cross_test.go
+    id: r.random-ops
+    level: MUST
+    text: getRandomOps must generate the configured operation counts (1000 for the
+      non-transactional run, 1000 with a transaction limit of 10 for the transactional
+      run) over the fixed file, folder, after and content operand sets, and the executors
+      must serialize the ops to a JSON file under the system temporary directory,
+      delete that file when the run finishes, and fail if any backend disagrees on
+      error presence, list result or entry result.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/storage/crosstest/cross_test.go
+    id: r.read-only-transaction
+    level: MUST
+    text: Put and Delete on a read-only transaction must fail while Commit of that
+      same transaction must succeed, and listing the underlying storage afterwards
+      must show no change.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/storage/crosstest/cross_test.go
+    id: r.storage-semantics
+    level: MUST
+    text: 'The exercised storage contract must hold: the empty prefix is the root;
+      Delete of a missing key succeeds; Get of a missing key returns nil entry and
+      no error; Put then Get returns the stored value; List of a key with children
+      returns both the key and its trailing-slash subtree entry; Delete of a parent
+      removes only the base entry and leaves children; repeated writes to one key
+      return the last value even when shorter; and deleting all entries leaves no
+      list artifacts.'
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/storage/crosstest/cross_test.go
+    id: r.transaction-conflict
+    level: MUST
+    text: Two concurrent transactions that write the same key must conflict so the
+      second terminal commit fails and the first committed value stands, including
+      when both wrote byte-identical contents or one read then deleted the other's
+      key; transactions writing disjoint keys must both commit and both values must
+      be readable.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/storage/crosstest/cross_test.go
+    id: r.transaction-lifecycle
+    level: MUST
+    text: A transaction begun by BeginTx or BeginReadOnlyTx that is committed or rolled
+      back with no intervening operations must succeed once, and the same terminal
+      operation repeated on the finished transaction must fail regardless of whether
+      the second operation is Commit or Rollback or swaps between them.
   upstream: self
