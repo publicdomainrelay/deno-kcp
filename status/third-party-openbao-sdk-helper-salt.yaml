@@ -1,1 +1,113 @@
-observed: {}
+conditions:
+- message: 'undeclared: Config, HMACIdentifiedValue, HMACValue, HashFunc, NewNonpersistentSalt,
+    NewSalt, SHA1Hash, SHA256Hash, Salt, Salt.DidGenerate, Salt.GetHMAC, Salt.GetIdentifiedHMAC,
+    Salt.SaltID, Salt.SaltIDHashFunc, SaltID'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/sdk/helper/salt/salt.go
+  - third_party/openbao/sdk/helper/salt/salt_test.go
+  fingerprint: 0d3b90360603bb745abd4859c3e972b01b400b7b95ef0c9bd05cdce34d999e25
+  interfaces:
+  - codegraphId: struct:a1fed3ab6292f17841889ba2b4b932d9
+    file: third_party/openbao/sdk/helper/salt/salt.go
+    kind: struct
+    line: 30
+    name: Salt
+  - codegraphId: type_alias:784f3ffcf9b9c8ae309e23b867deac40
+    file: third_party/openbao/sdk/helper/salt/salt.go
+    kind: type_alias
+    line: 36
+    name: HashFunc
+  - codegraphId: struct:ea5a758f1b77c9a0e3e76dae5afe0969
+    file: third_party/openbao/sdk/helper/salt/salt.go
+    kind: struct
+    line: 39
+    name: Config
+  - codegraphId: function:ada98ce13a571a1ab3ea45efe04dfd1d
+    file: third_party/openbao/sdk/helper/salt/salt.go
+    kind: function
+    line: 58
+    name: NewSalt
+    signature: (ctx context.Context, view logical.Storage, config *Config) (*Salt,
+      error)
+  - codegraphId: function:8b0bf0298e5d76baa06f89d699ef77bc
+    file: third_party/openbao/sdk/helper/salt/salt.go
+    kind: function
+    line: 122
+    name: NewNonpersistentSalt
+    signature: () *Salt
+  - codegraphId: method:f2e3aac23518ef74b39e165cdb5d279f
+    file: third_party/openbao/sdk/helper/salt/salt.go
+    kind: method
+    line: 140
+    name: Salt.SaltID
+    signature: (id string) string
+  - codegraphId: method:5cd808cb4b1b12965ebbb1fd4014712e
+    file: third_party/openbao/sdk/helper/salt/salt.go
+    kind: method
+    line: 146
+    name: Salt.GetHMAC
+    signature: (data string) string
+  - codegraphId: method:c41e90acac0bb2cf56cdb9c229633fed
+    file: third_party/openbao/sdk/helper/salt/salt.go
+    kind: method
+    line: 154
+    name: Salt.GetIdentifiedHMAC
+    signature: (data string) string
+  - codegraphId: method:3ca946c377612e6d67838c409a2bc0d8
+    file: third_party/openbao/sdk/helper/salt/salt.go
+    kind: method
+    line: 160
+    name: Salt.DidGenerate
+    signature: () bool
+  - codegraphId: method:6149150e8291270af421811963b3dc87
+    file: third_party/openbao/sdk/helper/salt/salt.go
+    kind: method
+    line: 166
+    name: Salt.SaltIDHashFunc
+    signature: (id string, hashFunc HashFunc) string
+  - codegraphId: function:29c38f0f6b6f2ef26a94545f1a25b8b4
+    file: third_party/openbao/sdk/helper/salt/salt.go
+    kind: function
+    line: 172
+    name: SaltID
+    signature: (salt, id string, hash HashFunc) string
+  - codegraphId: function:69669d2fcbda6ced1d85b2bbd49d6a27
+    file: third_party/openbao/sdk/helper/salt/salt.go
+    kind: function
+    line: 178
+    name: HMACValue
+    signature: (salt, val string, hashFunc func() hash.Hash) string
+  - codegraphId: function:816fc49eb26bd61183f198047efaee03
+    file: third_party/openbao/sdk/helper/salt/salt.go
+    kind: function
+    line: 184
+    name: HMACIdentifiedValue
+    signature: (salt, val, hmacType string, hashFunc func() hash.Hash) string
+  - codegraphId: function:e6f01ecbf16d2fbaa0cf757ff29aebb0
+    file: third_party/openbao/sdk/helper/salt/salt.go
+    kind: function
+    line: 189
+    name: SHA1Hash
+    signature: (inp []byte) []byte
+  - codegraphId: function:647708e4e3fba40683b937c1a4e7e986
+    file: third_party/openbao/sdk/helper/salt/salt.go
+    kind: function
+    line: 195
+    name: SHA256Hash
+    signature: (inp []byte) []byte
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 69896364a9b01cf11b9428eb89aa5f9aba4d669871033ba5a9998ab55962834e
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 0d3b90360603bb745abd4859c3e972b01b400b7b95ef0c9bd05cdce34d999e25
