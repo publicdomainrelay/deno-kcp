@@ -1,5 +1,7 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
+- class:6768f8a77ef44e47f4b276581b9678a2 PkiCertificateGenerateSerializer@third_party/openbao/ui/app/serializers/pki/certificate/generate.js:8
+- class:f911826941e024f780359dc88ceefb1f PkiCertificateBaseSerializer@third_party/openbao/ui/app/serializers/pki/certificate/base.js:9
 - file:third_party/openbao/ui/app/serializers/pki/certificate/base.js base.js@third_party/openbao/ui/app/serializers/pki/certificate/base.js
 - file:third_party/openbao/ui/app/serializers/pki/certificate/generate.js generate.js@third_party/openbao/ui/app/serializers/pki/certificate/generate.js
 - file:third_party/openbao/ui/app/serializers/pki/certificate/sign.js sign.js@third_party/openbao/ui/app/serializers/pki/certificate/sign.js
@@ -8,5 +10,82 @@ metadata:
   name: third-party-openbao-ui-app-serializers-pki-certificate
   namespace: default
 spec:
+  intent: 'The context exists so the PKI certificate response shape is described in
+    one place: how a raw OpenBao PKI API response is turned into an Ember Data model,
+    why the serial number is the primary key, why `role` is stripped on write, and
+    why the parsed certificate and its common name are lifted to the top level of
+    the payload. It is documentation for the certificate generate and sign routes
+    of the OpenBao UI, which share one base serializer and differ only by subclass
+    identity.'
+  interfaces:
+  - file: third_party/openbao/ui/app/serializers/pki/certificate/base.js
+    kind: class
+    name: PkiCertificateBaseSerializer
+    signature: 'class PkiCertificateBaseSerializer extends ApplicationSerializer {
+      primaryKey = ''serial_number''; attrs = { role: { serialize: false } }; normalizeResponse(store,
+      primaryModelClass, payload, id, requestType) }'
+  - file: third_party/openbao/ui/app/serializers/pki/certificate/generate.js
+    kind: class
+    name: PkiCertificateGenerateSerializer
+    signature: class PkiCertificateGenerateSerializer extends PkiCertificateBaseSerializer
+      {}
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - class:f911826941e024f780359dc88ceefb1f
+    - file:third_party/openbao/ui/app/serializers/pki/certificate/base.js
+    id: r.base-extends-application-serializer
+    level: MUST
+    text: '`PkiCertificateBaseSerializer` must extend the application''s `ApplicationSerializer`,
+      so the PKI certificate normalization is layered on the project-wide serializer
+      behavior rather than on Ember Data''s default.'
+  - codeRefs:
+    - class:6768f8a77ef44e47f4b276581b9678a2
+    - file:third_party/openbao/ui/app/serializers/pki/certificate/generate.js
+    id: r.generate-subclass-inherits
+    level: MUST
+    text: The generate serializer must be an empty subclass of `PkiCertificateBaseSerializer`,
+      so the generate route reuses the base primary key, attrs and normalization without
+      overriding them.
+  - codeRefs:
+    - class:f911826941e024f780359dc88ceefb1f
+    - file:third_party/openbao/ui/app/serializers/pki/certificate/base.js
+    id: r.parse-certificate-on-normalize
+    level: MUST
+    text: '`normalizeResponse` must detect a `payload.data.certificate` value, parse
+      that PEM certificate with `parseCertificate`, and call the superclass `normalizeResponse`
+      with a payload spread from the original plus `parsed_certificate` set to the
+      parse result and `common_name` set to `parsedCert.common_name`, passing the
+      received `store`, `primaryModelClass`, `id` and `requestType` through unchanged.'
+  - codeRefs:
+    - class:f911826941e024f780359dc88ceefb1f
+    - file:third_party/openbao/ui/app/serializers/pki/certificate/base.js
+    id: r.passthrough-without-certificate
+    level: MUST
+    text: When `payload.data.certificate` is absent, `normalizeResponse` must delegate
+      to the superclass with the original arguments, adding no `parsed_certificate`
+      or `common_name` fields.
+  - codeRefs:
+    - class:f911826941e024f780359dc88ceefb1f
+    - file:third_party/openbao/ui/app/serializers/pki/certificate/base.js
+    id: r.primary-key-serial-number
+    level: MUST
+    text: The base serializer must use `serial_number` as the Ember Data primary key,
+      so a normalized certificate record is identified by its serial number rather
+      than by Ember Data's default `id`.
+  - codeRefs:
+    - class:f911826941e024f780359dc88ceefb1f
+    - file:third_party/openbao/ui/app/serializers/pki/certificate/base.js
+    id: r.role-not-serialized
+    level: MUST
+    text: 'The `attrs` map must declare `role` with `serialize: false`, so the role
+      name is accepted when reading a certificate response but is never written back
+      into an outbound request payload.'
+  - codeRefs:
+    - file:third_party/openbao/ui/app/serializers/pki/certificate/sign.js
+    id: r.sign-subclass-inherits
+    level: MUST
+    text: The sign serializer file must define a class also named `PkiCertificateGenerateSerializer`
+      that is an empty subclass of `PkiCertificateBaseSerializer`, so the sign route
+      shares the base serialization behavior.
   upstream: self

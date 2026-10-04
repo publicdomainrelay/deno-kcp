@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so the PKI certificate response shape is described in one place: how a raw OpenBao PKI API response is turned into an Ember Data model, why the serial number is the primary key, why `role` is stripped on write, and why the parsed certificate and its common name are lifted to the top level of the payload. It is documentation for the certificate generate and sign routes of the OpenBao UI, which share one base serializer and differ only by subclass identity.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

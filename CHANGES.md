@@ -5275,6 +5275,17 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.role-serialize-preserves-key-usage` (MUST): "PkiRoleSerializer marks name as serialize: false and, after delegating to the base serialize, coerces key_usage to an empty array when absent so the no-default-constraint case survives the stripping of empty arrays."
 - added `r.tidy-serialize-manual` (MUST): "PkiTidySerializer.serialize removes enabled and intervalDuration from the serialized payload when the tidy type is manual, and otherwise returns the base serialization unchanged."
 
+### third-party-openbao-ui-app-serializers-pki-certificate
+
+- intent: "" -> "The context exists so the PKI certificate response shape is described in one place: how a raw OpenBao PKI API response is turned into an Ember Data model, why the serial number is the primary key, why `role` is stripped on write, and why the parsed certificate and its common name are lifted to the top level of the payload. It is documentation for the certificate generate and sign routes of the OpenBao UI, which share one base serializer and differ only by subclass identity."
+- added `r.base-extends-application-serializer` (MUST): "`PkiCertificateBaseSerializer` must extend the application's `ApplicationSerializer`, so the PKI certificate normalization is layered on the project-wide serializer behavior rather than on Ember Data's default."
+- added `r.generate-subclass-inherits` (MUST): "The generate serializer must be an empty subclass of `PkiCertificateBaseSerializer`, so the generate route reuses the base primary key, attrs and normalization without overriding them."
+- added `r.parse-certificate-on-normalize` (MUST): "`normalizeResponse` must detect a `payload.data.certificate` value, parse that PEM certificate with `parseCertificate`, and call the superclass `normalizeResponse` with a payload spread from the original plus `parsed_certificate` set to the parse result and `common_name` set to `parsedCert.common_name`, passing the received `store`, `primaryModelClass`, `id` and `requestType` through unchanged."
+- added `r.passthrough-without-certificate` (MUST): "When `payload.data.certificate` is absent, `normalizeResponse` must delegate to the superclass with the original arguments, adding no `parsed_certificate` or `common_name` fields."
+- added `r.primary-key-serial-number` (MUST): "The base serializer must use `serial_number` as the Ember Data primary key, so a normalized certificate record is identified by its serial number rather than by Ember Data's default `id`."
+- added `r.role-not-serialized` (MUST): "The `attrs` map must declare `role` with `serialize: false`, so the role name is accepted when reading a certificate response but is never written back into an outbound request payload."
+- added `r.sign-subclass-inherits` (MUST): "The sign serializer file must define a class also named `PkiCertificateGenerateSerializer` that is an empty subclass of `PkiCertificateBaseSerializer`, so the sign route shares the base serialization behavior."
+
 ### third-party-openbao-ui-app-serializers-policy
 
 - intent: "" -> "This context exists so the UI can resolve a distinct serializer module per policy type while keeping one implementation. The Ember resolver maps each policy type's model and serializer by module path, so acl, egp and rgp each need their own file even though the wire format is the same. Declaring these as empty extensions of the base PolicySerializer means any later per-type normalization step can be added in one file without touching the other two or the shared base."
@@ -5627,6 +5638,13 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.decorator-state-defaults` (MUST): "The returned FetchConfig subclass must declare the fields configModel, configError and promptConfig, defaulting to null, null and false, so consumers can read them before beforeModel resolves."
 - added `r.query-on-cache-miss` (MUST): "When no cached record is present, beforeModel must call this.store.queryRecord('kubernetes/config', { backend }) and, on success, store the returned record in configModel and set promptConfig to false; the promise must be returned from beforeModel so the route transition waits on it."
 - added `r.route-only-application` (MUST): "The decorator must test the target with Object.prototype.isPrototypeOf.call(Route, SuperClass); if the target is not an Ember Route subclass it must log the message 'withConfig decorator must be used on an instance of ember Route class. Decorator not applied to returned class' via console.error and return the SuperClass unchanged, applying no behavior."
+
+### third-party-openbao-ui-lib-kubernetes-addon-helpers
+
+- intent: "" -> "This context exists so the Kubernetes addon portion of the OpenBao UI can expose the currently viewed secret mount path to its templates without each template reaching into the secretMountPath service directly. The helper is a thin template-facing wrapper: it depends on the secretMountPath service for state and exposes that state as a helper value. It exists because the addon lives in its own Ember engine with its own helper namespace, so it needs a local copy of the helper rather than a cross-engine import from the app or the pki addon."
+- added `r.compute-returns-current-path` (MUST): "The compute method must take no arguments and return this.secretMountPath.currentPath, so the helper's template value is always the path of the secret mount currently being viewed and stays live as the service's currentPath changes."
+- added `r.export-default-helper-class` (MUST): "The module must default-export a class named CurrentMountPathHelper that extends Ember's Helper base class, so the Kubernetes addon's template resolver can look it up as the current-mount-path helper."
+- added `r.inject-secret-mount-path-service` (MUST): "The class must declare a secretMountPath property injected via the @service decorator, so the helper reads mount state from the shared service instead of holding its own copy."
 
 ## Realization
 
@@ -6078,7 +6096,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-serializers-pki-certificate-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Failed |  | 0 | - |
 | third-party-openbao-ui-app-serializers-pki-certificate-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Failed |  | 0 | - |
 | third-party-openbao-ui-app-serializers-pki-certificate-c2s-6c1bbe4c3ba9-89cee50ec5ae-a3 | CodeToSpec | Failed |  | 0 | - |
-| third-party-openbao-ui-app-serializers-pki-certificate-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-serializers-pki-certificate-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-serializers-policy-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-services-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-transforms-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
@@ -6120,4 +6138,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-kubernetes-addon-controllers-roles-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-kubernetes-addon-decorators-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-kubernetes-addon-helpers-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-lib-kubernetes-addon-routes-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-kubernetes-addon-routes-roles-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-lib-kubernetes-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
