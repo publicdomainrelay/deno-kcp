@@ -9,5 +9,5 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/ui/lib/core/app/modifiers/code-mirror.js` file code-mirror.js (third_party/openbao/ui/lib/core/app/modifiers/code-mirror.js)
 <!-- SPECD_MANAGED_END -->

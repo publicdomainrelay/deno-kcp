@@ -9,5 +9,6 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/ui/lib/core/app/utils/b64.js` file b64.js (third_party/openbao/ui/lib/core/app/utils/b64.js)
+- `file:third_party/openbao/ui/lib/core/app/utils/timestamp.js` file timestamp.js (third_party/openbao/ui/lib/core/app/utils/timestamp.js)
 <!-- SPECD_MANAGED_END -->
