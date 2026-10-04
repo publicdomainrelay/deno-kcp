@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists to capture the small amount of presentation state that the OIDC key route needs: whether the user is on the edit sub-route. It is recorded as a spec so the controller's observable contract is stable — the router-event subscription in the constructor, the isEditRoute tracked property it drives, and the showHeader getter derived from it — giving a reference for what the template can rely on without re-reading the controller source.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

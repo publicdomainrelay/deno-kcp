@@ -4393,6 +4393,13 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.exports-details-controller` (MUST): "The details route controller is exported as the default export, named OidcClientDetailsController, and extends Ember's Controller so the OIDC client details route resolves it by the standard naming convention."
 - added `r.injects-router-and-flash-messages` (MUST): "The controller declares the router and flashMessages services as injected properties, so the delete action can navigate through the router and show success or danger banners without reaching for globals."
 
+### third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-keys
+
+- intent: "" -> "The context exists to capture the small amount of presentation state that the OIDC key route needs: whether the user is on the edit sub-route. It is recorded as a spec so the controller's observable contract is stable — the router-event subscription in the constructor, the isEditRoute tracked property it drives, and the showHeader getter derived from it — giving a reference for what the template can rely on without re-reading the controller source."
+- added `r.class-is-default-export` (MUST): "The file must export OidcKeyController as its default export so Ember's resolver loads it as the controller for the vault.cluster.access.oidc.keys.key route."
+- added `r.showheader-inverts-edit-route` (MUST): "The showHeader getter must return the boolean negation of isEditRoute, so the header is shown on all routes except the edit route and is hidden while the edit form renders."
+- added `r.tracks-edit-route-from-router-event` (MUST): "The constructor must call super with the passed arguments and subscribe to the router service's 'routeDidChange' event; on each event it must set the tracked isEditRoute property to true when the event's targetName contains the substring 'edit' and to false otherwise, so the controller follows every later navigation rather than only the initial route."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4744,7 +4751,8 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-clients-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-clients-client-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-keys-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-keys-key-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-keys-key-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-providers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

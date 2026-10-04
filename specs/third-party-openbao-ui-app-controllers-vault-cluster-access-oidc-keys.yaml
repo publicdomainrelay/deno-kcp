@@ -1,5 +1,6 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
+- class:15b4ca10ba703e0bbe511a57f87c7c64 OidcKeyController@third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/keys/key.js:10
 - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/keys/key.js
   key.js@third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/keys/key.js
 kind: SystemContext
@@ -7,5 +8,43 @@ metadata:
   name: third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-keys
   namespace: default
 spec:
+  intent: 'The context exists to capture the small amount of presentation state that
+    the OIDC key route needs: whether the user is on the edit sub-route. It is recorded
+    as a spec so the controller''s observable contract is stable — the router-event
+    subscription in the constructor, the isEditRoute tracked property it drives, and
+    the showHeader getter derived from it — giving a reference for what the template
+    can rely on without re-reading the controller source.'
+  interfaces:
+  - file: third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/keys/key.js
+    kind: class
+    name: OidcKeyController
+    signature: export default class OidcKeyController extends Controller
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - class:15b4ca10ba703e0bbe511a57f87c7c64
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/keys/key.js
+    id: r.class-is-default-export
+    level: MUST
+    text: The file must export OidcKeyController as its default export so Ember's
+      resolver loads it as the controller for the vault.cluster.access.oidc.keys.key
+      route.
+  - codeRefs:
+    - class:15b4ca10ba703e0bbe511a57f87c7c64
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/keys/key.js
+    id: r.showheader-inverts-edit-route
+    level: MUST
+    text: The showHeader getter must return the boolean negation of isEditRoute, so
+      the header is shown on all routes except the edit route and is hidden while
+      the edit form renders.
+  - codeRefs:
+    - class:15b4ca10ba703e0bbe511a57f87c7c64
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/keys/key.js
+    id: r.tracks-edit-route-from-router-event
+    level: MUST
+    text: The constructor must call super with the passed arguments and subscribe
+      to the router service's 'routeDidChange' event; on each event it must set the
+      tracked isEditRoute property to true when the event's targetName contains the
+      substring 'edit' and to false otherwise, so the controller follows every later
+      navigation rather than only the initial route.
   upstream: self
