@@ -9,5 +9,7 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/ui/app/models/policy/acl.js` file acl.js (third_party/openbao/ui/app/models/policy/acl.js)
+- `file:third_party/openbao/ui/app/models/policy/egp.js` file egp.js (third_party/openbao/ui/app/models/policy/egp.js)
+- `file:third_party/openbao/ui/app/models/policy/rgp.js` file rgp.js (third_party/openbao/ui/app/models/policy/rgp.js)
 <!-- SPECD_MANAGED_END -->

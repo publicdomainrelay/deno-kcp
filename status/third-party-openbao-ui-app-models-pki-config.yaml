@@ -1,15 +1,46 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: PkiConfigAcmeModel, PkiConfigClusterModel, PkiConfigCrlModel,
+    PkiConfigUrlsModel'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/ui/app/models/pki/config/acme.js
+  - third_party/openbao/ui/app/models/pki/config/cluster.js
+  - third_party/openbao/ui/app/models/pki/config/crl.js
+  - third_party/openbao/ui/app/models/pki/config/urls.js
+  fingerprint: c87ca38016c0a575dbb01ecc5f8d05814293d133bbc57065169dc175203384be
+  interfaces:
+  - codegraphId: class:11f9538efb972a0a6a640217e161c307
+    file: third_party/openbao/ui/app/models/pki/config/acme.js
+    kind: class
+    line: 11
+    name: PkiConfigAcmeModel
+  - codegraphId: class:811c1c2b377c20e67c49d062851b8405
+    file: third_party/openbao/ui/app/models/pki/config/cluster.js
+    kind: class
+    line: 11
+    name: PkiConfigClusterModel
+  - codegraphId: class:0dcaa854434eaefbc976d6883d5ddd47
+    file: third_party/openbao/ui/app/models/pki/config/crl.js
+    kind: class
+    line: 19
+    name: PkiConfigCrlModel
+  - codegraphId: class:c163acf9c02241811a259c1952b2a508
+    file: third_party/openbao/ui/app/models/pki/config/urls.js
+    kind: class
+    line: 11
+    name: PkiConfigUrlsModel
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 298724c42303c7e2345d227665d195faab06207912fdb42ce29bdb44d3016482
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: c87ca38016c0a575dbb01ecc5f8d05814293d133bbc57065169dc175203384be

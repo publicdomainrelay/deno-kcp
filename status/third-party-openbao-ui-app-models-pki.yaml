@@ -1,15 +1,58 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: PkiActionModel, PkiIssuerModel, PkiKeyModel, PkiRoleModel,
+    PkiSignIntermediateModel, PkiTidyModel'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/ui/app/models/pki/action.js
+  - third_party/openbao/ui/app/models/pki/issuer.js
+  - third_party/openbao/ui/app/models/pki/key.js
+  - third_party/openbao/ui/app/models/pki/role.js
+  - third_party/openbao/ui/app/models/pki/sign-intermediate.js
+  - third_party/openbao/ui/app/models/pki/tidy.js
+  fingerprint: bfd226f8b1923458dabe0e8d92baddfe51c390ae02d1837813b95cf5c3e1be0f
+  interfaces:
+  - codegraphId: class:c41f2189781777365f01d63f6f5ce5e1
+    file: third_party/openbao/ui/app/models/pki/action.js
+    kind: class
+    line: 49
+    name: PkiActionModel
+  - codegraphId: class:ed97b0eda21ce3413f482a312ce2b03a
+    file: third_party/openbao/ui/app/models/pki/issuer.js
+    kind: class
+    line: 28
+    name: PkiIssuerModel
+  - codegraphId: class:dcf1fb5555c3db5ee172a816792e9ea1
+    file: third_party/openbao/ui/app/models/pki/key.js
+    kind: class
+    line: 29
+    name: PkiKeyModel
+  - codegraphId: class:94060da0bdffa022432d3ad39befd9fd
+    file: third_party/openbao/ui/app/models/pki/role.js
+    kind: class
+    line: 76
+    name: PkiRoleModel
+  - codegraphId: class:2bc734ca8db65c0e3725743bd1a43272
+    file: third_party/openbao/ui/app/models/pki/sign-intermediate.js
+    kind: class
+    line: 26
+    name: PkiSignIntermediateModel
+  - codegraphId: class:f3b616b5f2ee31a0617e1c0429a929e0
+    file: third_party/openbao/ui/app/models/pki/tidy.js
+    kind: class
+    line: 11
+    name: PkiTidyModel
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: abda293d7d77e4446305d6013445140e27c98583fa674b5c27afb411007864b7
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: bfd226f8b1923458dabe0e8d92baddfe51c390ae02d1837813b95cf5c3e1be0f
