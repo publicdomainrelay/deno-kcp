@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the vendored identity store can be described and checked as a unit: what the store persists, which external collaborators it depends on, how OIDC key material and provider resources are created and cached, and how MFA state is read and written. Requirements here pin the exported surface and the contracts the rest of the vault relies on when it mounts the identity backend.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

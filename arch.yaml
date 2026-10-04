@@ -37817,8 +37817,969 @@ system_contexts:
   - file:third_party/openbao/internal/vault/identity/store_structs.go store_structs.go@third_party/openbao/internal/vault/identity/store_structs.go
   - file:third_party/openbao/internal/vault/identity/store_upgrade.go store_upgrade.go@third_party/openbao/internal/vault/identity/store_upgrade.go
   - file:third_party/openbao/internal/vault/identity/store_util.go store_util.go@third_party/openbao/internal/vault/identity/store_util.go
+  - function:25eef2407a8fbe0908712bfa26a12b59 NewOIDCCache@third_party/openbao/internal/vault/identity/store_oidc.go:2118
+  - function:5e198781c89dfa398d767fa65f225c67 IsTargetNamespacedKey@third_party/openbao/internal/vault/identity/store_oidc.go:2175
+  - function:9a1e70541a717e1949d53fe2f0ac3aac ChangedAliasIndex@third_party/openbao/internal/vault/identity/store.go:1551
+  - function:a0682dc3ca805b467ae2b0927d07169d LowercaseIdentityIDs@third_party/openbao/internal/vault/identity/store_oidc_provider.go:3202
+  - interface:09cc5be174c8f1018c819ded7cd0c9e3 LoggerAdder@third_party/openbao/internal/vault/identity/store.go:60
+  - interface:40c34ef251254636285fb26d3e668695 Namespacer@third_party/openbao/internal/vault/identity/store_structs.go:123
+  - interface:63a95dd01b6529284ad740a4b8b7dc0a MFABackend@third_party/openbao/internal/vault/identity/mfa.go:132
+  - interface:6ee494f9715a75f9c94fa1951d1977eb TOTPPersister@third_party/openbao/internal/vault/identity/store_structs.go:128
+  - interface:c43b10edf46f93df414f23fb18c0371f TokenStorer@third_party/openbao/internal/vault/identity/store_structs.go:132
+  - interface:dc053fc95cbbf99260aeb61705cbc006 LocalNode@third_party/openbao/internal/vault/identity/store_structs.go:118
+  - method:064df75847df7716da78d8ff1c0d070e IdentityStore.LoadOIDCClients@third_party/openbao/internal/vault/identity/store_oidc_provider.go:2775
+  - method:0cf022ee549eea43a0fb802944d4e1cb IdentityStore.MemDBDeleteEntityByIDInTxn@third_party/openbao/internal/vault/identity/store_util.go:1093
+  - method:0e19a5ac8051c394c89093819228b606 IdentityStore.MemDBDeleteEntityByID@third_party/openbao/internal/vault/identity/store_util.go:1071
+  - method:0e1bdf77b25885fbec153395a9bef2ff MFABackend.CleanupNamespace@third_party/openbao/internal/vault/identity/mfa.go:137
+  - method:0ebd56effc14bcb2474fa49f4f48be90 userError.Unwrap@third_party/openbao/internal/vault/identity/store_entities.go:858
+  - method:12ae58ebb7ecdfbbed3d0f3dd183ba60 IdentityStore.MemDBGroupsByMemberEntityID@third_party/openbao/internal/vault/identity/store_util.go:1834
+  - method:131e56190aca454a5788dfddbc2d18fe NamedKey.GenerateAndSetNextKey@third_party/openbao/internal/vault/identity/store_oidc.go:1166
+  - method:13efc92be0a1ccdf2b70f2c6ef0895e1 NamedKey.GenerateAndSetKey@third_party/openbao/internal/vault/identity/store_oidc.go:1148
+  - method:179eb06308243620e986a3ddba7dc4c6 MFABackend.PutMFALoginEnforcementConfig@third_party/openbao/internal/vault/identity/mfa.go:146
+  - method:1e5d1ca2caa6c30a4c050926d116835f MFABackend.DeleteMFALoginEnforcementConfigByNameAndNamespace@third_party/openbao/internal/vault/identity/mfa.go:148
+  - method:2397801a430831cf40592f799c125b6c IdentityStore.DeleteAliasesInEntityInTxn@third_party/openbao/internal/vault/identity/store_util.go:1478
+  - method:2e1769494250abb917955e29ba861ba2 IdentityStore.RemoveNamespaceView@third_party/openbao/internal/vault/identity/store.go:172
+  - method:334dffd43a818fe841b839be92297131 IdentityStore.DisableLowerCasedNames@third_party/openbao/internal/vault/identity/store_util.go:44
+  - method:358b35cd59930abb7b0d0c205899058e IdentityStore.AddNamespaceView@third_party/openbao/internal/vault/identity/store.go:128
+  - method:3be4241024aefbf2af6d1021e84ab8a3 IdentityStore.PathOIDCKeyExistenceCheck@third_party/openbao/internal/vault/identity/store_oidc.go:904
+  - method:40907425f90cd33349b5d501a88f1792 IdentityStore.MemDBUpsertGroupInTxn@third_party/openbao/internal/vault/identity/store_util.go:1693
+  - method:45e1f75dd3da4df336ac85be3292ffcf IdentityStore.MemDBDeleteAliasByIDInTxn@third_party/openbao/internal/vault/identity/store_util.go:779
+  - method:46134ecc343959c97e5702df31730108 userError.Error@third_party/openbao/internal/vault/identity/store_entities.go:854
+  - method:48c24b8efa35d44c39c361dc6421f6c0 IdentityStore.OidcPeriodicFunc@third_party/openbao/internal/vault/identity/store_oidc.go:2026
+  - method:4a17ae36ae45b2f6ef9efa446f406196 IdentityStore.CountEntities@third_party/openbao/internal/vault/identity/store_util.go:2378
+  - method:4ab931c63f0f41717b92385076035ffb IdentityStore.SanitizeEntity@third_party/openbao/internal/vault/identity/store_util.go:1180
+  - method:4d14129885b104ee521e2c2ff17ad0c9 IdentityStore.MemDBUpsertAliasInTxn@third_party/openbao/internal/vault/identity/store_util.go:636
+  - method:4fecf670e8db3debcea0950165b2bba0 MFABackend.MemDBMFALoginEnforcementConfigByNameAndNamespace@third_party/openbao/internal/vault/identity/mfa.go:155
+  - method:50d1fe9b806aa50f51ef1526d59691e3 IdentityStore.EntityPacker@third_party/openbao/internal/vault/identity/store.go:244
+  - method:531f6c4a017218beb87b755e15aa45ca oidcCache.Flush@third_party/openbao/internal/vault/identity/store_oidc.go:2154
+  - method:549293f5cfdea45470586a0d5b0804f8 IdentityStore.MemberGroupIDsByID@third_party/openbao/internal/vault/identity/store_util.go:2040
+  - method:54ba4c2c57631f5317b1a0a149a8faed IdentityStore.MemDBAliasByFactors@third_party/openbao/internal/vault/identity/store_util.go:722
+  - method:580532707f8d60689d0aa586d4cad04b IdentityStore.LoadGroups@third_party/openbao/internal/vault/identity/store_util.go:48
+  - method:5adcbd272bf40772ea76adc2d80c70a6 IdentityStore.CountEntitiesByMountAccessor@third_party/openbao/internal/vault/identity/store_util.go:2474
+  - method:63cb03a74c1795132d4a233975b01c6e IdentityStore.PathOIDCClientExistenceCheck@third_party/openbao/internal/vault/identity/store_oidc_provider.go:1356
+  - method:6481e5ccab2066e1ba3d9a465c947fc4 IdentityStore.LoadEntities@third_party/openbao/internal/vault/identity/store_util.go:129
+  - method:665b1259379675b9a6c6c20f4c6e1f91 IdentityStore.PathOIDCAssignmentExistenceCheck@third_party/openbao/internal/vault/identity/store_oidc_provider.go:944
+  - method:6b53248416cf502f0da609b431960c62 IdentityStore.GroupPacker@third_party/openbao/internal/vault/identity/store.go:264
+  - method:6f82ee8b2ff7dc043be416faf54e236c ClientType.String@third_party/openbao/internal/vault/identity/store_oidc_provider.go:166
+  - method:6fdd3bf13cbba07d6af8cd29fd2e0256 IdentityStore.CountEntitiesByNamespace@third_party/openbao/internal/vault/identity/store_util.go:2421
+  - method:702b987cbc8cdb0b3eec38de2190888e IdentityStore.MemDBDeleteGroupByIDInTxn@third_party/openbao/internal/vault/identity/store_util.go:1725
+  - method:75043e5898a811b6c7b51d8e45397e98 IdentityStore.ResetDB@third_party/openbao/internal/vault/identity/store.go:41
+  - method:764a73d1288d001707d23f9ef2a05002 IdentityStore.MemDBAliasByID@third_party/openbao/internal/vault/identity/store_util.go:708
+  - method:7dfa4a74f9d9502de24b3b7688860806 LoggerAdder.AddLogger@third_party/openbao/internal/vault/identity/store.go:61
+  - method:818ce45a701337d73ac783726ae468a4 MFABackend.HandleMFAGenerateTOTP@third_party/openbao/internal/vault/identity/mfa.go:135
+  - method:8628069f25702724a5a7a4b50dd209f2 IdentityStore.UpsertEntityInTxn@third_party/openbao/internal/vault/identity/store_util.go:340
+  - method:873827fe07a2a7d1f5dba14fd9751a26 IdentityStore.MemDBGroupsByParentGroupID@third_party/openbao/internal/vault/identity/store_util.go:1820
+  - method:88bc3aeb162242d2ddae04b2213bef4e IdentityStore.EntityByAliasFactors@third_party/openbao/internal/vault/identity/store.go:1370
+  - method:8be38da73603a4cb468469039b0f023f IdentityStore.MemDBGroupsByBucketKeyInTxn@third_party/openbao/internal/vault/identity/store_util.go:2091
+  - method:90e27c76662bd923b4f672afe90c9995 IdentityStore.Txn@third_party/openbao/internal/vault/identity/store.go:1543
+  - method:91b46d7b74eb8ff055d57263a296ce2e IdentityStore.PathOIDCRoleExistenceCheck@third_party/openbao/internal/vault/identity/store_oidc.go:1205
+  - method:9316f225d37c42370876acabbc3231c8 IdentityStore.GetKeysCacheControlHeader@third_party/openbao/internal/vault/identity/store_oidc.go:1456
+  - method:961d5b7f9ab61e072343e603a88a16d4 oidcCache.Get@third_party/openbao/internal/vault/identity/store_oidc.go:2128
+  - method:99833b68aa34c300262e6cd606e7d38b IdentityStore.UpsertEntity@third_party/openbao/internal/vault/identity/store_util.go:615
+  - method:9d180dbe9396d017207157a1f17d914c IdentityStore.RefreshExternalGroupMembershipsByEntityID@third_party/openbao/internal/vault/identity/store_util.go:2148
+  - method:9e70a731e026a7b1ca22a3c414f90401 IdentityStore.GroupPoliciesByEntityID@third_party/openbao/internal/vault/identity/store_util.go:1873
+  - method:a557162e64e736c44bd3c48544383469 IdentityStore.MemDBGroupsByMemberEntityIDInTxn@third_party/openbao/internal/vault/identity/store_util.go:1845
+  - method:ad833aa8670ac9ce3394b4927b392a4e IdentityStore.SanitizeAlias@third_party/openbao/internal/vault/identity/store_util.go:1119
+  - method:bba61404e4a1fb0031fe8893b771108f IdentityStore.View@third_party/openbao/internal/vault/identity/store.go:234
+  - method:beff5b008d06ce0e2c8830afe300e45d IdentityStore.CreateOrFetchEntity@third_party/openbao/internal/vault/identity/store.go:1419
+  - method:bfbfa7dfb0ddc89c3af9b2ac084efdaf IdentityStore.GroupsByEntityID@third_party/openbao/internal/vault/identity/store_util.go:1895
+  - method:c9042761b81ca3a5cb215ea684d91024 IdentityStore.SanitizeAndUpsertGroup@third_party/openbao/internal/vault/identity/store_util.go:1245
+  - method:c9fd534d50a1803195c35821494e554a oidcCache.Delete@third_party/openbao/internal/vault/identity/store_oidc.go:2145
+  - method:cac1ae7eae7c80160ef0f98e1335da16 IdentityStore.PathOIDCScopeExistenceCheck@third_party/openbao/internal/vault/identity/store_oidc_provider.go:1103
+  - method:cf432b723fdc3483f380967684c148a2 IdentityStore.Invalidate@third_party/openbao/internal/vault/identity/store.go:841
+  - method:d0be938c0b20ed86d90edc1f537f22a5 IdentityStore.MemDBEntityByID@third_party/openbao/internal/vault/identity/store_util.go:894
+  - method:d95ba02b14e5d0b20905b483a9fc52b2 oidcCache.Set@third_party/openbao/internal/vault/identity/store_oidc.go:2136
+  - method:da642fabad8c9379b5e740750ae3d05c userError.Is@third_party/openbao/internal/vault/identity/store_entities.go:862
+  - method:e0c97f4025bcbd4f1d979fff4069f109 IdentityStore.StoreOIDCDefaultResources@third_party/openbao/internal/vault/identity/store_oidc_provider.go:2668
+  - method:ec8211c3ffc6d6a8545c9c6a34eb8288 IdentityStore.MemDBGroupsByParentGroupIDInTxn@third_party/openbao/internal/vault/identity/store_util.go:1795
+  - method:ee248d871fe76799058b8908404b6a2f IdentityStore.MemDBUpsertEntityInTxn@third_party/openbao/internal/vault/identity/store_util.go:832
+  - method:ef9dbf1c0811044044ec43f38d700e5e IdentityStore.MemDBEntitiesByBucketKeyInTxn@third_party/openbao/internal/vault/identity/store_util.go:978
+  - method:f5a04adc2239a6f00910e072a58a7923 LoggerAdder.UnsafeCrossNamespaceIdentity@third_party/openbao/internal/vault/identity/store.go:62
+  - method:f6333f77c2de189d5203a13ff75c7b6d IdentityStore.MemDBEntityByName@third_party/openbao/internal/vault/identity/store_util.go:908
+  - method:f82048ee07d9401969d6d31a6cdc2e3d IdentityStore.MemDBLocalAliasesByBucketKeyInTxn@third_party/openbao/internal/vault/identity/store_util.go:953
+  - method:fa4cc35fc8de4f8bd9cf702de5c4337d IdentityStore.LocalAliasPacker@third_party/openbao/internal/vault/identity/store.go:254
+  - method:fff8ec6f4207753a31104db8ed759d8d IdentityStore.PathOIDCProviderExistenceCheck@third_party/openbao/internal/vault/identity/store_oidc_provider.go:1604
+  - struct:0ede9debc97cbb6c04dd0d3907f50c49 IdentityStoreConfig@third_party/openbao/internal/vault/identity/store.go:65
+  - struct:25c4a7c8828bf08b24f1410429d70485 CaseSensitivity@third_party/openbao/internal/vault/identity/store_structs.go:114
+  - struct:327887a6af149bab86c832aa4943218c NamedKey@third_party/openbao/internal/vault/identity/store_oidc.go:57
   id: sc.third-party-openbao-internal-vault-identity
+  intent: 'This context exists so the vendored identity store can be described and
+    checked as a unit: what the store persists, which external collaborators it depends
+    on, how OIDC key material and provider resources are created and cached, and how
+    MFA state is read and written. Requirements here pin the exported surface and
+    the contracts the rest of the vault relies on when it mounts the identity backend.'
+  interfaces:
+  - file: third_party/openbao/internal/vault/identity/store_oidc_provider.go
+    kind: struct
+    name: Assignment
+    signature: type Assignment struct
+  - file: third_party/openbao/internal/vault/identity/store_structs.go
+    kind: struct
+    name: CaseSensitivity
+    signature: type CaseSensitivity struct
+  - file: third_party/openbao/internal/vault/identity/store.go
+    kind: function
+    name: ChangedAliasIndex
+    signature: func ChangedAliasIndex(entity *identity.Entity, alias *logical.Alias)
+      int
+  - file: third_party/openbao/internal/vault/identity/store_oidc_provider.go
+    kind: struct
+    name: Client
+    signature: type Client struct
+  - file: third_party/openbao/internal/vault/identity/store_oidc_provider.go
+    kind: type_alias
+    name: ClientType
+    signature: type ClientType string
+  - file: third_party/openbao/internal/vault/identity/store_oidc_provider.go
+    kind: method
+    name: ClientType.String
+    signature: func (ClientType) String() string
+  - file: third_party/openbao/internal/vault/identity/store_oidc.go
+    kind: struct
+    name: Discovery
+    signature: type Discovery struct
+  - file: third_party/openbao/internal/vault/identity/store_oidc_provider.go
+    kind: type_alias
+    name: GrantType
+    signature: type GrantType string
+  - file: third_party/openbao/internal/vault/identity/store_structs.go
+    kind: struct
+    name: IdentityStore
+    signature: type IdentityStore struct
+  - file: third_party/openbao/internal/vault/identity/store.go
+    kind: method
+    name: IdentityStore.AddNamespaceView
+    signature: func (IdentityStore) AddNamespaceView(la LoggerAdder, ns *namespace.Namespace,
+      view logical.Storage) error
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.CountEntities
+    signature: func (IdentityStore) CountEntities(ctx context.Context) (int, error)
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.CountEntitiesByMountAccessor
+    signature: func (IdentityStore) CountEntitiesByMountAccessor(ctx context.Context)
+      (map[string]int, error)
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.CountEntitiesByNamespace
+    signature: func (IdentityStore) CountEntitiesByNamespace(ctx context.Context)
+      (map[string]int, error)
+  - file: third_party/openbao/internal/vault/identity/store.go
+    kind: method
+    name: IdentityStore.CreateOrFetchEntity
+    signature: func (IdentityStore) CreateOrFetchEntity(ctx context.Context, alias
+      *logical.Alias) (*identity.Entity, bool, error)
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.DeleteAliasesInEntityInTxn
+    signature: func (IdentityStore) DeleteAliasesInEntityInTxn(txn *memdb.Txn, entity
+      *identity.Entity, aliases []*identity.Alias) error
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.DisableLowerCasedNames
+    signature: func (IdentityStore) DisableLowerCasedNames(b bool)
+  - file: third_party/openbao/internal/vault/identity/store.go
+    kind: method
+    name: IdentityStore.EntityByAliasFactors
+    signature: func (IdentityStore) EntityByAliasFactors(ctx context.Context, mountAccessor,
+      aliasName string, clone bool) (*identity.Entity, error)
+  - file: third_party/openbao/internal/vault/identity/store.go
+    kind: method
+    name: IdentityStore.EntityPacker
+    signature: func (IdentityStore) EntityPacker(ctx context.Context) *storagepacker.StoragePacker
+  - file: third_party/openbao/internal/vault/identity/store_oidc.go
+    kind: method
+    name: IdentityStore.GetKeysCacheControlHeader
+    signature: func (IdentityStore) GetKeysCacheControlHeader(ns *namespace.Namespace)
+      (string, error)
+  - file: third_party/openbao/internal/vault/identity/store.go
+    kind: method
+    name: IdentityStore.GroupPacker
+    signature: func (IdentityStore) GroupPacker(ctx context.Context) *storagepacker.StoragePacker
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.GroupPoliciesByEntityID
+    signature: func (IdentityStore) GroupPoliciesByEntityID(ctx context.Context, entityID
+      string) (map[string][]string, error)
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.GroupsByEntityID
+    signature: func (IdentityStore) GroupsByEntityID(ctx context.Context, entityID
+      string) ([]*identity.Group, []*identity.Group, error)
+  - file: third_party/openbao/internal/vault/identity/store.go
+    kind: method
+    name: IdentityStore.Invalidate
+    signature: func (IdentityStore) Invalidate(ctx context.Context, key string)
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.LoadEntities
+    signature: func (IdentityStore) LoadEntities(ctx context.Context, ns *namespace.Namespace,
+      readOnly bool) error
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.LoadGroups
+    signature: func (IdentityStore) LoadGroups(ctx context.Context, ns *namespace.Namespace,
+      readOnly bool) error
+  - file: third_party/openbao/internal/vault/identity/store_oidc_provider.go
+    kind: method
+    name: IdentityStore.LoadOIDCClients
+    signature: func (IdentityStore) LoadOIDCClients(ctx context.Context) error
+  - file: third_party/openbao/internal/vault/identity/store.go
+    kind: method
+    name: IdentityStore.LocalAliasPacker
+    signature: func (IdentityStore) LocalAliasPacker(ctx context.Context) *storagepacker.StoragePacker
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.Logger
+    signature: func (IdentityStore) Logger() hclog.Logger
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.MemDBAliasByFactors
+    signature: func (IdentityStore) MemDBAliasByFactors(ctx context.Context, mountAccessor,
+      aliasName string, clone bool, groupAlias bool) (*identity.Alias, error)
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.MemDBAliasByFactorsInTxn
+    signature: func (IdentityStore) MemDBAliasByFactorsInTxn(txn *memdb.Txn, mountAccessor,
+      aliasName string, clone bool, groupAlias bool) (*identity.Alias, error)
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.MemDBAliasByID
+    signature: func (IdentityStore) MemDBAliasByID(ctx context.Context, aliasID string,
+      clone bool, groupAlias bool) (*identity.Alias, error)
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.MemDBAliasByIDInTxn
+    signature: func (IdentityStore) MemDBAliasByIDInTxn(txn *memdb.Txn, aliasID string,
+      clone bool, groupAlias bool) (*identity.Alias, error)
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.MemDBAliases
+    signature: func (IdentityStore) MemDBAliases(ctx context.Context, ws memdb.WatchSet,
+      groupAlias bool) (memdb.ResultIterator, error)
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.MemDBDeleteAliasByIDInTxn
+    signature: func (IdentityStore) MemDBDeleteAliasByIDInTxn(txn *memdb.Txn, aliasID
+      string, groupAlias bool) error
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.MemDBDeleteEntityByID
+    signature: func (IdentityStore) MemDBDeleteEntityByID(ctx context.Context, entityID
+      string) error
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.MemDBDeleteEntityByIDInTxn
+    signature: func (IdentityStore) MemDBDeleteEntityByIDInTxn(txn *memdb.Txn, entityID
+      string) error
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.MemDBDeleteGroupByIDInTxn
+    signature: func (IdentityStore) MemDBDeleteGroupByIDInTxn(txn *memdb.Txn, groupID
+      string) error
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.MemDBEntitiesByBucketKeyInTxn
+    signature: func (IdentityStore) MemDBEntitiesByBucketKeyInTxn(txn *memdb.Txn,
+      bucketKey string) ([]*identity.Entity, error)
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.MemDBEntityByAliasID
+    signature: func (IdentityStore) MemDBEntityByAliasID(ctx context.Context, aliasID
+      string, clone bool) (*identity.Entity, error)
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.MemDBEntityByAliasIDInTxn
+    signature: func (IdentityStore) MemDBEntityByAliasIDInTxn(txn *memdb.Txn, aliasID
+      string, clone bool) (*identity.Entity, error)
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.MemDBEntityByID
+    signature: func (IdentityStore) MemDBEntityByID(ctx context.Context, entityID
+      string, clone bool) (*identity.Entity, error)
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.MemDBEntityByIDInTxn
+    signature: func (IdentityStore) MemDBEntityByIDInTxn(txn *memdb.Txn, entityID
+      string, clone bool) (*identity.Entity, error)
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.MemDBEntityByMergedEntityID
+    signature: func (IdentityStore) MemDBEntityByMergedEntityID(ctx context.Context,
+      mergedEntityID string, clone bool) (*identity.Entity, error)
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.MemDBEntityByName
+    signature: func (IdentityStore) MemDBEntityByName(ctx context.Context, entityName
+      string, clone bool) (*identity.Entity, error)
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.MemDBEntityByNameInTxn
+    signature: func (IdentityStore) MemDBEntityByNameInTxn(ctx context.Context, txn
+      *memdb.Txn, entityName string, clone bool) (*identity.Entity, error)
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.MemDBGroupByAliasID
+    signature: func (IdentityStore) MemDBGroupByAliasID(ctx context.Context, aliasID
+      string, clone bool) (*identity.Group, error)
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.MemDBGroupByAliasIDInTxn
+    signature: func (IdentityStore) MemDBGroupByAliasIDInTxn(txn *memdb.Txn, aliasID
+      string, clone bool) (*identity.Group, error)
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.MemDBGroupByID
+    signature: func (IdentityStore) MemDBGroupByID(ctx context.Context, groupID string,
+      clone bool) (*identity.Group, error)
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.MemDBGroupByIDInTxn
+    signature: func (IdentityStore) MemDBGroupByIDInTxn(txn *memdb.Txn, groupID string,
+      clone bool) (*identity.Group, error)
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.MemDBGroupByName
+    signature: func (IdentityStore) MemDBGroupByName(ctx context.Context, groupName
+      string, clone bool) (*identity.Group, error)
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.MemDBGroupByNameInTxn
+    signature: func (IdentityStore) MemDBGroupByNameInTxn(ctx context.Context, txn
+      *memdb.Txn, groupName string, clone bool) (*identity.Group, error)
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.MemDBGroupsByBucketKeyInTxn
+    signature: func (IdentityStore) MemDBGroupsByBucketKeyInTxn(txn *memdb.Txn, bucketKey
+      string) ([]*identity.Group, error)
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.MemDBGroupsByMemberEntityID
+    signature: func (IdentityStore) MemDBGroupsByMemberEntityID(ctx context.Context,
+      entityID string, clone bool, externalOnly bool) ([]*identity.Group, error)
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.MemDBGroupsByMemberEntityIDInTxn
+    signature: func (IdentityStore) MemDBGroupsByMemberEntityIDInTxn(txn *memdb.Txn,
+      entityID string, clone bool, externalOnly bool) ([]*identity.Group, error)
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.MemDBGroupsByParentGroupID
+    signature: func (IdentityStore) MemDBGroupsByParentGroupID(ctx context.Context,
+      memberGroupID string, clone bool) ([]*identity.Group, error)
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.MemDBGroupsByParentGroupIDInTxn
+    signature: func (IdentityStore) MemDBGroupsByParentGroupIDInTxn(txn *memdb.Txn,
+      memberGroupID string, clone bool) ([]*identity.Group, error)
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.MemDBLocalAliasesByBucketKeyInTxn
+    signature: func (IdentityStore) MemDBLocalAliasesByBucketKeyInTxn(txn *memdb.Txn,
+      bucketKey string) ([]*identity.Alias, error)
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.MemDBUpsertAliasInTxn
+    signature: func (IdentityStore) MemDBUpsertAliasInTxn(txn *memdb.Txn, alias *identity.Alias,
+      groupAlias bool) error
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.MemDBUpsertEntityInTxn
+    signature: func (IdentityStore) MemDBUpsertEntityInTxn(txn *memdb.Txn, entity
+      *identity.Entity) error
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.MemDBUpsertGroupInTxn
+    signature: func (IdentityStore) MemDBUpsertGroupInTxn(txn *memdb.Txn, group *identity.Group)
+      error
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.MemberGroupIDsByID
+    signature: func (IdentityStore) MemberGroupIDsByID(ctx context.Context, groupID
+      string) ([]string, error)
+  - file: third_party/openbao/internal/vault/identity/store_oidc.go
+    kind: method
+    name: IdentityStore.OidcPeriodicFunc
+    signature: func (IdentityStore) OidcPeriodicFunc(ctx context.Context)
+  - file: third_party/openbao/internal/vault/identity/store_oidc_provider.go
+    kind: method
+    name: IdentityStore.PathOIDCAssignmentExistenceCheck
+    signature: func (IdentityStore) PathOIDCAssignmentExistenceCheck(ctx context.Context,
+      req *logical.Request, d *framework.FieldData) (bool, error)
+  - file: third_party/openbao/internal/vault/identity/store_oidc_provider.go
+    kind: method
+    name: IdentityStore.PathOIDCClientExistenceCheck
+    signature: func (IdentityStore) PathOIDCClientExistenceCheck(ctx context.Context,
+      req *logical.Request, d *framework.FieldData) (bool, error)
+  - file: third_party/openbao/internal/vault/identity/store_oidc.go
+    kind: method
+    name: IdentityStore.PathOIDCKeyExistenceCheck
+    signature: func (IdentityStore) PathOIDCKeyExistenceCheck(ctx context.Context,
+      req *logical.Request, d *framework.FieldData) (bool, error)
+  - file: third_party/openbao/internal/vault/identity/store_oidc_provider.go
+    kind: method
+    name: IdentityStore.PathOIDCProviderExistenceCheck
+    signature: func (IdentityStore) PathOIDCProviderExistenceCheck(ctx context.Context,
+      req *logical.Request, d *framework.FieldData) (bool, error)
+  - file: third_party/openbao/internal/vault/identity/store_oidc.go
+    kind: method
+    name: IdentityStore.PathOIDCRoleExistenceCheck
+    signature: func (IdentityStore) PathOIDCRoleExistenceCheck(ctx context.Context,
+      req *logical.Request, d *framework.FieldData) (bool, error)
+  - file: third_party/openbao/internal/vault/identity/store_oidc_provider.go
+    kind: method
+    name: IdentityStore.PathOIDCScopeExistenceCheck
+    signature: func (IdentityStore) PathOIDCScopeExistenceCheck(ctx context.Context,
+      req *logical.Request, d *framework.FieldData) (bool, error)
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.RefreshExternalGroupMembershipsByEntityID
+    signature: func (IdentityStore) RefreshExternalGroupMembershipsByEntityID(ctx
+      context.Context, entityID string, groupAliases []*logical.Alias, mountAccessor
+      string) ([]*logical.Alias, error)
+  - file: third_party/openbao/internal/vault/identity/store.go
+    kind: method
+    name: IdentityStore.RemoveNamespaceView
+    signature: func (IdentityStore) RemoveNamespaceView(ns *namespace.Namespace) error
+  - file: third_party/openbao/internal/vault/identity/store.go
+    kind: method
+    name: IdentityStore.ResetDB
+    signature: func (IdentityStore) ResetDB(ctx context.Context) error
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.SanitizeAlias
+    signature: func (IdentityStore) SanitizeAlias(ctx context.Context, alias *identity.Alias)
+      error
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.SanitizeAndUpsertGroup
+    signature: func (IdentityStore) SanitizeAndUpsertGroup(ctx context.Context, group
+      *identity.Group, previousGroup *identity.Group, memberGroupIDs []string) error
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.SanitizeEntity
+    signature: func (IdentityStore) SanitizeEntity(ctx context.Context, entity *identity.Entity)
+      error
+  - file: third_party/openbao/internal/vault/identity/store_oidc_provider.go
+    kind: method
+    name: IdentityStore.StoreOIDCDefaultResources
+    signature: func (IdentityStore) StoreOIDCDefaultResources(ctx context.Context,
+      view logical.Storage) error
+  - file: third_party/openbao/internal/vault/identity/store.go
+    kind: method
+    name: IdentityStore.Txn
+    signature: func (IdentityStore) Txn(ctx context.Context, write bool) *memdb.Txn
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.UpsertEntity
+    signature: func (IdentityStore) UpsertEntity(ctx context.Context, entity *identity.Entity,
+      previousEntity *identity.Entity, persist bool) error
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.UpsertEntityInTxn
+    signature: func (IdentityStore) UpsertEntityInTxn(ctx context.Context, txn *memdb.Txn,
+      entity *identity.Entity, previousEntity *identity.Entity, persist bool) error
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.UpsertGroup
+    signature: func (IdentityStore) UpsertGroup(ctx context.Context, group *identity.Group,
+      persist bool) error
+  - file: third_party/openbao/internal/vault/identity/store_util.go
+    kind: method
+    name: IdentityStore.UpsertGroupInTxn
+    signature: func (IdentityStore) UpsertGroupInTxn(ctx context.Context, txn *memdb.Txn,
+      group *identity.Group, persist bool) error
+  - file: third_party/openbao/internal/vault/identity/store.go
+    kind: method
+    name: IdentityStore.View
+    signature: func (IdentityStore) View(ctx context.Context) logical.Storage
+  - file: third_party/openbao/internal/vault/identity/store.go
+    kind: struct
+    name: IdentityStoreConfig
+    signature: type IdentityStoreConfig struct
+  - file: third_party/openbao/internal/vault/identity/store_oidc.go
+    kind: function
+    name: IsTargetNamespacedKey
+    signature: func IsTargetNamespacedKey(nskey string, nsTarget string) bool
+  - file: third_party/openbao/internal/vault/identity/store_structs.go
+    kind: interface
+    name: LocalNode
+    signature: type LocalNode interface
+  - file: third_party/openbao/internal/vault/identity/store_structs.go
+    kind: method
+    name: LocalNode.HAState
+    signature: HAState() consts.HAState
+  - file: third_party/openbao/internal/vault/identity/store_structs.go
+    kind: method
+    name: LocalNode.ReplicationState
+    signature: ReplicationState() consts.ReplicationState
+  - file: third_party/openbao/internal/vault/identity/store.go
+    kind: interface
+    name: LoggerAdder
+    signature: type LoggerAdder interface
+  - file: third_party/openbao/internal/vault/identity/store.go
+    kind: method
+    name: LoggerAdder.AddLogger
+    signature: AddLogger(log.Logger)
+  - file: third_party/openbao/internal/vault/identity/store.go
+    kind: method
+    name: LoggerAdder.UnsafeCrossNamespaceIdentity
+    signature: UnsafeCrossNamespaceIdentity() bool
+  - file: third_party/openbao/internal/vault/identity/store_oidc_provider.go
+    kind: function
+    name: LowercaseIdentityIDs
+    signature: func LowercaseIdentityIDs(identities []string) []string
+  - file: third_party/openbao/internal/vault/identity/mfa.go
+    kind: interface
+    name: MFABackend
+    signature: type MFABackend interface
+  - file: third_party/openbao/internal/vault/identity/mfa.go
+    kind: method
+    name: MFABackend.CleanupNamespace
+    signature: CleanupNamespace(context.Context, *namespace.Namespace, bool) error
+  - file: third_party/openbao/internal/vault/identity/mfa.go
+    kind: method
+    name: MFABackend.DeleteMFAConfigByMethodID
+    signature: DeleteMFAConfigByMethodID(context.Context, string, string, string)
+      error
+  - file: third_party/openbao/internal/vault/identity/mfa.go
+    kind: method
+    name: MFABackend.DeleteMFALoginEnforcementConfigByNameAndNamespace
+    signature: DeleteMFALoginEnforcementConfigByNameAndNamespace(context.Context,
+      string, *namespace.Namespace) error
+  - file: third_party/openbao/internal/vault/identity/mfa.go
+    kind: method
+    name: MFABackend.HandleMFAGenerateTOTP
+    signature: HandleMFAGenerateTOTP(context.Context, *mfa.Config, string) (*logical.Response,
+      error)
+  - file: third_party/openbao/internal/vault/identity/mfa.go
+    kind: method
+    name: MFABackend.Lock
+    signature: Lock()
+  - file: third_party/openbao/internal/vault/identity/mfa.go
+    kind: method
+    name: MFABackend.MemDBMFAConfigByID
+    signature: MemDBMFAConfigByID(string) (*mfa.Config, error)
+  - file: third_party/openbao/internal/vault/identity/mfa.go
+    kind: method
+    name: MFABackend.MemDBMFAConfigByName
+    signature: MemDBMFAConfigByName(context.Context, string) (*mfa.Config, error)
+  - file: third_party/openbao/internal/vault/identity/mfa.go
+    kind: method
+    name: MFABackend.MemDBMFALoginEnforcementConfigByNameAndNamespace
+    signature: MemDBMFALoginEnforcementConfigByNameAndNamespace(string, string) (*mfa.MFAEnforcementConfig,
+      error)
+  - file: third_party/openbao/internal/vault/identity/mfa.go
+    kind: method
+    name: MFABackend.MemDBUpsertMFAConfig
+    signature: MemDBUpsertMFAConfig(context.Context, *mfa.Config) error
+  - file: third_party/openbao/internal/vault/identity/mfa.go
+    kind: method
+    name: MFABackend.MemDBUpsertMFALoginEnforcementConfig
+    signature: MemDBUpsertMFALoginEnforcementConfig(context.Context, *mfa.MFAEnforcementConfig)
+      error
+  - file: third_party/openbao/internal/vault/identity/mfa.go
+    kind: method
+    name: MFABackend.MfaLoginEnforcementList
+    signature: MfaLoginEnforcementList(context.Context) (map[string]any, error)
+  - file: third_party/openbao/internal/vault/identity/mfa.go
+    kind: method
+    name: MFABackend.MfaMethodList
+    signature: MfaMethodList(context.Context, string) (map[string]any, error)
+  - file: third_party/openbao/internal/vault/identity/mfa.go
+    kind: method
+    name: MFABackend.PutMFAConfigByID
+    signature: PutMFAConfigByID(context.Context, *mfa.Config) error
+  - file: third_party/openbao/internal/vault/identity/mfa.go
+    kind: method
+    name: MFABackend.PutMFALoginEnforcementConfig
+    signature: PutMFALoginEnforcementConfig(context.Context, *mfa.MFAEnforcementConfig,
+      *namespace.Namespace) error
+  - file: third_party/openbao/internal/vault/identity/mfa.go
+    kind: method
+    name: MFABackend.ReadMFAConfigByMethodID
+    signature: ReadMFAConfigByMethodID(string) (map[string]any, error)
+  - file: third_party/openbao/internal/vault/identity/mfa.go
+    kind: method
+    name: MFABackend.ReadMFALoginEnforcementConfigByNameAndNamespace
+    signature: ReadMFALoginEnforcementConfigByNameAndNamespace(string, *namespace.Namespace)
+      (map[string]any, error)
+  - file: third_party/openbao/internal/vault/identity/mfa.go
+    kind: method
+    name: MFABackend.Unlock
+    signature: Unlock()
+  - file: third_party/openbao/internal/vault/identity/mfa.go
+    kind: method
+    name: MFABackend.ValidateAuthEntriesForAccessorOrType
+    signature: ValidateAuthEntriesForAccessorOrType(context.Context, *namespace.Namespace,
+      func(entry *routing.MountEntry) bool) (bool, error)
+  - file: third_party/openbao/internal/vault/identity/store_oidc.go
+    kind: struct
+    name: NamedKey
+    signature: type NamedKey struct
+  - file: third_party/openbao/internal/vault/identity/store_oidc.go
+    kind: method
+    name: NamedKey.GenerateAndSetKey
+    signature: func (NamedKey) GenerateAndSetKey(ctx context.Context, logger hclog.Logger,
+      s logical.Storage) error
+  - file: third_party/openbao/internal/vault/identity/store_oidc.go
+    kind: method
+    name: NamedKey.GenerateAndSetNextKey
+    signature: func (NamedKey) GenerateAndSetNextKey(ctx context.Context, logger hclog.Logger,
+      s logical.Storage) error
+  - file: third_party/openbao/internal/vault/identity/store_structs.go
+    kind: interface
+    name: Namespacer
+    signature: type Namespacer interface
+  - file: third_party/openbao/internal/vault/identity/store_structs.go
+    kind: method
+    name: Namespacer.ListNamespaces
+    signature: ListNamespaces(context.Context) ([]*namespace.Namespace, error)
+  - file: third_party/openbao/internal/vault/identity/store_structs.go
+    kind: method
+    name: Namespacer.NamespaceByID
+    signature: NamespaceByID(context.Context, string) (*namespace.Namespace, error)
+  - file: third_party/openbao/internal/vault/identity/store.go
+    kind: function
+    name: NewIdentityStore
+    signature: func NewIdentityStore(ctx context.Context, identityStoreConfig *IdentityStoreConfig,
+      config *logical.BackendConfig, logger log.Logger) (*IdentityStore, error)
+  - file: third_party/openbao/internal/vault/identity/store_oidc.go
+    kind: function
+    name: NewOIDCCache
+    signature: func NewOIDCCache(defaultExpiration, cleanupInterval time.Duration)
+      *oidcCache
+  - file: third_party/openbao/internal/vault/identity/store_oidc_provider.go
+    kind: struct
+    name: ProviderDiscovery
+    signature: type ProviderDiscovery struct
+  - file: third_party/openbao/internal/vault/identity/store_oidc.go
+    kind: struct
+    name: Role
+    signature: type Role struct
+  - file: third_party/openbao/internal/vault/identity/store_oidc_provider.go
+    kind: struct
+    name: Scope
+    signature: type Scope struct
+  - file: third_party/openbao/internal/vault/identity/store_structs.go
+    kind: interface
+    name: TOTPPersister
+    signature: type TOTPPersister interface
+  - file: third_party/openbao/internal/vault/identity/store_structs.go
+    kind: method
+    name: TOTPPersister.PersistTOTPKey
+    signature: PersistTOTPKey(ctx context.Context, configID string, entityID string,
+      key string) error
+  - file: third_party/openbao/internal/vault/identity/store_structs.go
+    kind: interface
+    name: TokenStorer
+    signature: type TokenStorer interface
+  - file: third_party/openbao/internal/vault/identity/store_structs.go
+    kind: method
+    name: TokenStorer.CreateToken
+    signature: CreateToken(context.Context, *logical.TokenEntry, bool) error
+  - file: third_party/openbao/internal/vault/identity/store_structs.go
+    kind: method
+    name: TokenStorer.LookupToken
+    signature: LookupToken(context.Context, string) (*logical.TokenEntry, error)
+  - file: third_party/openbao/internal/vault/identity/store_oidc.go
+    kind: method
+    name: oidcCache.Delete
+    signature: func (oidcCache) Delete(ns *namespace.Namespace, key string) error
+  - file: third_party/openbao/internal/vault/identity/store_oidc.go
+    kind: method
+    name: oidcCache.Flush
+    signature: func (oidcCache) Flush(ns *namespace.Namespace) error
+  - file: third_party/openbao/internal/vault/identity/store_oidc.go
+    kind: method
+    name: oidcCache.Get
+    signature: func (oidcCache) Get(ns *namespace.Namespace, key string) (any, bool,
+      error)
+  - file: third_party/openbao/internal/vault/identity/store_oidc.go
+    kind: method
+    name: oidcCache.Items
+    signature: func (oidcCache) Items() map[string]zcache.Item[any]
+  - file: third_party/openbao/internal/vault/identity/store_oidc.go
+    kind: method
+    name: oidcCache.Set
+    signature: func (oidcCache) Set(ns *namespace.Namespace, key string, obj any)
+      error
+  - file: third_party/openbao/internal/vault/identity/store_entities.go
+    kind: method
+    name: userError.Error
+    signature: func (userError) Error() string
+  - file: third_party/openbao/internal/vault/identity/store_entities.go
+    kind: method
+    name: userError.Is
+    signature: func (userError) Is(err error) bool
+  - file: third_party/openbao/internal/vault/identity/store_entities.go
+    kind: method
+    name: userError.Unwrap
+    signature: func (userError) Unwrap() error
   name: third-party-openbao-internal-vault-identity
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/identity/store.go
+    - function:9a1e70541a717e1949d53fe2f0ac3aac
+    id: r.alias-change-index
+    level: MUST
+    text: ChangedAliasIndex must report which index of an entity's alias set changed
+      when a new logical.Alias is compared with the stored entity, so the caller can
+      reindex only the affected alias.
+  - codeRefs:
+    - method:8be38da73603a4cb468469039b0f023f
+    - method:ef9dbf1c0811044044ec43f38d700e5e
+    - method:f82048ee07d9401969d6d31a6cdc2e3d
+    id: r.bucket-key-lookups
+    level: MUST
+    text: 'Case-folded lookups must be served by the bucket-key helpers: MemDBEntitiesByBucketKeyInTxn,
+      MemDBLocalAliasesByBucketKeyInTxn and MemDBGroupsByBucketKeyInTxn return the
+      entities, local aliases or groups whose sanitized bucket key matches, so name
+      matching is case-insensitive when lower-casing is enabled.'
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/identity/store_structs.go
+    - method:334dffd43a818fe841b839be92297131
+    - struct:25c4a7c8828bf08b24f1410429d70485
+    id: r.case-sensitivity-switch
+    level: MUST
+    text: Case sensitivity handling must be driven by the CaseSensitivity setting
+      on the store, and DisableLowerCasedNames must let a caller turn off the lower-casing
+      of entity and group names.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/identity/store_entities.go
+    id: r.classify-user-error
+    level: MAY
+    text: A helper may classify an entity or alias persistence failure as a user error
+      so the API layer can return a validation response instead of a server error.
+  - codeRefs:
+    - method:0cf022ee549eea43a0fb802944d4e1cb
+    - method:0e19a5ac8051c394c89093819228b606
+    - method:2397801a430831cf40592f799c125b6c
+    - method:45e1f75dd3da4df336ac85be3292ffcf
+    - method:702b987cbc8cdb0b3eec38de2190888e
+    id: r.deletion
+    level: MUST
+    text: 'Deletion must remove both the memdb rows and the persisted record: MemDBDeleteEntityByID
+      and MemDBDeleteEntityByIDInTxn remove an entity, MemDBDeleteAliasByIDInTxn removes
+      an alias with the groupAlias switch, MemDBDeleteGroupByIDInTxn removes a group,
+      and DeleteAliasesInEntityInTxn removes a set of aliases from an entity.'
+  - codeRefs:
+    - method:40907425f90cd33349b5d501a88f1792
+    - method:4d14129885b104ee521e2c2ff17ad0c9
+    - method:54ba4c2c57631f5317b1a0a149a8faed
+    - method:764a73d1288d001707d23f9ef2a05002
+    - method:8628069f25702724a5a7a4b50dd209f2
+    - method:99833b68aa34c300262e6cd606e7d38b
+    - method:d0be938c0b20ed86d90edc1f537f22a5
+    - method:ee248d871fe76799058b8908404b6a2f
+    - method:f6333f77c2de189d5203a13ff75c7b6d
+    id: r.entity-and-alias-persistence
+    level: MUST
+    text: 'The store must persist and load entities and groups in transactions: UpsertEntity
+      and UpsertEntityInTxn write an entity with its previous entity for index maintenance;
+      MemDBUpsertAliasInTxn, MemDBUpsertEntityInTxn and MemDBUpsertGroupInTxn write
+      aliases, entities and groups into the memdb tables; MemDBAliasByID, MemDBAliasByFactors,
+      MemDBEntityByID and MemDBEntityByName read them back with the clone and groupAlias
+      switches.'
+  - codeRefs:
+    - method:4a17ae36ae45b2f6ef9efa446f406196
+    - method:5adcbd272bf40772ea76adc2d80c70a6
+    - method:6fdd3bf13cbba07d6af8cd29fd2e0256
+    id: r.entity-counting
+    level: SHOULD
+    text: 'The store should expose entity counts for callers that report usage: CountEntities
+      returns the total for the context''s namespace, CountEntitiesByNamespace returns
+      counts keyed by namespace, and CountEntitiesByMountAccessor returns counts keyed
+      by mount accessor.'
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/identity/store_util.go
+    - method:580532707f8d60689d0aa586d4cad04b
+    - method:6481e5ccab2066e1ba3d9a465c947fc4
+    id: r.entity-loading
+    level: MUST
+    text: LoadEntities and LoadGroups must populate the in-memory tables for a namespace,
+      honouring a read-only flag that skips writes, so the store reflects the persisted
+      entities and groups after startup or namespace activation.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/identity/store_util.go
+    - method:88bc3aeb162242d2ddae04b2213bef4e
+    - method:beff5b008d06ce0e2c8830afe300e45d
+    id: r.entity-resolution-by-alias
+    level: MUST
+    text: Entity lookup by authentication factors must resolve an entity from a mount
+      accessor and alias name via EntityByAliasFactors, and CreateOrFetchEntity must
+      return the existing entity for a logical.Alias or create a new one, reporting
+      whether it was created, or an error.
+  - codeRefs:
+    - interface:40c34ef251254636285fb26d3e668695
+    - interface:6ee494f9715a75f9c94fa1951d1977eb
+    - interface:c43b10edf46f93df414f23fb18c0371f
+    - interface:dc053fc95cbbf99260aeb61705cbc006
+    id: r.external-collaborators
+    level: MUST
+    text: 'The store must depend on narrow interfaces rather than concrete vault types:
+      LocalNode supplies ReplicationState and HAState, Namespacer supplies NamespaceByID
+      and ListNamespaces, TOTPPersister persists a TOTP key for a config and entity,
+      and TokenStorer supplies LookupToken and CreateToken.'
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/identity/store_util.go
+    - method:9d180dbe9396d017207157a1f17d914c
+    id: r.external-group-refresh
+    level: MUST
+    text: External group membership must be refreshed from login-time aliases by RefreshExternalGroupMembershipsByEntityID,
+      which takes the entity ID, the group aliases and the mount accessor and returns
+      the aliases that were not consumed.
+  - codeRefs:
+    - method:12ae58ebb7ecdfbbed3d0f3dd183ba60
+    - method:549293f5cfdea45470586a0d5b0804f8
+    - method:873827fe07a2a7d1f5dba14fd9751a26
+    - method:9e70a731e026a7b1ca22a3c414f90401
+    - method:a557162e64e736c44bd3c48544383469
+    - method:bfbfa7dfb0ddc89c3af9b2ac084efdaf
+    - method:ec8211c3ffc6d6a8545c9c6a34eb8288
+    id: r.group-membership
+    level: MUST
+    text: 'Group membership must be queryable in both directions: MemDBGroupsByMemberEntityID
+      and MemDBGroupsByMemberEntityIDInTxn return the groups holding an entity, MemDBGroupsByParentGroupID
+      and MemDBGroupsByParentGroupIDInTxn return groups nested under a member group,
+      GroupsByEntityID must split internal and external groups, GroupPoliciesByEntityID
+      must collect policies by group, and MemberGroupIDsByID must list member group
+      IDs of a group.'
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/identity/store.go
+    - struct:0ede9debc97cbb6c04dd0d3907f50c49
+    id: r.identity-store-construction
+    level: MUST
+    text: IdentityStore must be created by NewIdentityStore, which takes a context,
+      an *IdentityStoreConfig, a *logical.BackendConfig and a log.Logger, and must
+      return the constructed *IdentityStore or an error.
+  - codeRefs:
+    - interface:09cc5be174c8f1018c819ded7cd0c9e3
+    - method:7dfa4a74f9d9502de24b3b7688860806
+    - method:f5a04adc2239a6f00910e072a58a7923
+    id: r.logger-injection
+    level: MUST
+    text: LoggerAdder must let a namespace view attach a log.Logger and report UnsafeCrossNamespaceIdentity,
+      so the store can decide whether cross-namespace identity reads are permitted
+      for that view.
+  - codeRefs:
+    - method:75043e5898a811b6c7b51d8e45397e98
+    - method:90e27c76662bd923b4f672afe90c9995
+    - method:cf432b723fdc3483f380967684c148a2
+    id: r.memdb-transactions
+    level: MUST
+    text: Reads and writes against the in-memory tables must go through Txn, which
+      returns a *memdb.Txn according to the write flag; Invalidate must evict the
+      cached entry for a key so later reads reload from storage; ResetDB must clear
+      store state for a context.
+  - codeRefs:
+    - interface:63a95dd01b6529284ad740a4b8b7dc0a
+    - method:0e1bdf77b25885fbec153395a9bef2ff
+    - method:179eb06308243620e986a3ddba7dc4c6
+    - method:1e5d1ca2caa6c30a4c050926d116835f
+    - method:4fecf670e8db3debcea0950165b2bba0
+    - method:818ce45a701337d73ac783726ae468a4
+    id: r.mfa-backend-contract
+    level: MUST
+    text: 'The MFABackend interface must declare the MFA surface the identity store
+      depends on: Lock and Unlock for mutual exclusion, HandleMFAGenerateTOTP for
+      TOTP generation, ValidateAuthEntriesForAccessorOrType for mount-entry validation,
+      CleanupNamespace for namespace teardown, config CRUD via PutMFAConfigByID, ReadMFAConfigByMethodID,
+      DeleteMFAConfigByMethodID and MfaMethodList, login-enforcement CRUD via PutMFALoginEnforcementConfig,
+      ReadMFALoginEnforcementConfigByNameAndNamespace, DeleteMFALoginEnforcementConfigByNameAndNamespace
+      and MfaLoginEnforcementList, plus the memdb accessors MemDBUpsertMFAConfig,
+      MemDBMFAConfigByID, MemDBMFAConfigByName, MemDBMFALoginEnforcementConfigByNameAndNamespace
+      and MemDBUpsertMFALoginEnforcementConfig.'
+  - codeRefs:
+    - method:2e1769494250abb917955e29ba861ba2
+    - method:358b35cd59930abb7b0d0c205899058e
+    - method:50d1fe9b806aa50f51ef1526d59691e3
+    - method:6b53248416cf502f0da609b431960c62
+    - method:bba61404e4a1fb0031fe8893b771108f
+    - method:fa4cc35fc8de4f8bd9cf702de5c4337d
+    id: r.namespace-views
+    level: MUST
+    text: 'The store must attach and detach per-namespace storage: AddNamespaceView
+      registers a LoggerAdder, namespace and logical.Storage, RemoveNamespaceView
+      drops it, View returns the logical.Storage for the context''s namespace, and
+      EntityPacker, LocalAliasPacker and GroupPacker return the storagepacker.StoragePacker
+      bound to that namespace.'
+  - codeRefs:
+    - function:25eef2407a8fbe0908712bfa26a12b59
+    - function:5e198781c89dfa398d767fa65f225c67
+    - method:531f6c4a017218beb87b755e15aa45ca
+    - method:961d5b7f9ab61e072343e603a88a16d4
+    - method:c9fd534d50a1803195c35821494e554a
+    - method:d95ba02b14e5d0b20905b483a9fc52b2
+    id: r.oidc-cache
+    level: MUST
+    text: The OIDC cache must be built by NewOIDCCache from a default expiration and
+      cleanup interval, must key entries by namespace through Get, Set, Delete, Flush
+      and Items, and IsTargetNamespacedKey must decide whether a namespaced key belongs
+      to a target namespace.
+  - codeRefs:
+    - function:a0682dc3ca805b467ae2b0927d07169d
+    - method:6f82ee8b2ff7dc043be416faf54e236c
+    id: r.oidc-identity-id-normalization
+    level: MUST
+    text: LowercaseIdentityIDs must return the given identity IDs with their letter
+      case lowered, and ClientType.String must render a client type as its string
+      form.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/identity/store_oidc.go
+    - method:9316f225d37c42370876acabbc3231c8
+    id: r.oidc-key-cache-header
+    level: MUST
+    text: GetKeysCacheControlHeader must return the HTTP cache-control header value
+      for a namespace's OIDC keys, or an error when it cannot be determined.
+  - codeRefs:
+    - method:131e56190aca454a5788dfddbc2d18fe
+    - method:13efc92be0a1ccdf2b70f2c6ef0895e1
+    - method:48c24b8efa35d44c39c361dc6421f6c0
+    - struct:327887a6af149bab86c832aa4943218c
+    id: r.oidc-key-rotation
+    level: MUST
+    text: 'NamedKey must generate and persist OIDC signing keys: GenerateAndSetKey
+      writes the current key, GenerateAndSetNextKey writes the next key used for rotation,
+      and OidcPeriodicFunc must run the periodic rotation work driven by those keys.'
+  - codeRefs:
+    - method:064df75847df7716da78d8ff1c0d070e
+    - method:3be4241024aefbf2af6d1021e84ab8a3
+    - method:63cb03a74c1795132d4a233975b01c6e
+    - method:665b1259379675b9a6c6c20f4c6e1f91
+    - method:91b46d7b74eb8ff055d57263a296ce2e
+    - method:cac1ae7eae7c80160ef0f98e1335da16
+    - method:e0c97f4025bcbd4f1d979fff4069f109
+    - method:fff8ec6f4207753a31104db8ed759d8d
+    id: r.oidc-provider-resources
+    level: MUST
+    text: 'OIDC provider state must be created, checked and loaded: StoreOIDCDefaultResources
+      writes the default assignment, scope, client and provider records for a namespace,
+      LoadOIDCClients loads stored clients into the store, and the PathOIDCKeyExistenceCheck,
+      PathOIDCRoleExistenceCheck, PathOIDCAssignmentExistenceCheck, PathOIDCScopeExistenceCheck,
+      PathOIDCClientExistenceCheck and PathOIDCProviderExistenceCheck handlers report
+      whether the named resource exists, returning an error when the read fails.'
+  - codeRefs:
+    - method:4ab931c63f0f41717b92385076035ffb
+    - method:ad833aa8670ac9ce3394b4927b392a4e
+    - method:c9042761b81ca3a5cb215ea684d91024
+    id: r.sanitization
+    level: MUST
+    text: 'Before persistence the store must normalize input: SanitizeAlias and SanitizeEntity
+      clean an alias and entity against the store''s case and namespace rules, and
+      SanitizeAndUpsertGroup cleans a group and its member group IDs then upserts
+      it.'
+  - codeRefs:
+    - method:0ebd56effc14bcb2474fa49f4f48be90
+    - method:46134ecc343959c97e5702df31730108
+    - method:da642fabad8c9379b5e740750ae3d05c
+    id: r.user-error
+    level: MUST
+    text: 'userError must wrap an underlying error and satisfy the error interface:
+      Error returns the message, Unwrap returns the wrapped error, and Is reports
+      whether the wrapped error matches, so callers can distinguish user-input failures
+      from internal failures.'
   upstream: self
 - code:
   - third_party/openbao/internal/vault/policy/acl.go
