@@ -63492,19 +63492,20 @@ system_contexts:
     - function:b2de2dd4797e6ac7df2a41ae6cb405c4
     id: r.api-path-template
     level: MUST
-    text: apiPath takes a tagged template's literal segments and key names and returns
-      a function that rebuilds the string by interleaving the literal segments with
-      the value of each named key read from the data argument; a null or undefined
-      data argument is treated as an empty object so every key interpolates as undefined
-      rather than throwing, and the segments are joined into a single string.
+    text: apiPath takes a tagged template's literal segments in strings and the interpolated
+      key names in keys, and returns a function that rebuilds the string by interleaving
+      each literal segment with the value of the matching key read from the data argument;
+      a null or undefined data argument is replaced by an empty object so every key
+      interpolates as undefined instead of throwing, and the accumulated pieces are
+      joined with an empty separator into a single string.
   - codeRefs:
     - file:third_party/openbao/ui/app/macros/identity-capabilities.js
     id: r.identity-capabilities-path
     level: MUST
     text: The default export of identity-capabilities returns a lazy capability computed
-      property built from the apiPath template identity/${identityType}/id/${id},
-      declaring 'id' and 'identityType' as the interpolated keys so the capability
-      id is `identity/<identityType>/id/<id>`.
+      property built from the apiPath template identity/<identityType>/id/<id>, declaring
+      'id' and 'identityType' as the interpolated keys, so the capability id requested
+      for an identity is identity/<identityType>/id/<id>.
   - codeRefs:
     - file:third_party/openbao/ui/app/macros/lazy-capabilities.js
     - function:b2de2dd4797e6ac7df2a41ae6cb405c4
@@ -63512,20 +63513,21 @@ system_contexts:
     level: MUST
     text: The default export of lazy-capabilities takes a path template function followed
       by the key names it interpolates and returns a maybeQueryRecord computed property
-      for the 'capabilities' model whose options function reads exactly those key
-      names off the context; it drops null and undefined values from that read, and
-      when the number of remaining non-empty values is less than the number of keys
-      it returns undefined so no request is issued, otherwise it returns an object
-      whose id is the template function evaluated against the non-empty context object.
+      for the 'capabilities' model; its options function reads exactly those key names
+      off the context, rejects null and undefined values, returns undefined when the
+      number of remaining non-empty values is less than the number of keys so that
+      no request is issued, and otherwise returns an object whose id is the template
+      function evaluated against the non-empty context object.
   - codeRefs:
     - file:third_party/openbao/ui/app/macros/maybe-query-record.js
     - function:4a20b2d73189d0f97c759bc82588b607
     id: r.maybe-query-record-computed
     level: MUST
-    text: maybeQueryRecord returns an Ember computed property that depends on the
-      supplied key names plus 'store', and its getter builds a PromiseProxy object
-      whose promise is the result of store.queryRecord for the given model name and
-      query, so consumers observe a pending/settled proxy rather than the raw promise.
+    text: maybeQueryRecord returns an Ember computed property depending on the supplied
+      key names plus 'store', and its getter constructs an ObjectProxy extended with
+      PromiseProxyMixin whose promise is this.store.queryRecord(modelName, query),
+      so consumers observe a pending or settled proxy rather than the raw promise
+      and recompute when any key or the store changes.
   - codeRefs:
     - file:third_party/openbao/ui/app/macros/maybe-query-record.js
     - function:4a20b2d73189d0f97c759bc82588b607
@@ -63533,8 +63535,8 @@ system_contexts:
     level: MUST
     text: maybeQueryRecord accepts either an options object or a function as its second
       argument; a function is invoked with the computed property's context to produce
-      the query, and when the resulting query is falsy the proxy resolves to an empty
-      object instead of calling store.queryRecord.
+      the query, and when the resulting query is falsy the proxy's promise is a resolved
+      empty object instead of a store.queryRecord call.
   upstream: self
 - code:
   - third_party/openbao/ui/app/models/auth-config.js

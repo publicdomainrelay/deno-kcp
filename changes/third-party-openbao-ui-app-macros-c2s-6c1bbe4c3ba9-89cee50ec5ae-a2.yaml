@@ -1,0 +1,31 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-ui-app-macros-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-ui-app-macros
+  toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
+status:
+  agentLog: This context covers the three Ember.js macro modules under third_party/openbao/ui/app/macros
+    in the deno-kcp repository. maybe-query-record.js exports maybeQueryRecord, which
+    turns a store.queryRecord call into an Ember computed property whose getter returns
+    an ObjectProxy extended with PromiseProxyMixin, so consumers observe a pending/settled
+    proxy instead of the raw promise, and which accepts either a literal options object
+    or a function invoked with the computed property's context as the query source.
+    lazy-capabilities.js exports an apiPath tagged-template helper, a local variant
+    of the shared utils/api-path helper that omits the assertion, plus a default macro
+    that wires the 'capabilities' model query to a path template, reads the named
+    keys off the context, drops null and undefined values, and refuses to fire a request
+    until every key is present. identity-capabilities.js is a thin consumer that composes
+    apiPath and the lazy-capabilities macro into the identity/<identityType>/id/<id>
+    path over the keys 'id' and 'identityType'.
+  message: wrote 5 requirement(s) and 2 interface(s) for third-party-openbao-ui-app-macros
+  phase: Succeeded
+superseded:
+- message: wrote 5 requirement(s) and 2 interface(s) for third-party-openbao-ui-app-macros
+  name: third-party-openbao-ui-app-macros-c2s-6c1bbe4c3ba9-89cee50ec5ae
+  phase: Succeeded
