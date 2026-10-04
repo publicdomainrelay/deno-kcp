@@ -729,6 +729,40 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.secrets-abilities-role` (MUST): "testRoles.yaml declares ClusterRole k8s-secrets-abilities granting create on serviceaccounts/token, get on namespaces, create and delete on serviceaccounts, and create and delete on rolebindings, roles, clusterrolebindings and clusterroles, so a bound ServiceAccount can stand in for what the secrets engine needs."
 - added `r.test-service-accounts` (MUST): "testServiceAccounts.yaml declares four ServiceAccounts, all in namespace test: test-token-create, sample-app, super-jwt and broken-jwt; these are the subjects the bindings attach roles to."
 
+### third-party-openbao-internal-builtin-logical-kv
+
+- intent: "" -> "This context exists so the versioned KV v2 engine and its legacy passthrough sibling can be changed without breaking their storage layout, their upgrade path, or their delete-version-after and version-pruning rules. It fixes the factory entry points, the path set a mount exposes, the seal-wrap prefixes, and the protobuf-backed metadata semantics that the path handlers read and write."
+- added `r.add-version` (MUST): "KeyMetadata.AddVersion must append a new version with the given created and deletion timestamps, return the new VersionMetadata and its version number, and keep the version map within configMaxVersions by evicting the oldest entries."
+- added `r.behaviour-tests` (SHOULD): "Each non-generated file must keep its sibling test file covering the behaviour it defines: delete-version-after, passthrough, path config, path data, path delete, path destroy, path metadata, path subkeys and upgrade."
+- added `r.cleanup-cancels-upgrade` (MUST): "versionedKVBackend.Cleanup must cancel the upgrade context when one was created, so background upgrade work stops when the mount is cleaned up."
+- added `r.configuration-fields` (MUST): "Configuration must hold the mount-wide max versions, CAS-required, delete-version-after and metadata-CAS-required settings, all readable through generated getters and resettable through Reset."
+- added `r.delete-version-after-getter` (MUST): "deleteVersionAfterGetter must expose GetDeleteVersionAfter returning a *durationpb.Duration, so both Configuration and KeyMetadata can be read through one policy interface."
+- added `r.delete-version-after-policy` (MUST): "Configuration must express the delete-version-after policy: IsDeleteVersionAfterDisabled reports the disabled state, DisableDeleteVersionAfter sets it, and ResetDeleteVersionAfter clears it back to the unset value."
+- added `r.factory-alias` (MUST): "Factory must expose the versioned KV engine under the package's logical.Factory signature, taking a context and backend config and returning a logical.Backend or an error."
+- added `r.invalidate-key` (MUST): "versionedKVBackend.Invalidate must be wired as the framework invalidate hook and must drop cached state for the given key."
+- added `r.key-metadata-fields` (MUST): "KeyMetadata must carry the key name, the versions map, the current and oldest version numbers, the created and updated times, the max versions, the CAS-required flags, the delete-version-after duration and the custom metadata map, each readable through its getter."
+- added `r.one-time-upgrade` (MUST): "The factory must check upgradeDone on the storage view and run Upgrade only when the upgrade has not already completed, so repeated mounts do not re-run the storage migration."
+- added `r.passthrough-factories` (MUST): "PassthroughBackendFactory and LeasedPassthroughBackendFactory must both delegate to LeaseSwitchedPassthroughBackend, passing leases false and true respectively, so a single constructor covers both mount types."
+- added `r.passthrough-interface` (SHOULD): "The Passthrough interface must name the operations the passthrough backend family supports, so lease-generating and plain variants stay interchangeable behind it."
+- added `r.passthrough-lease-switch` (MUST): "A PassthroughBackend built with leases enabled must report true from GeneratesLeases, and one built without must report false."
+- added `r.path-registration-order` (MUST): "The versioned backend must register the config, data, metadata, detailed metadata, destroy and subkeys paths plus the delete paths, and must append the invalid path last so valid paths match first."
+- added `r.protobuf-message-contract` (MUST): "Every protobuf type in types.pb.go must implement the proto.Message surface — Reset, String, ProtoMessage, ProtoReflect and Descriptor — so the metadata records serialize to and from the storage format."
+- added `r.salt-accessor` (MUST): "versionedKVBackend.Salt must return the salt.Salt for the given storage, used to hash sensitive metadata in responses."
+- added `r.seal-wrap-storage` (MUST): "The versioned backend must seal-wrap the versioned data prefix, the key policy prefix and the archived key policy prefix, so those three storage subtrees are never written unsealed."
+- added `r.upgrade-info-done` (MUST): "UpgradeInfo must carry StartedTime and Done so the upgrade records when it began and whether it finished, and Done must be readable through GetDone."
+- added `r.version-fields` (MUST): "Version must store the opaque data blob together with its created time and deletion time, so a read can return the payload and its lifecycle timestamps."
+- added `r.version-metadata-fields` (MUST): "VersionMetadata must record created time, deletion time and the destroyed flag per version, so deleted and destroyed versions stay distinguishable after the fact."
+- added `r.versioned-factory-entry` (MUST): "VersionedKVFactory must build a versionedKVBackend, reject a config whose BackendUUID is empty with an error, and use that UUID as the backend storage prefix so all keys are namespaced per mount."
+
+### third-party-openbao-internal-builtin-logical-kv-cmd-kv
+
+- intent: "" -> "This context exists because the KV secrets engine must be runnable as an out-of-process OpenBao plugin, not only as an in-tree backend. Its purpose is to adapt the kv backend's factory to the plugin serving protocol: it collects the TLS material the plugin needs to talk back to the OpenBao server, converts it into the provider function the plugin SDK expects, and starts the plugin server with the KV factory registered as the backend. It is deliberately thin, holding no KV logic and no policy of its own; all storage behavior lives in the kv package it references."
+- added `r.flag-configuration-surface` (MUST): "The configuration surface is the flag set returned by api.PluginAPIClientMeta.FlagSet, parsed from os.Args[1:]. It registers the string flags -ca-cert, -ca-path, -client-cert, -client-key and -tls-server-name, each defaulting to the empty string, and the boolean flag -tls-skip-verify defaulting to false. No environment variable backs any of these flags; an absent flag leaves its default in place, and a non-empty or true value is what causes a custom TLSConfig to be constructed."
+- added `r.no-go-source-comments-or-exports` (SHOULD): "The file should remain a minimal package main entrypoint: it declares no exported identifiers and no own types or methods, keeping all KV behavior in the referenced kv package."
+- added `r.serve-error-exit` (MUST): "When plugin.Serve returns a non-nil error, main must log "plugin shutting down" at error level through an hclog logger created with default LoggerOptions, attaching the error under the "error" key, and then terminate the process with exit status 1."
+- added `r.serve-kv-backend-as-plugin` (MUST): "main must call plugin.Serve with a ServeOpts value whose BackendFactoryFunc is kv.Factory, so that the process serves the KV secrets backend over the plugin protocol."
+- added `r.tls-provider-from-parsed-flags` (MUST): "main must derive its TLS configuration from the parsed plugin flags and pass api.VaultPluginTLSProvider of that configuration as ServeOpts.TLSProviderFunc, so the plugin can establish its connection back to the server."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -740,5 +774,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-builtin-logical-kubernetes-integrationtest-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-kubernetes-integrationtest-kind-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-kubernetes-integrationtest-vault-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-builtin-logical-kv-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-internal-builtin-logical-kv-cmd-kv-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-builtin-logical-kv-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-internal-builtin-logical-kv-cmd-kv-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |

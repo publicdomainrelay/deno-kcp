@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the versioned KV v2 engine and its legacy passthrough sibling can be changed without breaking their storage layout, their upgrade path, or their delete-version-after and version-pruning rules. It fixes the factory entry points, the path set a mount exposes, the seal-wrap prefixes, and the protobuf-backed metadata semantics that the path handlers read and write.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

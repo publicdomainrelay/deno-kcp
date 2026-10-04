@@ -6,5 +6,53 @@ metadata:
   name: third-party-openbao-internal-builtin-logical-kv-cmd-kv
   namespace: default
 spec:
+  intent: 'This context exists because the KV secrets engine must be runnable as an
+    out-of-process OpenBao plugin, not only as an in-tree backend. Its purpose is
+    to adapt the kv backend''s factory to the plugin serving protocol: it collects
+    the TLS material the plugin needs to talk back to the OpenBao server, converts
+    it into the provider function the plugin SDK expects, and starts the plugin server
+    with the KV factory registered as the backend. It is deliberately thin, holding
+    no KV logic and no policy of its own; all storage behavior lives in the kv package
+    it references.'
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kv/cmd/kv/main.go
+    id: r.flag-configuration-surface
+    level: MUST
+    text: The configuration surface is the flag set returned by api.PluginAPIClientMeta.FlagSet,
+      parsed from os.Args[1:]. It registers the string flags -ca-cert, -ca-path, -client-cert,
+      -client-key and -tls-server-name, each defaulting to the empty string, and the
+      boolean flag -tls-skip-verify defaulting to false. No environment variable backs
+      any of these flags; an absent flag leaves its default in place, and a non-empty
+      or true value is what causes a custom TLSConfig to be constructed.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kv/cmd/kv/main.go
+    id: r.no-go-source-comments-or-exports
+    level: SHOULD
+    text: 'The file should remain a minimal package main entrypoint: it declares no
+      exported identifiers and no own types or methods, keeping all KV behavior in
+      the referenced kv package.'
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kv/cmd/kv/main.go
+    id: r.serve-error-exit
+    level: MUST
+    text: When plugin.Serve returns a non-nil error, main must log "plugin shutting
+      down" at error level through an hclog logger created with default LoggerOptions,
+      attaching the error under the "error" key, and then terminate the process with
+      exit status 1.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kv/cmd/kv/main.go
+    id: r.serve-kv-backend-as-plugin
+    level: MUST
+    text: main must call plugin.Serve with a ServeOpts value whose BackendFactoryFunc
+      is kv.Factory, so that the process serves the KV secrets backend over the plugin
+      protocol.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kv/cmd/kv/main.go
+    id: r.tls-provider-from-parsed-flags
+    level: MUST
+    text: main must derive its TLS configuration from the parsed plugin flags and
+      pass api.VaultPluginTLSProvider of that configuration as ServeOpts.TLSProviderFunc,
+      so the plugin can establish its connection back to the server.
   upstream: self

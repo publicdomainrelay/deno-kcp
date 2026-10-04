@@ -10899,15 +10899,558 @@ system_contexts:
   - file:third_party/openbao/internal/builtin/logical/kv/types.pb.go types.pb.go@third_party/openbao/internal/builtin/logical/kv/types.pb.go
   - file:third_party/openbao/internal/builtin/logical/kv/upgrade.go upgrade.go@third_party/openbao/internal/builtin/logical/kv/upgrade.go
   - file:third_party/openbao/internal/builtin/logical/kv/upgrade_test.go upgrade_test.go@third_party/openbao/internal/builtin/logical/kv/upgrade_test.go
+  - function:5fcdf7982ae03bba4203bc39c5406900 Factory@third_party/openbao/internal/builtin/logical/kv/backend.go:79
+  - function:778fef452fd9feebfb8741bdccad3f35 LeaseSwitchedPassthroughBackend@third_party/openbao/internal/builtin/logical/kv/passthrough.go:39
+  - function:84e679d44e00f2f0fa66550bce1db1bc VersionedKVFactory@third_party/openbao/internal/builtin/logical/kv/backend.go:98
+  - function:90356317fc490e84ebfd192e84cb6157 PassthroughBackendFactory@third_party/openbao/internal/builtin/logical/kv/passthrough.go:27
+  - function:d43fb0f0c8c3c2c25ec72221964346b4 LeasedPassthroughBackendFactory@third_party/openbao/internal/builtin/logical/kv/passthrough.go:33
+  - interface:53ea5d2d60b2adc53a6ac04664c96914 Passthrough@third_party/openbao/internal/builtin/logical/kv/passthrough.go:17
+  - method:0672e4f40697d72f6b93499722d1d493 UpgradeInfo.ProtoMessage@third_party/openbao/internal/builtin/logical/kv/types.pb.go:403
+  - method:0731b8446cfba4fcbe3a49dc76d27c73 Version.GetDeletionTime@third_party/openbao/internal/builtin/logical/kv/types.pb.go:374
+  - method:0fbd0f3cf35d1f1d1ec161fc87fe3661 versionedKVBackend.Salt@third_party/openbao/internal/builtin/logical/kv/backend.go:241
+  - method:1a0d09d668b21f82b5e0182563b41385 Configuration.ResetDeleteVersionAfter@third_party/openbao/internal/builtin/logical/kv/delete_version_after.go:58
+  - method:1a6df70c296f2a6e7d8aa4a3d3d5abb2 KeyMetadata.AddVersion@third_party/openbao/internal/builtin/logical/kv/path_data.go:680
+  - method:2e1528ea4c97b2e57195886dd7e3f097 Configuration.Descriptor@third_party/openbao/internal/builtin/logical/kv/types.pb.go:63
+  - method:37f0bb7dc1e0d867af2f2979d72969e3 UpgradeInfo.GetDone@third_party/openbao/internal/builtin/logical/kv/types.pb.go:429
+  - method:3dc9638c8f97f4ba51a1290d931e5183 Version.GetData@third_party/openbao/internal/builtin/logical/kv/types.pb.go:360
+  - method:43c8a046b7f3e9d4474ff332247435b4 Configuration.GetCasRequired@third_party/openbao/internal/builtin/logical/kv/types.pb.go:74
+  - method:48872ceadb4870f7b55413de370307f4 Configuration.IsDeleteVersionAfterDisabled@third_party/openbao/internal/builtin/logical/kv/delete_version_after.go:47
+  - method:4a69613ad0bf60102650a922b801e483 Version.GetCreatedTime@third_party/openbao/internal/builtin/logical/kv/types.pb.go:367
+  - method:4b18eb3baf24c04dcb2c0cf759e72258 KeyMetadata.GetVersions@third_party/openbao/internal/builtin/logical/kv/types.pb.go:238
+  - method:599e5305ed222a21773656d9594cda2b KeyMetadata.GetOldestVersion@third_party/openbao/internal/builtin/logical/kv/types.pb.go:252
+  - method:5b122daa4a84b8f06fb18c8d59a921ab Configuration.GetMetadataCasRequired@third_party/openbao/internal/builtin/logical/kv/types.pb.go:88
+  - method:5cdd63e5d66feecd8add8f17b2ad22c1 Configuration.GetDeleteVersionAfter@third_party/openbao/internal/builtin/logical/kv/types.pb.go:81
+  - method:63a13ea1b4728b1bba83a69cf1ee2620 Configuration.DisableDeleteVersionAfter@third_party/openbao/internal/builtin/logical/kv/delete_version_after.go:52
+  - method:6c4cece2ad1f07035c21e58b88820c58 UpgradeInfo.GetStartedTime@third_party/openbao/internal/builtin/logical/kv/types.pb.go:422
+  - method:6e3e20ca59f6690b6e50bc3f72ce286c VersionMetadata.GetDestroyed@third_party/openbao/internal/builtin/logical/kv/types.pb.go:154
+  - method:7b042dd4f0a69c5d18a91bd7dcac61ed Configuration.ProtoMessage@third_party/openbao/internal/builtin/logical/kv/types.pb.go:48
+  - method:82171a9381c918072e55f4ed4e84ffbc KeyMetadata.GetKey@third_party/openbao/internal/builtin/logical/kv/types.pb.go:231
+  - method:846b341836637f13f26955fcb8f60911 Configuration.Reset@third_party/openbao/internal/builtin/logical/kv/types.pb.go:37
+  - method:8c335d66de99d3f69de17e0138118ac1 deleteVersionAfterGetter.GetDeleteVersionAfter@third_party/openbao/internal/builtin/logical/kv/delete_version_after.go:27
+  - method:8f53bbd4a8bf9299292fb50cab63aff7 VersionMetadata.GetCreatedTime@third_party/openbao/internal/builtin/logical/kv/types.pb.go:140
+  - method:c095ed7b9c7da8c3cd0a61c11192fa48 Configuration.ProtoReflect@third_party/openbao/internal/builtin/logical/kv/types.pb.go:50
+  - method:c5e0e72d4faa4d927a79851e31cdc6fe PassthroughBackend.GeneratesLeases@third_party/openbao/internal/builtin/logical/kv/passthrough.go:206
+  - method:d52f89735b4f3b670dfb0b1d5e56467d KeyMetadata.GetCurrentVersion@third_party/openbao/internal/builtin/logical/kv/types.pb.go:245
+  - method:ecb117f78d684863ae523519b5e3af95 versionedKVBackend.Invalidate@third_party/openbao/internal/builtin/logical/kv/backend.go:222
+  - method:f3a70af10d3f80a7e3e6a73554de9223 Configuration.GetMaxVersions@third_party/openbao/internal/builtin/logical/kv/types.pb.go:67
+  - method:f5909d260f563448d984345fbd09d030 versionedKVBackend.Cleanup@third_party/openbao/internal/builtin/logical/kv/backend.go:214
+  - method:f9d661b94003b422417cdedcfa5f644e VersionMetadata.GetDeletionTime@third_party/openbao/internal/builtin/logical/kv/types.pb.go:147
+  - method:fdd05a5d8c350a1c63d475834bfa2416 versionedKVBackend.Upgrade@third_party/openbao/internal/builtin/logical/kv/upgrade.go:68
+  - struct:1b3bc262aee3825d7be629949168940b VersionMetadata@third_party/openbao/internal/builtin/logical/kv/types.pb.go:95
+  - struct:602c72e936a6725a7d0d8bf7a7d02223 Configuration@third_party/openbao/internal/builtin/logical/kv/types.pb.go:27
+  - struct:9592f5063b50dc739a3be3a50f36d882 Version@third_party/openbao/internal/builtin/logical/kv/types.pb.go:315
+  - struct:a99b80262036efd07220ce3d5cec7438 PassthroughBackend@third_party/openbao/internal/builtin/logical/kv/passthrough.go:122
+  - struct:fc97c951480eea58123fbac86e4df12b KeyMetadata@third_party/openbao/internal/builtin/logical/kv/types.pb.go:161
   id: sc.third-party-openbao-internal-builtin-logical-kv
+  intent: This context exists so the versioned KV v2 engine and its legacy passthrough
+    sibling can be changed without breaking their storage layout, their upgrade path,
+    or their delete-version-after and version-pruning rules. It fixes the factory
+    entry points, the path set a mount exposes, the seal-wrap prefixes, and the protobuf-backed
+    metadata semantics that the path handlers read and write.
+  interfaces:
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: struct
+    name: Configuration
+    signature: type Configuration struct
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: Configuration.Descriptor
+    signature: func (x *Configuration) Descriptor() ([]byte, []int)
+  - file: third_party/openbao/internal/builtin/logical/kv/delete_version_after.go
+    kind: method
+    name: Configuration.DisableDeleteVersionAfter
+    signature: func (c *Configuration) DisableDeleteVersionAfter()
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: Configuration.GetCasRequired
+    signature: func (x *Configuration) GetCasRequired() bool
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: Configuration.GetDeleteVersionAfter
+    signature: func (x *Configuration) GetDeleteVersionAfter() *durationpb.Duration
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: Configuration.GetMaxVersions
+    signature: func (x *Configuration) GetMaxVersions() uint32
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: Configuration.GetMetadataCasRequired
+    signature: func (x *Configuration) GetMetadataCasRequired() bool
+  - file: third_party/openbao/internal/builtin/logical/kv/delete_version_after.go
+    kind: method
+    name: Configuration.IsDeleteVersionAfterDisabled
+    signature: func (c *Configuration) IsDeleteVersionAfterDisabled() bool
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: Configuration.ProtoMessage
+    signature: func (x *Configuration) ProtoMessage()
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: Configuration.ProtoReflect
+    signature: func (x *Configuration) ProtoReflect() protoreflect.Message
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: Configuration.Reset
+    signature: func (x *Configuration) Reset()
+  - file: third_party/openbao/internal/builtin/logical/kv/delete_version_after.go
+    kind: method
+    name: Configuration.ResetDeleteVersionAfter
+    signature: func (c *Configuration) ResetDeleteVersionAfter()
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: Configuration.String
+    signature: func (x *Configuration) String() string
+  - file: third_party/openbao/internal/builtin/logical/kv/backend.go
+    kind: function
+    name: Factory
+    signature: func Factory(ctx context.Context, conf *logical.BackendConfig) (logical.Backend,
+      error)
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: struct
+    name: KeyMetadata
+    signature: type KeyMetadata struct
+  - file: third_party/openbao/internal/builtin/logical/kv/path_data.go
+    kind: method
+    name: KeyMetadata.AddVersion
+    signature: func (k *KeyMetadata) AddVersion(createdTime, deletionTime *timestamppb.Timestamp,
+      configMaxVersions uint32) (*VersionMetadata, uint64)
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: KeyMetadata.GetCasRequired
+    signature: func (x *KeyMetadata) GetCasRequired() bool
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: KeyMetadata.GetCreatedTime
+    signature: func (x *KeyMetadata) GetCreatedTime() *timestamppb.Timestamp
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: KeyMetadata.GetCurrentMetadataVersion
+    signature: func (x *KeyMetadata) GetCurrentMetadataVersion() uint64
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: KeyMetadata.GetCurrentVersion
+    signature: func (x *KeyMetadata) GetCurrentVersion() uint64
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: KeyMetadata.GetCustomMetadata
+    signature: func (x *KeyMetadata) GetCustomMetadata() map[string]string
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: KeyMetadata.GetDeleteVersionAfter
+    signature: func (x *KeyMetadata) GetDeleteVersionAfter() *durationpb.Duration
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: KeyMetadata.GetKey
+    signature: func (x *KeyMetadata) GetKey() string
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: KeyMetadata.GetMaxVersions
+    signature: func (x *KeyMetadata) GetMaxVersions() uint32
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: KeyMetadata.GetMetadataCasRequired
+    signature: func (x *KeyMetadata) GetMetadataCasRequired() bool
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: KeyMetadata.GetOldestVersion
+    signature: func (x *KeyMetadata) GetOldestVersion() uint64
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: KeyMetadata.GetUpdatedTime
+    signature: func (x *KeyMetadata) GetUpdatedTime() *timestamppb.Timestamp
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: KeyMetadata.GetVersions
+    signature: func (x *KeyMetadata) GetVersions() map[uint64]*VersionMetadata
+  - file: third_party/openbao/internal/builtin/logical/kv/passthrough.go
+    kind: function
+    name: LeaseSwitchedPassthroughBackend
+    signature: func LeaseSwitchedPassthroughBackend(ctx context.Context, conf *logical.BackendConfig,
+      leases bool) (logical.Backend, error)
+  - file: third_party/openbao/internal/builtin/logical/kv/passthrough.go
+    kind: function
+    name: LeasedPassthroughBackendFactory
+    signature: func LeasedPassthroughBackendFactory(ctx context.Context, conf *logical.BackendConfig)
+      (logical.Backend, error)
+  - file: third_party/openbao/internal/builtin/logical/kv/passthrough.go
+    kind: interface
+    name: Passthrough
+    signature: type Passthrough interface
+  - file: third_party/openbao/internal/builtin/logical/kv/passthrough.go
+    kind: struct
+    name: PassthroughBackend
+    signature: type PassthroughBackend struct
+  - file: third_party/openbao/internal/builtin/logical/kv/passthrough.go
+    kind: method
+    name: PassthroughBackend.GeneratesLeases
+    signature: func (b *PassthroughBackend) GeneratesLeases() bool
+  - file: third_party/openbao/internal/builtin/logical/kv/passthrough.go
+    kind: function
+    name: PassthroughBackendFactory
+    signature: func PassthroughBackendFactory(ctx context.Context, conf *logical.BackendConfig)
+      (logical.Backend, error)
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: struct
+    name: UpgradeInfo
+    signature: type UpgradeInfo struct
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: UpgradeInfo.Descriptor
+    signature: func (x *UpgradeInfo) Descriptor() ([]byte, []int)
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: UpgradeInfo.GetDone
+    signature: func (x *UpgradeInfo) GetDone() bool
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: UpgradeInfo.GetStartedTime
+    signature: func (x *UpgradeInfo) GetStartedTime() *timestamppb.Timestamp
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: UpgradeInfo.ProtoMessage
+    signature: func (x *UpgradeInfo) ProtoMessage()
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: UpgradeInfo.ProtoReflect
+    signature: func (x *UpgradeInfo) ProtoReflect() protoreflect.Message
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: UpgradeInfo.Reset
+    signature: func (x *UpgradeInfo) Reset()
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: UpgradeInfo.String
+    signature: func (x *UpgradeInfo) String() string
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: struct
+    name: Version
+    signature: type Version struct
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: Version.Descriptor
+    signature: func (x *Version) Descriptor() ([]byte, []int)
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: Version.GetCreatedTime
+    signature: func (x *Version) GetCreatedTime() *timestamppb.Timestamp
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: Version.GetData
+    signature: func (x *Version) GetData() []byte
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: Version.GetDeletionTime
+    signature: func (x *Version) GetDeletionTime() *timestamppb.Timestamp
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: Version.ProtoMessage
+    signature: func (x *Version) ProtoMessage()
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: Version.ProtoReflect
+    signature: func (x *Version) ProtoReflect() protoreflect.Message
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: Version.Reset
+    signature: func (x *Version) Reset()
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: Version.String
+    signature: func (x *Version) String() string
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: struct
+    name: VersionMetadata
+    signature: type VersionMetadata struct
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: VersionMetadata.GetCreatedTime
+    signature: func (x *VersionMetadata) GetCreatedTime() *timestamppb.Timestamp
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: VersionMetadata.GetDeletionTime
+    signature: func (x *VersionMetadata) GetDeletionTime() *timestamppb.Timestamp
+  - file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    kind: method
+    name: VersionMetadata.GetDestroyed
+    signature: func (x *VersionMetadata) GetDestroyed() bool
+  - file: third_party/openbao/internal/builtin/logical/kv/backend.go
+    kind: function
+    name: VersionedKVFactory
+    signature: func VersionedKVFactory(ctx context.Context, conf *logical.BackendConfig)
+      (logical.Backend, error)
+  - file: third_party/openbao/internal/builtin/logical/kv/delete_version_after.go
+    kind: method
+    name: deleteVersionAfterGetter.GetDeleteVersionAfter
+    signature: func (x deleteVersionAfterGetter) GetDeleteVersionAfter() *durationpb.Duration
+  - file: third_party/openbao/internal/builtin/logical/kv/backend.go
+    kind: method
+    name: versionedKVBackend.Cleanup
+    signature: func (b *versionedKVBackend) Cleanup(ctx context.Context)
+  - file: third_party/openbao/internal/builtin/logical/kv/backend.go
+    kind: method
+    name: versionedKVBackend.Invalidate
+    signature: func (b *versionedKVBackend) Invalidate(ctx context.Context, key string)
+  - file: third_party/openbao/internal/builtin/logical/kv/backend.go
+    kind: method
+    name: versionedKVBackend.Salt
+    signature: func (b *versionedKVBackend) Salt(ctx context.Context, s logical.Storage)
+      (*salt.Salt, error)
+  - file: third_party/openbao/internal/builtin/logical/kv/upgrade.go
+    kind: method
+    name: versionedKVBackend.Upgrade
+    signature: func (b *versionedKVBackend) Upgrade(ctx context.Context, s logical.Storage)
+      error
   name: third-party-openbao-internal-builtin-logical-kv
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kv/path_data.go
+    - method:1a6df70c296f2a6e7d8aa4a3d3d5abb2
+    id: r.add-version
+    level: MUST
+    text: KeyMetadata.AddVersion must append a new version with the given created
+      and deletion timestamps, return the new VersionMetadata and its version number,
+      and keep the version map within configMaxVersions by evicting the oldest entries.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kv/delete_version_after_test.go
+    - file:third_party/openbao/internal/builtin/logical/kv/passthrough_test.go
+    - file:third_party/openbao/internal/builtin/logical/kv/path_config_test.go
+    - file:third_party/openbao/internal/builtin/logical/kv/path_data_test.go
+    - file:third_party/openbao/internal/builtin/logical/kv/path_delete_test.go
+    - file:third_party/openbao/internal/builtin/logical/kv/path_destroy_test.go
+    - file:third_party/openbao/internal/builtin/logical/kv/path_metadata_test.go
+    - file:third_party/openbao/internal/builtin/logical/kv/path_subkeys_test.go
+    - file:third_party/openbao/internal/builtin/logical/kv/upgrade_test.go
+    id: r.behaviour-tests
+    level: SHOULD
+    text: 'Each non-generated file must keep its sibling test file covering the behaviour
+      it defines: delete-version-after, passthrough, path config, path data, path
+      delete, path destroy, path metadata, path subkeys and upgrade.'
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kv/backend.go
+    - method:f5909d260f563448d984345fbd09d030
+    id: r.cleanup-cancels-upgrade
+    level: MUST
+    text: versionedKVBackend.Cleanup must cancel the upgrade context when one was
+      created, so background upgrade work stops when the mount is cleaned up.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    - method:43c8a046b7f3e9d4474ff332247435b4
+    - method:5b122daa4a84b8f06fb18c8d59a921ab
+    - method:5cdd63e5d66feecd8add8f17b2ad22c1
+    - method:846b341836637f13f26955fcb8f60911
+    - method:f3a70af10d3f80a7e3e6a73554de9223
+    - struct:602c72e936a6725a7d0d8bf7a7d02223
+    id: r.configuration-fields
+    level: MUST
+    text: Configuration must hold the mount-wide max versions, CAS-required, delete-version-after
+      and metadata-CAS-required settings, all readable through generated getters and
+      resettable through Reset.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kv/delete_version_after.go
+    - method:8c335d66de99d3f69de17e0138118ac1
+    id: r.delete-version-after-getter
+    level: MUST
+    text: deleteVersionAfterGetter must expose GetDeleteVersionAfter returning a *durationpb.Duration,
+      so both Configuration and KeyMetadata can be read through one policy interface.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kv/delete_version_after.go
+    - method:1a0d09d668b21f82b5e0182563b41385
+    - method:48872ceadb4870f7b55413de370307f4
+    - method:63a13ea1b4728b1bba83a69cf1ee2620
+    id: r.delete-version-after-policy
+    level: MUST
+    text: 'Configuration must express the delete-version-after policy: IsDeleteVersionAfterDisabled
+      reports the disabled state, DisableDeleteVersionAfter sets it, and ResetDeleteVersionAfter
+      clears it back to the unset value.'
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kv/backend.go
+    - function:5fcdf7982ae03bba4203bc39c5406900
+    id: r.factory-alias
+    level: MUST
+    text: Factory must expose the versioned KV engine under the package's logical.Factory
+      signature, taking a context and backend config and returning a logical.Backend
+      or an error.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kv/backend.go
+    - method:ecb117f78d684863ae523519b5e3af95
+    id: r.invalidate-key
+    level: MUST
+    text: versionedKVBackend.Invalidate must be wired as the framework invalidate
+      hook and must drop cached state for the given key.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    - method:4b18eb3baf24c04dcb2c0cf759e72258
+    - method:599e5305ed222a21773656d9594cda2b
+    - method:82171a9381c918072e55f4ed4e84ffbc
+    - method:d52f89735b4f3b670dfb0b1d5e56467d
+    - struct:fc97c951480eea58123fbac86e4df12b
+    id: r.key-metadata-fields
+    level: MUST
+    text: KeyMetadata must carry the key name, the versions map, the current and oldest
+      version numbers, the created and updated times, the max versions, the CAS-required
+      flags, the delete-version-after duration and the custom metadata map, each readable
+      through its getter.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kv/upgrade.go
+    - function:84e679d44e00f2f0fa66550bce1db1bc
+    - method:fdd05a5d8c350a1c63d475834bfa2416
+    id: r.one-time-upgrade
+    level: MUST
+    text: The factory must check upgradeDone on the storage view and run Upgrade only
+      when the upgrade has not already completed, so repeated mounts do not re-run
+      the storage migration.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kv/passthrough.go
+    - function:778fef452fd9feebfb8741bdccad3f35
+    - function:90356317fc490e84ebfd192e84cb6157
+    - function:d43fb0f0c8c3c2c25ec72221964346b4
+    id: r.passthrough-factories
+    level: MUST
+    text: PassthroughBackendFactory and LeasedPassthroughBackendFactory must both
+      delegate to LeaseSwitchedPassthroughBackend, passing leases false and true respectively,
+      so a single constructor covers both mount types.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kv/passthrough.go
+    - interface:53ea5d2d60b2adc53a6ac04664c96914
+    id: r.passthrough-interface
+    level: SHOULD
+    text: The Passthrough interface must name the operations the passthrough backend
+      family supports, so lease-generating and plain variants stay interchangeable
+      behind it.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kv/passthrough.go
+    - method:c5e0e72d4faa4d927a79851e31cdc6fe
+    - struct:a99b80262036efd07220ce3d5cec7438
+    id: r.passthrough-lease-switch
+    level: MUST
+    text: A PassthroughBackend built with leases enabled must report true from GeneratesLeases,
+      and one built without must report false.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kv/backend.go
+    - function:84e679d44e00f2f0fa66550bce1db1bc
+    id: r.path-registration-order
+    level: MUST
+    text: The versioned backend must register the config, data, metadata, detailed
+      metadata, destroy and subkeys paths plus the delete paths, and must append the
+      invalid path last so valid paths match first.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    - method:0672e4f40697d72f6b93499722d1d493
+    - method:2e1528ea4c97b2e57195886dd7e3f097
+    - method:7b042dd4f0a69c5d18a91bd7dcac61ed
+    - method:c095ed7b9c7da8c3cd0a61c11192fa48
+    id: r.protobuf-message-contract
+    level: MUST
+    text: Every protobuf type in types.pb.go must implement the proto.Message surface
+      — Reset, String, ProtoMessage, ProtoReflect and Descriptor — so the metadata
+      records serialize to and from the storage format.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kv/backend.go
+    - method:0fbd0f3cf35d1f1d1ec161fc87fe3661
+    id: r.salt-accessor
+    level: MUST
+    text: versionedKVBackend.Salt must return the salt.Salt for the given storage,
+      used to hash sensitive metadata in responses.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kv/backend.go
+    - function:84e679d44e00f2f0fa66550bce1db1bc
+    id: r.seal-wrap-storage
+    level: MUST
+    text: The versioned backend must seal-wrap the versioned data prefix, the key
+      policy prefix and the archived key policy prefix, so those three storage subtrees
+      are never written unsealed.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    - method:37f0bb7dc1e0d867af2f2979d72969e3
+    - method:6c4cece2ad1f07035c21e58b88820c58
+    id: r.upgrade-info-done
+    level: MUST
+    text: UpgradeInfo must carry StartedTime and Done so the upgrade records when
+      it began and whether it finished, and Done must be readable through GetDone.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    - method:0731b8446cfba4fcbe3a49dc76d27c73
+    - method:3dc9638c8f97f4ba51a1290d931e5183
+    - method:4a69613ad0bf60102650a922b801e483
+    - struct:9592f5063b50dc739a3be3a50f36d882
+    id: r.version-fields
+    level: MUST
+    text: Version must store the opaque data blob together with its created time and
+      deletion time, so a read can return the payload and its lifecycle timestamps.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    - method:6e3e20ca59f6690b6e50bc3f72ce286c
+    - method:8f53bbd4a8bf9299292fb50cab63aff7
+    - method:f9d661b94003b422417cdedcfa5f644e
+    - struct:1b3bc262aee3825d7be629949168940b
+    id: r.version-metadata-fields
+    level: MUST
+    text: VersionMetadata must record created time, deletion time and the destroyed
+      flag per version, so deleted and destroyed versions stay distinguishable after
+      the fact.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kv/backend.go
+    - function:84e679d44e00f2f0fa66550bce1db1bc
+    id: r.versioned-factory-entry
+    level: MUST
+    text: VersionedKVFactory must build a versionedKVBackend, reject a config whose
+      BackendUUID is empty with an error, and use that UUID as the backend storage
+      prefix so all keys are namespaced per mount.
   upstream: self
 - code:
   - third_party/openbao/internal/builtin/logical/kv/cmd/kv/main.go
   codeRefIndex:
   - file:third_party/openbao/internal/builtin/logical/kv/cmd/kv/main.go main.go@third_party/openbao/internal/builtin/logical/kv/cmd/kv/main.go
   id: sc.third-party-openbao-internal-builtin-logical-kv-cmd-kv
+  intent: 'This context exists because the KV secrets engine must be runnable as an
+    out-of-process OpenBao plugin, not only as an in-tree backend. Its purpose is
+    to adapt the kv backend''s factory to the plugin serving protocol: it collects
+    the TLS material the plugin needs to talk back to the OpenBao server, converts
+    it into the provider function the plugin SDK expects, and starts the plugin server
+    with the KV factory registered as the backend. It is deliberately thin, holding
+    no KV logic and no policy of its own; all storage behavior lives in the kv package
+    it references.'
   name: third-party-openbao-internal-builtin-logical-kv-cmd-kv
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kv/cmd/kv/main.go
+    id: r.flag-configuration-surface
+    level: MUST
+    text: The configuration surface is the flag set returned by api.PluginAPIClientMeta.FlagSet,
+      parsed from os.Args[1:]. It registers the string flags -ca-cert, -ca-path, -client-cert,
+      -client-key and -tls-server-name, each defaulting to the empty string, and the
+      boolean flag -tls-skip-verify defaulting to false. No environment variable backs
+      any of these flags; an absent flag leaves its default in place, and a non-empty
+      or true value is what causes a custom TLSConfig to be constructed.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kv/cmd/kv/main.go
+    id: r.no-go-source-comments-or-exports
+    level: SHOULD
+    text: 'The file should remain a minimal package main entrypoint: it declares no
+      exported identifiers and no own types or methods, keeping all KV behavior in
+      the referenced kv package.'
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kv/cmd/kv/main.go
+    id: r.serve-error-exit
+    level: MUST
+    text: When plugin.Serve returns a non-nil error, main must log "plugin shutting
+      down" at error level through an hclog logger created with default LoggerOptions,
+      attaching the error under the "error" key, and then terminate the process with
+      exit status 1.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kv/cmd/kv/main.go
+    id: r.serve-kv-backend-as-plugin
+    level: MUST
+    text: main must call plugin.Serve with a ServeOpts value whose BackendFactoryFunc
+      is kv.Factory, so that the process serves the KV secrets backend over the plugin
+      protocol.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kv/cmd/kv/main.go
+    id: r.tls-provider-from-parsed-flags
+    level: MUST
+    text: main must derive its TLS configuration from the parsed plugin flags and
+      pass api.VaultPluginTLSProvider of that configuration as ServeOpts.TLSProviderFunc,
+      so the plugin can establish its connection back to the server.
   upstream: self
 - code:
   - third_party/openbao/internal/builtin/logical/pki/acme_authorizations.go
