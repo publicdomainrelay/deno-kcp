@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so that OpenBao's agent can authenticate to a OpenBao server using a Kubernetes service account token. It is the Kubernetes implementation of the shared auth.AuthMethod interface used by agentproxyshared: the constructor turns agent configuration into a method object, and the method object supplies the login request that the agent sends. Because the plugin is vendored third-party code inside deno-kcp, the specification records the observed contract of that plugin rather than any locally authored behavior.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

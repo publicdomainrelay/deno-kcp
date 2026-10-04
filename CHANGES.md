@@ -1119,6 +1119,21 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.shutdown-surface` (MUST): "jwtMethod must implement Shutdown with no arguments and no return value, completing the auth.AuthMethod surface the type offers to the agent."
 - added `r.watcher-startup` (MUST): "NewJWTAuthMethod must run the file watcher in its own goroutine before returning, initialise the credsFound, watch, stop, done and credSuccessGate channels and a sync.Once on the method, and log the path it will read the JWT from at info level."
 
+### third-party-openbao-internal-command-agentproxyshared-auth-kubernetes
+
+- intent: "" -> "The context exists so that OpenBao's agent can authenticate to a OpenBao server using a Kubernetes service account token. It is the Kubernetes implementation of the shared auth.AuthMethod interface used by agentproxyshared: the constructor turns agent configuration into a method object, and the method object supplies the login request that the agent sends. Because the plugin is vendored third-party code inside deno-kcp, the specification records the observed contract of that plugin rather than any locally authored behavior."
+- added `r.authenticate-builds-login-request` (MUST): "kubernetesMethod.Authenticate traces "beginning authentication", reads the JWT, and returns the path fmt.Sprintf("%s/login", k.mountPath) with a nil http.Header and a body map holding the keys "role" and "jwt" (the stored role and the JWT string)."
+- added `r.authenticate-jwt-read-error` (MUST): "When reading the JWT fails, kubernetesMethod.Authenticate returns empty path, nil header, nil body and an error wrapped as "error reading JWT with Kubernetes Auth: %w" over the readJWT failure, so no login request is issued."
+- added `r.constructor-copies-logger-and-mount` (MUST): "NewKubernetesAuthMethod carries the Logger and MountPath from the supplied AuthConfig onto the returned kubernetesMethod, so later logging and login path construction use the agent's values rather than package defaults."
+- added `r.constructor-validates-config` (MUST): "NewKubernetesAuthMethod rejects a nil *auth.AuthConfig with the error "empty config" and a config whose Config map is nil with the error "empty config data"; it never returns a partially built method on those paths."
+- added `r.cred-success-noop` (MUST): "kubernetesMethod.CredSuccess has an empty body: a successful credential fetch triggers no state change, no cache update and no side effect on the method."
+- added `r.implements-auth-method` (MUST): "kubernetesMethod satisfies the auth.AuthMethod interface of the agentproxyshared auth package: NewKubernetesAuthMethod returns it as an auth.AuthMethod, so Authenticate, NewCreds, CredSuccess and Shutdown must keep the signatures that interface declares."
+- added `r.new-creds-never-signals` (MUST): "kubernetesMethod.NewCreds returns a nil channel, so the method never asks the agent to re-authenticate on a credential change; the service account token is treated as non-rotating."
+- added `r.role-required-string` (MUST): "NewKubernetesAuthMethod requires the config map key "role": a missing key yields "missing 'role' value", a value that is not a string yields "could not convert 'role' config value to string", and an empty string yields "'role' value is empty". Only when a non-empty string role is present does it store the role on the method."
+- added `r.shutdown-noop` (MUST): "kubernetesMethod.Shutdown has an empty body: it releases no resources and closes nothing, so shutdown of the agent leaves the method's fields untouched."
+- added `r.test-covers-constructor` (MUST): "kubernetes_test.go exercises the constructor through TestKubernetesAuth_basic, which calls NewKubernetesAuthMethod, so configuration validation behavior stays covered by a test."
+- added `r.token-path-optional-string` (MUST): "The config map key "token_path" is optional: when absent the constructor leaves tokenPath empty so the default service account token is used, and when present it must be a string or the constructor returns "could not convert 'token_path' config value to string"."
+
 ### third-party-openbao-internal-command-agentproxyshared-auth-token-file
 
 - intent: "" -> "This context exists so the agent has a documented contract for the token-file auth method: which configuration key it consumes, how it behaves when the file is missing, empty, or unreadable, and which parts of the auth.AuthMethod interface it intentionally leaves inert. It is the code under third_party/openbao/internal/command/agentproxyshared/auth/token-file and the tests that pin its constructor and authenticate behavior."
@@ -1173,7 +1188,9 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-command-agentproxyshared-auth-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agentproxyshared-auth-cert-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agentproxyshared-auth-jwt-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-command-agentproxyshared-auth-kubernetes-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-command-agentproxyshared-auth-kubernetes-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-internal-command-agentproxyshared-auth-kubernetes-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-internal-command-agentproxyshared-auth-token-file-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agentproxyshared-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-internal-command-agentproxyshared-cache-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-internal-command-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
