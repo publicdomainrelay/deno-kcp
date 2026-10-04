@@ -103,6 +103,16 @@ bash deploy/examples/atproto/market/apply.sh
 `apply.sh` starts OpenBao itself unless `START_OPENBAO=0`, and waits for each
 workspace's `OpenBao` object to report ready before it applies the workloads.
 
+`accept.sh` is that whole sequence as one live acceptance: it brings up its own
+kcp, kine, OpenBao and provider under a throwaway `$ACCEPT_ROOT` on ports the
+kernel hands out, runs `apply.sh`, then reads every DenoPod back and reaches each
+service on its own name and from the host, and exits non-zero unless every check
+passed:
+
+```bash
+bash deploy/examples/atproto/market/accept.sh
+```
+
 Requires the sibling repositories `atproto-market`, `atproto-relay`, `hono-pds`
 and `typescript-helpers`.
 
