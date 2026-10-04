@@ -2492,6 +2492,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.sys-pprof-endpoint-sweep` (MUST): "SysPprof_Test must exercise the sys/pprof endpoints index, cmdline, goroutine, heap, profile, symbol and trace, issuing one GET request per case against the first node of the cluster and running each as its own subtest named after the case."
 - added `r.test-wiring` (SHOULD): "The Go tests in pprof_test.go should call the exported helpers with a freshly created test cluster, so TestSysPprof drives SysPprof_Test and TestSysPprof_Standby drives SysPprof_Standby_Test."
 
+### third-party-openbao-internal-vault-external-tests-pprof-pprof-binary
+
+- intent: "" -> "This context exists to verify that the sys/pprof endpoints behave the same way on a real OpenBao server process as they do on the fake test cluster used by the sibling pprof package. The two tests are deliberately thin: they only build the exec dev cluster, wire the binary path and listen address, and hand the cluster to the shared pprof test bodies, because the mechanism under test is the exec-based cluster, not the pprof assertions themselves. The BAO_BINARY gate keeps the suite from failing on machines without a built server binary."
+- added `r.assertions-delegated` (SHOULD): "The package holds no pprof assertions of its own; the pprof response checks stay in the imported pprof package and are reached only through pprof.SysPprof_Test and pprof.SysPprof_Standby_Test, so the exec wrapper stays a thin transport-swap layer over the in-process tests."
+- added `r.binary-env-gate` (MUST): "Both tests read BAO_BINARY through api.ReadBaoVariable and call t.Skip with "only running exec test when $BAO_BINARY present" when the value is empty, so no cluster is started and no pprof assertion runs without a server binary; there are no command-line flags in this package."
+- added `r.cluster-cleanup-deferred` (MUST): "Each test defers cluster.Cleanup() immediately after the cluster is created, so the spawned server process tree is torn down on pass, fail, or skip of the delegated pprof test."
+- added `r.exec-dev-cluster-for-pprof` (MUST): "TestSysPprof_Exec runs in parallel and, when the BAO_BINARY variable is non-empty, builds a dev cluster through testcluster.NewTestExecDevCluster with ClusterOptions.NumCores set to 1, BinaryPath taken from BAO_BINARY, and BaseListenAddress 127.0.0.1:8208, then calls pprof.SysPprof_Test with that cluster."
+- added `r.standby-exec-dev-cluster` (MUST): "TestSysPprof_Standby_Exec runs in parallel and, when BAO_BINARY is non-empty, builds an exec dev cluster with VaultNodeConfig.DisablePerformanceStandby set to true, BinaryPath from BAO_BINARY, and BaseListenAddress 127.0.0.1:8210, then calls pprof.SysPprof_Standby_Test with that cluster."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -2660,4 +2669,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-vault-external-tests-postgresql-binary-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-postgresql-binary-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-pprof-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-vault-external-tests-pprof-pprof-binary-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-vault-external-tests-pprof-pprof-binary-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-internal-vault-external-tests-quotas-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |

@@ -10,5 +10,18 @@ spec:
   systemContext: third-party-openbao-internal-vault-external-tests-pprof-pprof-binary
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-vault-external-tests-pprof-pprof-binary
-  phase: Running
+  agentLog: One Go test file, third_party/openbao/internal/vault/external_tests/pprof/pprof_binary/pprof_test.go,
+    in package pprof_binary. It holds two acceptance-style tests that re-run the pprof
+    external tests against a real OpenBao binary started in dev mode by testcluster.NewTestExecDevCluster
+    instead of the fake in-process single-node cluster. TestSysPprof_Exec starts one
+    exec dev cluster with one core and base listen address 127.0.0.1:8208, then delegates
+    to pprof.SysPprof_Test. TestSysPprof_Standby_Exec starts a three-node exec dev
+    cluster with performance standby disabled and base listen address 127.0.0.1:8210,
+    then delegates to pprof.SysPprof_Standby_Test. Both call t.Parallel(), read the
+    binary path from the BAO_BINARY variable through api.ReadBaoVariable, skip with
+    the message "only running exec test when $BAO_BINARY present" when it is empty,
+    and defer cluster.Cleanup().
+  message: wrote 5 requirement(s) and 0 interface(s) for third-party-openbao-internal-vault-external-tests-pprof-pprof-binary;
+    interface TestSysPprof_Exec is not in the observed facts; dropped; interface TestSysPprof_Standby_Exec
+    is not in the observed facts; dropped
+  phase: Succeeded
