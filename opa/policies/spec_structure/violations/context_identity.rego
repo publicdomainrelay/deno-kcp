@@ -120,6 +120,19 @@ violations contains v if {
 violations contains v if {
 	row := spec.contexts_in_scope(input.spec_tree)[_]
 	upstream := object.get(spec.spec_of(row.context), "upstream", null)
+	not is_string(upstream)
+	v := violation.build(
+		policy_id,
+		"context-upstream-missing",
+		violation.context_location(row.name, row.path),
+		sprintf("context %s declares no upstream; a context says where it sits with upstream: self", [row.name]),
+		{},
+	)
+}
+
+violations contains v if {
+	row := spec.contexts_in_scope(input.spec_tree)[_]
+	upstream := object.get(spec.spec_of(row.context), "upstream", null)
 	is_string(upstream)
 	not refs.is_ref(upstream)
 	v := violation.build(

@@ -9,7 +9,18 @@ import data.deno_kcp.lib.violation
 # violation with the severity and title its policy declared, and answers the one
 # question a caller asks: is this spec tree, change and code diff safe.
 
-policy_names := {"spec_structure"}
+policy_names := {
+	"spec_structure",
+	"spec_references",
+	"arch_consistency",
+	"change_integrity",
+	"change_impact",
+	"acceptance_integrity",
+	"traceability",
+	"code_safety",
+	"change_security",
+	"change_quality",
+}
 
 violations contains v if {
 	some policy in policy_names

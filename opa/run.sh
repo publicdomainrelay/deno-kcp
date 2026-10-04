@@ -17,6 +17,7 @@ OPA=${OPA:-opa}
 SPEC_ROOT=${SPEC_ROOT:-$(cd "$HERE/.." && pwd)}
 CODE_ROOT=${CODE_ROOT:-}
 REF=""
+BASE_REF=""
 CHANGE=""
 DIFF_BASE=""
 DIFF_HEAD=""
@@ -31,6 +32,7 @@ while [ $# -gt 0 ]; do
     --spec-root) SPEC_ROOT=$2; shift 2 ;;
     --code-root) CODE_ROOT=$2; shift 2 ;;
     --ref) REF=$2; shift 2 ;;
+    --base-ref) BASE_REF=$2; shift 2 ;;
     --change) CHANGE=$2; shift 2 ;;
     --diff-base) DIFF_BASE=$2; shift 2 ;;
     --diff-head) DIFF_HEAD=$2; shift 2 ;;
@@ -43,8 +45,9 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-LOAD_ARGS=(--root "$SPEC_ROOT" --out "${OUT:-$HERE/data/input.json}")
+LOAD_ARGS=(--root "$SPEC_ROOT" --scope "$SCOPE" --out "${OUT:-$HERE/data/input.json}")
 [ -n "$REF" ] && LOAD_ARGS+=(--ref "$REF")
+[ -n "$BASE_REF" ] && LOAD_ARGS+=(--base-ref "$BASE_REF")
 [ -n "$CODE_ROOT" ] && LOAD_ARGS+=(--code-root "$CODE_ROOT")
 [ -n "$CHANGE" ] && LOAD_ARGS+=(--change "$CHANGE")
 [ -n "$DIFF_BASE" ] && LOAD_ARGS+=(--diff-base "$DIFF_BASE")
@@ -60,7 +63,7 @@ EVAL_FORMAT=pretty
 [ "$JSON" = "1" ] && EVAL_FORMAT=json
 
 if [ "$JSON" = "1" ]; then
-  "$OPA" eval -b "$HERE" -i "$INPUT" --input-scope all \
+  "$OPA" eval -b "$HERE" -i "$INPUT" \
     --format json "$QUERY" \
     | python3 -c 'import json,sys; d=json.load(sys.stdin); print(json.dumps(d["result"][0]["expressions"][0]["value"], indent=2, sort_keys=True))'
 else

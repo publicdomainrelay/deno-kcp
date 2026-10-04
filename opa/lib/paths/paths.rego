@@ -59,6 +59,27 @@ is_file_ref(ref) if {
 	code_ref_kind(ref) == "file"
 }
 
+# The part after the kind. For a file ref it is a repo-relative path; for a
+# symbol ref it is either a name (Type.Method) or a codegraph id.
+code_ref_payload(ref) := payload if {
+	payload := code_ref_path(ref)
+}
+
+# Every symbol ref in the real trees is a codegraph id: 32 hex characters, the
+# id the observer assigned the symbol it saw. A symbol ref resolves when that id
+# is one of the context's observed interfaces, not when it names a file.
+codegraph_id_pattern := `^[0-9a-f]{32}$`
+
+is_codegraph_id(payload) if {
+	is_string(payload)
+	regex.match(codegraph_id_pattern, payload)
+}
+
+is_codegraph_ref(ref) if {
+	is_code_ref(ref)
+	is_codegraph_id(code_ref_payload(ref))
+}
+
 code_ref_scheme(ref) := scheme if {
 	parts := split(ref, ":")
 	count(parts) >= 2

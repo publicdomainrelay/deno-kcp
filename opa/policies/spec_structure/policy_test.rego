@@ -102,6 +102,12 @@ test_missing_repository if {
 	"spec_structure/context-repository-missing" in ids(result)
 }
 
+test_missing_upstream if {
+	spec_body := object.remove(demo_spec_body, ["upstream"])
+	result := policy.violations with input as {"spec_tree": tree({"demo": demo_context(spec_body, demo_status)})}
+	"spec_structure/context-upstream-missing" in ids(result)
+}
+
 test_invalid_upstream if {
 	spec_body := object.union(demo_spec_body, {"upstream": "somewhere"})
 	result := policy.violations with input as {"spec_tree": tree({"demo": demo_context(spec_body, demo_status)})}

@@ -429,6 +429,13 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", default=".", help="spec tree root (default: cwd)")
     parser.add_argument("--ref", default=None, help="read the tree from this git ref")
+    parser.add_argument(
+        "--base-ref",
+        default=None,
+        help="read a second, earlier tree from this git ref so a policy can "
+        "compare the two and see the whole spec delta, not only the last "
+        "SpecChange record's entry",
+    )
     parser.add_argument("--code-root", default=None, help="code repository root for file existence")
     parser.add_argument("--diff-base", default=None)
     parser.add_argument("--diff-head", default=None)
@@ -438,6 +445,12 @@ def main() -> int:
         help="repository the diff refs live in (default: --root)",
     )
     parser.add_argument("--change", default=None, help="SpecChange name under review")
+    parser.add_argument(
+        "--scope",
+        default="own",
+        choices=["own", "all"],
+        help="own (default) drops vendored contexts; all keeps every context",
+    )
     parser.add_argument("--out", default=None, help="write JSON here (default: stdout)")
     args = parser.parse_args()
 
@@ -479,15 +492,44 @@ def main() -> int:
     if args.diff_base and args.diff_head:
         diff = build_diff(args.diff_root or root, args.diff_base, args.diff_head)
         if diff:
-            head_paths = set(diff["paths"])
+            # The file index was built by walking a working tree, and the tree a
+            # diff head lives in is not that working tree: a file the change
+            # adds is on disk nowhere the walk looked. Fold the head into the
+            # index, or every ref a new requirement makes to a new file reads as
+            # dangling.
             for entry in diff["files"]:
                 entry["head_exists"] = entry["status"] != "D"
-                entry["known_path"] = entry["path"] in files
+                path = entry["path"]
+                if entry["head_exists"] and path not in files:
+                    text = entry.get("head_text")
+                    data = text.encode() if isinstance(text, str) else b""
+                    files[path] = {
+                        "path": path,
+                        "kind": file_kind(path),
+                        "size": len(data),
+                        "sha256": sha256_hex(data),
+                        "present": True,
+                        "source": "diff_head",
+                    }
+                entry["known_path"] = path in files
             diff["untracked_paths"] = sorted(
-                path for path in head_paths if path not in files
+                entry["path"] for entry in diff["files"] if not entry["known_path"]
             )
 
+    base_tree = None
+    if args.base_ref:
+        base_source = Source(root, args.base_ref)
+        base_contexts = build_contexts(base_source)
+        base_tree = {
+            "ref": args.base_ref,
+            "repository": base_source.read_yaml("repository.yaml") or {},
+            "contexts": base_contexts,
+            "changes": flatten_changes(base_contexts),
+            "context_names": sorted(base_contexts.keys()),
+        }
+
     document = {
+        "base_tree": base_tree,
         "spec_tree": {
             "root": root,
             "ref": args.ref,
@@ -505,6 +547,8 @@ def main() -> int:
         "change": change,
         "diff": diff,
         "options": {
+            "scope": args.scope,
+            "base_ref": args.base_ref,
             "code_root": args.code_root,
             "diff_base": args.diff_base,
             "diff_head": args.diff_head,

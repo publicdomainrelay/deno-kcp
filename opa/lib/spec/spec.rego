@@ -196,6 +196,147 @@ dangling_contexts(tree) := names if {
 	}
 }
 
+# A field of a requirement, with null standing in for `the requirement is not
+# there`, so the two sides of a diff can be compared without a guard at every
+# use.
+field_of(req, name) := value if {
+	is_object(req)
+	value := object.get(req, name, null)
+}
+
+field_of(req, _) := null if not is_object(req)
+
+comparable_requirement_fields := ["level", "text", "codeRefs"]
+
+changed_fields(from_req, to_req) := fields if {
+	fields := [f |
+		some f in comparable_requirement_fields
+		field_of(from_req, f) != field_of(to_req, f)
+	]
+}
+
+# The requirement-level diff between two trees. A SpecChange record carries only
+# the delta of the edit that produced it, so the whole spec delta of a branch is
+# only visible by comparing the tree before against the tree after. A row is
+# {context, op, id, from, to, fields}. A rule with arguments is a function, so
+# the three kinds are concatenated rather than merged into one set.
+requirement_diff(base_tree, head_tree) := rows if {
+	rows := array.concat(
+		removed_requirements(base_tree, head_tree),
+		array.concat(
+			added_requirements(base_tree, head_tree),
+			changed_requirements(base_tree, head_tree),
+		),
+	)
+}
+
+removed_requirements(base_tree, head_tree) := rows if {
+	rows := [row |
+		some context, base_ctx in object.get(base_tree, "contexts", {})
+		in_scope(context)
+		some id, base_req in {req.id: req | some req in requirements(base_ctx)}
+		head_ctx := object.get(object.get(head_tree, "contexts", {}), context, null)
+		head_reqs := {req.id: req | some req in requirements(head_ctx)}
+		not id in object.keys(head_reqs)
+		row := {
+			"context": context,
+			"op": "removed",
+			"id": id,
+			"from": base_req,
+			"to": null,
+			"fields": changed_fields(base_req, null),
+		}
+	]
+}
+
+added_requirements(base_tree, head_tree) := rows if {
+	rows := [row |
+		some context, head_ctx in object.get(head_tree, "contexts", {})
+		in_scope(context)
+		some id, head_req in {req.id: req | some req in requirements(head_ctx)}
+		base_ctx := object.get(object.get(base_tree, "contexts", {}), context, null)
+		base_reqs := {req.id: req | some req in requirements(base_ctx)}
+		not id in object.keys(base_reqs)
+		row := {
+			"context": context,
+			"op": "added",
+			"id": id,
+			"from": null,
+			"to": head_req,
+			"fields": changed_fields(null, head_req),
+		}
+	]
+}
+
+changed_requirements(base_tree, head_tree) := rows if {
+	rows := [row |
+		some context, head_ctx in object.get(head_tree, "contexts", {})
+		in_scope(context)
+		base_ctx := object.get(object.get(base_tree, "contexts", {}), context, null)
+		base_reqs := {req.id: req | some req in requirements(base_ctx)}
+		head_reqs := {req.id: req | some req in requirements(head_ctx)}
+		some id, head_req in head_reqs
+		base_req := object.get(base_reqs, id, null)
+		is_object(base_req)
+		fields := changed_fields(base_req, head_req)
+		count(fields) > 0
+		row := {
+			"context": context,
+			"op": "changed",
+			"id": id,
+			"from": base_req,
+			"to": head_req,
+			"fields": fields,
+		}
+	]
+}
+
+interface_diff(base_tree, head_tree) := rows if {
+	rows := array.concat(
+		removed_interfaces(base_tree, head_tree),
+		array.concat(added_interfaces(base_tree, head_tree), changed_interfaces(base_tree, head_tree)),
+	)
+}
+
+removed_interfaces(base_tree, head_tree) := rows if {
+	rows := [row |
+		some context, base_ctx in object.get(base_tree, "contexts", {})
+		in_scope(context)
+		some name, base_iface in {iface.name: iface | some iface in interfaces(base_ctx)}
+		head_ctx := object.get(object.get(head_tree, "contexts", {}), context, null)
+		head_ifaces := {iface.name: iface | some iface in interfaces(head_ctx)}
+		not name in object.keys(head_ifaces)
+		row := {"context": context, "op": "removed", "name": name, "from": base_iface, "to": null, "fields": []}
+	]
+}
+
+added_interfaces(base_tree, head_tree) := rows if {
+	rows := [row |
+		some context, head_ctx in object.get(head_tree, "contexts", {})
+		in_scope(context)
+		some name, head_iface in {iface.name: iface | some iface in interfaces(head_ctx)}
+		base_ctx := object.get(object.get(base_tree, "contexts", {}), context, null)
+		base_ifaces := {iface.name: iface | some iface in interfaces(base_ctx)}
+		not name in object.keys(base_ifaces)
+		row := {"context": context, "op": "added", "name": name, "from": null, "to": head_iface, "fields": []}
+	]
+}
+
+changed_interfaces(base_tree, head_tree) := rows if {
+	rows := [row |
+		some context, head_ctx in object.get(head_tree, "contexts", {})
+		in_scope(context)
+		base_ctx := object.get(object.get(base_tree, "contexts", {}), context, null)
+		base_ifaces := {iface.name: iface | some iface in interfaces(base_ctx)}
+		some name, head_iface in {iface.name: iface | some iface in interfaces(head_ctx)}
+		base_iface := object.get(base_ifaces, name, null)
+		is_object(base_iface)
+		fields := [f | some f in ["kind", "signature", "file"]; field_of(base_iface, f) != field_of(head_iface, f)]
+		count(fields) > 0
+		row := {"context": context, "op": "changed", "name": name, "from": base_iface, "to": head_iface, "fields": fields}
+	]
+}
+
 observed_files(tree) := paths if {
 	paths := object.get(tree, "observed_files", [])
 }

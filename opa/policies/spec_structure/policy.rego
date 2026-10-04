@@ -38,6 +38,7 @@ metadata := {
 	"context-intent-missing": {"severity": "error", "level": "MUST", "title": "A context states no intent"},
 	"context-intent-too-short": {"severity": "warning", "level": "SHOULD", "title": "A context intent is too short to say what the context is for"},
 	"context-repository-missing": {"severity": "error", "level": "MUST", "title": "A context names no repository"},
+	"context-upstream-missing": {"severity": "error", "level": "MUST", "title": "A context declares no upstream"},
 	"context-upstream-invalid": {"severity": "error", "level": "MUST", "title": "A context upstream is not a valid reference"},
 	"context-requirements-missing": {"severity": "error", "level": "MUST", "title": "A context declares no requirements"},
 	"context-status-missing": {"severity": "error", "level": "MUST", "title": "A context has no status file"},

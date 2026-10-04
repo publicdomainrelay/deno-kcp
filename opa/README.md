@@ -42,6 +42,7 @@ Every policy reads `input.spec_tree`, and optionally `input.change` (the
 
 ```json
 {
+  "base_tree": { ...the same shape as spec_tree, read from --base-ref, or null... },
   "spec_tree": {
     "repository": { ...repository.yaml... },
     "arch":       { ...arch.yaml... },
@@ -63,6 +64,19 @@ Every policy reads `input.spec_tree`, and optionally `input.change` (the
 
 `scope` defaults to `own`, which drops the `third-party-*` contexts a tree grows
 when it is populated on top of a vendored submodule. `scope: all` keeps them.
+
+**`base_tree` is why the whole spec delta is visible.** A `SpecChange` record
+carries only the delta of the edit that produced it. The branch's real spec work
+— nine requirements added, one removed, one changed — is invisible in the one
+record `deploy-examples-atproto-market-s2c-834078074eaa` carries. Passing
+`--base-ref` loads the earlier tree too, and `lib/spec.requirement_diff(base, head)`
+returns the `{context, op, id, from, to, fields}` rows that record cannot show.
+Without a base tree those rules stay quiet rather than guessing.
+
+`input.spec_tree.files` is the union of the working tree under `--code-root` and,
+when a diff is present, every file at the diff head (marked
+`"source": "diff_head"`), because the tree a diff head lives in is not the
+working tree a walk can see.
 
 ## The violation object
 

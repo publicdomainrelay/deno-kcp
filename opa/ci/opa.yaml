@@ -1,0 +1,63 @@
+# Copy to .github/workflows/opa.yaml in the repository that hosts opa/.
+# Every step is a gate: a policy that is unformatted, does not compile, fails a
+# test, or raises an error-severity violation over the real spec trees fails the
+# build.
+name: opa
+
+on:
+  push:
+    paths: ["opa/**"]
+  pull_request:
+    paths: ["opa/**"]
+
+jobs:
+  policy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: opa
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: open-policy-agent/setup-opa@v2
+        with:
+          version: latest
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: install the loader's dependency
+        run: python3 -m pip install --disable-pip-version-check pyyaml
+
+      - name: formatting
+        run: opa fmt -l . | tee /dev/stderr | wc -l | grep -qx 0
+
+      - name: compile, strictly
+        run: opa check --strict .
+
+      - name: unit tests
+        run: opa test -b . -v -c --threshold 70
+
+      - name: the spec trees the repository is checked out with
+        run: |
+          git fetch --no-tags origin \
+            'refs/heads/main:refs/remotes/origin/main' \
+            'refs/heads/spec/bidder-and-bob-pds:refs/remotes/origin/spec/bidder-and-bob-pds' \
+            'refs/heads/open-architecture/deno-kcp--spec-bidder-and-bob-pds:refs/remotes/origin/open-architecture/deno-kcp--spec-bidder-and-bob-pds' || true
+
+      - name: integration
+        run: python3 test/integration.py
+
+      - name: catalogue is current
+        run: |
+          python3 tools/catalogue.py
+          git diff --exit-code VIOLATIONS.md
+
+      - name: regal
+        run: |
+          curl -sLo /tmp/regal https://github.com/open-policy-agent/regal/releases/latest/download/regal_linux_amd64
+          chmod +x /tmp/regal
+          /tmp/regal lint --format github .

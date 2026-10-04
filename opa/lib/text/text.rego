@@ -103,17 +103,58 @@ has_vague_term(text) if count(vague_terms_in(text)) > 0
 
 has_non_normative_phrase(text) if count(non_normative_in(text)) > 0
 
-# The strength a sentence claims, read off its modal verbs.
-implied_level(text) := "MAY" if contains_any(text, ["may ", "can ", "is allowed to", "is optional"])
+# The strength a sentence claims, read off its modal verbs. A prohibition is a
+# MUST: "may not start" forbids, it does not permit. The MUST phrases are
+# checked first and excluded from the weaker levels, so a prohibition is never
+# read as a permission just because it contains the word may.
+must_phrases := [
+	"must not",
+	"may not",
+	"shall not",
+	"must ",
+	"shall ",
+	"is required to",
+	"is required",
+	"are required",
+	"is forbidden",
+	"are forbidden",
+	"never ",
+	"only when",
+	"under no circumstances",
+]
+
+should_phrases := [
+	"should ",
+	"should not",
+	"ought to",
+	"is recommended",
+	"are recommended",
+	"is encouraged",
+	"are encouraged",
+	"preferably",
+]
+
+may_phrases := [
+	"may ",
+	"can ",
+	"is allowed to",
+	"are allowed to",
+	"is optional",
+	"are optional",
+	"at its discretion",
+]
+
+implied_level(text) := "MUST" if contains_any(text, must_phrases)
 
 implied_level(text) := "SHOULD" if {
-	not contains_any(text, ["may ", "is allowed to", "is optional"])
-	contains_any(text, ["should ", "ought to", "is recommended", "is encouraged"])
+	not contains_any(text, must_phrases)
+	contains_any(text, should_phrases)
 }
 
-implied_level(text) := "MUST" if {
-	not contains_any(text, ["may ", "is allowed to", "is optional", "should ", "ought to"])
-	contains_any(text, ["must ", "must not", "shall ", "may not", "never ", "is required", "is forbidden", "only when"])
+implied_level(text) := "MAY" if {
+	not contains_any(text, must_phrases)
+	not contains_any(text, should_phrases)
+	contains_any(text, may_phrases)
 }
 
 level_disagrees(declared, text) := implied if {
