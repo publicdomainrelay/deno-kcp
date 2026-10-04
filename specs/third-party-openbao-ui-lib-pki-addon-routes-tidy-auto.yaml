@@ -12,7 +12,19 @@ spec:
   intent: The context exists so the automatic tidy configuration and index screens
     of the PKI secrets engine keep a described, checkable contract for their breadcrumb
     navigation and mount-path-driven titles, which the shared route tests and other
-    PKI routes depend on.
+    PKI routes depend on. The two routes are leaf screens of the tidy subtree, so
+    their breadcrumb depth and link targets must stay consistent with the parent structures
+    they sit under, and their titles must follow whichever mount path the engine is
+    mounted at.
+  interfaces:
+  - file: third_party/openbao/ui/lib/pki/addon/routes/tidy/auto/configure.js
+    kind: class
+    name: PkiTidyAutoConfigureRoute
+    signature: class PkiTidyAutoConfigureRoute extends Route
+  - file: third_party/openbao/ui/lib/pki/addon/routes/tidy/auto/index.js
+    kind: class
+    name: TidyAutoIndexRoute
+    signature: class TidyAutoIndexRoute extends Route
   repository: deno-kcp
   requirements:
   - codeRefs:

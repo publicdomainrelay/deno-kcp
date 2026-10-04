@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-The context exists so the automatic tidy configuration and index screens of the PKI secrets engine keep a described, checkable contract for their breadcrumb navigation and mount-path-driven titles, which the shared route tests and other PKI routes depend on.
+The context exists so the automatic tidy configuration and index screens of the PKI secrets engine keep a described, checkable contract for their breadcrumb navigation and mount-path-driven titles, which the shared route tests and other PKI routes depend on. The two routes are leaf screens of the tidy subtree, so their breadcrumb depth and link targets must stay consistent with the parent structures they sit under, and their titles must follow whichever mount path the engine is mounted at.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

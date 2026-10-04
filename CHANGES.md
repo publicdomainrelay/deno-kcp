@@ -6008,7 +6008,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 
 ### third-party-openbao-ui-lib-pki-addon-routes-tidy-auto
 
-- intent: "" -> "The context exists so the automatic tidy configuration and index screens of the PKI secrets engine keep a described, checkable contract for their breadcrumb navigation and mount-path-driven titles, which the shared route tests and other PKI routes depend on."
+- intent: "" -> "The context exists so the automatic tidy configuration and index screens of the PKI secrets engine keep a described, checkable contract for their breadcrumb navigation and mount-path-driven titles, which the shared route tests and other PKI routes depend on. The two routes are leaf screens of the tidy subtree, so their breadcrumb depth and link targets must stay consistent with the parent structures they sit under, and their titles must follow whichever mount path the engine is mounted at."
 - added `r.configure-route-breadcrumbs` (MUST): "PkiTidyAutoConfigureRoute.setupController must call super with the controller and resolvedModel, then set controller.breadcrumbs to exactly six entries in order: secrets with route 'secrets' and linkExternal true; the secretMountPath.currentPath with route 'overview' and models [currentPath]; 'configuration' with route 'configuration.index' and models [currentPath]; 'tidy' with route 'tidy' and models [currentPath]; 'auto' with route 'tidy.auto' and models [currentPath]; and a final 'configure' leaf carrying no route."
 - added `r.configure-route-services` (MUST): "PkiTidyAutoConfigureRoute must inject the store and secretMountPath services, and must read the mounted engine path from secretMountPath.currentPath when building breadcrumbs; it declares no model and inherits one from the tidy/auto parent route."
 - added `r.index-route-breadcrumbs` (MUST): "TidyAutoIndexRoute.setupController must call super with the arguments object, then set controller.breadcrumbs to exactly four entries in order: secrets with route 'secrets' and linkExternal true; the secretMountPath.currentPath with route 'overview' and models [currentPath]; 'tidy' with route 'tidy.index' and models [currentPath]; and a final 'auto' leaf carrying no route."
@@ -6555,7 +6555,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-pki-addon-routes-roles-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-routes-roles-role-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-routes-tidy-auto-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-lib-pki-addon-routes-tidy-auto-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-pki-addon-routes-tidy-auto-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-routes-tidy-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-routes-tidy-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-utils-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |

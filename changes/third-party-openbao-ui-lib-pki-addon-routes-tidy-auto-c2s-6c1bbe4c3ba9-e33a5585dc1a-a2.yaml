@@ -1,0 +1,36 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-ui-lib-pki-addon-routes-tidy-auto-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-ui-lib-pki-addon-routes-tidy-auto
+  toCommit: e33a5585dc1ac9d3bf63bc1ebdcf5dbb45369989
+status:
+  agentLog: 'This context covers two Ember route classes in the OpenBao PKI UI addon
+    that serve the automatic tidy screens under a secrets engine mount. PkiTidyAutoConfigureRoute
+    in third_party/openbao/ui/lib/pki/addon/routes/tidy/auto/configure.js injects
+    the store and secretMountPath services and, in setupController(controller, resolvedModel),
+    calls super with both arguments and then sets a six-entry breadcrumb trail: secrets
+    (external link), the current mount path linked to overview, configuration.index,
+    tidy, tidy.auto, and a bare configure leaf. TidyAutoIndexRoute in third_party/openbao/ui/lib/pki/addon/routes/tidy/auto/index.js
+    injects the same two services and, in setupController(controller), calls super
+    with the arguments object, then sets a four-entry breadcrumb trail: secrets (external
+    link), the current mount path linked to overview, tidy.index, and a bare auto
+    leaf, and sets controller.title to the current mount path. Neither route declares
+    a model; both inherit theirs from the shared tidy/auto parent route.'
+  message: wrote 4 requirement(s) and 2 interface(s) for third-party-openbao-ui-lib-pki-addon-routes-tidy-auto;
+    interface PkiTidyAutoConfigureRoute.setupController is not in the observed facts;
+    dropped; interface TidyAutoIndexRoute.setupController is not in the observed facts;
+    dropped
+  phase: Succeeded
+superseded:
+- message: wrote 4 requirement(s) and 0 interface(s) for third-party-openbao-ui-lib-pki-addon-routes-tidy-auto;
+    interface PkiTidyAutoConfigureRoute.setupController is not in the observed facts;
+    dropped; interface TidyAutoIndexRoute.setupController is not in the observed facts;
+    dropped
+  name: third-party-openbao-ui-lib-pki-addon-routes-tidy-auto-c2s-6c1bbe4c3ba9-e33a5585dc1a
+  phase: Succeeded
