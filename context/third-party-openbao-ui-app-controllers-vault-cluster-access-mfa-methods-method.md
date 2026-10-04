@@ -9,5 +9,6 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
+- `class:344497ad2abb8c229aa7cbc42719c21f` class MfaMethodController (third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/method/index.js)
 - `file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/method/index.js` file index.js (third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/method/index.js)
 <!-- SPECD_MANAGED_END -->
