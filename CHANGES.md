@@ -5113,6 +5113,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.policy-show-populates-controller` (MUST): "The show route setupController hook must set the controller's model to the resolved policy record, capabilities to the resolved capabilities record, and policyType to the derived policy type."
 - added `r.policy-show-redirects-root-acl` (MUST): "In beforeModel, when the derived policy type is 'acl' and the policy_name param is 'root', the show route must not render the detail view and must transition to the vault.cluster.policies route with 'acl'."
 
+### third-party-openbao-ui-app-routes-vault-cluster-secrets
+
+- intent: "" -> "This context exists so the secrets-engine list and single-engine URLs of the OpenBao/Vault UI resolve to real model data and to a sensible default child route. backends.js gives the secrets overview a model of all secret engines; backend.js resolves one engine by path, records that path in the shared secretMountPath service so descendants and components know the active mount, and forwards the intermediate route to the engine's list-root child when no child route claimed the transition. Together they are the routing seam between URL parameters and the secret-engine ember-data records that every secrets screen reads."
+- added `r.backend-route-keeps-old-model-slot` (MAY): "backend.js may keep an oldModel field initialized to null on the route object to carry the previously resolved engine across transitions."
+- added `r.backend-route-redirects-to-list-root` (MUST): "backend.js must implement afterModel(model, transition) so that when transition.targetName equals the route's own routeName it replaces the current transition with vault.cluster.secrets.backend.list-root, passing the model's path; the redirect must not run for transitions that target a deeper child route."
+- added `r.backend-route-resolves-one-engine-by-path` (MUST): "The single-engine route in backend.js must inject the store, flashMessages and secretMountPath services, and its model hook must read the backend value out of params, call secretMountPath.update(backend) before querying, then return store.query('secret-engine', { path: backend }) and resolve to the first record of the result, or to a falsy value when the query returns nothing."
+- added `r.backends-index-route-lists-engines` (MUST): "The secrets route in backends.js must inject the store service and, in its model hook, return store.query('secret-engine', {}) so the route's model is every mounted secrets engine record."
+- added `r.both-routes-default-export` (MUST): "Both files must extend Ember's Route and expose the result as the module's default export; they export no named bindings."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5544,5 +5553,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-routes-vault-cluster-policy-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-policy-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-secrets-backend-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-ui-app-routes-vault-cluster-secrets-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-routes-vault-cluster-secrets-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
