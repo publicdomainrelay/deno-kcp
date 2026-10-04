@@ -15,5 +15,6 @@ upstream: self
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
+- `class:24bac0dcfdbe6512952bea4c1f647223` class PkiIssuerIndexController (third_party/openbao/ui/lib/pki/addon/controllers/issuers/index.js)
 - `file:third_party/openbao/ui/lib/pki/addon/controllers/issuers/index.js` file index.js (third_party/openbao/ui/lib/pki/addon/controllers/issuers/index.js)
 <!-- SPECD_MANAGED_END -->
