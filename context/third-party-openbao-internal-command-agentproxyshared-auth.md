@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists because agent and proxy auto-auth needs one place that owns the token lifecycle: it defines the contract credential methods implement, decides when to re-authenticate or renew, fans the token out to file/template/exec sinks, and keeps retry behavior uniform across all auth methods. It is the shared dependency of the approle, cert, jwt, kubernetes and token-file method packages, so its interfaces and configuration structs are the seam those packages and the agent/sink code compile against.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

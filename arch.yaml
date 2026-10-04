@@ -15265,8 +15265,239 @@ system_contexts:
   codeRefIndex:
   - file:third_party/openbao/internal/command/agentproxyshared/auth/auth.go auth.go@third_party/openbao/internal/command/agentproxyshared/auth/auth.go
   - file:third_party/openbao/internal/command/agentproxyshared/auth/auth_test.go auth_test.go@third_party/openbao/internal/command/agentproxyshared/auth/auth_test.go
+  - function:dce3dfc9a119cb3f8d51a85e7cc0c4c1 NewAuthHandler@third_party/openbao/internal/command/agentproxyshared/auth/auth.go:91
+  - interface:0d74489ab0d559a9769b26c729cee007 AuthMethod@third_party/openbao/internal/command/agentproxyshared/auth/auth.go:28
+  - interface:d197ccafdc0a79f7b5f34693af3e4723 AuthMethodWithClient@third_party/openbao/internal/command/agentproxyshared/auth/auth.go:39
+  - method:05b8dcd27eda904ebd0f01667b26547e AuthMethod.NewCreds@third_party/openbao/internal/command/agentproxyshared/auth/auth.go:32
+  - method:0e8ea0d941e22ea58ef3a88d096fefb4 AuthMethodWithClient.AuthClient@third_party/openbao/internal/command/agentproxyshared/auth/auth.go:41
+  - method:3031eb440e4b09b483f86a106036de8b AuthMethod.Authenticate@third_party/openbao/internal/command/agentproxyshared/auth/auth.go:31
+  - method:356a9104cf38f50d20bdd8b28b005400 autoAuthBackoff.String@third_party/openbao/internal/command/agentproxyshared/auth/auth.go:549
+  - method:600796333fc443a1fcce1cf63eae033e AuthMethod.Shutdown@third_party/openbao/internal/command/agentproxyshared/auth/auth.go:34
+  - method:ad8dc37f5a35b58de42ae1227cece785 AuthHandler.Run@third_party/openbao/internal/command/agentproxyshared/auth/auth.go:132
+  - method:dd14a787df21b4dd31349d380e916be1 AuthMethod.CredSuccess@third_party/openbao/internal/command/agentproxyshared/auth/auth.go:33
+  - struct:283295d326d630f31d67353ca011a1f7 AuthHandlerConfig@third_party/openbao/internal/command/agentproxyshared/auth/auth.go:72
+  - struct:aca458a585521ce17b4a96b9a546b1af AuthHandler@third_party/openbao/internal/command/agentproxyshared/auth/auth.go:53
+  - struct:f1af97701d51ef4e9dbcff6f27be7097 AuthConfig@third_party/openbao/internal/command/agentproxyshared/auth/auth.go:44
   id: sc.third-party-openbao-internal-command-agentproxyshared-auth
+  intent: 'This context exists because agent and proxy auto-auth needs one place that
+    owns the token lifecycle: it defines the contract credential methods implement,
+    decides when to re-authenticate or renew, fans the token out to file/template/exec
+    sinks, and keeps retry behavior uniform across all auth methods. It is the shared
+    dependency of the approle, cert, jwt, kubernetes and token-file method packages,
+    so its interfaces and configuration structs are the seam those packages and the
+    agent/sink code compile against.'
+  interfaces:
+  - file: third_party/openbao/internal/command/agentproxyshared/auth/auth.go
+    kind: struct
+    name: AuthConfig
+    signature: type AuthConfig struct { Logger hclog.Logger; MountPath string; WrapTTL
+      time.Duration; Config map[string]any }
+  - file: third_party/openbao/internal/command/agentproxyshared/auth/auth.go
+    kind: struct
+    name: AuthHandler
+    signature: type AuthHandler struct { OutputCh chan string; TemplateTokenCh chan
+      string; ExecTokenCh chan string; ... }
+  - file: third_party/openbao/internal/command/agentproxyshared/auth/auth.go
+    kind: method
+    name: AuthHandler.Run
+    signature: func (ah *AuthHandler) Run(ctx context.Context, am AuthMethod) error
+  - file: third_party/openbao/internal/command/agentproxyshared/auth/auth.go
+    kind: struct
+    name: AuthHandlerConfig
+    signature: type AuthHandlerConfig struct { Logger hclog.Logger; Client *api.Client;
+      WrapTTL time.Duration; MaxBackoff time.Duration; MinBackoff time.Duration; Token
+      string; UserAgent string; MetricsSignifier string; EnableReauthOnNewCredentials
+      bool; EnableTemplateTokenCh bool; EnableExecTokenCh bool; ExitOnError bool }
+  - file: third_party/openbao/internal/command/agentproxyshared/auth/auth.go
+    kind: interface
+    name: AuthMethod
+    signature: type AuthMethod interface { Authenticate(context.Context, *api.Client)
+      (string, http.Header, map[string]any, error); NewCreds() chan struct{}; CredSuccess();
+      Shutdown() }
+  - file: third_party/openbao/internal/command/agentproxyshared/auth/auth.go
+    kind: method
+    name: AuthMethod.Authenticate
+    signature: Authenticate(context.Context, *api.Client) (string, http.Header, map[string]any,
+      error)
+  - file: third_party/openbao/internal/command/agentproxyshared/auth/auth.go
+    kind: method
+    name: AuthMethod.CredSuccess
+    signature: CredSuccess()
+  - file: third_party/openbao/internal/command/agentproxyshared/auth/auth.go
+    kind: method
+    name: AuthMethod.NewCreds
+    signature: NewCreds() chan struct{}
+  - file: third_party/openbao/internal/command/agentproxyshared/auth/auth.go
+    kind: method
+    name: AuthMethod.Shutdown
+    signature: Shutdown()
+  - file: third_party/openbao/internal/command/agentproxyshared/auth/auth.go
+    kind: interface
+    name: AuthMethodWithClient
+    signature: type AuthMethodWithClient interface { AuthMethod; AuthClient(client
+      *api.Client) (*api.Client, error) }
+  - file: third_party/openbao/internal/command/agentproxyshared/auth/auth.go
+    kind: method
+    name: AuthMethodWithClient.AuthClient
+    signature: AuthClient(client *api.Client) (*api.Client, error)
+  - file: third_party/openbao/internal/command/agentproxyshared/auth/auth.go
+    kind: function
+    name: NewAuthHandler
+    signature: func NewAuthHandler(conf *AuthHandlerConfig) *AuthHandler
+  - file: third_party/openbao/internal/command/agentproxyshared/auth/auth.go
+    kind: method
+    name: autoAuthBackoff.String
+    signature: func (b autoAuthBackoff) String() string
   name: third-party-openbao-internal-command-agentproxyshared-auth
+  requirements:
+  - codeRefs:
+    - struct:f1af97701d51ef4e9dbcff6f27be7097
+    id: r.auth-config-shape
+    level: MAY
+    text: 'AuthConfig carries only what a method constructor needs to build itself:
+      a logger, the mount path, an optional wrap TTL and the method-specific config
+      map.'
+  - codeRefs:
+    - interface:0d74489ab0d559a9769b26c729cee007
+    - method:05b8dcd27eda904ebd0f01667b26547e
+    - method:3031eb440e4b09b483f86a106036de8b
+    - method:600796333fc443a1fcce1cf63eae033e
+    - method:dd14a787df21b4dd31349d380e916be1
+    id: r.auth-method-contract
+    level: MUST
+    text: Every auto-auth method implements AuthMethod, exporting Authenticate to
+      return a mount path, optional HTTP header, request body and error, plus NewCreds,
+      CredSuccess and Shutdown; AuthHandler calls Authenticate to learn where and
+      with what body to log in.
+  - codeRefs:
+    - interface:d197ccafdc0a79f7b5f34693af3e4723
+    - method:0e8ea0d941e22ea58ef3a88d096fefb4
+    id: r.auth-method-with-client
+    level: MUST
+    text: A method that also implements AuthMethodWithClient is asked for its own
+      API client through AuthClient before each authentication attempt, and Run uses
+      that returned client for the login call instead of the handler's shared client;
+      a failure to build the client is logged, counted as an auth failure, and either
+      backed off or returned.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/auth/auth.go
+    - method:ad8dc37f5a35b58de42ae1227cece785
+    id: r.backoff-defaults-and-bounds
+    level: MUST
+    text: Run defaults a non-positive minBackoff to 1 second, the backoff constructor
+      defaults a non-positive max to 5 minutes, and Run fails when the effective minimum
+      is greater than or equal to the maximum.
+  - codeRefs:
+    - method:356a9104cf38f50d20bdd8b28b005400
+    id: r.backoff-string-format
+    level: SHOULD
+    text: The backoff's string form prints the current delay truncated to 10 milliseconds
+      so log lines stay compact.
+  - codeRefs:
+    - method:ad8dc37f5a35b58de42ae1227cece785
+    - struct:aca458a585521ce17b4a96b9a546b1af
+    id: r.client-header-and-retry-setup
+    level: MUST
+    text: When a client is configured, Run sets its User-Agent header from the configured
+      user agent and enables header cloning, and it sets the client used for each
+      attempt to zero retries so the handler's own backoff is the only retry source.
+  - codeRefs:
+    - method:05b8dcd27eda904ebd0f01667b26547e
+    - method:ad8dc37f5a35b58de42ae1227cece785
+    id: r.cred-channel-handling
+    level: MUST
+    text: Run takes the credential channel from the method, and when reauth-on-new-credentials
+      is disabled it drains and discards that channel in a goroutine so the method
+      cannot block on send; the handler then works with a nil-free channel so its
+      select statements never spin on a closed or absent channel.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/auth/auth.go
+    - method:356a9104cf38f50d20bdd8b28b005400
+    - method:ad8dc37f5a35b58de42ae1227cece785
+    id: r.exponential-backoff
+    level: MUST
+    text: Each failed attempt waits the current backoff delay, then roughly doubles
+      it capped at the maximum and trims a random 0 to 25 percent off the doubled
+      value; a successful authentication resets the delay to the minimum, and when
+      exitOnError is set no wait happens so Run returns the error instead of retrying.
+  - codeRefs:
+    - function:dce3dfc9a119cb3f8d51a85e7cc0c4c1
+    - struct:283295d326d630f31d67353ca011a1f7
+    - struct:aca458a585521ce17b4a96b9a546b1af
+    id: r.handler-config-wiring
+    level: MUST
+    text: NewAuthHandler copies token, logger, client, wrap TTL, min and max backoff,
+      user agent, metrics signifier, the reauth/template/exec enable flags and exit-on-error
+      from AuthHandlerConfig into the handler, and allocates OutputCh, TemplateTokenCh
+      and ExecTokenCh as channels buffered with capacity 1 so publishing during sink
+      shutdown does not block.
+  - codeRefs:
+    - method:ad8dc37f5a35b58de42ae1227cece785
+    id: r.metrics-counters
+    level: MUST
+    text: Run increments the configured metrics signifier counters for authentication
+      failure and success, including on watcher renewals, so operator dashboards see
+      auth health per application.
+  - codeRefs:
+    - method:ad8dc37f5a35b58de42ae1227cece785
+    id: r.preloaded-token-lookup
+    level: MUST
+    text: On the first iteration with a configured token, Run uses that token to call
+      lookup-self instead of authenticating, and synthesizes the secret's auth block
+      from the returned id, ttl and renewable fields, falling back to real auto-auth
+      when the token no longer works.
+  - codeRefs:
+    - method:ad8dc37f5a35b58de42ae1227cece785
+    id: r.renewal-loop
+    level: MUST
+    text: Run builds an API lifetime watcher for the secret and renews in a goroutine,
+      stopping the previous watcher first; the inner loop ends on context cancellation,
+      on the watcher's done channel, or when the method signals new credentials, and
+      each renewal tick counts as an auth success.
+  - codeRefs:
+    - method:ad8dc37f5a35b58de42ae1227cece785
+    id: r.run-rejects-nil-method
+    level: MUST
+    text: AuthHandler.Run returns an error when handed a nil AuthMethod rather than
+      dereferencing it.
+  - codeRefs:
+    - method:600796333fc443a1fcce1cf63eae033e
+    - method:ad8dc37f5a35b58de42ae1227cece785
+    id: r.shutdown-cleanup
+    level: MUST
+    text: Run defers cleanup that shuts the auth method down and closes OutputCh,
+      TemplateTokenCh and ExecTokenCh, and it returns nil when the context is cancelled
+      so shutdown is not reported as an error.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/auth/auth_test.go
+    id: r.test-method-fixture
+    level: MAY
+    text: The package tests supply an in-package test auth method so Run can be exercised
+      without a live server.
+  - codeRefs:
+    - method:ad8dc37f5a35b58de42ae1227cece785
+    - method:dd14a787df21b4dd31349d380e916be1
+    id: r.token-fanout
+    level: MUST
+    text: After a successful authentication or validation, Run sends the client token
+      to OutputCh and, only when the corresponding flag is enabled, to TemplateTokenCh
+      and ExecTokenCh, then tells the method CredSuccess.
+  - codeRefs:
+    - method:ad8dc37f5a35b58de42ae1227cece785
+    id: r.token-file-special-case
+    level: MUST
+    text: 'The token-file method, identified by the path auth/token/lookup-self, is
+      treated as validation rather than login: Run requires a secret with a non-empty
+      id and synthesizes the auth block, notes that batch tokens cannot be renewed,
+      and skips the renewal process when the token has unlimited TTL.'
+  - codeRefs:
+    - method:ad8dc37f5a35b58de42ae1227cece785
+    id: r.wrap-ttl-path
+    level: MUST
+    text: When a wrap TTL is set, Run installs a wrapping lookup function returning
+      that TTL, rejects a login response with nil or empty wrap info, and publishes
+      the JSON-encoded wrap info to the sink channels before pausing until shutdown
+      or new credentials arrive.
   upstream: self
 - code:
   - third_party/openbao/internal/command/agentproxyshared/auth/approle/approle.go
