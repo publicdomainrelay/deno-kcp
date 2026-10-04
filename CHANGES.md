@@ -4193,6 +4193,13 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.instructions-per-feature-state` (MUST): "WizardSecretsKeymgmtComponent must derive its user instructions from this.args.featureState, telling the user to enter provider details and click 'Create provider' for provider, to click 'Distribute key' in the toolbar for displayProvider, and to enter key details and click 'Distribute key' for distribute."
 - added `r.wizard-step-component-files` (SHOULD): "The wizard step components should stay together in the wizard directory, with features-selection.js and mounts-wizard.js sitting alongside secrets-keymgmt.js as the other steps of the same flow."
 
+### third-party-openbao-ui-app-config
+
+- intent: "" -> "It exists so the OpenBao web UI can import its build-time environment configuration through `import config from 'my-app/config/environment'` with full type checking under TypeScript. Without this declaration the Ember resolver's virtual module would be untyped, so every read of environment metadata would be implicit any. The context therefore pins the configuration surface the UI code is allowed to rely on."
+- added `r.declaration-only` (MUST): "The file must stay a pure type declaration: it declares `config` without providing a runtime value, so no JavaScript is emitted for it."
+- added `r.declares-env-config-shape` (MUST): "The module must declare a constant named `config` whose type holds exactly the keys `environment`, `modulePrefix`, `podModulePrefix`, `locationType`, `rootURL` and `APP`; `environment`, `modulePrefix`, `podModulePrefix` and `rootURL` must be strings, `locationType` must be limited to the literals 'history', 'hash', 'none' or 'auto', and `APP` must be a record of string keys to unknown values."
+- added `r.default-export` (MUST): "The declared `config` constant must be the module's default export, so importers using `import config from 'my-app/config/environment'` receive that typed object."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4522,6 +4529,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-components-transit-key-action-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-components-transit-key-action-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-components-wizard-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-config-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-config-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+It exists so the OpenBao web UI can import its build-time environment configuration through `import config from 'my-app/config/environment'` with full type checking under TypeScript. Without this declaration the Ember resolver's virtual module would be untyped, so every read of environment metadata would be implicit any. The context therefore pins the configuration surface the UI code is allowed to rely on.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
