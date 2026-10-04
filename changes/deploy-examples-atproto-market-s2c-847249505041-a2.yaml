@@ -46,8 +46,98 @@ spec:
   systemContext: deploy-examples-atproto-market
   toSpecHash: 847249505041403014ba8894aaac79deaf0fef652f87dfb8dd8642389fcb6403
 status:
-  message: the agent is realizing deploy-examples-atproto-market
-  phase: Running
+  acceptance:
+  - durationSeconds: 529.390669113
+    exitCode: 1
+    name: market-live-acceptance
+    outputTail: |-
+      ...7rqv name=relay err="provider: start pod relay: execrunner: write main.ts: write /tmp/tmp.RsfvKrV4nG/runs/pod-20261004T214032.251345240-1014/main.ts: disk quota exceeded"
+      time=2026-10-04T14:40:34.815-07:00 level=ERROR msg="watch reconcile failed" kind=denopod workspace=ctq6eczyqs3j7rqv name=relay err="provider: start pod relay: execrunner: write main.ts: write /tmp/tmp.RsfvKrV4nG/runs/pod-20261004T214034.815777237-1015/main.ts: disk quota exceeded"
+
+      status of the pods that are not Running and ready:
+      root:global plc:
+        {"conditions":[{"lastTransitionTime":"2026-10-04T21:32:25Z","message":"the readiness probe has not passed","observedGeneration":1,"reason":"NotReady","status":"False","type":"Ready"},{"lastTransitionTime":"2026-10-04T21:32:25Z","message":"the deno process is long-running","observedGeneration":1,"reason":"Running","status":"False","type":"Complete"}],"message":"the deno process exited; the restart policy is Always","phase":"Running","ready":false,"restarts":203,"runID":"pod-20261004T214026.352077331-1000","startTime":"2026-10-04T21:32:25Z"}
+      root:relay relay:
+        {"conditions":[{"lastTransitionTime":"2026-10-04T21:32:25Z","message":"the deno process exited; the restart policy is Always","observedGeneration":1,"reason":"Restarting","status":"False","type":"Ready"},{"lastTransitionTime":"2026-10-04T21:32:25Z","message":"the deno process is long-running","observedGeneration":1,"reason":"Running","status":"False","type":"Complete"}],"message":"the deno process exited; the restart policy is Always","phase":"Running","ready":false,"restarts":205,"runID":"","startTime":"2026-10-04T21:32:25Z"}
+      root:alice pds:
+        {"conditions":[{"lastTransitionTime":"2026-10-04T21:32:25Z","message":"the readiness probe has not passed","observedGeneration":1,"reason":"NotReady","status":"False","type":"Ready"},{"lastTransitionTime":"2026-10-04T21:32:25Z","message":"the deno process is long-running","observedGeneration":1,"reason":"Running","status":"False","type":"Complete"}],"message":"the deno process exited; the restart policy is Always","phase":"Running","ready":false,"restarts":201,"runID":"pod-20261004T214026.582085022-1002","startTime":"2026-10-04T21:32:25Z"}
+      root:bob pds:
+        {"conditions":[{"lastTransitionTime":"2026-10-04T21:32:25Z","message":"the readiness probe has not passed","observedGeneration":1,"reason":"NotReady","status":"False","type":"Ready"},{"lastTransitionTime":"2026-10-04T21:32:25Z","message":"the deno process is long-running","observedGeneration":1,"reason":"Running","status":"False","type":"Complete"}],"message":"the deno process exited; the restart policy is Always","phase":"Running","ready":false,"restarts":202,"runID":"pod-20261004T214026.583799941-1003","startTime":"2026-10-04T21:32:25Z"}
+      root:bob bidder:
+        {"conditions":[{"lastTransitionTime":"2026-10-04T21:32:25Z","message":"the deno process is starting","observedGeneration":1,"reason":"Starting","status":"False","type":"Ready"},{"lastTransitionTime":"2026-10-04T21:32:25Z","message":"the deno process is long-running","observedGeneration":1,"reason":"Running","status":"False","type":"Complete"}],"message":"the deno process exited; the restart policy is Always","phase":"Running","ready":false,"restarts":188,"runID":"pod-20261004T214028.168867853-1004","startTime":"2026-10-04T21:32:25Z"}
+      root:alice verifier:
+        {"completionTime":"2026-10-04T21:36:28Z","conditions":[{"lastTransitionTime":"2026-10-04T21:36:28Z","message":"the pod reached a terminal phase","observedGeneration":1,"reason":"Terminal","status":"False","type":"Ready"},{"lastTransitionTime":"2026-10-04T21:36:26Z","message":"the deno process failed and the restart policy is Never","observedGeneration":1,"reason":"ProcessFailed","status":"False","type":"Complete"}],"exitCode":1,"message":"the deno process exited with code 1","outputs":{"error":"fetch failed","verdict":"fail"},"phase":"Failed","ready":false,"restarts":0,"runID":"pod-20261004T213626.774490552-570","startTime":"2026-10-04T21:36:26Z"}
+
+      accept: fail
+    passed: false
+  agentLog: "... `health:`/`create alice` curls now `https` with `-k`, matching `SERVICE_TLS
+    true` listeners.\n\n**`deploy/examples/atproto/market/accept.sh`**\n- New `start_provider`/`stop_provider`;
+    provider log appended so restarts keep stalled attempt log; cleanup uses `stop_provider`.\n-
+    `KC`/`SERVER` plus helpers `openbao_ready_any` (any workspace `status.ready=true`)
+    and `denopod_exists_any` moved ahead of apply.\n- Apply wrapped in attempt loop:
+    prints `apply attempt N of MAX_ATTEMPTS` (default 3), records each exit code in
+    `ATTEMPT_STATUS`. On failure polls `STALL_SECONDS` (default 30) for reconciliation.
+    Only when no OpenBao ready and no DenoPod anywhere does it stop+restart provider
+    and retry; DenoPod gate means no restart once workloads exist, so children never
+    orphaned.\n- `apply.sh` check evidence now `exit=N attempts=1 1 0`.\n\n`bash -n`
+    clean on both; `go test ./...` exit 0.\n\n⚠ claude.ai connectors are disabled
+    because ANTHROPIC_API_KEY or another auth source is set and takes precedence over
+    your claude.ai login · Unset it to load your organization's connectors\n[claude-code:unrecognized_model]
+    {\"model\":\"deepseek-v4-flash\",\"query_source\":\"sdk\"}\nok  \tgithub.com/johnandersen777/deno-kcp/api/v1alpha1\t(cached)\n?
+    \  \tgithub.com/johnandersen777/deno-kcp/cmd/deno-kcp-provider\t[no test files]\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/internal/denojob\t(cached)\nok  \tgithub.com/johnandersen777/deno-kcp/internal/denopod\t(cached)\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/internal/denorun\t(cached)\n?   \tgithub.com/johnandersen777/deno-kcp/internal/livegate\t[no
+    test files]\nok  \tgithub.com/johnandersen777/deno-kcp/internal/policyengine\t(cached)\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/internal/policyworkflowpod\t(cached)\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/internal/policyworkflowrun\t(cached)\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/internal/provider\t0.044s\nok  \tgithub.com/johnandersen777/deno-kcp/internal/trigger\t(cached)\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/test/integration\t(cached)"
+  branch: spec/deploy-examples-atproto-market/84724950
+  commit: 89cee50ec5aea977a42f904a758e506729e1158e
+  filesTouched:
+  - deploy/examples/atproto/market/accept.sh
+  - deploy/examples/atproto/market/apply.sh
+  message: 'realized deploy-examples-atproto-market on spec/deploy-examples-atproto-market/84724950:
+    2 file(s) touched, verify exit 0'
+  phase: Succeeded
+  progress:
+  - at: "2026-10-04T21:30:57Z"
+    files:
+    - deploy/examples/atproto/market/apply.sh
+    tool: Read
+  - at: "2026-10-04T21:30:57Z"
+    files:
+    - deploy/examples/atproto/market/accept.sh
+    tool: Read
+  - at: "2026-10-04T21:31:02Z"
+    files:
+    - test/integration/examples.go
+    tool: Read
+  - at: "2026-10-04T21:31:21Z"
+    files:
+    - deploy/examples/atproto/market/apply.sh
+    tool: Edit
+  - at: "2026-10-04T21:31:24Z"
+    files:
+    - deploy/examples/atproto/market/accept.sh
+    tool: Edit
+  - at: "2026-10-04T21:31:48Z"
+    files:
+    - deploy/examples/atproto/market/accept.sh
+    tool: Read
+  - at: "2026-10-04T21:31:51Z"
+    files:
+    - deploy/examples/atproto/market/apply.sh
+    tool: Edit
+  - at: "2026-10-04T21:31:57Z"
+    files:
+    - deploy/examples/atproto/market/apply.sh
+    tool: Read
+  - at: "2026-10-04T21:32:05Z"
+    note: turn
+  - at: "2026-10-04T21:32:05Z"
+    note: turn
+    turn: 1
 superseded:
 - message: 'gitrepo: git add -A in /tmp/specd-worktree-3897205593/deno-kcp: exit status
     128: fatal: cannot change to ''/tmp/specd-worktree-3897205593/deno-kcp'': No such
