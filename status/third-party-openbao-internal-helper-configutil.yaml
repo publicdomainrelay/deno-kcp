@@ -1,0 +1,252 @@
+conditions:
+- message: 'undeclared: AgentAPI, ConfigError, ConfigError.Error, ConfigError.String,
+    EncryptDecrypt, GetSupportedUserLockoutsAuthMethods, IsValidStatusCode, KMS, KMS.GoString,
+    Listener, Listener.GoString, Listener.Validate, ListenerInFlightRequestLogging,
+    ListenerProfiling, ListenerTelemetry, ParseConfig, ParseCustomResponseHeaders,
+    ParseKMSes, ParseListeners, ParseSingleIPTemplate, ParseUserLockouts, ProxyAPI,
+    SetupTelemetry, SetupTelemetryOpts, SharedConfig, SharedConfig.Merge, SharedConfig.Sanitized,
+    Telemetry, Telemetry.GoString, Telemetry.Validate, UnderscoreToCamelCase, UnusedFieldDifference,
+    UnusedKeyMap, UserLockout, ValidatableConfig, ValidatableConfig.Validate, ValidateUnusedFields'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/helper/configutil/config.go
+  - third_party/openbao/internal/helper/configutil/config_test.go
+  - third_party/openbao/internal/helper/configutil/encrypt_decrypt.go
+  - third_party/openbao/internal/helper/configutil/encrypt_decrypt_test.go
+  - third_party/openbao/internal/helper/configutil/http_response_headers.go
+  - third_party/openbao/internal/helper/configutil/kms.go
+  - third_party/openbao/internal/helper/configutil/lint.go
+  - third_party/openbao/internal/helper/configutil/listener.go
+  - third_party/openbao/internal/helper/configutil/listener_test.go
+  - third_party/openbao/internal/helper/configutil/merge.go
+  - third_party/openbao/internal/helper/configutil/telemetry.go
+  - third_party/openbao/internal/helper/configutil/telemetry_test.go
+  - third_party/openbao/internal/helper/configutil/userlockout.go
+  - third_party/openbao/internal/helper/configutil/userlockout_test.go
+  fingerprint: 756c117bb6cc0407e9218b8aecfbcb60bb66079781c08e064c631c11418ed154
+  interfaces:
+  - codegraphId: struct:fce4c4fc8f1f5e067009fff9beb4ec03
+    file: third_party/openbao/internal/helper/configutil/config.go
+    kind: struct
+    line: 24
+    name: SharedConfig
+  - codegraphId: function:77fb544202bb8532bb23c6ca1a880a12
+    file: third_party/openbao/internal/helper/configutil/config.go
+    kind: function
+    line: 61
+    name: ParseConfig
+    signature: (d string) (*SharedConfig, error)
+  - codegraphId: method:aa5e6acfac4c7338e2cd5c1cc3039af8
+    file: third_party/openbao/internal/helper/configutil/config.go
+    kind: method
+    line: 150
+    name: SharedConfig.Sanitized
+    signature: () map[string]any
+  - codegraphId: function:105fc35b9336fe2384c8bc4ec6296298
+    file: third_party/openbao/internal/helper/configutil/encrypt_decrypt.go
+    kind: function
+    line: 23
+    name: EncryptDecrypt
+    signature: (rawStr string, decrypt, strip bool, wrapper wrapping.Wrapper) (string,
+      error)
+  - codegraphId: function:ad21829897e52ff55f5c9d66fe0c6a88
+    file: third_party/openbao/internal/helper/configutil/http_response_headers.go
+    kind: function
+    line: 31
+    name: ParseCustomResponseHeaders
+    signature: (responseHeaders any) (map[string]map[string]string, error)
+  - codegraphId: function:5df91abbbc37bcb098ea3934303d853c
+    file: third_party/openbao/internal/helper/configutil/http_response_headers.go
+    kind: function
+    line: 80
+    name: IsValidStatusCode
+    signature: (sc string) bool
+  - codegraphId: struct:bee252964a822afcacf869c84b293248
+    file: third_party/openbao/internal/helper/configutil/kms.go
+    kind: struct
+    line: 20
+    name: KMS
+  - codegraphId: method:718a8e21ce1943a1ec0a025e1bbaea43
+    file: third_party/openbao/internal/helper/configutil/kms.go
+    kind: method
+    line: 43
+    name: KMS.GoString
+    signature: () string
+  - codegraphId: function:1ef1977e32c1b866e0ae56bacdcfe142
+    file: third_party/openbao/internal/helper/configutil/kms.go
+    kind: function
+    line: 171
+    name: ParseKMSes
+    signature: (d string) ([]*KMS, error)
+  - codegraphId: type_alias:4fbf332dae9c39abacc69e9919849795
+    file: third_party/openbao/internal/helper/configutil/lint.go
+    kind: type_alias
+    line: 14
+    name: UnusedKeyMap
+  - codegraphId: struct:84e66809f5b9059cdeb57184cb41309f
+    file: third_party/openbao/internal/helper/configutil/lint.go
+    kind: struct
+    line: 16
+    name: ConfigError
+  - codegraphId: method:45418d60631816c60f3d1a5f0c0d46ba
+    file: third_party/openbao/internal/helper/configutil/lint.go
+    kind: method
+    line: 21
+    name: ConfigError.String
+    signature: () string
+  - codegraphId: method:863010fc3d10b12ed4744af29674264a
+    file: third_party/openbao/internal/helper/configutil/lint.go
+    kind: method
+    line: 25
+    name: ConfigError.Error
+    signature: () string
+  - codegraphId: interface:40d27ad81527a8b72d5d7340ac3da553
+    file: third_party/openbao/internal/helper/configutil/lint.go
+    kind: interface
+    line: 29
+    name: ValidatableConfig
+  - codegraphId: method:b791b9f161fdf8e9e7baaea392cc8814
+    file: third_party/openbao/internal/helper/configutil/lint.go
+    kind: method
+    line: 30
+    name: ValidatableConfig.Validate
+    signature: () []ConfigError
+  - codegraphId: function:889db6405dcc67df264d39f6652243bf
+    file: third_party/openbao/internal/helper/configutil/lint.go
+    kind: function
+    line: 34
+    name: ValidateUnusedFields
+    signature: (unusedKeyPositions UnusedKeyMap, sourceFilePath string) []ConfigError
+  - codegraphId: function:7824b2d2889493796c34348fb087bf9c
+    file: third_party/openbao/internal/helper/configutil/lint.go
+    kind: function
+    line: 55
+    name: UnusedFieldDifference
+    signature: (a, b UnusedKeyMap, foundKeys []string) UnusedKeyMap
+  - codegraphId: function:f5089c82048c4cea033334fe34b63869
+    file: third_party/openbao/internal/helper/configutil/lint.go
+    kind: function
+    line: 68
+    name: UnderscoreToCamelCase
+    signature: (s string) string
+  - codegraphId: struct:f950e5187a3ecba5b4c3d55b886ca587
+    file: third_party/openbao/internal/helper/configutil/listener.go
+    kind: struct
+    line: 24
+    name: ListenerTelemetry
+  - codegraphId: struct:e2b0d6d26b1899efcd9316f14f4df5b1
+    file: third_party/openbao/internal/helper/configutil/listener.go
+    kind: struct
+    line: 35
+    name: ListenerProfiling
+  - codegraphId: struct:9098d8a9bbfe7006a86e92ca1cbf1a76
+    file: third_party/openbao/internal/helper/configutil/listener.go
+    kind: struct
+    line: 41
+    name: ListenerInFlightRequestLogging
+  - codegraphId: struct:30d9de86e173f6b9e4e8461f3667ab64
+    file: third_party/openbao/internal/helper/configutil/listener.go
+    kind: struct
+    line: 48
+    name: Listener
+  - codegraphId: struct:d1ef65ef693328fe44125a5c24c35943
+    file: third_party/openbao/internal/helper/configutil/listener.go
+    kind: struct
+    line: 192
+    name: AgentAPI
+  - codegraphId: struct:70a56a735cbb50b480ec425ab8671ea0
+    file: third_party/openbao/internal/helper/configutil/listener.go
+    kind: struct
+    line: 197
+    name: ProxyAPI
+  - codegraphId: method:7174d250cff915fe8613079c4c153028
+    file: third_party/openbao/internal/helper/configutil/listener.go
+    kind: method
+    line: 201
+    name: Listener.GoString
+    signature: () string
+  - codegraphId: method:ec04b6dd0fde338221ba2de35dbfd8ab
+    file: third_party/openbao/internal/helper/configutil/listener.go
+    kind: method
+    line: 205
+    name: Listener.Validate
+    signature: (path string) []ConfigError
+  - codegraphId: function:ad1fa2941b767b001c84d87304b05e93
+    file: third_party/openbao/internal/helper/configutil/listener.go
+    kind: function
+    line: 210
+    name: ParseListeners
+    signature: (result *SharedConfig, list *ast.ObjectList) error
+  - codegraphId: function:97bf02a0c2bada84b295d6fdb511e60d
+    file: third_party/openbao/internal/helper/configutil/listener.go
+    kind: function
+    line: 665
+    name: ParseSingleIPTemplate
+    signature: (ipTmpl string) (string, error)
+  - codegraphId: method:3a541cae658e9b501a97bcfc32cc5882
+    file: third_party/openbao/internal/helper/configutil/merge.go
+    kind: method
+    line: 6
+    name: SharedConfig.Merge
+    signature: (c2 *SharedConfig) *SharedConfig
+  - codegraphId: struct:4e12c84860b9039cd52dc4818c970dd8
+    file: third_party/openbao/internal/helper/configutil/telemetry.go
+    kind: struct
+    line: 38
+    name: Telemetry
+  - codegraphId: method:e975de05e86e938e1977f1a2fa845aa2
+    file: third_party/openbao/internal/helper/configutil/telemetry.go
+    kind: method
+    line: 167
+    name: Telemetry.Validate
+    signature: (source string) []ConfigError
+  - codegraphId: method:06b3b98e173778274bdc6e6a9ba4d800
+    file: third_party/openbao/internal/helper/configutil/telemetry.go
+    kind: method
+    line: 171
+    name: Telemetry.GoString
+    signature: () string
+  - codegraphId: struct:5f845f43816f72fa6ac585be93cdb02e
+    file: third_party/openbao/internal/helper/configutil/telemetry.go
+    kind: struct
+    line: 240
+    name: SetupTelemetryOpts
+  - codegraphId: function:b24ca91d4246209aa7376606a368ae71
+    file: third_party/openbao/internal/helper/configutil/telemetry.go
+    kind: function
+    line: 251
+    name: SetupTelemetry
+    signature: (opts *SetupTelemetryOpts) (*metrics.InmemSink, *metricsutil.ClusterMetricSink,
+      bool, error)
+  - codegraphId: struct:6ea0537903ada49c640d6f30dab3ce0f
+    file: third_party/openbao/internal/helper/configutil/userlockout.go
+    kind: struct
+    line: 26
+    name: UserLockout
+  - codegraphId: function:b1e6e342299e667aa7b190951c4c2f78
+    file: third_party/openbao/internal/helper/configutil/userlockout.go
+    kind: function
+    line: 38
+    name: GetSupportedUserLockoutsAuthMethods
+    signature: () []string
+  - codegraphId: function:bea73cf5a0d9564ea42718d1714c2b7e
+    file: third_party/openbao/internal/helper/configutil/userlockout.go
+    kind: function
+    line: 42
+    name: ParseUserLockouts
+    signature: (result *SharedConfig, list *ast.ObjectList) error
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: b90976303e570c914a2895da7617ba2d16ba35fb79bf867b713171a40122b4af
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 756c117bb6cc0407e9218b8aecfbcb60bb66079781c08e064c631c11418ed154

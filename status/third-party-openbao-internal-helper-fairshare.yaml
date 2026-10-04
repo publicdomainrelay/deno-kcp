@@ -1,0 +1,130 @@
+conditions:
+- message: 'undeclared: GetNumWorkers, Job, Job.Execute, Job.OnFailure, JobManager,
+    JobManager.AddJob, JobManager.GetPendingJobCount, JobManager.GetWorkQueueLengths,
+    JobManager.GetWorkerCounts, JobManager.Start, JobManager.Stop, NewJobManager,
+    SimpleJob, SimpleJob.Execute, SimpleJob.OnFailure, testJob.Execute, testJob.OnFailure'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/helper/fairshare/fairshare_testing_util.go
+  - third_party/openbao/internal/helper/fairshare/jobmanager.go
+  - third_party/openbao/internal/helper/fairshare/jobmanager_test.go
+  - third_party/openbao/internal/helper/fairshare/simple_job.go
+  - third_party/openbao/internal/helper/fairshare/workerpool.go
+  - third_party/openbao/internal/helper/fairshare/workerpool_test.go
+  fingerprint: e8955b3f05a56b4c951ace1312457e47f026bae5a34c16c81ef9270d427d634f
+  interfaces:
+  - codegraphId: method:243171cf7d78d01d9825d3ad77eb7965
+    file: third_party/openbao/internal/helper/fairshare/fairshare_testing_util.go
+    kind: method
+    line: 20
+    name: testJob.Execute
+    signature: () error
+  - codegraphId: method:1a3f27add3579cb8043963363c4de892
+    file: third_party/openbao/internal/helper/fairshare/fairshare_testing_util.go
+    kind: method
+    line: 24
+    name: testJob.OnFailure
+    signature: (err error)
+  - codegraphId: function:a25203cc8fb9b9acd89054978492bd97
+    file: third_party/openbao/internal/helper/fairshare/fairshare_testing_util.go
+    kind: function
+    line: 61
+    name: GetNumWorkers
+    signature: (j *JobManager) int
+  - codegraphId: struct:09a3af83eb6b540ce9d54bf386603ef0
+    file: third_party/openbao/internal/helper/fairshare/jobmanager.go
+    kind: struct
+    line: 21
+    name: JobManager
+  - codegraphId: function:4b129dd9f878e9e637aa9f571775c444
+    file: third_party/openbao/internal/helper/fairshare/jobmanager.go
+    kind: function
+    line: 51
+    name: NewJobManager
+    signature: (name string, numWorkers int, l log.Logger, metricSink *metricsutil.ClusterMetricSink)
+      *JobManager
+  - codegraphId: method:7c89e7dbd7b4e50772d64ef3d857ac08
+    file: third_party/openbao/internal/helper/fairshare/jobmanager.go
+    kind: method
+    line: 86
+    name: JobManager.Start
+    signature: ()
+  - codegraphId: method:bdc00af64aa765049d89d9e6902b1142
+    file: third_party/openbao/internal/helper/fairshare/jobmanager.go
+    kind: method
+    line: 95
+    name: JobManager.Stop
+    signature: ()
+  - codegraphId: method:c21a7c1e65c595c0b5628fa9790f4fdd
+    file: third_party/openbao/internal/helper/fairshare/jobmanager.go
+    kind: method
+    line: 105
+    name: JobManager.AddJob
+    signature: (job Job, queueID string)
+  - codegraphId: method:52fd9c225ff007a2c7a6526b56daf5e9
+    file: third_party/openbao/internal/helper/fairshare/jobmanager.go
+    kind: method
+    line: 133
+    name: JobManager.GetPendingJobCount
+    signature: () int
+  - codegraphId: method:bd92c0739319b162b5bdf92aaca462ef
+    file: third_party/openbao/internal/helper/fairshare/jobmanager.go
+    kind: method
+    line: 146
+    name: JobManager.GetWorkerCounts
+    signature: () map[string]int
+  - codegraphId: method:e29495e289a0e66c0fde8fe4092bbc90
+    file: third_party/openbao/internal/helper/fairshare/jobmanager.go
+    kind: method
+    line: 153
+    name: JobManager.GetWorkQueueLengths
+    signature: () map[string]int
+  - codegraphId: type_alias:bc8a2d6a2a4a2d1c6a08271183ef8290
+    file: third_party/openbao/internal/helper/fairshare/simple_job.go
+    kind: type_alias
+    line: 5
+    name: SimpleJob
+  - codegraphId: method:5e17595d016c4f4cf6b061d94c1e2f55
+    file: third_party/openbao/internal/helper/fairshare/simple_job.go
+    kind: method
+    line: 7
+    name: SimpleJob.Execute
+    signature: () error
+  - codegraphId: method:b11f823816dbf7962ffaa7493241f55b
+    file: third_party/openbao/internal/helper/fairshare/simple_job.go
+    kind: method
+    line: 12
+    name: SimpleJob.OnFailure
+    signature: (err error)
+  - codegraphId: interface:f20c7873181e8d9d7200218fdeb45888
+    file: third_party/openbao/internal/helper/fairshare/workerpool.go
+    kind: interface
+    line: 17
+    name: Job
+  - codegraphId: method:d5687b37193fcb4618d7ddabd0119c3d
+    file: third_party/openbao/internal/helper/fairshare/workerpool.go
+    kind: method
+    line: 20
+    name: Job.Execute
+    signature: () error
+  - codegraphId: method:dc4a3f45feb63a80716378dfc1fed3c7
+    file: third_party/openbao/internal/helper/fairshare/workerpool.go
+    kind: method
+    line: 24
+    name: Job.OnFailure
+    signature: (err error)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 011fd76e72694dc0e15c00dd6ee758bca115bba00670079dd3db85ac8b52ecd0
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: e8955b3f05a56b4c951ace1312457e47f026bae5a34c16c81ef9270d427d634f
