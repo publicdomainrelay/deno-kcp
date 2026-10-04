@@ -9,5 +9,11 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `class:71e521bb7cde0980024910cb7866c4f8` class Model (third_party/openbao/ui/app/models/identity/entity.js)
+- `file:third_party/openbao/ui/app/models/identity/_base.js` file _base.js (third_party/openbao/ui/app/models/identity/_base.js)
+- `file:third_party/openbao/ui/app/models/identity/entity-alias.js` file entity-alias.js (third_party/openbao/ui/app/models/identity/entity-alias.js)
+- `file:third_party/openbao/ui/app/models/identity/entity-merge.js` file entity-merge.js (third_party/openbao/ui/app/models/identity/entity-merge.js)
+- `file:third_party/openbao/ui/app/models/identity/entity.js` file entity.js (third_party/openbao/ui/app/models/identity/entity.js)
+- `file:third_party/openbao/ui/app/models/identity/group-alias.js` file group-alias.js (third_party/openbao/ui/app/models/identity/group-alias.js)
+- `file:third_party/openbao/ui/app/models/identity/group.js` file group.js (third_party/openbao/ui/app/models/identity/group.js)
 <!-- SPECD_MANAGED_END -->

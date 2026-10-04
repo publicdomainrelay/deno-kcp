@@ -1,15 +1,33 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: KubernetesConfigModel, KubernetesRoleModel'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/ui/app/models/kubernetes/config.js
+  - third_party/openbao/ui/app/models/kubernetes/role.js
+  fingerprint: 3611e53476679528ea4e57ba8631ed13be88e9cbe6896ba70c2a70ac98729041
+  interfaces:
+  - codegraphId: class:b832b4e691efebc11e0e5a20e3c638bd
+    file: third_party/openbao/ui/app/models/kubernetes/config.js
+    kind: class
+    line: 20
+    name: KubernetesConfigModel
+  - codegraphId: class:282a6a22ad22b2423f7af3f320e5ec45
+    file: third_party/openbao/ui/app/models/kubernetes/role.js
+    kind: class
+    line: 28
+    name: KubernetesRoleModel
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 174e5f03121bd0f92e86ff4b088a7f520bd314f55b0cc87005f630cd930c949f
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 3611e53476679528ea4e57ba8631ed13be88e9cbe6896ba70c2a70ac98729041

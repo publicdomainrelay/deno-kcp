@@ -1,15 +1,52 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: OidcAssignmentModel, OidcClientModel, OidcKeyModel, OidcProviderModel,
+    OidcScopeModel'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/ui/app/models/oidc/assignment.js
+  - third_party/openbao/ui/app/models/oidc/client.js
+  - third_party/openbao/ui/app/models/oidc/key.js
+  - third_party/openbao/ui/app/models/oidc/provider.js
+  - third_party/openbao/ui/app/models/oidc/scope.js
+  fingerprint: e6bdf53c9f7d1224510eeffc26a1b055fedae2bbc267ec1bad2484cdd82520e3
+  interfaces:
+  - codegraphId: class:47bd6620e0b1468753ab65f2174824ff
+    file: third_party/openbao/ui/app/models/oidc/assignment.js
+    kind: class
+    line: 30
+    name: OidcAssignmentModel
+  - codegraphId: class:261dca2bb7f66ffcfbb9bbf5f9b2ed47
+    file: third_party/openbao/ui/app/models/oidc/client.js
+    kind: class
+    line: 24
+    name: OidcClientModel
+  - codegraphId: class:ace1f2a8ef976995b7f07739033b4c7c
+    file: third_party/openbao/ui/app/models/oidc/key.js
+    kind: class
+    line: 22
+    name: OidcKeyModel
+  - codegraphId: class:13025483db13a0a8d234a0b5977da762
+    file: third_party/openbao/ui/app/models/oidc/provider.js
+    kind: class
+    line: 22
+    name: OidcProviderModel
+  - codegraphId: class:c75f9d2624e93ca2e45bf2838a3e1775
+    file: third_party/openbao/ui/app/models/oidc/scope.js
+    kind: class
+    line: 16
+    name: OidcScopeModel
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: d499608dfa04be25c821b6a2398818d2040b66d3a3f2e4e93445d9c48fc271cf
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: e6bdf53c9f7d1224510eeffc26a1b055fedae2bbc267ec1bad2484cdd82520e3

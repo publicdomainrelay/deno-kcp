@@ -9,5 +9,8 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `class:282a6a22ad22b2423f7af3f320e5ec45` class KubernetesRoleModel (third_party/openbao/ui/app/models/kubernetes/role.js)
+- `class:b832b4e691efebc11e0e5a20e3c638bd` class KubernetesConfigModel (third_party/openbao/ui/app/models/kubernetes/config.js)
+- `file:third_party/openbao/ui/app/models/kubernetes/config.js` file config.js (third_party/openbao/ui/app/models/kubernetes/config.js)
+- `file:third_party/openbao/ui/app/models/kubernetes/role.js` file role.js (third_party/openbao/ui/app/models/kubernetes/role.js)
 <!-- SPECD_MANAGED_END -->
