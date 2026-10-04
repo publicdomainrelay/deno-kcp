@@ -68147,7 +68147,87 @@ system_contexts:
   - file:third_party/openbao/ui/app/routes/vault/cluster/settings/auth/configure/section.js
     section.js@third_party/openbao/ui/app/routes/vault/cluster/settings/auth/configure/section.js
   id: sc.third-party-openbao-ui-app-routes-vault-cluster-settings-auth-configure
+  intent: This context exists so the auth-method settings screens can reuse one route
+    for every supported auth backend instead of one route per backend. index.js always
+    lands on the first available tab, and section.js interprets the tab name to pick
+    the right auth-config model (aws, azure, github, gcp, jwt, oidc, kubernetes, ldap,
+    okta, radius), fetch it from the API, and tolerate the API 404 that means no configuration
+    has been saved yet. The reset hook keeps the shared controller clean when the
+    user leaves a section.
   name: third-party-openbao-ui-app-routes-vault-cluster-settings-auth-configure
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/settings/auth/configure/index.js
+    id: r.index-redirects-to-first-tab
+    level: MUST
+    text: The configure index route must, in beforeModel, read the parent 'vault.cluster.settings.auth.configure'
+      model, take the first entry returned by tabsForAuthSection([model]), and transition
+      to 'vault.cluster.settings.auth.configure.section' using that tab's routeParams.lastObject
+      as the section. The route must inject the Ember router service to perform the
+      transition.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/settings/auth/configure/section.js
+    id: r.section-beforemodel-path-help
+    level: MUST
+    text: The section route must skip all model preparation when the route parameter
+      section_name equals 'options'. For every other section it must read method from
+      the parent 'vault.cluster.settings.auth.configure' params and the backend model
+      from that same route, resolve the model type from backend.type and section_name,
+      and return the promise from pathHelp.getNewModel(modelType, method, backend.apiPath).
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/settings/auth/configure/section.js
+    id: r.section-model-load-and-404-fallback
+    level: MUST
+    text: For a known model type the section route must first check the store with
+      peekRecord(modelType, backend.id) and, when cached, return an RSVP hash of that
+      record plus the section. Otherwise it must call findRecord(modelType, backend.id),
+      set the parent backend on the loaded config, and return the hash. If the request
+      rejects with httpStatus 404 it must create a new unsaved record of the model
+      type with id backend.id, set the backend on it, and return it in the hash; any
+      other rejection must be rethrown.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/settings/auth/configure/section.js
+    id: r.section-model-options-section
+    level: MUST
+    text: When the section parameter is 'options', the section route's model hook
+      must return an RSVP hash of the parent auth-method backend as 'model' and the
+      string 'options' as 'section', without touching the store.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/settings/auth/configure/section.js
+    id: r.section-model-path-property
+    level: MAY
+    text: The section route may declare a modelPath property of 'model.model' to point
+      the path-help service at the nested model, and injects the path-help and store
+      services.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/settings/auth/configure/section.js
+    id: r.section-model-type-table
+    level: MUST
+    text: The section route must resolve a section by looking up the key '<backendType>-<section>'
+      in a fixed model table and returning the matching Ember Data model name. The
+      table must contain aws-client -> auth-config/aws/client, aws-identity-accesslist
+      -> auth-config/aws/identity-accesslist, aws-roletag-denylist -> auth-config/aws/roletag-denylist,
+      azure-configuration -> auth-config/azure, github-configuration -> auth-config/github,
+      gcp-configuration -> auth-config/gcp, jwt-configuration -> auth-config/jwt,
+      oidc-configuration -> auth-config/oidc, kubernetes-configuration -> auth-config/kubernetes,
+      ldap-configuration -> auth-config/ldap, okta-configuration -> auth-config/okta,
+      and radius-configuration -> auth-config/radius. Any other combination must resolve
+      to undefined.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/settings/auth/configure/section.js
+    id: r.section-model-unknown-type-404
+    level: MUST
+    text: When the section is not 'options' and the model table yields no model type,
+      the section route's model hook must throw an AdapterError instance whose httpStatus
+      is set to 404, so unknown backend/section pairs surface as not-found.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/settings/auth/configure/section.js
+    id: r.section-reset-controller-cleanup
+    level: SHOULD
+    text: The section route's resetController must call the super implementation,
+      must not clean up when the controller model's constructor modelName is 'auth-method',
+      and on route exit must call cleanupModel on the controller when that method
+      is present.
   upstream: self
 - code:
   - third_party/openbao/ui/app/routes/vault/cluster/tools/index.js
