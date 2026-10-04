@@ -1,0 +1,30 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-internal-command-healthcheck-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-internal-command-healthcheck
+  toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+status:
+  agentLog: third_party/openbao/internal/command/healthcheck packages a set of PKI
+    health checks that run against a live OpenBao server. Executor owns the api client,
+    the mount path, the per-check configuration map and a per-operation path cache;
+    AddCheck registers checks, BuildConfig merges each check's defaults with external
+    per-check config, and Execute runs them and returns results grouped by check name.
+    FetchIfNotFetched reads a raw path at most once per operation and returns a cached
+    PathFetch whose predicates (IsOK, IsSecretOK, FetchSurfaceError, IsSecretPermissionsError,
+    IsUnsupportedPathError, IsMissingResource, Is404NotFound) let a check downgrade
+    or skip instead of failing hard. Every check implements the Check interface (Name,
+    IsEnabled, DefaultConfig, LoadConfig, FetchResources, Evaluate) and is produced
+    by its own New* constructor; shared helpers StringList, FormatDuration and ParsePEMCert
+    cover config coercion, duration rendering and certificate decoding.
+  message: wrote 15 requirement(s) and 139 interface(s) for third-party-openbao-internal-command-healthcheck
+  phase: Succeeded
+superseded:
+- message: wrote 15 requirement(s) and 139 interface(s) for third-party-openbao-internal-command-healthcheck
+  name: third-party-openbao-internal-command-healthcheck-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9
+  phase: Succeeded

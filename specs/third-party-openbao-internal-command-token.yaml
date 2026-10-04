@@ -7,10 +7,237 @@ codeRefIndex:
 - file:third_party/openbao/internal/command/token/helper_internal_test.go helper_internal_test.go@third_party/openbao/internal/command/token/helper_internal_test.go
 - file:third_party/openbao/internal/command/token/helper_testing.go helper_testing.go@third_party/openbao/internal/command/token/helper_testing.go
 - file:third_party/openbao/internal/command/token/testing.go testing.go@third_party/openbao/internal/command/token/testing.go
+- function:23b3e236bbf6635196d7bf7fc1f93d32 Test@third_party/openbao/internal/command/token/testing.go:17
+- function:3f2a36bbcd1abbb0f005b16ea64490f2 NewInternalTokenHelper@third_party/openbao/internal/command/token/helper_internal.go:26
+- function:43aa8625ae6454dbe879b173902fcd9e TestProcessPath@third_party/openbao/internal/command/token/testing.go:54
+- function:54a4eccf095a762d8fbcbbe14292e7b9 ExecScript@third_party/openbao/internal/command/token/helper_external.go:123
+- function:a438cf4fa333d5311befcee1574798fe NewTestingTokenHelper@third_party/openbao/internal/command/token/helper_testing.go:19
+- function:afc47b32b6792cdfd4456db2bd76fde0 TestExternalTokenHelperProcessCLI@third_party/openbao/internal/command/token/testing.go:66
+- function:f32d71a999e8a937edbeb0342aa55ba5 TestProcess@third_party/openbao/internal/command/token/testing.go:48
+- function:fa36836d21c45a07ae1caee3edb73184 ExternalTokenHelperPath@third_party/openbao/internal/command/token/helper_external.go:28
+- interface:245d0d200e4d2f5977a07ae0d13f38bb TokenHelper@third_party/openbao/internal/command/token/helper.go:8
+- method:023e1aa2dbad7c6e73d4ae37fdb94a65 TokenHelper.Store@third_party/openbao/internal/command/token/helper.go:15
+- method:542111467c677fe96b9bcd4cd053e25b TestingTokenHelper.Path@third_party/openbao/internal/command/token/helper_testing.go:36
+- method:583caebeb553ae693c30651576da99ca TestingTokenHelper.Get@third_party/openbao/internal/command/token/helper_testing.go:30
+- method:5b0531242d9da60fc26badf2150fee17 InternalTokenHelper.Path@third_party/openbao/internal/command/token/helper_internal.go:37
+- method:7f7097b3a1df264307d999d0db18ec27 ExternalTokenHelper.Path@third_party/openbao/internal/command/token/helper_external.go:108
+- method:817e184d460765d3dea4d1820b63ace2 InternalTokenHelper.Erase@third_party/openbao/internal/command/token/helper_internal.go:90
+- method:a67228461dc294162e503b20297b72d2 InternalTokenHelper.Store@third_party/openbao/internal/command/token/helper_internal.go:65
+- method:a8d518db2734e90a68144cbe1b8e2c7d TokenHelper.Get@third_party/openbao/internal/command/token/helper.go:14
+- method:b36b48e8b4682aefb2f46c975602e779 TokenHelper.Path@third_party/openbao/internal/command/token/helper.go:12
+- method:baedd47b0bf25b4a0aec00b7fc072bdf InternalTokenHelper.Get@third_party/openbao/internal/command/token/helper_internal.go:42
+- method:c22145270cbeea936b796b6dc639554f TokenHelper.Erase@third_party/openbao/internal/command/token/helper.go:13
+- method:c27b39c7e48d825d8e1fb017f7e48ded ExternalTokenHelper.Store@third_party/openbao/internal/command/token/helper_external.go:94
+- method:c3363c6a8a22099be31d31b7f76c712c TestingTokenHelper.Erase@third_party/openbao/internal/command/token/helper_testing.go:23
+- method:e992c760b3c5f07307af271d2c17c589 TestingTokenHelper.Store@third_party/openbao/internal/command/token/helper_testing.go:40
+- method:eb1419d3304aec07d81f0fda4ef553a6 ExternalTokenHelper.Get@third_party/openbao/internal/command/token/helper_external.go:78
+- method:f8fb55f02dd273284d4c8c58f9e57b06 ExternalTokenHelper.Erase@third_party/openbao/internal/command/token/helper_external.go:66
+- struct:0ff633f347418a596be8cbdb068158fa ExternalTokenHelper@third_party/openbao/internal/command/token/helper_external.go:60
+- struct:5cfa139b8fca97aee4597f90baccf686 InternalTokenHelper@third_party/openbao/internal/command/token/helper_internal.go:22
+- struct:bc7d6877e626118d9054aa5a11abea99 TestingTokenHelper@third_party/openbao/internal/command/token/helper_testing.go:14
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-command-token
   namespace: default
 spec:
+  intent: This context exists so command code can read, write and clear the client
+    token without knowing where it lives, and so tests can substitute an in-memory
+    or subprocess-backed helper. It provides the storage abstraction behind OpenBao
+    CLI login and token commands, plus the harness used to test the external-script
+    and file-backed variants.
+  interfaces:
+  - file: third_party/openbao/internal/command/token/helper_external.go
+    kind: function
+    name: ExecScript
+    signature: func ExecScript(script string) (*exec.Cmd, error)
+  - file: third_party/openbao/internal/command/token/helper_external.go
+    kind: struct
+    name: ExternalTokenHelper
+    signature: type ExternalTokenHelper struct
+  - file: third_party/openbao/internal/command/token/helper_external.go
+    kind: method
+    name: ExternalTokenHelper.Erase
+    signature: func (h *ExternalTokenHelper) Erase() error
+  - file: third_party/openbao/internal/command/token/helper_external.go
+    kind: method
+    name: ExternalTokenHelper.Get
+    signature: func (h *ExternalTokenHelper) Get() (string, error)
+  - file: third_party/openbao/internal/command/token/helper_external.go
+    kind: method
+    name: ExternalTokenHelper.Path
+    signature: func (h *ExternalTokenHelper) Path() string
+  - file: third_party/openbao/internal/command/token/helper_external.go
+    kind: method
+    name: ExternalTokenHelper.Store
+    signature: func (h *ExternalTokenHelper) Store(v string) error
+  - file: third_party/openbao/internal/command/token/helper_external.go
+    kind: function
+    name: ExternalTokenHelperPath
+    signature: func ExternalTokenHelperPath(path string) (string, error)
+  - file: third_party/openbao/internal/command/token/helper_internal.go
+    kind: struct
+    name: InternalTokenHelper
+    signature: type InternalTokenHelper struct { tokenPath string }
+  - file: third_party/openbao/internal/command/token/helper_internal.go
+    kind: method
+    name: InternalTokenHelper.Erase
+    signature: func (i *InternalTokenHelper) Erase() error
+  - file: third_party/openbao/internal/command/token/helper_internal.go
+    kind: method
+    name: InternalTokenHelper.Get
+    signature: func (i *InternalTokenHelper) Get() (value string, err error)
+  - file: third_party/openbao/internal/command/token/helper_internal.go
+    kind: method
+    name: InternalTokenHelper.Path
+    signature: func (i *InternalTokenHelper) Path() string
+  - file: third_party/openbao/internal/command/token/helper_internal.go
+    kind: method
+    name: InternalTokenHelper.Store
+    signature: func (i *InternalTokenHelper) Store(input string) error
+  - file: third_party/openbao/internal/command/token/helper_internal.go
+    kind: function
+    name: NewInternalTokenHelper
+    signature: func NewInternalTokenHelper() (*InternalTokenHelper, error)
+  - file: third_party/openbao/internal/command/token/helper_testing.go
+    kind: function
+    name: NewTestingTokenHelper
+    signature: func NewTestingTokenHelper() *TestingTokenHelper
+  - file: third_party/openbao/internal/command/token/testing.go
+    kind: function
+    name: Test
+    signature: func Test(t *testing.T, h TokenHelper)
+  - file: third_party/openbao/internal/command/token/testing.go
+    kind: function
+    name: TestExternalTokenHelperProcessCLI
+    signature: func TestExternalTokenHelperProcessCLI(t *testing.T, cmd cli.Command)
+  - file: third_party/openbao/internal/command/token/testing.go
+    kind: function
+    name: TestProcess
+    signature: func TestProcess(t *testing.T, s ...string)
+  - file: third_party/openbao/internal/command/token/testing.go
+    kind: function
+    name: TestProcessPath
+    signature: func TestProcessPath(t *testing.T, s ...string) string
+  - file: third_party/openbao/internal/command/token/helper_testing.go
+    kind: struct
+    name: TestingTokenHelper
+    signature: type TestingTokenHelper struct
+  - file: third_party/openbao/internal/command/token/helper_testing.go
+    kind: method
+    name: TestingTokenHelper.Erase
+    signature: func (h *TestingTokenHelper) Erase() error
+  - file: third_party/openbao/internal/command/token/helper_testing.go
+    kind: method
+    name: TestingTokenHelper.Get
+    signature: func (h *TestingTokenHelper) Get() (string, error)
+  - file: third_party/openbao/internal/command/token/helper_testing.go
+    kind: method
+    name: TestingTokenHelper.Path
+    signature: func (h *TestingTokenHelper) Path() string
+  - file: third_party/openbao/internal/command/token/helper_testing.go
+    kind: method
+    name: TestingTokenHelper.Store
+    signature: func (h *TestingTokenHelper) Store(token string) error
+  - file: third_party/openbao/internal/command/token/helper.go
+    kind: interface
+    name: TokenHelper
+    signature: type TokenHelper interface { Path() string; Erase() error; Get() (string,
+      error); Store(string) error }
+  - file: third_party/openbao/internal/command/token/helper.go
+    kind: method
+    name: TokenHelper.Erase
+    signature: Erase() error
+  - file: third_party/openbao/internal/command/token/helper.go
+    kind: method
+    name: TokenHelper.Get
+    signature: Get() (string, error)
+  - file: third_party/openbao/internal/command/token/helper.go
+    kind: method
+    name: TokenHelper.Path
+    signature: Path() string
+  - file: third_party/openbao/internal/command/token/helper.go
+    kind: method
+    name: TokenHelper.Store
+    signature: Store(string) error
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/command/token/helper_external.go
+    - function:54a4eccf095a762d8fbcbbe14292e7b9
+    - function:fa36836d21c45a07ae1caee3edb73184
+    - method:7f7097b3a1df264307d999d0db18ec27
+    - method:c27b39c7e48d825d8e1fb017f7e48ded
+    - method:eb1419d3304aec07d81f0fda4ef553a6
+    - method:f8fb55f02dd273284d4c8c58f9e57b06
+    - struct:0ff633f347418a596be8cbdb068158fa
+    id: r.external-helper-subprocess
+    level: MUST
+    text: 'ExternalTokenHelper runs a configured external script through ExecScript,
+      passing a verb argument for each operation: Erase invokes the script with "erase"
+      and wraps combined stdout/stderr into the error when the command fails, and
+      Get, Store and Path follow the same get/store/path dispatch through the script.
+      ExternalTokenHelperPath resolves the executable path for the helper.'
+  - codeRefs:
+    - file:third_party/openbao/internal/command/token/helper_internal.go
+    - method:817e184d460765d3dea4d1820b63ace2
+    - method:a67228461dc294162e503b20297b72d2
+    - method:baedd47b0bf25b4a0aec00b7fc072bdf
+    id: r.internal-get-missing-is-empty
+    level: MUST
+    text: InternalTokenHelper.Get opens the token file and returns an empty string
+      with a nil error when the file does not exist, so a first run is not an error
+      condition; any other open or read failure is returned, and the file is closed
+      via a deferred join into the named error. A successful read returns the file
+      contents with surrounding whitespace trimmed.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/token/helper_internal.go
+    - function:3f2a36bbcd1abbb0f005b16ea64490f2
+    - method:5b0531242d9da60fc26badf2150fee17
+    - struct:5cfa139b8fca97aee4597f90baccf686
+    id: r.internal-token-path-resolution
+    level: MUST
+    text: NewInternalTokenHelper reads the BAO token path environment variable (api.ReadBaoVariable(api.EnvTokenPath))
+      and uses it directly when non-empty; otherwise it expands ~/.vault-token through
+      homedir.Expand and fails with a wrapped "could not expand home directory" error
+      if expansion fails. InternalTokenHelper.Path returns that resolved path unchanged.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/token/testing.go
+    - function:23b3e236bbf6635196d7bf7fc1f93d32
+    - function:43aa8625ae6454dbe879b173902fcd9e
+    - function:afc47b32b6792cdfd4456db2bd76fde0
+    - function:f32d71a999e8a937edbeb0342aa55ba5
+    id: r.shared-helper-test-harness
+    level: SHOULD
+    text: 'testing.go supplies the reusable harness: Test(t, h) drives any TokenHelper
+      through its Path/Get/Store/Erase cycle so every implementation is checked against
+      the same behavior, TestProcess and TestProcessPath build the re-exec subprocess
+      invocation used to simulate the external script, and TestExternalTokenHelperProcessCLI
+      registers the cli.Command that runs the external helper in the child process.'
+  - codeRefs:
+    - file:third_party/openbao/internal/command/token/helper_testing.go
+    - function:a438cf4fa333d5311befcee1574798fe
+    - method:542111467c677fe96b9bcd4cd053e25b
+    - method:583caebeb553ae693c30651576da99ca
+    - method:c3363c6a8a22099be31d31b7f76c712c
+    - method:e992c760b3c5f07307af271d2c17c589
+    - struct:bc7d6877e626118d9054aa5a11abea99
+    id: r.testing-helper-in-memory
+    level: MUST
+    text: 'TestingTokenHelper holds the token in memory only: NewTestingTokenHelper
+      constructs it, Store sets the held token, Get returns it, Erase clears it, and
+      Path reports the in-memory location. It exists so command tests never touch
+      the real token file.'
+  - codeRefs:
+    - file:third_party/openbao/internal/command/token/helper.go
+    - interface:245d0d200e4d2f5977a07ae0d13f38bb
+    - method:023e1aa2dbad7c6e73d4ae37fdb94a65
+    - method:a8d518db2734e90a68144cbe1b8e2c7d
+    - method:b36b48e8b4682aefb2f46c975602e779
+    - method:c22145270cbeea936b796b6dc639554f
+    id: r.token-helper-contract
+    level: MUST
+    text: 'TokenHelper is the storage abstraction: Path reports where the token lives,
+      Get returns the stored token, Store writes a token, and Erase removes it. Every
+      implementation in this package satisfies the interface so callers can swap file,
+      subprocess and in-memory backends.'
   upstream: self

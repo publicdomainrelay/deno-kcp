@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so command code can read, write and clear the client token without knowing where it lives, and so tests can substitute an in-memory or subprocess-backed helper. It provides the storage abstraction behind OpenBao CLI login and token commands, plus the harness used to test the external-script and file-backed variants.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
