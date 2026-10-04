@@ -4736,6 +4736,19 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.sign-intermediate-inherits-certificate-base` (MUST): "PkiSignIntermediateModel extends PkiCertificateBaseModel rather than a plain Model, and adds the CSR-signing fields on top: issuer reference, PEM-encoded CSR, use-CSR-values toggle, not-before duration defaulting to 30s, permitted DNS domains defaulting to empty, and max path length defaulting to -1."
 - added `r.tidy-config-attributes` (MUST): "PkiTidyModel models the single auto-tidy configuration record, pairing each boolean toggle (tidyAcme, enabled) with a mapped detail attribute that carries the label, disabled label, helper text for both states, details label, and TTL formatting: acmeAccountSafetyBuffer maps to tidyAcme, and intervalDuration maps to enabled. The 'enabled' and 'intervalDuration' attributes apply to automatic tidy only."
 
+### third-party-openbao-ui-app-models-pki-certificate
+
+- intent: "" -> "This context exists to describe the data models that back the OpenBao PKI engine's certificate generate and sign workflows in the bundled UI. The three classes are the request/response shape the UI sends to and reads from the PKI mount: the base model defines every field an issued certificate and its request share, while the generate and sign subclasses specialize that shape for the issue endpoint and the sign endpoint respectively. Consumers use these models to render forms, build help links against the active backend mount, and decide whether a displayed certificate offers revocation."
+- added `r.base-model-fields` (MUST): "PkiCertificateBaseModel holds the certificate request attributes commonName, altNames, ipSans, uriSans, otherSans, excludeCnFromSans, customTtl and parsedCertificate, and the certificate response attributes certificate, privateKey, privateKeyType, caChain, expiration, issuingCa, serialNumber and revocationTime, so that one model instance carries both the request sent to the PKI mount and the material returned by it."
+- added `r.consumed-by-role-generate` (MUST): "The generate and sign models are consumed by the pki-role-generate component, which uses them to drive certificate issuance and signing from a PKI role page."
+- added `r.generate-role` (MUST): "PkiCertificateGenerateModel extends PkiCertificateBaseModel and adds the role attribute naming the PKI role to issue the certificate against, which the model uses to form the request URL."
+- added `r.help-url` (MUST): "PkiCertificateBaseModel provides getHelpUrl for the mounted backend, and each subclass overrides it so the help link matches its own endpoint; PkiCertificateGenerateModel.getHelpUrl returns the path `/v1/${backend}/issue/example?help=1` for the backend passed in."
+- added `r.mount-path-and-backend` (MUST): "PkiCertificateBaseModel exposes secretMountPath and derives the backend path from it through the backend method, so that the same model serves any PKI mount the user has open."
+- added `r.openapi-mode` (SHOULD): "PkiCertificateBaseModel exposes useOpenAPI alongside backend, so the UI can select an OpenAPI-driven code path for the certificate model."
+- added `r.revocation` (MUST): "PkiCertificateBaseModel exposes revokePath and the canRevoke method so the certificate details view can decide whether the displayed certificate may be revoked and against which path."
+- added `r.sign-role-csr` (MUST): "PkiCertificateSignModel extends PkiCertificateBaseModel and adds the role, csr and removeRootsFromChain attributes, so a signing request carries the target role, the submitted certificate signing request, and whether roots are stripped from the returned chain."
+- added `r.sign-validations` (SHOULD): "PkiCertificateSignModel participates in model validation, so the role and csr fields are checked through ModelValidations before the sign request is submitted."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5123,6 +5136,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-models-kubernetes-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-models-oidc-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-models-pki-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-models-pki-certificate-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-models-pki-certificate-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-models-pki-config-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

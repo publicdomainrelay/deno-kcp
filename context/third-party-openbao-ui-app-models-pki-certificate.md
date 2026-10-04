@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to describe the data models that back the OpenBao PKI engine's certificate generate and sign workflows in the bundled UI. The three classes are the request/response shape the UI sends to and reads from the PKI mount: the base model defines every field an issued certificate and its request share, while the generate and sign subclasses specialize that shape for the issue endpoint and the sign endpoint respectively. Consumers use these models to render forms, build help links against the active backend mount, and decide whether a displayed certificate offers revocation.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

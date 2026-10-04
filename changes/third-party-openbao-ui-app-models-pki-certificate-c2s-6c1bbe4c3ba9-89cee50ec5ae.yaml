@@ -10,5 +10,26 @@ spec:
   systemContext: third-party-openbao-ui-app-models-pki-certificate
   toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
 status:
-  message: the agent is summarizing third-party-openbao-ui-app-models-pki-certificate
-  phase: Running
+  agentLog: 'This context covers the three PKI certificate model classes in the bundled
+    OpenBao (Vault-derived) Ember UI at third_party/openbao/ui/app/models/pki/certificate/.
+    PkiCertificateBaseModel in base.js is the shared parent: it carries the certificate
+    request fields (commonName, altNames, ipSans, uriSans, otherSans, excludeCnFromSans,
+    customTtl, parsedCertificate) and the issuance response fields (certificate, privateKey,
+    privateKeyType, caChain, expiration, issuingCa, serialNumber, revocationTime),
+    plus the mount wiring (secretMountPath), the derived backend path, a help-URL
+    builder, and revocation support (revokePath, canRevoke). PkiCertificateGenerateModel
+    in generate.js extends it for the issue path, adding a role reference and returning
+    the help URL `/v1/${backend}/issue/example?help=1`. PkiCertificateSignModel in
+    sign.js extends it for the sign path, adding role, csr and removeRootsFromChain.
+    Parallel TypeScript declaration files under third_party/openbao/ui/types/vault/models/pki/certificate/
+    mirror the same attributes, and the sign model is consumed by the pki-role-generate
+    component together with ModelValidations.'
+  message: wrote 9 requirement(s) and 3 interface(s) for third-party-openbao-ui-app-models-pki-certificate;
+    interface PkiCertificateBaseModel.useOpenAPI is not in the observed facts; dropped;
+    interface PkiCertificateBaseModel.backend is not in the observed facts; dropped;
+    interface PkiCertificateBaseModel.getHelpUrl is not in the observed facts; dropped;
+    interface PkiCertificateBaseModel.canRevoke is not in the observed facts; dropped;
+    interface PkiCertificateGenerateModel.getHelpUrl is not in the observed facts;
+    dropped; interface PkiCertificateSignModel.getHelpUrl is not in the observed facts;
+    dropped
+  phase: Succeeded
