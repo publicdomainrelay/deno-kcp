@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so the CSP event tracking service starts exactly once when the Ember application instance boots. Instance-initializers run after the application instance and its services are available, which is why the lookup of 'service:csp-event' and the attach() call live here rather than in a plain initializer. Separating this file keeps the CSP reporting concern out of the service itself and out of application boot code.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

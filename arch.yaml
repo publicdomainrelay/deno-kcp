@@ -63033,8 +63033,40 @@ system_contexts:
   - third_party/openbao/ui/app/instance-initializers/track-csp-event.js
   codeRefIndex:
   - file:third_party/openbao/ui/app/instance-initializers/track-csp-event.js track-csp-event.js@third_party/openbao/ui/app/instance-initializers/track-csp-event.js
+  - function:4b03aad49f16b64f3ea2ec56bbf50525 initialize@third_party/openbao/ui/app/instance-initializers/track-csp-event.js:6
   id: sc.third-party-openbao-ui-app-instance-initializers
+  intent: The context exists so the CSP event tracking service starts exactly once
+    when the Ember application instance boots. Instance-initializers run after the
+    application instance and its services are available, which is why the lookup of
+    'service:csp-event' and the attach() call live here rather than in a plain initializer.
+    Separating this file keeps the CSP reporting concern out of the service itself
+    and out of application boot code.
+  interfaces:
+  - file: third_party/openbao/ui/app/instance-initializers/track-csp-event.js
+    kind: function
+    name: initialize
+    signature: export function initialize(appInstance)
   name: third-party-openbao-ui-app-instance-initializers
+  requirements:
+  - codeRefs:
+    - function:4b03aad49f16b64f3ea2ec56bbf50525
+    id: r.attach-service-on-init
+    level: MUST
+    text: initialize must call attach() on the looked-up CSP event service, which
+      starts that service's CSP report listener for the running application.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/instance-initializers/track-csp-event.js
+    - function:4b03aad49f16b64f3ea2ec56bbf50525
+    id: r.export-initialize-function
+    level: MUST
+    text: The module must export a function named initialize that takes the Ember
+      application instance as its only argument, so Ember can invoke it as an instance-initializer.
+  - codeRefs:
+    - function:4b03aad49f16b64f3ea2ec56bbf50525
+    id: r.lookup-csp-event-service
+    level: MUST
+    text: initialize must resolve the CSP event service by looking up the container
+      key 'service:csp-event' on the application instance it receives.
   upstream: self
 - code:
   - third_party/openbao/ui/app/lib/arg-tokenizer.js

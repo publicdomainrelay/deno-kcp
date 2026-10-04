@@ -4549,6 +4549,13 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.wildcard-string-predicate` (MUST): "isWildcardString reports whether the supplied string contains wildcard syntax, letting callers branch before applying wildcard matching."
 - added `r.wizard-constants` (SHOULD): "wizard-constants exposes the fixed values the wizard flow reads, keeping those values in one module instead of repeating them across wizard templates and components."
 
+### third-party-openbao-ui-app-instance-initializers
+
+- intent: "" -> "The context exists so the CSP event tracking service starts exactly once when the Ember application instance boots. Instance-initializers run after the application instance and its services are available, which is why the lookup of 'service:csp-event' and the attach() call live here rather than in a plain initializer. Separating this file keeps the CSP reporting concern out of the service itself and out of application boot code."
+- added `r.attach-service-on-init` (MUST): "initialize must call attach() on the looked-up CSP event service, which starts that service's CSP report listener for the running application."
+- added `r.export-initialize-function` (MUST): "The module must export a function named initialize that takes the Ember application instance as its only argument, so Ember can invoke it as an instance-initializer."
+- added `r.lookup-csp-event-service` (MUST): "initialize must resolve the CSP event service by looking up the container key 'service:csp-event' on the application instance it receives."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4921,4 +4928,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-initializers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Failed |  | 0 | - |
 | third-party-openbao-ui-app-initializers-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-instance-initializers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-instance-initializers-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
