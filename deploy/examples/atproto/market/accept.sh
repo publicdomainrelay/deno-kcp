@@ -32,6 +32,9 @@ SETTLE_SECONDS=${SETTLE_SECONDS:-10}
 # nothing.
 STALL_SECONDS=${STALL_SECONDS:-30}
 MAX_ATTEMPTS=${MAX_ATTEMPTS:-3}
+# How long the EXIT trap waits for the deleted DenoPods to go away before it
+# stops the provider that owns their processes.
+DELETE_SECONDS=${DELETE_SECONDS:-60}
 
 KUBECONFIG_PATH=$ACCEPT_ROOT/kcp/admin.kubeconfig
 KCACHE=$ACCEPT_ROOT/.kubectl-cache
@@ -79,9 +82,39 @@ stop_provider() {
   PROVIDER_PID=""
 }
 
+# The DenoPod processes are children of the provider. Killing the provider
+# first orphans them and they keep holding the fixed host ports 2583 to 2587 of
+# the example, so the next run on this machine cannot bind them, and a run that
+# leaks its workloads is not repeatable. Delete every DenoPod in every workspace
+# through kcp first -- the denopod.deno.computer/run finalizer stops each
+# process, and it only runs while the provider is up -- wait, bounded, for the
+# objects to disappear, and only then stop the provider. This does nothing when
+# the cluster was never reached, so it never touches a kcp it did not start.
+delete_workloads() {
+  [ -n "${SERVER:-}" ] || return 0
+  local ws deadline
+  for ws in $WORKSPACES; do
+    KC --server="$SERVER/clusters/root:$ws" delete denopods --all --ignore-not-found >/dev/null 2>&1 || true
+  done
+  deadline=$(( $(date +%s) + DELETE_SECONDS ))
+  while :; do
+    if ! denopod_exists_any; then
+      return 0
+    fi
+    if [ "$(date +%s)" -ge "$deadline" ]; then
+      echo "workloads did not disappear within ${DELETE_SECONDS}s; stopping the provider anyway" >&2
+      return 0
+    fi
+    sleep 2
+  done
+}
+
 cleanup() {
   local status=$?
   trap - EXIT
+  # Workloads before the provider that owns them, in that order, so no process
+  # is orphaned onto the example's fixed ports.
+  delete_workloads
   stop_provider
   if [ -s "$OPENBAO_DIR/bao.pid" ]; then
     local bao_pid
