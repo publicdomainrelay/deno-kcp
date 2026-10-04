@@ -98,8 +98,60 @@ spec:
   systemContext: deploy-examples-atproto-market
   toSpecHash: 834078074eaa9fd7e9914fd2e2849b0c6aed8421541e51a79acb09c81c6a11f8
 status:
-  message: the agent is realizing deploy-examples-atproto-market
-  phase: Running
+  acceptance:
+  - durationSeconds: 284.075514257
+    exitCode: 1
+    name: market-live-acceptance
+    outputTail: |-
+      ...oot:relay/relay            FAIL phase=Running ready=false after 10s
+        still up root:alice/pds              FAIL phase=Running ready=false after 10s
+        still up root:bob/pds                FAIL phase=Running ready=false after 10s
+        still up root:bob/bidder             FAIL phase=Running ready=false after 10s
+
+      provider log, tail of /tmp/tmp.yZJYVkD9an/provider.log:
+      time=2026-10-04T13:06:54.105-07:00 level=INFO msg="watch: waiting for APIExport virtual workspace endpoints" denoruntime=0 policyworkflowruns=0
+
+      status of the pods that are not Running and ready:
+      root:global plc:
+        {"conditions":[{"lastTransitionTime":"2026-10-04T20:06:58Z","message":"the readiness probe has not passed","observedGeneration":1,"reason":"NotReady","status":"False","type":"Ready"},{"lastTransitionTime":"2026-10-04T20:06:58Z","message":"the deno process is long-running","observedGeneration":1,"reason":"Running","status":"False","type":"Complete"}],"message":"the deno process exited; the restart policy is Always","phase":"Running","ready":false,"restarts":128,"runID":"pod-20261004T201120.112839913-516","startTime":"2026-10-04T20:06:58Z"}
+      root:relay relay:
+        {"conditions":[{"lastTransitionTime":"2026-10-04T20:06:58Z","message":"the readiness probe has not passed","observedGeneration":1,"reason":"NotReady","status":"False","type":"Ready"},{"lastTransitionTime":"2026-10-04T20:06:58Z","message":"the deno process is long-running","observedGeneration":1,"reason":"Running","status":"False","type":"Complete"}],"message":"the deno process exited; the restart policy is Always","phase":"Running","ready":false,"restarts":128,"runID":"pod-20261004T201120.448665940-518","startTime":"2026-10-04T20:06:58Z"}
+      root:alice pds:
+        {"conditions":[{"lastTransitionTime":"2026-10-04T20:06:58Z","message":"the readiness probe has not passed","observedGeneration":1,"reason":"NotReady","status":"False","type":"Ready"},{"lastTransitionTime":"2026-10-04T20:06:58Z","message":"the deno process is long-running","observedGeneration":1,"reason":"Running","status":"False","type":"Complete"}],"message":"the deno process exited; the restart policy is Always","phase":"Running","ready":false,"restarts":128,"runID":"pod-20261004T201120.351079782-517","startTime":"2026-10-04T20:06:58Z"}
+      root:bob pds:
+        {"conditions":[{"lastTransitionTime":"2026-10-04T20:06:58Z","message":"the readiness probe has not passed","observedGeneration":1,"reason":"NotReady","status":"False","type":"Ready"},{"lastTransitionTime":"2026-10-04T20:06:58Z","message":"the deno process is long-running","observedGeneration":1,"reason":"Running","status":"False","type":"Complete"}],"message":"","phase":"Running","ready":false,"restarts":0,"runID":"pod-20261004T200658.455179376-3","startTime":"2026-10-04T20:06:58Z"}
+      root:bob bidder:
+        {"conditions":[{"lastTransitionTime":"2026-10-04T20:06:58Z","message":"the deno process exited; the restart policy is Always","observedGeneration":1,"reason":"Restarting","status":"False","type":"Ready"},{"lastTransitionTime":"2026-10-04T20:06:58Z","message":"the deno process is long-running","observedGeneration":1,"reason":"Running","status":"False","type":"Complete"}],"message":"the deno process exited; the restart policy is Always","phase":"Running","ready":false,"restarts":129,"runID":"","startTime":"2026-10-04T20:06:58Z"}
+      root:alice verifier:
+        {"completionTime":"2026-10-04T20:07:10Z","conditions":[{"lastTransitionTime":"2026-10-04T20:07:10Z","message":"the pod reached a terminal phase","observedGeneration":1,"reason":"Terminal","status":"False","type":"Ready"},{"lastTransitionTime":"2026-10-04T20:07:08Z","message":"the deno process failed and the restart policy is Never","observedGeneration":1,"reason":"ProcessFailed","status":"False","type":"Complete"}],"exitCode":1,"message":"the deno process exited with code 1","outputs":{"error":"fetch failed","verdict":"fail"},"phase":"Failed","ready":false,"restarts":0,"runID":"pod-20261004T200708.531861651-22","startTime":"2026-10-04T20:07:08Z"}
+
+      accept: fail
+    passed: false
+  agentLog: "accept.sh updated.\n\n- `http_code` now captures curl's status and echoes
+    `${code:-000}` once — no double fallback on failure; `-k` added since leaf is
+    OpenBao-signed and SAN'd to the service name, not 127.0.0.1.\n- Host checks now
+    `https://127.0.0.1:2585/xrpc/_health` and `https://127.0.0.1:2586/oauth-client-metadata.json`,
+    evidence strings and comment updated to match SERVICE_TLS true.\n\nVerified: `bash
+    -n` clean, `http_code` prints `000` single line on refusal/DNS failure, `go test
+    ./...` exits 0.\n\n⚠ claude.ai connectors are disabled because ANTHROPIC_API_KEY
+    or another auth source is set and takes precedence over your claude.ai login ·
+    Unset it to load your organization's connectors\n[claude-code:unrecognized_model]
+    {\"model\":\"deepseek-v4-flash\",\"query_source\":\"sdk\"}\nok  \tgithub.com/johnandersen777/deno-kcp/api/v1alpha1\t(cached)\n?
+    \  \tgithub.com/johnandersen777/deno-kcp/cmd/deno-kcp-provider\t[no test files]\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/internal/denojob\t(cached)\nok  \tgithub.com/johnandersen777/deno-kcp/internal/denopod\t(cached)\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/internal/denorun\t(cached)\n?   \tgithub.com/johnandersen777/deno-kcp/internal/livegate\t[no
+    test files]\nok  \tgithub.com/johnandersen777/deno-kcp/internal/policyengine\t(cached)\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/internal/policyworkflowpod\t(cached)\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/internal/policyworkflowrun\t(cached)\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/internal/provider\t0.026s\nok  \tgithub.com/johnandersen777/deno-kcp/internal/trigger\t(cached)\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/test/integration\t(cached)"
+  branch: spec/deploy-examples-atproto-market/83407807
+  commit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  filesTouched:
+  - deploy/examples/atproto/market/accept.sh
+  message: 'realized deploy-examples-atproto-market on spec/deploy-examples-atproto-market/83407807:
+    1 file(s) touched, verify exit 0'
+  phase: Succeeded
   progress:
   - at: "2026-10-04T20:06:00Z"
     files:
