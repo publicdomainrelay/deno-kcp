@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so that the shared, non-visual helpers of the OpenBao core addon have one described specification instead of being re-derived from source each time. The helpers exist because several components need the same primitive operations: base64 round-tripping for transit and copy-toggle widgets, consistent API-timestamp parsing and chart labelling for the clients and calendar views, a single seconds/unit conversion surface shared by the TTL picker and info table row so a duration entered in days and a duration stored in seconds agree, and one place that knows how to write a has-many selection back onto an Ember Data model. The context records the observable contract of each exported function, the input shapes they accept, the fallback behaviour on bad input, and the unit-selection rule that duration display depends on.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

@@ -71159,8 +71159,146 @@ system_contexts:
   - file:third_party/openbao/ui/lib/core/addon/utils/parse-url.js parse-url.js@third_party/openbao/ui/lib/core/addon/utils/parse-url.js
   - file:third_party/openbao/ui/lib/core/addon/utils/search-select-has-many.js search-select-has-many.js@third_party/openbao/ui/lib/core/addon/utils/search-select-has-many.js
   - file:third_party/openbao/ui/lib/core/addon/utils/timestamp.js timestamp.js@third_party/openbao/ui/lib/core/addon/utils/timestamp.js
+  - function:4883e25fd659500dddab0e7cb7167f6c largestUnitFromSeconds@third_party/openbao/ui/lib/core/addon/utils/duration-utils.ts:34
+  - function:880ff6cadc7123538d3b7ba208f1ff2f convertToSeconds@third_party/openbao/ui/lib/core/addon/utils/duration-utils.ts:23
+  - function:8ee96ffe8fcdd8fe63a85e242a7c0d26 convertFromSeconds@third_party/openbao/ui/lib/core/addon/utils/duration-utils.ts:26
+  - function:a1a11e18e8d9536d1a1b9d284dec6698 formatChartDate@third_party/openbao/ui/lib/core/addon/utils/date-formatters.js:32
+  - function:aec97de0630778f834a60ada6511e3a2 handleHasManySelection@third_party/openbao/ui/lib/core/addon/utils/search-select-has-many.js:23
+  - function:b84b4c3e73b94b65de385a0caba1d311 decodeString@third_party/openbao/ui/lib/core/addon/utils/b64.js:14
+  - function:da93833cd88a359145d99c922952423e encodeString@third_party/openbao/ui/lib/core/addon/utils/b64.js:9
+  - function:f6f7d4b2a6461178b24f810c6b690b24 parseAPITimestamp@third_party/openbao/ui/lib/core/addon/utils/date-formatters.js:24
+  - function:fe68eefde45a1e689b83dc55bc675a4f goSafeConvertFromSeconds@third_party/openbao/ui/lib/core/addon/utils/duration-utils.ts:29
   id: sc.third-party-openbao-ui-lib-core-addon-utils
+  intent: 'This context exists so that the shared, non-visual helpers of the OpenBao
+    core addon have one described specification instead of being re-derived from source
+    each time. The helpers exist because several components need the same primitive
+    operations: base64 round-tripping for transit and copy-toggle widgets, consistent
+    API-timestamp parsing and chart labelling for the clients and calendar views,
+    a single seconds/unit conversion surface shared by the TTL picker and info table
+    row so a duration entered in days and a duration stored in seconds agree, and
+    one place that knows how to write a has-many selection back onto an Ember Data
+    model. The context records the observable contract of each exported function,
+    the input shapes they accept, the fallback behaviour on bad input, and the unit-selection
+    rule that duration display depends on.'
+  interfaces:
+  - file: third_party/openbao/ui/lib/core/addon/utils/duration-utils.ts
+    kind: function
+    name: convertFromSeconds
+    signature: 'convertFromSeconds(seconds: number, unit: string)'
+  - file: third_party/openbao/ui/lib/core/addon/utils/duration-utils.ts
+    kind: function
+    name: convertToSeconds
+    signature: 'convertToSeconds(time: number, unit: string)'
+  - file: third_party/openbao/ui/lib/core/addon/utils/b64.js
+    kind: function
+    name: decodeString
+    signature: decodeString(b64String)
+  - file: third_party/openbao/ui/lib/core/addon/utils/b64.js
+    kind: function
+    name: encodeString
+    signature: encodeString(string)
+  - file: third_party/openbao/ui/lib/core/addon/utils/date-formatters.js
+    kind: function
+    name: formatChartDate
+    signature: formatChartDate(date)
+  - file: third_party/openbao/ui/lib/core/addon/utils/duration-utils.ts
+    kind: function
+    name: goSafeConvertFromSeconds
+    signature: 'goSafeConvertFromSeconds(seconds: number, unit: string)'
+  - file: third_party/openbao/ui/lib/core/addon/utils/search-select-has-many.js
+    kind: function
+    name: handleHasManySelection
+    signature: handleHasManySelection(selectedIds, modelCollection, store, modelRecord)
+  - file: third_party/openbao/ui/lib/core/addon/utils/duration-utils.ts
+    kind: function
+    name: largestUnitFromSeconds
+    signature: 'largestUnitFromSeconds(seconds: number)'
+  - file: third_party/openbao/ui/lib/core/addon/utils/date-formatters.js
+    kind: function
+    name: parseAPITimestamp
+    signature: parseAPITimestamp(timestamp, style)
   name: third-party-openbao-ui-lib-core-addon-utils
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/addon/utils/date-formatters.js
+    - function:f6f7d4b2a6461178b24f810c6b690b24
+    id: r.api-timestamp-parse
+    level: MUST
+    text: parseAPITimestamp MUST return undefined when its timestamp argument is not
+      a string, rather than throwing. For a string input it MUST take the date portion
+      by splitting on 'T' and parse it with parseISO into a Date; when no style argument
+      is given it MUST return that Date, and when a style is given it MUST return
+      format(date, style).
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/addon/utils/b64.js
+    - function:b84b4c3e73b94b65de385a0caba1d311
+    - function:da93833cd88a359145d99c922952423e
+    id: r.base64-round-trip
+    level: MUST
+    text: encodeString MUST UTF-8 encode its string argument with TextEncoderLite
+      and return the base64 text produced by base64js.fromByteArray; decodeString
+      MUST reverse that path with base64js.toByteArray and TextDecoderLite, so that
+      decodeString(encodeString(s)) returns the original string, including for non-ASCII
+      input. Both MUST be exported ES module functions of third_party/openbao/ui/lib/core/addon/utils/b64.js
+      and stay re-exported through the app-level shim third_party/openbao/ui/lib/core/app/utils/b64.js
+      for the b64-toggle and transit-key-actions components.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/addon/utils/date-formatters.js
+    - function:a1a11e18e8d9536d1a1b9d284dec6698
+    id: r.chart-date-format
+    level: MUST
+    text: 'formatChartDate MUST be exported from third_party/openbao/ui/lib/core/addon/utils/date-formatters.js
+      as the chart-facing date formatter: it takes a single date argument and returns
+      the label string used for chart axis points, keeping chart labelling in the
+      same module as the API timestamp parsing so both agree on date handling.'
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/addon/utils/duration-utils.ts
+    - function:880ff6cadc7123538d3b7ba208f1ff2f
+    - function:8ee96ffe8fcdd8fe63a85e242a7c0d26
+    - function:fe68eefde45a1e689b83dc55bc675a4f
+    id: r.duration-unit-conversion
+    level: MUST
+    text: convertToSeconds MUST multiply the time argument by the secondsMap factor
+      for the given unit, and convertFromSeconds MUST divide the seconds argument
+      by that same factor; when the unit is not a key of secondsMap both MUST fall
+      back to a factor of 1, so an unknown unit is treated as seconds instead of producing
+      NaN. goSafeConvertFromSeconds MUST expose the same seconds-to-unit conversion
+      under a guard that keeps callers safe when the input or the divisor is not usable,
+      and MUST be exported from the same module so callers that cannot tolerate a
+      throw have a variant to use.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/addon/utils/search-select-has-many.js
+    - function:aec97de0630778f834a60ada6511e3a2
+    id: r.has-many-selection-apply
+    level: MUST
+    text: handleHasManySelection MUST take the selected ids, the candidate model collection,
+      the store and the target model record, resolve the selected ids against the
+      collection into records, and write the result back onto the model record's has-many
+      relationship, so that a search-select component does not have to know how the
+      relationship is stored. It MUST be exported from third_party/openbao/ui/lib/core/addon/utils/search-select-has-many.js.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/addon/utils/duration-utils.ts
+    - function:4883e25fd659500dddab0e7cb7167f6c
+    id: r.largest-unit-selection
+    level: MUST
+    text: largestUnitFromSeconds MUST return the largest unit that divides the seconds
+      value with no remainder, checked in the order day, hour, minute, using the secondsMap
+      factors; it MUST return 's' when the value is 0 and MUST also return 's' when
+      none of day, hour or minute divides it evenly. This rule is what lets the TTL
+      picker initialise and the info table row display a duration as '2d' rather than
+      '48h' or '2880m'.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/addon/utils/common-prefix.js
+    - file:third_party/openbao/ui/lib/core/addon/utils/parse-url.js
+    - file:third_party/openbao/ui/lib/core/addon/utils/timestamp.js
+    id: r.utils-module-layout
+    level: SHOULD
+    text: The core addon utilities MUST stay split into the single-purpose modules
+      listed here, one concern per file, so that common-prefix detection, URL parsing
+      and timestamp helpers remain independently importable from third_party/openbao/ui/lib/core/addon/utils/
+      alongside the base64, date-format, duration and search-select helpers, and each
+      MUST be exported as an ES module function or const rather than attached to a
+      global.
   upstream: self
 - code:
   - third_party/openbao/ui/lib/core/app/components/alert-banner.js
