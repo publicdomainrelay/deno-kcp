@@ -4418,6 +4418,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.router-service-injection` (MUST): "OidcProviderController must inject the Ember router service into the router property so the controller can observe route transitions, and must declare isEditRoute as a tracked property so changes to it re-render the template."
 - added `r.show-header-inverts-edit-route` (MUST): "The showHeader getter must return the negation of isEditRoute, so the header is shown only when the current route is not the edit route and is hidden while the edit form is rendered."
 
+### third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-providers-provider
+
+- intent: "" -> "The context exists to describe the delete-provider interaction that the OIDC provider details route offers. It captures the destructive action's full contract: the record mutation, the success confirmation and route transition, and the failure path that rolls back the model and reports a message, so the behavior of the details page controller is stated independently of the surrounding templates and routes."
+- added `r.delete-derives-error-message` (SHOULD): "The failure path should build the flash text from error.errors joined with '. ' when that array is present, and otherwise fall back to error.message, then emit it as a danger flash message."
+- added `r.delete-destroys-model-record` (MUST): "The delete action must await destroyRecord() on the controller's model, so the currently displayed OIDC provider is removed from the backend before any success feedback is shown."
+- added `r.delete-reports-success-and-navigates` (MUST): "After a successful destroyRecord the action must push a success flash message reading 'Provider deleted successfully' and then transition to the vault.cluster.access.oidc.providers route using transitionToSafe."
+- added `r.delete-rolls-back-on-failure` (MUST): "When destroyRecord rejects, the action must call rollbackAttributes() on the model so the provider record is not left in a deleted or dirty local state, and it must not transition away from the details route."
+- added `r.inject-router-and-flash-services` (MUST): "OidcProviderDetailsController must declare router and flashMessages as injected services, so the delete action can transition routes and report messages without direct container lookups."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4772,7 +4781,8 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-keys-key-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-keys-key-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-providers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-providers-provider-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-providers-provider-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-providers-provider-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-scopes-scope-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
