@@ -1,11 +1,19 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: ACL, ACL.AllowOperation, ACL.Capabilities, ACL.CheckAllowedFromNonExactPaths,
+    ACL.ExactRules, ACL.PrefixRules, ACL.Root, ACLPermissions, ACLPermissions.Clone,
+    ACLResults, AuthResults, CheckOpts, ControlGroup, ControlGroup.Clone, ControlGroupFactor,
+    ControlGroupIdentity, IdentityFactor, NewACL, NewStore, ParseACLPolicy, ParseACLPolicyWithTemplating,
+    PathRules, Policy, Policy.Decode, Policy.ShallowClone, SentinelResults, Store,
+    Store.ACL, Store.DeletePolicy, Store.DeletePolicyForce, Store.GetACLView, Store.GetNonEGPPolicyType,
+    Store.GetPolicy, Store.Invalidate, Store.InvalidateNamespace, Store.ListPolicies,
+    Store.ListPoliciesWithPrefix, Store.LoadACLPolicy, Store.LoadDefaultPolicies,
+    Store.PurgeCache, Store.SanitizeName, Store.SetPolicy, Type, Type.String, core.IdentityStore,
+    core.NamespaceByID, core.NamespaceView'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator

@@ -1,0 +1,419 @@
+conditions:
+- message: 'undeclared: APIMountConfig, APIUserLockoutConfig, Deserializable, Deserializable.Deserialize,
+    ListingVisibilityType, MountConfig, MountEntry, MountEntry.APIPath, MountEntry.APIPathNoNamespace,
+    MountEntry.Clone, MountEntry.Deserialize, MountEntry.IsExternalPlugin, MountEntry.MountClass,
+    MountEntry.SyncCache, MountTable, MountTable.Delta, MountTable.FindAllNamespaceMounts,
+    MountTable.FindByBackendUUID, MountTable.FindByPath, MountTable.Remove, MountTable.SetTaint,
+    MountTable.ShallowClone, MountTable.SortEntriesByPath, MountTable.SortEntriesByPathDepth,
+    NewRouter, ParseUnauthenticatedPaths, PathsToRadix, RouteEntry, RouteEntry.Deserialize,
+    RouteEntry.SaltID, RouteEntry.SetLoginPaths, RouteEntry.SetRootPaths, Router,
+    Router.Get, Router.GetRecords, Router.Invalidate, Router.LoginPath, Router.MatchingAPIPrefixByStoragePath,
+    Router.MatchingBackend, Router.MatchingMount, Router.MatchingMountByAPIPath, Router.MatchingMountByAccessor,
+    Router.MatchingMountByUUID, Router.MatchingMountEntry, Router.MatchingPrefixInternal,
+    Router.MatchingStorageByAPIPath, Router.MatchingStorageByStoragePath, Router.MatchingStoragePrefixByAPIPath,
+    Router.MatchingSystemView, Router.Mount, Router.MountConflict, Router.Remount,
+    Router.Reset, Router.ResolvePath, Router.RootPath, Router.Route, Router.RouteExistenceCheck,
+    Router.SetTokenStoreSaltFunc, Router.Taint, Router.Unmount, Router.Untaint, Router.ValidateMountByAccessor,
+    UserLockoutConfig, ValidateMountResponse'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/vault/routing/mount_entry.go
+  - third_party/openbao/internal/vault/routing/mount_table.go
+  - third_party/openbao/internal/vault/routing/router.go
+  - third_party/openbao/internal/vault/routing/router_test.go
+  - third_party/openbao/internal/vault/routing/routing.go
+  fingerprint: caeb640fd41660314367ca18018a2dcb2dfd58c0b498c514e7b9ffc56911c5d7
+  interfaces:
+  - codegraphId: struct:aebe5200accc4a57453029213cd7721d
+    file: third_party/openbao/internal/vault/routing/mount_entry.go
+    kind: struct
+    line: 18
+    name: MountEntry
+  - codegraphId: struct:11f497ccc4344200a18da05436153140
+    file: third_party/openbao/internal/vault/routing/mount_entry.go
+    kind: struct
+    line: 49
+    name: APIUserLockoutConfig
+  - codegraphId: method:f4d1814d127ea6527e512d5f09fa1b3e
+    file: third_party/openbao/internal/vault/routing/mount_entry.go
+    kind: method
+    line: 57
+    name: MountEntry.Clone
+    signature: () (*MountEntry, error)
+  - codegraphId: method:8ab5c421de92dd46e17162b6df8cb0f9
+    file: third_party/openbao/internal/vault/routing/mount_entry.go
+    kind: method
+    line: 66
+    name: MountEntry.IsExternalPlugin
+    signature: () bool
+  - codegraphId: method:3c3190192be061f1c6343c2818263c34
+    file: third_party/openbao/internal/vault/routing/mount_entry.go
+    kind: method
+    line: 71
+    name: MountEntry.MountClass
+    signature: () string
+  - codegraphId: method:792c4945871c5543b8536981bef5b2d5
+    file: third_party/openbao/internal/vault/routing/mount_entry.go
+    kind: method
+    line: 84
+    name: MountEntry.APIPath
+    signature: () string
+  - codegraphId: method:2c83029fa1ec83b90d0d0525df1104e5
+    file: third_party/openbao/internal/vault/routing/mount_entry.go
+    kind: method
+    line: 93
+    name: MountEntry.APIPathNoNamespace
+    signature: () string
+  - codegraphId: method:cc23137dfeed6efb24ae1ae343b4e494
+    file: third_party/openbao/internal/vault/routing/mount_entry.go
+    kind: method
+    line: 104
+    name: MountEntry.SyncCache
+    signature: ()
+  - codegraphId: method:26cfe967d1628fb86939938da37b68ee
+    file: third_party/openbao/internal/vault/routing/mount_entry.go
+    kind: method
+    line: 130
+    name: MountEntry.Deserialize
+    signature: () map[string]any
+  - codegraphId: interface:8945ea83968aa3197d0c77e2ef8bf7bb
+    file: third_party/openbao/internal/vault/routing/mount_entry.go
+    kind: interface
+    line: 140
+    name: Deserializable
+  - codegraphId: method:59085db6951ee5fbca5d81b8c3462963
+    file: third_party/openbao/internal/vault/routing/mount_entry.go
+    kind: method
+    line: 142
+    name: Deserializable.Deserialize
+    signature: () map[string]any
+  - codegraphId: struct:d8055d59cc462b4544b4a8fe88fb685b
+    file: third_party/openbao/internal/vault/routing/mount_table.go
+    kind: struct
+    line: 16
+    name: MountTable
+  - codegraphId: method:f0772ce97f953f44cf7d17773c32bf42
+    file: third_party/openbao/internal/vault/routing/mount_table.go
+    kind: method
+    line: 25
+    name: MountTable.ShallowClone
+    signature: () *MountTable
+  - codegraphId: method:8e6b89e2736e11e9b9f5f3ea6d43b976
+    file: third_party/openbao/internal/vault/routing/mount_table.go
+    kind: method
+    line: 32
+    name: MountTable.Delta
+    signature: (new *MountTable) (additions []*MountEntry, deletions []*MountEntry)
+  - codegraphId: method:b1f5b2a40c6682947221ab2fa2d62b25
+    file: third_party/openbao/internal/vault/routing/mount_table.go
+    kind: method
+    line: 71
+    name: MountTable.SetTaint
+    signature: (nsID, path string) *MountEntry
+  - codegraphId: method:ee4b3234baa06fe4efe3396a008cb42f
+    file: third_party/openbao/internal/vault/routing/mount_table.go
+    kind: method
+    line: 83
+    name: MountTable.Remove
+    signature: (ctx context.Context, path string) (*MountEntry, error)
+  - codegraphId: method:01925a0fa8b9126001e46ffa606a95cc
+    file: third_party/openbao/internal/vault/routing/mount_table.go
+    kind: method
+    line: 101
+    name: MountTable.FindByPath
+    signature: (ctx context.Context, path string) (*MountEntry, error)
+  - codegraphId: method:fb05f91fe47ece553e03499f682ffb30
+    file: third_party/openbao/internal/vault/routing/mount_table.go
+    kind: method
+    line: 105
+    name: MountTable.FindByBackendUUID
+    signature: (ctx context.Context, backendUUID string) (*MountEntry, error)
+  - codegraphId: method:fadbeb9160bbc5856c8880367672f4a9
+    file: third_party/openbao/internal/vault/routing/mount_table.go
+    kind: method
+    line: 109
+    name: MountTable.FindAllNamespaceMounts
+    signature: (ctx context.Context) ([]*MountEntry, error)
+  - codegraphId: method:e49c373d358402875f917ce03c5973f2
+    file: third_party/openbao/internal/vault/routing/mount_table.go
+    kind: method
+    line: 145
+    name: MountTable.SortEntriesByPath
+    signature: () *MountTable
+  - codegraphId: method:ec84b746ab09552472c585390c5e562a
+    file: third_party/openbao/internal/vault/routing/mount_table.go
+    kind: method
+    line: 155
+    name: MountTable.SortEntriesByPathDepth
+    signature: () *MountTable
+  - codegraphId: struct:88e76239410f58c017a5def308ec0394
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: struct
+    line: 36
+    name: Router
+  - codegraphId: function:3f8d0efa49d347811e59864a81e24e13
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: function
+    line: 50
+    name: NewRouter
+    signature: (logger hclog.Logger) *Router
+  - codegraphId: struct:ccb6d4de78a241c5761d0296bdd54db3
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: struct
+    line: 65
+    name: RouteEntry
+  - codegraphId: struct:e9c94ee2216845ad309a62c6a1b6a357
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: struct
+    line: 89
+    name: ValidateMountResponse
+  - codegraphId: method:b58c072c0f285ea264917421a4ccdc90
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: method
+    line: 96
+    name: Router.Reset
+    signature: ()
+  - codegraphId: method:588741170312cd5ea3640f96b75e8167
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: method
+    line: 105
+    name: Router.GetRecords
+    signature: (tag string) ([]map[string]any, error)
+  - codegraphId: method:3bd7d8a2ef3a1884b336ccbc08504044
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: method
+    line: 129
+    name: RouteEntry.Deserialize
+    signature: () map[string]any
+  - codegraphId: method:23fdf617629df5b0441039b029ce6a57
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: method
+    line: 141
+    name: RouteEntry.SaltID
+    signature: (id string) string
+  - codegraphId: method:b65362a647c4670723e13eba1c5d8382
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: method
+    line: 145
+    name: RouteEntry.SetRootPaths
+    signature: (tree *radix.Tree)
+  - codegraphId: method:3ef49830e4b6aa13bd1c77b6c7c6f51b
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: method
+    line: 149
+    name: RouteEntry.SetLoginPaths
+    signature: (lp *loginPathsEntry)
+  - codegraphId: method:9b4b65ff59a13c25c627575c191dc6bf
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: method
+    line: 155
+    name: Router.ValidateMountByAccessor
+    signature: (accessor string) *ValidateMountResponse
+  - codegraphId: method:294b794a2f2c5061c66996080b406fad
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: method
+    line: 180
+    name: Router.Mount
+    signature: (backend logical.Backend, prefix string, mountEntry *MountEntry, storageView
+      barrier.View) error
+  - codegraphId: method:ce9a7acbdaab4017324f574740741e26
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: method
+    line: 236
+    name: Router.Unmount
+    signature: (ctx context.Context, prefix string) error
+  - codegraphId: method:b0671e89df0a15f5b9ba5edbff7153db
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: method
+    line: 271
+    name: Router.Remount
+    signature: (ctx context.Context, src, dst string, callback func(*RouteEntry) error)
+      error
+  - codegraphId: method:5827ef0daa222bfc3293aea1969d4109
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: method
+    line: 303
+    name: Router.Taint
+    signature: (ctx context.Context, path string) error
+  - codegraphId: method:68902c73cc6ec547ff9499801ea3961a
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: method
+    line: 323
+    name: Router.Untaint
+    signature: (ctx context.Context, path string) error
+  - codegraphId: method:6cdf114d9d125760d3387cc3bc683634
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: method
+    line: 342
+    name: Router.MatchingMountByUUID
+    signature: (mountID string) *MountEntry
+  - codegraphId: method:65961d8ce41fcd625fb2cc5b512722c0
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: method
+    line: 360
+    name: Router.MatchingMountByAccessor
+    signature: (mountAccessor string) *MountEntry
+  - codegraphId: method:3de69813bc0bc6eb30091d92d79a9ec0
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: method
+    line: 378
+    name: Router.MatchingMount
+    signature: (ctx context.Context, path string) string
+  - codegraphId: method:0dd9546057bf8ac9f78c39fafa44aba6
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: method
+    line: 399
+    name: Router.MatchingPrefixInternal
+    signature: (ctx context.Context, path string) string
+  - codegraphId: method:514205cbd0f146c2a273f3bce875b86f
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: method
+    line: 472
+    name: Router.MountConflict
+    signature: (ctx context.Context, path string) string
+  - codegraphId: method:57c4dbcaca1444b60eb5bd3af6a56851
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: method
+    line: 489
+    name: Router.MatchingStorageByAPIPath
+    signature: (ctx context.Context, path string) logical.Storage
+  - codegraphId: method:7a06758a106cb8019827f82e7ee2a11b
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: method
+    line: 493
+    name: Router.MatchingStorageByStoragePath
+    signature: (ctx context.Context, path string) logical.Storage
+  - codegraphId: method:f1301a477bdde0ca3f689d15ffd63ae9
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: method
+    line: 520
+    name: Router.MatchingMountEntry
+    signature: (ctx context.Context, path string) *MountEntry
+  - codegraphId: method:6bf77a858ca3669ef0f10d0d440cc0d2
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: method
+    line: 537
+    name: Router.MatchingBackend
+    signature: (ctx context.Context, path string) logical.Backend
+  - codegraphId: method:52b72138b1d32c1aecee211a3b808af6
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: method
+    line: 563
+    name: Router.MatchingSystemView
+    signature: (ctx context.Context, path string) logical.SystemView
+  - codegraphId: method:3101ff0fc94cca41afdc6d7579adfda6
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: method
+    line: 579
+    name: Router.MatchingMountByAPIPath
+    signature: (ctx context.Context, path string) string
+  - codegraphId: method:5c1b59258b264ff07be7d89e569dcda6
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: method
+    line: 592
+    name: Router.MatchingStoragePrefixByAPIPath
+    signature: (ctx context.Context, path string) (string, bool)
+  - codegraphId: method:fb37a40387e10b4914986c4a44738513
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: method
+    line: 611
+    name: Router.MatchingAPIPrefixByStoragePath
+    signature: (ctx context.Context, path string) (*namespace.Namespace, string, string,
+      bool)
+  - codegraphId: method:f67a3a97705af4dc33872fff5e6cb4a9
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: method
+    line: 649
+    name: Router.Route
+    signature: (ctx context.Context, req *logical.Request) (*logical.Response, error)
+  - codegraphId: method:b2fa87db977662e2ee63b8b0fec69519
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: method
+    line: 655
+    name: Router.RouteExistenceCheck
+    signature: (ctx context.Context, req *logical.Request) (*logical.Response, bool,
+      bool, error)
+  - codegraphId: method:db90265d9e5098b4a596096bc19427f3
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: method
+    line: 934
+    name: Router.RootPath
+    signature: (ctx context.Context, path string) bool
+  - codegraphId: method:c0eb86f313b77eca2b9d630b125c7fff
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: method
+    line: 978
+    name: Router.LoginPath
+    signature: (ctx context.Context, path string) bool
+  - codegraphId: function:598a764835555ff929b98b230368d95f
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: function
+    line: 1080
+    name: ParseUnauthenticatedPaths
+    signature: (paths []string) (*loginPathsEntry, error)
+  - codegraphId: function:70e79ca4c970c2a745fe67fe03129c9d
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: function
+    line: 1113
+    name: PathsToRadix
+    signature: (paths []string) *radix.Tree
+  - codegraphId: method:c9c63dd8d033c6e1354255e10099d7ce
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: method
+    line: 1165
+    name: Router.Invalidate
+    signature: (ctx context.Context, key string) bool
+  - codegraphId: method:e7a3f80c6a3c020e4b20b54278d5e7ec
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: method
+    line: 1176
+    name: Router.Get
+    signature: (path string) (*RouteEntry, bool)
+  - codegraphId: method:87b2150b4407e5e00d3b22f72fb7459e
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: method
+    line: 1184
+    name: Router.SetTokenStoreSaltFunc
+    signature: (fn func(context.Context) (*salt.Salt, error))
+  - codegraphId: method:36ae59223f6b3de0d4b31af0ff34d3cf
+    file: third_party/openbao/internal/vault/routing/router.go
+    kind: method
+    line: 1199
+    name: Router.ResolvePath
+    signature: (ctx context.Context, mount string, path string, data map[string]any)
+      (string, error)
+  - codegraphId: type_alias:75c5c877fa311e275818692ea700d334
+    file: third_party/openbao/internal/vault/routing/routing.go
+    kind: type_alias
+    line: 20
+    name: ListingVisibilityType
+  - codegraphId: struct:a75d198458522c064c536fdb3aae943e
+    file: third_party/openbao/internal/vault/routing/routing.go
+    kind: struct
+    line: 50
+    name: MountConfig
+  - codegraphId: struct:b65b0edca4c78d320b69fac917d6c590
+    file: third_party/openbao/internal/vault/routing/routing.go
+    kind: struct
+    line: 69
+    name: APIMountConfig
+  - codegraphId: struct:166879a6ad7d7f7f715dd250cb8a75c7
+    file: third_party/openbao/internal/vault/routing/routing.go
+    kind: struct
+    line: 88
+    name: UserLockoutConfig
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 4a319bdddef6749f9563fc270b0d093e3d8da278a93cb489ba9124467f13b19a
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: caeb640fd41660314367ca18018a2dcb2dfd58c0b498c514e7b9ffc56911c5d7

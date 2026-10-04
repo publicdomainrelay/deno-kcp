@@ -1,0 +1,187 @@
+conditions:
+- message: 'undeclared: Access, Access.GetWrapper, Envelope, Envelope.Decrypt, Envelope.Encrypt,
+    NewAccess, NewEnvelope, NewShamirWrapper, NewTestSeal, NewToggleableTestSeal,
+    ShamirWrapper, ShamirWrapper.Type, TestSealOpts, ToggleableWrapper, ToggleableWrapper.Decrypt,
+    ToggleableWrapper.Encrypt, ToggleableWrapper.SetError, ToggleableWrapper.Type,
+    access.Decrypt, access.Encrypt, access.Finalize, access.GetWrapper, access.Init,
+    access.KeyId, access.SetConfig, access.Type'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/vault/seal/envelope.go
+  - third_party/openbao/internal/vault/seal/envelope_test.go
+  - third_party/openbao/internal/vault/seal/seal.go
+  - third_party/openbao/internal/vault/seal/seal_testing.go
+  - third_party/openbao/internal/vault/seal/shamirwrapper.go
+  fingerprint: 99ac4fbe44e10b0d81189ebb4741d5d62872536ce59a53b8e19506b2bcb93ebe
+  interfaces:
+  - codegraphId: struct:cde35b63b8efef4de773f1fe38d109cc
+    file: third_party/openbao/internal/vault/seal/envelope.go
+    kind: struct
+    line: 14
+    name: Envelope
+  - codegraphId: function:3e10133f89ef87ae59ed5ee7d8a3b7f4
+    file: third_party/openbao/internal/vault/seal/envelope.go
+    kind: function
+    line: 19
+    name: NewEnvelope
+    signature: () *Envelope
+  - codegraphId: method:89fa7ef068356304b22bb4e499ea7e7d
+    file: third_party/openbao/internal/vault/seal/envelope.go
+    kind: method
+    line: 27
+    name: Envelope.Encrypt
+    signature: (plaintext, aad []byte) (*wrapping.EnvelopeInfo, error)
+  - codegraphId: method:08dd01392a2ffad48955b6e6d56b4249
+    file: third_party/openbao/internal/vault/seal/envelope.go
+    kind: method
+    line: 34
+    name: Envelope.Decrypt
+    signature: (data *wrapping.EnvelopeInfo, aad []byte) ([]byte, error)
+  - codegraphId: interface:afaac00a9d21de40718500c5552db29b
+    file: third_party/openbao/internal/vault/seal/seal.go
+    kind: interface
+    line: 16
+    name: Access
+  - codegraphId: method:950b7978c38d4d12e8235cca4cf10175
+    file: third_party/openbao/internal/vault/seal/seal.go
+    kind: method
+    line: 20
+    name: Access.GetWrapper
+    signature: () wrapping.Wrapper
+  - codegraphId: function:7b45c9a04bd194309dce481869223099
+    file: third_party/openbao/internal/vault/seal/seal.go
+    kind: function
+    line: 29
+    name: NewAccess
+    signature: (w wrapping.Wrapper) Access
+  - codegraphId: method:dd0c7dd26901375dc159bc6bb8b7895e
+    file: third_party/openbao/internal/vault/seal/seal.go
+    kind: method
+    line: 35
+    name: access.KeyId
+    signature: (ctx context.Context) (string, error)
+  - codegraphId: method:376305645ff538bdb39da47f01e54f53
+    file: third_party/openbao/internal/vault/seal/seal.go
+    kind: method
+    line: 39
+    name: access.SetConfig
+    signature: (ctx context.Context, options ...wrapping.Option) (*wrapping.WrapperConfig,
+      error)
+  - codegraphId: method:a5e27741c3a39dd34050d0b0e1961eb8
+    file: third_party/openbao/internal/vault/seal/seal.go
+    kind: method
+    line: 43
+    name: access.GetWrapper
+    signature: () wrapping.Wrapper
+  - codegraphId: method:7c2f8152d3977a09f192703547cc2575
+    file: third_party/openbao/internal/vault/seal/seal.go
+    kind: method
+    line: 47
+    name: access.Init
+    signature: (ctx context.Context, options ...wrapping.Option) error
+  - codegraphId: method:534a067b023f95ddc90393842d539036
+    file: third_party/openbao/internal/vault/seal/seal.go
+    kind: method
+    line: 54
+    name: access.Type
+    signature: (ctx context.Context) (wrapping.WrapperType, error)
+  - codegraphId: method:659bdc903ad58e0381560759a2574fa5
+    file: third_party/openbao/internal/vault/seal/seal.go
+    kind: method
+    line: 59
+    name: access.Encrypt
+    signature: (ctx context.Context, plaintext []byte, options ...wrapping.Option)
+      (blob *wrapping.BlobInfo, err error)
+  - codegraphId: method:198506727e64615a95ab6e16470c9be7
+    file: third_party/openbao/internal/vault/seal/seal.go
+    kind: method
+    line: 84
+    name: access.Decrypt
+    signature: (ctx context.Context, data *wrapping.BlobInfo, options ...wrapping.Option)
+      (pt []byte, err error)
+  - codegraphId: method:a8e0030bbe3e6d000d2d42e7ce9d1e05
+    file: third_party/openbao/internal/vault/seal/seal.go
+    kind: method
+    line: 102
+    name: access.Finalize
+    signature: (ctx context.Context, options ...wrapping.Option) error
+  - codegraphId: struct:479850c12230725a85d5623e41c503de
+    file: third_party/openbao/internal/vault/seal/seal_testing.go
+    kind: struct
+    line: 14
+    name: TestSealOpts
+  - codegraphId: function:cca408f342c172647650ff95c4dd9415
+    file: third_party/openbao/internal/vault/seal/seal_testing.go
+    kind: function
+    line: 20
+    name: NewTestSeal
+    signature: (opts *TestSealOpts) (Access, *ToggleableWrapper)
+  - codegraphId: function:6e518653c302086fa5426b31ecc2f2ae
+    file: third_party/openbao/internal/vault/seal/seal_testing.go
+    kind: function
+    line: 32
+    name: NewToggleableTestSeal
+    signature: (opts *TestSealOpts) (Access, func(error))
+  - codegraphId: struct:a72f879be1bbf0cdf0f1372de5ca30cb
+    file: third_party/openbao/internal/vault/seal/seal_testing.go
+    kind: struct
+    line: 41
+    name: ToggleableWrapper
+  - codegraphId: method:2fb2247f7429da01a67ba082d67f21f6
+    file: third_party/openbao/internal/vault/seal/seal_testing.go
+    kind: method
+    line: 48
+    name: ToggleableWrapper.Encrypt
+    signature: (ctx context.Context, bytes []byte, opts ...wrapping.Option) (*wrapping.BlobInfo,
+      error)
+  - codegraphId: method:3c14682bf7bce86369e14e82117840c6
+    file: third_party/openbao/internal/vault/seal/seal_testing.go
+    kind: method
+    line: 57
+    name: ToggleableWrapper.Decrypt
+    signature: (ctx context.Context, info *wrapping.BlobInfo, opts ...wrapping.Option)
+      ([]byte, error)
+  - codegraphId: method:bc4a91e21f497d9d9430cf90f7a7ac3e
+    file: third_party/openbao/internal/vault/seal/seal_testing.go
+    kind: method
+    line: 66
+    name: ToggleableWrapper.SetError
+    signature: (err error)
+  - codegraphId: method:78a01eaa48707823c0b739d357034194
+    file: third_party/openbao/internal/vault/seal/seal_testing.go
+    kind: method
+    line: 72
+    name: ToggleableWrapper.Type
+    signature: (ctx context.Context) (wrapping.WrapperType, error)
+  - codegraphId: struct:34990802a106e2116f074603b03f9633
+    file: third_party/openbao/internal/vault/seal/shamirwrapper.go
+    kind: struct
+    line: 17
+    name: ShamirWrapper
+  - codegraphId: function:1aaf573ed2a8369b18e6a50d2749296a
+    file: third_party/openbao/internal/vault/seal/shamirwrapper.go
+    kind: function
+    line: 23
+    name: NewShamirWrapper
+    signature: () *ShamirWrapper
+  - codegraphId: method:406d3ef61e8e1597a161b9ded005a763
+    file: third_party/openbao/internal/vault/seal/shamirwrapper.go
+    kind: method
+    line: 29
+    name: ShamirWrapper.Type
+    signature: (context.Context) (wrapping.WrapperType, error)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: e15fe78b92282cd9dc3209fd2ab23c6d237871488666d5cd279e8564c20c3750
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 99ac4fbe44e10b0d81189ebb4741d5d62872536ce59a53b8e19506b2bcb93ebe
