@@ -5509,6 +5509,12 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.store-service-injection` (MAY): "The ConfirmLeave class injects the Ember data store service with @service store so model state can be inspected and rolled back from the decorator."
 - added `r.will-transition-guard` (MUST): "The returned ConfirmLeave class calls super.willTransition(...arguments) inside a try/catch so that a SuperClass without its own willTransition does not throw, and then reads the model at modelPath from this.controller before deciding whether to block the transition."
 
+### third-party-openbao-ui-lib-core-app-modifiers
+
+- intent: "" -> "This context exists so that the app-layer modifier namespace in the OpenBao UI has an entry for `code-mirror` without duplicating the implementation. Ember classic layout resolves modifiers from both the core and app trees; the app tree file is a thin alias that re-points the app path at the core path. Keeping it as a pure re-export means there is exactly one definition of the modifier, and any change to the modifier lands in the core module only."
+- added `r.preserve-upstream-header` (MUST): "The file must keep the upstream HashiCorp copyright and `SPDX-License-Identifier: MPL-2.0` header comment unchanged, because this file is vendored third-party OpenBao source."
+- added `r.re-export-core-code-mirror` (MUST): "The app-level modifier module must re-export the default binding of `core/modifiers/code-mirror` as its own default export, so `import codeMirror from 'core/app/modifiers/code-mirror'` yields the same value as importing the core module directly. The module must define no local modifier implementation of its own."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
