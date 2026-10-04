@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the OpenBao API explorer route warns users, before any interaction, about the side effects of the explorer's "Try it out" feature. It is the route-level guard for a UI whose requests act on a real OpenBao server using the operator's token, so the warning must appear on entry to the route rather than after a request is issued. The empty model hook is part of the same intent: it keeps the explorer's own query-param state from being clobbered by an inherited parent model.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

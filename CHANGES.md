@@ -5720,6 +5720,26 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.rewrite-spec-paths` (MUST): "For requests that are not spec loads, the interceptor parses the URL and rewrites it to `protocol//host/v1` followed by the original pathname and search, because spec paths omit the `/v1` prefix."
 - added `r.update-filter-action` (MUST): "The `updateFilter` action calls the `onFilterChange` callback with the event target's value, or an empty string when that value is falsy, so the filter query parameter stays sharable."
 
+### third-party-openbao-ui-lib-open-api-explorer-addon-controllers
+
+- intent: "" -> "This context exists to pin down the contents and contract of the vendored `open-api-explorer` addon controller file so that a reader of the broader deno-kcp specification knows what this particular third-party UI artifact guarantees, without having to re-read the upstream Ember addon. It records that the file is a thin Ember controller whose only behaviour is exposing a `filter` query parameter, and that no callable interfaces originate from it. It also marks the boundary: content here is upstream OpenBao UI code governed by its own license and repository policy, not first-party deno-kcp logic."
+- added `r.declare-filter-query-param` (MUST): "The exported controller must declare `filter` as its sole query parameter, listing it in the `queryParams` array, so that the addon's route can read and write the filter through the URL."
+- added `r.export-single-ember-controller` (MUST): "The module must import the base `Controller` from `@ember/controller` and export exactly one default value: a controller produced by extending that base."
+- added `r.filter-default-empty` (MUST): "The controller's `filter` property must default to the empty string, so an unfiltered visit shows every operation rather than requiring the query parameter to be present."
+- added `r.no-additional-behaviour` (SHOULD): "The controller should stay free of actions, computed properties and service injections; filtering behaviour belongs to the addon's templates and components, not to this controller."
+- added `r.preserve-upstream-license-header` (MUST): "The file must keep the upstream copyright and SPDX header naming HashiCorp, Inc. and MPL-2.0, because the file is vendored third-party source and not first-party code."
+- added `r.stay-under-third-party` (MUST): "The file must remain under `third_party/openbao/ui/lib/open-api-explorer/addon/controllers/`; first-party deno-kcp code must not import from or modify it in place."
+
+### third-party-openbao-ui-lib-open-api-explorer-addon-routes
+
+- intent: "" -> "This context exists so the OpenBao API explorer route warns users, before any interaction, about the side effects of the explorer's "Try it out" feature. It is the route-level guard for a UI whose requests act on a real OpenBao server using the operator's token, so the warning must appear on entry to the route rather than after a request is issued. The empty model hook is part of the same intent: it keeps the explorer's own query-param state from being clobbered by an inherited parent model."
+- added `r.after-model-warning` (MUST): "The route's afterModel hook calls flashMessages.warning exactly once with the side-effect warning text and the options sticky true and preformatted true, so the notice persists and renders with its line breaks intact."
+- added `r.default-route-extension` (MUST): "The module default-exports an Ember Route instance created by Route.extend, which becomes the open-api-explorer index route; the route class is the only thing the module exports."
+- added `r.flash-messages-service-injection` (MUST): "The route injects the flashMessages service via the service() injector so that afterModel can push a warning into the application's flash message queue."
+- added `r.license-header` (MUST): "The file carries the HashiCorp copyright header and the SPDX-License-Identifier MPL-2.0 comment at the top, as required for vendored OpenBao source."
+- added `r.no-op-model-hook` (MUST): "The route defines a no-op model hook returning nothing, so Ember does not reuse the parent route's model, which would conflict with this route's query params."
+- added `r.warning-content` (MUST): "The warning text states that "Try it out" makes requests to the OpenBao server on the user's behalf, that a token with the proper capabilities will create and delete items on that server, and that the token will also be shown on screen in the example curl command output."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -6224,7 +6244,9 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-open-api-explorer-addon-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-open-api-explorer-addon-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-open-api-explorer-addon-components-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-lib-open-api-explorer-addon-controllers-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-ui-lib-open-api-explorer-addon-routes-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-open-api-explorer-addon-controllers-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-lib-open-api-explorer-addon-routes-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-lib-open-api-explorer-addon-routes-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-lib-open-api-explorer-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-open-api-explorer-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-lib-open-api-explorer-config-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
