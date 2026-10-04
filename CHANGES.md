@@ -5329,6 +5329,16 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.transition-to-safe` (MUST): "transitionToSafe(router, ...args) performs a router transition while guarding against the Ember transition-aborted error, so a superseded or aborted navigation does not surface as an application error. Additional arguments are forwarded to the underlying transition call."
 - added `r.validators` (MUST): "validators.js supplies form value validators. presence(value) checks that a value is non-empty; length(value, { nullable = false, min, max }) checks the value's length against the optional min and max bounds, treating null as acceptable only when nullable is true; number(value, { nullable = false }) checks that the value is numeric, again accepting null only when nullable is true; containsWhiteSpace(value) reports whether the value contains whitespace. Defaults are nullable false for both options objects."
 
+### third-party-openbao-ui-config
+
+- intent: "" -> "These files exist so the OpenBao UI has one declarative place for its environment-dependent build settings, its Content-Security-Policy directives, and its browser support targets. The context documents the contract each config module must keep: what ember-cli reads from ENV, what the CSP plugin enforces, and which browsers the build targets, so that changes to the vendored OpenBao UI stay reviewable and auditable."
+- added `r.app-endpoint-lists` (MUST): "The returned ENV.APP must carry the polling endpoint list ['sys/health', 'sys/seal-status'], the namespace-root endpoint list ['sys/health', 'sys/seal-status', 'sys/internal/counters/config'], and DEFAULT_PAGE_SIZE 100 for the client-side pagination default."
+- added `r.browser-targets` (MUST): "targets.js must export a browsers list naming the last 1 Chrome, Firefox, and Safari versions, which the build uses as its browserslist targets."
+- added `r.csp-config` (MUST): "content-security-policy.js must export a function of the environment name that returns the ember-cli-content-security-policy config: delivery ['header', 'meta'], enabled for every environment except production, failTests true, reportOnly false, and the directive map default-src 'none'; script-src, font-src, connect-src, media-src 'self'; img-src 'self' and data:; style-src 'unsafe-inline' and 'self'; form-action 'none'."
+- added `r.environment-branches` (MUST): "The function must branch on the environment name: in development it enables APP.LOG_TRANSITIONS and enables ember-cli-mirage with the handler from process.env.MIRAGE_DEV_HANDLER when that variable is defined; in test it sets locationType 'none', rootElement '#ember-testing', autoboot false, flashMessageDefaults.timeout 50, and mirage disabled; in any non-production environment it lowers APP.DEFAULT_PAGE_SIZE to 15."
+- added `r.environment-exports-env-function` (MUST): "environment.js must export a function that takes the Ember environment name (development, test, or production) and returns the ENV object, populated with modulePrefix 'vault', rootURL '/ui/', serviceWorkerScope '/v1/sys/storage/raft/snapshot', locationType 'history', and the EmberENV flags that disable Date and String prototype extension."
+- added `r.welcome-message-env` (MUST): "The returned ENV must set welcomeMessage from the UI_AUTH_WELCOME environment variable, so the login welcome text is configured outside the build."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5785,3 +5795,4 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-utils-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-config-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-config-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
