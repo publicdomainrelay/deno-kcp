@@ -1,0 +1,211 @@
+conditions:
+- message: 'undeclared: Client, Client.DialLDAP, Client.GetLdapGroups, Client.GetUserAliasAttributeValue,
+    Client.GetUserBindDN, Client.GetUserDN, Client.RenderUserSearchFilter, ConfigEntry,
+    ConfigEntry.Map, ConfigEntry.PasswordlessMap, ConfigEntry.Validate, ConfigFields,
+    Connection, Connection.Add, Connection.Bind, Connection.Close, Connection.Del,
+    Connection.Modify, Connection.Search, Connection.SetTimeout, Connection.StartTLS,
+    Connection.UnauthenticatedBind, EscapeLDAPValue, LDAP, LDAP.DialURL, NewConfigEntry,
+    NewLDAP, PagingConnection, PagingConnection.SearchWithPaging, ldapIfc.DialURL'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/sdk/helper/ldaputil/client.go
+  - third_party/openbao/sdk/helper/ldaputil/client_test.go
+  - third_party/openbao/sdk/helper/ldaputil/config.go
+  - third_party/openbao/sdk/helper/ldaputil/config_test.go
+  - third_party/openbao/sdk/helper/ldaputil/connection.go
+  - third_party/openbao/sdk/helper/ldaputil/ldap.go
+  fingerprint: a0ac31860e65078ae36c85c87946c6507369e943288589df443682fd630a3c9f
+  interfaces:
+  - codegraphId: struct:1bb05ab64209a2d68270899096b4f7c9
+    file: third_party/openbao/sdk/helper/ldaputil/client.go
+    kind: struct
+    line: 28
+    name: Client
+  - codegraphId: method:13e5a4ed7a1476b08ab8fc6083ff13f8
+    file: third_party/openbao/sdk/helper/ldaputil/client.go
+    kind: method
+    line: 33
+    name: Client.DialLDAP
+    signature: (cfg *ConfigEntry) (Connection, error)
+  - codegraphId: method:4974672a9c0f670414bba0a3ce8a1d78
+    file: third_party/openbao/sdk/helper/ldaputil/client.go
+    kind: method
+    line: 168
+    name: Client.GetUserBindDN
+    signature: (cfg *ConfigEntry, conn Connection, username string) (string, error)
+  - codegraphId: method:a21256d96530b8c261860357747b8fc9
+    file: third_party/openbao/sdk/helper/ldaputil/client.go
+    kind: method
+    line: 196
+    name: Client.RenderUserSearchFilter
+    signature: (cfg *ConfigEntry, username string) (string, error)
+  - codegraphId: method:73039199f4b528a6dc4ee9b21ace966f
+    file: third_party/openbao/sdk/helper/ldaputil/client.go
+    kind: method
+    line: 253
+    name: Client.GetUserAliasAttributeValue
+    signature: (cfg *ConfigEntry, conn Connection, username string) (string, error)
+  - codegraphId: method:7ddf3fecbc3bc265b95d08515a70134a
+    file: third_party/openbao/sdk/helper/ldaputil/client.go
+    kind: method
+    line: 291
+    name: Client.GetUserDN
+    signature: (cfg *ConfigEntry, conn Connection, bindDN, username string) (string,
+      error)
+  - codegraphId: method:81e6b6dc4b5cd16eabf93d22cdaf9fa2
+    file: third_party/openbao/sdk/helper/ldaputil/client.go
+    kind: method
+    line: 557
+    name: Client.GetLdapGroups
+    signature: (cfg *ConfigEntry, conn Connection, userDN string, username string)
+      ([]string, error)
+  - codegraphId: function:b6dd5dc7a40159995f200a94ff42c126
+    file: third_party/openbao/sdk/helper/ldaputil/client.go
+    kind: function
+    line: 611
+    name: EscapeLDAPValue
+    signature: (input string) string
+  - codegraphId: function:887541decbc45fcf241c29b15de11095
+    file: third_party/openbao/sdk/helper/ldaputil/config.go
+    kind: function
+    line: 30
+    name: ConfigFields
+    signature: () map[string]*framework.FieldSchema
+  - codegraphId: function:80731a2c0c1e7ab58d52503166aebd35
+    file: third_party/openbao/sdk/helper/ldaputil/config.go
+    kind: function
+    line: 265
+    name: NewConfigEntry
+    signature: (existing *ConfigEntry, d *framework.FieldData) (*ConfigEntry, error)
+  - codegraphId: struct:d9a5b1056a138af3f4885e847fcc87e0
+    file: third_party/openbao/sdk/helper/ldaputil/config.go
+    kind: struct
+    line: 439
+    name: ConfigEntry
+  - codegraphId: method:50ef833814a8dabc06e632a3e5520a03
+    file: third_party/openbao/sdk/helper/ldaputil/config.go
+    kind: method
+    line: 475
+    name: ConfigEntry.Map
+    signature: () map[string]any
+  - codegraphId: method:d0dca584e5f2e58e6cc07e885514bfee
+    file: third_party/openbao/sdk/helper/ldaputil/config.go
+    kind: method
+    line: 481
+    name: ConfigEntry.PasswordlessMap
+    signature: () map[string]any
+  - codegraphId: method:dc530a868c994b2a4de5c18323eb280f
+    file: third_party/openbao/sdk/helper/ldaputil/config.go
+    kind: method
+    line: 528
+    name: ConfigEntry.Validate
+    signature: () error
+  - codegraphId: interface:3b9af4bf8f5fb1ffb79bdadbdf666ebf
+    file: third_party/openbao/sdk/helper/ldaputil/connection.go
+    kind: interface
+    line: 15
+    name: Connection
+  - codegraphId: method:d5ea325c6f77b97d44cdeb7075403ec8
+    file: third_party/openbao/sdk/helper/ldaputil/connection.go
+    kind: method
+    line: 16
+    name: Connection.Bind
+    signature: (username, password string) error
+  - codegraphId: method:86e35fc5ffc9501363670e480892cd59
+    file: third_party/openbao/sdk/helper/ldaputil/connection.go
+    kind: method
+    line: 17
+    name: Connection.Close
+    signature: () error
+  - codegraphId: method:d5623f1b5a339b843f12796d7ff416e3
+    file: third_party/openbao/sdk/helper/ldaputil/connection.go
+    kind: method
+    line: 18
+    name: Connection.Add
+    signature: (addRequest *ldap.AddRequest) error
+  - codegraphId: method:30d830fe5b12b3ebc3e6a1da6346f1a6
+    file: third_party/openbao/sdk/helper/ldaputil/connection.go
+    kind: method
+    line: 19
+    name: Connection.Modify
+    signature: (modifyRequest *ldap.ModifyRequest) error
+  - codegraphId: method:21e588180474cf39cb119930c9353df4
+    file: third_party/openbao/sdk/helper/ldaputil/connection.go
+    kind: method
+    line: 20
+    name: Connection.Del
+    signature: (delRequest *ldap.DelRequest) error
+  - codegraphId: method:26e80762b82df4bc2b84d56fb4f06ac4
+    file: third_party/openbao/sdk/helper/ldaputil/connection.go
+    kind: method
+    line: 21
+    name: Connection.Search
+    signature: (searchRequest *ldap.SearchRequest) (*ldap.SearchResult, error)
+  - codegraphId: method:c90a5834a68fe430bbed15f903bc19a6
+    file: third_party/openbao/sdk/helper/ldaputil/connection.go
+    kind: method
+    line: 22
+    name: Connection.StartTLS
+    signature: (config *tls.Config) error
+  - codegraphId: method:c09f1b82ba8f22cd8e96623e4eac6651
+    file: third_party/openbao/sdk/helper/ldaputil/connection.go
+    kind: method
+    line: 23
+    name: Connection.SetTimeout
+    signature: (timeout time.Duration)
+  - codegraphId: method:c5eeb84dc923c83b6bb08b6d719ef3f9
+    file: third_party/openbao/sdk/helper/ldaputil/connection.go
+    kind: method
+    line: 24
+    name: Connection.UnauthenticatedBind
+    signature: (username string) error
+  - codegraphId: interface:a2452b5b2d859deb8f9ae9a730534a93
+    file: third_party/openbao/sdk/helper/ldaputil/connection.go
+    kind: interface
+    line: 27
+    name: PagingConnection
+  - codegraphId: method:4b7bb073b0fe37555621258624ca1062
+    file: third_party/openbao/sdk/helper/ldaputil/connection.go
+    kind: method
+    line: 29
+    name: PagingConnection.SearchWithPaging
+    signature: (searchRequest *ldap.SearchRequest, pagingSize uint32) (*ldap.SearchResult,
+      error)
+  - codegraphId: function:36af85f1faca3106c10bcbe63baabcb4
+    file: third_party/openbao/sdk/helper/ldaputil/ldap.go
+    kind: function
+    line: 10
+    name: NewLDAP
+    signature: () LDAP
+  - codegraphId: interface:305a06cf4b4e6a8215f5ba864f6edebb
+    file: third_party/openbao/sdk/helper/ldaputil/ldap.go
+    kind: interface
+    line: 16
+    name: LDAP
+  - codegraphId: method:83e99d613179b279236ca011cca396eb
+    file: third_party/openbao/sdk/helper/ldaputil/ldap.go
+    kind: method
+    line: 17
+    name: LDAP.DialURL
+    signature: (addr string, opts ...ldap.DialOpt) (Connection, error)
+  - codegraphId: method:09ff0b981e1cb1cea7a369416931c805
+    file: third_party/openbao/sdk/helper/ldaputil/ldap.go
+    kind: method
+    line: 22
+    name: ldapIfc.DialURL
+    signature: (addr string, opts ...ldap.DialOpt) (Connection, error)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 09bc0830dfb193a7af6baaa8ea30b51fe3af7c900588b0b78db63103ed692668
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: a0ac31860e65078ae36c85c87946c6507369e943288589df443682fd630a3c9f
