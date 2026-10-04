@@ -26237,7 +26237,10 @@ system_contexts:
     NewStoragePacker, and the generated Item and Bucket protobuf types), the bucket-key
     derivation rule, the locking discipline around bucket reads and writes, and the
     decompress/unmarshal path that every accessor shares. Downstream OpenBao identity
-    code (entity, group and local alias packers) depends on this contract.'
+    code (entity, group and local alias packers in internal/vault/identity) depends
+    on this contract, so the spec fixes what those callers may rely on: identifier-to-bucket
+    mapping, nil-on-missing read semantics, the WithStorage delegation pattern, and
+    the batching behaviour of multi-item deletes.'
   interfaces:
   - file: third_party/openbao/internal/helper/storagepacker/types.pb.go
     kind: struct
@@ -26432,7 +26435,9 @@ system_contexts:
       a null logger when the supplied logger is nil, groups the item IDs by their
       bucket key so each bucket is locked exactly once, skips buckets missing from
       storage after logging a warning, and removes the requested items from each bucket
-      before writing it back.
+      before writing it back; DeleteItem, DeleteItemWithStorage, DeleteMultipleItems
+      and DeleteMultipleItemsWithStorage are the single-item and multi-item entry
+      points over this behaviour.
   - codeRefs:
     - method:42f3f9816b6a170b513393fffff43893
     - method:76bff3d9582c9ee1235c855401a80d84

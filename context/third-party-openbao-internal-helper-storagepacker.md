@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-The context exists to specify the storagepacker helper as a self-contained unit inside third_party/openbao: its public API surface (StoragePacker methods, NewStoragePacker, and the generated Item and Bucket protobuf types), the bucket-key derivation rule, the locking discipline around bucket reads and writes, and the decompress/unmarshal path that every accessor shares. Downstream OpenBao identity code (entity, group and local alias packers) depends on this contract.
+The context exists to specify the storagepacker helper as a self-contained unit inside third_party/openbao: its public API surface (StoragePacker methods, NewStoragePacker, and the generated Item and Bucket protobuf types), the bucket-key derivation rule, the locking discipline around bucket reads and writes, and the decompress/unmarshal path that every accessor shares. Downstream OpenBao identity code (entity, group and local alias packers in internal/vault/identity) depends on this contract, so the spec fixes what those callers may rely on: identifier-to-bucket mapping, nil-on-missing read semantics, the WithStorage delegation pattern, and the batching behaviour of multi-item deletes.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
