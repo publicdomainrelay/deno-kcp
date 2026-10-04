@@ -5599,6 +5599,17 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.roles-delete-removes-record-and-option` (MUST): "The onDelete action must call model.destroyRecord(), then remove the model from args.roles by index when it is present, and report a success flash message naming the deleted role; on any thrown error it must report a danger flash message built from the error and the fallback text 'Error deleting role. Please try again or contact support'."
 - added `r.roles-mount-point-from-owner` (MUST): "The mountPoint getter must return the mountPoint of the owner obtained through getOwner(this), so role links and routes resolve against the engine's actual mount path rather than a hardcoded prefix."
 
+### third-party-openbao-ui-lib-kubernetes-addon-components-page-role
+
+- intent: "" -> "This context exists to record the contract of the Kubernetes role create-and-edit and details pages so that the UI behavior they implement (generation-preference gating, annotations expansion, extra-field derivation, delete-and-transition) stays described by, and anchored to, the code that actually implements it. It is a specification of existing third-party OpenBao UI library code vendored into the repository, not a description of code to be written."
+- added `r.details-delete-and-transition` (MUST): "RoleDetailsPageComponent's delete action awaits this.args.model.destroyRecord() and, on success, transitions via the 'host-router' service to the route vault.cluster.secrets.backend.kubernetes.roles; on failure it derives a message with errorMessage(error, 'Unable to delete role. Please try again or contact support') and shows it with flashMessages.danger."
+- added `r.details-extra-fields-derivation` (MUST): "RoleDetailsPageComponent's extraFields getter returns an array containing the entry {label: 'Annotations', key: 'extraAnnotations'} when this.args.model.extraAnnotations is truthy and the entry {label: 'Labels', key: 'extraLabels'} when this.args.model.extraLabels is truthy, and otherwise returns the entries for whichever of the two exist."
+- added `r.editing-tracked-state` (MUST): "CreateAndEditRolePageComponent tracks roleRulesTemplates, selectedTemplateId, modelValidations, invalidFormAlert and errorBanner, and exposes actions resetRoleRules, selectTemplate(event), changePreference(pref), save(), onSave(event) and cancel() plus the readonly roleRulesHelpText and extraFields getters that the editing template binds to."
+- added `r.existing-metadata-expands-annotations` (MUST): "CreateAndEditRolePageComponent's constructor sets showAnnotations to true when the model has extraAnnotations or extraLabels, so editing a role with existing metadata opens the annotations section."
+- added `r.generation-preference-gates-rule-init` (MUST): "CreateAndEditRolePageComponent's constructor calls initRoleRules only when this.args.model.generationPreference equals 'full', so generated role rules are rendered only for the full object-chain option."
+- added `r.generation-preference-options` (MUST): "The generationPreferences getter returns exactly three options in order: 'basic' (generate token only using an existing service account), 'expanded' (generate token, service account and role binding objects from a pre-existing role or ClusterRole), and 'full' (generate the entire Kubernetes object chain from user-supplied rules), each carrying a title, description and value."
+- added `r.role-pages-inject-services` (MUST): "Both page components inject the 'host-router' service (accessed as this['host-router']) and the flashMessages service, and read all page state from this.args.model, the Kubernetes role model holding the role record and backend."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -6085,5 +6096,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-kubernetes-addon-components-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-kubernetes-addon-components-page-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-kubernetes-addon-components-page-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-ui-lib-kubernetes-addon-components-page-role-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-kubernetes-addon-components-page-role-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-kubernetes-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to record the contract of the Kubernetes role create-and-edit and details pages so that the UI behavior they implement (generation-preference gating, annotations expansion, extra-field derivation, delete-and-transition) stays described by, and anchored to, the code that actually implements it. It is a specification of existing third-party OpenBao UI library code vendored into the repository, not a description of code to be written.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

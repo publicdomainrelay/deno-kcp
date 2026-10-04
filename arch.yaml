@@ -72528,12 +72528,94 @@ system_contexts:
   - third_party/openbao/ui/lib/kubernetes/addon/components/page/role/create-and-edit.js
   - third_party/openbao/ui/lib/kubernetes/addon/components/page/role/details.js
   codeRefIndex:
+  - class:2383cb62a6484c16da8d1871b8257237 CreateAndEditRolePageComponent@third_party/openbao/ui/lib/kubernetes/addon/components/page/role/create-and-edit.js:22
+  - class:dbfdefee8c48a63542c31d25c86c5ae8 RoleDetailsPageComponent@third_party/openbao/ui/lib/kubernetes/addon/components/page/role/details.js:19
   - file:third_party/openbao/ui/lib/kubernetes/addon/components/page/role/create-and-edit.js
     create-and-edit.js@third_party/openbao/ui/lib/kubernetes/addon/components/page/role/create-and-edit.js
   - file:third_party/openbao/ui/lib/kubernetes/addon/components/page/role/details.js
     details.js@third_party/openbao/ui/lib/kubernetes/addon/components/page/role/details.js
   id: sc.third-party-openbao-ui-lib-kubernetes-addon-components-page-role
+  intent: This context exists to record the contract of the Kubernetes role create-and-edit
+    and details pages so that the UI behavior they implement (generation-preference
+    gating, annotations expansion, extra-field derivation, delete-and-transition)
+    stays described by, and anchored to, the code that actually implements it. It
+    is a specification of existing third-party OpenBao UI library code vendored into
+    the repository, not a description of code to be written.
+  interfaces:
+  - file: third_party/openbao/ui/lib/kubernetes/addon/components/page/role/create-and-edit.js
+    kind: class
+    name: CreateAndEditRolePageComponent
+    signature: export default class CreateAndEditRolePageComponent extends Component
+  - file: third_party/openbao/ui/lib/kubernetes/addon/components/page/role/details.js
+    kind: class
+    name: RoleDetailsPageComponent
+    signature: export default class RoleDetailsPageComponent extends Component
   name: third-party-openbao-ui-lib-kubernetes-addon-components-page-role
+  requirements:
+  - codeRefs:
+    - class:dbfdefee8c48a63542c31d25c86c5ae8
+    - file:third_party/openbao/ui/lib/kubernetes/addon/components/page/role/details.js
+    id: r.details-delete-and-transition
+    level: MUST
+    text: RoleDetailsPageComponent's delete action awaits this.args.model.destroyRecord()
+      and, on success, transitions via the 'host-router' service to the route vault.cluster.secrets.backend.kubernetes.roles;
+      on failure it derives a message with errorMessage(error, 'Unable to delete role.
+      Please try again or contact support') and shows it with flashMessages.danger.
+  - codeRefs:
+    - class:dbfdefee8c48a63542c31d25c86c5ae8
+    - file:third_party/openbao/ui/lib/kubernetes/addon/components/page/role/details.js
+    id: r.details-extra-fields-derivation
+    level: MUST
+    text: 'RoleDetailsPageComponent''s extraFields getter returns an array containing
+      the entry {label: ''Annotations'', key: ''extraAnnotations''} when this.args.model.extraAnnotations
+      is truthy and the entry {label: ''Labels'', key: ''extraLabels''} when this.args.model.extraLabels
+      is truthy, and otherwise returns the entries for whichever of the two exist.'
+  - codeRefs:
+    - class:2383cb62a6484c16da8d1871b8257237
+    - file:third_party/openbao/ui/lib/kubernetes/addon/components/page/role/create-and-edit.js
+    id: r.editing-tracked-state
+    level: MUST
+    text: CreateAndEditRolePageComponent tracks roleRulesTemplates, selectedTemplateId,
+      modelValidations, invalidFormAlert and errorBanner, and exposes actions resetRoleRules,
+      selectTemplate(event), changePreference(pref), save(), onSave(event) and cancel()
+      plus the readonly roleRulesHelpText and extraFields getters that the editing
+      template binds to.
+  - codeRefs:
+    - class:2383cb62a6484c16da8d1871b8257237
+    - file:third_party/openbao/ui/lib/kubernetes/addon/components/page/role/create-and-edit.js
+    id: r.existing-metadata-expands-annotations
+    level: MUST
+    text: CreateAndEditRolePageComponent's constructor sets showAnnotations to true
+      when the model has extraAnnotations or extraLabels, so editing a role with existing
+      metadata opens the annotations section.
+  - codeRefs:
+    - class:2383cb62a6484c16da8d1871b8257237
+    - file:third_party/openbao/ui/lib/kubernetes/addon/components/page/role/create-and-edit.js
+    id: r.generation-preference-gates-rule-init
+    level: MUST
+    text: CreateAndEditRolePageComponent's constructor calls initRoleRules only when
+      this.args.model.generationPreference equals 'full', so generated role rules
+      are rendered only for the full object-chain option.
+  - codeRefs:
+    - class:2383cb62a6484c16da8d1871b8257237
+    - file:third_party/openbao/ui/lib/kubernetes/addon/components/page/role/create-and-edit.js
+    id: r.generation-preference-options
+    level: MUST
+    text: 'The generationPreferences getter returns exactly three options in order:
+      ''basic'' (generate token only using an existing service account), ''expanded''
+      (generate token, service account and role binding objects from a pre-existing
+      role or ClusterRole), and ''full'' (generate the entire Kubernetes object chain
+      from user-supplied rules), each carrying a title, description and value.'
+  - codeRefs:
+    - class:2383cb62a6484c16da8d1871b8257237
+    - class:dbfdefee8c48a63542c31d25c86c5ae8
+    - file:third_party/openbao/ui/lib/kubernetes/addon/components/page/role/create-and-edit.js
+    - file:third_party/openbao/ui/lib/kubernetes/addon/components/page/role/details.js
+    id: r.role-pages-inject-services
+    level: MUST
+    text: Both page components inject the 'host-router' service (accessed as this['host-router'])
+      and the flashMessages service, and read all page state from this.args.model,
+      the Kubernetes role model holding the role record and backend.
   upstream: self
 - code:
   - third_party/openbao/ui/lib/kubernetes/addon/controllers/roles/index.js
