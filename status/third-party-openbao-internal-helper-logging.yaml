@@ -1,0 +1,89 @@
+conditions:
+- message: 'undeclared: LogConfig, LogFile, LogFile.Write, LogFormat, LogFormat.String,
+    NewLogConfig, ParseLogFormat, ParseLogLevel, Setup, TranslateLoggerLevel, noErrorWriter.Write'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/helper/logging/logfile.go
+  - third_party/openbao/internal/helper/logging/logfile_test.go
+  - third_party/openbao/internal/helper/logging/logger.go
+  - third_party/openbao/internal/helper/logging/logger_test.go
+  fingerprint: 1b213567936bd61f82f771362931ed504a78ce620bcf7e476d44c41c1d7782b5
+  interfaces:
+  - codegraphId: struct:59334325f198b803cde297154f486f17
+    file: third_party/openbao/internal/helper/logging/logfile.go
+    kind: struct
+    line: 21
+    name: LogFile
+  - codegraphId: method:5500d8e2374667288edd52fa9a2d49f8
+    file: third_party/openbao/internal/helper/logging/logfile.go
+    kind: method
+    line: 51
+    name: LogFile.Write
+    signature: (b []byte) (n int, err error)
+  - codegraphId: type_alias:fa3e242007f3869112f3c010e80541c3
+    file: third_party/openbao/internal/helper/logging/logger.go
+    kind: type_alias
+    line: 27
+    name: LogFormat
+  - codegraphId: struct:cfe77498c19809198497223af61dc308
+    file: third_party/openbao/internal/helper/logging/logger.go
+    kind: struct
+    line: 30
+    name: LogConfig
+  - codegraphId: function:43409d49484bc726883df74478f18c0d
+    file: third_party/openbao/internal/helper/logging/logger.go
+    kind: function
+    line: 61
+    name: NewLogConfig
+    signature: (defaultFileName string) (*LogConfig, error)
+  - codegraphId: method:c3c5b256f72ec609e77f5b5f02f6fb3c
+    file: third_party/openbao/internal/helper/logging/logger.go
+    kind: method
+    line: 79
+    name: LogFormat.String
+    signature: () string
+  - codegraphId: method:1ca522ab4abbc3354ece35997c81515d
+    file: third_party/openbao/internal/helper/logging/logger.go
+    kind: method
+    line: 98
+    name: noErrorWriter.Write
+    signature: (p []byte) (n int, err error)
+  - codegraphId: function:267f8b54aea9c228c4a468e655e0675e
+    file: third_party/openbao/internal/helper/logging/logger.go
+    kind: function
+    line: 124
+    name: Setup
+    signature: (config *LogConfig, w io.Writer) (hclog.InterceptLogger, error)
+  - codegraphId: function:eb740607e0ef652311891af3faedbfe2
+    file: third_party/openbao/internal/helper/logging/logger.go
+    kind: function
+    line: 176
+    name: ParseLogFormat
+    signature: (format string) (LogFormat, error)
+  - codegraphId: function:bca6079fb39df81291a1021227b83c88
+    file: third_party/openbao/internal/helper/logging/logger.go
+    kind: function
+    line: 191
+    name: ParseLogLevel
+    signature: (logLevel string) (hclog.Level, error)
+  - codegraphId: function:44fe4949e60b578345cf37efc63a5873
+    file: third_party/openbao/internal/helper/logging/logger.go
+    kind: function
+    line: 214
+    name: TranslateLoggerLevel
+    signature: (logger hclog.Logger) (string, error)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 1063be4384a113ea7005040dd3379f5c7a015544d63d8299bd410719e5f8f959
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 1b213567936bd61f82f771362931ed504a78ce620bcf7e476d44c41c1d7782b5
