@@ -4178,7 +4178,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 
 ### third-party-openbao-ui-app-components-transit-key-action
 
-- intent: "" -> "This context exists to pin down the public shape of the transit key export action component so downstream work — templates that bind to it, route or controller code that invokes it, and any refactor or port of the OpenBao UI — has a stable, machine-checkable description of what the file exposes. It records that the component is state-only in the observed facts: two tracked fields and no behaviour, which is what a caller must assume when consuming it. Anchoring the specification to the CodeGraph id and repository-relative path keeps the description traceable to the exact declaration rather than to prose about how the component is used elsewhere."
+- intent: "" -> "This context exists to pin down the public shape of the transit key export action component so downstream work — templates that bind to it, route or controller code that invokes it, and any refactor or port of the OpenBao UI — has a stable, machine-checkable description of what the file exposes. It records that the component is state-only: two tracked fields and no behaviour, which is the assumption a consumer must make. The surface is deliberately narrow because the observed facts show nothing beyond the class declaration and its two properties."
 - added `r.export-component-class` (MUST): "The module third_party/openbao/ui/app/components/transit-key-action/export.js MUST default-export a class named ExportComponent that extends the Ember Component base class, so that Ember's resolver can load it as the component backing the transit key export action."
 - added `r.state-only-surface` (MUST): "ExportComponent MUST expose only the tracked state fields wrapTTL and exportVersion as its own declared members, with no methods, actions, or injected services declared in the class body; consumers therefore MUST supply all export behaviour from outside the class."
 - added `r.tracked-export-version` (MUST): "ExportComponent MUST declare a tracked property exportVersion whose initial value is false, so that the export-version toggle defaults to off and mutating it invalidates any template or computed value that depends on it."
@@ -4513,4 +4513,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-components-transit-key-action-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-components-transit-key-action-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-components-wizard-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-config-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
