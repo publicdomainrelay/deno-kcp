@@ -1,0 +1,27 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: deploy-examples-c2s-25d10f922ec7-25d10f922ec7
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
+  systemContext: deploy-examples
+  toCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
+status:
+  agentLog: 'The deploy/examples context holds ten hand-written Kubernetes manifests
+    that stand as the deployable examples for the deno-kcp operator: deno-job.yaml,
+    deno-pod.yaml, deno-run.yaml, native-fire-pod.yaml, openbao-tls-pod.yaml, openbao.yaml,
+    policy-workflow-run.yaml, policyengine.yaml, policyworkflowpod.yaml and runtrigger.yaml.
+    Each file is a single YAML document that instantiates one custom resource kind
+    — DenoJob, DenoPod, DenoRun, OpenBao, PolicyWorkflowRun, PolicyEngine, PolicyWorkflowPod,
+    RunTrigger — and the integration suite keeps a parallel registry in test/integration/examples.go
+    that pairs every file name with its Kind, its plural resource name and its generated
+    APIResourceSchema file, so the examples double as a conformance corpus for the
+    CRDs. The registry is asserted from both directions: exampleFiles enumerates the
+    expected ten, exampleFilesOnDisk reads the directory, keeps only .yaml entries,
+    sorts them, and the two lists must agree.'
+  message: wrote 17 requirement(s) and 3 interface(s) for deploy-examples; dropped
+    5 unresolved code ref(s)
+  phase: Succeeded
