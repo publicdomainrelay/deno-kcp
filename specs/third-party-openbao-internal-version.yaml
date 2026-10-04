@@ -3,10 +3,98 @@ codeRefIndex:
 - file:third_party/openbao/internal/version/cgo.go cgo.go@third_party/openbao/internal/version/cgo.go
 - file:third_party/openbao/internal/version/version.go version.go@third_party/openbao/internal/version/version.go
 - file:third_party/openbao/internal/version/version_base.go version_base.go@third_party/openbao/internal/version/version_base.go
+- function:52fa50d01aba28104d7c44b8b362c0cb GetVersion@third_party/openbao/internal/version/version.go:19
+- method:02fdf5a0f711c862d7f66d281c7111b7 VersionInfo.VersionNumber@third_party/openbao/internal/version/version.go:39
+- method:2a97cbe3c6dab4e6c39ea81d6a1b2161 VersionInfo.FullVersionNumber@third_party/openbao/internal/version/version.go:57
+- struct:2d3628dae900cade0193015ce3c20557 VersionInfo@third_party/openbao/internal/version/version.go:11
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-version
   namespace: default
 spec:
+  intent: This context exists so the OpenBao binary can name itself. Every component
+    that prints, logs, or transmits a version — the HTTP audit backend's User-Agent,
+    the CLI commands, the sys/health endpoint, service registration, and the seal-status
+    API — calls into this package instead of hardcoding a string. It separates the
+    injected build facts (ldflags variables) from the presentation rules, so a single
+    place decides how a commit, a prerelease tag, vendor metadata, and a commit date
+    combine into a user-visible version string.
+  interfaces:
+  - file: third_party/openbao/internal/version/version.go
+    kind: function
+    name: GetVersion
+    signature: func GetVersion() *VersionInfo
+  - file: third_party/openbao/internal/version/version.go
+    kind: struct
+    name: VersionInfo
+    signature: type VersionInfo struct { Revision, Version, VersionPrerelease, VersionMetadata,
+      CommitDate string }
+  - file: third_party/openbao/internal/version/version.go
+    kind: method
+    name: VersionInfo.FullVersionNumber
+    signature: func (c *VersionInfo) FullVersionNumber(rev bool) string
+  - file: third_party/openbao/internal/version/version.go
+    kind: method
+    name: VersionInfo.VersionNumber
+    signature: func (c *VersionInfo) VersionNumber() string
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/version/cgo.go
+    id: r.cgo-flag
+    level: MUST
+    text: The cgo build-tagged file must set CgoEnabled to true at init, leaving it
+      false in builds without the cgo tag so callers can tell whether the binary was
+      built with cgo.
+  - codeRefs:
+    - file:third_party/openbao/internal/version/version_base.go
+    id: r.commit-date-fallback
+    level: SHOULD
+    text: The package must fill CommitDate from the deprecated BuildDate variable
+      at init when CommitDate is empty, so builds that still pass only BuildDate keep
+      a commit date in the rendered version string.
+  - codeRefs:
+    - file:third_party/openbao/internal/version/version.go
+    - method:2a97cbe3c6dab4e6c39ea81d6a1b2161
+    id: r.full-version-number-format
+    level: MUST
+    text: VersionInfo.FullVersionNumber must return "OpenBao (version unknown)" when
+      the package-level Version and VersionPrerelease are both "unknown"; otherwise
+      it must render "OpenBao v<Version>", append "-<VersionPrerelease>" and "+<VersionMetadata>"
+      when those are non-empty, append " (<Revision>)" only when rev is true and Revision
+      is non-empty, and finish with ", committed <CommitDate>" when CommitDate is
+      non-empty.
+  - codeRefs:
+    - file:third_party/openbao/internal/version/version.go
+    - function:52fa50d01aba28104d7c44b8b362c0cb
+    id: r.getversion-resolution
+    level: MUST
+    text: GetVersion must return a new VersionInfo whose Revision is GitCommit and
+      CommitDate is CommitDate, choosing GitDescribe as Version when GitDescribe is
+      non-empty; when GitDescribe is empty, the resolved prerelease is empty, and
+      VersionPrerelease is non-empty, it must substitute the prerelease "dev".
+  - codeRefs:
+    - file:third_party/openbao/internal/version/version_base.go
+    id: r.ldflags-variables
+    level: MUST
+    text: The package must expose GitCommit, GitDescribe, CommitDate, VersionMetadata,
+      and the unexported fullVersion (default "2.0.0-HEAD") as the variables the build
+      sets via ldflags, and must derive Version and VersionPrerelease at init by trimming
+      fullVersion and cutting it at the first "-".
+  - codeRefs:
+    - file:third_party/openbao/internal/version/version.go
+    - struct:2d3628dae900cade0193015ce3c20557
+    id: r.version-info-fields
+    level: MUST
+    text: 'VersionInfo must carry exactly the build identity of one binary as five
+      string fields: Revision, Version, VersionPrerelease, VersionMetadata, and CommitDate.'
+  - codeRefs:
+    - file:third_party/openbao/internal/version/version.go
+    - method:02fdf5a0f711c862d7f66d281c7111b7
+    id: r.version-number-format
+    level: MUST
+    text: VersionInfo.VersionNumber must return "(version unknown)" when the package-level
+      Version and VersionPrerelease are both "unknown"; otherwise it must begin with
+      the receiver's Version and append "-<VersionPrerelease>" when the prerelease
+      is non-empty, then "+<VersionMetadata>" when the metadata is non-empty.
   upstream: self

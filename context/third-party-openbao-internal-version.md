@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the OpenBao binary can name itself. Every component that prints, logs, or transmits a version — the HTTP audit backend's User-Agent, the CLI commands, the sys/health endpoint, service registration, and the seal-status API — calls into this package instead of hardcoding a string. It separates the injected build facts (ldflags variables) from the presentation rules, so a single place decides how a commit, a prerelease tag, vendor metadata, and a commit date combine into a user-visible version string.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

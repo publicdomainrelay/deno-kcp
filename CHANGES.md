@@ -2832,6 +2832,17 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.token-string-renders` (MUST): "Token.String returns the protobuf text representation produced by protoimpl.X.MessageStringOf for the receiver."
 - added `r.token-wire-field-numbers` (MUST): "Token carries Random as protobuf field 1 (string, the unencoded equivalent of the former randbase62 value), IndexEpoch as field 3 (uint32 varint, JSON name indexEpoch) and LocalIndex as field 50 (string, JSON name localIndex, the storage state required to have this token); these numbers and JSON names are the wire and JSON contract."
 
+### third-party-openbao-internal-version
+
+- intent: "" -> "This context exists so the OpenBao binary can name itself. Every component that prints, logs, or transmits a version — the HTTP audit backend's User-Agent, the CLI commands, the sys/health endpoint, service registration, and the seal-status API — calls into this package instead of hardcoding a string. It separates the injected build facts (ldflags variables) from the presentation rules, so a single place decides how a commit, a prerelease tag, vendor metadata, and a commit date combine into a user-visible version string."
+- added `r.cgo-flag` (MUST): "The cgo build-tagged file must set CgoEnabled to true at init, leaving it false in builds without the cgo tag so callers can tell whether the binary was built with cgo."
+- added `r.commit-date-fallback` (SHOULD): "The package must fill CommitDate from the deprecated BuildDate variable at init when CommitDate is empty, so builds that still pass only BuildDate keep a commit date in the rendered version string."
+- added `r.full-version-number-format` (MUST): "VersionInfo.FullVersionNumber must return "OpenBao (version unknown)" when the package-level Version and VersionPrerelease are both "unknown"; otherwise it must render "OpenBao v<Version>", append "-<VersionPrerelease>" and "+<VersionMetadata>" when those are non-empty, append " (<Revision>)" only when rev is true and Revision is non-empty, and finish with ", committed <CommitDate>" when CommitDate is non-empty."
+- added `r.getversion-resolution` (MUST): "GetVersion must return a new VersionInfo whose Revision is GitCommit and CommitDate is CommitDate, choosing GitDescribe as Version when GitDescribe is non-empty; when GitDescribe is empty, the resolved prerelease is empty, and VersionPrerelease is non-empty, it must substitute the prerelease "dev"."
+- added `r.ldflags-variables` (MUST): "The package must expose GitCommit, GitDescribe, CommitDate, VersionMetadata, and the unexported fullVersion (default "2.0.0-HEAD") as the variables the build sets via ldflags, and must derive Version and VersionPrerelease at init by trimming fullVersion and cutting it at the first "-"."
+- added `r.version-info-fields` (MUST): "VersionInfo must carry exactly the build identity of one binary as five string fields: Revision, Version, VersionPrerelease, VersionMetadata, and CommitDate."
+- added `r.version-number-format` (MUST): "VersionInfo.VersionNumber must return "(version unknown)" when the package-level Version and VersionPrerelease are both "unknown"; otherwise it must begin with the receiver's Version and append "-<VersionPrerelease>" when the prerelease is non-empty, then "+<VersionMetadata>" when the metadata is non-empty."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -3030,5 +3041,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-vault-seal-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-seal-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-tokens-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-version-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-version-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-release-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-database-dbplugin-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
