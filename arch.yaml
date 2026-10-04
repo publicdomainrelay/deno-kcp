@@ -73278,7 +73278,62 @@ system_contexts:
   - file:third_party/openbao/ui/lib/open-api-explorer/addon/resolver.js resolver.js@third_party/openbao/ui/lib/open-api-explorer/addon/resolver.js
   - file:third_party/openbao/ui/lib/open-api-explorer/addon/routes.js routes.js@third_party/openbao/ui/lib/open-api-explorer/addon/routes.js
   id: sc.third-party-openbao-ui-lib-open-api-explorer-addon
+  intent: 'This context exists so the OpenBao web UI can mount the OpenAPI explorer
+    as an isolated Ember Engine without pulling its code into the host application''s
+    own route or resolver space. The three files are the minimum a mountable engine
+    needs: a class that names its module prefix and tells Ember which host services
+    it may inject, a resolver so the engine''s own modules are found under that prefix,
+    and a route map so the engine can grow routes later. A reader of this context
+    learns how the explorer is wired into OpenBao and which host services it depends
+    on, which is what matters when changing the UI or reasoning about vendored upstream
+    code.'
   name: third-party-openbao-ui-lib-open-api-explorer-addon
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/open-api-explorer/addon/engine.js
+    id: r.engine-extends-ember-engine
+    level: MUST
+    text: The explorer engine MUST be an `ember-engines/engine` `Engine` subclass
+      that sets `modulePrefix` from `./config/environment` and `Resolver` from `./resolver`,
+      so the engine resolves its own modules under the OpenBao UI prefix instead of
+      the host application's.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/open-api-explorer/addon/engine.js
+    id: r.engine-injected-host-services
+    level: MUST
+    text: The engine MUST declare the host services it consumes as `dependencies.services`
+      with exactly `auth`, `flash-messages`, `namespace`, `host-router`, and `version`,
+      because an Ember Engine can only inject services named in that list and any
+      additional dependency would have to be added here.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/open-api-explorer/addon/engine.js
+    id: r.engine-loads-initializers-and-exports-default
+    level: MUST
+    text: '`engine.js` MUST pass the engine class and `modulePrefix` to `ember-load-initializers`''
+      `loadInitializers` and export the resulting engine class as the module''s default
+      export, so the host build registers the engine''s initializers.'
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/open-api-explorer/addon/resolver.js
+    id: r.resolver-re-exports-ember-resolver
+    level: MUST
+    text: '`resolver.js` MUST re-export `ember-resolver`''s `Resolver` as the default
+      export, giving the engine the standard lookup behaviour it references from `engine.js`.'
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/open-api-explorer/addon/routes.js
+    id: r.routes-builds-empty-route-map
+    level: MUST
+    text: '`routes.js` MUST export as default the result of calling `ember-engines/routes`''
+      `buildRoutes` with a callback, and that callback MUST register no routes today,
+      so the engine''s route table stays empty until routes are added there.'
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/open-api-explorer/addon/engine.js
+    - file:third_party/openbao/ui/lib/open-api-explorer/addon/resolver.js
+    - file:third_party/openbao/ui/lib/open-api-explorer/addon/routes.js
+    id: r.vendored-upstream-license-headers
+    level: SHOULD
+    text: 'Each file SHOULD keep the `Copyright (c) HashiCorp, Inc.` header and the
+      `SPDX-License-Identifier: MPL-2.0` line, because this directory is vendored
+      OpenBao code and the license and attribution travel with the source.'
   upstream: self
 - code:
   - third_party/openbao/ui/lib/open-api-explorer/addon/components/swagger-ui.js

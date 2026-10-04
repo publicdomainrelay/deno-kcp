@@ -5695,6 +5695,16 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.lazy-loading-enabled` (MUST): "The `lazyLoading` configuration must have `enabled: true`, so the engine's assets are loaded only when the host routes into the engine."
 - added `r.third-party-provenance` (SHOULD): "The file should keep the HashiCorp copyright and `SPDX-License-Identifier: MPL-2.0` header and the `ember/avoid-leaking-state-in-ember-objects` eslint-disable, since it is vendored third-party code and not authored in this repository."
 
+### third-party-openbao-ui-lib-open-api-explorer-addon
+
+- intent: "" -> "This context exists so the OpenBao web UI can mount the OpenAPI explorer as an isolated Ember Engine without pulling its code into the host application's own route or resolver space. The three files are the minimum a mountable engine needs: a class that names its module prefix and tells Ember which host services it may inject, a resolver so the engine's own modules are found under that prefix, and a route map so the engine can grow routes later. A reader of this context learns how the explorer is wired into OpenBao and which host services it depends on, which is what matters when changing the UI or reasoning about vendored upstream code."
+- added `r.engine-extends-ember-engine` (MUST): "The explorer engine MUST be an `ember-engines/engine` `Engine` subclass that sets `modulePrefix` from `./config/environment` and `Resolver` from `./resolver`, so the engine resolves its own modules under the OpenBao UI prefix instead of the host application's."
+- added `r.engine-injected-host-services` (MUST): "The engine MUST declare the host services it consumes as `dependencies.services` with exactly `auth`, `flash-messages`, `namespace`, `host-router`, and `version`, because an Ember Engine can only inject services named in that list and any additional dependency would have to be added here."
+- added `r.engine-loads-initializers-and-exports-default` (MUST): "`engine.js` MUST pass the engine class and `modulePrefix` to `ember-load-initializers`' `loadInitializers` and export the resulting engine class as the module's default export, so the host build registers the engine's initializers."
+- added `r.resolver-re-exports-ember-resolver` (MUST): "`resolver.js` MUST re-export `ember-resolver`'s `Resolver` as the default export, giving the engine the standard lookup behaviour it references from `engine.js`."
+- added `r.routes-builds-empty-route-map` (MUST): "`routes.js` MUST export as default the result of calling `ember-engines/routes`' `buildRoutes` with a callback, and that callback MUST register no routes today, so the engine's route table stays empty until routes are added there."
+- added `r.vendored-upstream-license-headers` (SHOULD): "Each file SHOULD keep the `Copyright (c) HashiCorp, Inc.` header and the `SPDX-License-Identifier: MPL-2.0` line, because this directory is vendored OpenBao code and the license and attribution travel with the source."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -6197,6 +6207,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-kubernetes-config-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-kubernetes-config-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-open-api-explorer-addon-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-lib-open-api-explorer-addon-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-lib-open-api-explorer-addon-components-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-lib-open-api-explorer-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-open-api-explorer-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
