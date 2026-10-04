@@ -55471,8 +55471,182 @@ system_contexts:
   codeRefIndex:
   - file:third_party/openbao/sdk/queue/priority_queue.go priority_queue.go@third_party/openbao/sdk/queue/priority_queue.go
   - file:third_party/openbao/sdk/queue/priority_queue_test.go priority_queue_test.go@third_party/openbao/sdk/queue/priority_queue_test.go
+  - function:8c560b7d1b2182d690d8e2257c10f53c New@third_party/openbao/sdk/queue/priority_queue.go:29
+  - method:1e21ef9ecdbf74b7d1e82434a43b4fdc PriorityQueue.Push@third_party/openbao/sdk/queue/priority_queue.go:108
+  - method:27eeaabf9bcda277d96139bcd9789878 queue.Less@third_party/openbao/sdk/queue/priority_queue.go:164
+  - method:329614106bb685f4fd551d53358daa97 PriorityQueue.Pop@third_party/openbao/sdk/queue/priority_queue.go:90
+  - method:34a9d798013468550f8b53ff68d3cd8d queue.Swap@third_party/openbao/sdk/queue/priority_queue.go:169
+  - method:63fa393a0e2e4d628f37acdd4f732467 queue.Push@third_party/openbao/sdk/queue/priority_queue.go:178
+  - method:6d4de202ef0f1f820ef44d730d9197f6 queue.Pop@third_party/openbao/sdk/queue/priority_queue.go:188
+  - method:9d3108c5979daba6563ca673841d8f9b queue.Len@third_party/openbao/sdk/queue/priority_queue.go:158
+  - method:e1751c7c2e16c44f7f95a526c610a29c PriorityQueue.PopByKey@third_party/openbao/sdk/queue/priority_queue.go:134
+  - method:f985a2dedd426f7289a840dbcd24e30c PriorityQueue.Len@third_party/openbao/sdk/queue/priority_queue.go:81
+  - struct:54b043abf4de82c270fabef9612f374a Item@third_party/openbao/sdk/queue/priority_queue.go:64
+  - struct:d57b802de9250e42431273c1d2a8d46b PriorityQueue@third_party/openbao/sdk/queue/priority_queue.go:45
   id: sc.third-party-openbao-sdk-queue
+  intent: This context exists to record the vendored OpenBao SDK priority queue that
+    this repository carries under third_party, so that its contract, its exported
+    surface and its locking and copy semantics are described from the code as it stands
+    rather than inferred. It matters because the package is third-party code retained
+    verbatim except for the queue import path, and anything that consumes it needs
+    to know that ordering is lowest-int64-wins, that keys are unique and immutable
+    once pushed, that pushes clone their input, and that every public operation is
+    mutex-guarded.
+  interfaces:
+  - file: third_party/openbao/sdk/queue/priority_queue.go
+    kind: struct
+    name: Item
+    signature: type Item struct
+  - file: third_party/openbao/sdk/queue/priority_queue.go
+    kind: function
+    name: New
+    signature: func New() *PriorityQueue
+  - file: third_party/openbao/sdk/queue/priority_queue.go
+    kind: struct
+    name: PriorityQueue
+    signature: type PriorityQueue struct
+  - file: third_party/openbao/sdk/queue/priority_queue.go
+    kind: method
+    name: PriorityQueue.Len
+    signature: func (pq *PriorityQueue) Len() int
+  - file: third_party/openbao/sdk/queue/priority_queue.go
+    kind: method
+    name: PriorityQueue.Pop
+    signature: func (pq *PriorityQueue) Pop() (*Item, error)
+  - file: third_party/openbao/sdk/queue/priority_queue.go
+    kind: method
+    name: PriorityQueue.PopByKey
+    signature: func (pq *PriorityQueue) PopByKey(key string) (*Item, error)
+  - file: third_party/openbao/sdk/queue/priority_queue.go
+    kind: method
+    name: PriorityQueue.Push
+    signature: func (pq *PriorityQueue) Push(i *Item) error
+  - file: third_party/openbao/sdk/queue/priority_queue.go
+    kind: method
+    name: queue.Len
+    signature: func (q queue) Len() int
+  - file: third_party/openbao/sdk/queue/priority_queue.go
+    kind: method
+    name: queue.Less
+    signature: func (q queue) Less(i, j int) bool
+  - file: third_party/openbao/sdk/queue/priority_queue.go
+    kind: method
+    name: queue.Pop
+    signature: func (q *queue) Pop() any
+  - file: third_party/openbao/sdk/queue/priority_queue.go
+    kind: method
+    name: queue.Push
+    signature: func (q *queue) Push(x any)
+  - file: third_party/openbao/sdk/queue/priority_queue.go
+    kind: method
+    name: queue.Swap
+    signature: func (q queue) Swap(i, j int)
   name: third-party-openbao-sdk-queue
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/sdk/queue/priority_queue.go
+    - function:8c560b7d1b2182d690d8e2257c10f53c
+    id: r.construction
+    level: MUST
+    text: New MUST return a *PriorityQueue whose heap slice and key map are both allocated
+      empty, and the slice MUST be initialized through heap.Init so the queue is immediately
+      usable.
+  - codeRefs:
+    - method:1e21ef9ecdbf74b7d1e82434a43b4fdc
+    - method:329614106bb685f4fd551d53358daa97
+    - method:e1751c7c2e16c44f7f95a526c610a29c
+    - struct:d57b802de9250e42431273c1d2a8d46b
+    id: r.data-map-sync
+    level: MUST
+    text: The dataMap keyed by Item.Key MUST stay in sync with the heap slice at all
+      times, so that after any Push, Pop or PopByKey the map length equals the slice
+      length and every map value points at the item held in the slice.
+  - codeRefs:
+    - method:34a9d798013468550f8b53ff68d3cd8d
+    - method:63fa393a0e2e4d628f37acdd4f732467
+    - method:6d4de202ef0f1f820ef44d730d9197f6
+    - method:9d3108c5979daba6563ca673841d8f9b
+    id: r.heap-interface
+    level: MUST
+    text: The unexported queue type MUST satisfy container/heap.Interface, with queue.Len
+      reporting the slice length, queue.Swap exchanging elements in place, queue.Push
+      appending an item, and queue.Pop removing the last element and clearing the
+      vacated slot to avoid a memory leak.
+  - codeRefs:
+    - method:34a9d798013468550f8b53ff68d3cd8d
+    - method:63fa393a0e2e4d628f37acdd4f732467
+    - method:6d4de202ef0f1f820ef44d730d9197f6
+    id: r.index-maintenance
+    level: MUST
+    text: Swap, queue.Push and queue.Pop MUST keep each Item's unexported index field
+      equal to its position in the heap slice, since heap.Remove and heap.Fix locate
+      items by that index; queue.Pop MUST set the removed item's index to -1.
+  - codeRefs:
+    - file:third_party/openbao/sdk/queue/priority_queue.go
+    - struct:54b043abf4de82c270fabef9612f374a
+    id: r.item-fields
+    level: MUST
+    text: Item MUST expose Key as the unique string identifier, Value as an any-typed
+      payload for callers, and Priority as the int64 ordering key, and MUST keep the
+      heap bookkeeping index unexported so consumers cannot corrupt it.
+  - codeRefs:
+    - method:329614106bb685f4fd551d53358daa97
+    - method:f985a2dedd426f7289a840dbcd24e30c
+    - struct:d57b802de9250e42431273c1d2a8d46b
+    id: r.locked-access
+    level: MUST
+    text: 'Every operation that touches the heap slice or the key map MUST hold the
+      PriorityQueue mutex: Len takes a read lock, while Pop, Push and PopByKey take
+      the write lock for their full body.'
+  - codeRefs:
+    - file:third_party/openbao/sdk/queue/priority_queue.go
+    - method:e1751c7c2e16c44f7f95a526c610a29c
+    id: r.pop-by-key
+    level: MUST
+    text: PopByKey MUST return (nil, nil) when the key is absent, and when present
+      MUST remove the item from the heap with heap.Remove using the item's stored
+      index, delete the key from dataMap, and return the removed item.
+  - codeRefs:
+    - file:third_party/openbao/sdk/queue/priority_queue.go
+    - method:329614106bb685f4fd551d53358daa97
+    id: r.pop-empty-error
+    level: MUST
+    text: Pop MUST return ErrEmpty when the queue holds no items, and otherwise MUST
+      remove and return the highest priority item while deleting its key from dataMap.
+  - codeRefs:
+    - method:27eeaabf9bcda277d96139bcd9789878
+    - struct:54b043abf4de82c270fabef9612f374a
+    id: r.priority-ordering
+    level: MUST
+    text: Ordering MUST be by Item.Priority as an int64 with the lowest value treated
+      as highest priority; queue.Less compares q[i].Priority < q[j].Priority, and
+      the priority of items with equal values is undetermined.
+  - codeRefs:
+    - method:1e21ef9ecdbf74b7d1e82434a43b4fdc
+    - struct:54b043abf4de82c270fabef9612f374a
+    id: r.push-clones-item
+    level: MUST
+    text: Push MUST deep-copy the item with copystructure.Copy before storing it,
+      so the queued entry and the dataMap entry are the clone and later modification
+      of the caller's item cannot affect the queue.
+  - codeRefs:
+    - file:third_party/openbao/sdk/queue/priority_queue.go
+    - method:1e21ef9ecdbf74b7d1e82434a43b4fdc
+    id: r.push-validation
+    level: MUST
+    text: 'Push MUST reject a nil item or an item with an empty Key by returning the
+      error "error adding item: Item Key is required", and MUST reject a Key that
+      is already in dataMap by returning ErrDuplicateItem rather than updating the
+      existing entry.'
+  - codeRefs:
+    - file:third_party/openbao/sdk/queue/priority_queue_test.go
+    id: r.test-coverage
+    level: SHOULD
+    text: The package tests SHOULD assert heap.Interface conformance for queue at
+      compile time and cover New leaving both structures empty, Push rejecting nil,
+      duplicate and keyless items, Pop returning items in ascending priority together
+      with their keys, PopByKey returning no error for a missing key, and the slice
+      and map lengths agreeing after every mutation and drain.
   upstream: self
 - code:
   - third_party/openbao/tools/semgrep/hostport.yml

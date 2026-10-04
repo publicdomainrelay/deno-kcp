@@ -3702,6 +3702,22 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.running-version-from-environment` (MUST): "Backend reports RunningVersion "v0.0.0+mock" by default, and overrides it with the value of the TESTING_MOCK_VAULT_PLUGIN_VERSION environment variable read through api.ReadBaoVariable whenever that variable is non-empty, so tests can fake a plugin version."
 - added `r.special-path-is-unauthenticated` (MUST): "A read of the special path returns {"data": "foo"}, and that path is listed under PathsSpecial.Unauthenticated so it can be reached without a token."
 
+### third-party-openbao-sdk-queue
+
+- intent: "" -> "This context exists to record the vendored OpenBao SDK priority queue that this repository carries under third_party, so that its contract, its exported surface and its locking and copy semantics are described from the code as it stands rather than inferred. It matters because the package is third-party code retained verbatim except for the queue import path, and anything that consumes it needs to know that ordering is lowest-int64-wins, that keys are unique and immutable once pushed, that pushes clone their input, and that every public operation is mutex-guarded."
+- added `r.construction` (MUST): "New MUST return a *PriorityQueue whose heap slice and key map are both allocated empty, and the slice MUST be initialized through heap.Init so the queue is immediately usable."
+- added `r.data-map-sync` (MUST): "The dataMap keyed by Item.Key MUST stay in sync with the heap slice at all times, so that after any Push, Pop or PopByKey the map length equals the slice length and every map value points at the item held in the slice."
+- added `r.heap-interface` (MUST): "The unexported queue type MUST satisfy container/heap.Interface, with queue.Len reporting the slice length, queue.Swap exchanging elements in place, queue.Push appending an item, and queue.Pop removing the last element and clearing the vacated slot to avoid a memory leak."
+- added `r.index-maintenance` (MUST): "Swap, queue.Push and queue.Pop MUST keep each Item's unexported index field equal to its position in the heap slice, since heap.Remove and heap.Fix locate items by that index; queue.Pop MUST set the removed item's index to -1."
+- added `r.item-fields` (MUST): "Item MUST expose Key as the unique string identifier, Value as an any-typed payload for callers, and Priority as the int64 ordering key, and MUST keep the heap bookkeeping index unexported so consumers cannot corrupt it."
+- added `r.locked-access` (MUST): "Every operation that touches the heap slice or the key map MUST hold the PriorityQueue mutex: Len takes a read lock, while Pop, Push and PopByKey take the write lock for their full body."
+- added `r.pop-by-key` (MUST): "PopByKey MUST return (nil, nil) when the key is absent, and when present MUST remove the item from the heap with heap.Remove using the item's stored index, delete the key from dataMap, and return the removed item."
+- added `r.pop-empty-error` (MUST): "Pop MUST return ErrEmpty when the queue holds no items, and otherwise MUST remove and return the highest priority item while deleting its key from dataMap."
+- added `r.priority-ordering` (MUST): "Ordering MUST be by Item.Priority as an int64 with the lowest value treated as highest priority; queue.Less compares q[i].Priority < q[j].Priority, and the priority of items with equal values is undetermined."
+- added `r.push-clones-item` (MUST): "Push MUST deep-copy the item with copystructure.Copy before storing it, so the queued entry and the dataMap entry are the clone and later modification of the caller's item cannot affect the queue."
+- added `r.push-validation` (MUST): "Push MUST reject a nil item or an item with an empty Key by returning the error "error adding item: Item Key is required", and MUST reject a Key that is already in dataMap by returning ErrDuplicateItem rather than updating the existing entry."
+- added `r.test-coverage` (SHOULD): "The package tests SHOULD assert heap.Interface conformance for queue at compile time and cover New leaving both structures empty, Push rejecting nil, duplicate and keyless items, Pop returning items in ascending priority together with their keys, PopByKey returning no error for a missing key, and the slice and map lengths agreeing after every mutation and drain."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -3978,4 +3994,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-sdk-plugin-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-plugin-mock-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-plugin-pb-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-sdk-queue-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-queue-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-tools-semgrep-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |

@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to record the vendored OpenBao SDK priority queue that this repository carries under third_party, so that its contract, its exported surface and its locking and copy semantics are described from the code as it stands rather than inferred. It matters because the package is third-party code retained verbatim except for the queue import path, and anything that consumes it needs to know that ordering is lowest-int64-wins, that keys are unique and immutable once pushed, that pushes clone their input, and that every public operation is mutex-guarded.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
