@@ -1,0 +1,27 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-sdk-helper-cryptoutil-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-sdk-helper-cryptoutil
+  toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
+status:
+  agentLog: 'The vendored OpenBao SDK helper package `sdk/helper/cryptoutil` is copied
+    into the deno-kcp repository under `third_party/openbao`. It holds one exported
+    function, `Blake2b256Hash`, which takes a string key and returns the BLAKE2b-256
+    digest of that key''s bytes as a `[]byte`. The hash is built with an unkeyed `blake2b.New256(nil)`
+    instance (its error discarded), written with `hf.Write([]byte(key))`, and finalized
+    with `hf.Sum(nil)`. The package contains nothing else: no types, no init, no configuration.
+    A companion test, `TestBlake2b256Hash`, calls the function with `"sampletext"`
+    and fails when the result is empty or still equal to the input, pinning down that
+    the helper must really transform its input into a fixed-size digest.'
+  message: wrote 3 requirement(s) and 1 interface(s) for third-party-openbao-sdk-helper-cryptoutil
+  phase: Succeeded
+superseded:
+- message: wrote 3 requirement(s) and 1 interface(s) for third-party-openbao-sdk-helper-cryptoutil
+  name: third-party-openbao-sdk-helper-cryptoutil-c2s-6c1bbe4c3ba9-89cee50ec5ae
+  phase: Succeeded
