@@ -5969,6 +5969,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.secrets-crumb-external-link` (MUST): "The first breadcrumb sets linkExternal: true so the 'secrets' label navigates out of the PKI addon to the core secrets route rather than resolving inside the addon's own router."
 - added `r.setup-controller-calls-super` (MUST): "Both PkiKeyDetailsRoute.setupController and PkiKeyEditRoute.setupController call super.setupController(controller, resolvedModel) before setting breadcrumbs, so Ember's default model-to-controller wiring is preserved."
 
+### third-party-openbao-ui-lib-pki-addon-routes-roles
+
+- intent: "" -> "These routes exist to feed the PKI roles list and role creation screens with data taken from the secret engine mount that the user is browsing. Both classes inject the `store` and `secretMountPath` services so that every query is scoped to `secretMountPath.currentPath` rather than a fixed backend, which is what lets the same route serve any PKI mount in the UI. The 404 handling keeps a freshly mounted engine, whose role or issuer endpoints do not exist yet, from surfacing an error instead of an empty screen."
+- added `r.roles-create-breadcrumbs` (MUST): "PkiRolesCreateRoute.setupController must call the super implementation and then assign `controller.breadcrumbs` to the four-entry trail secrets (external link) to the current mount path under the `overview` route to `roles.index` to the label `create`, with the mount path passed as the model of the mount and roles entries."
+- added `r.roles-create-model` (MUST): "PkiRolesCreateRoute.model must resolve `hash` containing an unsaved `pki/role` record created through the store with `backend` set to `secretMountPath.currentPath`, plus the result of querying `pki/issuer` with the same backend, where a 404 error is converted to an empty array and any other error is rethrown."
+- added `r.roles-index-model-hash` (MUST): "PkiRolesIndexRoute.model must resolve `hash` with `hasConfig` from `shouldPromptConfig`, `roles` from the `fetchRoles` promise, and `parentModel` from `modelFor('roles')`, so the template receives both the role list and the parent route model together."
+- added `r.roles-index-not-configured-message` (MUST): "PkiRolesIndexRoute.setupController must call the super implementation, then set `controller.notConfiguredMessage` to `getCliMessage('roles')` when the resolved role list is non-empty and to `getCliMessage()` with no argument otherwise."
+- added `r.roles-index-query-by-mount` (MUST): "PkiRolesIndexRoute.fetchRoles must query the `pki/role` records from the store with `backend` set to `secretMountPath.currentPath`; a thrown error whose `httpStatus` is 404 must be replaced by an object carrying `parentModel` from `modelFor('roles')`, and any other error must be rethrown."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -6505,7 +6514,8 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-pki-addon-routes-issuers-issuer-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-routes-keys-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-routes-keys-key-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-lib-pki-addon-routes-keys-key-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-pki-addon-routes-keys-key-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-routes-roles-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-lib-pki-addon-routes-roles-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |

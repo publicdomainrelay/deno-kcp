@@ -76013,10 +76013,73 @@ system_contexts:
   - third_party/openbao/ui/lib/pki/addon/routes/roles/create.js
   - third_party/openbao/ui/lib/pki/addon/routes/roles/index.js
   codeRefIndex:
+  - class:238b6e12742a458a3bce1ac75810a4a6 PkiRolesCreateRoute@third_party/openbao/ui/lib/pki/addon/routes/roles/create.js:12
+  - class:23a6de23f5f18e3cec44322f7d779e76 PkiRolesIndexRoute@third_party/openbao/ui/lib/pki/addon/routes/roles/index.js:12
   - file:third_party/openbao/ui/lib/pki/addon/routes/roles/create.js create.js@third_party/openbao/ui/lib/pki/addon/routes/roles/create.js
   - file:third_party/openbao/ui/lib/pki/addon/routes/roles/index.js index.js@third_party/openbao/ui/lib/pki/addon/routes/roles/index.js
   id: sc.third-party-openbao-ui-lib-pki-addon-routes-roles
+  intent: These routes exist to feed the PKI roles list and role creation screens
+    with data taken from the secret engine mount that the user is browsing. Both classes
+    inject the `store` and `secretMountPath` services so that every query is scoped
+    to `secretMountPath.currentPath` rather than a fixed backend, which is what lets
+    the same route serve any PKI mount in the UI. The 404 handling keeps a freshly
+    mounted engine, whose role or issuer endpoints do not exist yet, from surfacing
+    an error instead of an empty screen.
+  interfaces:
+  - file: third_party/openbao/ui/lib/pki/addon/routes/roles/create.js
+    kind: class
+    name: PkiRolesCreateRoute
+    signature: PkiRolesCreateRoute()
+  - file: third_party/openbao/ui/lib/pki/addon/routes/roles/index.js
+    kind: class
+    name: PkiRolesIndexRoute
+    signature: PkiRolesIndexRoute()
   name: third-party-openbao-ui-lib-pki-addon-routes-roles
+  requirements:
+  - codeRefs:
+    - class:238b6e12742a458a3bce1ac75810a4a6
+    - file:third_party/openbao/ui/lib/pki/addon/routes/roles/create.js
+    id: r.roles-create-breadcrumbs
+    level: MUST
+    text: PkiRolesCreateRoute.setupController must call the super implementation and
+      then assign `controller.breadcrumbs` to the four-entry trail secrets (external
+      link) to the current mount path under the `overview` route to `roles.index`
+      to the label `create`, with the mount path passed as the model of the mount
+      and roles entries.
+  - codeRefs:
+    - class:238b6e12742a458a3bce1ac75810a4a6
+    - file:third_party/openbao/ui/lib/pki/addon/routes/roles/create.js
+    id: r.roles-create-model
+    level: MUST
+    text: PkiRolesCreateRoute.model must resolve `hash` containing an unsaved `pki/role`
+      record created through the store with `backend` set to `secretMountPath.currentPath`,
+      plus the result of querying `pki/issuer` with the same backend, where a 404
+      error is converted to an empty array and any other error is rethrown.
+  - codeRefs:
+    - class:23a6de23f5f18e3cec44322f7d779e76
+    - file:third_party/openbao/ui/lib/pki/addon/routes/roles/index.js
+    id: r.roles-index-model-hash
+    level: MUST
+    text: PkiRolesIndexRoute.model must resolve `hash` with `hasConfig` from `shouldPromptConfig`,
+      `roles` from the `fetchRoles` promise, and `parentModel` from `modelFor('roles')`,
+      so the template receives both the role list and the parent route model together.
+  - codeRefs:
+    - class:23a6de23f5f18e3cec44322f7d779e76
+    - file:third_party/openbao/ui/lib/pki/addon/routes/roles/index.js
+    id: r.roles-index-not-configured-message
+    level: MUST
+    text: PkiRolesIndexRoute.setupController must call the super implementation, then
+      set `controller.notConfiguredMessage` to `getCliMessage('roles')` when the resolved
+      role list is non-empty and to `getCliMessage()` with no argument otherwise.
+  - codeRefs:
+    - class:23a6de23f5f18e3cec44322f7d779e76
+    - file:third_party/openbao/ui/lib/pki/addon/routes/roles/index.js
+    id: r.roles-index-query-by-mount
+    level: MUST
+    text: PkiRolesIndexRoute.fetchRoles must query the `pki/role` records from the
+      store with `backend` set to `secretMountPath.currentPath`; a thrown error whose
+      `httpStatus` is 404 must be replaced by an object carrying `parentModel` from
+      `modelFor('roles')`, and any other error must be rethrown.
   upstream: self
 - code:
   - third_party/openbao/ui/lib/pki/addon/routes/roles/role/details.js

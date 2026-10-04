@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+These routes exist to feed the PKI roles list and role creation screens with data taken from the secret engine mount that the user is browsing. Both classes inject the `store` and `secretMountPath` services so that every query is scoped to `secretMountPath.currentPath` rather than a fixed backend, which is what lets the same route serve any PKI mount in the UI. The 404 handling keeps a freshly mounted engine, whose role or issuer endpoints do not exist yet, from surfacing an error instead of an empty screen.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
