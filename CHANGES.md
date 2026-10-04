@@ -5610,6 +5610,13 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.generation-preference-options` (MUST): "The generationPreferences getter returns exactly three options in order: 'basic' (generate token only using an existing service account), 'expanded' (generate token, service account and role binding objects from a pre-existing role or ClusterRole), and 'full' (generate the entire Kubernetes object chain from user-supplied rules), each carrying a title, description and value."
 - added `r.role-pages-inject-services` (MUST): "Both page components inject the 'host-router' service (accessed as this['host-router']) and the flashMessages service, and read all page state from this.args.model, the Kubernetes role model holding the role record and backend."
 
+### third-party-openbao-ui-lib-kubernetes-addon-controllers-roles
+
+- intent: "" -> "This context exists to pin down the URL-state surface of the Kubernetes roles page: the roles route's controller must declare pageFilter as a query parameter so the route can read and update the filter value from the query string, and so the page component that renders the roles list can drive it. It is a thin contract file, and the spec records that contract rather than any behavior, because the class carries no logic of its own."
+- added `r.default-export-controller` (MUST): "The module must default-export a class named KubernetesRolesController that extends the Ember Controller base class, so the Ember resolver can instantiate it as the controller for the Kubernetes roles route."
+- added `r.no-additional-state` (SHOULD): "The controller should carry only the queryParams declaration and no actions, computed properties, or injected services, keeping the roles route's request state in the URL and out of memory."
+- added `r.query-params-declares-page-filter` (MUST): "KubernetesRolesController must declare a queryParams class property whose value is the array ['pageFilter'], so that the pageFilter query string parameter is bound to the controller and the roles route can read it from and write it to the URL."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -6098,6 +6105,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-kubernetes-addon-components-page-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-kubernetes-addon-components-page-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-kubernetes-addon-components-page-role-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-lib-kubernetes-addon-controllers-roles-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-kubernetes-addon-controllers-roles-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-kubernetes-addon-decorators-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-lib-kubernetes-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
