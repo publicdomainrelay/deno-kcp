@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-The context exists to describe the delete-provider interaction that the OIDC provider details route offers. It captures the destructive action's full contract: the record mutation, the success confirmation and route transition, and the failure path that rolls back the model and reports a message, so the behavior of the details page controller is stated independently of the surrounding templates and routes.
+This context exists to describe the delete-provider interaction offered by the OIDC provider details route. It records the destructive action's full contract: the record mutation, the success confirmation and route transition, and the failure path that rolls back the model and reports a message. Stating that behavior here keeps the details page controller described independently of the surrounding templates and routes.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

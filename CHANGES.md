@@ -4420,7 +4420,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 
 ### third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-providers-provider
 
-- intent: "" -> "The context exists to describe the delete-provider interaction that the OIDC provider details route offers. It captures the destructive action's full contract: the record mutation, the success confirmation and route transition, and the failure path that rolls back the model and reports a message, so the behavior of the details page controller is stated independently of the surrounding templates and routes."
+- intent: "" -> "This context exists to describe the delete-provider interaction offered by the OIDC provider details route. It records the destructive action's full contract: the record mutation, the success confirmation and route transition, and the failure path that rolls back the model and reports a message. Stating that behavior here keeps the details page controller described independently of the surrounding templates and routes."
 - added `r.delete-derives-error-message` (SHOULD): "The failure path should build the flash text from error.errors joined with '. ' when that array is present, and otherwise fall back to error.message, then emit it as a danger flash message."
 - added `r.delete-destroys-model-record` (MUST): "The delete action must await destroyRecord() on the controller's model, so the currently displayed OIDC provider is removed from the backend before any success feedback is shown."
 - added `r.delete-reports-success-and-navigates` (MUST): "After a successful destroyRecord the action must push a success flash message reading 'Provider deleted successfully' and then transition to the vault.cluster.access.oidc.providers route using transitionToSafe."
@@ -4793,9 +4793,10 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-keys-key-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-providers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-providers-provider-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-providers-provider-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-providers-provider-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-scopes-scope-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-policies-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-policy-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
