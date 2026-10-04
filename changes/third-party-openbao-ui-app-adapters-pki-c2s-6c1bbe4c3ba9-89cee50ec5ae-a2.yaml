@@ -1,0 +1,58 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-ui-app-adapters-pki-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-ui-app-adapters-pki
+  toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
+status:
+  agentLog: 'The PKI adapter directory third_party/openbao/ui/app/adapters/pki/ holds
+    seven Ember Data adapter modules, one per PKI model family: action.js (PkiActionAdapter),
+    issuer.js (PkiIssuerAdapter), key.js (PkiKeyAdapter), role.js (PkiRoleAdapter),
+    sign-intermediate.js (PkiSignIntermediateAdapter), tidy.js (PkiTidyAdapter) and
+    cert.js. Each adapter sets namespace = ''v1'' so buildURL() places every request
+    under the /v1 API prefix, appends the backend mount to that base, and passes mount
+    names, key ids and issuer refs through encodePath before interpolation. PkiActionAdapter
+    maps adapterOptions.actionType plus optional mount, issuerRef and useIssuer flags
+    onto generation, import, sign-intermediate and rotate-root endpoints, choosing
+    between the legacy paths (root/generate/<type>, intermediate/generate/<type>,
+    config/ca, root/rotate/<type>) and the issuer paths (issuers/generate/root/<type>,
+    issuers/generate/intermediate/<type>, issuers/import/bundle). PkiKeyAdapter lists
+    and mutates keys under <backend>/keys and <backend>/key/<id>, generating or importing
+    on create and posting only key_name on update. PkiTidyAdapter keeps manual tidy
+    records (POST <backend>/tidy, never updated, synthesized back as a pki/tidy record
+    with id equal to the backend) separate from auto-tidy config (POST and GET <backend>/config/auto-tidy,
+    never created), and throws when a model arrives on the wrong path. PkiIssuerAdapter
+    resolves the backend from the snapshot, builds issuer URLs through urlForQuery,
+    normalizes payloads through getIssuerMetadata, and exposes deleteAllIssuers. PkiRoleAdapter
+    and PkiSignIntermediateAdapter are the default exports giving those record families
+    their own HTTP adapters.'
+  message: wrote 14 requirement(s) and 6 interface(s) for third-party-openbao-ui-app-adapters-pki
+  phase: Succeeded
+superseded:
+- message: wrote 14 requirement(s) and 6 interface(s) for third-party-openbao-ui-app-adapters-pki;
+    interface PkiActionAdapter.urlForCreateRecord is not in the observed facts; dropped;
+    interface PkiActionAdapter.createRecord is not in the observed facts; dropped;
+    interface PkiIssuerAdapter._getBackend is not in the observed facts; dropped;
+    interface PkiIssuerAdapter.optionsForQuery is not in the observed facts; dropped;
+    interface PkiIssuerAdapter.urlForQuery is not in the observed facts; dropped;
+    interface PkiIssuerAdapter.getIssuerMetadata is not in the observed facts; dropped;
+    interface PkiIssuerAdapter.updateRecord is not in the observed facts; dropped;
+    interface PkiIssuerAdapter.query is not in the observed facts; dropped; interface
+    PkiIssuerAdapter.queryRecord is not in the observed facts; dropped; interface
+    PkiIssuerAdapter.deleteAllIssuers is not in the observed facts; dropped; interface
+    PkiKeyAdapter._baseUrl is not in the observed facts; dropped; interface PkiKeyAdapter.createRecord
+    is not in the observed facts; dropped; interface PkiKeyAdapter.updateRecord is
+    not in the observed facts; dropped; interface PkiKeyAdapter.query is not in the
+    observed facts; dropped; interface PkiKeyAdapter.queryRecord is not in the observed
+    facts; dropped; interface PkiKeyAdapter.deleteRecord is not in the observed facts;
+    dropped; interface PkiTidyAdapter._baseUrl is not in the observed facts; dropped;
+    interface PkiTidyAdapter.createRecord is not in the observed facts; dropped; interface
+    PkiTidyAdapter.updateRecord is not in the observed facts; dropped; interface PkiTidyAdapter.findRecord
+    is not in the observed facts; dropped
+  name: third-party-openbao-ui-app-adapters-pki-c2s-6c1bbe4c3ba9-89cee50ec5ae
+  phase: Succeeded

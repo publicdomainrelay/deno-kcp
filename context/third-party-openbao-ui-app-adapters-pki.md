@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-This context exists to pin down the client-side HTTP contract that the OpenBao web UI uses to talk to the PKI secrets engine. Each adapter owns one PKI model family and is responsible for translating Ember Data operations (create, update, query, queryRecord, findRecord, deleteRecord) into the correct PKI mount URLs and payloads. The spec records which endpoint each operation must hit, which adapterOptions drive URL selection, and which invalid state combinations must be rejected, so that the UI behaves correctly against either the legacy PKI endpoints (root/generate, intermediate/generate, config/ca) or the newer issuer endpoints (issuers/generate/..., issuers/import/bundle).
+This context pins down the client-side HTTP contract that the OpenBao web UI uses to talk to the PKI secrets engine. Each adapter owns one PKI model family and exists to translate Ember Data operations (create, update, query, queryRecord, findRecord, deleteRecord) into the correct PKI mount URLs and payloads. The specification records which endpoint each operation must hit, which adapterOptions drive URL selection, and which invalid state combinations must be rejected, so that the UI behaves correctly against either the legacy PKI endpoints (root/generate, intermediate/generate, config/ca) or the newer issuer endpoints (issuers/generate/..., issuers/import/bundle).
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
