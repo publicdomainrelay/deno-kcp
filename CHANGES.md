@@ -2328,6 +2328,21 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.lease-list-endpoint` (MUST): "A read of sys/leases with parameter type=irrevocable must return a non-nil response with no warnings, lease_count 0 and an empty leases list on a fresh cluster; after 50 irrevocable leases are injected, it must return lease_count 50 and a leases list whose entries each carry a mount_id string, with a tally of mount_id values across the list deep-equal to the injected per-mount map."
 - added `r.numeric-decoding` (SHOULD): "Numeric fields in the API responses (lease_count and each per-mount count) are decoded as json.Number and converted with Int64, so the tests assert on exact integer values rather than float64."
 
+### third-party-openbao-internal-vault-external-tests-identity
+
+- intent: "" -> "This context exists to verify the identity secrets engine from outside its implementation package, so engine behaviour stays testable across refactors of internal code. Each file targets one slice of identity: entity aliases, entity lifecycle, groups, group aliases, cross-namespace visibility, login MFA by Duo and by TOTP, OIDC provider behaviour, and user lockouts. Because the tests are external, they pin the externally observable contract of the identity engine — request paths, response fields, and error conditions — and must keep passing as the engine internals change."
+- added `r.cross-namespace-identity` (MUST): "The suite must verify identity objects across namespaces, confirming which entities, groups, and aliases are visible or resolvable from a namespace other than the one that owns them."
+- added `r.entities-lifecycle` (MUST): "The suite must cover the full entity lifecycle end to end: create an entity, list and read it back, update its metadata, attach and detach aliases, and delete it, asserting the API responses at each step."
+- added `r.entity-aliases-covered` (MUST): "The external test suite must exercise entity alias creation, read, update, and deletion through the identity engine's public API, including the case where an alias is moved between entities, so alias reassignment stays observable from outside the engine package."
+- added `r.external-package-boundary` (MUST): "Every file in this context must remain an external test, driving the identity engine only through exported API and the shared test harness, so the suite never depends on identity package internals and the package must export no interface of its own beyond test functions."
+- added `r.group-aliases-covered` (MUST): "The suite must exercise group alias creation, read, update, and deletion, including adding an alias to a group and checking that membership resolves through the alias after it is attached."
+- added `r.groups-lifecycle` (MUST): "The suite must cover internal and external groups: create, list, read, update membership by entity and by group, and delete, asserting that membership edits take effect on subsequent reads."
+- added `r.identity-baseline` (MUST): "The suite must contain the baseline identity engine checks that mount the engine and assert the core read and lookup paths, giving the other identity test files a shared starting contract."
+- added `r.login-mfa-duo` (SHOULD): "The suite should cover login MFA using a Duo MFA method, driving the MFA enrollment and validation path for a login that requires a second factor, and should skip or gate cleanly when Duo credentials are not configured."
+- added `r.login-mfa-totp` (MUST): "The suite must cover login MFA using TOTP: enroll a TOTP method for an entity, attempt a login without the code and assert it is rejected, then supply a valid code and assert the login succeeds."
+- added `r.oidc-provider` (MUST): "The suite must exercise the identity OIDC provider: configure a provider and its scopes, assign clients and keys, and assert the discovery and authorization endpoints respond as the provider contract requires."
+- added `r.user-lockouts` (MUST): "The suite must verify user lockout behaviour: after the configured number of failed logins the user is locked out, locked-out logins are rejected, and an unlock operation or lockout expiry restores the ability to log in."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -2476,4 +2491,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-vault-external-tests-api-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-approle-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-expiration-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-vault-external-tests-identity-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-vault-external-tests-identity-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-internal-vault-external-tests-identity-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-vault-external-tests-kms-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
