@@ -33,64 +33,70 @@ spec:
     id: r.config-check
     level: MUST
     text: KubernetesConfigAdapter.checkConfigVars GETs the 'check' subpath of the
-      backend's config URL so the UI can verify the mount's configuration variables.
+      backend's config URL, so the UI can verify the mount's configuration variables
+      without reading the config record itself.
   - codeRefs:
     - class:79c09b75c4ee536ddd9bf3addc6df266
     - file:third_party/openbao/ui/app/adapters/kubernetes/config.js
     id: r.config-namespace
     level: MUST
-    text: KubernetesConfigAdapter extends ApplicationAdapter and sets namespace to
-      'v1', so every request it builds is rooted at the versioned UI API namespace.
+    text: KubernetesConfigAdapter extends ApplicationAdapter and sets its namespace
+      property to 'v1', so every request it builds is rooted at the versioned UI API
+      namespace.
   - codeRefs:
     - class:79c09b75c4ee536ddd9bf3addc6df266
     - file:third_party/openbao/ui/app/adapters/kubernetes/config.js
     id: r.config-query-record
     level: MUST
     text: KubernetesConfigAdapter.queryRecord GETs the config URL for the queried
-      backend and returns the raw response with the backend name attached to it.
+      backend and returns the raw response object with the backend name attached to
+      it as a top-level backend property, so the caller can re-address the record.
   - codeRefs:
     - class:79c09b75c4ee536ddd9bf3addc6df266
     - file:third_party/openbao/ui/app/adapters/kubernetes/config.js
     id: r.config-save-record
     level: MUST
-    text: KubernetesConfigAdapter.createRecord and updateRecord both delegate to _saveRecord,
-      which serializes the snapshot through the store serializer for the record's
-      modelName, takes the record id from snapshot.id or the snapshot's backend attribute,
-      POSTs the serialized data to that URL, and resolves with the serialized data
-      plus backend and id set to that id.
+    text: KubernetesConfigAdapter.createRecord and updateRecord both forward their
+      arguments to the private _saveRecord, which serializes the snapshot through
+      the store serializer for the record's modelName, takes the URL id from snapshot.id
+      falling back to the snapshot's backend attribute, POSTs the serialized data
+      to that URL, and resolves with the serialized data spread together with backend
+      and id both set to that id.
   - codeRefs:
     - class:79c09b75c4ee536ddd9bf3addc6df266
     - file:third_party/openbao/ui/app/adapters/kubernetes/config.js
     id: r.config-url-shape
     level: MUST
     text: KubernetesConfigAdapter.getURL joins the adapter buildURL with the encoded
-      backend mount path and a path segment that defaults to 'config'; urlForUpdateRecord
-      returns that config URL from the snapshot's backend attribute and urlForDeleteRecord
-      returns it from the backend argument.
+      backend mount path and a trailing path segment that defaults to 'config'; urlForUpdateRecord
+      returns that config URL built from the snapshot's backend attribute, and urlForDeleteRecord
+      returns it from the backend argument it is handed.
   - codeRefs:
     - class:4ccde46e2def7df4b8568c996f3e847f
     - file:third_party/openbao/ui/app/adapters/kubernetes/role.js
     id: r.role-generate-credentials
     level: MUST
-    text: KubernetesRoleAdapter.generateCredentials POSTs the request data with its
-      role field removed to the backend's creds path for the named role, and resolves
-      with an object holding lease_id, lease_duration and the flattened response data.
+    text: KubernetesRoleAdapter.generateCredentials builds <buildURL>/<encodePath(backend)>/creds/<data.role>,
+      deletes the role field from the request data, POSTs the remaining data there,
+      and resolves with one object holding lease_id, lease_duration and the flattened
+      response data.
   - codeRefs:
     - class:4ccde46e2def7df4b8568c996f3e847f
     - file:third_party/openbao/ui/app/adapters/kubernetes/role.js
     id: r.role-query
     level: MUST
-    text: KubernetesRoleAdapter.query GETs the roles collection URL with list=true
-      and maps each key in the response data to a role object carrying that name and
-      the queried backend.
+    text: KubernetesRoleAdapter.query GETs the roles collection URL with the data
+      parameter list=true and maps each key of the response data to a role object
+      carrying that key as name and the queried backend, so role lists are addressable
+      per mount.
   - codeRefs:
     - class:4ccde46e2def7df4b8568c996f3e847f
     - file:third_party/openbao/ui/app/adapters/kubernetes/role.js
     id: r.role-query-record
     level: MUST
-    text: KubernetesRoleAdapter.queryRecord GETs the named role URL and returns the
-      response data with backend and name written onto it, so the record is addressable
-      after load.
+    text: KubernetesRoleAdapter.queryRecord GETs the named role URL for the queried
+      backend and returns the response data with backend and name written onto it,
+      so the record is addressable after load.
   - codeRefs:
     - class:4ccde46e2def7df4b8568c996f3e847f
     - file:third_party/openbao/ui/app/adapters/kubernetes/role.js
@@ -98,7 +104,7 @@ spec:
     level: MUST
     text: KubernetesRoleAdapter extends NamedPathAdapter and builds role URLs as the
       adapter buildURL plus the encoded backend plus '/roles', appending the role
-      name only when a name is given; urlForQuery, urlForUpdateRecord and urlForDeleteRecord
-      all resolve through that helper using the backend carried by the query object
-      or the snapshot.
+      name only when a name is given; urlForQuery resolves through that helper with
+      the backend carried by the query object, and urlForUpdateRecord and urlForDeleteRecord
+      resolve through it with the backend carried by the snapshot.
   upstream: self

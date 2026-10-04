@@ -1,0 +1,70 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-ui-app-adapters-kubernetes-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-ui-app-adapters-kubernetes
+  toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
+status:
+  agentLog: 'This context covers the two Ember Data adapters the bundled OpenBao UI
+    uses against a Kubernetes secrets engine mounted at an arbitrary backend path.
+    third_party/openbao/ui/app/adapters/kubernetes/config.js defines KubernetesConfigAdapter,
+    which extends ApplicationAdapter, pins its namespace to ''v1'', and addresses
+    the singleton config record at <buildURL>/<encodePath(backend)>/config: queryRecord
+    GETs that URL and stamps the backend onto the response, createRecord and updateRecord
+    both funnel into a private _saveRecord that serializes the snapshot through the
+    store serializer for the record''s modelName, takes the record id from snapshot.id
+    or the snapshot''s backend attribute, POSTs the serialized data to that URL, and
+    resolves with the serialized data plus backend and id set to that id, urlForUpdateRecord
+    and urlForDeleteRecord resolve to the config URL, and checkConfigVars GETs the
+    sibling <backend>/check path. third_party/openbao/ui/app/adapters/kubernetes/role.js
+    defines KubernetesRoleAdapter, which extends NamedPathAdapter and addresses role
+    records at <buildURL>/<encodePath(backend)>/roles[/<name>]: query GETs with list=true
+    and maps the returned keys to {name, backend} pairs, queryRecord GETs one named
+    role and returns its data with backend and name written onto it, the URL hooks
+    drive update and delete from the snapshot''s backend attribute, and generateCredentials
+    POSTs to <backend>/creds/<role> after deleting the role field from the payload,
+    then flattens lease_id, lease_duration and the response data into one object.
+    Both adapters take the engine mount path as the backend parameter and encode it
+    into every URL they build.'
+  message: wrote 9 requirement(s) and 2 interface(s) for third-party-openbao-ui-app-adapters-kubernetes;
+    interface KubernetesConfigAdapter.getURL is not in the observed facts; dropped;
+    interface KubernetesConfigAdapter.urlForUpdateRecord is not in the observed facts;
+    dropped; interface KubernetesConfigAdapter.urlForDeleteRecord is not in the observed
+    facts; dropped; interface KubernetesConfigAdapter.queryRecord is not in the observed
+    facts; dropped; interface KubernetesConfigAdapter.createRecord is not in the observed
+    facts; dropped; interface KubernetesConfigAdapter.updateRecord is not in the observed
+    facts; dropped; interface KubernetesConfigAdapter._saveRecord is not in the observed
+    facts; dropped; interface KubernetesConfigAdapter.checkConfigVars is not in the
+    observed facts; dropped; interface KubernetesRoleAdapter.getURL is not in the
+    observed facts; dropped; interface KubernetesRoleAdapter.urlForQuery is not in
+    the observed facts; dropped; interface KubernetesRoleAdapter.urlForUpdateRecord
+    is not in the observed facts; dropped; interface KubernetesRoleAdapter.urlForDeleteRecord
+    is not in the observed facts; dropped; interface KubernetesRoleAdapter.query is
+    not in the observed facts; dropped; interface KubernetesRoleAdapter.queryRecord
+    is not in the observed facts; dropped; interface KubernetesRoleAdapter.generateCredentials
+    is not in the observed facts; dropped
+  phase: Succeeded
+superseded:
+- message: wrote 9 requirement(s) and 2 interface(s) for third-party-openbao-ui-app-adapters-kubernetes;
+    interface KubernetesConfigAdapter.getURL is not in the observed facts; dropped;
+    interface KubernetesConfigAdapter.urlForUpdateRecord is not in the observed facts;
+    dropped; interface KubernetesConfigAdapter.urlForDeleteRecord is not in the observed
+    facts; dropped; interface KubernetesConfigAdapter.queryRecord is not in the observed
+    facts; dropped; interface KubernetesConfigAdapter.createRecord is not in the observed
+    facts; dropped; interface KubernetesConfigAdapter.updateRecord is not in the observed
+    facts; dropped; interface KubernetesConfigAdapter.checkConfigVars is not in the
+    observed facts; dropped; interface KubernetesRoleAdapter.getURL is not in the
+    observed facts; dropped; interface KubernetesRoleAdapter.urlForQuery is not in
+    the observed facts; dropped; interface KubernetesRoleAdapter.urlForUpdateRecord
+    is not in the observed facts; dropped; interface KubernetesRoleAdapter.urlForDeleteRecord
+    is not in the observed facts; dropped; interface KubernetesRoleAdapter.query is
+    not in the observed facts; dropped; interface KubernetesRoleAdapter.queryRecord
+    is not in the observed facts; dropped; interface KubernetesRoleAdapter.generateCredentials
+    is not in the observed facts; dropped
+  name: third-party-openbao-ui-app-adapters-kubernetes-c2s-6c1bbe4c3ba9-89cee50ec5ae
+  phase: Succeeded
