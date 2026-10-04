@@ -24,9 +24,58 @@ status:
   message: wrote 5 requirement(s) and 1 interface(s) for third-party-openbao-ui-app-initializers
   phase: Succeeded
 superseded:
-- message: the agent is summarizing third-party-openbao-ui-app-initializers
+- message: |-
+    ...     "file:third_party/openbao/ui/app/initializers/deprecation-filter.js"
+          ]
+        },
+        {
+          "id": "r.identifier-generation-method",
+          "level": "MUST",
+          "text": "The ember-data-identifiers initializer must call setIdentifierGenerationMethod with a function that returns data.lid when present, otherwise a string of the form @lid:<dasherized type>-<id> when data.id is present, and otherwise a uuidv4 value, so record identifiers no longer depend on the crypto API and keep working in non-secure contexts.",
+          "codeRefs": [
+            "file:third_party/openbao/ui/app/initializers/ember-data-identifiers.js"
+          ]
+        },
+        {
+          "id": "r.root-mount-hook",
+          "level": "MUST",
+          "text": "The enable-engines initializer must attach a no-op addRootMounts function to the environment config, giving the router DSL a mount hook that root-level engine mounts are added through.",
+          "codeRefs": [
+            "file:third_party/openbao/ui/app/initializers/enable-engines.js"
+          ]
+        },
+        {
+          "id": "r.disable-ember-inspector",
+          "level": "SHOULD",
+          "text": "The application must ship a disable-ember-inspector initializer under app/initializers so the Ember Inspector is disabled for the running application.",
+          "codeRefs": [
+            "file:third_party/openbao/ui/app/initializers/disable-ember-inspector.js"
+          ]
+        }
+      ],
+      "interfaces": [
+        {
+          "name": "initialize",
+          "kind": "function",
+          "signature": "export function initialize()",
+          "file": "third_party/openbao/ui/app/initializers/deprecation-filter.js"
+        },
+        {
+          "name": "initialize",
+          "kind": "function",
+          "signature": "export function initialize()",
+          "file": "third_party/openbao/ui/app/initializers/ember-data-identifiers.js"
+        },
+        {
+          "name": "initialize",
+          "kind": "function",
+          "signature": "export function initialize(/* application */)",
+          "file": "third_party/openbao/ui/app/initializers/enable-engines.js"
+        }
+      ]
+    }
   name: third-party-openbao-ui-app-initializers-c2s-6c1bbe4c3ba9-89cee50ec5ae-a3
-  phase: Running
+  phase: Failed
 - message: |-
     ...  "text": "The enable-engines module default-exports an object of the form { initialize } so the module is usable as an Ember initializer.",
           "codeRefs": [
