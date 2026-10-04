@@ -1,0 +1,49 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-ui-lib-pki-addon-routes-issuers-issuer-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-ui-lib-pki-addon-routes-issuers-issuer
+  toCommit: e33a5585dc1ac9d3bf63bc1ebdcf5dbb45369989
+status:
+  agentLog: 'Five Ember route classes in the vendored OpenBao PKI UI addon back the
+    per-issuer screens of the PKI secrets engine: PkiIssuerDetailsRoute (issuer details
+    and certificate downloads), PkiIssuerEditRoute (update), PkiIssuerCrossSignRoute
+    (cross-sign), PkiIssuerSignRoute (sign intermediate) and PkiIssuerRotateRootRoute
+    (rotate root). Each injects the `store` and `secretMountPath` services as class
+    fields, implements a `model()` hook that either reuses the parent `issuers.issuer`
+    model or queries/creates a PKI record against the current secrets mount path,
+    and implements `setupController()` that super-calls the base hook and then assigns
+    `controller.breadcrumbs`. Details adds `fetchCertByFormat`, an unauthenticated
+    raw GET of `/v1/<mount>/issuer/<id>/<format>` that returns a blob for `der` and
+    text otherwise, plus an `isRoot` helper that treats a certificate as self-signed
+    root only when it verifies against itself and a key id is present. Rotate root
+    parses the old root certificate, joins `parsing_errors` into one `parsingErrors`
+    string, builds a new `pki/action` record with `actionType: ''rotate-root''` and
+    `type: ''internal''`, and is decorated with `@withConfirmLeave(''model.newRootModel'')`;
+    sign carries a bare `@withConfirmLeave()`. The files are HashiCorp MPL-2.0 headed,
+    vendored third-party OpenBao sources.'
+  message: wrote 10 requirement(s) and 5 interface(s) for third-party-openbao-ui-lib-pki-addon-routes-issuers-issuer;
+    the spec already said this
+  phase: Succeeded
+superseded:
+- message: wrote 10 requirement(s) and 5 interface(s) for third-party-openbao-ui-lib-pki-addon-routes-issuers-issuer;
+    interface PkiIssuerCrossSignRoute.model is not in the observed facts; dropped;
+    interface PkiIssuerCrossSignRoute.setupController is not in the observed facts;
+    dropped; interface PkiIssuerDetailsRoute.model is not in the observed facts; dropped;
+    interface PkiIssuerDetailsRoute.setupController is not in the observed facts;
+    dropped; interface PkiIssuerDetailsRoute.fetchCertByFormat is not in the observed
+    facts; dropped; interface PkiIssuerDetailsRoute.isRoot is not in the observed
+    facts; dropped; interface PkiIssuerEditRoute.model is not in the observed facts;
+    dropped; interface PkiIssuerEditRoute.setupController is not in the observed facts;
+    dropped; interface PkiIssuerRotateRootRoute.model is not in the observed facts;
+    dropped; interface PkiIssuerRotateRootRoute.setupController is not in the observed
+    facts; dropped; interface PkiIssuerSignRoute.model is not in the observed facts;
+    dropped; interface PkiIssuerSignRoute.setupController is not in the observed facts;
+    dropped
+  name: third-party-openbao-ui-lib-pki-addon-routes-issuers-issuer-c2s-6c1bbe4c3ba9-e33a5585dc1a
+  phase: Succeeded
