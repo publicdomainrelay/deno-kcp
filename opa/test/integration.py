@@ -22,9 +22,10 @@ OPA_ROOT = os.path.dirname(HERE)
 SPEC_ROOT = os.path.dirname(OPA_ROOT)
 CODE_ROOT = os.path.join(os.path.dirname(SPEC_ROOT), "deno-kcp")
 OPA = os.environ.get("OPA", "opa")
+DATA_DIR = os.path.join(OPA_ROOT, "data")
 
-BASE = "/tmp/opa-integration-base.json"
-CHANGE = "/tmp/opa-integration-change.json"
+BASE = os.path.join(DATA_DIR, "input-base.json")
+CHANGE = os.path.join(DATA_DIR, "input-change.json")
 CHANGE_NAME = "deploy-examples-atproto-market-s2c-834078074eaa"
 
 BUILD = [
@@ -76,6 +77,18 @@ EXPECTATIONS = [
 
     (BASE, "code_safety/", "==", 0,
      "there is no code diff in the base document, so no code rule can fire"),
+
+    (CHANGE, "code_safety/safety-absolute-machine-path-in-manifest", ">=", 4,
+     "60-bob-pds.yaml and 70-bidder.yaml embed /home/johnandersen777 in SERVICE_ENTRY/SERVICE_CWD"),
+    (CHANGE, "code_safety/safety-insecure-tls-flag", ">=", 1,
+     "accept.sh runs curl -skS; the leaf is OpenBao-signed and SAN'd to the service name, so the bypass is deliberate and the finding is a warning"),
+    (CHANGE, "code_safety/safety-stale-tls-guidance", ">=", 1,
+     "apply.sh still prints an http:// health check for pods that declare SERVICE_TLS true"),
+
+    (BASE, "arch_consistency/", "==", 0,
+     "arch.yaml and specs/ are two renderings of one thing and agree in the base tree"),
+    (CHANGE, "arch_consistency/", "==", 0,
+     "the change tree's arch.yaml, specs/ and graph agree too"),
 ]
 
 REQUIRED_POLICIES = [
@@ -144,8 +157,10 @@ def main() -> int:
         if prefix.endswith("/"):
             got = sum(n for i, n in table.items() if i.startswith(prefix))
         else:
+            # An id that never fired has a count of zero. That is a failure only
+            # when the expectation wants it to have fired.
             got = table.get(prefix, 0)
-            if got == 0 and prefix not in table:
+            if got == 0 and prefix not in table and not compare(0, op, expected):
                 failures += 1
                 print(f"{label(document):<8} {prefix:<62} {op + ' ' + str(expected):>6} {'absent':>5}  FAIL  {why}")
                 continue
@@ -161,16 +176,21 @@ def main() -> int:
             f"({rep['errors']} error, {rep['warnings']} warning, {rep['infos']} info), "
             f"passed={rep['passed']}"
         )
-        for policy, n in sorted(rep["by_policy"].items()):
-            print(f"    {policy:<24} {n}")
+        for policy in sorted(declared_policies()):
+            print(f"    {policy:<24} {rep['by_policy'].get(policy, 0)}")
 
-    present = set()
-    for rep in reports.values():
-        present.update(rep["by_policy"].keys())
-    missing = [p for p in REQUIRED_POLICIES if p not in present]
+    declared = declared_policies()
+    missing = [p for p in REQUIRED_POLICIES if p not in declared]
     if missing:
         failures += 1
-        print(f"\nFAIL: no violation was ever raised by: {', '.join(missing)}")
+        print(f"\nFAIL: no policy set named: {', '.join(missing)}")
+    extra = sorted(declared - set(REQUIRED_POLICIES))
+    if extra:
+        failures += 1
+        print(f"\nFAIL: policy set(s) not in the required list: {', '.join(extra)}")
+    silent = sorted(p for p in declared if not any(p in rep["by_policy"] for rep in reports.values()))
+    if silent:
+        print(f"\nnote: {len(silent)} policy set(s) raised nothing on either document, which is correct when the trees are consistent: {', '.join(silent)}")
 
     print()
     if failures:
@@ -178,6 +198,14 @@ def main() -> int:
         return 1
     print("integration: every expectation held")
     return 0
+
+
+def declared_policies() -> set[str]:
+    proc = run([OPA, "eval", "-b", OPA_ROOT, "--format", "json", "data.deno_kcp.metadata"])
+    if proc.returncode != 0:
+        return set()
+    metadata = json.loads(proc.stdout)["result"][0]["expressions"][0]["value"]
+    return set(metadata.keys())
 
 
 def label(document: str) -> str:

@@ -134,9 +134,12 @@ should_phrases := [
 	"preferably",
 ]
 
+# "can" is deliberately absent. In this corpus it is almost always a capability
+# ("a client can verify it"), not a permission, and reading a capability as a
+# permission made a MUST requirement whose text says "clients can decode" look
+# like a MAY. A permission is written "may", "is allowed to" or "is optional".
 may_phrases := [
 	"may ",
-	"can ",
 	"is allowed to",
 	"are allowed to",
 	"is optional",
