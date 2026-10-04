@@ -10,5 +10,16 @@ spec:
   systemContext: internal-trigger
   toCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
 status:
-  message: the agent is summarizing internal-trigger
-  phase: Running
+  agentLog: 'internal/trigger holds the pure decision logic for the RunTrigger custom
+    resource. Reconciler.Reconcile takes an Observed snapshot (the RunTrigger object,
+    an optional RunObservation of the referenced policy workflow''s latest run, an
+    AnyRun flag, and a clock) and returns a Result describing the desired RunTriggerPhase,
+    whether the run matched the spec''s match map, the derived job name, the last
+    consumed run, status conditions, and a list of Ops for the caller to carry out.
+    It is a decider only: it performs no client calls, and the driver executes the
+    returned Ops (create-job, remove-finalizer) and applies the Result to the object''s
+    status. New wires an Options struct whose Now function defaults to time.Now, keeping
+    the reconciler deterministic in tests. The package deliberately asks for no requeue
+    interval; the driver wakes it from run events and backstops a missing event.'
+  message: wrote 13 requirement(s) and 8 interface(s) for internal-trigger
+  phase: Succeeded

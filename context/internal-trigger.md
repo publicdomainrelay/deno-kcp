@@ -2,13 +2,138 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context is the trigger decider, the piece of the deno-kcp control plane that turns a finished policy workflow run into a deno job. It exists so the RunTrigger reconciliation decision is testable and side-effect free: the reconciler decides, and the provider layer acts. When the referenced run succeeds and its outputs match the trigger's match map, the decider asks for a job named <trigger>-<run> and records the run as consumed so the same run never fires twice; cancelled, failed, or unfinished runs leave the trigger pending or skipped. Deletion is handled by asking for finalizer removal.
 
 _Write the prose above and the fields in the spec block. `codeRefs` and the resolved references below are maintained by the tool; an edit there is lost._
 
 ## spec
 
 ```yaml spec
+interfaces:
+- file: internal/trigger/trigger.go
+  kind: function
+  name: New
+  signature: func New(opts Options) *Reconciler
+- file: internal/trigger/trigger.go
+  kind: struct
+  name: Observed
+  signature: type Observed struct { Trigger v1alpha1.RunTrigger; Run *RunObservation;
+    AnyRun bool; Now time.Time }
+- file: internal/trigger/trigger.go
+  kind: type_alias
+  name: Op
+  signature: type Op string
+- file: internal/trigger/trigger.go
+  kind: struct
+  name: Options
+  signature: type Options struct { Now func() time.Time }
+- file: internal/trigger/trigger.go
+  kind: struct
+  name: Reconciler
+  signature: type Reconciler struct { opts Options }
+- file: internal/trigger/trigger.go
+  kind: method
+  name: Reconciler.Reconcile
+  signature: func (r *Reconciler) Reconcile(ctx context.Context, o Observed) (Result,
+    error)
+- file: internal/trigger/trigger.go
+  kind: struct
+  name: Result
+  signature: type Result struct { Phase v1alpha1.RunTriggerPhase; Matched bool; JobName
+    string; LastRun string; Conditions []metav1.Condition; Ops []Op; RemoveFinalizer
+    bool }
+- file: internal/trigger/trigger.go
+  kind: struct
+  name: RunObservation
+  signature: type RunObservation struct { Name string; Phase v1alpha1.PolicyWorkflowPhase;
+    Outputs map[string]string }
+requirements:
+- codeRefs:
+  - struct:a3fbb6626d9d915cb17e70f240a59a55
+  id: r.carry-status
+  level: MUST
+  text: Result starts as a copy of the trigger's existing status (phase, matched,
+    job name, last run, and a deep copy of conditions), so fields the decider does
+    not touch are preserved.
+- codeRefs:
+  - function:f347057cde00720e2ba57c3dd951470c
+  - struct:ce2bb0551ed1ce86badc642077aab120
+  id: r.clock-default
+  level: MUST
+  text: New defaults Options.Now to time.Now when it is nil, so a zero observed Now
+    is filled from the reconciler's clock.
+- codeRefs:
+  - method:5926281263a64123a37f6099290debee
+  - struct:a3fbb6626d9d915cb17e70f240a59a55
+  - type_alias:ea5d49f390b7f0cb47a28a95e8f58b81
+  id: r.create-job-once
+  level: MUST
+  text: On a matching success, Result sets phase Triggered, Matched, JobName as <trigger
+    name>-<run name>, and appends OpCreateJob only when the run name differs from
+    the carried LastRun.
+- codeRefs:
+  - method:5926281263a64123a37f6099290debee
+  id: r.ctx-cancel
+  level: MUST
+  text: Reconcile returns the context error when the passed context is already cancelled.
+- codeRefs:
+  - method:5926281263a64123a37f6099290debee
+  - struct:9094b81797efe240a545142966b526c0
+  id: r.decider-only
+  level: MUST
+  text: Reconcile performs no client calls; it only reports desired state and Ops
+    for the caller to execute.
+- codeRefs:
+  - method:5926281263a64123a37f6099290debee
+  - type_alias:ea5d49f390b7f0cb47a28a95e8f58b81
+  id: r.deletion-finalizer
+  level: MUST
+  text: When the trigger has a deletion timestamp, Result asks for OpRemoveFinalizer,
+    sets RemoveFinalizer, and returns without further evaluation.
+- codeRefs:
+  - method:5926281263a64123a37f6099290debee
+  - struct:128da6e45c96bafe5081998013f47ffe
+  id: r.match-gate
+  level: MUST
+  text: A succeeded run triggers only when every key of Spec.Match equals the run's
+    output value; an empty match map matches any success.
+- codeRefs:
+  - method:5926281263a64123a37f6099290debee
+  id: r.name-required
+  level: MUST
+  text: Reconcile returns an error when the observed trigger has no name, before doing
+    any other work.
+- codeRefs:
+  - method:5926281263a64123a37f6099290debee
+  id: r.no-requeue
+  level: SHOULD
+  text: The reconciler asks for no requeue interval; it relies on the driver enqueuing
+    it from run events plus a backstop for a missing event.
+- codeRefs:
+  - method:5926281263a64123a37f6099290debee
+  - struct:dc3e99d1633068172953c5024a851849
+  id: r.no-run-pending
+  level: MUST
+  text: With no observed run, Result stays Pending unless the carried phase is already
+    Triggered, which is returned unchanged.
+- codeRefs:
+  - method:5926281263a64123a37f6099290debee
+  id: r.observed-generation
+  level: MUST
+  text: Every condition the decider writes carries the trigger's generation as ObservedGeneration
+    and is set through meta.SetStatusCondition.
+- codeRefs:
+  - method:5926281263a64123a37f6099290debee
+  id: r.skipped-runs
+  level: MUST
+  text: A cancelled or failed run yields phase Skipped with Matched false and no job
+    op, each with its own condition reason.
+- codeRefs:
+  - method:5926281263a64123a37f6099290debee
+  id: r.unfinished-pending
+  level: MUST
+  text: A run in any other (non-terminal) phase yields phase Pending with a condition
+    saying the run has not finished.
 upstream: self
 ```
 
