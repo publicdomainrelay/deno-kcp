@@ -19746,8 +19746,124 @@ system_contexts:
   codeRefIndex:
   - file:third_party/openbao/internal/helper/dhutil/dhutil.go dhutil.go@third_party/openbao/internal/helper/dhutil/dhutil.go
   - file:third_party/openbao/internal/helper/dhutil/dhutil_test.go dhutil_test.go@third_party/openbao/internal/helper/dhutil/dhutil_test.go
+  - function:8ca2ccc79826b904a4ec08ee7760e712 GenerateSharedSecret@third_party/openbao/internal/helper/dhutil/dhutil.go:46
+  - function:a0e84f63e82dabb9d7295ab7a589b596 DecryptAES@third_party/openbao/internal/helper/dhutil/dhutil.go:128
+  - function:d9a825b271260345358c73b6c33e069f GeneratePublicPrivateKey@third_party/openbao/internal/helper/dhutil/dhutil.go:33
+  - function:e817a4230471d8db2fb10e5a3aad734b DeriveSharedKey@third_party/openbao/internal/helper/dhutil/dhutil.go:58
+  - function:f1f1a24b58704b9968cb6b555f5f2824 EncryptAES@third_party/openbao/internal/helper/dhutil/dhutil.go:101
+  - struct:6d3778c0fe4a755cb285791c52756c1a Envelope@third_party/openbao/internal/helper/dhutil/dhutil.go:25
+  - struct:f8f0dc19bdc2d73609c758f61a0592e6 PublicKeyInfo@third_party/openbao/internal/helper/dhutil/dhutil.go:21
   id: sc.third-party-openbao-internal-helper-dhutil
+  intent: 'The package exists to give OpenBao a small, dependency-light set of primitives
+    for sealed and shared-secret export flows: two parties exchange Curve25519 public
+    keys, each derives the same symmetric key from the raw X25519 output plus both
+    public keys, and that key then encrypts or decrypts the payload carried in an
+    Envelope. DeriveSharedKey sorts the public keys because HKDF binds salt and info
+    in order, so Alice computing HKDF(secret, A, B) and Bob computing HKDF(secret,
+    B, A) would otherwise disagree; it also refuses the degenerate case where both
+    participants present the same public key.'
+  interfaces:
+  - file: third_party/openbao/internal/helper/dhutil/dhutil.go
+    kind: function
+    name: DecryptAES
+    signature: func DecryptAES(key, ciphertext, nonce, aad []byte) ([]byte, error)
+  - file: third_party/openbao/internal/helper/dhutil/dhutil.go
+    kind: function
+    name: DeriveSharedKey
+    signature: func DeriveSharedKey(secret, ourPublic, theirPublic []byte) ([]byte,
+      error)
+  - file: third_party/openbao/internal/helper/dhutil/dhutil.go
+    kind: function
+    name: EncryptAES
+    signature: func EncryptAES(key, plaintext, aad []byte) ([]byte, []byte, error)
+  - file: third_party/openbao/internal/helper/dhutil/dhutil.go
+    kind: struct
+    name: Envelope
+    signature: type Envelope struct { Curve25519PublicKey []byte `json:"curve25519_public_key"`;
+      Nonce []byte `json:"nonce"`; EncryptedPayload []byte `json:"encrypted_payload"`
+      }
+  - file: third_party/openbao/internal/helper/dhutil/dhutil.go
+    kind: function
+    name: GeneratePublicPrivateKey
+    signature: func GeneratePublicPrivateKey() ([]byte, []byte, error)
+  - file: third_party/openbao/internal/helper/dhutil/dhutil.go
+    kind: function
+    name: GenerateSharedSecret
+    signature: func GenerateSharedSecret(ourPrivate, theirPublic []byte) ([]byte,
+      error)
+  - file: third_party/openbao/internal/helper/dhutil/dhutil.go
+    kind: struct
+    name: PublicKeyInfo
+    signature: type PublicKeyInfo struct { Curve25519PublicKey []byte `json:"curve25519_public_key"`
+      }
   name: third-party-openbao-internal-helper-dhutil
+  requirements:
+  - codeRefs:
+    - function:a0e84f63e82dabb9d7295ab7a589b596
+    id: r.decrypt-aes
+    level: MUST
+    text: DecryptAES takes the symmetric key, the ciphertext, the nonce and the associated
+      data and returns the recovered plaintext or an error, so a decryption under
+      the wrong key, nonce or associated data fails rather than returning data.
+  - codeRefs:
+    - function:e817a4230471d8db2fb10e5a3aad734b
+    id: r.derive-key-output
+    level: MUST
+    text: DeriveSharedKey returns exactly a 32-byte key, and returns no key at all
+      when the HKDF read fails or reads a short value, so a caller never receives
+      a partial key alongside an error.
+  - codeRefs:
+    - function:e817a4230471d8db2fb10e5a3aad734b
+    id: r.derive-shared-key-ordering
+    level: MUST
+    text: DeriveSharedKey runs HKDF-SHA256 over the raw secret using the two public
+      keys as salt and info, placing them in bytes.Compare order so both participants
+      derive the same key, and returns an error when the two supplied public keys
+      are identical.
+  - codeRefs:
+    - function:f1f1a24b58704b9968cb6b555f5f2824
+    id: r.encrypt-aes
+    level: MUST
+    text: EncryptAES takes a symmetric key, a plaintext and associated data, and returns
+      the ciphertext and the nonce used for it, with an error on failure, so the caller
+      can transmit both outputs.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/dhutil/dhutil.go
+    - function:d9a825b271260345358c73b6c33e069f
+    id: r.generate-key-pair
+    level: MUST
+    text: GeneratePublicPrivateKey reads 32 random bytes from crypto/rand into a scalar,
+      computes the Curve25519 public key with ScalarBaseMult, and returns the public
+      key first and the private scalar second, together with any read error.
+  - codeRefs:
+    - function:8ca2ccc79826b904a4ec08ee7760e712
+    id: r.reject-bad-key-lengths
+    level: MUST
+    text: GenerateSharedSecret rejects any private key or public key whose length
+      is not 32 bytes, returning an error naming the offending length and the invalid
+      side, before any X25519 computation runs.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/dhutil/dhutil_test.go
+    id: r.tests-cover-helpers
+    level: SHOULD
+    text: dhutil_test.go exercises the helper functions so key agreement, the identical-public-key
+      rejection and the AES round trip are covered by tests.
+  - codeRefs:
+    - struct:6d3778c0fe4a755cb285791c52756c1a
+    - struct:f8f0dc19bdc2d73609c758f61a0592e6
+    id: r.wire-structs
+    level: MUST
+    text: PublicKeyInfo serializes its key as the JSON field curve25519_public_key,
+      and Envelope serializes its public key, nonce and ciphertext as curve25519_public_key,
+      nonce and encrypted_payload, so the on-the-wire field names stay stable across
+      peers.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/dhutil/dhutil.go
+    - function:8ca2ccc79826b904a4ec08ee7760e712
+    id: r.x25519-shared-secret
+    level: MUST
+    text: GenerateSharedSecret computes the shared secret with curve25519.X25519 from
+      the validated private key and peer public key and propagates the returned error.
   upstream: self
 - code:
   - third_party/openbao/internal/helper/fairshare/fairshare_testing_util.go

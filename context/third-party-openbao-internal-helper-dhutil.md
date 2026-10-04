@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The package exists to give OpenBao a small, dependency-light set of primitives for sealed and shared-secret export flows: two parties exchange Curve25519 public keys, each derives the same symmetric key from the raw X25519 output plus both public keys, and that key then encrypts or decrypts the payload carried in an Envelope. DeriveSharedKey sorts the public keys because HKDF binds salt and info in order, so Alice computing HKDF(secret, A, B) and Bob computing HKDF(secret, B, A) would otherwise disagree; it also refuses the degenerate case where both participants present the same public key.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

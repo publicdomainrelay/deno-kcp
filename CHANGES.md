@@ -1391,6 +1391,19 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.registry-map-partition` (MUST): "The registry must keep its entries in three separate maps keyed by plugin name, one each for credential backends, logical (secrets) backends and database plugins, so a name registered under one plugin type is never returned for another."
 - added `r.tests-cover-lookup-and-status` (SHOULD): "The registry behaviour must stay covered by tests: Test_RegistryGet exercises Get, Test_RegistryKeyCounts exercises Keys key counts, and Test_RegistryStatus exercises DeprecationStatus for a non-existent builtin, a name paired with a mismatched plugin type, a valid name paired with an invalid plugin type, and a supported builtin lookup returning consts.Supported with true."
 
+### third-party-openbao-internal-helper-dhutil
+
+- intent: "" -> "The package exists to give OpenBao a small, dependency-light set of primitives for sealed and shared-secret export flows: two parties exchange Curve25519 public keys, each derives the same symmetric key from the raw X25519 output plus both public keys, and that key then encrypts or decrypts the payload carried in an Envelope. DeriveSharedKey sorts the public keys because HKDF binds salt and info in order, so Alice computing HKDF(secret, A, B) and Bob computing HKDF(secret, B, A) would otherwise disagree; it also refuses the degenerate case where both participants present the same public key."
+- added `r.decrypt-aes` (MUST): "DecryptAES takes the symmetric key, the ciphertext, the nonce and the associated data and returns the recovered plaintext or an error, so a decryption under the wrong key, nonce or associated data fails rather than returning data."
+- added `r.derive-key-output` (MUST): "DeriveSharedKey returns exactly a 32-byte key, and returns no key at all when the HKDF read fails or reads a short value, so a caller never receives a partial key alongside an error."
+- added `r.derive-shared-key-ordering` (MUST): "DeriveSharedKey runs HKDF-SHA256 over the raw secret using the two public keys as salt and info, placing them in bytes.Compare order so both participants derive the same key, and returns an error when the two supplied public keys are identical."
+- added `r.encrypt-aes` (MUST): "EncryptAES takes a symmetric key, a plaintext and associated data, and returns the ciphertext and the nonce used for it, with an error on failure, so the caller can transmit both outputs."
+- added `r.generate-key-pair` (MUST): "GeneratePublicPrivateKey reads 32 random bytes from crypto/rand into a scalar, computes the Curve25519 public key with ScalarBaseMult, and returns the public key first and the private scalar second, together with any read error."
+- added `r.reject-bad-key-lengths` (MUST): "GenerateSharedSecret rejects any private key or public key whose length is not 32 bytes, returning an error naming the offending length and the invalid side, before any X25519 computation runs."
+- added `r.tests-cover-helpers` (SHOULD): "dhutil_test.go exercises the helper functions so key agreement, the identical-public-key rejection and the AES round trip are covered by tests."
+- added `r.wire-structs` (MUST): "PublicKeyInfo serializes its key as the JSON field curve25519_public_key, and Envelope serializes its public key, nonce and ciphertext as curve25519_public_key, nonce and encrypted_payload, so the on-the-wire field names stay stable across peers."
+- added `r.x25519-shared-secret` (MUST): "GenerateSharedSecret computes the shared secret with curve25519.X25519 from the validated private key and peer public key and propagates the returned error."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -1461,4 +1474,4 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-helper-buffer-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-builtinplugins-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-configutil-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-internal-helper-dhutil-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-helper-dhutil-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
