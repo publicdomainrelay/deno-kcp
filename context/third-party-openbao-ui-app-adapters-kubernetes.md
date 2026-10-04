@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to specify the browser-side Kubernetes secrets engine integration of the bundled OpenBao UI: the read and write paths the UI uses against a Kubernetes mount, so the config singleton and the per-mount roles plus credential generation stay addressable and serializable. It records which HTTP verbs and URL shapes the adapters emit, how the backend mount path travels through query, snapshot and response objects, and which fields the models expect back, so the UI layer keeps working unchanged against the Kubernetes secrets engine API.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
