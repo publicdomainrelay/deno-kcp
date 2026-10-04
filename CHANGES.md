@@ -5901,6 +5901,19 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.injected-services` (MUST): "The route must declare the `store` and `secretMountPath` services as injected Ember services, since both `model()` and `setupController()` read `this.store` and `this.secretMountPath.currentPath` when building the request and the breadcrumbs."
 - added `r.route-fetch-single-certificate` (MUST): "`PkiCertificateDetailsRoute.model()` must resolve the parent route's `serial` param via `this.paramsFor('certificates/certificate')` and issue `this.store.queryRecord('pki/certificate/base', ...)`, passing `{ backend: this.secretMountPath.currentPath, id }` so the fetched certificate is scoped to the currently selected secrets mount."
 
+### third-party-openbao-ui-lib-pki-addon-routes-configuration
+
+- intent: "" -> "The context exists so the PKI addon has routable screens for viewing, creating and editing a PKI engine's configuration. The index route gathers every piece of configuration state the overview renders, the create route hands the template an empty pki/action record to submit a new configuration, and the edit route hands the template the current configuration values plus a breadcrumb trail. Grouping them describes one navigation unit: the read, create and edit halves of the same configuration resource, each loading its own model and shaping it for its template."
+- added `r.create-breadcrumbs` (MUST): "PkiConfigurationCreateRoute.setupController must call super and then set controller.breadcrumbs to the trail 'secrets' (route secrets, linkExternal), the current secret mount path (route overview, modelled on currentPath), and a final 'configure' entry."
+- added `r.create-model-action-record` (MUST): "PkiConfigurationCreateRoute.model must return a hash holding a new empty 'pki/action' record as config and the urls taken from the parent 'configuration' model, so the configure form starts from a blank action record seeded with the discovered URLs."
+- added `r.edit-breadcrumbs` (MUST): "PkiConfigurationEditRoute.setupController must call super and then set controller.breadcrumbs to 'secrets' (route secrets, linkExternal), the current secret mount path (route overview), 'configuration' (route configuration.index), and a final 'edit' entry, each modelled on the current mount path where a model is given."
+- added `r.edit-model-fields` (MUST): "PkiConfigurationEditRoute.model must read the parent 'configuration' model and return a plain object with engineId set to engine.id plus the acme, cluster, urls and crl values, so the edit form receives the current configuration fields."
+- added `r.fetch-mount-config` (MUST): "ConfigurationIndexRoute.fetchMountConfig must query the 'secret-engine' store with the given backend as the path and return the first record of the result, returning nothing when the query yields no mount configuration."
+- added `r.index-injects-store` (MUST): "ConfigurationIndexRoute must obtain the store through service injection, which is the only service it declares, and use it both for the secret-engine query and for creating the pki/issuer record."
+- added `r.index-model-hash` (MUST): "ConfigurationIndexRoute.model must read the parent 'configuration' model to obtain acme, cluster, urls, crl and engine, and must return a hash containing hasConfig (from shouldPromptConfig), engine, acme, cluster, urls, crl, the mountConfig promise for engine.id, and a freshly created 'pki/issuer' record as issuerModel."
+- added `r.mount-path-service` (MUST): "PkiConfigurationCreateRoute and PkiConfigurationEditRoute must obtain the secret mount path through the secretMountPath service and use its currentPath as the label and model for the mount breadcrumb entries."
+- added `r.parent-model-source` (SHOULD): "All three routes should take acme, cluster, urls, crl and engine from modelFor('configuration') rather than re-fetching them, so the child routes stay consistent with the parent configuration model."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -6430,7 +6443,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-pki-addon-routes-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-routes-certificates-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-routes-certificates-certificate-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-lib-pki-addon-routes-configuration-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-ui-lib-pki-addon-routes-issuers-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-pki-addon-routes-configuration-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-lib-pki-addon-routes-issuers-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |

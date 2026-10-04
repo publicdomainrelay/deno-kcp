@@ -10,5 +10,28 @@ spec:
   systemContext: third-party-openbao-ui-lib-pki-addon-routes-issuers
   toCommit: e33a5585dc1ac9d3bf63bc1ebdcf5dbb45369989
 status:
-  message: the agent is summarizing third-party-openbao-ui-lib-pki-addon-routes-issuers
-  phase: Running
+  agentLog: 'This context covers the Ember.js route classes that serve the PKI secrets
+    engine''s issuer screens in the vendored OpenBao UI, at third_party/openbao/ui/lib/pki/addon/routes/issuers/.
+    Five routes live here: the issuer list route (index.js) queries the pki/issuer
+    store with isListView true for the current mount path and falls back to a parent-only
+    model on HTTP 404; the issuer detail route (issuer.js) takes the issuer_ref param
+    from the issuers/issuer parent route and does a queryRecord of a single pki/issuer;
+    and three action routes — generate-root.js, generate-intermediate.js and import.js
+    — create unsaved pki/action records, with actionType generate-root, generate-csr,
+    or no actionType respectively, each decorated with withConfirmLeave so leaving
+    the form asks for confirmation. Every route reads secretMountPath.currentPath
+    to build its breadcrumb chain (secrets, mount overview, issuers index where applicable,
+    then the current step) and the list route also sets notConfiguredMessage to PKI_DEFAULT_EMPTY_STATE_MSG
+    from pki/routes/overview.'
+  message: wrote 13 requirement(s) and 5 interface(s) for third-party-openbao-ui-lib-pki-addon-routes-issuers;
+    interface PkiIssuersListRoute.model is not in the observed facts; dropped; interface
+    PkiIssuersListRoute.setupController is not in the observed facts; dropped; interface
+    PkiIssuerIndexRoute.model is not in the observed facts; dropped; interface PkiIssuerIndexRoute.setupController
+    is not in the observed facts; dropped; interface PkiIssuersGenerateRootRoute.model
+    is not in the observed facts; dropped; interface PkiIssuersGenerateRootRoute.setupController
+    is not in the observed facts; dropped; interface PkiIssuersGenerateIntermediateRoute.model
+    is not in the observed facts; dropped; interface PkiIssuersGenerateIntermediateRoute.setupController
+    is not in the observed facts; dropped; interface PkiIssuersImportRoute.model is
+    not in the observed facts; dropped; interface PkiIssuersImportRoute.setupController
+    is not in the observed facts; dropped
+  phase: Succeeded

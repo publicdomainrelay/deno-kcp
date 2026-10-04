@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so the PKI addon has routable screens for viewing, creating and editing a PKI engine's configuration. The index route gathers every piece of configuration state the overview renders, the create route hands the template an empty pki/action record to submit a new configuration, and the edit route hands the template the current configuration values plus a breadcrumb trail. Grouping them describes one navigation unit: the read, create and edit halves of the same configuration resource, each loading its own model and shaping it for its template.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

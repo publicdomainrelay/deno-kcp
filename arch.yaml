@@ -75395,11 +75395,111 @@ system_contexts:
   - third_party/openbao/ui/lib/pki/addon/routes/configuration/edit.js
   - third_party/openbao/ui/lib/pki/addon/routes/configuration/index.js
   codeRefIndex:
+  - class:328bc27d4d4d2e804e5c8d8445052f6e PkiConfigurationCreateRoute@third_party/openbao/ui/lib/pki/addon/routes/configuration/create.js:12
+  - class:3d56cd545182cf74e2eafcc5ca4cac9f ConfigurationIndexRoute@third_party/openbao/ui/lib/pki/addon/routes/configuration/index.js:12
+  - class:687415f6be20c0b7f58519cfc5fad17c PkiConfigurationEditRoute@third_party/openbao/ui/lib/pki/addon/routes/configuration/edit.js:11
   - file:third_party/openbao/ui/lib/pki/addon/routes/configuration/create.js create.js@third_party/openbao/ui/lib/pki/addon/routes/configuration/create.js
   - file:third_party/openbao/ui/lib/pki/addon/routes/configuration/edit.js edit.js@third_party/openbao/ui/lib/pki/addon/routes/configuration/edit.js
   - file:third_party/openbao/ui/lib/pki/addon/routes/configuration/index.js index.js@third_party/openbao/ui/lib/pki/addon/routes/configuration/index.js
   id: sc.third-party-openbao-ui-lib-pki-addon-routes-configuration
+  intent: 'The context exists so the PKI addon has routable screens for viewing, creating
+    and editing a PKI engine''s configuration. The index route gathers every piece
+    of configuration state the overview renders, the create route hands the template
+    an empty pki/action record to submit a new configuration, and the edit route hands
+    the template the current configuration values plus a breadcrumb trail. Grouping
+    them describes one navigation unit: the read, create and edit halves of the same
+    configuration resource, each loading its own model and shaping it for its template.'
+  interfaces:
+  - file: third_party/openbao/ui/lib/pki/addon/routes/configuration/index.js
+    kind: class
+    name: ConfigurationIndexRoute
+    signature: class ConfigurationIndexRoute extends Route
+  - file: third_party/openbao/ui/lib/pki/addon/routes/configuration/create.js
+    kind: class
+    name: PkiConfigurationCreateRoute
+    signature: class PkiConfigurationCreateRoute extends Route
+  - file: third_party/openbao/ui/lib/pki/addon/routes/configuration/edit.js
+    kind: class
+    name: PkiConfigurationEditRoute
+    signature: class PkiConfigurationEditRoute extends Route
   name: third-party-openbao-ui-lib-pki-addon-routes-configuration
+  requirements:
+  - codeRefs:
+    - class:328bc27d4d4d2e804e5c8d8445052f6e
+    - file:third_party/openbao/ui/lib/pki/addon/routes/configuration/create.js
+    id: r.create-breadcrumbs
+    level: MUST
+    text: PkiConfigurationCreateRoute.setupController must call super and then set
+      controller.breadcrumbs to the trail 'secrets' (route secrets, linkExternal),
+      the current secret mount path (route overview, modelled on currentPath), and
+      a final 'configure' entry.
+  - codeRefs:
+    - class:328bc27d4d4d2e804e5c8d8445052f6e
+    - file:third_party/openbao/ui/lib/pki/addon/routes/configuration/create.js
+    id: r.create-model-action-record
+    level: MUST
+    text: PkiConfigurationCreateRoute.model must return a hash holding a new empty
+      'pki/action' record as config and the urls taken from the parent 'configuration'
+      model, so the configure form starts from a blank action record seeded with the
+      discovered URLs.
+  - codeRefs:
+    - class:687415f6be20c0b7f58519cfc5fad17c
+    - file:third_party/openbao/ui/lib/pki/addon/routes/configuration/edit.js
+    id: r.edit-breadcrumbs
+    level: MUST
+    text: PkiConfigurationEditRoute.setupController must call super and then set controller.breadcrumbs
+      to 'secrets' (route secrets, linkExternal), the current secret mount path (route
+      overview), 'configuration' (route configuration.index), and a final 'edit' entry,
+      each modelled on the current mount path where a model is given.
+  - codeRefs:
+    - class:687415f6be20c0b7f58519cfc5fad17c
+    - file:third_party/openbao/ui/lib/pki/addon/routes/configuration/edit.js
+    id: r.edit-model-fields
+    level: MUST
+    text: PkiConfigurationEditRoute.model must read the parent 'configuration' model
+      and return a plain object with engineId set to engine.id plus the acme, cluster,
+      urls and crl values, so the edit form receives the current configuration fields.
+  - codeRefs:
+    - class:3d56cd545182cf74e2eafcc5ca4cac9f
+    - file:third_party/openbao/ui/lib/pki/addon/routes/configuration/index.js
+    id: r.fetch-mount-config
+    level: MUST
+    text: ConfigurationIndexRoute.fetchMountConfig must query the 'secret-engine'
+      store with the given backend as the path and return the first record of the
+      result, returning nothing when the query yields no mount configuration.
+  - codeRefs:
+    - class:3d56cd545182cf74e2eafcc5ca4cac9f
+    id: r.index-injects-store
+    level: MUST
+    text: ConfigurationIndexRoute must obtain the store through service injection,
+      which is the only service it declares, and use it both for the secret-engine
+      query and for creating the pki/issuer record.
+  - codeRefs:
+    - class:3d56cd545182cf74e2eafcc5ca4cac9f
+    - file:third_party/openbao/ui/lib/pki/addon/routes/configuration/index.js
+    id: r.index-model-hash
+    level: MUST
+    text: ConfigurationIndexRoute.model must read the parent 'configuration' model
+      to obtain acme, cluster, urls, crl and engine, and must return a hash containing
+      hasConfig (from shouldPromptConfig), engine, acme, cluster, urls, crl, the mountConfig
+      promise for engine.id, and a freshly created 'pki/issuer' record as issuerModel.
+  - codeRefs:
+    - class:328bc27d4d4d2e804e5c8d8445052f6e
+    - class:687415f6be20c0b7f58519cfc5fad17c
+    id: r.mount-path-service
+    level: MUST
+    text: PkiConfigurationCreateRoute and PkiConfigurationEditRoute must obtain the
+      secret mount path through the secretMountPath service and use its currentPath
+      as the label and model for the mount breadcrumb entries.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/pki/addon/routes/configuration/create.js
+    - file:third_party/openbao/ui/lib/pki/addon/routes/configuration/edit.js
+    - file:third_party/openbao/ui/lib/pki/addon/routes/configuration/index.js
+    id: r.parent-model-source
+    level: SHOULD
+    text: All three routes should take acme, cluster, urls, crl and engine from modelFor('configuration')
+      rather than re-fetching them, so the child routes stay consistent with the parent
+      configuration model.
   upstream: self
 - code:
   - third_party/openbao/ui/lib/pki/addon/routes/issuers/generate-intermediate.js
