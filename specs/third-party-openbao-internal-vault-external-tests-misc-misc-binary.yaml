@@ -7,5 +7,84 @@ metadata:
   name: third-party-openbao-internal-vault-external-tests-misc-misc-binary
   namespace: default
 spec:
+  intent: 'This context exists to pin down the behavior of the OpenBao recovery-mode
+    external test so that the surrounding specification knows what that file guarantees:
+    that recovery mode gates nearly every API path behind a recovery token, that sys/raw
+    can be used under a recovery token to mutate persisted data directly, and that
+    such mutations survive a return to normal mode. It is an acceptance test that
+    only runs when a real OpenBao binary is supplied, so its requirements describe
+    conditional, environment-gated behavior rather than production code paths.'
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/misc/misc_binary/recovery_test.go
+    id: r.list-secrets-nil-safe
+    level: SHOULD
+    text: The listSecrets helper should return nil when the list response is nil,
+      and otherwise decode the "keys" field with mapstructure into a []string so callers
+      compare length only.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/misc/misc_binary/recovery_test.go
+    id: r.parallel-test
+    level: MAY
+    text: The test may call t.Parallel() so it runs concurrently with other tests
+      in the package.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/misc/misc_binary/recovery_test.go
+    id: r.raw-delete-persists
+    level: MUST
+    text: After a final normal-mode restart, the test must require that listing secret/
+      returns zero keys, proving the raw deletion performed in recovery mode persisted
+      across the restart.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/misc/misc_binary/recovery_test.go
+    id: r.raw-delete-under-recovery
+    level: MUST
+    text: With the recovery token set, the test must list sys/raw/logical/<secretMountUUID>
+      and require its keys to equal [foo], then delete sys/raw/logical/<secretMountUUID>/foo
+      through the raw storage endpoint.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/misc/misc_binary/recovery_test.go
+    id: r.recovery-mode-probe
+    level: MUST
+    text: The recovery-mode restart must stop the node and start it with Args ["-recovery"],
+      and its StartProbe must call GenerateRecoveryOperationTokenStatusWithContext,
+      because in recovery mode the only paths reachable without a recovery token are
+      those used to generate one.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/misc/misc_binary/recovery_test.go
+    id: r.recovery-token-single-use
+    level: MUST
+    text: In recovery mode the test must generate a recovery token with testcluster.GenerateRoot(cluster,
+      testcluster.GenerateRecovery), and must fail if a second GenerateRecovery call
+      succeeds; the returned token is then set on the client.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/misc/misc_binary/recovery_test.go
+    id: r.restart-preserves-secret
+    level: MUST
+    text: The restart helper must stop the first node, start it again with the original
+      options, unseal all nodes, and wait for an active node; after the first restart
+      the test must require that listing secret/ still returns at least one key.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/misc/misc_binary/recovery_test.go
+    id: r.seed-secret-and-record-uuid
+    level: MUST
+    text: 'Before any restart, the test must mount a kv-v1 engine at secret/, write
+      secret/foo with value {"bar": 1.0}, list secret/ and require the keys to equal
+      [foo], then read the mount list and record the UUID of the secret/ mount for
+      later raw access.'
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/misc/misc_binary/recovery_test.go
+    id: r.single-node-trace-cluster
+    level: MUST
+    text: The test must start a Docker cluster with NumCores 1, image repo quay.io/openbao/openbao,
+      tag latest, VaultBinary set to the BAO_BINARY value, node LogLevel TRACE, and
+      must defer cluster cleanup.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/misc/misc_binary/recovery_test.go
+    id: r.skip-without-binary
+    level: MUST
+    text: TestRecovery_Docker must read the BAO_BINARY variable and skip the test
+      with the message "only running docker test when $BAO_BINARY present" when it
+      is empty, so the Docker test never runs without an explicit binary.
   upstream: self

@@ -2413,6 +2413,20 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.recovery-token-cleared-between-phases` (SHOULD): "Each phase of TestRecovery should construct its own TestCluster with NumCores 1 and defer cluster.Cleanup, and should call cluster.EnsureCoresSealed before moving to the next phase, so the recovery and regular clusters never hold the storage backend open at the same time."
 - added `r.seal-after-panic-no-deadlock` (MUST): "After the panicking read, TestRecoverFromPanic must wait for the core to become active with vault.TestWaitActive and then call cluster.EnsureCoresSealed(t), so a regression in panic recovery that prevents the core from sealing causes the test to deadlock rather than pass."
 
+### third-party-openbao-internal-vault-external-tests-misc-misc-binary
+
+- intent: "" -> "This context exists to pin down the behavior of the OpenBao recovery-mode external test so that the surrounding specification knows what that file guarantees: that recovery mode gates nearly every API path behind a recovery token, that sys/raw can be used under a recovery token to mutate persisted data directly, and that such mutations survive a return to normal mode. It is an acceptance test that only runs when a real OpenBao binary is supplied, so its requirements describe conditional, environment-gated behavior rather than production code paths."
+- added `r.list-secrets-nil-safe` (SHOULD): "The listSecrets helper should return nil when the list response is nil, and otherwise decode the "keys" field with mapstructure into a []string so callers compare length only."
+- added `r.parallel-test` (MAY): "The test may call t.Parallel() so it runs concurrently with other tests in the package."
+- added `r.raw-delete-persists` (MUST): "After a final normal-mode restart, the test must require that listing secret/ returns zero keys, proving the raw deletion performed in recovery mode persisted across the restart."
+- added `r.raw-delete-under-recovery` (MUST): "With the recovery token set, the test must list sys/raw/logical/<secretMountUUID> and require its keys to equal [foo], then delete sys/raw/logical/<secretMountUUID>/foo through the raw storage endpoint."
+- added `r.recovery-mode-probe` (MUST): "The recovery-mode restart must stop the node and start it with Args ["-recovery"], and its StartProbe must call GenerateRecoveryOperationTokenStatusWithContext, because in recovery mode the only paths reachable without a recovery token are those used to generate one."
+- added `r.recovery-token-single-use` (MUST): "In recovery mode the test must generate a recovery token with testcluster.GenerateRoot(cluster, testcluster.GenerateRecovery), and must fail if a second GenerateRecovery call succeeds; the returned token is then set on the client."
+- added `r.restart-preserves-secret` (MUST): "The restart helper must stop the first node, start it again with the original options, unseal all nodes, and wait for an active node; after the first restart the test must require that listing secret/ still returns at least one key."
+- added `r.seed-secret-and-record-uuid` (MUST): "Before any restart, the test must mount a kv-v1 engine at secret/, write secret/foo with value {"bar": 1.0}, list secret/ and require the keys to equal [foo], then read the mount list and record the UUID of the secret/ mount for later raw access."
+- added `r.single-node-trace-cluster` (MUST): "The test must start a Docker cluster with NumCores 1, image repo quay.io/openbao/openbao, tag latest, VaultBinary set to the BAO_BINARY value, node LogLevel TRACE, and must defer cluster cleanup."
+- added `r.skip-without-binary` (MUST): "TestRecovery_Docker must read the BAO_BINARY variable and skip the test with the message "only running docker test when $BAO_BINARY present" when it is empty, so the Docker test never runs without an explicit binary."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -2572,3 +2586,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-vault-external-tests-mfa-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-misc-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-misc-misc-binary-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-internal-vault-external-tests-misc-misc-binary-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-vault-external-tests-namespaces-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |

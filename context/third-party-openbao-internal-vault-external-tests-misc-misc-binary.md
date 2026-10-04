@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to pin down the behavior of the OpenBao recovery-mode external test so that the surrounding specification knows what that file guarantees: that recovery mode gates nearly every API path behind a recovery token, that sys/raw can be used under a recovery token to mutate persisted data directly, and that such mutations survive a return to normal mode. It is an acceptance test that only runs when a real OpenBao binary is supplied, so its requirements describe conditional, environment-gated behavior rather than production code paths.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
