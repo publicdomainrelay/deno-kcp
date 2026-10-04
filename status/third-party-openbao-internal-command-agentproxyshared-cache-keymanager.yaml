@@ -1,0 +1,66 @@
+conditions:
+- message: 'undeclared: KeyManager, KeyManager.RetrievalToken, KeyManager.Wrapper,
+    NewPassthroughKeyManager, PassthroughKeyManager, PassthroughKeyManager.RetrievalToken,
+    PassthroughKeyManager.Wrapper'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/command/agentproxyshared/cache/keymanager/manager.go
+  - third_party/openbao/internal/command/agentproxyshared/cache/keymanager/passthrough.go
+  - third_party/openbao/internal/command/agentproxyshared/cache/keymanager/passthrough_test.go
+  fingerprint: 3c5547742aaf8c7b73e22a4950f1c6e5773457975ea494558dacce39b1a7683b
+  interfaces:
+  - codegraphId: interface:d00c51a0235874fb732e081ad66bc03a
+    file: third_party/openbao/internal/command/agentproxyshared/cache/keymanager/manager.go
+    kind: interface
+    line: 16
+    name: KeyManager
+  - codegraphId: method:ff0d80c0ab9cc136eac0d0a232e1c88a
+    file: third_party/openbao/internal/command/agentproxyshared/cache/keymanager/manager.go
+    kind: method
+    line: 18
+    name: KeyManager.Wrapper
+    signature: () wrapping.Wrapper
+  - codegraphId: method:08219df992da36d79b44d2a92e7f0c51
+    file: third_party/openbao/internal/command/agentproxyshared/cache/keymanager/manager.go
+    kind: method
+    line: 22
+    name: KeyManager.RetrievalToken
+    signature: (ctx context.Context) ([]byte, error)
+  - codegraphId: struct:194fd2b46e2244a6f7f3f7de2e915e3f
+    file: third_party/openbao/internal/command/agentproxyshared/cache/keymanager/passthrough.go
+    kind: struct
+    line: 18
+    name: PassthroughKeyManager
+  - codegraphId: function:d44e09ab3af0fd99b64a10c3f2faa4d2
+    file: third_party/openbao/internal/command/agentproxyshared/cache/keymanager/passthrough.go
+    kind: function
+    line: 25
+    name: NewPassthroughKeyManager
+    signature: (ctx context.Context, key []byte) (*PassthroughKeyManager, error)
+  - codegraphId: method:a129007c172ebe0a5d8127eb26368b58
+    file: third_party/openbao/internal/command/agentproxyshared/cache/keymanager/passthrough.go
+    kind: method
+    line: 59
+    name: PassthroughKeyManager.Wrapper
+    signature: () wrapping.Wrapper
+  - codegraphId: method:1d7f8031128f2daa290c05a3247b7687
+    file: third_party/openbao/internal/command/agentproxyshared/cache/keymanager/passthrough.go
+    kind: method
+    line: 66
+    name: PassthroughKeyManager.RetrievalToken
+    signature: (ctx context.Context) ([]byte, error)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: d06df411740aa54a7c19da70b7bfe2c60da5976d5e69345e63626470d6c9ad0a
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 3c5547742aaf8c7b73e22a4950f1c6e5773457975ea494558dacce39b1a7683b

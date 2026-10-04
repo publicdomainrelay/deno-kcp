@@ -1,0 +1,97 @@
+conditions:
+- message: 'undeclared: BoltStorage, BoltStorage.Clear, BoltStorage.Close, BoltStorage.Delete,
+    BoltStorage.GetAutoAuthToken, BoltStorage.GetByType, BoltStorage.GetRetrievalToken,
+    BoltStorage.Set, BoltStorage.StoreRetrievalToken, BoltStorageConfig, DBFileExists,
+    NewBoltStorage'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go
+  - third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt_test.go
+  fingerprint: 180f2442fa07282639a3adbc0cfbf7bc721b83be78c6ae2602768cffabad9f30
+  interfaces:
+  - codegraphId: struct:744ae4605d56de77f6afc07d6c8f6aee
+    file: third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go
+    kind: struct
+    line: 66
+    name: BoltStorage
+  - codegraphId: struct:87114aebead1ea17d513ad633a32b309
+    file: third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go
+    kind: struct
+    line: 75
+    name: BoltStorageConfig
+  - codegraphId: function:f1a739369259036a49786b0739e2ff97
+    file: third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go
+    kind: function
+    line: 85
+    name: NewBoltStorage
+    signature: (config *BoltStorageConfig) (*BoltStorage, error)
+  - codegraphId: method:bdae86ad3c7c5ad08788564510e300cd
+    file: third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go
+    kind: method
+    line: 236
+    name: BoltStorage.Set
+    signature: (ctx context.Context, id string, plaintext []byte, indexType string)
+      error
+  - codegraphId: method:0f35ddf93e43b0bdfb238d1f6f0e7f83
+    file: third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go
+    kind: method
+    line: 277
+    name: BoltStorage.Delete
+    signature: (id string, indexType string) error
+  - codegraphId: method:7b6ed657ebf53eac2ef6e7393b801636
+    file: third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go
+    kind: method
+    line: 314
+    name: BoltStorage.GetByType
+    signature: (ctx context.Context, indexType string) ([][]byte, error)
+  - codegraphId: method:9cd57cb838cde16a6d4ed7a3a3211f0a
+    file: third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go
+    kind: method
+    line: 343
+    name: BoltStorage.GetAutoAuthToken
+    signature: (ctx context.Context) ([]byte, error)
+  - codegraphId: method:d623a3438a0ab3059ee0cf5018bd3bf3
+    file: third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go
+    kind: method
+    line: 375
+    name: BoltStorage.GetRetrievalToken
+    signature: () ([]byte, error)
+  - codegraphId: method:49d950bd579d14b5a6e9fb769a9091cd
+    file: third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go
+    kind: method
+    line: 398
+    name: BoltStorage.StoreRetrievalToken
+    signature: (token []byte) error
+  - codegraphId: method:f371a40adf2f9c7903dc678db1f1ebce
+    file: third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go
+    kind: method
+    line: 409
+    name: BoltStorage.Close
+    signature: () error
+  - codegraphId: method:9136c2f5f9f6d5aa65801a67a68f316c
+    file: third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go
+    kind: method
+    line: 416
+    name: BoltStorage.Clear
+    signature: () error
+  - codegraphId: function:0266aa1f36c231df4b1fb43aaa4eb2e5
+    file: third_party/openbao/internal/command/agentproxyshared/cache/cacheboltdb/bolt.go
+    kind: function
+    line: 429
+    name: DBFileExists
+    signature: (path string) (bool, error)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 5802eed4fac9abd6526b7dce9d48335c22c79ff24befdc1fa8c4c14760cec423
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 180f2442fa07282639a3adbc0cfbf7bc721b83be78c6ae2602768cffabad9f30
