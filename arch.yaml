@@ -59029,6 +59029,18 @@ system_contexts:
       params[1] as policyName; its transaction sets model.policies to that collection
       with policyName removed via without(), saves the model, and reports 'Successfully
       removed '{policyName}' policy from {model.id}' or a problem-removing message.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/components/identity/popup-alias.js
+    - file:third_party/openbao/ui/app/components/identity/popup-members.js
+    - file:third_party/openbao/ui/app/components/identity/popup-metadata.js
+    - file:third_party/openbao/ui/app/components/identity/popup-policy.js
+    id: r.popup-subclasses-override-transaction
+    level: MUST
+    text: Each popup subclass extends the popup base, supplies its own messageArgs
+      and transaction override, and reports its own successMessage and errorMessage,
+      so the base contract's asserting transaction is never reached and the confirm-then-mutate
+      flow is identical across alias deletion, member removal, metadata removal and
+      policy removal.
   upstream: self
 - code:
   - third_party/openbao/ui/app/components/keymgmt/distribute.js

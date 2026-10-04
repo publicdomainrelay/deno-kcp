@@ -4050,6 +4050,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.popup-members-remove` (MUST): "popup-members.js extends the popup base and reads its three arguments from params as model, groupArray and memberId; its transaction removes memberId from the named group array on the model with without() and saves the model, reporting 'Successfully removed '{memberId}' from the group' or a problem-removing message."
 - added `r.popup-metadata-remove` (MUST): "popup-metadata.js extends the popup base and reads params[0] as model and params[1] as key; its transaction deletes metadata[key], reassigns the metadata object to a shallow copy to preserve reactivity, and saves the model, reporting removal or failure of that key."
 - added `r.popup-policy-remove` (MUST): "popup-policy.js extends the popup base and reads params[0] as model and params[1] as policyName; its transaction sets model.policies to that collection with policyName removed via without(), saves the model, and reports 'Successfully removed '{policyName}' policy from {model.id}' or a problem-removing message."
+- added `r.popup-subclasses-override-transaction` (MUST): "Each popup subclass extends the popup base, supplies its own messageArgs and transaction override, and reports its own successMessage and errorMessage, so the base contract's asserting transaction is never reached and the confirm-then-mutate flow is identical across alias deletion, member removal, metadata removal and policy removal."
 
 ### third-party-openbao-ui-app-components-keymgmt
 
@@ -4388,4 +4389,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-components-identity-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-components-keymgmt-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-components-keymgmt-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-components-mfa-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
