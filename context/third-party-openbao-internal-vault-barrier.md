@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the repository can use OpenBao's barrier implementation from inside its own tree rather than as an external module. The barrier is the trust boundary for stored data: it holds the root key, seals and unseals, owns the keyring of encryption terms, and mediates every Put/Get/Delete/List against physical storage through AES-GCM. It also defines the contracts (SecurityBarrierCore, SecurityBarrier, TransactionalSecurityBarrier, Encryptor, View, TransactionalView, ViewTransaction) that the rest of the vault depends on, and it adapts to backends that implement physical.TransactionalBackend.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
