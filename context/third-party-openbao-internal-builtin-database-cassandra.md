@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-The context exists to specify the Cassandra database plugin of the embedded OpenBao distribution that deno-kcp vendors: a secrets engine that dynamically provisions, rotates, and revokes Cassandra users and roles on behalf of the platform. It is third-party code carried in-tree rather than written here, so the spec records the contract the plugin must satisfy (the dbplugin interface, session lifecycle, CQL statement handling, rollback on failed creation) for anyone reading, testing, or modifying the vendored copy.
+The context exists to specify the Cassandra database plugin of the embedded OpenBao distribution that deno-kcp vendors: a secrets engine that dynamically provisions, rotates, and revokes Cassandra users on behalf of the platform. It is third-party code carried in-tree rather than written here, so the spec records the contract the vendored copy must satisfy (the dbplugin method set, the gocql session lifecycle, CQL statement splitting and interpolation, and rollback on failed creation) for anyone reading, testing, or modifying it.
 
 _Write the prose above and the fields in the spec block. `codeRefs` and the resolved references below are maintained by the tool; an edit there is lost._
 
@@ -75,13 +75,15 @@ requirements:
     generate the username through usernameProducer.Generate, and fall back to defaultUserCreationCQL
     when the request supplies no creation statements.
 - codeRefs:
+  - file:third_party/openbao/internal/builtin/database/cassandra/cassandra.go
   - method:e7749700dfbe1b3401f7c87b94a47a51
   id: r.new-user-rollback
   level: MUST
-  text: On a failed creation statement, Cassandra.NewUser must roll back with the
-    rollback statements (defaultUserDeletionCQL when none are given) and return the
-    original error joined with any rollback error via multierror.Append.
+  text: On a failed creation statement Cassandra.NewUser must roll back with the rollback
+    statements (defaultUserDeletionCQL when none are given) and return the original
+    error joined with any rollback error via multierror.Append.
 - codeRefs:
+  - file:third_party/openbao/internal/builtin/database/cassandra/cassandra.go
   - method:e7749700dfbe1b3401f7c87b94a47a51
   id: r.new-user-splits-statements
   level: MUST
@@ -94,7 +96,7 @@ requirements:
   id: r.new-wraps-sanitizer
   level: MUST
   text: New must build a Cassandra via new() and return it wrapped by dbplugin.NewDatabaseErrorSanitizerMiddleware
-    so errors are scrubbed of secret values.
+    with the embedded secretValues so errors are scrubbed of secret values.
 - codeRefs:
   - file:third_party/openbao/internal/builtin/database/cassandra/connection_producer.go
   - method:5fdcc8148196b14dda92e86d37277920
@@ -129,7 +131,7 @@ requirements:
   id: r.tls-config
   level: SHOULD
   text: TLS settings for Cassandra connections must be built in tls.go and applied
-    when the session is created.
+    when the gocql session is created.
 - codeRefs:
   - method:e84994d2e2914fd4b017db889f7b23a5
   - struct:cf5ab4cfb46e08ff7c0a3f11416c81d0
