@@ -9,5 +9,10 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/ui/tests/unit/services/auth-test.js` file auth-test.js (third_party/openbao/ui/tests/unit/services/auth-test.js)
+- `file:third_party/openbao/ui/tests/unit/services/console-test.js` file console-test.js (third_party/openbao/ui/tests/unit/services/console-test.js)
+- `file:third_party/openbao/ui/tests/unit/services/path-helper-test.js` file path-helper-test.js (third_party/openbao/ui/tests/unit/services/path-helper-test.js)
+- `file:third_party/openbao/ui/tests/unit/services/permissions-test.js` file permissions-test.js (third_party/openbao/ui/tests/unit/services/permissions-test.js)
+- `file:third_party/openbao/ui/tests/unit/services/store-test.js` file store-test.js (third_party/openbao/ui/tests/unit/services/store-test.js)
+- `file:third_party/openbao/ui/tests/unit/services/wizard-test.js` file wizard-test.js (third_party/openbao/ui/tests/unit/services/wizard-test.js)
 <!-- SPECD_MANAGED_END -->

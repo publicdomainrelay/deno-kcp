@@ -9,5 +9,7 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/ui/tests/unit/serializers/mfa-login-enforcement-test.js` file mfa-login-enforcement-test.js (third_party/openbao/ui/tests/unit/serializers/mfa-login-enforcement-test.js)
+- `file:third_party/openbao/ui/tests/unit/serializers/policy-test.js` file policy-test.js (third_party/openbao/ui/tests/unit/serializers/policy-test.js)
+- `file:third_party/openbao/ui/tests/unit/serializers/transit-key-test.js` file transit-key-test.js (third_party/openbao/ui/tests/unit/serializers/transit-key-test.js)
 <!-- SPECD_MANAGED_END -->

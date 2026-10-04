@@ -9,5 +9,7 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/ui/types/forms.ts` file forms.ts (third_party/openbao/ui/types/forms.ts)
+- `file:third_party/openbao/ui/types/global.d.ts` file global.d.ts (third_party/openbao/ui/types/global.d.ts)
+- `type_alias:68d772687802cdc5760f5fc2c6225df0` type_alias HTMLElementEvent (third_party/openbao/ui/types/forms.ts)
 <!-- SPECD_MANAGED_END -->
