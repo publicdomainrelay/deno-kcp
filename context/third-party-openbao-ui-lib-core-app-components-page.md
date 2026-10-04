@@ -9,5 +9,6 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/ui/lib/core/app/components/page/breadcrumbs.js` file breadcrumbs.js (third_party/openbao/ui/lib/core/app/components/page/breadcrumbs.js)
+- `file:third_party/openbao/ui/lib/core/app/components/page/error.js` file error.js (third_party/openbao/ui/lib/core/app/components/page/error.js)
 <!-- SPECD_MANAGED_END -->
