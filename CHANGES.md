@@ -5835,9 +5835,17 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 
 ### third-party-openbao-ui-lib-pki-addon-controllers-roles
 
-- intent: "" -> "The context exists to capture the contract of the PKI roles index controller: a route-scoped Ember controller whose only responsibility is to hand templates the mount point of the PKI engine the roles list belongs to. It is a small, single-purpose read-only surface — the list itself, filtering, and role data come from the route and model, while this controller only answers "which mount is this?" so links and API paths can be built relative to the correct engine."
+- intent: "" -> "The context exists to capture the contract of the PKI roles index controller: a route-scoped Ember controller whose only responsibility is to hand templates the mount point of the PKI engine the roles list belongs to. It is a small, single-purpose read-only surface — the list itself, filtering, and role data come from the route and model, while this controller only answers which mount is this, so links and API paths can be built relative to the correct engine."
 - added `r.default-export-controller-class` (MUST): "The module third_party/openbao/ui/lib/pki/addon/controllers/roles/index.js must default-export a single class PkiRolesIndexController that extends Ember's Controller, so the roles index route resolves it as its controller."
 - added `r.mount-point-getter` (MUST): "PkiRolesIndexController must expose a getter mountPoint that obtains the controller's owner via getOwner(this) and returns that owner's mountPoint property, so consumers read the PKI engine mount path without the controller storing any mount state of its own."
+
+### third-party-openbao-ui-lib-pki-addon-controllers-roles-role
+
+- intent: "" -> "This context exists so the role generate and sign route controllers of the OpenBao PKI UI addon are described as they are: a minimal submitted-state flag plus the action that toggles it. It anchors the two controller classes and their only members, giving the specification a place to state that submission state and title toggling are the entire contract of these files, with no route model, service, or API call in scope."
+- added `r.generate-controller-tracks-submission` (MUST): "PkiRolesGenerateController extends Ember's Controller and holds a tracked hasSubmitted property that starts as false; this flag is the controller's only state for the role generate route."
+- added `r.generate-toggle-title` (MUST): "PkiRolesGenerateController exposes an action toggleTitle() that assigns hasSubmitted the negation of its current value, so calling it once flips the flag from false to true and calling it again flips it back."
+- added `r.sign-controller-tracks-submission` (MUST): "PkiRolesSignController extends Ember's Controller and holds a tracked hasSubmitted property that starts as false; this flag is the controller's only state for the role sign route."
+- added `r.sign-toggle-title` (MUST): "PkiRolesSignController exposes an action toggleTitle() that assigns hasSubmitted the negation of its current value, so calling it once flips the flag from false to true and calling it again flips it back."
 
 ## Realization
 
@@ -6360,5 +6368,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-pki-addon-controllers-roles-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-controllers-roles-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-controllers-roles-role-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-lib-pki-addon-controllers-tidy-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-pki-addon-decorators-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |

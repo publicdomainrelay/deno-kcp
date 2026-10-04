@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the role generate and sign route controllers of the OpenBao PKI UI addon are described as they are: a minimal submitted-state flag plus the action that toggles it. It anchors the two controller classes and their only members, giving the specification a place to state that submission state and title toggling are the entire contract of these files, with no route model, service, or API call in scope.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

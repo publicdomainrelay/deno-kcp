@@ -1,5 +1,7 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
+- class:10670943171f0fc51d50f5e149b3a85d PkiRolesGenerateController@third_party/openbao/ui/lib/pki/addon/controllers/roles/role/generate.js:10
+- class:ac560dd4208c215d6856feeb695aa96e PkiRolesSignController@third_party/openbao/ui/lib/pki/addon/controllers/roles/role/sign.js:10
 - file:third_party/openbao/ui/lib/pki/addon/controllers/roles/role/generate.js generate.js@third_party/openbao/ui/lib/pki/addon/controllers/roles/role/generate.js
 - file:third_party/openbao/ui/lib/pki/addon/controllers/roles/role/sign.js sign.js@third_party/openbao/ui/lib/pki/addon/controllers/roles/role/sign.js
 kind: SystemContext
@@ -7,5 +9,53 @@ metadata:
   name: third-party-openbao-ui-lib-pki-addon-controllers-roles-role
   namespace: default
 spec:
+  intent: 'This context exists so the role generate and sign route controllers of
+    the OpenBao PKI UI addon are described as they are: a minimal submitted-state
+    flag plus the action that toggles it. It anchors the two controller classes and
+    their only members, giving the specification a place to state that submission
+    state and title toggling are the entire contract of these files, with no route
+    model, service, or API call in scope.'
+  interfaces:
+  - file: third_party/openbao/ui/lib/pki/addon/controllers/roles/role/generate.js
+    kind: class
+    name: PkiRolesGenerateController
+    signature: export default class PkiRolesGenerateController extends Controller
+  - file: third_party/openbao/ui/lib/pki/addon/controllers/roles/role/sign.js
+    kind: class
+    name: PkiRolesSignController
+    signature: export default class PkiRolesSignController extends Controller
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - class:10670943171f0fc51d50f5e149b3a85d
+    - file:third_party/openbao/ui/lib/pki/addon/controllers/roles/role/generate.js
+    id: r.generate-controller-tracks-submission
+    level: MUST
+    text: PkiRolesGenerateController extends Ember's Controller and holds a tracked
+      hasSubmitted property that starts as false; this flag is the controller's only
+      state for the role generate route.
+  - codeRefs:
+    - class:10670943171f0fc51d50f5e149b3a85d
+    - file:third_party/openbao/ui/lib/pki/addon/controllers/roles/role/generate.js
+    id: r.generate-toggle-title
+    level: MUST
+    text: PkiRolesGenerateController exposes an action toggleTitle() that assigns
+      hasSubmitted the negation of its current value, so calling it once flips the
+      flag from false to true and calling it again flips it back.
+  - codeRefs:
+    - class:ac560dd4208c215d6856feeb695aa96e
+    - file:third_party/openbao/ui/lib/pki/addon/controllers/roles/role/sign.js
+    id: r.sign-controller-tracks-submission
+    level: MUST
+    text: PkiRolesSignController extends Ember's Controller and holds a tracked hasSubmitted
+      property that starts as false; this flag is the controller's only state for
+      the role sign route.
+  - codeRefs:
+    - class:ac560dd4208c215d6856feeb695aa96e
+    - file:third_party/openbao/ui/lib/pki/addon/controllers/roles/role/sign.js
+    id: r.sign-toggle-title
+    level: MUST
+    text: PkiRolesSignController exposes an action toggleTitle() that assigns hasSubmitted
+      the negation of its current value, so calling it once flips the flag from false
+      to true and calling it again flips it back.
   upstream: self
