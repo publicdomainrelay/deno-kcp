@@ -2144,6 +2144,21 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.retry-run-sets-initial-state-first` (MUST): "retryHandler.Run must call setInitialState before starting its goroutine, then register the work on the wait group so the call does not block; the goroutine must run a run.Group with one actor that waits on the shutdown channel and one that runs the periodic state update, and the second actor's interrupt function must shut the client down."
 - added `r.run-delegates-to-retry-handler` (MUST): "serviceRegistration.Run must accept the shutdown channel, the wait group and a string argument that it ignores, and it must delegate to the retry handler so retries start without blocking the caller."
 
+### third-party-openbao-internal-serviceregistration-kubernetes-client
+
+- intent: "" -> "The package is vendored third-party code inside deno-kcp so the OpenBao service-registration path can talk to Kubernetes without pulling in the full client-go dependency tree. The spec records the behavior the vendored copy must keep: authenticated, retrying, TLS-verified pod reads and non-destructive pod patches, plus the sanitization and secret-hygiene rules that make its error output safe to log."
+- added `r.client-construction` (MUST): "New loads the in-cluster configuration (host, CA pool, bearer token) and returns its error unchanged when the process is not running in Kubernetes; on success it stores the given logger, the loaded Config, and a fresh stop channel on the returned Client."
+- added `r.get-pod` (MUST): "GetPod rejects an empty namespace with ErrNamespaceUnset and an empty pod name with ErrPodNameUnset, otherwise issues a GET to /api/v1/namespaces/{namespace}/pods/{podName} against the configured host and decodes the JSON response body into a Pod."
+- added `r.https-and-auth` (MUST): "Every request sets an Authorization header of the form Bearer plus the configured bearer token, an Accept: application/json header, and a transport whose TLS client config uses the Config's CA cert pool as RootCAs."
+- added `r.in-cluster-config` (MUST): "inClusterConfig reads host and port from KUBERNETES_SERVICE_HOST and KUBERNETES_SERVICE_PORT, returning ErrNotInCluster when either is empty, then reads the service-account token file and root CA file, builds the x509 pool, and returns a Config whose Host is scheme plus host:port and whose BearerToken comes from the token file."
+- added `r.namespace-and-pod-env-names` (MAY): "The package exposes EnvVarKubernetesNamespace (BAO_K8S_NAMESPACE) and EnvVarKubernetesPodName (BAO_K8S_POD_NAME) as consistently named constants for callers that read the Downward API, and does not read them itself."
+- added `r.no-secret-leak` (SHOULD): "Error strings returned from request handling include only the request method, request URL and response status code, never the request or response body, so tokens and payloads do not reach logs."
+- added `r.not-found-error` (MUST): "A 404 response is reported as a *ErrNotFound whose Error method returns the sanitized debugging string rather than any response body."
+- added `r.patch-pod` (MUST): "PatchPod rejects an empty namespace or pod name with the same sentinel errors, is a no-op when called with no patches, errors when any patch carries the unset operation, and otherwise sends a PATCH to the pod endpoint with Content-Type application/json-patch+json and a JSON array whose entries carry op, path and value."
+- added `r.retry-policy` (MUST): "Requests run through a retryable HTTP client configured with RetryWaitMin 500ms, RetryWaitMax 30s and RetryMax 10; the check-retry predicate retries a nil response and the 500/502/503/504 statuses, treats 200/201/202/204 as success, and on 401/403 re-reads the in-cluster config so a refreshed bearer token is picked up before retrying."
+- added `r.sanitize` (MUST): "Sanitize maps each rune of its input to itself when it is a letter, a number, or one of '-', '_' or '.', and to '-' otherwise, so the result contains only Kubernetes-legal characters."
+- added `r.shutdown-cancels-retries` (MUST): "Shutdown closes the client's stop channel, and the in-flight request context watches that channel so an in-progress retry loop is cancelled instead of hanging at process exit."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -2279,5 +2294,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-physical-raft-snapshot-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-serviceregistration-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-serviceregistration-kubernetes-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-serviceregistration-kubernetes-client-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-serviceregistration-kubernetes-client-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-serviceregistration-kubernetes-client-cmd-kubeclient-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-serviceregistration-kubernetes-testing-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |

@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The package is vendored third-party code inside deno-kcp so the OpenBao service-registration path can talk to Kubernetes without pulling in the full client-go dependency tree. The spec records the behavior the vendored copy must keep: authenticated, retrying, TLS-verified pod reads and non-destructive pod patches, plus the sanitization and secret-hygiene rules that make its error output safe to log.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
