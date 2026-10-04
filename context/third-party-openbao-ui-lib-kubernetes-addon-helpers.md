@@ -9,5 +9,6 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `class:d0f222f7db6aa4f4d2ad9e72f0099d51` class CurrentMountPathHelper (third_party/openbao/ui/lib/kubernetes/addon/helpers/current-mount-path.js)
+- `file:third_party/openbao/ui/lib/kubernetes/addon/helpers/current-mount-path.js` file current-mount-path.js (third_party/openbao/ui/lib/kubernetes/addon/helpers/current-mount-path.js)
 <!-- SPECD_MANAGED_END -->

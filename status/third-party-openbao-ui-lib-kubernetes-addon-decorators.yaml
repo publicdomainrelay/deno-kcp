@@ -1,15 +1,34 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: decorator, withConfig'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/ui/lib/kubernetes/addon/decorators/fetch-config.js
+  fingerprint: 2f7c85bdbae2c4400fba894b1c6ac0cb026b6bdd390102ac02d3a038df613f82
+  interfaces:
+  - codegraphId: function:d90c137b6b5934dba9fdb7039bd644df
+    file: third_party/openbao/ui/lib/kubernetes/addon/decorators/fetch-config.js
+    kind: function
+    line: 14
+    name: withConfig
+    signature: ()
+  - codegraphId: function:f77d15cc82e182359a209a7b5b1bb19c
+    file: third_party/openbao/ui/lib/kubernetes/addon/decorators/fetch-config.js
+    kind: function
+    line: 15
+    name: decorator
+    signature: (SuperClass)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: aeb0d53b4321bfb93d59933e75ec0462c4609e7f0311d6ed1d537e374e1ae084
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 2f7c85bdbae2c4400fba894b1c6ac0cb026b6bdd390102ac02d3a038df613f82
