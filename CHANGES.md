@@ -4979,6 +4979,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.index-setup-controller` (MUST): "The index route setupController passes the model, a has404 flag and hasModel true to the controller, and when no 404 was recorded also sets the controller page property from the model meta currentPage, defaulting to 1."
 - added `r.index-transition-cache` (MUST): "The willTransition action scrolls the window to the top and clears all store datasets whenever the transition target is not this route, and the reload action clears all datasets before refreshing the route."
 
+### third-party-openbao-ui-app-routes-vault-cluster-access-oidc
+
+- intent: "" -> "This context exists to record the OIDC access index route of the OpenBao UI: the page a user reaches under a cluster's access section for OIDC. Its purpose is to decide, before the index template renders, whether any OIDC clients already exist; if they do, the user is sent straight to the client list, and if they do not (the adapter raises 404 for an empty collection), the index route stays in place to present the first-time setup call to action. Documenting it makes that redirect contract, the injected services it depends on, and its error-swallowing rule explicit for anyone changing the OIDC routing tree or the oidc/client adapter."
+- added `r.before-model-queries-oidc-clients` (MUST): "The beforeModel hook must query the oidc/client model through the store service with an empty query object and return the resulting promise, so the redirect decision happens before the index route renders."
+- added `r.default-export-route-subclass` (MUST): "The module must default-export a class named OidcConfigureRoute that extends Ember's Route, so the Ember router can resolve it as the route handler for vault.cluster.access.oidc.index."
+- added `r.inject-store-and-router-services` (MUST): "The route must declare injected Ember services named store and router via the service decorator, because the redirect logic reads the oidc/client model through store and performs the transition through router."
+- added `r.swallow-query-error` (MUST): "When the oidc/client query rejects, the hook must catch the error and swallow it without rethrowing or transitioning, so the 404 the adapter raises for an empty client collection leaves the user on the index route that shows the first-time configuration call to action."
+- added `r.transition-to-clients-on-success` (MUST): "When the oidc/client query resolves, the hook must call router.transitionTo with the route name vault.cluster.access.oidc.clients, sending the user to the client list instead of the OIDC index page."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5389,6 +5398,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-routes-vault-cluster-access-mfa-methods-method-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-namespaces-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-oidc-assignments-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-ui-app-routes-vault-cluster-access-oidc-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-routes-vault-cluster-access-oidc-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
