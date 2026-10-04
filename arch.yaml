@@ -73502,22 +73502,23 @@ system_contexts:
     - file:third_party/openbao/ui/lib/open-api-explorer/addon/routes/index.js
     id: r.after-model-warning
     level: MUST
-    text: The route's afterModel hook calls flashMessages.warning exactly once with
-      the side-effect warning text and the options sticky true and preformatted true,
-      so the notice persists and renders with its line breaks intact.
+    text: The route's afterModel hook calls this.flashMessages.warning exactly once
+      with the warning text and the options sticky true and preformatted true, so
+      the notice persists and renders with its line breaks intact.
   - codeRefs:
     - file:third_party/openbao/ui/lib/open-api-explorer/addon/routes/index.js
     id: r.default-route-extension
     level: MUST
-    text: The module default-exports an Ember Route instance created by Route.extend,
-      which becomes the open-api-explorer index route; the route class is the only
+    text: The module default-exports a single Ember Route instance created by Route.extend,
+      which becomes the open-api-explorer index route; the route object is the only
       thing the module exports.
   - codeRefs:
     - file:third_party/openbao/ui/lib/open-api-explorer/addon/routes/index.js
     id: r.flash-messages-service-injection
     level: MUST
-    text: The route injects the flashMessages service via the service() injector so
-      that afterModel can push a warning into the application's flash message queue.
+    text: The route injects the flashMessages service with the service() injector
+      imported from @ember/service under the property name flashMessages, so that
+      afterModel can push a warning into the application's flash message queue.
   - codeRefs:
     - file:third_party/openbao/ui/lib/open-api-explorer/addon/routes/index.js
     id: r.license-header
@@ -73528,17 +73529,18 @@ system_contexts:
     - file:third_party/openbao/ui/lib/open-api-explorer/addon/routes/index.js
     id: r.no-op-model-hook
     level: MUST
-    text: The route defines a no-op model hook returning nothing, so Ember does not
-      reuse the parent route's model, which would conflict with this route's query
+    text: The route defines an empty model hook that returns nothing, so Ember does
+      not reuse the parent route's model, which would conflict with this route's query
       params.
   - codeRefs:
     - file:third_party/openbao/ui/lib/open-api-explorer/addon/routes/index.js
     id: r.warning-content
     level: MUST
-    text: The warning text states that "Try it out" makes requests to the OpenBao
-      server on the user's behalf, that a token with the proper capabilities will
-      create and delete items on that server, and that the token will also be shown
-      on screen in the example curl command output.
+    text: The warning text states that the "Try it out" functionality in the API explorer
+      makes requests to the OpenBao server on the user's behalf, that if the token
+      has the proper capabilities this will create and delete items on the OpenBao
+      server, and that the token will also be shown on the screen in the example curl
+      command output.
   upstream: self
 - code:
   - third_party/openbao/ui/lib/open-api-explorer/config/environment.js

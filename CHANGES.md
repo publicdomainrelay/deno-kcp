@@ -5733,12 +5733,12 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 ### third-party-openbao-ui-lib-open-api-explorer-addon-routes
 
 - intent: "" -> "This context exists so the OpenBao API explorer route warns users, before any interaction, about the side effects of the explorer's "Try it out" feature. It is the route-level guard for a UI whose requests act on a real OpenBao server using the operator's token, so the warning must appear on entry to the route rather than after a request is issued. The empty model hook is part of the same intent: it keeps the explorer's own query-param state from being clobbered by an inherited parent model."
-- added `r.after-model-warning` (MUST): "The route's afterModel hook calls flashMessages.warning exactly once with the side-effect warning text and the options sticky true and preformatted true, so the notice persists and renders with its line breaks intact."
-- added `r.default-route-extension` (MUST): "The module default-exports an Ember Route instance created by Route.extend, which becomes the open-api-explorer index route; the route class is the only thing the module exports."
-- added `r.flash-messages-service-injection` (MUST): "The route injects the flashMessages service via the service() injector so that afterModel can push a warning into the application's flash message queue."
+- added `r.after-model-warning` (MUST): "The route's afterModel hook calls this.flashMessages.warning exactly once with the warning text and the options sticky true and preformatted true, so the notice persists and renders with its line breaks intact."
+- added `r.default-route-extension` (MUST): "The module default-exports a single Ember Route instance created by Route.extend, which becomes the open-api-explorer index route; the route object is the only thing the module exports."
+- added `r.flash-messages-service-injection` (MUST): "The route injects the flashMessages service with the service() injector imported from @ember/service under the property name flashMessages, so that afterModel can push a warning into the application's flash message queue."
 - added `r.license-header` (MUST): "The file carries the HashiCorp copyright header and the SPDX-License-Identifier MPL-2.0 comment at the top, as required for vendored OpenBao source."
-- added `r.no-op-model-hook` (MUST): "The route defines a no-op model hook returning nothing, so Ember does not reuse the parent route's model, which would conflict with this route's query params."
-- added `r.warning-content` (MUST): "The warning text states that "Try it out" makes requests to the OpenBao server on the user's behalf, that a token with the proper capabilities will create and delete items on that server, and that the token will also be shown on screen in the example curl command output."
+- added `r.no-op-model-hook` (MUST): "The route defines an empty model hook that returns nothing, so Ember does not reuse the parent route's model, which would conflict with this route's query params."
+- added `r.warning-content` (MUST): "The warning text states that the "Try it out" functionality in the API explorer makes requests to the OpenBao server on the user's behalf, that if the token has the proper capabilities this will create and delete items on the OpenBao server, and that the token will also be shown on the screen in the example curl command output."
 
 ### third-party-openbao-ui-lib-open-api-explorer-config
 
@@ -6260,3 +6260,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-open-api-explorer-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-open-api-explorer-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-open-api-explorer-config-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-lib-pki-addon-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
