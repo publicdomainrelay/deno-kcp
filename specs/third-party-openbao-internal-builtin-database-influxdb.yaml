@@ -4,5 +4,146 @@ metadata:
   name: third-party-openbao-internal-builtin-database-influxdb
   namespace: default
 spec:
+  intent: 'The context exists so the plugin''s contract is stated without reading
+    the tree: what the engine must accept at configuration time, how a client is lazily
+    created and reused, and which dbplugin v5 methods must be implemented for the
+    plugin to register. It also fixes the split of responsibility between the exported
+    Influxdb type and the reusable embedded connection producer, so changes to connection
+    lifecycle do not leak into user-management methods and vice versa.'
+  interfaces:
+  - file: third_party/openbao/internal/builtin/database/influxdb/influxdb.go
+    kind: struct
+    name: Influxdb
+    signature: type Influxdb struct
+  - file: third_party/openbao/internal/builtin/database/influxdb/influxdb.go
+    kind: method
+    name: Influxdb.DeleteUser
+    signature: (ctx context.Context, req dbplugin.DeleteUserRequest) (dbplugin.DeleteUserResponse,
+      error)
+  - file: third_party/openbao/internal/builtin/database/influxdb/influxdb.go
+    kind: method
+    name: Influxdb.Initialize
+    signature: (ctx context.Context, req dbplugin.InitializeRequest) (resp dbplugin.InitializeResponse,
+      err error)
+  - file: third_party/openbao/internal/builtin/database/influxdb/influxdb.go
+    kind: method
+    name: Influxdb.NewUser
+    signature: (ctx context.Context, req dbplugin.NewUserRequest) (resp dbplugin.NewUserResponse,
+      err error)
+  - file: third_party/openbao/internal/builtin/database/influxdb/influxdb.go
+    kind: method
+    name: Influxdb.Type
+    signature: () (string, error)
+  - file: third_party/openbao/internal/builtin/database/influxdb/influxdb.go
+    kind: method
+    name: Influxdb.UpdateUser
+    signature: (ctx context.Context, req dbplugin.UpdateUserRequest) (dbplugin.UpdateUserResponse,
+      error)
+  - file: third_party/openbao/internal/builtin/database/influxdb/influxdb.go
+    kind: function
+    name: New
+    signature: () (any, error)
+  - file: third_party/openbao/internal/builtin/database/influxdb/connection_producer.go
+    kind: method
+    name: influxdbConnectionProducer.Close
+    signature: () error
+  - file: third_party/openbao/internal/builtin/database/influxdb/connection_producer.go
+    kind: method
+    name: influxdbConnectionProducer.Connection
+    signature: (_ context.Context) (any, error)
+  - file: third_party/openbao/internal/builtin/database/influxdb/connection_producer.go
+    kind: method
+    name: influxdbConnectionProducer.Initialize
+    signature: (ctx context.Context, req dbplugin.InitializeRequest) (dbplugin.InitializeResponse,
+      error)
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - method:e391d167b34e53753dc09bbe81074f3c
+    id: r.close-releases-client
+    level: MUST
+    text: Close must take the write lock, close the client when one is present, clear
+      it to nil, and return a nil error.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/database/influxdb/connection_producer.go
+    - method:e71af09f65386ef024c2e6e63e055684
+    id: r.config-decode-and-defaults
+    level: MUST
+    text: The connection producer's Initialize must take the write lock, store rawConfig
+      from req.Config, weakly decode req.Config into itself, and default ConnectTimeoutRaw
+      to "5s" and Port to "8086" when those fields are empty.
+  - codeRefs:
+    - method:e71af09f65386ef024c2e6e63e055684
+    id: r.connect-timeout-parse
+    level: MUST
+    text: The connection producer's Initialize must parse ConnectTimeoutRaw with parseutil.ParseDurationSecond
+      into connectTimeout, and must return an error wrapped as "invalid connect_timeout"
+      if parsing fails.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/database/influxdb/connection_producer.go
+    - method:3cc3f29e393367b29390c3c1bfabca54
+    id: r.connection-lazy-reuse
+    level: MUST
+    text: Connection must return connutil.ErrNotInitialized when Initialized is false,
+      return the cached client when one exists, and otherwise create a client via
+      createClient, store it on the producer and return it.
+  - codeRefs:
+    - function:c1484f85f39f628d19195cc28565bce5
+    - struct:c02eba0c9ce1c52ce8f9e4effa345749
+    id: r.constructor-returns-plugin
+    level: MUST
+    text: New must return a freshly constructed plugin (an Influxdb value carrying
+      an initialized influxdbConnectionProducer and a username producer) as any, with
+      a nil error, so dbplugin can load it.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/database/influxdb/influxdb_test.go
+    id: r.existing-tests
+    level: SHOULD
+    text: The package should keep influxdb_test.go covering the plugin so the interface
+      behaviour stated above stays verified.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/database/influxdb/influxdb.go
+    - method:f4c9593b085943a1ed3692b16c0041d3
+    id: r.influxdb-type-identity
+    level: MUST
+    text: Influxdb.Type must return the constant influxdbTypeName as the plugin type
+      string, identifying the engine to the database plugin registry.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/database/influxdb/influxdb.go
+    - method:4b45f855fd127fbc969c645b15707c76
+    id: r.initialize-delegates
+    level: MUST
+    text: Influxdb.Initialize must delegate to the embedded connection producer's
+      Initialize and return its response and error.
+  - codeRefs:
+    - method:e71af09f65386ef024c2e6e63e055684
+    id: r.initialized-and-verify
+    level: MUST
+    text: The connection producer's Initialize must set Initialized to true after
+      all fields are set, and, when req.VerifyConnection is set, must call Connection
+      and return an error wrapped as "error verifying connection" on failure.
+  - codeRefs:
+    - method:e71af09f65386ef024c2e6e63e055684
+    id: r.required-config-fields
+    level: MUST
+    text: The connection producer's Initialize must reject configuration with empty
+      Host, Username or Password, and must return the errors "host cannot be empty",
+      "username cannot be empty" and "password cannot be empty" respectively.
+  - codeRefs:
+    - method:e71af09f65386ef024c2e6e63e055684
+    id: r.tls-from-pem-input
+    level: MUST
+    text: The connection producer's Initialize must accept either PemJSON (parsed
+      with certutil.ParsePKIJSON) or PemBundle (parsed with certutil.ParsePEMBundle),
+      convert the parsed bundle to a cert bundle, and set certificate, privateKey,
+      issuingCA and TLS on itself.
+  - codeRefs:
+    - method:905d8c8e90a01bace90902617d440b03
+    - method:cfbba024b2a25d90ac816d96b59ba6b4
+    - method:fb96838d44355cb6541ae53ec7b80b92
+    id: r.user-crud-methods
+    level: MUST
+    text: Influxdb must implement NewUser, DeleteUser and UpdateUser against dbplugin
+      v5 request and response types so the engine satisfies the database plugin user-management
+      interface.
   upstream: self
