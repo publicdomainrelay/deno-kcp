@@ -1467,6 +1467,19 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.string-joins-with-comma` (MUST): "StringFlag.String must return the elements of the slice joined with a single comma and no surrounding spaces, giving the flag package a stable textual rendering of the accumulated values."
 - added `r.tests-cover-behaviour` (SHOULD): "The package's behaviour should stay covered by the accompanying test file, which exercises the flag slice helper alongside the implementation."
 
+### third-party-openbao-internal-helper-homedir
+
+- intent: "" -> "This context exists so that OpenBao-derived code in this repository has one place to resolve the home directory portably and to turn user-supplied `~`-prefixed configuration paths into absolute ones. It isolates the platform difference in home-directory discovery and the caching of that lookup, and gives callers a single expansion routine that fails loudly instead of silently mishandling `~user` paths."
+- added `r.behaviour-covered-by-tests` (SHOULD): "The package's behaviour for Dir() and Expand() stay covered by the unit tests in homedir_test.go."
+- added `r.cache-concurrency-safe` (MUST): "Dir() hold the package cache lock around the cache check and the discovery call so concurrent callers cannot race on the cached value."
+- added `r.discovery-error` (MUST): "Dir() return an empty string together with the discovery error when the underlying OS-specific routine fails."
+- added `r.expand-propagates-error` (MUST): "Expand() return an empty string and propagate the error from Dir() when home directory discovery fails."
+- added `r.home-directory-cached` (MUST): "Dir() cache the first successful home directory in a package-level variable and return that cached value on subsequent calls without repeating discovery."
+- added `r.home-directory-discovery` (MUST): "Dir() return the home directory of the executing user, choosing the discovery routine by operating system: dirWindows on windows and dirUnix on every other OS."
+- added `r.tilde-prefix-expansion` (MUST): "Expand() replace a leading `~` in the path with the home directory returned by Dir() and join it with the remainder using filepath.Join."
+- added `r.untouched-paths` (MUST): "Expand() return the input path unchanged, with no error, when the path is empty or does not begin with `~`."
+- added `r.user-specific-rejected` (MUST): "Expand() return an error with the text "cannot expand user-specific home directory" when the path begins with `~` followed by a character other than `/` or `\`."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -1544,4 +1557,4 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-helper-flag-slice-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-flag-slice-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-forwarding-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-internal-helper-homedir-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-helper-homedir-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |

@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so that OpenBao-derived code in this repository has one place to resolve the home directory portably and to turn user-supplied `~`-prefixed configuration paths into absolute ones. It isolates the platform difference in home-directory discovery and the caching of that lookup, and gives callers a single expansion routine that fails loudly instead of silently mishandling `~user` paths.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

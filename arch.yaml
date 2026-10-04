@@ -20675,8 +20675,83 @@ system_contexts:
   codeRefIndex:
   - file:third_party/openbao/internal/helper/homedir/homedir.go homedir.go@third_party/openbao/internal/helper/homedir/homedir.go
   - file:third_party/openbao/internal/helper/homedir/homedir_test.go homedir_test.go@third_party/openbao/internal/helper/homedir/homedir_test.go
+  - function:4cb6dd1a877c5fa72a15a67c31238a1e Dir@third_party/openbao/internal/helper/homedir/homedir.go:24
+  - function:c145f28b3a5d3aef304d86cc7e6ad2d5 Expand@third_party/openbao/internal/helper/homedir/homedir.go:50
   id: sc.third-party-openbao-internal-helper-homedir
+  intent: This context exists so that OpenBao-derived code in this repository has
+    one place to resolve the home directory portably and to turn user-supplied `~`-prefixed
+    configuration paths into absolute ones. It isolates the platform difference in
+    home-directory discovery and the caching of that lookup, and gives callers a single
+    expansion routine that fails loudly instead of silently mishandling `~user` paths.
+  interfaces:
+  - file: third_party/openbao/internal/helper/homedir/homedir.go
+    kind: function
+    name: Dir
+    signature: func Dir() (string, error)
+  - file: third_party/openbao/internal/helper/homedir/homedir.go
+    kind: function
+    name: Expand
+    signature: func Expand(path string) (string, error)
   name: third-party-openbao-internal-helper-homedir
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/homedir/homedir_test.go
+    id: r.behaviour-covered-by-tests
+    level: SHOULD
+    text: The package's behaviour for Dir() and Expand() stay covered by the unit
+      tests in homedir_test.go.
+  - codeRefs:
+    - function:4cb6dd1a877c5fa72a15a67c31238a1e
+    id: r.cache-concurrency-safe
+    level: MUST
+    text: Dir() hold the package cache lock around the cache check and the discovery
+      call so concurrent callers cannot race on the cached value.
+  - codeRefs:
+    - function:4cb6dd1a877c5fa72a15a67c31238a1e
+    id: r.discovery-error
+    level: MUST
+    text: Dir() return an empty string together with the discovery error when the
+      underlying OS-specific routine fails.
+  - codeRefs:
+    - function:c145f28b3a5d3aef304d86cc7e6ad2d5
+    id: r.expand-propagates-error
+    level: MUST
+    text: Expand() return an empty string and propagate the error from Dir() when
+      home directory discovery fails.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/homedir/homedir.go
+    - function:4cb6dd1a877c5fa72a15a67c31238a1e
+    id: r.home-directory-cached
+    level: MUST
+    text: Dir() cache the first successful home directory in a package-level variable
+      and return that cached value on subsequent calls without repeating discovery.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/homedir/homedir.go
+    - function:4cb6dd1a877c5fa72a15a67c31238a1e
+    id: r.home-directory-discovery
+    level: MUST
+    text: 'Dir() return the home directory of the executing user, choosing the discovery
+      routine by operating system: dirWindows on windows and dirUnix on every other
+      OS.'
+  - codeRefs:
+    - function:c145f28b3a5d3aef304d86cc7e6ad2d5
+    id: r.tilde-prefix-expansion
+    level: MUST
+    text: Expand() replace a leading `~` in the path with the home directory returned
+      by Dir() and join it with the remainder using filepath.Join.
+  - codeRefs:
+    - function:c145f28b3a5d3aef304d86cc7e6ad2d5
+    id: r.untouched-paths
+    level: MUST
+    text: Expand() return the input path unchanged, with no error, when the path is
+      empty or does not begin with `~`.
+  - codeRefs:
+    - function:c145f28b3a5d3aef304d86cc7e6ad2d5
+    id: r.user-specific-rejected
+    level: MUST
+    text: Expand() return an error with the text "cannot expand user-specific home
+      directory" when the path begins with `~` followed by a character other than
+      `/` or `\`.
   upstream: self
 - code:
   - third_party/openbao/internal/helper/hostutil/hostinfo.go
