@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context is the client/server contract for running an OpenBao database secrets engine backend as a separate plugin process. It exists so that a plugin binary implements one Go interface and the host can call it over gRPC without sharing a type identity, while the host keeps tracing, metrics and error sanitization in front of every call.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
