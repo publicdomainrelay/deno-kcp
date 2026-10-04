@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the PKI engine routes can detect whether a secrets engine has been configured before rendering. The withConfig decorator wraps a route and, during beforeModel, probes the unauthenticated pki/issuer endpoint for the current mount path. Routes apply the decorator to gain a shouldPromptConfig flag that the view layer can use to prompt the user for configuration. The guard keeps the decorator safe to apply only to Ember Route subclasses, degrading to a console error and the original class instead of throwing.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

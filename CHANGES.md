@@ -5847,6 +5847,14 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.sign-controller-tracks-submission` (MUST): "PkiRolesSignController extends Ember's Controller and holds a tracked hasSubmitted property that starts as false; this flag is the controller's only state for the role sign route."
 - added `r.sign-toggle-title` (MUST): "PkiRolesSignController exposes an action toggleTitle() that assigns hasSubmitted the negation of its current value, so calling it once flips the flag from false to true and calling it again flips it back."
 
+### third-party-openbao-ui-lib-pki-addon-decorators
+
+- intent: "" -> "This context exists so the PKI engine routes can detect whether a secrets engine has been configured before rendering. The withConfig decorator wraps a route and, during beforeModel, probes the unauthenticated pki/issuer endpoint for the current mount path. Routes apply the decorator to gain a shouldPromptConfig flag that the view layer can use to prompt the user for configuration. The guard keeps the decorator safe to apply only to Ember Route subclasses, degrading to a console error and the original class instead of throwing."
+- added `r.before-model-probe` (MUST): "CheckConfig.beforeModel must be async, must call super.beforeModel(...arguments) first, then query the store for 'pki/issuer' with backend set to this.secretMountPath.currentPath, setting shouldPromptConfig to true when the query resolves and to false when it rejects, and must return that promise."
+- added `r.export-factory` (MUST): "The module must export withConfig, a zero-argument factory that returns the route class decorator function."
+- added `r.route-guard` (MUST): "The returned decorator must check Object.prototype.isPrototypeOf.call(Route, SuperClass); when the check fails it must log 'withConfig decorator must be used on an instance of ember Route class. Decorator not applied to returned class' to console.error and return SuperClass unchanged."
+- added `r.wrapped-class` (MUST): "When the guard passes, the decorator must return a class CheckConfig that extends SuperClass, injects the secretMountPath service, and initializes shouldPromptConfig to false."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -6369,6 +6377,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-pki-addon-controllers-roles-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-controllers-roles-role-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-controllers-tidy-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-ui-lib-pki-addon-decorators-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-pki-addon-decorators-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-lib-pki-addon-decorators-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |

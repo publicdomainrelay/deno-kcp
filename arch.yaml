@@ -74979,8 +74979,60 @@ system_contexts:
   - third_party/openbao/ui/lib/pki/addon/decorators/check-config.js
   codeRefIndex:
   - file:third_party/openbao/ui/lib/pki/addon/decorators/check-config.js check-config.js@third_party/openbao/ui/lib/pki/addon/decorators/check-config.js
+  - function:0c525784d07e38e0a048415378b52427 decorator@third_party/openbao/ui/lib/pki/addon/decorators/check-config.js:16
+  - function:77c6c1fd50a76c505b38f9b6d4154d75 withConfig@third_party/openbao/ui/lib/pki/addon/decorators/check-config.js:15
   id: sc.third-party-openbao-ui-lib-pki-addon-decorators
+  intent: This context exists so the PKI engine routes can detect whether a secrets
+    engine has been configured before rendering. The withConfig decorator wraps a
+    route and, during beforeModel, probes the unauthenticated pki/issuer endpoint
+    for the current mount path. Routes apply the decorator to gain a shouldPromptConfig
+    flag that the view layer can use to prompt the user for configuration. The guard
+    keeps the decorator safe to apply only to Ember Route subclasses, degrading to
+    a console error and the original class instead of throwing.
+  interfaces:
+  - file: third_party/openbao/ui/lib/pki/addon/decorators/check-config.js
+    kind: function
+    name: decorator
+    signature: decorator(SuperClass)
+  - file: third_party/openbao/ui/lib/pki/addon/decorators/check-config.js
+    kind: function
+    name: withConfig
+    signature: withConfig()
   name: third-party-openbao-ui-lib-pki-addon-decorators
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/pki/addon/decorators/check-config.js
+    - function:0c525784d07e38e0a048415378b52427
+    id: r.before-model-probe
+    level: MUST
+    text: CheckConfig.beforeModel must be async, must call super.beforeModel(...arguments)
+      first, then query the store for 'pki/issuer' with backend set to this.secretMountPath.currentPath,
+      setting shouldPromptConfig to true when the query resolves and to false when
+      it rejects, and must return that promise.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/pki/addon/decorators/check-config.js
+    - function:77c6c1fd50a76c505b38f9b6d4154d75
+    id: r.export-factory
+    level: MUST
+    text: The module must export withConfig, a zero-argument factory that returns
+      the route class decorator function.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/pki/addon/decorators/check-config.js
+    - function:0c525784d07e38e0a048415378b52427
+    id: r.route-guard
+    level: MUST
+    text: The returned decorator must check Object.prototype.isPrototypeOf.call(Route,
+      SuperClass); when the check fails it must log 'withConfig decorator must be
+      used on an instance of ember Route class. Decorator not applied to returned
+      class' to console.error and return SuperClass unchanged.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/pki/addon/decorators/check-config.js
+    - function:0c525784d07e38e0a048415378b52427
+    id: r.wrapped-class
+    level: MUST
+    text: When the guard passes, the decorator must return a class CheckConfig that
+      extends SuperClass, injects the secretMountPath service, and initializes shouldPromptConfig
+      to false.
   upstream: self
 - code:
   - third_party/openbao/ui/lib/pki/addon/helpers/current-mount-path.js
