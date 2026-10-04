@@ -10,5 +10,19 @@ spec:
   systemContext: third-party-openbao-ui-lib-pki-addon-routes-certificates-certificate
   toCommit: e33a5585dc1ac9d3bf63bc1ebdcf5dbb45369989
 status:
-  message: the agent is summarizing third-party-openbao-ui-lib-pki-addon-routes-certificates-certificate
-  phase: Running
+  agentLog: 'This context covers a single Ember.js route in the OpenBao PKI UI addon:
+    `PkiCertificateDetailsRoute`, defined in `third_party/openbao/ui/lib/pki/addon/routes/certificates/certificate/details.js`.
+    The class extends the Ember `Route` base and injects two services, `store` (Ember
+    Data) and `secretMountPath`. Its `model()` hook reads the `serial` segment from
+    the parent `certificates/certificate` route''s params and issues an Ember Data
+    `queryRecord` against the `pki/certificate/base` model type, passing the current
+    secrets-engine mount path as `backend` and the serial as `id`. Its `setupController()`
+    hook calls the superclass implementation and then assigns a four-entry `breadcrumbs`
+    array onto the controller, linking `secrets`, the current mount path (via the
+    `overview` route), `certificates.index`, and finally the certificate''s own `model.id`
+    as the terminal crumb.'
+  message: wrote 3 requirement(s) and 0 interface(s) for third-party-openbao-ui-lib-pki-addon-routes-certificates-certificate;
+    interface PkiCertificateDetailsRoute.model is not in the observed facts; dropped;
+    interface PkiCertificateDetailsRoute.setupController is not in the observed facts;
+    dropped
+  phase: Succeeded
