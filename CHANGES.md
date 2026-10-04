@@ -5994,6 +5994,18 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.sign-controller-state` (MUST): "The sign route's `setupController` sets `controller.breadcrumbs` to a trail ending in a terminal `sign certificate` label and sets `controller.hasSubmitted = false`, which the controller updates on a successful sign."
 - added `r.sign-model` (MUST): "The sign route's model hook reads the `role` param from `roles/role` and returns `store.createRecord('pki/certificate/sign', { role })`, producing an unsaved model for the signing form."
 
+### third-party-openbao-ui-lib-pki-addon-routes-tidy
+
+- intent: "" -> "This context exists to pin down the routing and controller-wiring behaviour of the PKI tidy feature in the vendored OpenBao UI, so that changes to the tidy status polling, the auto-tidy view model, or the manual tidy form's record creation and breadcrumbs can be made without breaking the rest of the addon. It is a slice of third_party code rather than first-party code, so the spec records what these three route modules actually do — the endpoints they call, the services they inject, the model keys they expose and the lifecycle hooks they implement — as the contract other route, controller and template modules in the same addon depend on."
+- added `r.tidy-auto-model-from-parent` (MUST): "PkiTidyAutoRoute.model calls modelFor('tidy'), destructures autoTidyConfig from the parent tidy model and returns it unchanged, so the auto-tidy route never issues its own network request and always reflects the configuration already resolved by the parent route."
+- added `r.tidy-index-model-hash` (MUST): "PkiTidyIndexRoute.model reads hasConfig, autoTidyConfig and engine from modelFor('tidy') and returns hash() combining the promise from fetchTidyStatus with those three values, so the status template sees the fetch result and the parent configuration together."
+- added `r.tidy-index-reset-controller` (MUST): "PkiTidyIndexRoute.resetController cancels all running pollTidyStatus tasks when isExiting is true, preventing the status poll from surviving after the user leaves the route; on any other exit it leaves polling untouched."
+- added `r.tidy-index-setup-controller` (MUST): "PkiTidyIndexRoute.setupController calls super.setupController, sets controller.notConfiguredMessage to PKI_DEFAULT_EMPTY_STATE_MSG, assigns resolvedModel.tidyStatus and this.fetchTidyStatus onto the controller, and starts polling by performing controller.pollTidyStatus."
+- added `r.tidy-index-status-fetch` (MUST): "PkiTidyIndexRoute.fetchTidyStatus resolves the application adapter through the injected store and issues a GET to `/v1/${this.secretMountPath.currentPath}/tidy-status`, then stamps the returned payload with responseTimestamp from timestamp.now() and returns tidyStatusResponse.data."
+- added `r.tidy-manual-breadcrumbs` (MUST): "PkiTidyManualRoute.setupController calls super.setupController and then sets controller.breadcrumbs to the five-entry chain: secrets linked externally, the current secret mount path routed to overview with the path as its model, configuration.index, tidy, and the unlinked manual leaf — each of the first four entries carrying secretMountPath.currentPath in its models array."
+- added `r.tidy-manual-new-record` (MUST): "PkiTidyManualRoute.model creates an unsaved pki/tidy record through the store with backend set to secretMountPath.currentPath, so the manual tidy form starts from a blank record bound to the current mount."
+- added `r.tidy-services-injected` (MUST): "PkiTidyIndexRoute and PkiTidyManualRoute each inject the store and secretMountPath services, and both use secretMountPath.currentPath as the backend path they operate on."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -6536,5 +6548,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-pki-addon-routes-roles-role-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-routes-tidy-auto-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-routes-tidy-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-lib-pki-addon-routes-tidy-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |

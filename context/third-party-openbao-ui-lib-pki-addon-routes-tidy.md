@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to pin down the routing and controller-wiring behaviour of the PKI tidy feature in the vendored OpenBao UI, so that changes to the tidy status polling, the auto-tidy view model, or the manual tidy form's record creation and breadcrumbs can be made without breaking the rest of the addon. It is a slice of third_party code rather than first-party code, so the spec records what these three route modules actually do — the endpoints they call, the services they inject, the model keys they expose and the lifecycle hooks they implement — as the contract other route, controller and template modules in the same addon depend on.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
