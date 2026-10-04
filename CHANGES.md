@@ -1260,6 +1260,18 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.token-reads-stored-value` (MUST): "mockSink.Token must return the token currently held by the sink — the constructor argument until a write replaces it, the last written value afterwards — letting tests assert on captured writes."
 - added `r.write-token-replaces-value` (MUST): "mockSink.WriteToken must overwrite the sink's stored token with the supplied token and return nil, so every write succeeds and the newest token is what a later read observes."
 
+### third-party-openbao-internal-command-agentproxyshared-winsvc
+
+- intent: "" -> "This context exists so the agent proxy can run as a native Windows service. The Windows service manager drives the process through a handler interface, but the rest of the agent only needs one portable signal: a channel that fires when the service controller asks the process to stop. ShutdownChannel is that portable surface, and serviceWindows.Execute is the adapter that translates Windows service control requests into it. The init hook keeps normal interactive invocations unaffected, registering the handler only in a real service session."
+- added `r.execute-answers-interrogate` (MUST): "On an Interrogate command, Execute writes the request's current status back on the status channel and continues the loop, keeping the service manager's view of the service state up to date."
+- added `r.execute-loops-on-change-requests` (MUST): "Execute loops reading change requests from the request channel and dispatches on the command field, so the service stays alive and responsive until a stop or shutdown command ends it."
+- added `r.execute-reports-start-and-running` (MUST): "serviceWindows.Execute sends StartPending on the status channel, then sends Running with accepts set to AcceptStop combined with AcceptShutdown, declaring the two control codes the service will honor."
+- added `r.execute-stops-on-stop-or-shutdown` (MUST): "On Stop or Shutdown, Execute sends StopPending, sends the value 1 on chanGraceExit so anything waiting on ShutdownChannel learns that shutdown was requested, then returns svcSpecificEC false with exit code 0, which ends the service."
+- added `r.init-detects-interactive-session` (MUST): "The package init calls wsvc.IsAnInteractiveSession, panics if that check returns an error, and returns early when the session is interactive, so the program never registers itself as a service while running from a console."
+- added `r.init-runs-service-handler` (MUST): "When the session is not interactive, init launches wsvc.Run with an empty service name and a serviceWindows value in a goroutine, so the Windows service dispatcher reaches serviceWindows.Execute."
+- added `r.shutdown-channel-exposes-grace-exit` (MUST): "ShutdownChannel returns the receive-only end of the package-level chanGraceExit channel, so callers outside the package can wait for the signal that a shutdown request arrived for the service without being able to send on it."
+- added `r.windows-only-build` (MUST): "The service handler and its init registration live in a Windows-specific file, so the interactive-session check, the wsvc handler, and the service registration are compiled only on Windows while ShutdownChannel stays available on every platform."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -1318,6 +1330,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-command-agentproxyshared-sink-file-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agentproxyshared-sink-inmem-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agentproxyshared-sink-mock-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-command-agentproxyshared-winsvc-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-command-agentproxyshared-winsvc-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-config-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
