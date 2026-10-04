@@ -42991,8 +42991,179 @@ system_contexts:
   - file:third_party/openbao/sdk/database/helper/connutil/connutil.go connutil.go@third_party/openbao/sdk/database/helper/connutil/connutil.go
   - file:third_party/openbao/sdk/database/helper/connutil/sql.go sql.go@third_party/openbao/sdk/database/helper/connutil/sql.go
   - file:third_party/openbao/sdk/database/helper/connutil/sql_test.go sql_test.go@third_party/openbao/sdk/database/helper/connutil/sql_test.go
+  - interface:48d4b5869c65a3b882d131454d06163c ConnectionProducer@third_party/openbao/sdk/database/helper/connutil/connutil.go:17
+  - method:04fdc8dc8f6253a32a168232526042f8 ConnectionProducer.Init@third_party/openbao/sdk/database/helper/connutil/connutil.go:19
+  - method:502c42c9107694a9c33a985fd2cc9b2a SQLConnectionProducer.SetCredentials@third_party/openbao/sdk/database/helper/connutil/sql.go:203
+  - method:6fcf84dfb3c68382c9e7b1bea6d77885 SQLConnectionProducer.Connection@third_party/openbao/sdk/database/helper/connutil/sql.go:122
+  - method:84115a9344807fbb8bc739368f64d780 SQLConnectionProducer.Close@third_party/openbao/sdk/database/helper/connutil/sql.go:183
+  - method:9816f53d6ac0e746c72b7357c2e3be4c SQLConnectionProducer.SecretValues@third_party/openbao/sdk/database/helper/connutil/sql.go:176
+  - method:c99c5c903f8a077b34026b268b8c4458 ConnectionProducer.Close@third_party/openbao/sdk/database/helper/connutil/connutil.go:18
+  - method:dc4c94228b7447cb58b273d7e8546074 SQLConnectionProducer.Init@third_party/openbao/sdk/database/helper/connutil/sql.go:42
+  - method:e6cf6b9a6696eff4668c928fb4e0056d ConnectionProducer.Connection@third_party/openbao/sdk/database/helper/connutil/connutil.go:20
+  - struct:d81f5bea6f8380adacb6db72f7f323e0 SQLConnectionProducer@third_party/openbao/sdk/database/helper/connutil/sql.go:25
   id: sc.third-party-openbao-sdk-database-helper-connutil
+  intent: 'This context exists because the builtin database plugins (for example the
+    MySQL and Valkey producers under third_party/openbao/internal/builtin/database)
+    embed connutil.SQLConnectionProducer and are driven through the connutil.ConnectionProducer
+    interface, so the interface contract and the shared SQL producer behaviour must
+    be described as one unit: the interface fixes what a producer can do, and sql.go
+    fixes the default implementation of that contract, including credential escaping
+    and connection-pool settings that every SQL-backed plugin inherits.'
+  interfaces:
+  - file: third_party/openbao/sdk/database/helper/connutil/connutil.go
+    kind: interface
+    name: ConnectionProducer
+    signature: type ConnectionProducer interface { Close() error; Init(context.Context,
+      map[string]any, bool) (map[string]any, error); Connection(context.Context) (any,
+      error); sync.Locker }
+  - file: third_party/openbao/sdk/database/helper/connutil/connutil.go
+    kind: method
+    name: ConnectionProducer.Close
+    signature: Close() error
+  - file: third_party/openbao/sdk/database/helper/connutil/connutil.go
+    kind: method
+    name: ConnectionProducer.Connection
+    signature: Connection(context.Context) (any, error)
+  - file: third_party/openbao/sdk/database/helper/connutil/connutil.go
+    kind: method
+    name: ConnectionProducer.Init
+    signature: Init(context.Context, map[string]any, bool) (map[string]any, error)
+  - file: third_party/openbao/sdk/database/helper/connutil/sql.go
+    kind: struct
+    name: SQLConnectionProducer
+    signature: type SQLConnectionProducer struct { ConnectionURL string; MaxOpenConnections
+      int; MaxIdleConnections int; MaxConnectionLifetimeRaw any; Username string;
+      Password string; DisableEscaping bool; Type string; RawConfig map[string]any;
+      maxConnectionLifetime time.Duration; Initialized bool; db *sql.DB; sync.Mutex
+      }
+  - file: third_party/openbao/sdk/database/helper/connutil/sql.go
+    kind: method
+    name: SQLConnectionProducer.Close
+    signature: func (c *SQLConnectionProducer) Close() error
+  - file: third_party/openbao/sdk/database/helper/connutil/sql.go
+    kind: method
+    name: SQLConnectionProducer.Connection
+    signature: func (c *SQLConnectionProducer) Connection(ctx context.Context) (any,
+      error)
+  - file: third_party/openbao/sdk/database/helper/connutil/sql.go
+    kind: method
+    name: SQLConnectionProducer.Init
+    signature: func (c *SQLConnectionProducer) Init(ctx context.Context, conf map[string]any,
+      verifyConnection bool) (map[string]any, error)
+  - file: third_party/openbao/sdk/database/helper/connutil/sql.go
+    kind: method
+    name: SQLConnectionProducer.SecretValues
+    signature: func (c *SQLConnectionProducer) SecretValues() map[string]any
+  - file: third_party/openbao/sdk/database/helper/connutil/sql.go
+    kind: method
+    name: SQLConnectionProducer.SetCredentials
+    signature: func (c *SQLConnectionProducer) SetCredentials(ctx context.Context,
+      statements dbplugin.Statements, staticUser dbplugin.StaticUserConfig) (username,
+      password string, err error)
   name: third-party-openbao-sdk-database-helper-connutil
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/sdk/database/helper/connutil/sql.go
+    - method:84115a9344807fbb8bc739368f64d780
+    id: r.close-clears-handle
+    level: MUST
+    text: Close must take the write lock, close the underlying *sql.DB when present,
+      set the handle to nil, and return nil so a closed producer can be reinitialized.
+  - codeRefs:
+    - file:third_party/openbao/sdk/database/helper/connutil/sql.go
+    - method:6fcf84dfb3c68382c9e7b1bea6d77885
+    id: r.connection-reuse-and-open
+    level: MUST
+    text: Connection must return the cached *sql.DB when its PingContext succeeds,
+      close and discard it when the ping fails, then open a new handle whose driver
+      name is sqlserver for Type "mssql" and Type otherwise, appending timezone=UTC
+      and application_name=vault for postgres:// and postgresql:// URLs, and apply
+      max open connections, max idle connections and max connection lifetime to the
+      handle.
+  - codeRefs:
+    - file:third_party/openbao/sdk/database/helper/connutil/sql_test.go
+    id: r.credential-escaping-tests
+    level: SHOULD
+    text: The package tests should cover round-tripping credentials containing braces,
+      colons, slashes, at-signs and quotes through Init into a parseable URL, honour
+      and reject raw credentials according to disable_escaping, and assert that template
+      variables in credentials produce the documented template error.
+  - codeRefs:
+    - file:third_party/openbao/sdk/database/helper/connutil/sql.go
+    - method:dc4c94228b7447cb58b273d7e8546074
+    - struct:d81f5bea6f8380adacb6db72f7f323e0
+    id: r.init-decodes-config
+    level: MUST
+    text: SQLConnectionProducer.Init must hold the mutex, store the raw config map,
+      and weakly decode it into the producer fields; it must reject an empty connection_url,
+      default max_open_connections to 4, default max_idle_connections to max_open_connections
+      capped at that value, default max_connection_lifetime to "0s", and return an
+      error wrapping "invalid max_connection_lifetime" when the duration cannot be
+      parsed.
+  - codeRefs:
+    - file:third_party/openbao/sdk/database/helper/connutil/sql.go
+    - method:dc4c94228b7447cb58b273d7e8546074
+    id: r.init-escapes-credentials
+    level: MUST
+    text: Init must path-escape the username unless disable_escaping is true, path-escape
+      the password unless disable_escaping is true or the producer Type is mysql,
+      and substitute both values for the {{username}} and {{password}} markers in
+      the connection URL through dbutil.QueryHelper.
+  - codeRefs:
+    - file:third_party/openbao/sdk/database/helper/connutil/sql.go
+    - method:dc4c94228b7447cb58b273d7e8546074
+    id: r.init-rejects-template-credentials
+    level: MUST
+    text: Init must refuse a username or password that itself contains {{username}}
+      or {{password}}, returning the error "username and/or password cannot contain
+      the template variables", so the substitution markers cannot be re-injected by
+      configuration.
+  - codeRefs:
+    - file:third_party/openbao/sdk/database/helper/connutil/sql.go
+    - method:dc4c94228b7447cb58b273d7e8546074
+    id: r.init-verifies-connection
+    level: MUST
+    text: When Init is called with verifyConnection true it must obtain a connection
+      and ping it, returning an error wrapping "error verifying connection" on failure;
+      the Initialized flag is set before verification so the connection can be established
+      lazily.
+  - codeRefs:
+    - file:third_party/openbao/sdk/database/helper/connutil/connutil.go
+    - method:6fcf84dfb3c68382c9e7b1bea6d77885
+    - method:dc4c94228b7447cb58b273d7e8546074
+    id: r.not-initialized-error
+    level: MUST
+    text: A producer that has not been initialized must return the package-level ErrNotInitialized
+      error rather than a nil connection, and successful Init must set the Initialized
+      flag so later Connection calls proceed.
+  - codeRefs:
+    - file:third_party/openbao/sdk/database/helper/connutil/connutil.go
+    - interface:48d4b5869c65a3b882d131454d06163c
+    - method:04fdc8dc8f6253a32a168232526042f8
+    - method:c99c5c903f8a077b34026b268b8c4458
+    - method:e6cf6b9a6696eff4668c928fb4e0056d
+    id: r.producer-interface-contract
+    level: MUST
+    text: ConnectionProducer must be satisfied by any database connection producer
+      and must combine Close() error, Init(context.Context, map[string]any, bool)
+      (map[string]any, error), Connection(context.Context) (any, error) and the sync.Locker
+      methods, so callers can lock a producer while initializing or closing it.
+  - codeRefs:
+    - file:third_party/openbao/sdk/database/helper/connutil/sql.go
+    - method:9816f53d6ac0e746c72b7357c2e3be4c
+    id: r.secret-values-masks-password
+    level: MUST
+    text: SecretValues must return a map that masks the configured password under
+      the key equal to the password itself with the value "[password]", so logging
+      a producer never prints the credential.
+  - codeRefs:
+    - file:third_party/openbao/sdk/database/helper/connutil/sql.go
+    - method:502c42c9107694a9c33a985fd2cc9b2a
+    id: r.set-credentials-unimplemented
+    level: MUST
+    text: SQLConnectionProducer.SetCredentials must be a stub that returns empty username
+      and password together with dbutil.Unimplemented(), because the generic SQL producer
+      does not manage static database users.
   upstream: self
 - code:
   - third_party/openbao/sdk/database/helper/credsutil/credsutil.go

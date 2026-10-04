@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists because the builtin database plugins (for example the MySQL and Valkey producers under third_party/openbao/internal/builtin/database) embed connutil.SQLConnectionProducer and are driven through the connutil.ConnectionProducer interface, so the interface contract and the shared SQL producer behaviour must be described as one unit: the interface fixes what a producer can do, and sql.go fixes the default implementation of that contract, including credential escaping and connection-pool settings that every SQL-backed plugin inherits.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
