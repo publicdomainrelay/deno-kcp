@@ -3,10 +3,331 @@ codeRefIndex:
 - file:third_party/openbao/sdk/helper/stepwise/helpers.go helpers.go@third_party/openbao/sdk/helper/stepwise/helpers.go
 - file:third_party/openbao/sdk/helper/stepwise/stepwise.go stepwise.go@third_party/openbao/sdk/helper/stepwise/stepwise.go
 - file:third_party/openbao/sdk/helper/stepwise/stepwise_test.go stepwise_test.go@third_party/openbao/sdk/helper/stepwise/stepwise_test.go
+- function:02be2fcde650dd2ffc251bae7d9f6fa9 Run@third_party/openbao/sdk/helper/stepwise/stepwise.go:156
+- function:a7b9c5e2ca772eec6c12e53764581d72 NewCertificateGetter@third_party/openbao/sdk/helper/stepwise/helpers.go:77
+- function:edf9806f79977872bbfd56a69101b908 CompilePlugin@third_party/openbao/sdk/helper/stepwise/helpers.go:23
+- interface:0817ab851865c9ef74781c18acff32d5 TestT@third_party/openbao/sdk/helper/stepwise/stepwise.go:317
+- interface:f7ca7f1188a7494a5008d870ae488b6f Environment@third_party/openbao/sdk/helper/stepwise/stepwise.go:37
+- method:08627482674d496992f382856290192f Environment.RootToken@third_party/openbao/sdk/helper/stepwise/stepwise.go:60
+- method:1c0f2753811a37b6db744d0132cbc63d CertificateGetter.Reload@third_party/openbao/sdk/helper/stepwise/helpers.go:85
+- method:56049d2a2232ad510215bc10c140821f Environment.Setup@third_party/openbao/sdk/helper/stepwise/stepwise.go:40
+- method:69abdeb99aa7b8f8bd68885580ca80b5 TestT.Error@third_party/openbao/sdk/helper/stepwise/stepwise.go:318
+- method:7a1b603f9532b20dca72b9c2896b925d TestT.Skip@third_party/openbao/sdk/helper/stepwise/stepwise.go:320
+- method:7dfae5877780c8685bfbed9ed64e996b TestT.Fatal@third_party/openbao/sdk/helper/stepwise/stepwise.go:319
+- method:8b434df9968038dcbe1b73d50f6f27e0 Environment.MountPath@third_party/openbao/sdk/helper/stepwise/stepwise.go:56
+- method:a97659d3c35150844aec3e86b0215cb4 Environment.Teardown@third_party/openbao/sdk/helper/stepwise/stepwise.go:49
+- method:ab1e9d5f7a08c8152f4eeb4a153d5438 CertificateGetter.GetCertificate@third_party/openbao/sdk/helper/stepwise/helpers.go:122
+- method:ec37d7c3aac4e5c1e8982b019f62e6e5 TestT.Helper@third_party/openbao/sdk/helper/stepwise/stepwise.go:321
+- method:edad7c7486ceb7a30554b1aaf1e08d4b Environment.Client@third_party/openbao/sdk/helper/stepwise/stepwise.go:45
+- struct:120ef8241dd9ae315d68ae5c4c3d08e1 Case@third_party/openbao/sdk/helper/stepwise/stepwise.go:125
+- struct:57303a45e15b861bb9e3fdd5091480da Step@third_party/openbao/sdk/helper/stepwise/stepwise.go:98
+- struct:5bf0dc5af7a113bc7f73d3d035f7d19b MountOptions@third_party/openbao/sdk/helper/stepwise/stepwise.go:65
+- struct:ebe7261c51ec984308fa34ce5662f315 CertificateGetter@third_party/openbao/sdk/helper/stepwise/helpers.go:67
+- type_alias:44651373c5870ae2d042f2c9202876f6 AssertionFunc@third_party/openbao/sdk/helper/stepwise/stepwise.go:121
+- type_alias:a017da16582241366245e3282754c20a ReloadFunc@third_party/openbao/sdk/helper/stepwise/helpers.go:62
+- type_alias:caeda280550f76de593e09a6c4aae703 Operation@third_party/openbao/sdk/helper/stepwise/stepwise.go:23
 kind: SystemContext
 metadata:
   name: third-party-openbao-sdk-helper-stepwise
   namespace: default
 spec:
+  intent: 'It exists so plugin and backend authors can write table-driven, step-sequenced
+    acceptance tests against a real server without hand-rolling client setup, token
+    handling, lease revocation or teardown. The `Environment` interface abstracts
+    how the server is brought up (Docker, Minikube, etc.), letting one test `Case`
+    run unchanged across providers, while `TestT` decouples `Run` from `*testing.T`
+    so the harness itself is unit-testable. `helpers.go` exists to remove duplicated
+    boilerplate from those tests: compiling the plugin under test to the container''s
+    target architecture and hashing it for registration, and hot-reloading TLS material
+    used by the test server.'
+  interfaces:
+  - file: third_party/openbao/sdk/helper/stepwise/stepwise.go
+    kind: type_alias
+    name: AssertionFunc
+    signature: type AssertionFunc func(*api.Secret, error) error
+  - file: third_party/openbao/sdk/helper/stepwise/stepwise.go
+    kind: struct
+    name: Case
+    signature: type Case struct { Environment Environment; Precheck func(); Steps
+      []Step; SkipTeardown bool }
+  - file: third_party/openbao/sdk/helper/stepwise/helpers.go
+    kind: struct
+    name: CertificateGetter
+    signature: type CertificateGetter struct { sync.RWMutex; cert *tls.Certificate;
+      certFile, keyFile, passphrase string }
+  - file: third_party/openbao/sdk/helper/stepwise/helpers.go
+    kind: method
+    name: CertificateGetter.GetCertificate
+    signature: func (cg *CertificateGetter) GetCertificate(clientHello *tls.ClientHelloInfo)
+      (*tls.Certificate, error)
+  - file: third_party/openbao/sdk/helper/stepwise/helpers.go
+    kind: method
+    name: CertificateGetter.Reload
+    signature: func (cg *CertificateGetter) Reload() error
+  - file: third_party/openbao/sdk/helper/stepwise/helpers.go
+    kind: function
+    name: CompilePlugin
+    signature: func CompilePlugin(name, pluginName, srcDir, tmpDir string) (string,
+      string, string, error)
+  - file: third_party/openbao/sdk/helper/stepwise/stepwise.go
+    kind: interface
+    name: Environment
+    signature: type Environment interface { Setup() error; Client() (*api.Client,
+      error); Teardown() error; Name() string; MountPath() string; RootToken() string
+      }
+  - file: third_party/openbao/sdk/helper/stepwise/stepwise.go
+    kind: method
+    name: Environment.Client
+    signature: Client() (*api.Client, error)
+  - file: third_party/openbao/sdk/helper/stepwise/stepwise.go
+    kind: method
+    name: Environment.MountPath
+    signature: MountPath() string
+  - file: third_party/openbao/sdk/helper/stepwise/stepwise.go
+    kind: method
+    name: Environment.Name
+    signature: Name() string
+  - file: third_party/openbao/sdk/helper/stepwise/stepwise.go
+    kind: method
+    name: Environment.RootToken
+    signature: RootToken() string
+  - file: third_party/openbao/sdk/helper/stepwise/stepwise.go
+    kind: method
+    name: Environment.Setup
+    signature: Setup() error
+  - file: third_party/openbao/sdk/helper/stepwise/stepwise.go
+    kind: method
+    name: Environment.Teardown
+    signature: Teardown() error
+  - file: third_party/openbao/sdk/helper/stepwise/stepwise.go
+    kind: struct
+    name: MountOptions
+    signature: type MountOptions struct { MountPathPrefix string; RegistryName string;
+      PluginType api.PluginType; PluginName string }
+  - file: third_party/openbao/sdk/helper/stepwise/helpers.go
+    kind: function
+    name: NewCertificateGetter
+    signature: func NewCertificateGetter(certFile, keyFile, passphrase string) *CertificateGetter
+  - file: third_party/openbao/sdk/helper/stepwise/stepwise.go
+    kind: type_alias
+    name: Operation
+    signature: type Operation string
+  - file: third_party/openbao/sdk/helper/stepwise/helpers.go
+    kind: type_alias
+    name: ReloadFunc
+    signature: type ReloadFunc func() error
+  - file: third_party/openbao/sdk/helper/stepwise/stepwise.go
+    kind: function
+    name: Run
+    signature: func Run(tt TestT, c Case)
+  - file: third_party/openbao/sdk/helper/stepwise/stepwise.go
+    kind: struct
+    name: Step
+    signature: type Step struct { Operation Operation; Path string; Data map[string]any;
+      Assert AssertionFunc; Unauthenticated bool }
+  - file: third_party/openbao/sdk/helper/stepwise/stepwise.go
+    kind: interface
+    name: TestT
+    signature: type TestT interface { Error(args ...any); Fatal(args ...any); Skip(args
+      ...any); Helper() }
+  - file: third_party/openbao/sdk/helper/stepwise/stepwise.go
+    kind: method
+    name: TestT.Error
+    signature: Error(args ...any)
+  - file: third_party/openbao/sdk/helper/stepwise/stepwise.go
+    kind: method
+    name: TestT.Fatal
+    signature: Fatal(args ...any)
+  - file: third_party/openbao/sdk/helper/stepwise/stepwise.go
+    kind: method
+    name: TestT.Helper
+    signature: Helper()
+  - file: third_party/openbao/sdk/helper/stepwise/stepwise.go
+    kind: method
+    name: TestT.Skip
+    signature: Skip(args ...any)
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/stepwise/stepwise.go
+    - function:02be2fcde650dd2ffc251bae7d9f6fa9
+    id: r.acceptance-env-gate
+    level: MUST
+    text: Run must read the environment variable named by the constant TestEnvVar
+      ("BAO_ACC") via api.ReadBaoVariable; when its value is empty, Run must call
+      tt.Skip with a message naming that variable rather than execute any step.
+  - codeRefs:
+    - function:02be2fcde650dd2ffc251bae7d9f6fa9
+    - type_alias:44651373c5870ae2d042f2c9202876f6
+    id: r.assert-callback
+    level: MUST
+    text: 'After each step, when Step.Assert is non-nil, Run must call it with the
+      returned secret and error, and report a non-nil assertion error through tt.Error
+      wrapped as "failed step <1-based index>: ..."; steps are logged with a 1-based
+      index against the total step count.'
+  - codeRefs:
+    - function:a7b9c5e2ca772eec6c12e53764581d72
+    - method:1c0f2753811a37b6db744d0132cbc63d
+    - method:ab1e9d5f7a08c8152f4eeb4a153d5438
+    - struct:ebe7261c51ec984308fa34ce5662f315
+    id: r.certificate-getter
+    level: MUST
+    text: CertificateGetter must hold a sync.RWMutex, the current *tls.Certificate
+      and the cert file, key file and passphrase given to NewCertificateGetter; Reload
+      must read both PEM files, fail with "decoded PEM is blank" when the key PEM
+      does not decode, decrypt an encrypted PEM key block with the passphrase (wrapping
+      failures as "decrypting PEM block failed"), build the key pair with tls.X509KeyPair,
+      and store it under the write lock; GetCertificate must take the read lock and
+      return the stored certificate, or an error containing "nil certificate" when
+      no certificate has been loaded.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/stepwise/helpers.go
+    - function:edf9806f79977872bbfd56a69101b908
+    id: r.compile-plugin
+    level: MUST
+    text: CompilePlugin must prefix the binary name with the constant pluginPrefix
+      ("vault-plugin-") when it is not already present, run `go build -o <tmpDir>/<binName>
+      <srcDir>/cmd/<pluginName>/main.go` with GOOS=linux and GOARCH=amd64 added to
+      the inherited environment to match the target container architecture, return
+      the captured stderr as the error when the build command fails, and otherwise
+      return the binary name, binary path and the hex SHA-256 digest of the built
+      file.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/stepwise/stepwise.go
+    - interface:f7ca7f1188a7494a5008d870ae488b6f
+    id: r.env-interface-contract
+    level: MUST
+    text: The Environment interface must expose Setup, Client, Teardown, Name, MountPath
+      and RootToken so a Case can create a cluster, hand out a configured API client,
+      destroy the infrastructure, identify the provider, report the plugin mount path
+      and supply the root token; Client must return an error when a client cannot
+      be produced.
+  - codeRefs:
+    - function:02be2fcde650dd2ffc251bae7d9f6fa9
+    - struct:120ef8241dd9ae315d68ae5c4c3d08e1
+    id: r.environment-required
+    level: MUST
+    text: Run must call c.Precheck when it is non-nil, and must call tt.Fatal("nil
+      driver in acceptance test") and stop when c.Environment is nil.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/stepwise/stepwise.go
+    - function:02be2fcde650dd2ffc251bae7d9f6fa9
+    - method:08627482674d496992f382856290192f
+    id: r.lease-revocation
+    level: MUST
+    text: Run must collect every non-nil secret returned by the steps and, on exit,
+      restore the root token and call rootClient.Sys().Revoke for each secret that
+      has a non-empty LeaseID, reporting revoke failures with tt.Error and logging
+      a warning listing the secrets whose leases could not be revoked; secrets without
+      a lease ID must be skipped.
+  - codeRefs:
+    - struct:5bf0dc5af7a113bc7f73d3d035f7d19b
+    id: r.mount-options
+    level: MUST
+    text: MountOptions must carry the mount path prefix (defaulting to the plugin
+      name plus a random suffix when empty), the registry name used for plugin catalog
+      lookups, the api.PluginType, and the plugin name that corresponds to the folder
+      under cmd/ holding the plugin's main.go.
+  - codeRefs:
+    - function:02be2fcde650dd2ffc251bae7d9f6fa9
+    - method:8b434df9968038dcbe1b73d50f6f27e0
+    - struct:57303a45e15b861bb9e3fdd5091480da
+    id: r.mount-path-prefix
+    level: MUST
+    text: For every step, the request path must be formed as Environment.MountPath
+      joined with the Step.Path by a slash, so tests specify only the localized path
+      and the mount prefix is added automatically.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/stepwise/stepwise.go
+    - type_alias:caeda280550f76de593e09a6c4aae703
+    id: r.operation-constants
+    level: MUST
+    text: The Operation type must be a string alias exporting the constants WriteOperation
+      ("create"), UpdateOperation ("update"), ReadOperation ("read"), DeleteOperation
+      ("delete"), ListOperation ("list"), ScanOperation ("scan") and HelpOperation
+      ("help"), defined in this package so callers do not import the SDK logical package.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/stepwise/stepwise.go
+    - function:02be2fcde650dd2ffc251bae7d9f6fa9
+    - type_alias:caeda280550f76de593e09a6c4aae703
+    id: r.operation-dispatch
+    level: MUST
+    text: 'makeRequest must dispatch on Step.Operation: WriteOperation and UpdateOperation
+      map to Logical().Write(path, step.Data), ReadOperation maps to Logical().Read(path),
+      ListOperation maps to Logical().List(path), and DeleteOperation maps to Logical().Delete(path);
+      any other value must return an error of the form "invalid operation: <op>" instead
+      of issuing a request.'
+  - codeRefs:
+    - method:1c0f2753811a37b6db744d0132cbc63d
+    - struct:ebe7261c51ec984308fa34ce5662f315
+    - type_alias:a017da16582241366245e3282754c20a
+    id: r.reload-func
+    level: MUST
+    text: ReloadFunc must be defined as `func() error` and CertificateGetter must
+      satisfy it through its Reload method, so the certificate holder can be registered
+      wherever a reload callback is expected.
+  - codeRefs:
+    - function:02be2fcde650dd2ffc251bae7d9f6fa9
+    - method:08627482674d496992f382856290192f
+    - method:edad7c7486ceb7a30554b1aaf1e08d4b
+    id: r.root-client-and-token
+    level: MUST
+    text: Run must obtain the cluster client from Environment.Client, fail via tt.Fatal
+      on error, capture Environment.RootToken before the steps run, and before each
+      step obtain a fresh clone of the client and set its token back to the captured
+      root token so that a step which clears or replaces the token does not break
+      later steps.
+  - codeRefs:
+    - function:02be2fcde650dd2ffc251bae7d9f6fa9
+    - method:56049d2a2232ad510215bc10c140821f
+    - method:a97659d3c35150844aec3e86b0215cb4
+    id: r.setup-teardown
+    level: MUST
+    text: Run must invoke Environment.Setup before any step and fail the test via
+      tt.Fatal when it returns an error; it must defer Environment.Teardown so teardown
+      runs on every exit path, logging rather than failing when Teardown returns an
+      error.
+  - codeRefs:
+    - function:02be2fcde650dd2ffc251bae7d9f6fa9
+    - struct:120ef8241dd9ae315d68ae5c4c3d08e1
+    id: r.skip-teardown
+    level: MUST
+    text: When Case.SkipTeardown is true, the deferred teardown must be skipped and
+      a message that the driver Teardown was skipped must be logged, leaving created
+      infrastructure in place for debugging.
+  - codeRefs:
+    - function:02be2fcde650dd2ffc251bae7d9f6fa9
+    - struct:57303a45e15b861bb9e3fdd5091480da
+    id: r.step-skip-assert-optional
+    level: MAY
+    text: A Step may omit Assert, in which case the next step runs without evaluating
+      the response, and may set Data to supply the request payload for write, update
+      and other operations that accept arguments.
+  - codeRefs:
+    - interface:0817ab851865c9ef74781c18acff32d5
+    - method:69abdeb99aa7b8f8bd68885580ca80b5
+    - method:7a1b603f9532b20dca72b9c2896b925d
+    - method:7dfae5877780c8685bfbed9ed64e996b
+    - method:ec37d7c3aac4e5c1e8982b019f62e6e5
+    id: r.testt-decoupling
+    level: MUST
+    text: TestT must be an interface declaring Error(args ...any), Fatal(args ...any),
+      Skip(args ...any) and Helper(), so that Run and its helpers can drive the test
+      lifecycle against *testing.T or a mock implementation.
+  - codeRefs:
+    - function:02be2fcde650dd2ffc251bae7d9f6fa9
+    - struct:57303a45e15b861bb9e3fdd5091480da
+    id: r.unauthenticated-step
+    level: MUST
+    text: When Step.Unauthenticated is true, the request must be sent with the client's
+      token cleared, and the original token must be restored via a deferred call once
+      the request completes.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/stepwise/stepwise.go
+    - function:02be2fcde650dd2ffc251bae7d9f6fa9
+    id: r.verbose-required
+    level: MUST
+    text: After the environment variable check passes, Run must call tt.Fatal with
+      an error stating that acceptance tests must be run with the -v flag when testing.Verbose()
+      is false, because the tests are long-running and require visible progress output.
   upstream: self

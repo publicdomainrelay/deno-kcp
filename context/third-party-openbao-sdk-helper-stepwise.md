@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+It exists so plugin and backend authors can write table-driven, step-sequenced acceptance tests against a real server without hand-rolling client setup, token handling, lease revocation or teardown. The `Environment` interface abstracts how the server is brought up (Docker, Minikube, etc.), letting one test `Case` run unchanged across providers, while `TestT` decouples `Run` from `*testing.T` so the harness itself is unit-testable. `helpers.go` exists to remove duplicated boilerplate from those tests: compiling the plugin under test to the container's target architecture and hashing it for registration, and hot-reloading TLS material used by the test server.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
