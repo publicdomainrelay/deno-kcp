@@ -1,0 +1,76 @@
+conditions:
+- message: 'undeclared: New, PostgreSQL, PostgreSQL.DeleteUser, PostgreSQL.Initialize,
+    PostgreSQL.NewUser, PostgreSQL.PluginVersion, PostgreSQL.Type, PostgreSQL.UpdateUser'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/builtin/database/postgresql/passwordauthentication.go
+  - third_party/openbao/internal/builtin/database/postgresql/postgresql.go
+  - third_party/openbao/internal/builtin/database/postgresql/postgresql_test.go
+  fingerprint: 6420f305cb1c121c18209507f309d0785cbe8814b8aa5904e9b07661fdc5aa63
+  interfaces:
+  - codegraphId: function:a2a5d9dc98ae361cc50affb0d7d7c011
+    file: third_party/openbao/internal/builtin/database/postgresql/postgresql.go
+    kind: function
+    line: 61
+    name: New
+    signature: () (any, error)
+  - codegraphId: struct:28e857d7ee88863c8395d0194dcedc5e
+    file: third_party/openbao/internal/builtin/database/postgresql/postgresql.go
+    kind: struct
+    line: 80
+    name: PostgreSQL
+  - codegraphId: method:104c6501594ab33e3be68a4b13902493
+    file: third_party/openbao/internal/builtin/database/postgresql/postgresql.go
+    kind: method
+    line: 87
+    name: PostgreSQL.Initialize
+    signature: (ctx context.Context, req dbplugin.InitializeRequest) (dbplugin.InitializeResponse,
+      error)
+  - codegraphId: method:816e944b2d4f0ba8b0c57ddc24124a85
+    file: third_party/openbao/internal/builtin/database/postgresql/postgresql.go
+    kind: method
+    line: 132
+    name: PostgreSQL.Type
+    signature: () (string, error)
+  - codegraphId: method:fee9a15454325c0f80242ad693eab42a
+    file: third_party/openbao/internal/builtin/database/postgresql/postgresql.go
+    kind: method
+    line: 145
+    name: PostgreSQL.UpdateUser
+    signature: (ctx context.Context, req dbplugin.UpdateUserRequest) (dbplugin.UpdateUserResponse,
+      error)
+  - codegraphId: method:e94446bf68d072b3dca3e5d40854d882
+    file: third_party/openbao/internal/builtin/database/postgresql/postgresql.go
+    kind: method
+    line: 274
+    name: PostgreSQL.NewUser
+    signature: (ctx context.Context, req dbplugin.NewUserRequest) (dbplugin.NewUserResponse,
+      error)
+  - codegraphId: method:48ca6109fb985aad531f4872bc2dd8aa
+    file: third_party/openbao/internal/builtin/database/postgresql/postgresql.go
+    kind: method
+    line: 346
+    name: PostgreSQL.DeleteUser
+    signature: (ctx context.Context, req dbplugin.DeleteUserRequest) (dbplugin.DeleteUserResponse,
+      error)
+  - codegraphId: method:6ab2c58e15ee2bf7219365719071ae5b
+    file: third_party/openbao/internal/builtin/database/postgresql/postgresql.go
+    kind: method
+    line: 524
+    name: PostgreSQL.PluginVersion
+    signature: () logical.PluginVersion
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: a638df6a97c73832e6e7b4736549e07223230ea19ca09ae785f3d6ce2dd9f00f
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 6420f305cb1c121c18209507f309d0785cbe8814b8aa5904e9b07661fdc5aa63
