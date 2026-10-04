@@ -4623,6 +4623,17 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.secret-v2-version-model` (MUST): "SecretV2VersionModel must extend the base secret model, carry failedServerRead, version, path, deletionTime, createdTime, destroyed and currentVersion, belong synchronously to secret-v2 through the secret inverse selectedVersion, declare pathAttr as 'path', and expose a deleted getter that is true when deletionTime is at or before the current timestamp."
 - added `r.shared-attr-metadata` (SHOULD): "Model fields should carry their UI metadata with the @attr declaration, including defaultValue, label, helpText, subText, possibleValues, readOnly and editType, so the form layer can render inputs without per-screen configuration."
 
+### third-party-openbao-ui-app-models-auth-config-aws
+
+- intent: "" -> "This context exists so the OpenBao UI can edit the AWS auth method's client configuration, periodic tidy behavior, identity access list, and role tag denylist through the same Ember Data models the rest of the UI uses. It is a declarative form-schema layer: the models decide which attributes exist, their labels, defaults, edit types, and how they group into form fields, and the shared AuthConfig base supplies the save/read mechanics against the auth-config API path."
+- added `r.client-extends-auth-config` (MUST): "The AWS client model must extend the shared AuthConfig model and declare the string attributes secretKey, accessKey, endpoint (labeled 'EC2 Endpoint'), iamEndpoint (labeled 'IAM Endpoint'), stsEndpoint (labeled 'STS Endpoint'), and iamServerIdHeaderValue (labeled 'IAM Server ID Header Value'), so the AWS client form edits exactly those credential and endpoint fields."
+- added `r.client-field-groups` (MUST): "The AWS client model must expose a computed fieldGroups that passes attribute names through fieldToAttrs and groups accessKey and secretKey into the unnamed default group while placing endpoint, iamEndpoint, stsEndpoint, and iamServerIdHeaderValue under an 'AWS Options' group."
+- added `r.copyright-headers` (SHOULD): "Each model module should carry the HashiCorp copyright header and the MPL-2.0 SPDX license identifier comment at the top of the file, matching the other models in this tree."
+- added `r.identity-accesslist-reuses-tidy` (MUST): "The AWS identity access list model must extend the tidy model without adding attributes or overriding anything, so the identity access list form presents the same safetyBuffer and disablePeriodicTidy fields as the tidy form."
+- added `r.roletag-denylist-reuses-tidy` (MUST): "The AWS role tag denylist model must extend the tidy model without adding attributes or overriding anything, so the role tag denylist form presents the same safetyBuffer and disablePeriodicTidy fields as the tidy form."
+- added `r.tidy-attributes-and-defaults` (MUST): "The AWS tidy model must extend AuthConfig and declare safetyBuffer with editType 'ttl' and a default value of '72h', and disablePeriodicTidy as a boolean defaulting to false, so an unset tidy form shows a 72 hour safety buffer with periodic tidy enabled."
+- added `r.tidy-attrs-meta` (MUST): "The AWS tidy model must expose a computed attrs property that returns expandAttributeMeta(this, ['safetyBuffer', 'disablePeriodicTidy']), so the tidy form field metadata is derived from those two attribute names only."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |

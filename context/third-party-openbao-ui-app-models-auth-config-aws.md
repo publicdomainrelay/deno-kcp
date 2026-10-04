@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the OpenBao UI can edit the AWS auth method's client configuration, periodic tidy behavior, identity access list, and role tag denylist through the same Ember Data models the rest of the UI uses. It is a declarative form-schema layer: the models decide which attributes exist, their labels, defaults, edit types, and how they group into form fields, and the shared AuthConfig base supplies the save/read mechanics against the auth-config API path.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
