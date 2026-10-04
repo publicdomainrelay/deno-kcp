@@ -75,5 +75,5 @@ upstream: self
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-- `file:internal/baoembed/cmd/baoembed/main.go` file main.go (internal/baoembed/cmd/baoembed/main.go)
+_None yet._
 <!-- SPECD_MANAGED_END -->

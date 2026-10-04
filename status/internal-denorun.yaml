@@ -1,71 +1,21 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'missing: New, Observed, Op, Options, Reconciler, Reconciler.Reconcile,
+    Result, RunObservation, RunState; unresolved: r.deadline-exceeded-fails: method:f155b5d02f0b9e87bf309fef18faa708,
+    r.failed-retries-or-fails: struct:ee4d89fa2c7dd0cff8185caf5882f1e5, r.new-defaults-clock:
+    function:ebb0b90e032475ce8ac596f8c699f18d, r.observed-shape: struct:46375556082738a3e31036edf9eb66d4,
+    r.op-values: type_alias:30190d31491ebfeaec53888338d8ddf7, r.reconciler-holds-options:
+    struct:8cfd6dfc94f9f9f64a46b94dc7cac4c6, r.result-carries-next-status: struct:729b6f20e41c65ca009aeef5ce0be147,
+    r.run-observation-shape: struct:871d7b88332e893f59d62b5249a55bca, r.run-state-values:
+    type_alias:bd23d69ec74e9fe3e50fcdbd3c0331ba'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+- message: no synced fingerprint has been recorded yet
+  reason: NotSyncedYet
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed:
-  files:
-  - internal/denorun/denorun.go
-  - internal/denorun/denorun_test.go
-  fingerprint: 88a307b7f1434beb68264c04285d55c5b0d6577ae50d291990513993d20b080c
-  interfaces:
-  - codegraphId: type_alias:bd23d69ec74e9fe3e50fcdbd3c0331ba
-    file: internal/denorun/denorun.go
-    kind: type_alias
-    line: 18
-    name: RunState
-  - codegraphId: struct:871d7b88332e893f59d62b5249a55bca
-    file: internal/denorun/denorun.go
-    kind: struct
-    line: 28
-    name: RunObservation
-  - codegraphId: struct:46375556082738a3e31036edf9eb66d4
-    file: internal/denorun/denorun.go
-    kind: struct
-    line: 40
-    name: Observed
-  - codegraphId: type_alias:30190d31491ebfeaec53888338d8ddf7
-    file: internal/denorun/denorun.go
-    kind: type_alias
-    line: 48
-    name: Op
-  - codegraphId: struct:729b6f20e41c65ca009aeef5ce0be147
-    file: internal/denorun/denorun.go
-    kind: struct
-    line: 60
-    name: Result
-  - codegraphId: struct:ee4d89fa2c7dd0cff8185caf5882f1e5
-    file: internal/denorun/denorun.go
-    kind: struct
-    line: 91
-    name: Options
-  - codegraphId: struct:8cfd6dfc94f9f9f64a46b94dc7cac4c6
-    file: internal/denorun/denorun.go
-    kind: struct
-    line: 97
-    name: Reconciler
-  - codegraphId: function:ebb0b90e032475ce8ac596f8c699f18d
-    file: internal/denorun/denorun.go
-    kind: function
-    line: 101
-    name: New
-    signature: (opts Options) *Reconciler
-  - codegraphId: method:f155b5d02f0b9e87bf309fef18faa708
-    file: internal/denorun/denorun.go
-    kind: method
-    line: 108
-    name: Reconciler.Reconcile
-    signature: (ctx context.Context, o Observed) (Result, error)
-observedCommit: a41ca4aea50b664f834bef53dc6e569d2a8feac3
-realizedSpecHash: efee3c6117b9b8a7f2d18e9473d75281babbc6d1c73a3e5767638485c22f54d4
-syncedCommit: 44bd6951fa6bf8f6e6d0264e27b7dfe6b967e21e
-syncedFingerprint: 88a307b7f1434beb68264c04285d55c5b0d6577ae50d291990513993d20b080c
+observed: {}
