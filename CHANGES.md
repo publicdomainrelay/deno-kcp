@@ -3702,6 +3702,28 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.running-version-from-environment` (MUST): "Backend reports RunningVersion "v0.0.0+mock" by default, and overrides it with the value of the TESTING_MOCK_VAULT_PLUGIN_VERSION environment variable read through api.ReadBaoVariable whenever that variable is non-empty, so tests can fake a plugin version."
 - added `r.special-path-is-unauthenticated` (MUST): "A read of the special path returns {"data": "foo"}, and that path is listed under PathsSpecial.Unauthenticated so it can be reached without a token."
 
+### third-party-openbao-sdk-plugin-pb
+
+- intent: "" -> "It exists so plugin backends can be served and consumed out of process: every logical value that crosses the plugin boundary is marshalled into a protobuf message, sent over gRPC, and unmarshalled back into the SDK logical types with errors, status codes and metadata intact. The generated files define the message and service surface; translation.go defines the exact round-trip semantics; the tests pin those semantics down."
+- added `r.auth-round-trip` (MUST): "A logical.Auth converts to a protobuf Auth and back again, carrying policies, metadata, lease options, internal data, display name, token type, alias and group aliases, boundary fields and token pieces across the boundary."
+- added `r.certificate-chain-round-trip` (MUST): "A slice of X.509 certificates converts to a protobuf CertificateChain and back again, so an ordered peer or verified chain keeps its length and order across the boundary."
+- added `r.certificate-round-trip` (MUST): "A single X.509 certificate converts to a protobuf Certificate and back again, preserving the ASN.1 DER bytes of the certificate."
+- added `r.connection-round-trip` (MUST): "A logical.Connection converts to a protobuf Connection and back again, keeping the remote address, remote port and the embedded TLS connection state of the caller."
+- added `r.empty-message-proto-contract` (MUST): "The Empty message implements the protobuf reflection contract: Reset zeroes the message, String renders the protobuf text form, ProtoMessage marks the type as a proto message, ProtoReflect returns the message state, and Descriptor returns the file descriptor bytes and message index."
+- added `r.error-round-trip` (MUST): "Errors cross the boundary as ProtoError values: ErrToProtoErr encodes a Go error into a protobuf error, ProtoErrToErr rebuilds an error from a protobuf error, and ErrToString renders an error as a string; a nil error maps to a nil protobuf error and back to nil."
+- added `r.grpc-client-constructors` (MUST): "Client constructors build a Backend, Storage or SystemView client from a gRPC client connection interface, so a host or plugin can call the remote service through the generated client interface."
+- added `r.grpc-service-registration` (MUST): "The package registers the Backend, Storage and SystemView gRPC services on a service registrar, each binding the service's full protobuf name to the supplied server implementation so a plugin host can serve the plugin over gRPC."
+- added `r.lease-options-round-trip` (MUST): "A logical.LeaseOptions converts to a protobuf LeaseOptions and back again, preserving the TTL, max TTL, renewable flag and increment value."
+- added `r.request-round-trip` (MUST): "A logical.Request converts to a protobuf Request and back again, so operation, path, data, storage, auth, headers, client token, display name, connection info and mount metadata survive the plugin boundary; conversion reports an error when a logical value cannot be represented."
+- added `r.response-round-trip` (MUST): "A logical.Response converts to a protobuf Response and back again, preserving data, the list of secret and auth entries, redirects, warnings, wrap info and the response's own secret and auth payloads."
+- added `r.secret-round-trip` (MUST): "A logical.Secret converts to a protobuf Secret and back again, preserving lease options, internal data, lease identifier, renewable flag and the dynamic and raw secret markers."
+- added `r.storage-entry-round-trip` (MUST): "A logical.StorageEntry converts to a protobuf StorageEntry and back again, so the key, value bytes and seal-wrap flag survive storage traffic over the plugin link."
+- added `r.tls-connection-state-round-trip` (MUST): "A TLS connection state converts to a protobuf ConnectionState and back again, preserving version, handshake completion, negotiated protocol, server name, peer certificates, verified chains and the cipher suite."
+- added `r.token-entry-round-trip` (MUST): "A logical.TokenEntry converts to a protobuf TokenEntry and back again, so token identity, path, policies, metadata, expiry, role, namespace and bound CIDRs keep their values in both directions."
+- added `r.translation-tests` (MUST): "The package's tests exercise the protobuf to logical translation functions so a change that breaks a round trip, drops a field, or changes error conversion fails the test suite."
+- added `r.unsafe-server-interfaces` (SHOULD): "The generated UnsafeBackendServer and UnsafeStorageServer interfaces carry the must-embed marker that tells implementers forward compatibility is not guaranteed, so servers embed the interface and keep compiling when the service gains methods."
+- added `r.wrap-info-round-trip` (MUST): "Request and response wrap info convert in both directions: a logical.RequestWrapInfo becomes a protobuf RequestWrapInfo and a ResponseWrapInfo becomes a protobuf ResponseWrapInfo, with TTL, token, accessor, creation time, creation path, wrapped accessor and seal-wrapping state preserved."
+
 ### third-party-openbao-sdk-queue
 
 - intent: "" -> "This context exists to record the vendored OpenBao SDK priority queue that this repository carries under third_party, so that its contract, its exported surface and its locking and copy semantics are described from the code as it stands rather than inferred. It matters because the package is third-party code retained verbatim except for the queue import path, and anything that consumes it needs to know that ordering is lowest-int64-wins, that keys are unique and immutable once pushed, that pushes clone their input, and that every public operation is mutex-guarded."
@@ -4007,7 +4029,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-sdk-plugin-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-plugin-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-plugin-mock-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-sdk-plugin-pb-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-plugin-pb-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-queue-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-tools-semgrep-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-tools-semgrep-ci-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |

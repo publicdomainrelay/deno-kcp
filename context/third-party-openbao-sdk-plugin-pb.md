@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+It exists so plugin backends can be served and consumed out of process: every logical value that crosses the plugin boundary is marshalled into a protobuf message, sent over gRPC, and unmarshalled back into the SDK logical types with errors, status codes and metadata intact. The generated files define the message and service surface; translation.go defines the exact round-trip semantics; the tests pin those semantics down.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
