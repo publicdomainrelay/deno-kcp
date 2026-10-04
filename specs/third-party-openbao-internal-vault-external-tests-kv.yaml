@@ -8,5 +8,102 @@ metadata:
   name: third-party-openbao-internal-vault-external-tests-kv
   namespace: default
 spec:
+  intent: 'This context exists to specify the black-box acceptance tests that guard
+    the KVv2 secret engine''s PATCH, subkeys and upgrade-handling behaviour. The tests
+    are deliberately end-to-end: they build a cluster from a CoreConfig that registers
+    logicalKv.Factory or logicalKv.VersionedKVFactory as the "kv" logical backend,
+    mount kv-v2 over the sys API, and then assert on raw HTTP status codes and parsed
+    secret bodies. The package pins three externally visible contracts, namely that
+    PATCH requires a merge-patch content type and produces exactly one audit request
+    and response record, that the subkeys endpoint reports nil subkeys with deletion
+    or destruction metadata instead of leaking data, and that reopening a KVv2 mount
+    whose policy and archive views were wiped does not emit a "cannot write to storage
+    during setup" error. The retry helper exists because a freshly mounted KVv2 backend
+    may still be performing its non-versioned-to-versioned upgrade when the first
+    request arrives, so the tests must tolerate that transient failure rather than
+    reporting it.'
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/kv/kv_patch_test.go
+    id: r.kv-patch-audit-record-count
+    level: MUST
+    text: When the file audit backend records a write to kv/data/foo followed by a
+      JSONMergePatch to the same path, decoding the audit log must yield exactly one
+      record of type "request" and exactly one of type "response" whose request operation
+      is "patch".
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/kv/kv_patch_test.go
+    id: r.kv-patch-requires-merge-patch-content-type
+    level: MUST
+    text: A raw PATCH request to /v1/kv/data/foo sent with Content-Type "application/json"
+      must be rejected with HTTP 415 Unsupported Media Type, so that only a merge-patch
+      media type is accepted by the KVv2 data endpoint.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/kv/kv_patch_test.go
+    id: r.kv-patch-root-token-merge-semantics
+    level: MUST
+    text: 'A JSONMergePatch issued with the cluster root token after writing {bar:
+      baz, foo: qux} must set bar to "quux" and remove the foo key entirely, so a
+      following read of kv/data/foo returns bar="quux" and a data map with no foo
+      entry; a null value in the patch body deletes the key.'
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/kv/kv_patch_test.go
+    id: r.kv-request-retry-absorbs-upgrade
+    level: MUST
+    text: kvRequestWithRetry must poll the supplied request closure once per second
+      for at most twenty seconds and return as soon as the closure succeeds, tolerating
+      repeated failures whose *api.ResponseError message contains "Upgrading from
+      non-versioned to versioned data"; it must return the response and error unchanged
+      for any other error, and must report "timeout expired waiting for upgrade" when
+      the deadline is reached.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/kv/kv_subkeys_test.go
+    id: r.kv-subkeys-current-version-tree
+    level: MUST
+    text: 'When multiple versions exist, a read of kv/subkeys/foo must succeed with
+      HTTP 200 and the parsed subkeys value must deep-equal the nested key tree {foo:
+      nil, bar: {a: {c: nil}, b: nil}, baz: nil}, so the endpoint returns only key
+      structure of the current version and never the values.'
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/kv/kv_subkeys_test.go
+    id: r.kv-subkeys-deleted-metadata
+    level: MUST
+    text: After a secret is deleted, a read of kv/subkeys/foo must return HTTP 404
+      and a parsed body whose subkeys value is nil and whose metadata map carries
+      a non-empty string deletion_time.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/kv/kv_subkeys_test.go
+    id: r.kv-subkeys-destroyed-metadata
+    level: MUST
+    text: After a secret version is destroyed, a read of kv/subkeys/foo must return
+      HTTP 404 and a parsed body containing a subkeys key that is nil together with
+      metadata whose destroyed flag is the boolean true.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/kv/kv_subkeys_test.go
+    id: r.kv-subkeys-missing-path-not-found
+    level: MUST
+    text: A read of kv/subkeys/foo for a path that was never written must fail with
+      HTTP 404 Not Found.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/kv/kv_patch_test.go
+    - file:third_party/openbao/internal/vault/external_tests/kv/kv_subkeys_test.go
+    - file:third_party/openbao/internal/vault/external_tests/kv/kvv2_upgrade_test.go
+    id: r.kv-tests-use-real-cluster
+    level: MUST
+    text: Each test in the package must construct its backend through vault.NewTestCluster
+      with a CoreConfig that registers the kv logical factory (logicalKv.VersionedKVFactory
+      or logicalKv.Factory) and vaulthttp.Handler as the handler, start the cluster,
+      wait for the core to become active with vault.TestWaitActive, and mount the
+      versioned KV engine under the path "kv" with type "kv-v2" before exercising
+      any endpoint.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/kv/kvv2_upgrade_test.go
+    id: r.kvv2-upgrade-path-clean-slate
+    level: MUST
+    text: For the upgrade regression, the test must mount kv-v2, seal the cores with
+      cluster.EnsureCoresSealed, delete the policy/ and archive/ subtrees beneath
+      the KVv2 base path using logical.ClearView over physical.NewView on core.UnderlyingRawStorage,
+      then unseal with testhelpers.EnsureCoresUnsealed, wait ten seconds, and fail
+      if the captured hclog output contains "cannot write to storage during setup".
   upstream: self

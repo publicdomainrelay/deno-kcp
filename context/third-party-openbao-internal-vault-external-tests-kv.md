@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to specify the black-box acceptance tests that guard the KVv2 secret engine's PATCH, subkeys and upgrade-handling behaviour. The tests are deliberately end-to-end: they build a cluster from a CoreConfig that registers logicalKv.Factory or logicalKv.VersionedKVFactory as the "kv" logical backend, mount kv-v2 over the sys API, and then assert on raw HTTP status codes and parsed secret bodies. The package pins three externally visible contracts, namely that PATCH requires a merge-patch content type and produces exactly one audit request and response record, that the subkeys endpoint reports nil subkeys with deletion or destruction metadata instead of leaking data, and that reopening a KVv2 mount whose policy and archive views were wiped does not emit a "cannot write to storage during setup" error. The retry helper exists because a freshly mounted KVv2 backend may still be performing its non-versioned-to-versioned upgrade when the first request arrives, so the tests must tolerate that transient failure rather than reporting it.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

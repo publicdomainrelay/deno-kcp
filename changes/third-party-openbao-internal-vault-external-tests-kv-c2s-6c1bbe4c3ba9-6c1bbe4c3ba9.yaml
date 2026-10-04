@@ -10,5 +10,32 @@ spec:
   systemContext: third-party-openbao-internal-vault-external-tests-kv
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-vault-external-tests-kv
+  agentLog: 'This context is the OpenBao KV secret-engine external test package at
+    third_party/openbao/internal/vault/external_tests/kv, holding three Go test files
+    in package kv: kv_patch_test.go, kv_subkeys_test.go and kvv2_upgrade_test.go.
+    Every test stands up a real in-process Vault/OpenBao test cluster with vaulthttp.Handler,
+    mounts the KVv2 backend at the path "kv", and then drives it through the HTTP
+    API client rather than through the backend directly. kv_patch_test.go covers JSON
+    merge PATCH semantics (unsupported media type rejection, audit-log emission, and
+    root-token patch with key deletion), kv_subkeys_test.go covers the kv/subkeys/foo
+    endpoint under not-found, deleted, destroyed and multi-version states, and kvv2_upgrade_test.go
+    reproduces the versioned-upgrade regression by clearing policy/ and archive/ storage
+    views while cores are sealed and asserting no setup write error appears in the
+    captured log. Shared plumbing is the kvRequestWithRetry helper, which absorbs
+    the transient "Upgrading from non-versioned to versioned data" error by polling
+    every second for up to twenty seconds.'
+  message: wrote 10 requirement(s) and 0 interface(s) for third-party-openbao-internal-vault-external-tests-kv;
+    interface TestKV_Patch_BadContentTypeHeader is not in the observed facts; dropped;
+    interface kvRequestWithRetry is not in the observed facts; dropped; interface
+    TestKV_Patch_Audit is not in the observed facts; dropped; interface TestKV_Patch_RootToken
+    is not in the observed facts; dropped; interface TestKV_Subkeys_NotFound is not
+    in the observed facts; dropped; interface TestKV_Subkeys_Deleted is not in the
+    observed facts; dropped; interface TestKV_Subkeys_Destroyed is not in the observed
+    facts; dropped; interface TestKV_Subkeys_CurrentVersion is not in the observed
+    facts; dropped; interface TestKVv2_UpgradePaths is not in the observed facts;
+    dropped
+  phase: Succeeded
+superseded:
+- message: the agent is summarizing third-party-openbao-internal-vault-external-tests-kv
+  name: third-party-openbao-internal-vault-external-tests-kv-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2
   phase: Running
