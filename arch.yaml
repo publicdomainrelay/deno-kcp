@@ -50,7 +50,7 @@ system_contexts:
   - type_alias:f1737f67a27a8469e8d83ac7bc87a249 DenoRestartPolicy@api/v1alpha1/types_shared.go:77
   - type_alias:f1812e2547cdacd2b9d3b0c4591ef2e2 DenoRunPhase@api/v1alpha1/types_denorun.go:32
   - type_alias:f821022f3e38a5407c14bb767eba914b ConcurrencyPolicy@api/v1alpha1/types_shared.go:87
-  id: sc.api-v1alpha1
+  id: type.ServiceAccountRef
   intent: This context exists so the operator can persist and reconcile deno-kcp custom
     resources through the Kubernetes API machinery. The package defines the on-cluster
     schema (specs, statuses, phase enums), the list types the informers and clientsets
@@ -636,7 +636,7 @@ system_contexts:
   - file:cmd/deno-kcp-provider/main.go main.go@cmd/deno-kcp-provider/main.go
   depends_on:
   - sc.internal-provider
-  id: sc.cmd-deno-kcp-provider
+  id: ov.provider-flags
   intent: 'This context exists to be the process entrypoint for the deno-kcp provider
     controller. Everything it does is wiring: turn command line flags and environment
     variables into a config, refuse to start without a kubeconfig, build the registry,
@@ -755,7 +755,7 @@ system_contexts:
   - file:deploy/runtrigger-apiresourceschema.yaml runtrigger-apiresourceschema.yaml@deploy/runtrigger-apiresourceschema.yaml
   - file:deploy/workspacetype-denoruntime.yaml workspacetype-denoruntime.yaml@deploy/workspacetype-denoruntime.yaml
   - file:deploy/workspacetype-workflow.yaml workspacetype-workflow.yaml@deploy/workspacetype-workflow.yaml
-  id: sc.deploy
+  id: ov.apiexport-vw
   intent: 'This context exists so the deno.computer API surface can be installed into
     a local kcp instance as declarative YAML: the APIResourceSchemas are the single
     definition of each kind''s spec and status, the APIExports are what tenant workspaces
@@ -18448,15 +18448,28 @@ system_contexts:
   id: sc.third-party-openbao-website-src-components-releases
   name: third-party-openbao-website-src-components-releases
   upstream: self
-- codeRefIndex:
+- code:
+  - third_party/openbao/website/src/docusaurus-plugin-sidebar-json/index.ts
+  codeRefIndex:
   - file:third_party/openbao/website/src/docusaurus-plugin-sidebar-json/index.ts index.ts@third_party/openbao/website/src/docusaurus-plugin-sidebar-json/index.ts
   id: sc.third-party-openbao-website-src-docusaurus-plugin-sidebar-json
   name: third-party-openbao-website-src-docusaurus-plugin-sidebar-json
   upstream: self
-- id: sc.third-party-openbao-website-src-pages
+- code:
+  - third_party/openbao/website/src/pages/downloads.tsx
+  - third_party/openbao/website/src/pages/index.tsx
+  codeRefIndex:
+  - file:third_party/openbao/website/src/pages/downloads.tsx downloads.tsx@third_party/openbao/website/src/pages/downloads.tsx
+  - file:third_party/openbao/website/src/pages/index.tsx index.tsx@third_party/openbao/website/src/pages/index.tsx
+  id: sc.third-party-openbao-website-src-pages
   name: third-party-openbao-website-src-pages
   upstream: self
-- id: sc.third-party-openbao-website-src-theme-navbaritem
+- code:
+  - third_party/openbao/website/src/theme/NavbarItem/DocsVersionDropdownNavbarItem.tsx
+  codeRefIndex:
+  - file:third_party/openbao/website/src/theme/NavbarItem/DocsVersionDropdownNavbarItem.tsx
+    DocsVersionDropdownNavbarItem.tsx@third_party/openbao/website/src/theme/NavbarItem/DocsVersionDropdownNavbarItem.tsx
+  id: sc.third-party-openbao-website-src-theme-navbaritem
   name: third-party-openbao-website-src-theme-navbaritem
   upstream: self
 - code:

@@ -9,5 +9,6 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/website/src/theme/NavbarItem/DocsVersionDropdownNavbarItem.tsx` file DocsVersionDropdownNavbarItem.tsx (third_party/openbao/website/src/theme/NavbarItem/DocsVersionDropdownNavbarItem.tsx)
+- `function:b2a44a8501bf70f7892d835a8e0e0f70` function DocsVersionDropdownNavbarItemWrapper (third_party/openbao/website/src/theme/NavbarItem/DocsVersionDropdownNavbarItem.tsx)
 <!-- SPECD_MANAGED_END -->

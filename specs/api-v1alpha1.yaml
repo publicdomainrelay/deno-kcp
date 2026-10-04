@@ -35,6 +35,28 @@ metadata:
   name: api-v1alpha1
   namespace: default
 spec:
+  arch:
+    code:
+    - file:api/v1alpha1/deno_types_test.go
+    - file:api/v1alpha1/types_shared.go
+    form: map
+    id: type.ServiceAccountRef
+    kind: node
+    node:
+      code:
+        absent: api/v1alpha1/deno_types_test.go:TestServiceAccountAbsentDistinguishesFromZero
+        default: internal/provider/registry_runtime.go:DefaultServiceAccountNamespace
+        type: api/v1alpha1/types_shared.go
+      default: no_token
+      defaults:
+        namespace: default
+      fields:
+      - name
+      - namespace
+      held_by:
+      - sc.kind.policyengine.spec.serviceAccount
+    position: 4
+    section: types
   intent: This context exists so the operator can persist and reconcile deno-kcp custom
     resources through the Kubernetes API machinery. The package defines the on-cluster
     schema (specs, statuses, phase enums), the list types the informers and clientsets
