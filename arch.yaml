@@ -11698,7 +11698,50 @@ system_contexts:
   codeRefIndex:
   - file:third_party/openbao/internal/builtin/logical/pki/cmd/pki/main.go main.go@third_party/openbao/internal/builtin/logical/pki/cmd/pki/main.go
   id: sc.third-party-openbao-internal-builtin-logical-pki-cmd-pki
+  intent: 'This context exists so the PKI secrets engine can run as an external, out-of-process
+    OpenBao plugin binary rather than being linked into the server. The entrypoint
+    wires three things together: the plugin API client metadata that carries the TLS
+    material the server hands the child process, the PKI backend factory that produces
+    the backend instance, and the multiplexing plugin server that speaks the plugin
+    protocol. The explicit TLSProviderFunc is kept so the plugin remains compatible
+    with OpenBao/Vault versions that do not support plugin AutoMTLS.'
   name: third-party-openbao-internal-builtin-logical-pki-cmd-pki
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/pki/cmd/pki/main.go
+    id: r.configuration-surface
+    level: MUST
+    text: The entrypoint's configuration surface is the flag set returned by api.PluginAPIClientMeta.FlagSet,
+      parsed from os.Args[1:] with flag.ContinueOnError; it declares six flags and
+      no flag is backed by an environment variable of its own. String flags ca-cert,
+      ca-path, client-cert, client-key and tls-server-name each default to the empty
+      string; the boolean flag tls-skip-verify defaults to false. AutoMTLS behavior
+      is not flag-driven and is instead keyed off the environment variables BAO_PLUGIN_AUTOMTLS_ENABLED
+      and BAO_PLUGIN_METADATA_MODE (an explicit "true" in either suppresses the TLS
+      configuration path), and the unwrap token is read from BAO_UNWRAP_TOKEN.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/pki/cmd/pki/main.go
+    id: r.fail-loudly-on-serve-error
+    level: MUST
+    text: When plugin.ServeMultiplex returns a non-nil error, main must build an hclog
+      logger, log the message "plugin shutting down" with the error attached under
+      the key "error", and call os.Exit(1) so a failed plugin does not exit silently
+      with status 0.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/pki/cmd/pki/main.go
+    id: r.serve-pki-backend-as-plugin
+    level: MUST
+    text: main must register pki.Factory as the BackendFactoryFunc of plugin.ServeOpts
+      and hand that opts value to plugin.ServeMultiplex, so the process serves the
+      PKI logical backend over the plugin protocol.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/pki/cmd/pki/main.go
+    id: r.tls-provider-for-backwards-compatibility
+    level: MUST
+    text: main must build the TLS configuration with api.PluginAPIClientMeta.GetTLSConfig,
+      wrap it with api.VaultPluginTLSProvider, and set the result as ServeOpts.TLSProviderFunc
+      so the plugin keeps working with server versions that do not support plugin
+      AutoMTLS.
   upstream: self
 - code:
   - third_party/openbao/internal/builtin/logical/pki/dnstest/server.go

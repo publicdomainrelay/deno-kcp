@@ -772,6 +772,14 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.wildcard-detection` (MUST): "isWildcardDomain must report a name as a wildcard when the name contains an asterisk anywhere, so glob-bearing names that are not valid wildcards are still classified as wildcards and are rejected later by the wildcard validation rather than being silently accepted as ordinary domains."
 - added `r.wildcard-parse` (MUST): "ACMEIdentifier.MaybeParseWildcard must treat an identifier as a wildcard only when its Type is the dns identifier and its Value contains an asterisk; in that case it sets IsWildcard and validates the wildcard. It must reject a wildcard whose asterisk is not the entire left-most label, and reject one that leaves no remaining domain labels, returning a non-nil error with an empty reduced name for both. On success it must rewrite the identifier's Value to the reduced name with the wildcard label removed and return that reduced name; when the identifier is not a wildcard it must return false together with the unchanged Value and no error."
 
+### third-party-openbao-internal-builtin-logical-pki-cmd-pki
+
+- intent: "" -> "This context exists so the PKI secrets engine can run as an external, out-of-process OpenBao plugin binary rather than being linked into the server. The entrypoint wires three things together: the plugin API client metadata that carries the TLS material the server hands the child process, the PKI backend factory that produces the backend instance, and the multiplexing plugin server that speaks the plugin protocol. The explicit TLSProviderFunc is kept so the plugin remains compatible with OpenBao/Vault versions that do not support plugin AutoMTLS."
+- added `r.configuration-surface` (MUST): "The entrypoint's configuration surface is the flag set returned by api.PluginAPIClientMeta.FlagSet, parsed from os.Args[1:] with flag.ContinueOnError; it declares six flags and no flag is backed by an environment variable of its own. String flags ca-cert, ca-path, client-cert, client-key and tls-server-name each default to the empty string; the boolean flag tls-skip-verify defaults to false. AutoMTLS behavior is not flag-driven and is instead keyed off the environment variables BAO_PLUGIN_AUTOMTLS_ENABLED and BAO_PLUGIN_METADATA_MODE (an explicit "true" in either suppresses the TLS configuration path), and the unwrap token is read from BAO_UNWRAP_TOKEN."
+- added `r.fail-loudly-on-serve-error` (MUST): "When plugin.ServeMultiplex returns a non-nil error, main must build an hclog logger, log the message "plugin shutting down" with the error attached under the key "error", and call os.Exit(1) so a failed plugin does not exit silently with status 0."
+- added `r.serve-pki-backend-as-plugin` (MUST): "main must register pki.Factory as the BackendFactoryFunc of plugin.ServeOpts and hand that opts value to plugin.ServeMultiplex, so the process serves the PKI logical backend over the plugin protocol."
+- added `r.tls-provider-for-backwards-compatibility` (MUST): "main must build the TLS configuration with api.PluginAPIClientMeta.GetTLSConfig, wrap it with api.VaultPluginTLSProvider, and set the result as ServeOpts.TLSProviderFunc so the plugin keeps working with server versions that do not support plugin AutoMTLS."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -786,4 +794,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-builtin-logical-kv-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-kv-cmd-kv-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-pki-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-builtin-logical-pki-cmd-pki-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-builtin-logical-pki-cmd-pki-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-internal-builtin-logical-pki-dnstest-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-builtin-logical-pkiext-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
