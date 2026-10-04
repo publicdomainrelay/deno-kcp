@@ -1,5 +1,6 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
+- class:f2a0935a91d080918371b78eefab5cc1 MfaMethodCreateController@third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/create.js:14
 - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/create.js
   create.js@third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/create.js
 kind: SystemContext
@@ -7,5 +8,104 @@ metadata:
   name: third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-methods
   namespace: default
 spec:
+  intent: The context exists to specify the behaviour of the MFA method creation controller
+    so that its form-state contract, validation rules, save ordering and error reporting
+    can be relied on by the templates and tests that drive it, and so the same behaviour
+    can be reimplemented or verified outside the original third-party UI tree.
+  interfaces:
+  - file: third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/create.js
+    kind: class
+    name: MfaMethodCreateController
+    signature: MfaMethodCreateController()
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - class:f2a0935a91d080918371b78eefab5cc1
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/create.js
+    id: r.cancel
+    level: MUST
+    text: cancel nulls method, enforcement and enforcementPreference, then transitions
+      safely to the vault.cluster.access.mfa.methods route.
+  - codeRefs:
+    - class:f2a0935a91d080918371b78eefab5cc1
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/create.js
+    id: r.controller-state
+    level: MUST
+    text: MfaMethodCreateController extends Ember Controller, injects the store, flashMessages
+      and router services, exposes 'type' in queryParams, lists method names ['TOTP','Duo','Okta','PingID'],
+      and tracks type (null), method (null), enforcement, enforcementPreference (default
+      'new'), methodErrors and enforcementErrors.
+  - codeRefs:
+    - class:f2a0935a91d080918371b78eefab5cc1
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/create.js
+    id: r.create-models
+    level: MUST
+    text: createModels unloads any existing method and enforcement records, then creates
+      an 'mfa-method' record with the current type and a new 'mfa-login-enforcement'
+      record.
+  - codeRefs:
+    - class:f2a0935a91d080918371b78eefab5cc1
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/create.js
+    id: r.description-copy
+    level: MUST
+    text: The description getter returns the TOTP-specific passcode text when type
+      is 'totp', and otherwise returns the push-confirmation text interpolating formattedType.
+  - codeRefs:
+    - class:f2a0935a91d080918371b78eefab5cc1
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/create.js
+    id: r.enforcement-preference
+    level: MUST
+    text: onEnforcementPreferenceChange(preference) creates a fresh 'mfa-login-enforcement'
+      record when the preference is 'new', unloads and nulls the enforcement record
+      for any other preference, and records the preference.
+  - codeRefs:
+    - class:f2a0935a91d080918371b78eefab5cc1
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/create.js
+    id: r.error-handling
+    level: MUST
+    text: 'handleError(error, message) flashes a danger message that is the message
+      alone, or the message followed by '': '' and the error''s errors joined with
+      '', '' when the error carries errors; save reports ''Error saving method'' for
+      method failures and ''Error saving enforcement. You can still create an enforcement
+      separately and add this method to it.'' for enforcement failures.'
+  - codeRefs:
+    - class:f2a0935a91d080918371b78eefab5cc1
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/create.js
+    id: r.formatted-type
+    level: MUST
+    text: The formattedType getter returns an empty string when type is falsy, the
+      uppercased type when type is 'totp', and the capitalized type otherwise.
+  - codeRefs:
+    - class:f2a0935a91d080918371b78eefab5cc1
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/create.js
+    id: r.save-order
+    level: MUST
+    text: The save task runs only when checkValidityState returns true; it saves the
+      method first, adds the method to the enforcement's mfa_methods relation when
+      not already present, saves the enforcement in its own try/catch, and on success
+      transitions to vault.cluster.access.mfa.methods.method with the saved method
+      id.
+  - codeRefs:
+    - class:f2a0935a91d080918371b78eefab5cc1
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/create.js
+    id: r.type-flags
+    level: MUST
+    text: isTotp is true only when type is 'totp'; showForms is truthy only when both
+      type and method are set.
+  - codeRefs:
+    - class:f2a0935a91d080918371b78eefab5cc1
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/create.js
+    id: r.type-select-reset
+    level: MUST
+    text: onTypeSelect(type) clears method, enforcement, methodErrors and enforcementErrors
+      to null, resets enforcementPreference to 'new', then assigns the new type.
+  - codeRefs:
+    - class:f2a0935a91d080918371b78eefab5cc1
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/create.js
+    id: r.validity-state
+    level: MUST
+    text: checkValidityState validates the method and stores methodErrors when invalid;
+      when enforcementPreference is 'new' it also validates the enforcement, requires
+      the name and targets validations to pass, and stores enforcementErrors; it returns
+      the combined result of the method validation and the enforcement validity.
   upstream: self

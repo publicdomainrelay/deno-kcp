@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists to specify the behaviour of the MFA method creation controller so that its form-state contract, validation rules, save ordering and error reporting can be relied on by the templates and tests that drive it, and so the same behaviour can be reimplemented or verified outside the original third-party UI tree.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

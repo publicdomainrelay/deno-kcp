@@ -4336,6 +4336,21 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.service-injection` (MUST): "The controller injects the router and flashMessages services so the delete action can navigate with transitionToSafe and report success to the user."
 - added `r.tab-query-param` (MUST): "The controller declares queryParams as ['tab'] so the active tab is driven by the URL query string, and the tab property starts at 'targets' when the query parameter is absent."
 
+### third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-methods
+
+- intent: "" -> "The context exists to specify the behaviour of the MFA method creation controller so that its form-state contract, validation rules, save ordering and error reporting can be relied on by the templates and tests that drive it, and so the same behaviour can be reimplemented or verified outside the original third-party UI tree."
+- added `r.cancel` (MUST): "cancel nulls method, enforcement and enforcementPreference, then transitions safely to the vault.cluster.access.mfa.methods route."
+- added `r.controller-state` (MUST): "MfaMethodCreateController extends Ember Controller, injects the store, flashMessages and router services, exposes 'type' in queryParams, lists method names ['TOTP','Duo','Okta','PingID'], and tracks type (null), method (null), enforcement, enforcementPreference (default 'new'), methodErrors and enforcementErrors."
+- added `r.create-models` (MUST): "createModels unloads any existing method and enforcement records, then creates an 'mfa-method' record with the current type and a new 'mfa-login-enforcement' record."
+- added `r.description-copy` (MUST): "The description getter returns the TOTP-specific passcode text when type is 'totp', and otherwise returns the push-confirmation text interpolating formattedType."
+- added `r.enforcement-preference` (MUST): "onEnforcementPreferenceChange(preference) creates a fresh 'mfa-login-enforcement' record when the preference is 'new', unloads and nulls the enforcement record for any other preference, and records the preference."
+- added `r.error-handling` (MUST): "handleError(error, message) flashes a danger message that is the message alone, or the message followed by ': ' and the error's errors joined with ', ' when the error carries errors; save reports 'Error saving method' for method failures and 'Error saving enforcement. You can still create an enforcement separately and add this method to it.' for enforcement failures."
+- added `r.formatted-type` (MUST): "The formattedType getter returns an empty string when type is falsy, the uppercased type when type is 'totp', and the capitalized type otherwise."
+- added `r.save-order` (MUST): "The save task runs only when checkValidityState returns true; it saves the method first, adds the method to the enforcement's mfa_methods relation when not already present, saves the enforcement in its own try/catch, and on success transitions to vault.cluster.access.mfa.methods.method with the saved method id."
+- added `r.type-flags` (MUST): "isTotp is true only when type is 'totp'; showForms is truthy only when both type and method are set."
+- added `r.type-select-reset` (MUST): "onTypeSelect(type) clears method, enforcement, methodErrors and enforcementErrors to null, resets enforcementPreference to 'new', then assigns the new type."
+- added `r.validity-state` (MUST): "checkValidityState validates the method and stores methodErrors when invalid; when enforcementPreference is 'new' it also validates the enforcement, requires the name and targets validations to pass, and stores enforcementErrors; it returns the combined result of the method validation and the enforcement validity."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4678,8 +4693,9 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-enforcements-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-enforcements-enforcement-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-methods-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-methods-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-methods-method-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-access-namespaces-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
