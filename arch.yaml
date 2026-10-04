@@ -61911,7 +61911,65 @@ system_contexts:
   codeRefIndex:
   - file:third_party/openbao/ui/app/controllers/vault/cluster/policies/index.js index.js@third_party/openbao/ui/app/controllers/vault/cluster/policies/index.js
   id: sc.third-party-openbao-ui-app-controllers-vault-cluster-policies
+  intent: This context exists so the policies list screen retains its filtering, pagination
+    binding, focus state, loading state, and delete-with-flash-feedback behavior in
+    one place, while the route supplies the policy model and toggles the loading flag.
+    The controller decouples the template's filter input from the model, lets the
+    user type a partial policy id and jump to the first match, and centralizes the
+    destructive delete flow so that both success and error paths produce consistent
+    uppercase-typed flash messages.
   name: third-party-openbao-ui-app-controllers-vault-cluster-policies
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/policies/index.js
+    id: r.delete-policy-error
+    level: MUST
+    text: When the `deletePolicy` destroy rejects, the controller MUST show a danger
+      flash message naming the uppercased `policyType`, the record `id`, and the error
+      text taken from the joined `errors` array when present or the error `message`
+      otherwise, and MUST NOT send `reload`.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/policies/index.js
+    id: r.delete-policy-flow
+    level: MUST
+    text: The `deletePolicy` action MUST destroy the passed model record, and on resolution
+      MUST send `reload` to clear the store's dataset cache and then show a success
+      flash message that interpolates the uppercased `policyType` and the record `id`.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/policies/index.js
+    id: r.filter-actions
+    level: MUST
+    text: The `setFilter` action MUST write its argument to the `filter` property,
+      and the `setFilterFocus` action MUST write its boolean argument to the `filterFocused`
+      property.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/policies/index.js
+    id: r.filter-matches-key
+    level: MUST
+    text: The `filterMatchesKey` computed property MUST recompute when `filter`, `model`,
+      or `model.[]` changes, and MUST return true only when the model is present,
+      non-empty, and contains an entry whose `id` equals the current `filter`.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/policies/index.js
+    id: r.first-partial-match
+    level: MUST
+    text: The `firstPartialMatch` computed property MUST return null when there is
+      no model or when the filter already matches an exact id, and otherwise MUST
+      return the first model entry whose `id` matches the regular expression anchored
+      at the start of the current filter string.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/policies/index.js
+    id: r.loading-flag-from-route
+    level: MUST
+    text: The controller holds an `isLoading` flag that defaults to false and is set
+      by the route's `loading` action, so the template reflects route transition progress.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/policies/index.js
+    id: r.query-params-bound
+    level: MUST
+    text: The controller binds the `page` and `pageFilter` properties to the URL query
+      parameters of the same names, and keeps the local filter state `filter` null,
+      `page` 1, `pageFilter` null, and `filterFocused` false until changed.
   upstream: self
 - code:
   - third_party/openbao/ui/app/controllers/vault/cluster/policy/create.js

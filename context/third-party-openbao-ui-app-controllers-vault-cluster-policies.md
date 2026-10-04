@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the policies list screen retains its filtering, pagination binding, focus state, loading state, and delete-with-flash-feedback behavior in one place, while the route supplies the policy model and toggles the loading flag. The controller decouples the template's filter input from the model, lets the user type a partial policy id and jump to the first match, and centralizes the destructive delete flow so that both success and error paths produce consistent uppercase-typed flash messages.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

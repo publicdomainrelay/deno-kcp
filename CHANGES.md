@@ -4438,6 +4438,17 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.injected-services` (MUST): "The controller must inject the router and flashMessages services so that delete can navigate and report outcomes."
 - added `r.transition-via-safe-helper` (SHOULD): "The post-delete navigation should go through the transitionToSafe helper with the router service and the target route name, rather than calling router.transitionTo directly, so aborted transitions are handled centrally."
 
+### third-party-openbao-ui-app-controllers-vault-cluster-policies
+
+- intent: "" -> "This context exists so the policies list screen retains its filtering, pagination binding, focus state, loading state, and delete-with-flash-feedback behavior in one place, while the route supplies the policy model and toggles the loading flag. The controller decouples the template's filter input from the model, lets the user type a partial policy id and jump to the first match, and centralizes the destructive delete flow so that both success and error paths produce consistent uppercase-typed flash messages."
+- added `r.delete-policy-error` (MUST): "When the `deletePolicy` destroy rejects, the controller MUST show a danger flash message naming the uppercased `policyType`, the record `id`, and the error text taken from the joined `errors` array when present or the error `message` otherwise, and MUST NOT send `reload`."
+- added `r.delete-policy-flow` (MUST): "The `deletePolicy` action MUST destroy the passed model record, and on resolution MUST send `reload` to clear the store's dataset cache and then show a success flash message that interpolates the uppercased `policyType` and the record `id`."
+- added `r.filter-actions` (MUST): "The `setFilter` action MUST write its argument to the `filter` property, and the `setFilterFocus` action MUST write its boolean argument to the `filterFocused` property."
+- added `r.filter-matches-key` (MUST): "The `filterMatchesKey` computed property MUST recompute when `filter`, `model`, or `model.[]` changes, and MUST return true only when the model is present, non-empty, and contains an entry whose `id` equals the current `filter`."
+- added `r.first-partial-match` (MUST): "The `firstPartialMatch` computed property MUST return null when there is no model or when the filter already matches an exact id, and otherwise MUST return the first model entry whose `id` matches the regular expression anchored at the start of the current filter string."
+- added `r.loading-flag-from-route` (MUST): "The controller holds an `isLoading` flag that defaults to false and is set by the route's `loading` action, so the template reflects route transition progress."
+- added `r.query-params-bound` (MUST): "The controller binds the `page` and `pageFilter` properties to the URL query parameters of the same names, and keeps the local filter state `filter` null, `page` 1, `pageFilter` null, and `filterFocused` false until changed."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4797,6 +4808,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-scopes-scope-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-controllers-vault-cluster-policies-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-policies-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-policy-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
