@@ -1,4 +1,356 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-internal-helper-metricsutil
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'This context exists because deno-kcp vendors OpenBao and depends on its
+    metrics plumbing: anything in the repo that emits TTL, lease-expiry, or cluster-labelled
+    telemetry goes through this package. The spec records the exported surface and
+    the behaviour behind it — bucket boundary lookup, gauge collection lifecycle,
+    response formatting, and label wrapping — so the vendored copy can be read, patched
+    or upgraded without breaking the callers that construct cluster sinks, gauge processes
+    and metrics helpers.'
+  requirements:
+  - id: r.cluster-metric-sink
+    level: MUST
+    text: 'ClusterMetricSink is a Metrics implementation over an underlying metrics.MetricSink:
+      it exposes the unlabelled SetGauge and AddSample alongside the labelled gauge,
+      counter, sample, duration and measure-since operations, all of which forward
+      to the wrapped sink after the cluster identity is applied; SetDefaultClusterName
+      sets the cluster name that later emissions use.'
+    codeRefs:
+    - method:1eb73f58a13fd0e44ffafb2a7a451958
+    - method:5d193f69089919ef07a4f325ec817cd8
+    - method:72b053473a3b6b3fb0f40d5dd5a81b48
+    - method:966f82646c755e99c15bb69cf5b9e6b8
+    - method:c268214f8aea3772881b0ef42a897e05
+    - method:d437478bf46e5f67e48f73334959c517
+    - method:ef8c102b407bc8603e85647e49d633da
+    - method:f4e3dfdf20e02cdd97e7d09218b2dd62
+    - struct:b79f2c47497ede3f59506e528ca9f65b
+  - id: r.cluster-sink-construction
+    level: MUST
+    text: NewClusterMetricSink builds a ClusterMetricSink from a cluster name and
+      an underlying metrics.MetricSink, and BlackholeSink returns a ClusterMetricSink
+      whose emissions are discarded, giving callers a no-op sink for disabled telemetry.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+    - function:3eb4035e4024e3fd2fdf61d6df948613
+    - function:7024718abeb00db63f6a581663177485
+  - id: r.cluster-sink-gauge-process
+    level: MUST
+    text: ClusterMetricSink.NewGaugeCollectionProcess builds a gauge process that
+      takes its interval and maximum cardinality from the sink's own GaugeInterval
+      and MaxGaugeCardinality fields and uses the default clock, so callers supply
+      only key, labels and collector.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/metricsutil/gauge_process.go
+    - method:5f91279461293ea622bcca95e362a485
+  - id: r.expiry-bucket
+    level: MUST
+    text: ExpiryBucket returns nil when the expiry time is not before the rolling
+      window, and otherwise returns a LeaseExpiryLabel whose LabelName is the expiry
+      rounded to leaseEpsilon and stringified; the namespace label is carried through
+      only when useNS is true and is otherwise blanked.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/metricsutil/bucket.go
+    - function:6f5b66a4523240a3a7f1d98dfd95eec6
+  - id: r.format-from-request
+    level: MUST
+    text: 'FormatFromRequest derives the requested metrics output format from a logical.Request,
+      and ResponseForFormat turns that format into a response: the Prometheus format
+      yields MetricsHelper.PrometheusResponse, and any other format yields MetricsHelper.GenericResponse.'
+    codeRefs:
+    - function:06a1b4a9af383486f41af9ed08d00691
+    - method:6e37bcdfdcceb97c6b69d258897db473
+    - method:8077cc54fbddffece3d556c1651d6c79
+    - method:c9dc863e9bb7eaebbc7cc6f71ae99cdc
+  - id: r.gauge-loop-metric-cache
+    level: MUST
+    text: MetricsHelper.AddGaugeLoopMetric stores a loop gauge value in the helper's
+      cache, keyed by the name CreateMetricsCacheKeyName derives from the metric key,
+      value and labels, so repeated loop emissions for the same series collapse into
+      one cache entry.
+    codeRefs:
+    - method:c444b5d2a6474b9646ffda159fea1dfa
+    - method:c5bb674e8e0fbc82c4c1be4688333167
+    - struct:171a486fcc6002030b8645ddc08c3b61
+    - struct:4981e221e11dc27b727bdebc227a5c86
+  - id: r.gauge-process-construction
+    level: MUST
+    text: NewGaugeCollectionProcess builds a GaugeCollectionProcess from a metric
+      key, an identifying label set, a GaugeCollector, a metrics.MetricSink, a collection
+      interval and a maximum cardinality, wrapping the raw sink in a SinkWrapper and
+      delegating to the clock-injecting constructor; the returned process stores the
+      collector, key, labels, sink, interval and cardinality for its run loop.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/metricsutil/gauge_process.go
+    - function:09d38a2a272e5fc175f70fbf18d79a5c
+  - id: r.gauge-process-lifecycle
+    level: MUST
+    text: GaugeCollectionProcess.Run drives the periodic collection loop that reads
+      the collector and streams values to the sink, and GaugeCollectionProcess.Stop
+      signals that loop to finish; the two are the only lifecycle entry points for
+      a process.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/metricsutil/gauge_process.go
+    - method:505da085c05d076d33e28d2c2515060d
+    - method:e73fe13ede92e09e3c6eaf53c8298e50
+  - id: r.gauge-value-shape
+    level: MUST
+    text: 'GaugeLabelValues is the unit of gauge collection: it pairs the label set
+      of one collected series with its float32 value, and is what collectors hand
+      back to the gauge process.'
+    codeRefs:
+    - file:third_party/openbao/internal/helper/metricsutil/gauge_process.go
+    - struct:226b57f38bdb4a41500477483c75e593
+  - id: r.metrics-helper-construction
+    level: MUST
+    text: NewMetricsHelper builds a MetricsHelper over an in-memory sink, recording
+      whether the Prometheus format is enabled; the enabled flag governs whether Prometheus
+      output can be served.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/metricsutil/metricsutil.go
+    - function:cd7219ca548a1f92b7e8cb6b8f23f79f
+    - struct:7885e82e78865fb57f133939c1aefa3e
+  - id: r.metrics-interface
+    level: MUST
+    text: 'Metrics is the labelled sink contract: an implementation must provide SetGaugeWithLabels,
+      IncrCounterWithLabels, AddSampleWithLabels, AddDurationWithLabels and MeasureSinceWithLabels,
+      each taking a metric key plus []Label, so gauge, counter, sample and timing
+      emission are uniform across wrappers.'
+    codeRefs:
+    - interface:3c7d7a36eafbabeb5182d01503812c9c
+    - method:4cb8ce0b09df550f2a2d516246c88402
+    - method:797f0bed7ce9d409cedb64a64f43b9bd
+    - method:b3f08132607d29db698c021d02e07ac5
+    - method:e17167cb0abe6746a33298d92ec833e2
+    - method:f8bae5d5eb0b1f107230b2cca91616a8
+  - id: r.namespace-label
+    level: MUST
+    text: NamespaceLabel converts a namespace.Namespace into a metrics.Label so that
+      metric emissions can be tagged with the namespace path they came from.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+    - function:133b46b64efe1450de4300ba37c909a4
+  - id: r.sink-wrapper
+    level: MUST
+    text: 'SinkWrapper adapts a plain metrics.MetricSink to the Metrics contract:
+      it implements AddDurationWithLabels and MeasureSinceWithLabels by forwarding
+      to the embedded sink, and is what NewGaugeCollectionProcess installs under the
+      gauge process.'
+    codeRefs:
+    - file:third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+    - method:497863c2d57e7565269727bbe2bce923
+    - method:b5791bd39736f68d5701e7a5d42df54b
+    - struct:09c5bd6fff78a06212bdc71a3f3fe71d
+  - id: r.telemetry-const-config
+    level: MAY
+    text: TelemetryConstConfig carries the constant telemetry settings that the cluster
+      sink and gauge processes read, so those values live in one place rather than
+      at each call site.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+    - struct:60f7b88d07e1b680e242a5f23aaec9b5
+  - id: r.tests-cover-package
+    level: SHOULD
+    text: 'The package keeps unit tests beside each source file: bucket_test exercises
+      TTL bucket lookup, gauge_process_test exercises gauge collection construction
+      and lifecycle, metricsutil_test exercises helper formatting and caching, and
+      wrapped_metrics_test exercises the cluster and wrapper sinks.'
+    codeRefs:
+    - file:third_party/openbao/internal/helper/metricsutil/bucket_test.go
+    - file:third_party/openbao/internal/helper/metricsutil/gauge_process_test.go
+    - file:third_party/openbao/internal/helper/metricsutil/metricsutil_test.go
+    - file:third_party/openbao/internal/helper/metricsutil/wrapped_metrics_test.go
+  - id: r.ttl-bucket
+    level: MUST
+    text: TTLBucket maps a token TTL to a bucket label by binary-searching a Time
+      value against bucketBoundaries; the first boundary that is greater than or equal
+      to the TTL wins, and a TTL above every boundary returns OverflowBucket.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/metricsutil/bucket.go
+    - function:5292eae29ebbbca15c235ec4603b5b98
+  interfaces:
+  - name: BlackholeSink
+    kind: function
+    signature: func BlackholeSink() *ClusterMetricSink
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+  - name: ClusterMetricSink
+    kind: struct
+    signature: type ClusterMetricSink struct
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+  - name: ClusterMetricSink.AddDurationWithLabels
+    kind: method
+    signature: func (m *ClusterMetricSink) AddDurationWithLabels(key []string, d time.Duration,
+      labels []Label)
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+  - name: ClusterMetricSink.AddSample
+    kind: method
+    signature: func (m *ClusterMetricSink) AddSample(key []string, val float32)
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+  - name: ClusterMetricSink.AddSampleWithLabels
+    kind: method
+    signature: func (m *ClusterMetricSink) AddSampleWithLabels(key []string, val float32,
+      labels []Label)
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+  - name: ClusterMetricSink.IncrCounterWithLabels
+    kind: method
+    signature: func (m *ClusterMetricSink) IncrCounterWithLabels(key []string, val
+      float32, labels []Label)
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+  - name: ClusterMetricSink.MeasureSinceWithLabels
+    kind: method
+    signature: func (m *ClusterMetricSink) MeasureSinceWithLabels(key []string, start
+      time.Time, labels []Label)
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+  - name: ClusterMetricSink.NewGaugeCollectionProcess
+    kind: method
+    signature: func (m *ClusterMetricSink) NewGaugeCollectionProcess(key []string,
+      id []Label, collector GaugeCollector, logger log.Logger) (*GaugeCollectionProcess,
+      error)
+    file: third_party/openbao/internal/helper/metricsutil/gauge_process.go
+  - name: ClusterMetricSink.SetDefaultClusterName
+    kind: method
+    signature: func (m *ClusterMetricSink) SetDefaultClusterName(clusterName string)
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+  - name: ClusterMetricSink.SetGauge
+    kind: method
+    signature: func (m *ClusterMetricSink) SetGauge(key []string, val float32)
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+  - name: ClusterMetricSink.SetGaugeWithLabels
+    kind: method
+    signature: func (m *ClusterMetricSink) SetGaugeWithLabels(key []string, val float32,
+      labels []Label)
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+  - name: ExpiryBucket
+    kind: function
+    signature: func ExpiryBucket(expiryTime time.Time, leaseEpsilon time.Duration,
+      rollingWindow time.Time, labelNS string, useNS bool) *LeaseExpiryLabel
+    file: third_party/openbao/internal/helper/metricsutil/bucket.go
+  - name: FormatFromRequest
+    kind: function
+    signature: func FormatFromRequest(req *logical.Request) string
+    file: third_party/openbao/internal/helper/metricsutil/metricsutil.go
+  - name: GaugeCollectionProcess
+    kind: struct
+    signature: type GaugeCollectionProcess struct
+    file: third_party/openbao/internal/helper/metricsutil/gauge_process.go
+  - name: GaugeCollectionProcess.Run
+    kind: method
+    signature: func (p *GaugeCollectionProcess) Run()
+    file: third_party/openbao/internal/helper/metricsutil/gauge_process.go
+  - name: GaugeCollectionProcess.Stop
+    kind: method
+    signature: func (p *GaugeCollectionProcess) Stop()
+    file: third_party/openbao/internal/helper/metricsutil/gauge_process.go
+  - name: GaugeLabelValues
+    kind: struct
+    signature: type GaugeLabelValues struct { Labels []Label; Value float32 }
+    file: third_party/openbao/internal/helper/metricsutil/gauge_process.go
+  - name: GaugeMetric
+    kind: struct
+    signature: type GaugeMetric struct
+    file: third_party/openbao/internal/helper/metricsutil/metricsutil.go
+  - name: GaugeMetrics
+    kind: struct
+    signature: type GaugeMetrics struct
+    file: third_party/openbao/internal/helper/metricsutil/metricsutil.go
+  - name: Metrics
+    kind: interface
+    signature: type Metrics interface
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+  - name: Metrics.AddDurationWithLabels
+    kind: method
+    signature: AddDurationWithLabels(key []string, d time.Duration, labels []Label)
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+  - name: Metrics.AddSampleWithLabels
+    kind: method
+    signature: AddSampleWithLabels(key []string, val float32, labels []Label)
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+  - name: Metrics.IncrCounterWithLabels
+    kind: method
+    signature: IncrCounterWithLabels(key []string, val float32, labels []Label)
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+  - name: Metrics.MeasureSinceWithLabels
+    kind: method
+    signature: MeasureSinceWithLabels(key []string, start time.Time, labels []Label)
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+  - name: Metrics.SetGaugeWithLabels
+    kind: method
+    signature: SetGaugeWithLabels(key []string, val float32, labels []Label)
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+  - name: MetricsHelper
+    kind: struct
+    signature: type MetricsHelper struct
+    file: third_party/openbao/internal/helper/metricsutil/metricsutil.go
+  - name: MetricsHelper.AddGaugeLoopMetric
+    kind: method
+    signature: func (m *MetricsHelper) AddGaugeLoopMetric(key []string, val float32,
+      labels []Label)
+    file: third_party/openbao/internal/helper/metricsutil/metricsutil.go
+  - name: MetricsHelper.CreateMetricsCacheKeyName
+    kind: method
+    signature: func (m *MetricsHelper) CreateMetricsCacheKeyName(key []string, val
+      float32, labels []Label) string
+    file: third_party/openbao/internal/helper/metricsutil/metricsutil.go
+  - name: MetricsHelper.GenericResponse
+    kind: method
+    signature: func (m *MetricsHelper) GenericResponse() *logical.Response
+    file: third_party/openbao/internal/helper/metricsutil/metricsutil.go
+  - name: MetricsHelper.PrometheusResponse
+    kind: method
+    signature: func (m *MetricsHelper) PrometheusResponse() *logical.Response
+    file: third_party/openbao/internal/helper/metricsutil/metricsutil.go
+  - name: MetricsHelper.ResponseForFormat
+    kind: method
+    signature: func (m *MetricsHelper) ResponseForFormat(format string) *logical.Response
+    file: third_party/openbao/internal/helper/metricsutil/metricsutil.go
+  - name: NamespaceLabel
+    kind: function
+    signature: func NamespaceLabel(ns *namespace.Namespace) metrics.Label
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+  - name: NewClusterMetricSink
+    kind: function
+    signature: func NewClusterMetricSink(clusterName string, sink metrics.MetricSink)
+      *ClusterMetricSink
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+  - name: NewGaugeCollectionProcess
+    kind: function
+    signature: func NewGaugeCollectionProcess(key []string, id []Label, collector
+      GaugeCollector, m metrics.MetricSink, gaugeInterval time.Duration, maxGaugeCardinality
+      int, logger log.Logger) (*GaugeCollectionProcess, error)
+    file: third_party/openbao/internal/helper/metricsutil/gauge_process.go
+  - name: NewMetricsHelper
+    kind: function
+    signature: func NewMetricsHelper(inMem *metrics.InmemSink, enablePrometheus bool)
+      *MetricsHelper
+    file: third_party/openbao/internal/helper/metricsutil/metricsutil.go
+  - name: SinkWrapper
+    kind: struct
+    signature: type SinkWrapper struct
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+  - name: SinkWrapper.AddDurationWithLabels
+    kind: method
+    signature: func (s SinkWrapper) AddDurationWithLabels(key []string, d time.Duration,
+      labels []Label)
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+  - name: SinkWrapper.MeasureSinceWithLabels
+    kind: method
+    signature: func (s SinkWrapper) MeasureSinceWithLabels(key []string, start time.Time,
+      labels []Label)
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+  - name: TTLBucket
+    kind: function
+    signature: func TTLBucket(ttl time.Duration) string
+    file: third_party/openbao/internal/helper/metricsutil/bucket.go
+  - name: TelemetryConstConfig
+    kind: struct
+    signature: type TelemetryConstConfig struct
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
 codeRefIndex:
 - file:third_party/openbao/internal/helper/metricsutil/bucket.go bucket.go@third_party/openbao/internal/helper/metricsutil/bucket.go
 - file:third_party/openbao/internal/helper/metricsutil/bucket_test.go bucket_test.go@third_party/openbao/internal/helper/metricsutil/bucket_test.go
@@ -47,355 +399,3 @@ codeRefIndex:
 - struct:60f7b88d07e1b680e242a5f23aaec9b5 TelemetryConstConfig@third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go:39
 - struct:7885e82e78865fb57f133939c1aefa3e MetricsHelper@third_party/openbao/internal/helper/metricsutil/metricsutil.go:39
 - struct:b79f2c47497ede3f59506e528ca9f65b ClusterMetricSink@third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go:21
-kind: SystemContext
-metadata:
-  name: third-party-openbao-internal-helper-metricsutil
-  namespace: default
-spec:
-  intent: 'This context exists because deno-kcp vendors OpenBao and depends on its
-    metrics plumbing: anything in the repo that emits TTL, lease-expiry, or cluster-labelled
-    telemetry goes through this package. The spec records the exported surface and
-    the behaviour behind it — bucket boundary lookup, gauge collection lifecycle,
-    response formatting, and label wrapping — so the vendored copy can be read, patched
-    or upgraded without breaking the callers that construct cluster sinks, gauge processes
-    and metrics helpers.'
-  interfaces:
-  - file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: function
-    name: BlackholeSink
-    signature: func BlackholeSink() *ClusterMetricSink
-  - file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: struct
-    name: ClusterMetricSink
-    signature: type ClusterMetricSink struct
-  - file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: method
-    name: ClusterMetricSink.AddDurationWithLabels
-    signature: func (m *ClusterMetricSink) AddDurationWithLabels(key []string, d time.Duration,
-      labels []Label)
-  - file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: method
-    name: ClusterMetricSink.AddSample
-    signature: func (m *ClusterMetricSink) AddSample(key []string, val float32)
-  - file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: method
-    name: ClusterMetricSink.AddSampleWithLabels
-    signature: func (m *ClusterMetricSink) AddSampleWithLabels(key []string, val float32,
-      labels []Label)
-  - file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: method
-    name: ClusterMetricSink.IncrCounterWithLabels
-    signature: func (m *ClusterMetricSink) IncrCounterWithLabels(key []string, val
-      float32, labels []Label)
-  - file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: method
-    name: ClusterMetricSink.MeasureSinceWithLabels
-    signature: func (m *ClusterMetricSink) MeasureSinceWithLabels(key []string, start
-      time.Time, labels []Label)
-  - file: third_party/openbao/internal/helper/metricsutil/gauge_process.go
-    kind: method
-    name: ClusterMetricSink.NewGaugeCollectionProcess
-    signature: func (m *ClusterMetricSink) NewGaugeCollectionProcess(key []string,
-      id []Label, collector GaugeCollector, logger log.Logger) (*GaugeCollectionProcess,
-      error)
-  - file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: method
-    name: ClusterMetricSink.SetDefaultClusterName
-    signature: func (m *ClusterMetricSink) SetDefaultClusterName(clusterName string)
-  - file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: method
-    name: ClusterMetricSink.SetGauge
-    signature: func (m *ClusterMetricSink) SetGauge(key []string, val float32)
-  - file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: method
-    name: ClusterMetricSink.SetGaugeWithLabels
-    signature: func (m *ClusterMetricSink) SetGaugeWithLabels(key []string, val float32,
-      labels []Label)
-  - file: third_party/openbao/internal/helper/metricsutil/bucket.go
-    kind: function
-    name: ExpiryBucket
-    signature: func ExpiryBucket(expiryTime time.Time, leaseEpsilon time.Duration,
-      rollingWindow time.Time, labelNS string, useNS bool) *LeaseExpiryLabel
-  - file: third_party/openbao/internal/helper/metricsutil/metricsutil.go
-    kind: function
-    name: FormatFromRequest
-    signature: func FormatFromRequest(req *logical.Request) string
-  - file: third_party/openbao/internal/helper/metricsutil/gauge_process.go
-    kind: struct
-    name: GaugeCollectionProcess
-    signature: type GaugeCollectionProcess struct
-  - file: third_party/openbao/internal/helper/metricsutil/gauge_process.go
-    kind: method
-    name: GaugeCollectionProcess.Run
-    signature: func (p *GaugeCollectionProcess) Run()
-  - file: third_party/openbao/internal/helper/metricsutil/gauge_process.go
-    kind: method
-    name: GaugeCollectionProcess.Stop
-    signature: func (p *GaugeCollectionProcess) Stop()
-  - file: third_party/openbao/internal/helper/metricsutil/gauge_process.go
-    kind: struct
-    name: GaugeLabelValues
-    signature: type GaugeLabelValues struct { Labels []Label; Value float32 }
-  - file: third_party/openbao/internal/helper/metricsutil/metricsutil.go
-    kind: struct
-    name: GaugeMetric
-    signature: type GaugeMetric struct
-  - file: third_party/openbao/internal/helper/metricsutil/metricsutil.go
-    kind: struct
-    name: GaugeMetrics
-    signature: type GaugeMetrics struct
-  - file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: interface
-    name: Metrics
-    signature: type Metrics interface
-  - file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: method
-    name: Metrics.AddDurationWithLabels
-    signature: AddDurationWithLabels(key []string, d time.Duration, labels []Label)
-  - file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: method
-    name: Metrics.AddSampleWithLabels
-    signature: AddSampleWithLabels(key []string, val float32, labels []Label)
-  - file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: method
-    name: Metrics.IncrCounterWithLabels
-    signature: IncrCounterWithLabels(key []string, val float32, labels []Label)
-  - file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: method
-    name: Metrics.MeasureSinceWithLabels
-    signature: MeasureSinceWithLabels(key []string, start time.Time, labels []Label)
-  - file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: method
-    name: Metrics.SetGaugeWithLabels
-    signature: SetGaugeWithLabels(key []string, val float32, labels []Label)
-  - file: third_party/openbao/internal/helper/metricsutil/metricsutil.go
-    kind: struct
-    name: MetricsHelper
-    signature: type MetricsHelper struct
-  - file: third_party/openbao/internal/helper/metricsutil/metricsutil.go
-    kind: method
-    name: MetricsHelper.AddGaugeLoopMetric
-    signature: func (m *MetricsHelper) AddGaugeLoopMetric(key []string, val float32,
-      labels []Label)
-  - file: third_party/openbao/internal/helper/metricsutil/metricsutil.go
-    kind: method
-    name: MetricsHelper.CreateMetricsCacheKeyName
-    signature: func (m *MetricsHelper) CreateMetricsCacheKeyName(key []string, val
-      float32, labels []Label) string
-  - file: third_party/openbao/internal/helper/metricsutil/metricsutil.go
-    kind: method
-    name: MetricsHelper.GenericResponse
-    signature: func (m *MetricsHelper) GenericResponse() *logical.Response
-  - file: third_party/openbao/internal/helper/metricsutil/metricsutil.go
-    kind: method
-    name: MetricsHelper.PrometheusResponse
-    signature: func (m *MetricsHelper) PrometheusResponse() *logical.Response
-  - file: third_party/openbao/internal/helper/metricsutil/metricsutil.go
-    kind: method
-    name: MetricsHelper.ResponseForFormat
-    signature: func (m *MetricsHelper) ResponseForFormat(format string) *logical.Response
-  - file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: function
-    name: NamespaceLabel
-    signature: func NamespaceLabel(ns *namespace.Namespace) metrics.Label
-  - file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: function
-    name: NewClusterMetricSink
-    signature: func NewClusterMetricSink(clusterName string, sink metrics.MetricSink)
-      *ClusterMetricSink
-  - file: third_party/openbao/internal/helper/metricsutil/gauge_process.go
-    kind: function
-    name: NewGaugeCollectionProcess
-    signature: func NewGaugeCollectionProcess(key []string, id []Label, collector
-      GaugeCollector, m metrics.MetricSink, gaugeInterval time.Duration, maxGaugeCardinality
-      int, logger log.Logger) (*GaugeCollectionProcess, error)
-  - file: third_party/openbao/internal/helper/metricsutil/metricsutil.go
-    kind: function
-    name: NewMetricsHelper
-    signature: func NewMetricsHelper(inMem *metrics.InmemSink, enablePrometheus bool)
-      *MetricsHelper
-  - file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: struct
-    name: SinkWrapper
-    signature: type SinkWrapper struct
-  - file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: method
-    name: SinkWrapper.AddDurationWithLabels
-    signature: func (s SinkWrapper) AddDurationWithLabels(key []string, d time.Duration,
-      labels []Label)
-  - file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: method
-    name: SinkWrapper.MeasureSinceWithLabels
-    signature: func (s SinkWrapper) MeasureSinceWithLabels(key []string, start time.Time,
-      labels []Label)
-  - file: third_party/openbao/internal/helper/metricsutil/bucket.go
-    kind: function
-    name: TTLBucket
-    signature: func TTLBucket(ttl time.Duration) string
-  - file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: struct
-    name: TelemetryConstConfig
-    signature: type TelemetryConstConfig struct
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - method:1eb73f58a13fd0e44ffafb2a7a451958
-    - method:5d193f69089919ef07a4f325ec817cd8
-    - method:72b053473a3b6b3fb0f40d5dd5a81b48
-    - method:966f82646c755e99c15bb69cf5b9e6b8
-    - method:c268214f8aea3772881b0ef42a897e05
-    - method:d437478bf46e5f67e48f73334959c517
-    - method:ef8c102b407bc8603e85647e49d633da
-    - method:f4e3dfdf20e02cdd97e7d09218b2dd62
-    - struct:b79f2c47497ede3f59506e528ca9f65b
-    id: r.cluster-metric-sink
-    level: MUST
-    text: 'ClusterMetricSink is a Metrics implementation over an underlying metrics.MetricSink:
-      it exposes the unlabelled SetGauge and AddSample alongside the labelled gauge,
-      counter, sample, duration and measure-since operations, all of which forward
-      to the wrapped sink after the cluster identity is applied; SetDefaultClusterName
-      sets the cluster name that later emissions use.'
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    - function:3eb4035e4024e3fd2fdf61d6df948613
-    - function:7024718abeb00db63f6a581663177485
-    id: r.cluster-sink-construction
-    level: MUST
-    text: NewClusterMetricSink builds a ClusterMetricSink from a cluster name and
-      an underlying metrics.MetricSink, and BlackholeSink returns a ClusterMetricSink
-      whose emissions are discarded, giving callers a no-op sink for disabled telemetry.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/metricsutil/gauge_process.go
-    - method:5f91279461293ea622bcca95e362a485
-    id: r.cluster-sink-gauge-process
-    level: MUST
-    text: ClusterMetricSink.NewGaugeCollectionProcess builds a gauge process that
-      takes its interval and maximum cardinality from the sink's own GaugeInterval
-      and MaxGaugeCardinality fields and uses the default clock, so callers supply
-      only key, labels and collector.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/metricsutil/bucket.go
-    - function:6f5b66a4523240a3a7f1d98dfd95eec6
-    id: r.expiry-bucket
-    level: MUST
-    text: ExpiryBucket returns nil when the expiry time is not before the rolling
-      window, and otherwise returns a LeaseExpiryLabel whose LabelName is the expiry
-      rounded to leaseEpsilon and stringified; the namespace label is carried through
-      only when useNS is true and is otherwise blanked.
-  - codeRefs:
-    - function:06a1b4a9af383486f41af9ed08d00691
-    - method:6e37bcdfdcceb97c6b69d258897db473
-    - method:8077cc54fbddffece3d556c1651d6c79
-    - method:c9dc863e9bb7eaebbc7cc6f71ae99cdc
-    id: r.format-from-request
-    level: MUST
-    text: 'FormatFromRequest derives the requested metrics output format from a logical.Request,
-      and ResponseForFormat turns that format into a response: the Prometheus format
-      yields MetricsHelper.PrometheusResponse, and any other format yields MetricsHelper.GenericResponse.'
-  - codeRefs:
-    - method:c444b5d2a6474b9646ffda159fea1dfa
-    - method:c5bb674e8e0fbc82c4c1be4688333167
-    - struct:171a486fcc6002030b8645ddc08c3b61
-    - struct:4981e221e11dc27b727bdebc227a5c86
-    id: r.gauge-loop-metric-cache
-    level: MUST
-    text: MetricsHelper.AddGaugeLoopMetric stores a loop gauge value in the helper's
-      cache, keyed by the name CreateMetricsCacheKeyName derives from the metric key,
-      value and labels, so repeated loop emissions for the same series collapse into
-      one cache entry.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/metricsutil/gauge_process.go
-    - function:09d38a2a272e5fc175f70fbf18d79a5c
-    id: r.gauge-process-construction
-    level: MUST
-    text: NewGaugeCollectionProcess builds a GaugeCollectionProcess from a metric
-      key, an identifying label set, a GaugeCollector, a metrics.MetricSink, a collection
-      interval and a maximum cardinality, wrapping the raw sink in a SinkWrapper and
-      delegating to the clock-injecting constructor; the returned process stores the
-      collector, key, labels, sink, interval and cardinality for its run loop.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/metricsutil/gauge_process.go
-    - method:505da085c05d076d33e28d2c2515060d
-    - method:e73fe13ede92e09e3c6eaf53c8298e50
-    id: r.gauge-process-lifecycle
-    level: MUST
-    text: GaugeCollectionProcess.Run drives the periodic collection loop that reads
-      the collector and streams values to the sink, and GaugeCollectionProcess.Stop
-      signals that loop to finish; the two are the only lifecycle entry points for
-      a process.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/metricsutil/gauge_process.go
-    - struct:226b57f38bdb4a41500477483c75e593
-    id: r.gauge-value-shape
-    level: MUST
-    text: 'GaugeLabelValues is the unit of gauge collection: it pairs the label set
-      of one collected series with its float32 value, and is what collectors hand
-      back to the gauge process.'
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/metricsutil/metricsutil.go
-    - function:cd7219ca548a1f92b7e8cb6b8f23f79f
-    - struct:7885e82e78865fb57f133939c1aefa3e
-    id: r.metrics-helper-construction
-    level: MUST
-    text: NewMetricsHelper builds a MetricsHelper over an in-memory sink, recording
-      whether the Prometheus format is enabled; the enabled flag governs whether Prometheus
-      output can be served.
-  - codeRefs:
-    - interface:3c7d7a36eafbabeb5182d01503812c9c
-    - method:4cb8ce0b09df550f2a2d516246c88402
-    - method:797f0bed7ce9d409cedb64a64f43b9bd
-    - method:b3f08132607d29db698c021d02e07ac5
-    - method:e17167cb0abe6746a33298d92ec833e2
-    - method:f8bae5d5eb0b1f107230b2cca91616a8
-    id: r.metrics-interface
-    level: MUST
-    text: 'Metrics is the labelled sink contract: an implementation must provide SetGaugeWithLabels,
-      IncrCounterWithLabels, AddSampleWithLabels, AddDurationWithLabels and MeasureSinceWithLabels,
-      each taking a metric key plus []Label, so gauge, counter, sample and timing
-      emission are uniform across wrappers.'
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    - function:133b46b64efe1450de4300ba37c909a4
-    id: r.namespace-label
-    level: MUST
-    text: NamespaceLabel converts a namespace.Namespace into a metrics.Label so that
-      metric emissions can be tagged with the namespace path they came from.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    - method:497863c2d57e7565269727bbe2bce923
-    - method:b5791bd39736f68d5701e7a5d42df54b
-    - struct:09c5bd6fff78a06212bdc71a3f3fe71d
-    id: r.sink-wrapper
-    level: MUST
-    text: 'SinkWrapper adapts a plain metrics.MetricSink to the Metrics contract:
-      it implements AddDurationWithLabels and MeasureSinceWithLabels by forwarding
-      to the embedded sink, and is what NewGaugeCollectionProcess installs under the
-      gauge process.'
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    - struct:60f7b88d07e1b680e242a5f23aaec9b5
-    id: r.telemetry-const-config
-    level: MAY
-    text: TelemetryConstConfig carries the constant telemetry settings that the cluster
-      sink and gauge processes read, so those values live in one place rather than
-      at each call site.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/metricsutil/bucket_test.go
-    - file:third_party/openbao/internal/helper/metricsutil/gauge_process_test.go
-    - file:third_party/openbao/internal/helper/metricsutil/metricsutil_test.go
-    - file:third_party/openbao/internal/helper/metricsutil/wrapped_metrics_test.go
-    id: r.tests-cover-package
-    level: SHOULD
-    text: 'The package keeps unit tests beside each source file: bucket_test exercises
-      TTL bucket lookup, gauge_process_test exercises gauge collection construction
-      and lifecycle, metricsutil_test exercises helper formatting and caching, and
-      wrapped_metrics_test exercises the cluster and wrapper sinks.'
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/metricsutil/bucket.go
-    - function:5292eae29ebbbca15c235ec4603b5b98
-    id: r.ttl-bucket
-    level: MUST
-    text: TTLBucket maps a token TTL to a bucket label by binary-searching a Time
-      value against bucketBoundaries; the first boundary that is greater than or equal
-      to the TTL wins, and a TTL above every boundary returns OverflowBucket.
-  upstream: self

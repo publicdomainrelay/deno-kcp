@@ -1,64 +1,64 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- class:f6fc4e6f70657055d0c2d0e0a0a6736a OidcProviderDetailsController@third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/providers/provider/details.js:11
-- file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/providers/provider/details.js
-  details.js@third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/providers/provider/details.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-providers-provider
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'This context exists to describe the delete-provider interaction offered
     by the OIDC provider details route. It records the destructive action''s full
     contract: the record mutation, the success confirmation and route transition,
     and the failure path that rolls back the model and reports a message. Stating
     that behavior here keeps the details page controller described independently of
     the surrounding templates and routes.'
-  interfaces:
-  - file: third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/providers/provider/details.js
-    kind: class
-    name: OidcProviderDetailsController
-    signature: class OidcProviderDetailsController extends Controller
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - class:f6fc4e6f70657055d0c2d0e0a0a6736a
-    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/providers/provider/details.js
-    id: r.delete-derives-error-message
+  - id: r.delete-derives-error-message
     level: SHOULD
     text: The failure path should build the flash text from error.errors joined with
       '. ' when that array is present, and otherwise fall back to error.message, then
       emit it as a danger flash message.
-  - codeRefs:
+    codeRefs:
     - class:f6fc4e6f70657055d0c2d0e0a0a6736a
     - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/providers/provider/details.js
-    id: r.delete-destroys-model-record
+  - id: r.delete-destroys-model-record
     level: MUST
     text: The delete action must await destroyRecord() on the controller's model,
       so the currently displayed OIDC provider is removed from the backend before
       any success feedback is shown.
-  - codeRefs:
+    codeRefs:
     - class:f6fc4e6f70657055d0c2d0e0a0a6736a
     - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/providers/provider/details.js
-    id: r.delete-reports-success-and-navigates
+  - id: r.delete-reports-success-and-navigates
     level: MUST
     text: After a successful destroyRecord the action must push a success flash message
       reading 'Provider deleted successfully' and then transition to the vault.cluster.access.oidc.providers
       route using transitionToSafe.
-  - codeRefs:
+    codeRefs:
     - class:f6fc4e6f70657055d0c2d0e0a0a6736a
     - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/providers/provider/details.js
-    id: r.delete-rolls-back-on-failure
+  - id: r.delete-rolls-back-on-failure
     level: MUST
     text: When destroyRecord rejects, the action must call rollbackAttributes() on
       the model so the provider record is not left in a deleted or dirty local state,
       and it must not transition away from the details route.
-  - codeRefs:
+    codeRefs:
     - class:f6fc4e6f70657055d0c2d0e0a0a6736a
     - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/providers/provider/details.js
-    id: r.inject-router-and-flash-services
+  - id: r.inject-router-and-flash-services
     level: MUST
     text: OidcProviderDetailsController must declare router and flashMessages as injected
       services, so the delete action can transition routes and report messages without
       direct container lookups.
-  upstream: self
+    codeRefs:
+    - class:f6fc4e6f70657055d0c2d0e0a0a6736a
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/providers/provider/details.js
+  interfaces:
+  - name: OidcProviderDetailsController
+    kind: class
+    signature: class OidcProviderDetailsController extends Controller
+    file: third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/providers/provider/details.js
+codeRefIndex:
+- class:f6fc4e6f70657055d0c2d0e0a0a6736a OidcProviderDetailsController@third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/providers/provider/details.js:11
+- file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/providers/provider/details.js
+  details.js@third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/providers/provider/details.js

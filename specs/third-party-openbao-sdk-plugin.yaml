@@ -1,4 +1,794 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-sdk-plugin
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: Exists so that the repository can compile against and link the OpenBao/Vault
+    plugin protocol without depending on an external module path for the SDK. It defines
+    the full server and client halves of the go-plugin gRPC contract for logical backends,
+    plus the storage, system-view and logger brokers a backend needs, and the serve
+    helpers a plugin binary's main function calls. Consumers inside this repository
+    use it to build, dispense and host logical backends.
+  requirements:
+  - id: r.backend-client-forwarding
+    level: MUST
+    text: Every backendGRPCPluginClient method forwards to the remote backend over
+      gRPC, so Initialize, HandleRequest, HandleExistenceCheck, SpecialPaths, Setup,
+      InvalidateKey, Cleanup, Type, PluginVersion, System, Logger and IsExternal all
+      reflect the plugin process's backend rather than local state.
+    codeRefs:
+    - file:third_party/openbao/sdk/plugin/grpc_backend_client.go
+    - method:1b7848a15e29d6ec84624977a059f707
+    - method:2b4b94171d09bc27210585e5a91bcb4e
+    - method:32468eb19e567c90f508f68e9638ac96
+    - method:6171e5e250fab85daba7f4057e0f8361
+    - method:849a48d975eba89fcea2bbba2cfe3767
+  - id: r.backend-plugin-client-capabilities
+    level: MUST
+    text: BackendPluginClient carries the remote backend handle plus its version metadata,
+      so Cleanup tears down the plugin client and PluginVersion reports the negotiated
+      version; the v5 variant additionally reports IsExternal from the plugin handshake.
+    codeRefs:
+    - file:third_party/openbao/sdk/plugin/plugin.go
+    - method:0a9c4bf7a631037cad289dd4779bf323
+    - method:d5e6e4ab01a24a7f082237abe1e18150
+    - method:fa166f39c25c9aca21b6a93bae1fc16a
+    - struct:4ff22f80117fe175971f2ca0995534e2
+  - id: r.backend-server-dispatch
+    level: MUST
+    text: backendGRPCPluginServer decodes each protobuf request into the logical types,
+      invokes the corresponding method on the obtained backend instance and encodes
+      the result or the error into the protobuf reply.
+    codeRefs:
+    - file:third_party/openbao/sdk/plugin/grpc_backend_server.go
+    - method:174d5d0103acb1b2ed4a07af8ea49a70
+    - method:1c58ea704d1ea3d538ed36c65bd1e213
+    - method:69224966363a14fd3c53f406c3df600e
+    - method:b9809ca3d0d49ddac6ce541c8c41bce2
+  - id: r.grpc-client-construction
+    level: MUST
+    text: GRPCClient returns a backendGRPCPluginClient holding the Backend client,
+      PluginVersion client, the broker, a fresh cleanup channel, the caller's done
+      context and the plugin's MetadataMode.
+    codeRefs:
+    - file:third_party/openbao/sdk/plugin/backend.go
+    - method:997450692afef7e5ec0642502549ce4f
+  - id: r.grpc-server-registration
+    level: MUST
+    text: GRPCServer builds a backendGRPCPluginServer from the plugin's Factory, MetadataMode-independent
+      instance map and Logger, registers it as both the Backend and PluginVersion
+      gRPC service, and additionally registers the multiplexing server when MultiplexingSupport
+      is set.
+    codeRefs:
+    - file:third_party/openbao/sdk/plugin/backend.go
+    - method:0d2b3ec3df7e24317bcaa59cdffacde0
+    - struct:a503c0d462a2d348fcc0594174abc825
+  - id: r.logger-rpc-surface
+    level: MUST
+    text: LoggerServer exposes the log.Logger interface over RPC, forwarding Trace,
+      Debug, Info, Warn, Error and Log to a shared logger, and reporting IsTrace,
+      IsDebug, IsInfo and IsWarn through a LoggerReply; SetLevel adjusts the logger's
+      level.
+    codeRefs:
+    - file:third_party/openbao/sdk/plugin/logger.go
+    - method:1ae9e1055c4c547f91bffecf87e3408b
+    - method:3396e99d36fce725371b2778e424e876
+    - method:488f91ae4607e2292d664b435e509be9
+    - struct:e1626e6329eb97242334a06e3ae8490c
+  - id: r.noop-storage
+    level: MUST
+    text: 'NOOPStorage implements the storage interface as a no-op: List and ListPage
+      return empty results, Get returns a not-found error, and Put and Delete return
+      nil errors.'
+    codeRefs:
+    - file:third_party/openbao/sdk/plugin/grpc_storage.go
+    - method:3653e0f25154a788fd8bf3e5584cf0bb
+    - method:b48d2ce520ef90129e6973a01e0f8074
+    - method:b90b0c85be30968ce7d690be635d4af5
+    - struct:3311490cc6926794ff20c280ed074776
+  - id: r.reload-preserving-cleanup
+    level: MUST
+    text: BackendPluginClientV5.Cleanup checks the context for ContextKeyPluginReload
+      and, when it is absent, cleans up the embedded backend and closes the plugin
+      client, so a reload does not tear down the reused plugin process.
+    codeRefs:
+    - file:third_party/openbao/sdk/plugin/plugin_v5.go
+    - method:3b581a46e9f9f8d7182c6a41083e2d5f
+    - method:bb98f92f7e7f53959d482198ae73019d
+    - type_alias:de240a20b03c3acb677fe02691925b5b
+  - id: r.serve-entrypoint
+    level: MUST
+    text: Serve runs the plugin main process from ServeOpts, defaulting the logger
+      when none is supplied, applying the TLSProviderFunc when set, and serving the
+      GRPCBackendPlugin built from BackendFactoryFunc; ServeMultiplex does the same
+      with multiplexing support enabled.
+    codeRefs:
+    - file:third_party/openbao/sdk/plugin/serve.go
+    - function:ace0d2c743fe6cb870f3439eaeeef5fc
+    - function:b052930f1568525b7416c6a7dd388b99
+    - struct:093e9499ed0d32dc6fa3ba35860e4560
+    - type_alias:ffcd33063c419df344c256774a320354
+  - id: r.storage-broker-roundtrip
+    level: MUST
+    text: GRPCStorageClient exposes the logical storage surface (List, ListPage, Get,
+      Put, Delete) by calling the gRPC storage server, and GRPCStorageServer serves
+      those same operations against the mounted storage backend, returning the storage
+      error in the reply rather than as a transport error.
+    codeRefs:
+    - file:third_party/openbao/sdk/plugin/grpc_storage.go
+    - method:2af708be0578b6d482b348656fbf5525
+    - method:af0cce5180fd3f3a609687842173904d
+    - method:c7c8d68ccf7cc2596400e9443b552e5e
+    - method:e62d5db3e874584c8e85f7aa82ef3f23
+    - method:f5fd3dce8409afac9488cce9128b1095
+  - id: r.system-view-broker
+    level: MUST
+    text: gRPCSystemViewClient answers every logical.SystemView query (lease TTLs,
+      tainted, caching disabled, replication state, mlock, local mount, entity and
+      group lookups, plugin environment, Vault version, cluster ID, external key,
+      response wrapping and new-plugin-client creation) by calling the corresponding
+      gRPC system view server method, and gRPCSystemViewServer answers those calls
+      from the embedded SystemView.
+    codeRefs:
+    - file:third_party/openbao/sdk/plugin/grpc_system.go
+    - method:0b9c4fcf76557462d9601358f6cd6b33
+    - method:0c70f9c91b6db5de7bbec6912b73a289
+    - method:2395253bf53d1ca1fa29f1fc054d3ac9
+    - method:2827ddabfa1ea12b12ff2585eef1c0b5
+    - method:3d20729ab9c557ad5d78002323aea05b
+    - method:bb04f4e7d6300db0c9d9eb7d2b8d30d2
+  - id: r.tracing-middleware
+    level: SHOULD
+    text: BackendTracingMiddleware wraps a logical.Backend and starts a tracing span
+      around each forwarded call (Initialize, HandleRequest, HandleExistenceCheck,
+      Setup, InvalidateKey, Cleanup) and delegates the non-traced accessors SpecialPaths,
+      System, Logger, Type and PluginVersion unchanged.
+    codeRefs:
+    - file:third_party/openbao/sdk/plugin/middleware.go
+    - method:9986a138ce360977306f17709a79b2a9
+    - method:a9b16dd37ca7f3262412072c70d2b980
+    - method:f6a2cb63630585488da8793281efa51a
+    - struct:f9823e24fba3e1260e837b886422d8ad
+  - id: r.transactional-storage
+    level: MUST
+    text: GRPCTransactionalStorageClient begins read-only and read-write transactions
+      through the storage server and returns a GRPCStorageClientTransaction whose
+      Commit and Rollback call the matching server methods.
+    codeRefs:
+    - file:third_party/openbao/sdk/plugin/grpc_storage.go
+    - method:0bfc2e84c1c3f42c856a3c8e25811b37
+    - method:497ac0debf7f4e2768f4ce31af9d5819
+    - method:b118df18a01349acaff756f826bcde96
+    - method:b21f0c9f65bfabbac120694d4f7c8d8a
+    - method:ce75c71d01169b33386fcc1b37edfcf7
+  - id: r.v5-dispense
+    level: MUST
+    text: Dispense inspects the plugin's handshake to decide the versioned client
+      form, and NewPluginClientV5 builds a BackendPluginClientV5 that embeds the dispensed
+      logical.Backend; NewBackendV5 resolves the runner by plugin name and version
+      before dispensing.
+    codeRefs:
+    - file:third_party/openbao/sdk/plugin/plugin_v5.go
+    - function:a6733a8b57e4b20e4fa4378c8674dcf6
+    - function:c9412851cff57cc07186a931b2d0570f
+    - function:f10fd7cb843087c77654f7dd89ad9c38
+  - id: r.versioned-backend-factory
+    level: MUST
+    text: NewBackendWithVersion, NewBackend and NewPluginClient resolve a plugin runner
+      through the supplied LookRunnerUtil/RunnerUtil, dispense the client and return
+      the logical.Backend, with NewBackend delegating to the versioned constructor
+      with an empty version.
+    codeRefs:
+    - file:third_party/openbao/sdk/plugin/plugin.go
+    - function:2102a0f2191f4030153f7abf9e3956e3
+    - function:6e3505f1f4c72782efe70fd3a74447ac
+    - function:c7b21232958a5b231b82265ec8ac21a2
+  interfaces:
+  - name: BackendPluginClient
+    kind: struct
+    signature: type BackendPluginClient struct
+    file: third_party/openbao/sdk/plugin/plugin.go
+  - name: BackendPluginClient.Cleanup
+    kind: method
+    signature: func (b *BackendPluginClient) Cleanup(ctx context.Context)
+    file: third_party/openbao/sdk/plugin/plugin.go
+  - name: BackendPluginClient.PluginVersion
+    kind: method
+    signature: func (b *BackendPluginClient) PluginVersion() logical.PluginVersion
+    file: third_party/openbao/sdk/plugin/plugin.go
+  - name: BackendPluginClientV5
+    kind: struct
+    signature: type BackendPluginClientV5 struct
+    file: third_party/openbao/sdk/plugin/plugin_v5.go
+  - name: BackendPluginClientV5.Cleanup
+    kind: method
+    signature: func (b *BackendPluginClientV5) Cleanup(ctx context.Context)
+    file: third_party/openbao/sdk/plugin/plugin_v5.go
+  - name: BackendPluginClientV5.IsExternal
+    kind: method
+    signature: func (b *BackendPluginClientV5) IsExternal() bool
+    file: third_party/openbao/sdk/plugin/plugin_v5.go
+  - name: BackendPluginClientV5.PluginVersion
+    kind: method
+    signature: func (b *BackendPluginClientV5) PluginVersion() logical.PluginVersion
+    file: third_party/openbao/sdk/plugin/plugin_v5.go
+  - name: BackendTracingMiddleware
+    kind: struct
+    signature: type BackendTracingMiddleware struct
+    file: third_party/openbao/sdk/plugin/middleware.go
+  - name: BackendTracingMiddleware.Cleanup
+    kind: method
+    signature: func (b *BackendTracingMiddleware) Cleanup(ctx context.Context)
+    file: third_party/openbao/sdk/plugin/middleware.go
+  - name: BackendTracingMiddleware.HandleExistenceCheck
+    kind: method
+    signature: func (b *BackendTracingMiddleware) HandleExistenceCheck(ctx context.Context,
+      req *logical.Request) (found bool, exists bool, err error)
+    file: third_party/openbao/sdk/plugin/middleware.go
+  - name: BackendTracingMiddleware.HandleRequest
+    kind: method
+    signature: func (b *BackendTracingMiddleware) HandleRequest(ctx context.Context,
+      req *logical.Request) (resp *logical.Response, err error)
+    file: third_party/openbao/sdk/plugin/middleware.go
+  - name: BackendTracingMiddleware.Initialize
+    kind: method
+    signature: func (b *BackendTracingMiddleware) Initialize(ctx context.Context,
+      req *logical.InitializationRequest) (err error)
+    file: third_party/openbao/sdk/plugin/middleware.go
+  - name: BackendTracingMiddleware.InvalidateKey
+    kind: method
+    signature: func (b *BackendTracingMiddleware) InvalidateKey(ctx context.Context,
+      key string)
+    file: third_party/openbao/sdk/plugin/middleware.go
+  - name: BackendTracingMiddleware.Logger
+    kind: method
+    signature: func (b *BackendTracingMiddleware) Logger() log.Logger
+    file: third_party/openbao/sdk/plugin/middleware.go
+  - name: BackendTracingMiddleware.PluginVersion
+    kind: method
+    signature: func (b *BackendTracingMiddleware) PluginVersion() logical.PluginVersion
+    file: third_party/openbao/sdk/plugin/middleware.go
+  - name: BackendTracingMiddleware.Setup
+    kind: method
+    signature: func (b *BackendTracingMiddleware) Setup(ctx context.Context, config
+      *logical.BackendConfig) (err error)
+    file: third_party/openbao/sdk/plugin/middleware.go
+  - name: BackendTracingMiddleware.SpecialPaths
+    kind: method
+    signature: func (b *BackendTracingMiddleware) SpecialPaths() *logical.Paths
+    file: third_party/openbao/sdk/plugin/middleware.go
+  - name: BackendTracingMiddleware.System
+    kind: method
+    signature: func (b *BackendTracingMiddleware) System() logical.SystemView
+    file: third_party/openbao/sdk/plugin/middleware.go
+  - name: BackendTracingMiddleware.Type
+    kind: method
+    signature: func (b *BackendTracingMiddleware) Type() logical.BackendType
+    file: third_party/openbao/sdk/plugin/middleware.go
+  - name: ContextKey
+    kind: type
+    signature: type ContextKey string
+    file: third_party/openbao/sdk/plugin/plugin_v5.go
+  - name: ContextKey.String
+    kind: method
+    signature: func (c ContextKey) String() string
+    file: third_party/openbao/sdk/plugin/plugin_v5.go
+  - name: Dispense
+    kind: function
+    signature: func Dispense(rpcClient plugin.ClientProtocol, pluginClient pluginutil.PluginClient)
+      (logical.Backend, error)
+    file: third_party/openbao/sdk/plugin/plugin_v5.go
+  - name: GRPCBackendPlugin
+    kind: struct
+    signature: type GRPCBackendPlugin struct
+    file: third_party/openbao/sdk/plugin/backend.go
+  - name: GRPCBackendPlugin.GRPCClient
+    kind: method
+    signature: func (b *GRPCBackendPlugin) GRPCClient(ctx context.Context, broker
+      *plugin.GRPCBroker, c *grpc.ClientConn) (any, error)
+    file: third_party/openbao/sdk/plugin/backend.go
+  - name: GRPCBackendPlugin.GRPCServer
+    kind: method
+    signature: func (b GRPCBackendPlugin) GRPCServer(broker *plugin.GRPCBroker, s
+      *grpc.Server) error
+    file: third_party/openbao/sdk/plugin/backend.go
+  - name: GRPCStorageClient
+    kind: struct
+    signature: type GRPCStorageClient struct
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
+  - name: GRPCStorageClient.Delete
+    kind: method
+    signature: func (c *GRPCStorageClient) Delete(ctx context.Context, key string)
+      error
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
+  - name: GRPCStorageClient.Get
+    kind: method
+    signature: func (c *GRPCStorageClient) Get(ctx context.Context, key string) (*logical.StorageEntry,
+      error)
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
+  - name: GRPCStorageClient.List
+    kind: method
+    signature: func (c *GRPCStorageClient) List(ctx context.Context, prefix string)
+      ([]string, error)
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
+  - name: GRPCStorageClient.ListPage
+    kind: method
+    signature: func (c *GRPCStorageClient) ListPage(ctx context.Context, prefix string,
+      after string, limit int) ([]string, error)
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
+  - name: GRPCStorageClient.Put
+    kind: method
+    signature: func (c *GRPCStorageClient) Put(ctx context.Context, entry *logical.StorageEntry)
+      error
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
+  - name: GRPCStorageClientTransaction
+    kind: struct
+    signature: type GRPCStorageClientTransaction struct
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
+  - name: GRPCStorageClientTransaction.Commit
+    kind: method
+    signature: func (c *GRPCStorageClientTransaction) Commit(ctx context.Context)
+      error
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
+  - name: GRPCStorageClientTransaction.Rollback
+    kind: method
+    signature: func (c *GRPCStorageClientTransaction) Rollback(ctx context.Context)
+      error
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
+  - name: GRPCStorageServer
+    kind: struct
+    signature: type GRPCStorageServer struct
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
+  - name: GRPCStorageServer.BeginReadOnlyTx
+    kind: method
+    signature: func (s *GRPCStorageServer) BeginReadOnlyTx(ctx context.Context, args
+      *pb.Empty) (*pb.StorageBeginTxReply, error)
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
+  - name: GRPCStorageServer.BeginTx
+    kind: method
+    signature: func (s *GRPCStorageServer) BeginTx(ctx context.Context, args *pb.Empty)
+      (*pb.StorageBeginTxReply, error)
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
+  - name: GRPCStorageServer.Commit
+    kind: method
+    signature: func (s *GRPCStorageServer) Commit(ctx context.Context, args *pb.StorageCommitTxArgs)
+      (*pb.StorageCommitTxReply, error)
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
+  - name: GRPCStorageServer.Delete
+    kind: method
+    signature: func (s *GRPCStorageServer) Delete(ctx context.Context, args *pb.StorageDeleteArgs)
+      (*pb.StorageDeleteReply, error)
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
+  - name: GRPCStorageServer.Get
+    kind: method
+    signature: func (s *GRPCStorageServer) Get(ctx context.Context, args *pb.StorageGetArgs)
+      (*pb.StorageGetReply, error)
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
+  - name: GRPCStorageServer.IsTransactional
+    kind: method
+    signature: func (s *GRPCStorageServer) IsTransactional(ctx context.Context, args
+      *pb.Empty) (*pb.StorageIsTransactionalReply, error)
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
+  - name: GRPCStorageServer.List
+    kind: method
+    signature: func (s *GRPCStorageServer) List(ctx context.Context, args *pb.StorageListArgs)
+      (*pb.StorageListReply, error)
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
+  - name: GRPCStorageServer.ListPage
+    kind: method
+    signature: func (s *GRPCStorageServer) ListPage(ctx context.Context, args *pb.StorageListPageArgs)
+      (*pb.StorageListReply, error)
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
+  - name: GRPCStorageServer.Put
+    kind: method
+    signature: func (s *GRPCStorageServer) Put(ctx context.Context, args *pb.StoragePutArgs)
+      (*pb.StoragePutReply, error)
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
+  - name: GRPCStorageServer.Rollback
+    kind: method
+    signature: func (s *GRPCStorageServer) Rollback(ctx context.Context, args *pb.StorageRollbackTxArgs)
+      (*pb.StorageRollbackTxReply, error)
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
+  - name: GRPCTransactionalStorageClient
+    kind: struct
+    signature: type GRPCTransactionalStorageClient struct
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
+  - name: GRPCTransactionalStorageClient.BeginReadOnlyTx
+    kind: method
+    signature: func (c *GRPCTransactionalStorageClient) BeginReadOnlyTx(ctx context.Context)
+      (logical.Transaction, error)
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
+  - name: GRPCTransactionalStorageClient.BeginTx
+    kind: method
+    signature: func (c *GRPCTransactionalStorageClient) BeginTx(ctx context.Context)
+      (logical.Transaction, error)
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
+  - name: LoggerArgs
+    kind: struct
+    signature: type LoggerArgs struct
+    file: third_party/openbao/sdk/plugin/logger.go
+  - name: LoggerReply
+    kind: struct
+    signature: type LoggerReply struct
+    file: third_party/openbao/sdk/plugin/logger.go
+  - name: LoggerServer
+    kind: struct
+    signature: type LoggerServer struct
+    file: third_party/openbao/sdk/plugin/logger.go
+  - name: LoggerServer.Debug
+    kind: method
+    signature: func (s *LoggerServer) Debug(args *LoggerArgs, _ *struct{}) error
+    file: third_party/openbao/sdk/plugin/logger.go
+  - name: LoggerServer.Error
+    kind: method
+    signature: func (s *LoggerServer) Error(args *LoggerArgs, reply *LoggerReply)
+      error
+    file: third_party/openbao/sdk/plugin/logger.go
+  - name: LoggerServer.Info
+    kind: method
+    signature: func (s *LoggerServer) Info(args *LoggerArgs, _ *struct{}) error
+    file: third_party/openbao/sdk/plugin/logger.go
+  - name: LoggerServer.IsDebug
+    kind: method
+    signature: func (s *LoggerServer) IsDebug(args any, reply *LoggerReply) error
+    file: third_party/openbao/sdk/plugin/logger.go
+  - name: LoggerServer.IsInfo
+    kind: method
+    signature: func (s *LoggerServer) IsInfo(args any, reply *LoggerReply) error
+    file: third_party/openbao/sdk/plugin/logger.go
+  - name: LoggerServer.IsTrace
+    kind: method
+    signature: func (s *LoggerServer) IsTrace(args any, reply *LoggerReply) error
+    file: third_party/openbao/sdk/plugin/logger.go
+  - name: LoggerServer.IsWarn
+    kind: method
+    signature: func (s *LoggerServer) IsWarn(args any, reply *LoggerReply) error
+    file: third_party/openbao/sdk/plugin/logger.go
+  - name: LoggerServer.Log
+    kind: method
+    signature: func (s *LoggerServer) Log(args *LoggerArgs, _ *struct{}) error
+    file: third_party/openbao/sdk/plugin/logger.go
+  - name: LoggerServer.SetLevel
+    kind: method
+    signature: func (s *LoggerServer) SetLevel(args int, _ *struct{}) error
+    file: third_party/openbao/sdk/plugin/logger.go
+  - name: LoggerServer.Trace
+    kind: method
+    signature: func (s *LoggerServer) Trace(args *LoggerArgs, _ *struct{}) error
+    file: third_party/openbao/sdk/plugin/logger.go
+  - name: LoggerServer.Warn
+    kind: method
+    signature: func (s *LoggerServer) Warn(args *LoggerArgs, reply *LoggerReply) error
+    file: third_party/openbao/sdk/plugin/logger.go
+  - name: NOOPStorage
+    kind: struct
+    signature: type NOOPStorage struct
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
+  - name: NOOPStorage.Delete
+    kind: method
+    signature: func (s *NOOPStorage) Delete(_ context.Context, key string) error
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
+  - name: NOOPStorage.Get
+    kind: method
+    signature: func (s *NOOPStorage) Get(_ context.Context, key string) (*logical.StorageEntry,
+      error)
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
+  - name: NOOPStorage.List
+    kind: method
+    signature: func (s *NOOPStorage) List(_ context.Context, prefix string) ([]string,
+      error)
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
+  - name: NOOPStorage.ListPage
+    kind: method
+    signature: func (s *NOOPStorage) ListPage(_ context.Context, prefix string, after
+      string, limit int) ([]string, error)
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
+  - name: NOOPStorage.Put
+    kind: method
+    signature: func (s *NOOPStorage) Put(_ context.Context, entry *logical.StorageEntry)
+      error
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
+  - name: NewBackend
+    kind: function
+    signature: func NewBackend(ctx context.Context, pluginName string, pluginType
+      consts.PluginType, sys pluginutil.LookRunnerUtil, conf *logical.BackendConfig,
+      isMetadataMode bool) (logical.Backend, error)
+    file: third_party/openbao/sdk/plugin/plugin.go
+  - name: NewBackendV5
+    kind: function
+    signature: func NewBackendV5(ctx context.Context, pluginName string, pluginType
+      consts.PluginType, pluginVersion string, sys pluginutil.LookRunnerUtil, conf
+      *logical.BackendConfig) (logical.Backend, error)
+    file: third_party/openbao/sdk/plugin/plugin_v5.go
+  - name: NewBackendWithVersion
+    kind: function
+    signature: func NewBackendWithVersion(ctx context.Context, pluginName string,
+      pluginType consts.PluginType, sys pluginutil.LookRunnerUtil, conf *logical.BackendConfig,
+      isMetadataMode bool, version string) (logical.Backend, error)
+    file: third_party/openbao/sdk/plugin/plugin.go
+  - name: NewPluginClient
+    kind: function
+    signature: func NewPluginClient(ctx context.Context, sys pluginutil.RunnerUtil,
+      pluginRunner *pluginutil.PluginRunner, logger log.Logger, isMetadataMode bool)
+      (logical.Backend, error)
+    file: third_party/openbao/sdk/plugin/plugin.go
+  - name: NewPluginClientV5
+    kind: function
+    signature: func NewPluginClientV5(ctx context.Context, sys pluginutil.RunnerUtil,
+      config pluginutil.PluginClientConfig) (logical.Backend, error)
+    file: third_party/openbao/sdk/plugin/plugin_v5.go
+  - name: Serve
+    kind: function
+    signature: func Serve(opts *ServeOpts) error
+    file: third_party/openbao/sdk/plugin/serve.go
+  - name: ServeMultiplex
+    kind: function
+    signature: func ServeMultiplex(opts *ServeOpts) error
+    file: third_party/openbao/sdk/plugin/serve.go
+  - name: ServeOpts
+    kind: struct
+    signature: type ServeOpts struct
+    file: third_party/openbao/sdk/plugin/serve.go
+  - name: TLSProviderFunc
+    kind: type
+    signature: type TLSProviderFunc func() (*tls.Config, error)
+    file: third_party/openbao/sdk/plugin/serve.go
+  - name: backendGRPCPluginClient.Cleanup
+    kind: method
+    signature: func (c *backendGRPCPluginClient) Cleanup(ctx context.Context)
+    file: third_party/openbao/sdk/plugin/grpc_backend_client.go
+  - name: backendGRPCPluginClient.HandleExistenceCheck
+    kind: method
+    signature: func (c *backendGRPCPluginClient) HandleExistenceCheck(ctx context.Context,
+      req *logical.Request) (bool, bool, error)
+    file: third_party/openbao/sdk/plugin/grpc_backend_client.go
+  - name: backendGRPCPluginClient.HandleRequest
+    kind: method
+    signature: func (c *backendGRPCPluginClient) HandleRequest(ctx context.Context,
+      req *logical.Request) (*logical.Response, error)
+    file: third_party/openbao/sdk/plugin/grpc_backend_client.go
+  - name: backendGRPCPluginClient.Initialize
+    kind: method
+    signature: func (c *backendGRPCPluginClient) Initialize(ctx context.Context, _
+      *logical.InitializationRequest) error
+    file: third_party/openbao/sdk/plugin/grpc_backend_client.go
+  - name: backendGRPCPluginClient.InvalidateKey
+    kind: method
+    signature: func (c *backendGRPCPluginClient) InvalidateKey(ctx context.Context,
+      key string)
+    file: third_party/openbao/sdk/plugin/grpc_backend_client.go
+  - name: backendGRPCPluginClient.IsExternal
+    kind: method
+    signature: func (c *backendGRPCPluginClient) IsExternal() bool
+    file: third_party/openbao/sdk/plugin/grpc_backend_client.go
+  - name: backendGRPCPluginClient.Logger
+    kind: method
+    signature: func (c *backendGRPCPluginClient) Logger() log.Logger
+    file: third_party/openbao/sdk/plugin/grpc_backend_client.go
+  - name: backendGRPCPluginClient.PluginVersion
+    kind: method
+    signature: func (c *backendGRPCPluginClient) PluginVersion() logical.PluginVersion
+    file: third_party/openbao/sdk/plugin/grpc_backend_client.go
+  - name: backendGRPCPluginClient.Setup
+    kind: method
+    signature: func (c *backendGRPCPluginClient) Setup(ctx context.Context, config
+      *logical.BackendConfig) error
+    file: third_party/openbao/sdk/plugin/grpc_backend_client.go
+  - name: backendGRPCPluginClient.SpecialPaths
+    kind: method
+    signature: func (c *backendGRPCPluginClient) SpecialPaths() *logical.Paths
+    file: third_party/openbao/sdk/plugin/grpc_backend_client.go
+  - name: backendGRPCPluginClient.System
+    kind: method
+    signature: func (c *backendGRPCPluginClient) System() logical.SystemView
+    file: third_party/openbao/sdk/plugin/grpc_backend_client.go
+  - name: backendGRPCPluginClient.Type
+    kind: method
+    signature: func (c *backendGRPCPluginClient) Type() logical.BackendType
+    file: third_party/openbao/sdk/plugin/grpc_backend_client.go
+  - name: backendGRPCPluginServer.Cleanup
+    kind: method
+    signature: func (s *backendGRPCPluginServer) Cleanup(ctx context.Context, _ *pb.Empty)
+      (*pb.Empty, error)
+    file: third_party/openbao/sdk/plugin/grpc_backend_server.go
+  - name: backendGRPCPluginServer.HandleExistenceCheck
+    kind: method
+    signature: func (s *backendGRPCPluginServer) HandleExistenceCheck(ctx context.Context,
+      args *pb.HandleExistenceCheckArgs) (*pb.HandleExistenceCheckReply, error)
+    file: third_party/openbao/sdk/plugin/grpc_backend_server.go
+  - name: backendGRPCPluginServer.HandleRequest
+    kind: method
+    signature: func (s *backendGRPCPluginServer) HandleRequest(ctx context.Context,
+      args *pb.HandleRequestArgs) (*pb.HandleRequestReply, error)
+    file: third_party/openbao/sdk/plugin/grpc_backend_server.go
+  - name: backendGRPCPluginServer.Initialize
+    kind: method
+    signature: func (s *backendGRPCPluginServer) Initialize(ctx context.Context, _
+      *pb.InitializeArgs) (*pb.InitializeReply, error)
+    file: third_party/openbao/sdk/plugin/grpc_backend_server.go
+  - name: backendGRPCPluginServer.InvalidateKey
+    kind: method
+    signature: func (s *backendGRPCPluginServer) InvalidateKey(ctx context.Context,
+      args *pb.InvalidateKeyArgs) (*pb.Empty, error)
+    file: third_party/openbao/sdk/plugin/grpc_backend_server.go
+  - name: backendGRPCPluginServer.Setup
+    kind: method
+    signature: func (s *backendGRPCPluginServer) Setup(ctx context.Context, args *pb.SetupArgs)
+      (*pb.SetupReply, error)
+    file: third_party/openbao/sdk/plugin/grpc_backend_server.go
+  - name: backendGRPCPluginServer.SpecialPaths
+    kind: method
+    signature: func (s *backendGRPCPluginServer) SpecialPaths(ctx context.Context,
+      args *pb.Empty) (*pb.SpecialPathsReply, error)
+    file: third_party/openbao/sdk/plugin/grpc_backend_server.go
+  - name: backendGRPCPluginServer.Type
+    kind: method
+    signature: func (s *backendGRPCPluginServer) Type(ctx context.Context, _ *pb.Empty)
+      (*pb.TypeReply, error)
+    file: third_party/openbao/sdk/plugin/grpc_backend_server.go
+  - name: backendGRPCPluginServer.Version
+    kind: method
+    signature: func (s *backendGRPCPluginServer) Version(ctx context.Context, _ *logical.Empty)
+      (*logical.VersionReply, error)
+    file: third_party/openbao/sdk/plugin/grpc_backend_server.go
+  - name: gRPCSystemViewClient.CachingDisabled
+    kind: method
+    signature: func (s *gRPCSystemViewClient) CachingDisabled() bool
+    file: third_party/openbao/sdk/plugin/grpc_system.go
+  - name: gRPCSystemViewClient.ClusterID
+    kind: method
+    signature: func (s *gRPCSystemViewClient) ClusterID(ctx context.Context) (string,
+      error)
+    file: third_party/openbao/sdk/plugin/grpc_system.go
+  - name: gRPCSystemViewClient.DefaultLeaseTTL
+    kind: method
+    signature: func (s *gRPCSystemViewClient) DefaultLeaseTTL() time.Duration
+    file: third_party/openbao/sdk/plugin/grpc_system.go
+  - name: gRPCSystemViewClient.EntityInfo
+    kind: method
+    signature: func (s *gRPCSystemViewClient) EntityInfo(entityID string) (*logical.Entity,
+      error)
+    file: third_party/openbao/sdk/plugin/grpc_system.go
+  - name: gRPCSystemViewClient.GeneratePasswordFromPolicy
+    kind: method
+    signature: func (s *gRPCSystemViewClient) GeneratePasswordFromPolicy(ctx context.Context,
+      policyName string) (password string, err error)
+    file: third_party/openbao/sdk/plugin/grpc_system.go
+  - name: gRPCSystemViewClient.GetExternalKey
+    kind: method
+    signature: func (s *gRPCSystemViewClient) GetExternalKey(ctx context.Context,
+      ref string) (kms.Key, error)
+    file: third_party/openbao/sdk/plugin/grpc_system.go
+  - name: gRPCSystemViewClient.GroupsForEntity
+    kind: method
+    signature: func (s *gRPCSystemViewClient) GroupsForEntity(entityID string) ([]*logical.Group,
+      error)
+    file: third_party/openbao/sdk/plugin/grpc_system.go
+  - name: gRPCSystemViewClient.ListVersionedPlugins
+    kind: method
+    signature: func (s *gRPCSystemViewClient) ListVersionedPlugins(_ context.Context,
+      _ consts.PluginType) ([]pluginutil.VersionedPlugin, error)
+    file: third_party/openbao/sdk/plugin/grpc_system.go
+  - name: gRPCSystemViewClient.LocalMount
+    kind: method
+    signature: func (s *gRPCSystemViewClient) LocalMount() bool
+    file: third_party/openbao/sdk/plugin/grpc_system.go
+  - name: gRPCSystemViewClient.LookupPlugin
+    kind: method
+    signature: func (s *gRPCSystemViewClient) LookupPlugin(_ context.Context, _ string,
+      _ consts.PluginType) (*pluginutil.PluginRunner, error)
+    file: third_party/openbao/sdk/plugin/grpc_system.go
+  - name: gRPCSystemViewClient.LookupPluginVersion
+    kind: method
+    signature: func (s *gRPCSystemViewClient) LookupPluginVersion(_ context.Context,
+      _ string, _ consts.PluginType, _ string) (*pluginutil.PluginRunner, error)
+    file: third_party/openbao/sdk/plugin/grpc_system.go
+  - name: gRPCSystemViewClient.MaxLeaseTTL
+    kind: method
+    signature: func (s *gRPCSystemViewClient) MaxLeaseTTL() time.Duration
+    file: third_party/openbao/sdk/plugin/grpc_system.go
+  - name: gRPCSystemViewClient.MlockEnabled
+    kind: method
+    signature: func (s *gRPCSystemViewClient) MlockEnabled() bool
+    file: third_party/openbao/sdk/plugin/grpc_system.go
+  - name: gRPCSystemViewClient.NewPluginClient
+    kind: method
+    signature: func (s *gRPCSystemViewClient) NewPluginClient(ctx context.Context,
+      config pluginutil.PluginClientConfig) (pluginutil.PluginClient, error)
+    file: third_party/openbao/sdk/plugin/grpc_system.go
+  - name: gRPCSystemViewClient.PluginEnv
+    kind: method
+    signature: func (s *gRPCSystemViewClient) PluginEnv(ctx context.Context) (*logical.PluginEnvironment,
+      error)
+    file: third_party/openbao/sdk/plugin/grpc_system.go
+  - name: gRPCSystemViewClient.ReplicationState
+    kind: method
+    signature: func (s *gRPCSystemViewClient) ReplicationState() consts.ReplicationState
+    file: third_party/openbao/sdk/plugin/grpc_system.go
+  - name: gRPCSystemViewClient.ResponseWrapData
+    kind: method
+    signature: func (s *gRPCSystemViewClient) ResponseWrapData(ctx context.Context,
+      data map[string]any, ttl time.Duration, jwt bool) (*wrapping.ResponseWrapInfo,
+      error)
+    file: third_party/openbao/sdk/plugin/grpc_system.go
+  - name: gRPCSystemViewClient.Tainted
+    kind: method
+    signature: func (s *gRPCSystemViewClient) Tainted() bool
+    file: third_party/openbao/sdk/plugin/grpc_system.go
+  - name: gRPCSystemViewClient.VaultVersion
+    kind: method
+    signature: func (s *gRPCSystemViewClient) VaultVersion(ctx context.Context) (string,
+      error)
+    file: third_party/openbao/sdk/plugin/grpc_system.go
+  - name: gRPCSystemViewServer.CachingDisabled
+    kind: method
+    signature: func (s *gRPCSystemViewServer) CachingDisabled(ctx context.Context,
+      _ *pb.Empty) (*pb.CachingDisabledReply, error)
+    file: third_party/openbao/sdk/plugin/grpc_system.go
+  - name: gRPCSystemViewServer.ClusterInfo
+    kind: method
+    signature: func (s *gRPCSystemViewServer) ClusterInfo(ctx context.Context, _ *pb.Empty)
+      (*pb.ClusterInfoReply, error)
+    file: third_party/openbao/sdk/plugin/grpc_system.go
+  - name: gRPCSystemViewServer.DefaultLeaseTTL
+    kind: method
+    signature: func (s *gRPCSystemViewServer) DefaultLeaseTTL(ctx context.Context,
+      _ *pb.Empty) (*pb.TTLReply, error)
+    file: third_party/openbao/sdk/plugin/grpc_system.go
+  - name: gRPCSystemViewServer.EntityInfo
+    kind: method
+    signature: func (s *gRPCSystemViewServer) EntityInfo(ctx context.Context, args
+      *pb.EntityInfoArgs) (*pb.EntityInfoReply, error)
+    file: third_party/openbao/sdk/plugin/grpc_system.go
+  - name: gRPCSystemViewServer.GeneratePasswordFromPolicy
+    kind: method
+    signature: func (s *gRPCSystemViewServer) GeneratePasswordFromPolicy(ctx context.Context,
+      req *pb.GeneratePasswordFromPolicyRequest) (*pb.GeneratePasswordFromPolicyReply,
+      error)
+    file: third_party/openbao/sdk/plugin/grpc_system.go
+  - name: gRPCSystemViewServer.GroupsForEntity
+    kind: method
+    signature: func (s *gRPCSystemViewServer) GroupsForEntity(ctx context.Context,
+      args *pb.EntityInfoArgs) (*pb.GroupsForEntityReply, error)
+    file: third_party/openbao/sdk/plugin/grpc_system.go
+  - name: gRPCSystemViewServer.LocalMount
+    kind: method
+    signature: func (s *gRPCSystemViewServer) LocalMount(ctx context.Context, _ *pb.Empty)
+      (*pb.LocalMountReply, error)
+    file: third_party/openbao/sdk/plugin/grpc_system.go
+  - name: gRPCSystemViewServer.MaxLeaseTTL
+    kind: method
+    signature: func (s *gRPCSystemViewServer) MaxLeaseTTL(ctx context.Context, _ *pb.Empty)
+      (*pb.TTLReply, error)
+    file: third_party/openbao/sdk/plugin/grpc_system.go
+  - name: gRPCSystemViewServer.MlockEnabled
+    kind: method
+    signature: func (s *gRPCSystemViewServer) MlockEnabled(ctx context.Context, _
+      *pb.Empty) (*pb.MlockEnabledReply, error)
+    file: third_party/openbao/sdk/plugin/grpc_system.go
+  - name: gRPCSystemViewServer.PluginEnv
+    kind: method
+    signature: func (s *gRPCSystemViewServer) PluginEnv(ctx context.Context, _ *pb.Empty)
+      (*pb.PluginEnvReply, error)
+    file: third_party/openbao/sdk/plugin/grpc_system.go
+  - name: gRPCSystemViewServer.ReplicationState
+    kind: method
+    signature: func (s *gRPCSystemViewServer) ReplicationState(ctx context.Context,
+      _ *pb.Empty) (*pb.ReplicationStateReply, error)
+    file: third_party/openbao/sdk/plugin/grpc_system.go
+  - name: gRPCSystemViewServer.ResponseWrapData
+    kind: method
+    signature: func (s *gRPCSystemViewServer) ResponseWrapData(ctx context.Context,
+      args *pb.ResponseWrapDataArgs) (*pb.ResponseWrapDataReply, error)
+    file: third_party/openbao/sdk/plugin/grpc_system.go
+  - name: gRPCSystemViewServer.Tainted
+    kind: method
+    signature: func (s *gRPCSystemViewServer) Tainted(ctx context.Context, _ *pb.Empty)
+      (*pb.TaintedReply, error)
+    file: third_party/openbao/sdk/plugin/grpc_system.go
 codeRefIndex:
 - file:third_party/openbao/sdk/plugin/backend.go backend.go@third_party/openbao/sdk/plugin/backend.go
 - file:third_party/openbao/sdk/plugin/grpc_backend.go grpc_backend.go@third_party/openbao/sdk/plugin/grpc_backend.go
@@ -72,793 +862,3 @@ codeRefIndex:
 - struct:f9823e24fba3e1260e837b886422d8ad BackendTracingMiddleware@third_party/openbao/sdk/plugin/middleware.go:16
 - type_alias:de240a20b03c3acb677fe02691925b5b ContextKey@third_party/openbao/sdk/plugin/plugin_v5.go:27
 - type_alias:ffcd33063c419df344c256774a320354 TLSProviderFunc@third_party/openbao/sdk/plugin/serve.go:23
-kind: SystemContext
-metadata:
-  name: third-party-openbao-sdk-plugin
-  namespace: default
-spec:
-  intent: Exists so that the repository can compile against and link the OpenBao/Vault
-    plugin protocol without depending on an external module path for the SDK. It defines
-    the full server and client halves of the go-plugin gRPC contract for logical backends,
-    plus the storage, system-view and logger brokers a backend needs, and the serve
-    helpers a plugin binary's main function calls. Consumers inside this repository
-    use it to build, dispense and host logical backends.
-  interfaces:
-  - file: third_party/openbao/sdk/plugin/plugin.go
-    kind: struct
-    name: BackendPluginClient
-    signature: type BackendPluginClient struct
-  - file: third_party/openbao/sdk/plugin/plugin.go
-    kind: method
-    name: BackendPluginClient.Cleanup
-    signature: func (b *BackendPluginClient) Cleanup(ctx context.Context)
-  - file: third_party/openbao/sdk/plugin/plugin.go
-    kind: method
-    name: BackendPluginClient.PluginVersion
-    signature: func (b *BackendPluginClient) PluginVersion() logical.PluginVersion
-  - file: third_party/openbao/sdk/plugin/plugin_v5.go
-    kind: struct
-    name: BackendPluginClientV5
-    signature: type BackendPluginClientV5 struct
-  - file: third_party/openbao/sdk/plugin/plugin_v5.go
-    kind: method
-    name: BackendPluginClientV5.Cleanup
-    signature: func (b *BackendPluginClientV5) Cleanup(ctx context.Context)
-  - file: third_party/openbao/sdk/plugin/plugin_v5.go
-    kind: method
-    name: BackendPluginClientV5.IsExternal
-    signature: func (b *BackendPluginClientV5) IsExternal() bool
-  - file: third_party/openbao/sdk/plugin/plugin_v5.go
-    kind: method
-    name: BackendPluginClientV5.PluginVersion
-    signature: func (b *BackendPluginClientV5) PluginVersion() logical.PluginVersion
-  - file: third_party/openbao/sdk/plugin/middleware.go
-    kind: struct
-    name: BackendTracingMiddleware
-    signature: type BackendTracingMiddleware struct
-  - file: third_party/openbao/sdk/plugin/middleware.go
-    kind: method
-    name: BackendTracingMiddleware.Cleanup
-    signature: func (b *BackendTracingMiddleware) Cleanup(ctx context.Context)
-  - file: third_party/openbao/sdk/plugin/middleware.go
-    kind: method
-    name: BackendTracingMiddleware.HandleExistenceCheck
-    signature: func (b *BackendTracingMiddleware) HandleExistenceCheck(ctx context.Context,
-      req *logical.Request) (found bool, exists bool, err error)
-  - file: third_party/openbao/sdk/plugin/middleware.go
-    kind: method
-    name: BackendTracingMiddleware.HandleRequest
-    signature: func (b *BackendTracingMiddleware) HandleRequest(ctx context.Context,
-      req *logical.Request) (resp *logical.Response, err error)
-  - file: third_party/openbao/sdk/plugin/middleware.go
-    kind: method
-    name: BackendTracingMiddleware.Initialize
-    signature: func (b *BackendTracingMiddleware) Initialize(ctx context.Context,
-      req *logical.InitializationRequest) (err error)
-  - file: third_party/openbao/sdk/plugin/middleware.go
-    kind: method
-    name: BackendTracingMiddleware.InvalidateKey
-    signature: func (b *BackendTracingMiddleware) InvalidateKey(ctx context.Context,
-      key string)
-  - file: third_party/openbao/sdk/plugin/middleware.go
-    kind: method
-    name: BackendTracingMiddleware.Logger
-    signature: func (b *BackendTracingMiddleware) Logger() log.Logger
-  - file: third_party/openbao/sdk/plugin/middleware.go
-    kind: method
-    name: BackendTracingMiddleware.PluginVersion
-    signature: func (b *BackendTracingMiddleware) PluginVersion() logical.PluginVersion
-  - file: third_party/openbao/sdk/plugin/middleware.go
-    kind: method
-    name: BackendTracingMiddleware.Setup
-    signature: func (b *BackendTracingMiddleware) Setup(ctx context.Context, config
-      *logical.BackendConfig) (err error)
-  - file: third_party/openbao/sdk/plugin/middleware.go
-    kind: method
-    name: BackendTracingMiddleware.SpecialPaths
-    signature: func (b *BackendTracingMiddleware) SpecialPaths() *logical.Paths
-  - file: third_party/openbao/sdk/plugin/middleware.go
-    kind: method
-    name: BackendTracingMiddleware.System
-    signature: func (b *BackendTracingMiddleware) System() logical.SystemView
-  - file: third_party/openbao/sdk/plugin/middleware.go
-    kind: method
-    name: BackendTracingMiddleware.Type
-    signature: func (b *BackendTracingMiddleware) Type() logical.BackendType
-  - file: third_party/openbao/sdk/plugin/plugin_v5.go
-    kind: type
-    name: ContextKey
-    signature: type ContextKey string
-  - file: third_party/openbao/sdk/plugin/plugin_v5.go
-    kind: method
-    name: ContextKey.String
-    signature: func (c ContextKey) String() string
-  - file: third_party/openbao/sdk/plugin/plugin_v5.go
-    kind: function
-    name: Dispense
-    signature: func Dispense(rpcClient plugin.ClientProtocol, pluginClient pluginutil.PluginClient)
-      (logical.Backend, error)
-  - file: third_party/openbao/sdk/plugin/backend.go
-    kind: struct
-    name: GRPCBackendPlugin
-    signature: type GRPCBackendPlugin struct
-  - file: third_party/openbao/sdk/plugin/backend.go
-    kind: method
-    name: GRPCBackendPlugin.GRPCClient
-    signature: func (b *GRPCBackendPlugin) GRPCClient(ctx context.Context, broker
-      *plugin.GRPCBroker, c *grpc.ClientConn) (any, error)
-  - file: third_party/openbao/sdk/plugin/backend.go
-    kind: method
-    name: GRPCBackendPlugin.GRPCServer
-    signature: func (b GRPCBackendPlugin) GRPCServer(broker *plugin.GRPCBroker, s
-      *grpc.Server) error
-  - file: third_party/openbao/sdk/plugin/grpc_storage.go
-    kind: struct
-    name: GRPCStorageClient
-    signature: type GRPCStorageClient struct
-  - file: third_party/openbao/sdk/plugin/grpc_storage.go
-    kind: method
-    name: GRPCStorageClient.Delete
-    signature: func (c *GRPCStorageClient) Delete(ctx context.Context, key string)
-      error
-  - file: third_party/openbao/sdk/plugin/grpc_storage.go
-    kind: method
-    name: GRPCStorageClient.Get
-    signature: func (c *GRPCStorageClient) Get(ctx context.Context, key string) (*logical.StorageEntry,
-      error)
-  - file: third_party/openbao/sdk/plugin/grpc_storage.go
-    kind: method
-    name: GRPCStorageClient.List
-    signature: func (c *GRPCStorageClient) List(ctx context.Context, prefix string)
-      ([]string, error)
-  - file: third_party/openbao/sdk/plugin/grpc_storage.go
-    kind: method
-    name: GRPCStorageClient.ListPage
-    signature: func (c *GRPCStorageClient) ListPage(ctx context.Context, prefix string,
-      after string, limit int) ([]string, error)
-  - file: third_party/openbao/sdk/plugin/grpc_storage.go
-    kind: method
-    name: GRPCStorageClient.Put
-    signature: func (c *GRPCStorageClient) Put(ctx context.Context, entry *logical.StorageEntry)
-      error
-  - file: third_party/openbao/sdk/plugin/grpc_storage.go
-    kind: struct
-    name: GRPCStorageClientTransaction
-    signature: type GRPCStorageClientTransaction struct
-  - file: third_party/openbao/sdk/plugin/grpc_storage.go
-    kind: method
-    name: GRPCStorageClientTransaction.Commit
-    signature: func (c *GRPCStorageClientTransaction) Commit(ctx context.Context)
-      error
-  - file: third_party/openbao/sdk/plugin/grpc_storage.go
-    kind: method
-    name: GRPCStorageClientTransaction.Rollback
-    signature: func (c *GRPCStorageClientTransaction) Rollback(ctx context.Context)
-      error
-  - file: third_party/openbao/sdk/plugin/grpc_storage.go
-    kind: struct
-    name: GRPCStorageServer
-    signature: type GRPCStorageServer struct
-  - file: third_party/openbao/sdk/plugin/grpc_storage.go
-    kind: method
-    name: GRPCStorageServer.BeginReadOnlyTx
-    signature: func (s *GRPCStorageServer) BeginReadOnlyTx(ctx context.Context, args
-      *pb.Empty) (*pb.StorageBeginTxReply, error)
-  - file: third_party/openbao/sdk/plugin/grpc_storage.go
-    kind: method
-    name: GRPCStorageServer.BeginTx
-    signature: func (s *GRPCStorageServer) BeginTx(ctx context.Context, args *pb.Empty)
-      (*pb.StorageBeginTxReply, error)
-  - file: third_party/openbao/sdk/plugin/grpc_storage.go
-    kind: method
-    name: GRPCStorageServer.Commit
-    signature: func (s *GRPCStorageServer) Commit(ctx context.Context, args *pb.StorageCommitTxArgs)
-      (*pb.StorageCommitTxReply, error)
-  - file: third_party/openbao/sdk/plugin/grpc_storage.go
-    kind: method
-    name: GRPCStorageServer.Delete
-    signature: func (s *GRPCStorageServer) Delete(ctx context.Context, args *pb.StorageDeleteArgs)
-      (*pb.StorageDeleteReply, error)
-  - file: third_party/openbao/sdk/plugin/grpc_storage.go
-    kind: method
-    name: GRPCStorageServer.Get
-    signature: func (s *GRPCStorageServer) Get(ctx context.Context, args *pb.StorageGetArgs)
-      (*pb.StorageGetReply, error)
-  - file: third_party/openbao/sdk/plugin/grpc_storage.go
-    kind: method
-    name: GRPCStorageServer.IsTransactional
-    signature: func (s *GRPCStorageServer) IsTransactional(ctx context.Context, args
-      *pb.Empty) (*pb.StorageIsTransactionalReply, error)
-  - file: third_party/openbao/sdk/plugin/grpc_storage.go
-    kind: method
-    name: GRPCStorageServer.List
-    signature: func (s *GRPCStorageServer) List(ctx context.Context, args *pb.StorageListArgs)
-      (*pb.StorageListReply, error)
-  - file: third_party/openbao/sdk/plugin/grpc_storage.go
-    kind: method
-    name: GRPCStorageServer.ListPage
-    signature: func (s *GRPCStorageServer) ListPage(ctx context.Context, args *pb.StorageListPageArgs)
-      (*pb.StorageListReply, error)
-  - file: third_party/openbao/sdk/plugin/grpc_storage.go
-    kind: method
-    name: GRPCStorageServer.Put
-    signature: func (s *GRPCStorageServer) Put(ctx context.Context, args *pb.StoragePutArgs)
-      (*pb.StoragePutReply, error)
-  - file: third_party/openbao/sdk/plugin/grpc_storage.go
-    kind: method
-    name: GRPCStorageServer.Rollback
-    signature: func (s *GRPCStorageServer) Rollback(ctx context.Context, args *pb.StorageRollbackTxArgs)
-      (*pb.StorageRollbackTxReply, error)
-  - file: third_party/openbao/sdk/plugin/grpc_storage.go
-    kind: struct
-    name: GRPCTransactionalStorageClient
-    signature: type GRPCTransactionalStorageClient struct
-  - file: third_party/openbao/sdk/plugin/grpc_storage.go
-    kind: method
-    name: GRPCTransactionalStorageClient.BeginReadOnlyTx
-    signature: func (c *GRPCTransactionalStorageClient) BeginReadOnlyTx(ctx context.Context)
-      (logical.Transaction, error)
-  - file: third_party/openbao/sdk/plugin/grpc_storage.go
-    kind: method
-    name: GRPCTransactionalStorageClient.BeginTx
-    signature: func (c *GRPCTransactionalStorageClient) BeginTx(ctx context.Context)
-      (logical.Transaction, error)
-  - file: third_party/openbao/sdk/plugin/logger.go
-    kind: struct
-    name: LoggerArgs
-    signature: type LoggerArgs struct
-  - file: third_party/openbao/sdk/plugin/logger.go
-    kind: struct
-    name: LoggerReply
-    signature: type LoggerReply struct
-  - file: third_party/openbao/sdk/plugin/logger.go
-    kind: struct
-    name: LoggerServer
-    signature: type LoggerServer struct
-  - file: third_party/openbao/sdk/plugin/logger.go
-    kind: method
-    name: LoggerServer.Debug
-    signature: func (s *LoggerServer) Debug(args *LoggerArgs, _ *struct{}) error
-  - file: third_party/openbao/sdk/plugin/logger.go
-    kind: method
-    name: LoggerServer.Error
-    signature: func (s *LoggerServer) Error(args *LoggerArgs, reply *LoggerReply)
-      error
-  - file: third_party/openbao/sdk/plugin/logger.go
-    kind: method
-    name: LoggerServer.Info
-    signature: func (s *LoggerServer) Info(args *LoggerArgs, _ *struct{}) error
-  - file: third_party/openbao/sdk/plugin/logger.go
-    kind: method
-    name: LoggerServer.IsDebug
-    signature: func (s *LoggerServer) IsDebug(args any, reply *LoggerReply) error
-  - file: third_party/openbao/sdk/plugin/logger.go
-    kind: method
-    name: LoggerServer.IsInfo
-    signature: func (s *LoggerServer) IsInfo(args any, reply *LoggerReply) error
-  - file: third_party/openbao/sdk/plugin/logger.go
-    kind: method
-    name: LoggerServer.IsTrace
-    signature: func (s *LoggerServer) IsTrace(args any, reply *LoggerReply) error
-  - file: third_party/openbao/sdk/plugin/logger.go
-    kind: method
-    name: LoggerServer.IsWarn
-    signature: func (s *LoggerServer) IsWarn(args any, reply *LoggerReply) error
-  - file: third_party/openbao/sdk/plugin/logger.go
-    kind: method
-    name: LoggerServer.Log
-    signature: func (s *LoggerServer) Log(args *LoggerArgs, _ *struct{}) error
-  - file: third_party/openbao/sdk/plugin/logger.go
-    kind: method
-    name: LoggerServer.SetLevel
-    signature: func (s *LoggerServer) SetLevel(args int, _ *struct{}) error
-  - file: third_party/openbao/sdk/plugin/logger.go
-    kind: method
-    name: LoggerServer.Trace
-    signature: func (s *LoggerServer) Trace(args *LoggerArgs, _ *struct{}) error
-  - file: third_party/openbao/sdk/plugin/logger.go
-    kind: method
-    name: LoggerServer.Warn
-    signature: func (s *LoggerServer) Warn(args *LoggerArgs, reply *LoggerReply) error
-  - file: third_party/openbao/sdk/plugin/grpc_storage.go
-    kind: struct
-    name: NOOPStorage
-    signature: type NOOPStorage struct
-  - file: third_party/openbao/sdk/plugin/grpc_storage.go
-    kind: method
-    name: NOOPStorage.Delete
-    signature: func (s *NOOPStorage) Delete(_ context.Context, key string) error
-  - file: third_party/openbao/sdk/plugin/grpc_storage.go
-    kind: method
-    name: NOOPStorage.Get
-    signature: func (s *NOOPStorage) Get(_ context.Context, key string) (*logical.StorageEntry,
-      error)
-  - file: third_party/openbao/sdk/plugin/grpc_storage.go
-    kind: method
-    name: NOOPStorage.List
-    signature: func (s *NOOPStorage) List(_ context.Context, prefix string) ([]string,
-      error)
-  - file: third_party/openbao/sdk/plugin/grpc_storage.go
-    kind: method
-    name: NOOPStorage.ListPage
-    signature: func (s *NOOPStorage) ListPage(_ context.Context, prefix string, after
-      string, limit int) ([]string, error)
-  - file: third_party/openbao/sdk/plugin/grpc_storage.go
-    kind: method
-    name: NOOPStorage.Put
-    signature: func (s *NOOPStorage) Put(_ context.Context, entry *logical.StorageEntry)
-      error
-  - file: third_party/openbao/sdk/plugin/plugin.go
-    kind: function
-    name: NewBackend
-    signature: func NewBackend(ctx context.Context, pluginName string, pluginType
-      consts.PluginType, sys pluginutil.LookRunnerUtil, conf *logical.BackendConfig,
-      isMetadataMode bool) (logical.Backend, error)
-  - file: third_party/openbao/sdk/plugin/plugin_v5.go
-    kind: function
-    name: NewBackendV5
-    signature: func NewBackendV5(ctx context.Context, pluginName string, pluginType
-      consts.PluginType, pluginVersion string, sys pluginutil.LookRunnerUtil, conf
-      *logical.BackendConfig) (logical.Backend, error)
-  - file: third_party/openbao/sdk/plugin/plugin.go
-    kind: function
-    name: NewBackendWithVersion
-    signature: func NewBackendWithVersion(ctx context.Context, pluginName string,
-      pluginType consts.PluginType, sys pluginutil.LookRunnerUtil, conf *logical.BackendConfig,
-      isMetadataMode bool, version string) (logical.Backend, error)
-  - file: third_party/openbao/sdk/plugin/plugin.go
-    kind: function
-    name: NewPluginClient
-    signature: func NewPluginClient(ctx context.Context, sys pluginutil.RunnerUtil,
-      pluginRunner *pluginutil.PluginRunner, logger log.Logger, isMetadataMode bool)
-      (logical.Backend, error)
-  - file: third_party/openbao/sdk/plugin/plugin_v5.go
-    kind: function
-    name: NewPluginClientV5
-    signature: func NewPluginClientV5(ctx context.Context, sys pluginutil.RunnerUtil,
-      config pluginutil.PluginClientConfig) (logical.Backend, error)
-  - file: third_party/openbao/sdk/plugin/serve.go
-    kind: function
-    name: Serve
-    signature: func Serve(opts *ServeOpts) error
-  - file: third_party/openbao/sdk/plugin/serve.go
-    kind: function
-    name: ServeMultiplex
-    signature: func ServeMultiplex(opts *ServeOpts) error
-  - file: third_party/openbao/sdk/plugin/serve.go
-    kind: struct
-    name: ServeOpts
-    signature: type ServeOpts struct
-  - file: third_party/openbao/sdk/plugin/serve.go
-    kind: type
-    name: TLSProviderFunc
-    signature: type TLSProviderFunc func() (*tls.Config, error)
-  - file: third_party/openbao/sdk/plugin/grpc_backend_client.go
-    kind: method
-    name: backendGRPCPluginClient.Cleanup
-    signature: func (c *backendGRPCPluginClient) Cleanup(ctx context.Context)
-  - file: third_party/openbao/sdk/plugin/grpc_backend_client.go
-    kind: method
-    name: backendGRPCPluginClient.HandleExistenceCheck
-    signature: func (c *backendGRPCPluginClient) HandleExistenceCheck(ctx context.Context,
-      req *logical.Request) (bool, bool, error)
-  - file: third_party/openbao/sdk/plugin/grpc_backend_client.go
-    kind: method
-    name: backendGRPCPluginClient.HandleRequest
-    signature: func (c *backendGRPCPluginClient) HandleRequest(ctx context.Context,
-      req *logical.Request) (*logical.Response, error)
-  - file: third_party/openbao/sdk/plugin/grpc_backend_client.go
-    kind: method
-    name: backendGRPCPluginClient.Initialize
-    signature: func (c *backendGRPCPluginClient) Initialize(ctx context.Context, _
-      *logical.InitializationRequest) error
-  - file: third_party/openbao/sdk/plugin/grpc_backend_client.go
-    kind: method
-    name: backendGRPCPluginClient.InvalidateKey
-    signature: func (c *backendGRPCPluginClient) InvalidateKey(ctx context.Context,
-      key string)
-  - file: third_party/openbao/sdk/plugin/grpc_backend_client.go
-    kind: method
-    name: backendGRPCPluginClient.IsExternal
-    signature: func (c *backendGRPCPluginClient) IsExternal() bool
-  - file: third_party/openbao/sdk/plugin/grpc_backend_client.go
-    kind: method
-    name: backendGRPCPluginClient.Logger
-    signature: func (c *backendGRPCPluginClient) Logger() log.Logger
-  - file: third_party/openbao/sdk/plugin/grpc_backend_client.go
-    kind: method
-    name: backendGRPCPluginClient.PluginVersion
-    signature: func (c *backendGRPCPluginClient) PluginVersion() logical.PluginVersion
-  - file: third_party/openbao/sdk/plugin/grpc_backend_client.go
-    kind: method
-    name: backendGRPCPluginClient.Setup
-    signature: func (c *backendGRPCPluginClient) Setup(ctx context.Context, config
-      *logical.BackendConfig) error
-  - file: third_party/openbao/sdk/plugin/grpc_backend_client.go
-    kind: method
-    name: backendGRPCPluginClient.SpecialPaths
-    signature: func (c *backendGRPCPluginClient) SpecialPaths() *logical.Paths
-  - file: third_party/openbao/sdk/plugin/grpc_backend_client.go
-    kind: method
-    name: backendGRPCPluginClient.System
-    signature: func (c *backendGRPCPluginClient) System() logical.SystemView
-  - file: third_party/openbao/sdk/plugin/grpc_backend_client.go
-    kind: method
-    name: backendGRPCPluginClient.Type
-    signature: func (c *backendGRPCPluginClient) Type() logical.BackendType
-  - file: third_party/openbao/sdk/plugin/grpc_backend_server.go
-    kind: method
-    name: backendGRPCPluginServer.Cleanup
-    signature: func (s *backendGRPCPluginServer) Cleanup(ctx context.Context, _ *pb.Empty)
-      (*pb.Empty, error)
-  - file: third_party/openbao/sdk/plugin/grpc_backend_server.go
-    kind: method
-    name: backendGRPCPluginServer.HandleExistenceCheck
-    signature: func (s *backendGRPCPluginServer) HandleExistenceCheck(ctx context.Context,
-      args *pb.HandleExistenceCheckArgs) (*pb.HandleExistenceCheckReply, error)
-  - file: third_party/openbao/sdk/plugin/grpc_backend_server.go
-    kind: method
-    name: backendGRPCPluginServer.HandleRequest
-    signature: func (s *backendGRPCPluginServer) HandleRequest(ctx context.Context,
-      args *pb.HandleRequestArgs) (*pb.HandleRequestReply, error)
-  - file: third_party/openbao/sdk/plugin/grpc_backend_server.go
-    kind: method
-    name: backendGRPCPluginServer.Initialize
-    signature: func (s *backendGRPCPluginServer) Initialize(ctx context.Context, _
-      *pb.InitializeArgs) (*pb.InitializeReply, error)
-  - file: third_party/openbao/sdk/plugin/grpc_backend_server.go
-    kind: method
-    name: backendGRPCPluginServer.InvalidateKey
-    signature: func (s *backendGRPCPluginServer) InvalidateKey(ctx context.Context,
-      args *pb.InvalidateKeyArgs) (*pb.Empty, error)
-  - file: third_party/openbao/sdk/plugin/grpc_backend_server.go
-    kind: method
-    name: backendGRPCPluginServer.Setup
-    signature: func (s *backendGRPCPluginServer) Setup(ctx context.Context, args *pb.SetupArgs)
-      (*pb.SetupReply, error)
-  - file: third_party/openbao/sdk/plugin/grpc_backend_server.go
-    kind: method
-    name: backendGRPCPluginServer.SpecialPaths
-    signature: func (s *backendGRPCPluginServer) SpecialPaths(ctx context.Context,
-      args *pb.Empty) (*pb.SpecialPathsReply, error)
-  - file: third_party/openbao/sdk/plugin/grpc_backend_server.go
-    kind: method
-    name: backendGRPCPluginServer.Type
-    signature: func (s *backendGRPCPluginServer) Type(ctx context.Context, _ *pb.Empty)
-      (*pb.TypeReply, error)
-  - file: third_party/openbao/sdk/plugin/grpc_backend_server.go
-    kind: method
-    name: backendGRPCPluginServer.Version
-    signature: func (s *backendGRPCPluginServer) Version(ctx context.Context, _ *logical.Empty)
-      (*logical.VersionReply, error)
-  - file: third_party/openbao/sdk/plugin/grpc_system.go
-    kind: method
-    name: gRPCSystemViewClient.CachingDisabled
-    signature: func (s *gRPCSystemViewClient) CachingDisabled() bool
-  - file: third_party/openbao/sdk/plugin/grpc_system.go
-    kind: method
-    name: gRPCSystemViewClient.ClusterID
-    signature: func (s *gRPCSystemViewClient) ClusterID(ctx context.Context) (string,
-      error)
-  - file: third_party/openbao/sdk/plugin/grpc_system.go
-    kind: method
-    name: gRPCSystemViewClient.DefaultLeaseTTL
-    signature: func (s *gRPCSystemViewClient) DefaultLeaseTTL() time.Duration
-  - file: third_party/openbao/sdk/plugin/grpc_system.go
-    kind: method
-    name: gRPCSystemViewClient.EntityInfo
-    signature: func (s *gRPCSystemViewClient) EntityInfo(entityID string) (*logical.Entity,
-      error)
-  - file: third_party/openbao/sdk/plugin/grpc_system.go
-    kind: method
-    name: gRPCSystemViewClient.GeneratePasswordFromPolicy
-    signature: func (s *gRPCSystemViewClient) GeneratePasswordFromPolicy(ctx context.Context,
-      policyName string) (password string, err error)
-  - file: third_party/openbao/sdk/plugin/grpc_system.go
-    kind: method
-    name: gRPCSystemViewClient.GetExternalKey
-    signature: func (s *gRPCSystemViewClient) GetExternalKey(ctx context.Context,
-      ref string) (kms.Key, error)
-  - file: third_party/openbao/sdk/plugin/grpc_system.go
-    kind: method
-    name: gRPCSystemViewClient.GroupsForEntity
-    signature: func (s *gRPCSystemViewClient) GroupsForEntity(entityID string) ([]*logical.Group,
-      error)
-  - file: third_party/openbao/sdk/plugin/grpc_system.go
-    kind: method
-    name: gRPCSystemViewClient.ListVersionedPlugins
-    signature: func (s *gRPCSystemViewClient) ListVersionedPlugins(_ context.Context,
-      _ consts.PluginType) ([]pluginutil.VersionedPlugin, error)
-  - file: third_party/openbao/sdk/plugin/grpc_system.go
-    kind: method
-    name: gRPCSystemViewClient.LocalMount
-    signature: func (s *gRPCSystemViewClient) LocalMount() bool
-  - file: third_party/openbao/sdk/plugin/grpc_system.go
-    kind: method
-    name: gRPCSystemViewClient.LookupPlugin
-    signature: func (s *gRPCSystemViewClient) LookupPlugin(_ context.Context, _ string,
-      _ consts.PluginType) (*pluginutil.PluginRunner, error)
-  - file: third_party/openbao/sdk/plugin/grpc_system.go
-    kind: method
-    name: gRPCSystemViewClient.LookupPluginVersion
-    signature: func (s *gRPCSystemViewClient) LookupPluginVersion(_ context.Context,
-      _ string, _ consts.PluginType, _ string) (*pluginutil.PluginRunner, error)
-  - file: third_party/openbao/sdk/plugin/grpc_system.go
-    kind: method
-    name: gRPCSystemViewClient.MaxLeaseTTL
-    signature: func (s *gRPCSystemViewClient) MaxLeaseTTL() time.Duration
-  - file: third_party/openbao/sdk/plugin/grpc_system.go
-    kind: method
-    name: gRPCSystemViewClient.MlockEnabled
-    signature: func (s *gRPCSystemViewClient) MlockEnabled() bool
-  - file: third_party/openbao/sdk/plugin/grpc_system.go
-    kind: method
-    name: gRPCSystemViewClient.NewPluginClient
-    signature: func (s *gRPCSystemViewClient) NewPluginClient(ctx context.Context,
-      config pluginutil.PluginClientConfig) (pluginutil.PluginClient, error)
-  - file: third_party/openbao/sdk/plugin/grpc_system.go
-    kind: method
-    name: gRPCSystemViewClient.PluginEnv
-    signature: func (s *gRPCSystemViewClient) PluginEnv(ctx context.Context) (*logical.PluginEnvironment,
-      error)
-  - file: third_party/openbao/sdk/plugin/grpc_system.go
-    kind: method
-    name: gRPCSystemViewClient.ReplicationState
-    signature: func (s *gRPCSystemViewClient) ReplicationState() consts.ReplicationState
-  - file: third_party/openbao/sdk/plugin/grpc_system.go
-    kind: method
-    name: gRPCSystemViewClient.ResponseWrapData
-    signature: func (s *gRPCSystemViewClient) ResponseWrapData(ctx context.Context,
-      data map[string]any, ttl time.Duration, jwt bool) (*wrapping.ResponseWrapInfo,
-      error)
-  - file: third_party/openbao/sdk/plugin/grpc_system.go
-    kind: method
-    name: gRPCSystemViewClient.Tainted
-    signature: func (s *gRPCSystemViewClient) Tainted() bool
-  - file: third_party/openbao/sdk/plugin/grpc_system.go
-    kind: method
-    name: gRPCSystemViewClient.VaultVersion
-    signature: func (s *gRPCSystemViewClient) VaultVersion(ctx context.Context) (string,
-      error)
-  - file: third_party/openbao/sdk/plugin/grpc_system.go
-    kind: method
-    name: gRPCSystemViewServer.CachingDisabled
-    signature: func (s *gRPCSystemViewServer) CachingDisabled(ctx context.Context,
-      _ *pb.Empty) (*pb.CachingDisabledReply, error)
-  - file: third_party/openbao/sdk/plugin/grpc_system.go
-    kind: method
-    name: gRPCSystemViewServer.ClusterInfo
-    signature: func (s *gRPCSystemViewServer) ClusterInfo(ctx context.Context, _ *pb.Empty)
-      (*pb.ClusterInfoReply, error)
-  - file: third_party/openbao/sdk/plugin/grpc_system.go
-    kind: method
-    name: gRPCSystemViewServer.DefaultLeaseTTL
-    signature: func (s *gRPCSystemViewServer) DefaultLeaseTTL(ctx context.Context,
-      _ *pb.Empty) (*pb.TTLReply, error)
-  - file: third_party/openbao/sdk/plugin/grpc_system.go
-    kind: method
-    name: gRPCSystemViewServer.EntityInfo
-    signature: func (s *gRPCSystemViewServer) EntityInfo(ctx context.Context, args
-      *pb.EntityInfoArgs) (*pb.EntityInfoReply, error)
-  - file: third_party/openbao/sdk/plugin/grpc_system.go
-    kind: method
-    name: gRPCSystemViewServer.GeneratePasswordFromPolicy
-    signature: func (s *gRPCSystemViewServer) GeneratePasswordFromPolicy(ctx context.Context,
-      req *pb.GeneratePasswordFromPolicyRequest) (*pb.GeneratePasswordFromPolicyReply,
-      error)
-  - file: third_party/openbao/sdk/plugin/grpc_system.go
-    kind: method
-    name: gRPCSystemViewServer.GroupsForEntity
-    signature: func (s *gRPCSystemViewServer) GroupsForEntity(ctx context.Context,
-      args *pb.EntityInfoArgs) (*pb.GroupsForEntityReply, error)
-  - file: third_party/openbao/sdk/plugin/grpc_system.go
-    kind: method
-    name: gRPCSystemViewServer.LocalMount
-    signature: func (s *gRPCSystemViewServer) LocalMount(ctx context.Context, _ *pb.Empty)
-      (*pb.LocalMountReply, error)
-  - file: third_party/openbao/sdk/plugin/grpc_system.go
-    kind: method
-    name: gRPCSystemViewServer.MaxLeaseTTL
-    signature: func (s *gRPCSystemViewServer) MaxLeaseTTL(ctx context.Context, _ *pb.Empty)
-      (*pb.TTLReply, error)
-  - file: third_party/openbao/sdk/plugin/grpc_system.go
-    kind: method
-    name: gRPCSystemViewServer.MlockEnabled
-    signature: func (s *gRPCSystemViewServer) MlockEnabled(ctx context.Context, _
-      *pb.Empty) (*pb.MlockEnabledReply, error)
-  - file: third_party/openbao/sdk/plugin/grpc_system.go
-    kind: method
-    name: gRPCSystemViewServer.PluginEnv
-    signature: func (s *gRPCSystemViewServer) PluginEnv(ctx context.Context, _ *pb.Empty)
-      (*pb.PluginEnvReply, error)
-  - file: third_party/openbao/sdk/plugin/grpc_system.go
-    kind: method
-    name: gRPCSystemViewServer.ReplicationState
-    signature: func (s *gRPCSystemViewServer) ReplicationState(ctx context.Context,
-      _ *pb.Empty) (*pb.ReplicationStateReply, error)
-  - file: third_party/openbao/sdk/plugin/grpc_system.go
-    kind: method
-    name: gRPCSystemViewServer.ResponseWrapData
-    signature: func (s *gRPCSystemViewServer) ResponseWrapData(ctx context.Context,
-      args *pb.ResponseWrapDataArgs) (*pb.ResponseWrapDataReply, error)
-  - file: third_party/openbao/sdk/plugin/grpc_system.go
-    kind: method
-    name: gRPCSystemViewServer.Tainted
-    signature: func (s *gRPCSystemViewServer) Tainted(ctx context.Context, _ *pb.Empty)
-      (*pb.TaintedReply, error)
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - file:third_party/openbao/sdk/plugin/grpc_backend_client.go
-    - method:1b7848a15e29d6ec84624977a059f707
-    - method:2b4b94171d09bc27210585e5a91bcb4e
-    - method:32468eb19e567c90f508f68e9638ac96
-    - method:6171e5e250fab85daba7f4057e0f8361
-    - method:849a48d975eba89fcea2bbba2cfe3767
-    id: r.backend-client-forwarding
-    level: MUST
-    text: Every backendGRPCPluginClient method forwards to the remote backend over
-      gRPC, so Initialize, HandleRequest, HandleExistenceCheck, SpecialPaths, Setup,
-      InvalidateKey, Cleanup, Type, PluginVersion, System, Logger and IsExternal all
-      reflect the plugin process's backend rather than local state.
-  - codeRefs:
-    - file:third_party/openbao/sdk/plugin/plugin.go
-    - method:0a9c4bf7a631037cad289dd4779bf323
-    - method:d5e6e4ab01a24a7f082237abe1e18150
-    - method:fa166f39c25c9aca21b6a93bae1fc16a
-    - struct:4ff22f80117fe175971f2ca0995534e2
-    id: r.backend-plugin-client-capabilities
-    level: MUST
-    text: BackendPluginClient carries the remote backend handle plus its version metadata,
-      so Cleanup tears down the plugin client and PluginVersion reports the negotiated
-      version; the v5 variant additionally reports IsExternal from the plugin handshake.
-  - codeRefs:
-    - file:third_party/openbao/sdk/plugin/grpc_backend_server.go
-    - method:174d5d0103acb1b2ed4a07af8ea49a70
-    - method:1c58ea704d1ea3d538ed36c65bd1e213
-    - method:69224966363a14fd3c53f406c3df600e
-    - method:b9809ca3d0d49ddac6ce541c8c41bce2
-    id: r.backend-server-dispatch
-    level: MUST
-    text: backendGRPCPluginServer decodes each protobuf request into the logical types,
-      invokes the corresponding method on the obtained backend instance and encodes
-      the result or the error into the protobuf reply.
-  - codeRefs:
-    - file:third_party/openbao/sdk/plugin/backend.go
-    - method:997450692afef7e5ec0642502549ce4f
-    id: r.grpc-client-construction
-    level: MUST
-    text: GRPCClient returns a backendGRPCPluginClient holding the Backend client,
-      PluginVersion client, the broker, a fresh cleanup channel, the caller's done
-      context and the plugin's MetadataMode.
-  - codeRefs:
-    - file:third_party/openbao/sdk/plugin/backend.go
-    - method:0d2b3ec3df7e24317bcaa59cdffacde0
-    - struct:a503c0d462a2d348fcc0594174abc825
-    id: r.grpc-server-registration
-    level: MUST
-    text: GRPCServer builds a backendGRPCPluginServer from the plugin's Factory, MetadataMode-independent
-      instance map and Logger, registers it as both the Backend and PluginVersion
-      gRPC service, and additionally registers the multiplexing server when MultiplexingSupport
-      is set.
-  - codeRefs:
-    - file:third_party/openbao/sdk/plugin/logger.go
-    - method:1ae9e1055c4c547f91bffecf87e3408b
-    - method:3396e99d36fce725371b2778e424e876
-    - method:488f91ae4607e2292d664b435e509be9
-    - struct:e1626e6329eb97242334a06e3ae8490c
-    id: r.logger-rpc-surface
-    level: MUST
-    text: LoggerServer exposes the log.Logger interface over RPC, forwarding Trace,
-      Debug, Info, Warn, Error and Log to a shared logger, and reporting IsTrace,
-      IsDebug, IsInfo and IsWarn through a LoggerReply; SetLevel adjusts the logger's
-      level.
-  - codeRefs:
-    - file:third_party/openbao/sdk/plugin/grpc_storage.go
-    - method:3653e0f25154a788fd8bf3e5584cf0bb
-    - method:b48d2ce520ef90129e6973a01e0f8074
-    - method:b90b0c85be30968ce7d690be635d4af5
-    - struct:3311490cc6926794ff20c280ed074776
-    id: r.noop-storage
-    level: MUST
-    text: 'NOOPStorage implements the storage interface as a no-op: List and ListPage
-      return empty results, Get returns a not-found error, and Put and Delete return
-      nil errors.'
-  - codeRefs:
-    - file:third_party/openbao/sdk/plugin/plugin_v5.go
-    - method:3b581a46e9f9f8d7182c6a41083e2d5f
-    - method:bb98f92f7e7f53959d482198ae73019d
-    - type_alias:de240a20b03c3acb677fe02691925b5b
-    id: r.reload-preserving-cleanup
-    level: MUST
-    text: BackendPluginClientV5.Cleanup checks the context for ContextKeyPluginReload
-      and, when it is absent, cleans up the embedded backend and closes the plugin
-      client, so a reload does not tear down the reused plugin process.
-  - codeRefs:
-    - file:third_party/openbao/sdk/plugin/serve.go
-    - function:ace0d2c743fe6cb870f3439eaeeef5fc
-    - function:b052930f1568525b7416c6a7dd388b99
-    - struct:093e9499ed0d32dc6fa3ba35860e4560
-    - type_alias:ffcd33063c419df344c256774a320354
-    id: r.serve-entrypoint
-    level: MUST
-    text: Serve runs the plugin main process from ServeOpts, defaulting the logger
-      when none is supplied, applying the TLSProviderFunc when set, and serving the
-      GRPCBackendPlugin built from BackendFactoryFunc; ServeMultiplex does the same
-      with multiplexing support enabled.
-  - codeRefs:
-    - file:third_party/openbao/sdk/plugin/grpc_storage.go
-    - method:2af708be0578b6d482b348656fbf5525
-    - method:af0cce5180fd3f3a609687842173904d
-    - method:c7c8d68ccf7cc2596400e9443b552e5e
-    - method:e62d5db3e874584c8e85f7aa82ef3f23
-    - method:f5fd3dce8409afac9488cce9128b1095
-    id: r.storage-broker-roundtrip
-    level: MUST
-    text: GRPCStorageClient exposes the logical storage surface (List, ListPage, Get,
-      Put, Delete) by calling the gRPC storage server, and GRPCStorageServer serves
-      those same operations against the mounted storage backend, returning the storage
-      error in the reply rather than as a transport error.
-  - codeRefs:
-    - file:third_party/openbao/sdk/plugin/grpc_system.go
-    - method:0b9c4fcf76557462d9601358f6cd6b33
-    - method:0c70f9c91b6db5de7bbec6912b73a289
-    - method:2395253bf53d1ca1fa29f1fc054d3ac9
-    - method:2827ddabfa1ea12b12ff2585eef1c0b5
-    - method:3d20729ab9c557ad5d78002323aea05b
-    - method:bb04f4e7d6300db0c9d9eb7d2b8d30d2
-    id: r.system-view-broker
-    level: MUST
-    text: gRPCSystemViewClient answers every logical.SystemView query (lease TTLs,
-      tainted, caching disabled, replication state, mlock, local mount, entity and
-      group lookups, plugin environment, Vault version, cluster ID, external key,
-      response wrapping and new-plugin-client creation) by calling the corresponding
-      gRPC system view server method, and gRPCSystemViewServer answers those calls
-      from the embedded SystemView.
-  - codeRefs:
-    - file:third_party/openbao/sdk/plugin/middleware.go
-    - method:9986a138ce360977306f17709a79b2a9
-    - method:a9b16dd37ca7f3262412072c70d2b980
-    - method:f6a2cb63630585488da8793281efa51a
-    - struct:f9823e24fba3e1260e837b886422d8ad
-    id: r.tracing-middleware
-    level: SHOULD
-    text: BackendTracingMiddleware wraps a logical.Backend and starts a tracing span
-      around each forwarded call (Initialize, HandleRequest, HandleExistenceCheck,
-      Setup, InvalidateKey, Cleanup) and delegates the non-traced accessors SpecialPaths,
-      System, Logger, Type and PluginVersion unchanged.
-  - codeRefs:
-    - file:third_party/openbao/sdk/plugin/grpc_storage.go
-    - method:0bfc2e84c1c3f42c856a3c8e25811b37
-    - method:497ac0debf7f4e2768f4ce31af9d5819
-    - method:b118df18a01349acaff756f826bcde96
-    - method:b21f0c9f65bfabbac120694d4f7c8d8a
-    - method:ce75c71d01169b33386fcc1b37edfcf7
-    id: r.transactional-storage
-    level: MUST
-    text: GRPCTransactionalStorageClient begins read-only and read-write transactions
-      through the storage server and returns a GRPCStorageClientTransaction whose
-      Commit and Rollback call the matching server methods.
-  - codeRefs:
-    - file:third_party/openbao/sdk/plugin/plugin_v5.go
-    - function:a6733a8b57e4b20e4fa4378c8674dcf6
-    - function:c9412851cff57cc07186a931b2d0570f
-    - function:f10fd7cb843087c77654f7dd89ad9c38
-    id: r.v5-dispense
-    level: MUST
-    text: Dispense inspects the plugin's handshake to decide the versioned client
-      form, and NewPluginClientV5 builds a BackendPluginClientV5 that embeds the dispensed
-      logical.Backend; NewBackendV5 resolves the runner by plugin name and version
-      before dispensing.
-  - codeRefs:
-    - file:third_party/openbao/sdk/plugin/plugin.go
-    - function:2102a0f2191f4030153f7abf9e3956e3
-    - function:6e3505f1f4c72782efe70fd3a74447ac
-    - function:c7b21232958a5b231b82265ec8ac21a2
-    id: r.versioned-backend-factory
-    level: MUST
-    text: NewBackendWithVersion, NewBackend and NewPluginClient resolve a plugin runner
-      through the supplied LookRunnerUtil/RunnerUtil, dispense the client and return
-      the logical.Backend, with NewBackend delegating to the versioned constructor
-      with an empty version.
-  upstream: self

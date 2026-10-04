@@ -1,11 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/ui/lib/open-api-explorer/addon/controllers/index.js index.js@third_party/openbao/ui/lib/open-api-explorer/addon/controllers/index.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-lib-open-api-explorer-addon-controllers
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'This context exists to pin down the contents and contract of the vendored
     `open-api-explorer` addon controller file so that a reader of the broader deno-kcp
     specification knows what this particular third-party UI artifact guarantees, without
@@ -14,46 +14,46 @@ spec:
     and that no callable interfaces originate from it. It also marks the boundary:
     content here is upstream OpenBao UI code governed by its own license and repository
     policy, not first-party deno-kcp logic.'
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/ui/lib/open-api-explorer/addon/controllers/index.js
-    id: r.declare-filter-query-param
+  - id: r.declare-filter-query-param
     level: MUST
     text: The exported controller must declare `filter` as its sole query parameter,
       listing it in the `queryParams` array, so that the addon's route can read and
       write the filter through the URL.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/open-api-explorer/addon/controllers/index.js
-    id: r.export-single-ember-controller
+  - id: r.export-single-ember-controller
     level: MUST
     text: 'The module must import the base `Controller` from `@ember/controller` and
       export exactly one default value: a controller produced by extending that base.'
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/open-api-explorer/addon/controllers/index.js
-    id: r.filter-default-empty
+  - id: r.filter-default-empty
     level: MUST
     text: The controller's `filter` property must default to the empty string, so
       an unfiltered visit shows every operation rather than requiring the query parameter
       to be present.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/open-api-explorer/addon/controllers/index.js
-    id: r.no-additional-behaviour
+  - id: r.no-additional-behaviour
     level: SHOULD
     text: The controller should stay free of actions, computed properties and service
       injections; filtering behaviour belongs to the addon's templates and components,
       not to this controller.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/open-api-explorer/addon/controllers/index.js
-    id: r.preserve-upstream-license-header
+  - id: r.preserve-upstream-license-header
     level: MUST
     text: The file must keep the upstream copyright and SPDX header naming HashiCorp,
       Inc. and MPL-2.0, because the file is vendored third-party source and not first-party
       code.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/open-api-explorer/addon/controllers/index.js
-    id: r.stay-under-third-party
+  - id: r.stay-under-third-party
     level: MUST
     text: The file must remain under `third_party/openbao/ui/lib/open-api-explorer/addon/controllers/`;
       first-party deno-kcp code must not import from or modify it in place.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/ui/lib/open-api-explorer/addon/controllers/index.js
+codeRefIndex:
+- file:third_party/openbao/ui/lib/open-api-explorer/addon/controllers/index.js index.js@third_party/openbao/ui/lib/open-api-explorer/addon/controllers/index.js

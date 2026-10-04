@@ -1,40 +1,40 @@
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: bf5fddff32505c8a4f89e0556e8e119935119b7519787a1ff6a2ea60c7751e2a
+realizedSpecHash: f759b0edc056fed0e61e07a46fe9906cc3ba514adbadd53ee28d4e7a11fb8df9
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
+- type: CodeSynced
+  status: "True"
   reason: InterfacesObserved
-  status: "True"
-  type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+  message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+- type: Drifted
   status: "False"
-  type: Drifted
-- message: the spec passes the validator
-  reason: ValidatorPassed
+  reason: FingerprintEqual
+  message: observed facts match the synced fingerprint
+- type: SpecValid
   status: "True"
-  type: SpecValid
+  reason: ValidatorPassed
+  message: the spec passes the validator
 observed:
   files:
   - third_party/openbao/internal/helper/flag-slice/flag.go
   - third_party/openbao/internal/helper/flag-slice/flag_test.go
-  fingerprint: bf5fddff32505c8a4f89e0556e8e119935119b7519787a1ff6a2ea60c7751e2a
   interfaces:
-  - codegraphId: type_alias:718f3bbeb4da00e52797b13de56943dd
-    file: third_party/openbao/internal/helper/flag-slice/flag.go
+  - name: StringFlag
     kind: type_alias
+    file: third_party/openbao/internal/helper/flag-slice/flag.go
     line: 10
-    name: StringFlag
-  - codegraphId: method:7200b0805cd103fa07c81138c4863073
-    file: third_party/openbao/internal/helper/flag-slice/flag.go
+    codegraphId: type_alias:718f3bbeb4da00e52797b13de56943dd
+  - name: StringFlag.String
     kind: method
-    line: 12
-    name: StringFlag.String
     signature: () string
-  - codegraphId: method:034969529844a720667adcf3ed37c437
     file: third_party/openbao/internal/helper/flag-slice/flag.go
+    line: 12
+    codegraphId: method:7200b0805cd103fa07c81138c4863073
+  - name: StringFlag.Set
     kind: method
-    line: 16
-    name: StringFlag.Set
     signature: (value string) error
-realizedSpecHash: f759b0edc056fed0e61e07a46fe9906cc3ba514adbadd53ee28d4e7a11fb8df9
-syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-syncedFingerprint: bf5fddff32505c8a4f89e0556e8e119935119b7519787a1ff6a2ea60c7751e2a
+    file: third_party/openbao/internal/helper/flag-slice/flag.go
+    line: 16
+    codegraphId: method:034969529844a720667adcf3ed37c437
+  fingerprint: bf5fddff32505c8a4f89e0556e8e119935119b7519787a1ff6a2ea60c7751e2a

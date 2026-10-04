@@ -1,51 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:.tools/open-architecture/arch.yaml arch.yaml@.tools/open-architecture/arch.yaml
-- file:deploy/examples/atproto/market/00-workspaces.yaml 00-workspaces.yaml@deploy/examples/atproto/market/00-workspaces.yaml
-- file:deploy/examples/atproto/market/10-rbac.yaml 10-rbac.yaml@deploy/examples/atproto/market/10-rbac.yaml
-- file:deploy/examples/atproto/market/15-openbao-alice.yaml 15-openbao-alice.yaml@deploy/examples/atproto/market/15-openbao-alice.yaml
-- file:deploy/examples/atproto/market/15-openbao-bob.yaml 15-openbao-bob.yaml@deploy/examples/atproto/market/15-openbao-bob.yaml
-- file:deploy/examples/atproto/market/15-openbao-global.yaml 15-openbao-global.yaml@deploy/examples/atproto/market/15-openbao-global.yaml
-- file:deploy/examples/atproto/market/15-openbao-relay.yaml 15-openbao-relay.yaml@deploy/examples/atproto/market/15-openbao-relay.yaml
-- file:deploy/examples/atproto/market/20-global-plc.yaml 20-global-plc.yaml@deploy/examples/atproto/market/20-global-plc.yaml
-- file:deploy/examples/atproto/market/30-relay-relay.yaml 30-relay-relay.yaml@deploy/examples/atproto/market/30-relay-relay.yaml
-- file:deploy/examples/atproto/market/40-alice-pds.yaml 40-alice-pds.yaml@deploy/examples/atproto/market/40-alice-pds.yaml
-- file:deploy/examples/atproto/market/50-verifier.yaml 50-verifier.yaml@deploy/examples/atproto/market/50-verifier.yaml
-- file:deploy/examples/atproto/market/60-bob-pds.yaml 60-bob-pds.yaml@deploy/examples/atproto/market/60-bob-pds.yaml
-- file:deploy/examples/atproto/market/70-bidder.yaml 70-bidder.yaml@deploy/examples/atproto/market/70-bidder.yaml
-- file:deploy/examples/atproto/market/README.md README.md@deploy/examples/atproto/market/README.md
-- file:deploy/examples/atproto/market/accept.sh accept.sh@deploy/examples/atproto/market/accept.sh
-- file:deploy/examples/atproto/market/apply.sh apply.sh@deploy/examples/atproto/market/apply.sh
 kind: SystemContext
 metadata:
   name: deploy-examples-atproto-market
   namespace: default
 spec:
-  arch:
-    code:
-    - file:deploy/examples/atproto/market/20-global-plc.yaml
-    - file:deploy/examples/atproto/market/30-relay-relay.yaml
-    - file:deploy/examples/atproto/market/40-alice-pds.yaml
-    form: list
-    id: tb.child-process
-    kind: node
-    node:
-      basis: example
-      code:
-      - deploy/examples/atproto/market/20-global-plc.yaml:Deno.execPath
-      - deploy/examples/atproto/market/20-global-plc.yaml:childEnv
-      - deploy/examples/atproto/market/30-relay-relay.yaml:Deno.execPath
-      - deploy/examples/atproto/market/30-relay-relay.yaml:childEnv
-      - deploy/examples/atproto/market/40-alice-pds.yaml:Deno.execPath
-      - deploy/examples/atproto/market/40-alice-pds.yaml:childEnv
-      enforced_by: []
-      id: tb.child-process
-      kind: process
-      principals: {}
-      runs_in: tb.host
-    parent: tb.workload
-    section: system_contexts
-    slot: children[0]
+  repository: deno-kcp
+  upstream: self
   intent: 'This context exists to pin down the deploy/examples/atproto/market example
     as an executable specification of what the kcp deno runtime must support: peer
     services that reach each other only by cluster-local name over TLS, with identity
@@ -58,24 +18,8 @@ spec:
     in the provider. The example carries its own live acceptance, accept.sh, so that
     it is proven by bringing the whole topology up and reaching it, not only by decoding
     its manifests and fitting them to the schemas.'
-  interfaces:
-  - file: .tools/open-architecture/validate.py
-    kind: variable
-    name: MARKET_WORKSPACES
-    signature: MARKET_WORKSPACES = "deploy/examples/atproto/market/00-workspaces.yaml"
-  - file: test/integration/examples.go
-    kind: function
-    name: exampleByName
-    signature: func exampleByName(file string) (example, bool)
-  - file: test/integration/examples.go
-    kind: function
-    name: exampleFiles
-    signature: func exampleFiles() []example
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:deploy/examples/atproto/market/accept.sh
-    id: r.acceptance-survives-a-stalled-provider
+  - id: r.acceptance-survives-a-stalled-provider
     level: MUST
     text: 'accept.sh must survive a provider that comes up, logs that it is waiting
       for its APIExport virtual workspace endpoints, and then reconciles nothing:
@@ -88,9 +32,9 @@ spec:
       it is on, and record each attempt''s apply.sh exit code. It must never restart
       the provider once a DenoPod exists, because the workloads are children of the
       provider and stopping it would orphan them.'
-  - codeRefs:
-    - file:deploy/examples/atproto/market/apply.sh
-    id: r.apply-includes-bob-and-bidder
+    codeRefs:
+    - file:deploy/examples/atproto/market/accept.sh
+  - id: r.apply-includes-bob-and-bidder
     level: MUST
     text: apply.sh names the workspaces global relay alice bob, requires atproto-market/hono-bidder
       (as well as hono-plc, hono-atproto-relay and hono-pds) in its preflight check,
@@ -100,16 +44,16 @@ spec:
       applies 15-openbao-bob.yaml with the other authorities, applies 60-bob-pds.yaml
       before 70-bidder.yaml, and reports the phase and readiness of both pds and bidder
       in its final summary.
-  - codeRefs:
-    - file:.tools/open-architecture/arch.yaml
-    id: r.arch-data-lists-bob
+    codeRefs:
+    - file:deploy/examples/atproto/market/apply.sh
+  - id: r.arch-data-lists-bob
     level: SHOULD
     text: The open-architecture overlay data ov.market-workspaces in .tools/open-architecture/arch.yaml
       lists root:bob alongside root:global, root:relay and root:alice, so validate.py
       and 00-workspaces.yaml agree.
-  - codeRefs:
-    - file:deploy/examples/atproto/market/70-bidder.yaml
-    id: r.bidder-pod
+    codeRefs:
+    - file:.tools/open-architecture/arch.yaml
+  - id: r.bidder-pod
     level: MUST
     text: 'The bob workspace runs DenoPod bidder in namespace default under the deno-runner
       service account with restartPolicy Always, the denopod.deno.computer/run finalizer,
@@ -125,9 +69,9 @@ spec:
       bob''s market participant: it shares bob''s OpenBao authority, service account
       and workspace identity with bob''s PDS and reaches the market through the same
       virtual DNS table.'
-  - codeRefs:
+    codeRefs:
     - file:deploy/examples/atproto/market/70-bidder.yaml
-    id: r.bidder-supervisor-script
+  - id: r.bidder-supervisor-script
     level: MUST
     text: 'The bidder pod''s script writes the injected KCP_CA_BUNDLE to ca.pem and
       sets DENO_CERT to it, prepends KCP_SHIM to the Deno flags as --preload, spawns
@@ -136,9 +80,9 @@ spec:
       and must NOT append --tls-cert-file or --tls-key-file to the child argv: hono-bidder''s
       cli-args-env declares no such options and its parser rejects unknown flags,
       so the bidder consumes only the trust bundle even though SERVICE_TLS is true.'
-  - codeRefs:
-    - file:deploy/examples/atproto/market/60-bob-pds.yaml
-    id: r.bob-pds-pod
+    codeRefs:
+    - file:deploy/examples/atproto/market/70-bidder.yaml
+  - id: r.bob-pds-pod
     level: MUST
     text: 'The bob workspace runs DenoPod pds in namespace default under the deno-runner
       service account with restartPolicy Always, the denopod.deno.computer/run finalizer,
@@ -148,15 +92,15 @@ spec:
       name, PDS_CRAWLERS pointed at the relay name, PDS_SUBSCRIBE_REPOS_FORMAT json,
       and PDS_PRIVATE_KEY_HEX in SERVICE_ENV as a key distinct from alice''s (__BOB_PDS_PRIVATE_KEY_HEX__),
       so the two PDS identities differ.'
-  - codeRefs:
-    - file:deploy/examples/atproto/market/00-workspaces.yaml
-    id: r.four-workspaces-at-root
+    codeRefs:
+    - file:deploy/examples/atproto/market/60-bob-pds.yaml
+  - id: r.four-workspaces-at-root
     level: MUST
     text: The example creates exactly the four workspaces global, relay, alice and
       bob, each with spec.type.name denoruntime and spec.type.path root.
-  - codeRefs:
-    - file:deploy/examples/atproto/market/apply.sh
-    id: r.live-acceptance-script
+    codeRefs:
+    - file:deploy/examples/atproto/market/00-workspaces.yaml
+  - id: r.live-acceptance-script
     level: MUST
     text: 'deploy/examples/atproto/market/accept.sh is the live acceptance of this
       example: it brings the whole market up in a throwaway state directory and exits
@@ -203,81 +147,79 @@ spec:
       so a pod that dies after startup fails the run. It prints a final table naming
       every check and its result, prints the tail of the provider log and the status
       of the failing pod when a check fails, and exits 0 only when every check passed.'
-  - codeRefs:
-    - file:deploy/examples/atproto/market/15-openbao-alice.yaml
-    - file:deploy/examples/atproto/market/15-openbao-bob.yaml
-    - file:deploy/examples/atproto/market/15-openbao-global.yaml
-    - file:deploy/examples/atproto/market/15-openbao-relay.yaml
-    id: r.openbao-object-per-workspace
+    codeRefs:
+    - file:deploy/examples/atproto/market/apply.sh
+  - id: r.openbao-object-per-workspace
     level: MUST
     text: 'Each workspace applies one OpenBao object named openbao in namespace default,
       carrying the finalizer openbao.deno.computer/namespace and naming the OpenBao
       namespace that serves it: global.default, relay.default, alice.default and bob.default
       respectively.'
-  - codeRefs:
-    - file:deploy/examples/atproto/market/40-alice-pds.yaml
-    id: r.pds-pod
+    codeRefs:
+    - file:deploy/examples/atproto/market/15-openbao-alice.yaml
+    - file:deploy/examples/atproto/market/15-openbao-bob.yaml
+    - file:deploy/examples/atproto/market/15-openbao-global.yaml
+    - file:deploy/examples/atproto/market/15-openbao-relay.yaml
+  - id: r.pds-pod
     level: MUST
     text: The alice workspace runs DenoPod pds under the deno-runner service account
       with restartPolicy Always, SERVICE_TLS true, --unstable-kv in SERVICE_DENO_FLAGS,
       port 2583, PDS_PUBLIC_HOSTNAME pds.default.alice.svc.kcp.local, PDS_PLC_DIRECTORY_URL
       pointed at the global PLC name, PDS_CRAWLERS pointed at the relay name, and
       PDS_PRIVATE_KEY_HEX in SERVICE_ENV.
-  - codeRefs:
-    - file:deploy/examples/atproto/market/20-global-plc.yaml
-    id: r.plc-directory-pod
+    codeRefs:
+    - file:deploy/examples/atproto/market/40-alice-pds.yaml
+  - id: r.plc-directory-pod
     level: MUST
     text: The global workspace runs DenoPod plc with restartPolicy Always, the denopod.deno.computer/run
       finalizer, SERVICE_TLS true, port 2587, and a readiness probe that resolves
       plc.default.global.svc.kcp.local and requests /health.
-  - codeRefs:
-    - file:deploy/examples/atproto/market/10-rbac.yaml
-    - file:deploy/examples/atproto/market/apply.sh
-    id: r.rbac-covers-bob
+    codeRefs:
+    - file:deploy/examples/atproto/market/20-global-plc.yaml
+  - id: r.rbac-covers-bob
     level: MUST
     text: apply.sh applies 10-rbac.yaml in root:bob as it does in every workspace,
       and every DenoPod in bob (pds and bidder) names the deno-runner service account.
       No new ClusterRole is added, because deno-runner-read-pods already grants get
       and list on denopods.
-  - codeRefs:
-    - file:deploy/examples/atproto/market/README.md
-    id: r.readme-lists-bob-and-bidder
+    codeRefs:
+    - file:deploy/examples/atproto/market/10-rbac.yaml
+    - file:deploy/examples/atproto/market/apply.sh
+  - id: r.readme-lists-bob-and-bidder
     level: MUST
     text: README.md's service table adds root:bob DenoPod/pds (hono-pds, port 2585,
       pds.default.bob.svc.kcp.local) and root:bob DenoPod/bidder (hono-bidder, port
       2586, bidder.default.bob.svc.kcp.local), its OpenBao table adds root:bob OpenBao/openbao
       bob.default (15-openbao-bob.yaml), its prose says four workspaces, and its ceilings
       note that the bidder registers with an XRPC dispatcher, so it needs one reachable.
-  - codeRefs:
-    - file:deploy/examples/atproto/market/30-relay-relay.yaml
-    id: r.relay-pod
+    codeRefs:
+    - file:deploy/examples/atproto/market/README.md
+  - id: r.relay-pod
     level: MUST
     text: The relay workspace runs DenoPod relay with restartPolicy Always, SERVICE_TLS
       true, HOSTNAME relay.default.relay.svc.kcp.local on port 2584, and a readiness
       probe that resolves relay.default.relay.svc.kcp.local and requests /xrpc/_health.
-  - codeRefs:
-    - file:deploy/examples/atproto/market/10-rbac.yaml
-    id: r.runner-rbac-reads-denopods
+    codeRefs:
+    - file:deploy/examples/atproto/market/30-relay-relay.yaml
+  - id: r.runner-rbac-reads-denopods
     level: MUST
     text: The example creates a ServiceAccount named deno-runner in namespace default,
       a ClusterRole named deno-runner-read-pods granting get and list on deno.computer
       denopods, and a ClusterRoleBinding of that role to that ServiceAccount.
-  - codeRefs:
-    - file:deploy/examples/atproto/market/20-global-plc.yaml
-    - file:deploy/examples/atproto/market/30-relay-relay.yaml
-    - file:deploy/examples/atproto/market/40-alice-pds.yaml
-    id: r.supervisor-env-allowlist
+    codeRefs:
+    - file:deploy/examples/atproto/market/10-rbac.yaml
+  - id: r.supervisor-env-allowlist
     level: MUST
     text: Every service pod's env allowList admits the shim's keys (SERVICE_*, KCP_SHIM,
       KCP_TLS_CERT, KCP_TLS_KEY, KCP_CA_BUNDLE, KCP_SERVICE_NAME, KCP_SERVICE_DOMAIN,
       KCP_DNS_TABLE, KCP_TOKENS, KCP_SERVER, KCP_NAMESPACE, PATH, HOME) and its write
       allowList admits only result.json, tls.crt, tls.key and ca.pem, with read and
       run allowed and noPrompt true.
-  - codeRefs:
+    codeRefs:
     - file:deploy/examples/atproto/market/20-global-plc.yaml
     - file:deploy/examples/atproto/market/30-relay-relay.yaml
     - file:deploy/examples/atproto/market/40-alice-pds.yaml
-    id: r.supervisor-injects-tls-and-shim
+  - id: r.supervisor-injects-tls-and-shim
     level: MUST
     text: The service pods' supervisor script writes the injected KCP_CA_BUNDLE to
       ca.pem and sets DENO_CERT to it, writes KCP_TLS_CERT and KCP_TLS_KEY to tls.crt
@@ -285,15 +227,17 @@ spec:
       prepends KCP_SHIM to the Deno flags as --preload, spawns the entry module as
       a child process with stdin null and inherited stdio, and writes the child exitCode
       to result.json.
-  - codeRefs:
-    - file:deploy/examples/atproto/market/50-verifier.yaml
-    id: r.verifier-bounded-wait
+    codeRefs:
+    - file:deploy/examples/atproto/market/20-global-plc.yaml
+    - file:deploy/examples/atproto/market/30-relay-relay.yaml
+    - file:deploy/examples/atproto/market/40-alice-pds.yaml
+  - id: r.verifier-bounded-wait
     level: MUST
     text: The verifier's relay watch settles exactly once, with a 90 second timeout,
       closing the WebSocket on settle and reporting error or closed instead of hanging.
-  - codeRefs:
+    codeRefs:
     - file:deploy/examples/atproto/market/50-verifier.yaml
-    id: r.verifier-end-to-end-check
+  - id: r.verifier-end-to-end-check
     level: MUST
     text: The alice workspace runs DenoPod verifier with restartPolicy Never, importing
       KCP_SHIM before anything else, creating an account on VERIFY_PDS, reading the
@@ -301,16 +245,16 @@ spec:
       itself, then writing a second record while watching VERIFY_RELAY's subscribeRepos
       WebSocket, and exiting 0 only when plcStatus is 200, gotAccessJwt is yes and
       relaySawCommit is yes.
-  - codeRefs:
+    codeRefs:
     - file:deploy/examples/atproto/market/50-verifier.yaml
-    id: r.verifier-judges-decode-frames
+  - id: r.verifier-judges-decode-frames
     level: SHOULD
     text: The verifier treats relay frames as bytes, decoding ArrayBuffer and Blob
       payloads with TextDecoder before searching for its own DID, because the relay
       emits DRISL where a CBOR string is its bytes verbatim.
-  - codeRefs:
-    - file:deploy/examples/atproto/market/apply.sh
-    id: r.verifier-waits-for-its-peers
+    codeRefs:
+    - file:deploy/examples/atproto/market/50-verifier.yaml
+  - id: r.verifier-waits-for-its-peers
     level: MUST
     text: apply.sh must not create the verifier after a fixed sleep. It must instead
       wait, with the same bounded WAIT_SECONDS deadline it uses elsewhere, until the
@@ -321,4 +265,60 @@ spec:
       ready, apply.sh must say so on stderr and still create the verifier, so the
       run reports the failure instead of hanging. A fixed sleep before a pod whose
       restartPolicy is Never is not a wait for anything and must not be written.
-  upstream: self
+    codeRefs:
+    - file:deploy/examples/atproto/market/apply.sh
+  interfaces:
+  - name: MARKET_WORKSPACES
+    kind: variable
+    signature: MARKET_WORKSPACES = "deploy/examples/atproto/market/00-workspaces.yaml"
+    file: .tools/open-architecture/validate.py
+  - name: exampleByName
+    kind: function
+    signature: func exampleByName(file string) (example, bool)
+    file: test/integration/examples.go
+  - name: exampleFiles
+    kind: function
+    signature: func exampleFiles() []example
+    file: test/integration/examples.go
+  arch:
+    id: tb.child-process
+    kind: node
+    section: system_contexts
+    form: list
+    parent: tb.workload
+    slot: children[0]
+    code:
+    - file:deploy/examples/atproto/market/20-global-plc.yaml
+    - file:deploy/examples/atproto/market/30-relay-relay.yaml
+    - file:deploy/examples/atproto/market/40-alice-pds.yaml
+    node:
+      basis: example
+      code:
+      - deploy/examples/atproto/market/20-global-plc.yaml:Deno.execPath
+      - deploy/examples/atproto/market/20-global-plc.yaml:childEnv
+      - deploy/examples/atproto/market/30-relay-relay.yaml:Deno.execPath
+      - deploy/examples/atproto/market/30-relay-relay.yaml:childEnv
+      - deploy/examples/atproto/market/40-alice-pds.yaml:Deno.execPath
+      - deploy/examples/atproto/market/40-alice-pds.yaml:childEnv
+      enforced_by: []
+      id: tb.child-process
+      kind: process
+      principals: {}
+      runs_in: tb.host
+codeRefIndex:
+- file:.tools/open-architecture/arch.yaml arch.yaml@.tools/open-architecture/arch.yaml
+- file:deploy/examples/atproto/market/00-workspaces.yaml 00-workspaces.yaml@deploy/examples/atproto/market/00-workspaces.yaml
+- file:deploy/examples/atproto/market/10-rbac.yaml 10-rbac.yaml@deploy/examples/atproto/market/10-rbac.yaml
+- file:deploy/examples/atproto/market/15-openbao-alice.yaml 15-openbao-alice.yaml@deploy/examples/atproto/market/15-openbao-alice.yaml
+- file:deploy/examples/atproto/market/15-openbao-bob.yaml 15-openbao-bob.yaml@deploy/examples/atproto/market/15-openbao-bob.yaml
+- file:deploy/examples/atproto/market/15-openbao-global.yaml 15-openbao-global.yaml@deploy/examples/atproto/market/15-openbao-global.yaml
+- file:deploy/examples/atproto/market/15-openbao-relay.yaml 15-openbao-relay.yaml@deploy/examples/atproto/market/15-openbao-relay.yaml
+- file:deploy/examples/atproto/market/20-global-plc.yaml 20-global-plc.yaml@deploy/examples/atproto/market/20-global-plc.yaml
+- file:deploy/examples/atproto/market/30-relay-relay.yaml 30-relay-relay.yaml@deploy/examples/atproto/market/30-relay-relay.yaml
+- file:deploy/examples/atproto/market/40-alice-pds.yaml 40-alice-pds.yaml@deploy/examples/atproto/market/40-alice-pds.yaml
+- file:deploy/examples/atproto/market/50-verifier.yaml 50-verifier.yaml@deploy/examples/atproto/market/50-verifier.yaml
+- file:deploy/examples/atproto/market/60-bob-pds.yaml 60-bob-pds.yaml@deploy/examples/atproto/market/60-bob-pds.yaml
+- file:deploy/examples/atproto/market/70-bidder.yaml 70-bidder.yaml@deploy/examples/atproto/market/70-bidder.yaml
+- file:deploy/examples/atproto/market/README.md README.md@deploy/examples/atproto/market/README.md
+- file:deploy/examples/atproto/market/accept.sh accept.sh@deploy/examples/atproto/market/accept.sh
+- file:deploy/examples/atproto/market/apply.sh apply.sh@deploy/examples/atproto/market/apply.sh

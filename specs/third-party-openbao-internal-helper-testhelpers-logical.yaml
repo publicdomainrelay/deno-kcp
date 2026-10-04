@@ -1,4 +1,243 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-internal-helper-testhelpers-logical
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'This context exists so that OpenBao backend authors can write declarative
+    acceptance and unit tests without standing up a server: a TestCase names the backend
+    or factory, a list of TestStep requests, optional check callbacks, teardown and
+    acceptance gating, and Test turns that description into a real in-memory core
+    plus HTTP client run. It also centralizes the common assertions used across backend
+    tests, so policy, entity, alias-metadata, display-name and error expectations
+    are expressed once as composable TestCheckFunc values rather than repeated inline.'
+  requirements:
+  - id: r.acceptance-gate
+    level: MUST
+    text: A TestCase with AcceptanceTest set is skipped with a message naming the
+      environment variable behind TestEnvVar (VAULT_ACC) when that variable is empty,
+      and is failed with the message "Acceptance tests must be run with the -v flag
+      on tests" when the test binary was not run verbosely, unless the package-level
+      testTesting flag is set.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/testhelpers/logical/testing.go
+    - function:bffd13ce92560f7f603ce10ee047ee20
+    - struct:42b7ba778cae62abfc0b1f01a496645d
+  - id: r.backend-exclusivity
+    level: MUST
+    text: A TestCase must supply at least one of LogicalBackend, LogicalFactory, CredentialBackend
+      or CredentialFactory, otherwise Test fails with "Must provide either Backend
+      or Factory"; supplying both a logical and a credential backend or factory fails
+      with "Must provide only one backend or factory".
+    codeRefs:
+    - function:bffd13ce92560f7f603ce10ee047ee20
+    - struct:42b7ba778cae62abfc0b1f01a496645d
+  - id: r.check-auth-alias-metadata-name
+    level: MUST
+    text: TestCheckAuthEntityAliasMetadataName requires both a key and a value, errors
+      when either is empty, errors when the response auth alias metadata lacks the
+      key, and errors when the stored value differs from the expected value.
+    codeRefs:
+    - function:ba52f6c4a067d64ec3f41d8f0cb9b40b
+    - type_alias:6819a5fbd56c1ee5bafdf6dfc35adf4e
+  - id: r.check-auth-display-name
+    level: MUST
+    text: TestCheckAuthDisplayName errors with "no auth in response" when the response
+      auth is nil, and when the supplied name is non-empty errors unless the auth
+      display name equals that name prefixed with "mnt-".
+    codeRefs:
+    - function:feb22204fb8b660a02cc6302e79cc00f
+    - type_alias:6819a5fbd56c1ee5bafdf6dfc35adf4e
+  - id: r.check-auth-entity-id
+    level: MUST
+    text: 'TestCheckAuthEntityId takes a pointer to the expected entity id: when that
+      pointer holds the empty string the check stores the response entity id back
+      through the pointer, otherwise it errors unless the response entity id equals
+      the expected value; a missing auth errors with "no auth in response".'
+    codeRefs:
+    - function:30e4c22b07e82e6ed3371e56228472b0
+    - type_alias:6819a5fbd56c1ee5bafdf6dfc35adf4e
+  - id: r.check-auth-policies
+    level: MUST
+    text: TestCheckAuth returns a check that errors with "no auth in response" when
+      the response or its Auth is nil, and otherwise compares the response policies
+      against the expected policy set ignoring order, erroring with the expected and
+      actual sets when they differ.
+    codeRefs:
+    - function:a80e7283afe4d3b00db7cdb9277c523e
+    - type_alias:6819a5fbd56c1ee5bafdf6dfc35adf4e
+  - id: r.check-error
+    level: MUST
+    text: TestCheckError returns a check that fails with "response should be error"
+      unless the response reports itself as an error.
+    codeRefs:
+    - function:cfa4fd6a7923e62a0c7d721eb201d1c6
+    - type_alias:6819a5fbd56c1ee5bafdf6dfc35adf4e
+  - id: r.check-multi
+    level: MUST
+    text: TestCheckMulti composes any number of TestCheckFunc values into one that
+      runs them in order against the same response and returns the first error, or
+      nil when all pass.
+    codeRefs:
+    - function:a03a0460ecaa1c5d0d39aad2d070181b
+    - type_alias:6819a5fbd56c1ee5bafdf6dfc35adf4e
+  - id: r.core-lifecycle
+    level: MUST
+    text: Test creates an in-memory physical backend and a Vault core with a mock
+      builtin registry, initializes it with one secret share and threshold one, unseals
+      it with that share, starts an HTTP test server, and builds an API client whose
+      token is the init root token; any failure at these points aborts the case via
+      Fatal.
+    codeRefs:
+    - function:bffd13ce92560f7f603ce10ee047ee20
+    - interface:bb6cef46389f1ee5b5a5900d954b01d1
+  - id: r.error-handling-and-check
+    level: MUST
+    text: A request error or a logical error response fails the step with the step
+      number unless TestStep.ErrorOk is set, in which case the error is discarded;
+      when no error remains and TestStep.Check is set the check func is called with
+      the response and its error, if any, fails the step and ends the loop.
+    codeRefs:
+    - function:bffd13ce92560f7f603ce10ee047ee20
+    - struct:fb096eccbfe3cd67a0e4949561fc3547
+    - type_alias:6819a5fbd56c1ee5bafdf6dfc35adf4e
+  - id: r.mount-prefix-and-auth-prefix
+    level: MUST
+    text: Test mounts a logical backend, or enables a credential backend, under the
+      prefix "mnt", and prepends that prefix to every step path; for credential backends
+      the path additionally gains an "auth/" prefix.
+    codeRefs:
+    - function:bffd13ce92560f7f603ce10ee047ee20
+    - struct:fb096eccbfe3cd67a0e4949561fc3547
+  - id: r.precheck-and-teardown
+    level: MUST
+    text: Test calls TestCase.PreCheck once before anything else when it is non-nil,
+      and defers TestCase.Teardown so it runs before the test case ends whether the
+      case passed or failed.
+    codeRefs:
+    - function:bffd13ce92560f7f603ce10ee047ee20
+    - struct:42b7ba778cae62abfc0b1f01a496645d
+    - type_alias:0c2e15b296c540f7fcff7d28556d2bdf
+  - id: r.preflight
+    level: MUST
+    text: When TestStep.PreFlight is set, Test clears the request client token, calls
+      the PreFlight func with the request so path or parameters can be rewritten,
+      restores the token, and stops the step loop reporting the step number if PreFlight
+      returns an error.
+    codeRefs:
+    - function:bffd13ce92560f7f603ce10ee047ee20
+    - struct:fb096eccbfe3cd67a0e4949561fc3547
+    - type_alias:aafde25e3c87edcaa92ae2bb32d677dd
+  - id: r.rollback
+    level: MUST
+    text: After the steps Test requests a rollback for the mount path, using the "auth/"
+      prefixed path for credential backends, and reports the rollback error unless
+      it wraps logical.ErrUnsupportedOperation.
+    codeRefs:
+    - function:bffd13ce92560f7f603ce10ee047ee20
+  - id: r.secret-revocation
+    level: MUST
+    text: Every step response carrying a Secret queues a revoke request against "sys/leases/revoke/<LeaseID>";
+      after the steps Test issues those revokes with the client token, reports each
+      failure via Error, and warns once per secret whose revocation failed.
+    codeRefs:
+    - function:bffd13ce92560f7f603ce10ee047ee20
+  - id: r.self-test-harness
+    level: MUST
+    text: The package's own tests set the testTesting flag and export TestEnvVar in
+      init so that Test bypasses the verbose-flag requirement, and cover that an acceptance
+      case is skipped when the environment variable is empty and that PreCheck is
+      invoked.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/testhelpers/logical/testing_test.go
+    - function:bffd13ce92560f7f603ce10ee047ee20
+  - id: r.step-request-construction
+    level: MUST
+    text: For each TestStep in order Test builds a logical.Request from Operation,
+      Path and Data, attaches the client token and a token entry carrying the caller's
+      policies and display name unless Unauthenticated is set, and sets the connection
+      remote address and, when supplied, the TLS connection state.
+    codeRefs:
+    - function:bffd13ce92560f7f603ce10ee047ee20
+    - struct:fb096eccbfe3cd67a0e4949561fc3547
+  - id: r.testt-interface
+    level: MUST
+    text: TestT is the minimal test lifecycle interface Test depends on, exposing
+      Error, Fatal and Skip, each taking variadic any arguments, so that a *testing.T
+      satisfies it directly.
+    codeRefs:
+    - interface:bb6cef46389f1ee5b5a5900d954b01d1
+    - method:425312cce9d5b75d3123ebc65d448360
+    - method:842a7c7dc646c071981348a46260ce6f
+    - method:b089c93bc4f74798cb2908fae828ed1e
+  interfaces:
+  - name: PreFlightFunc
+    kind: type_alias
+    signature: type PreFlightFunc func(*logical.Request) error
+    file: third_party/openbao/internal/helper/testhelpers/logical/testing.go
+  - name: Test
+    kind: function
+    signature: func Test(tt TestT, c TestCase)
+    file: third_party/openbao/internal/helper/testhelpers/logical/testing.go
+  - name: TestCase
+    kind: struct
+    signature: type TestCase struct
+    file: third_party/openbao/internal/helper/testhelpers/logical/testing.go
+  - name: TestCheckAuth
+    kind: function
+    signature: func TestCheckAuth(policies []string) TestCheckFunc
+    file: third_party/openbao/internal/helper/testhelpers/logical/testing.go
+  - name: TestCheckAuthDisplayName
+    kind: function
+    signature: func TestCheckAuthDisplayName(n string) TestCheckFunc
+    file: third_party/openbao/internal/helper/testhelpers/logical/testing.go
+  - name: TestCheckAuthEntityAliasMetadataName
+    kind: function
+    signature: func TestCheckAuthEntityAliasMetadataName(key string, value string)
+      TestCheckFunc
+    file: third_party/openbao/internal/helper/testhelpers/logical/testing.go
+  - name: TestCheckAuthEntityId
+    kind: function
+    signature: func TestCheckAuthEntityId(entity_id *string) TestCheckFunc
+    file: third_party/openbao/internal/helper/testhelpers/logical/testing.go
+  - name: TestCheckError
+    kind: function
+    signature: func TestCheckError() TestCheckFunc
+    file: third_party/openbao/internal/helper/testhelpers/logical/testing.go
+  - name: TestCheckFunc
+    kind: type_alias
+    signature: type TestCheckFunc func(*logical.Response) error
+    file: third_party/openbao/internal/helper/testhelpers/logical/testing.go
+  - name: TestCheckMulti
+    kind: function
+    signature: func TestCheckMulti(fs ...TestCheckFunc) TestCheckFunc
+    file: third_party/openbao/internal/helper/testhelpers/logical/testing.go
+  - name: TestStep
+    kind: struct
+    signature: type TestStep struct
+    file: third_party/openbao/internal/helper/testhelpers/logical/testing.go
+  - name: TestT
+    kind: interface
+    signature: type TestT interface
+    file: third_party/openbao/internal/helper/testhelpers/logical/testing.go
+  - name: TestT.Error
+    kind: method
+    signature: Error(args ...any)
+    file: third_party/openbao/internal/helper/testhelpers/logical/testing.go
+  - name: TestT.Fatal
+    kind: method
+    signature: Fatal(args ...any)
+    file: third_party/openbao/internal/helper/testhelpers/logical/testing.go
+  - name: TestT.Skip
+    kind: method
+    signature: Skip(args ...any)
+    file: third_party/openbao/internal/helper/testhelpers/logical/testing.go
+  - name: TestTeardownFunc
+    kind: type_alias
+    signature: type TestTeardownFunc func() error
+    file: third_party/openbao/internal/helper/testhelpers/logical/testing.go
 codeRefIndex:
 - file:third_party/openbao/internal/helper/testhelpers/logical/testing.go testing.go@third_party/openbao/internal/helper/testhelpers/logical/testing.go
 - file:third_party/openbao/internal/helper/testhelpers/logical/testing_test.go testing_test.go@third_party/openbao/internal/helper/testhelpers/logical/testing_test.go
@@ -18,242 +257,3 @@ codeRefIndex:
 - type_alias:0c2e15b296c540f7fcff7d28556d2bdf TestTeardownFunc@third_party/openbao/internal/helper/testhelpers/logical/testing.go:109
 - type_alias:6819a5fbd56c1ee5bafdf6dfc35adf4e TestCheckFunc@third_party/openbao/internal/helper/testhelpers/logical/testing.go:102
 - type_alias:aafde25e3c87edcaa92ae2bb32d677dd PreFlightFunc@third_party/openbao/internal/helper/testhelpers/logical/testing.go:106
-kind: SystemContext
-metadata:
-  name: third-party-openbao-internal-helper-testhelpers-logical
-  namespace: default
-spec:
-  intent: 'This context exists so that OpenBao backend authors can write declarative
-    acceptance and unit tests without standing up a server: a TestCase names the backend
-    or factory, a list of TestStep requests, optional check callbacks, teardown and
-    acceptance gating, and Test turns that description into a real in-memory core
-    plus HTTP client run. It also centralizes the common assertions used across backend
-    tests, so policy, entity, alias-metadata, display-name and error expectations
-    are expressed once as composable TestCheckFunc values rather than repeated inline.'
-  interfaces:
-  - file: third_party/openbao/internal/helper/testhelpers/logical/testing.go
-    kind: type_alias
-    name: PreFlightFunc
-    signature: type PreFlightFunc func(*logical.Request) error
-  - file: third_party/openbao/internal/helper/testhelpers/logical/testing.go
-    kind: function
-    name: Test
-    signature: func Test(tt TestT, c TestCase)
-  - file: third_party/openbao/internal/helper/testhelpers/logical/testing.go
-    kind: struct
-    name: TestCase
-    signature: type TestCase struct
-  - file: third_party/openbao/internal/helper/testhelpers/logical/testing.go
-    kind: function
-    name: TestCheckAuth
-    signature: func TestCheckAuth(policies []string) TestCheckFunc
-  - file: third_party/openbao/internal/helper/testhelpers/logical/testing.go
-    kind: function
-    name: TestCheckAuthDisplayName
-    signature: func TestCheckAuthDisplayName(n string) TestCheckFunc
-  - file: third_party/openbao/internal/helper/testhelpers/logical/testing.go
-    kind: function
-    name: TestCheckAuthEntityAliasMetadataName
-    signature: func TestCheckAuthEntityAliasMetadataName(key string, value string)
-      TestCheckFunc
-  - file: third_party/openbao/internal/helper/testhelpers/logical/testing.go
-    kind: function
-    name: TestCheckAuthEntityId
-    signature: func TestCheckAuthEntityId(entity_id *string) TestCheckFunc
-  - file: third_party/openbao/internal/helper/testhelpers/logical/testing.go
-    kind: function
-    name: TestCheckError
-    signature: func TestCheckError() TestCheckFunc
-  - file: third_party/openbao/internal/helper/testhelpers/logical/testing.go
-    kind: type_alias
-    name: TestCheckFunc
-    signature: type TestCheckFunc func(*logical.Response) error
-  - file: third_party/openbao/internal/helper/testhelpers/logical/testing.go
-    kind: function
-    name: TestCheckMulti
-    signature: func TestCheckMulti(fs ...TestCheckFunc) TestCheckFunc
-  - file: third_party/openbao/internal/helper/testhelpers/logical/testing.go
-    kind: struct
-    name: TestStep
-    signature: type TestStep struct
-  - file: third_party/openbao/internal/helper/testhelpers/logical/testing.go
-    kind: interface
-    name: TestT
-    signature: type TestT interface
-  - file: third_party/openbao/internal/helper/testhelpers/logical/testing.go
-    kind: method
-    name: TestT.Error
-    signature: Error(args ...any)
-  - file: third_party/openbao/internal/helper/testhelpers/logical/testing.go
-    kind: method
-    name: TestT.Fatal
-    signature: Fatal(args ...any)
-  - file: third_party/openbao/internal/helper/testhelpers/logical/testing.go
-    kind: method
-    name: TestT.Skip
-    signature: Skip(args ...any)
-  - file: third_party/openbao/internal/helper/testhelpers/logical/testing.go
-    kind: type_alias
-    name: TestTeardownFunc
-    signature: type TestTeardownFunc func() error
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/testhelpers/logical/testing.go
-    - function:bffd13ce92560f7f603ce10ee047ee20
-    - struct:42b7ba778cae62abfc0b1f01a496645d
-    id: r.acceptance-gate
-    level: MUST
-    text: A TestCase with AcceptanceTest set is skipped with a message naming the
-      environment variable behind TestEnvVar (VAULT_ACC) when that variable is empty,
-      and is failed with the message "Acceptance tests must be run with the -v flag
-      on tests" when the test binary was not run verbosely, unless the package-level
-      testTesting flag is set.
-  - codeRefs:
-    - function:bffd13ce92560f7f603ce10ee047ee20
-    - struct:42b7ba778cae62abfc0b1f01a496645d
-    id: r.backend-exclusivity
-    level: MUST
-    text: A TestCase must supply at least one of LogicalBackend, LogicalFactory, CredentialBackend
-      or CredentialFactory, otherwise Test fails with "Must provide either Backend
-      or Factory"; supplying both a logical and a credential backend or factory fails
-      with "Must provide only one backend or factory".
-  - codeRefs:
-    - function:ba52f6c4a067d64ec3f41d8f0cb9b40b
-    - type_alias:6819a5fbd56c1ee5bafdf6dfc35adf4e
-    id: r.check-auth-alias-metadata-name
-    level: MUST
-    text: TestCheckAuthEntityAliasMetadataName requires both a key and a value, errors
-      when either is empty, errors when the response auth alias metadata lacks the
-      key, and errors when the stored value differs from the expected value.
-  - codeRefs:
-    - function:feb22204fb8b660a02cc6302e79cc00f
-    - type_alias:6819a5fbd56c1ee5bafdf6dfc35adf4e
-    id: r.check-auth-display-name
-    level: MUST
-    text: TestCheckAuthDisplayName errors with "no auth in response" when the response
-      auth is nil, and when the supplied name is non-empty errors unless the auth
-      display name equals that name prefixed with "mnt-".
-  - codeRefs:
-    - function:30e4c22b07e82e6ed3371e56228472b0
-    - type_alias:6819a5fbd56c1ee5bafdf6dfc35adf4e
-    id: r.check-auth-entity-id
-    level: MUST
-    text: 'TestCheckAuthEntityId takes a pointer to the expected entity id: when that
-      pointer holds the empty string the check stores the response entity id back
-      through the pointer, otherwise it errors unless the response entity id equals
-      the expected value; a missing auth errors with "no auth in response".'
-  - codeRefs:
-    - function:a80e7283afe4d3b00db7cdb9277c523e
-    - type_alias:6819a5fbd56c1ee5bafdf6dfc35adf4e
-    id: r.check-auth-policies
-    level: MUST
-    text: TestCheckAuth returns a check that errors with "no auth in response" when
-      the response or its Auth is nil, and otherwise compares the response policies
-      against the expected policy set ignoring order, erroring with the expected and
-      actual sets when they differ.
-  - codeRefs:
-    - function:cfa4fd6a7923e62a0c7d721eb201d1c6
-    - type_alias:6819a5fbd56c1ee5bafdf6dfc35adf4e
-    id: r.check-error
-    level: MUST
-    text: TestCheckError returns a check that fails with "response should be error"
-      unless the response reports itself as an error.
-  - codeRefs:
-    - function:a03a0460ecaa1c5d0d39aad2d070181b
-    - type_alias:6819a5fbd56c1ee5bafdf6dfc35adf4e
-    id: r.check-multi
-    level: MUST
-    text: TestCheckMulti composes any number of TestCheckFunc values into one that
-      runs them in order against the same response and returns the first error, or
-      nil when all pass.
-  - codeRefs:
-    - function:bffd13ce92560f7f603ce10ee047ee20
-    - interface:bb6cef46389f1ee5b5a5900d954b01d1
-    id: r.core-lifecycle
-    level: MUST
-    text: Test creates an in-memory physical backend and a Vault core with a mock
-      builtin registry, initializes it with one secret share and threshold one, unseals
-      it with that share, starts an HTTP test server, and builds an API client whose
-      token is the init root token; any failure at these points aborts the case via
-      Fatal.
-  - codeRefs:
-    - function:bffd13ce92560f7f603ce10ee047ee20
-    - struct:fb096eccbfe3cd67a0e4949561fc3547
-    - type_alias:6819a5fbd56c1ee5bafdf6dfc35adf4e
-    id: r.error-handling-and-check
-    level: MUST
-    text: A request error or a logical error response fails the step with the step
-      number unless TestStep.ErrorOk is set, in which case the error is discarded;
-      when no error remains and TestStep.Check is set the check func is called with
-      the response and its error, if any, fails the step and ends the loop.
-  - codeRefs:
-    - function:bffd13ce92560f7f603ce10ee047ee20
-    - struct:fb096eccbfe3cd67a0e4949561fc3547
-    id: r.mount-prefix-and-auth-prefix
-    level: MUST
-    text: Test mounts a logical backend, or enables a credential backend, under the
-      prefix "mnt", and prepends that prefix to every step path; for credential backends
-      the path additionally gains an "auth/" prefix.
-  - codeRefs:
-    - function:bffd13ce92560f7f603ce10ee047ee20
-    - struct:42b7ba778cae62abfc0b1f01a496645d
-    - type_alias:0c2e15b296c540f7fcff7d28556d2bdf
-    id: r.precheck-and-teardown
-    level: MUST
-    text: Test calls TestCase.PreCheck once before anything else when it is non-nil,
-      and defers TestCase.Teardown so it runs before the test case ends whether the
-      case passed or failed.
-  - codeRefs:
-    - function:bffd13ce92560f7f603ce10ee047ee20
-    - struct:fb096eccbfe3cd67a0e4949561fc3547
-    - type_alias:aafde25e3c87edcaa92ae2bb32d677dd
-    id: r.preflight
-    level: MUST
-    text: When TestStep.PreFlight is set, Test clears the request client token, calls
-      the PreFlight func with the request so path or parameters can be rewritten,
-      restores the token, and stops the step loop reporting the step number if PreFlight
-      returns an error.
-  - codeRefs:
-    - function:bffd13ce92560f7f603ce10ee047ee20
-    id: r.rollback
-    level: MUST
-    text: After the steps Test requests a rollback for the mount path, using the "auth/"
-      prefixed path for credential backends, and reports the rollback error unless
-      it wraps logical.ErrUnsupportedOperation.
-  - codeRefs:
-    - function:bffd13ce92560f7f603ce10ee047ee20
-    id: r.secret-revocation
-    level: MUST
-    text: Every step response carrying a Secret queues a revoke request against "sys/leases/revoke/<LeaseID>";
-      after the steps Test issues those revokes with the client token, reports each
-      failure via Error, and warns once per secret whose revocation failed.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/testhelpers/logical/testing_test.go
-    - function:bffd13ce92560f7f603ce10ee047ee20
-    id: r.self-test-harness
-    level: MUST
-    text: The package's own tests set the testTesting flag and export TestEnvVar in
-      init so that Test bypasses the verbose-flag requirement, and cover that an acceptance
-      case is skipped when the environment variable is empty and that PreCheck is
-      invoked.
-  - codeRefs:
-    - function:bffd13ce92560f7f603ce10ee047ee20
-    - struct:fb096eccbfe3cd67a0e4949561fc3547
-    id: r.step-request-construction
-    level: MUST
-    text: For each TestStep in order Test builds a logical.Request from Operation,
-      Path and Data, attaches the client token and a token entry carrying the caller's
-      policies and display name unless Unauthenticated is set, and sets the connection
-      remote address and, when supplied, the TLS connection state.
-  - codeRefs:
-    - interface:bb6cef46389f1ee5b5a5900d954b01d1
-    - method:425312cce9d5b75d3123ebc65d448360
-    - method:842a7c7dc646c071981348a46260ce6f
-    - method:b089c93bc4f74798cb2908fae828ed1e
-    id: r.testt-interface
-    level: MUST
-    text: TestT is the minimal test lifecycle interface Test depends on, exposing
-      Error, Fatal and Skip, each taking variadic any arguments, so that a *testing.T
-      satisfies it directly.
-  upstream: self

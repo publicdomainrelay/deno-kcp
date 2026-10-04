@@ -1,13 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- class:655bb55c9ae5c9a164f5fc0c955e7c08 OidcClientController@third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client.js:10
-- file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client.js
-  client.js@third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-clients
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: This context exists to pin down the observable contract of the OIDC client
     detail controller in the vendored OpenBao UI, so the route-observation behavior
     and the header-visibility rule cannot drift. It exists because the page header
@@ -16,45 +14,47 @@ spec:
     base class for instantiation by the router, on the injected router service as
     the source of route-change events, and on the @tracked decorator so isEditRoute
     changes invalidate templates.
-  interfaces:
-  - file: third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client.js
-    kind: class
-    name: OidcClientController
-    signature: class OidcClientController extends Controller
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - class:655bb55c9ae5c9a164f5fc0c955e7c08
-    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client.js
-    id: r.constructor-route-observer
+  - id: r.constructor-route-observer
     level: MUST
     text: The constructor must call super with the forwarded arguments and register
       a handler on the injected router's 'routeDidChange' event; the handler reads
       the event's targetName and sets isEditRoute to true when targetName includes
       the substring 'edit', and false otherwise.
-  - codeRefs:
+    codeRefs:
     - class:655bb55c9ae5c9a164f5fc0c955e7c08
     - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client.js
-    id: r.default-export-controller
+  - id: r.default-export-controller
     level: MUST
     text: The file third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client.js
       must export as its default export a class OidcClientController that extends
       Ember's Controller base class, so the router can instantiate it as the controller
       for the OIDC client route.
-  - codeRefs:
+    codeRefs:
     - class:655bb55c9ae5c9a164f5fc0c955e7c08
     - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client.js
-    id: r.router-service-injection
+  - id: r.router-service-injection
     level: MUST
     text: OidcClientController must inject the Ember router service via the @service
       decorator into a property named router, and must declare isEditRoute as a @tracked
       property, so route changes are observable by templates.
-  - codeRefs:
+    codeRefs:
     - class:655bb55c9ae5c9a164f5fc0c955e7c08
     - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client.js
-    id: r.show-header-getter
+  - id: r.show-header-getter
     level: MUST
     text: OidcClientController must expose a showHeader getter that returns the boolean
       negation of isEditRoute, so the header is hidden whenever the current route
       is the edit route.
-  upstream: self
+    codeRefs:
+    - class:655bb55c9ae5c9a164f5fc0c955e7c08
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client.js
+  interfaces:
+  - name: OidcClientController
+    kind: class
+    signature: class OidcClientController extends Controller
+    file: third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client.js
+codeRefIndex:
+- class:655bb55c9ae5c9a164f5fc0c955e7c08 OidcClientController@third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client.js:10
+- file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client.js
+  client.js@third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client.js

@@ -1,21 +1,18 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/internal/builtin/logical/transit/cmd/transit/main.go main.go@third_party/openbao/internal/builtin/logical/transit/cmd/transit/main.go
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-builtin-logical-transit-cmd-transit
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: The context exists so the transit logical backend can be built and run as
     a standalone multiplexed plugin process rather than being linked into a server.
     It separates process wiring, argument and TLS handling from the backend logic
     in the transit package, and it deliberately sets TLSProviderFunc so the plugin
     keeps backwards compatibility with Vault versions that do not support plugin AutoMTLS.
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/transit/cmd/transit/main.go
-    id: r.configuration-surface-is-inherited-flag-set
+  - id: r.configuration-surface-is-inherited-flag-set
     level: MUST
     text: 'main defines no flags of its own: the whole configuration surface is the
       flag set registered by api.PluginAPIClientMeta.FlagSet() and parsed from os.Args[1:],
@@ -24,32 +21,35 @@ spec:
       VAULT_CLIENT_CERT, VAULT_CLIENT_KEY and VAULT_TLS_SERVER_NAME environment variables),
       and when a flag is absent the value registered by that flag set, including its
       environment lookup, applies.'
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/builtin/logical/transit/cmd/transit/main.go
-    id: r.exits-nonzero-on-serve-failure
+  - id: r.exits-nonzero-on-serve-failure
     level: MUST
     text: When plugin.ServeMultiplex returns an error, main must create an hclog logger,
       log the failure as "plugin shutting down" with the error attached, and call
       os.Exit(1).
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/builtin/logical/transit/cmd/transit/main.go
-    id: r.parses-plugin-api-client-flags
+  - id: r.parses-plugin-api-client-flags
     level: MUST
     text: main must build an api.PluginAPIClientMeta, take its FlagSet and parse os.Args[1:]
       into it, so plugin API client options reach the process from the command line.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/builtin/logical/transit/cmd/transit/main.go
-    id: r.provides-tls-config-to-plugin
+  - id: r.provides-tls-config-to-plugin
     level: MUST
     text: main must read the TLS configuration with apiClientMeta.GetTLSConfig() and
       set it as ServeOpts.TLSProviderFunc through api.VaultPluginTLSProvider, so the
       plugin keeps backwards compatibility with Vault versions that do not support
       plugin AutoMTLS.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/builtin/logical/transit/cmd/transit/main.go
-    id: r.serves-transit-factory-as-plugin
+  - id: r.serves-transit-factory-as-plugin
     level: MUST
     text: main must start the transit backend through plugin.ServeMultiplex, passing
       transit.Factory as BackendFactoryFunc, so the transit logical backend is served
       as a multiplexed plugin process.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/transit/cmd/transit/main.go
+codeRefIndex:
+- file:third_party/openbao/internal/builtin/logical/transit/cmd/transit/main.go main.go@third_party/openbao/internal/builtin/logical/transit/cmd/transit/main.go

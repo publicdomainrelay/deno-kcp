@@ -1,17 +1,20 @@
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: c549b22b03df93f5f82ba899cb117b6ad792c9a437a5a0cef1d621dda975f825
+realizedSpecHash: d23b5824e85338914ab05e42fb8df322c459ccc142f3403b62388018ec5eff22
 conditions:
-- message: 'undeclared: KubernetesConfigureRoute, KubernetesErrorRoute, KubernetesOverviewRoute,
-    KubernetesRoute'
+- type: CodeSynced
+  status: "False"
   reason: InterfacesMissing
+  message: 'undeclared: KubernetesConfigureRoute, KubernetesErrorRoute, KubernetesOverviewRoute,
+    KubernetesRoute'
+- type: Drifted
   status: "False"
-  type: CodeSynced
-- message: observed facts match the synced fingerprint
   reason: FingerprintEqual
-  status: "False"
-  type: Drifted
-- message: the spec passes the validator
-  reason: ValidatorPassed
+  message: observed facts match the synced fingerprint
+- type: SpecValid
   status: "True"
-  type: SpecValid
+  reason: ValidatorPassed
+  message: the spec passes the validator
 observed:
   files:
   - third_party/openbao/ui/lib/kubernetes/addon/routes/configuration.js
@@ -19,28 +22,25 @@ observed:
   - third_party/openbao/ui/lib/kubernetes/addon/routes/error.js
   - third_party/openbao/ui/lib/kubernetes/addon/routes/index.js
   - third_party/openbao/ui/lib/kubernetes/addon/routes/overview.js
-  fingerprint: c549b22b03df93f5f82ba899cb117b6ad792c9a437a5a0cef1d621dda975f825
   interfaces:
-  - codegraphId: class:005fb3b3d669c18102a320d19bb1e2ec
+  - name: KubernetesConfigureRoute
+    kind: class
     file: third_party/openbao/ui/lib/kubernetes/addon/routes/configuration.js
-    kind: class
     line: 11
-    name: KubernetesConfigureRoute
-  - codegraphId: class:da37f3b8e5710b872f319338d903e5ce
+    codegraphId: class:005fb3b3d669c18102a320d19bb1e2ec
+  - name: KubernetesErrorRoute
+    kind: class
     file: third_party/openbao/ui/lib/kubernetes/addon/routes/error.js
-    kind: class
     line: 9
-    name: KubernetesErrorRoute
-  - codegraphId: class:7fa40d099d6909fc139f589ff65cbfb4
+    codegraphId: class:da37f3b8e5710b872f319338d903e5ce
+  - name: KubernetesRoute
+    kind: class
     file: third_party/openbao/ui/lib/kubernetes/addon/routes/index.js
-    kind: class
     line: 9
-    name: KubernetesRoute
-  - codegraphId: class:6de79edfc46b4212daf56aa97e371733
-    file: third_party/openbao/ui/lib/kubernetes/addon/routes/overview.js
+    codegraphId: class:7fa40d099d6909fc139f589ff65cbfb4
+  - name: KubernetesOverviewRoute
     kind: class
+    file: third_party/openbao/ui/lib/kubernetes/addon/routes/overview.js
     line: 12
-    name: KubernetesOverviewRoute
-realizedSpecHash: d23b5824e85338914ab05e42fb8df322c459ccc142f3403b62388018ec5eff22
-syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-syncedFingerprint: c549b22b03df93f5f82ba899cb117b6ad792c9a437a5a0cef1d621dda975f825
+    codegraphId: class:6de79edfc46b4212daf56aa97e371733
+  fingerprint: c549b22b03df93f5f82ba899cb117b6ad792c9a437a5a0cef1d621dda975f825

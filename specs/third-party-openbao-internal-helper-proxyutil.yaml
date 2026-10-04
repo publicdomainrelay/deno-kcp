@@ -1,14 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/internal/helper/proxyutil/proxyutil.go proxyutil.go@third_party/openbao/internal/helper/proxyutil/proxyutil.go
-- function:bc8a41e1f897c27f5611df7fa195c96f WrapInProxyProto@third_party/openbao/internal/helper/proxyutil/proxyutil.go:39
-- method:16304eba8afdeca2dfd5b2edf506aedf ProxyProtoConfig.SetAuthorizedAddrs@third_party/openbao/internal/helper/proxyutil/proxyutil.go:25
-- struct:5d637bf772e385dfacc87f0d9ea70390 ProxyProtoConfig@third_party/openbao/internal/helper/proxyutil/proxyutil.go:19
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-helper-proxyutil
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: This context exists to describe the vendored OpenBao PROXY protocol listener
     helper that this repository carries under third_party. It is the seam between
     a raw listener and a listener that understands the PROXY protocol line sent by
@@ -17,86 +14,89 @@ spec:
     three accepted behavior values, the trust decision made per connection, and the
     failure modes, so downstream wiring that configures proxy_protocol_behavior and
     authorized_addrs can be reasoned about without reading the vendored file.
-  interfaces:
-  - file: third_party/openbao/internal/helper/proxyutil/proxyutil.go
-    kind: struct
-    name: ProxyProtoConfig
-    signature: type ProxyProtoConfig struct { sync.RWMutex; Behavior string; AuthorizedAddrs
-      []*sockaddr.SockAddrMarshaler `json:"authorized_addrs"` }
-  - file: third_party/openbao/internal/helper/proxyutil/proxyutil.go
-    kind: method
-    name: ProxyProtoConfig.SetAuthorizedAddrs
-    signature: func (p *ProxyProtoConfig) SetAuthorizedAddrs(addrs any) error
-  - file: third_party/openbao/internal/helper/proxyutil/proxyutil.go
-    kind: function
-    name: WrapInProxyProto
-    signature: func WrapInProxyProto(listener net.Listener, config *ProxyProtoConfig)
-      (net.Listener, error)
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - struct:5d637bf772e385dfacc87f0d9ea70390
-    id: r.authorized-addrs-json
+  - id: r.authorized-addrs-json
     level: SHOULD
     text: AuthorizedAddrs should stay serializable as the json field "authorized_addrs"
       holding sockaddr.SockAddrMarshaler pointers, so the authorized address list
       survives a config round trip.
-  - codeRefs:
-    - function:bc8a41e1f897c27f5611df7fa195c96f
+    codeRefs:
     - struct:5d637bf772e385dfacc87f0d9ea70390
-    id: r.authorized-match-uses
+  - id: r.authorized-match-uses
     level: MUST
     text: Within that Policy, if any entry of ProxyProtoConfig.AuthorizedAddrs Contains
       the parsed remote address, the Policy must return proxyproto.USE, so the PROXY
       header is trusted.
-  - codeRefs:
+    codeRefs:
     - function:bc8a41e1f897c27f5611df7fa195c96f
-    id: r.authorized-policy-parse
+    - struct:5d637bf772e385dfacc87f0d9ea70390
+  - id: r.authorized-policy-parse
     level: MUST
     text: For Behavior allow_authorized or deny_unauthorized, WrapInProxyProto must
       set a Policy that parses the remote address with sockaddr.NewSockAddr; when
       that parse fails the Policy returns proxyproto.REJECT and an error wrapping
       the failure as "error parsing remote address".
-  - codeRefs:
+    codeRefs:
     - function:bc8a41e1f897c27f5611df7fa195c96f
-    - struct:5d637bf772e385dfacc87f0d9ea70390
-    id: r.behavior-dispatch
+  - id: r.behavior-dispatch
     level: MUST
     text: WrapInProxyProto must dispatch on ProxyProtoConfig.Behavior. The accepted
       values are use_always, allow_authorized and deny_unauthorized; any other value
       must return the original listener unchanged together with an error whose text
       is "unknown behavior type for proxy proto config".
-  - codeRefs:
+    codeRefs:
     - function:bc8a41e1f897c27f5611df7fa195c96f
     - struct:5d637bf772e385dfacc87f0d9ea70390
-    id: r.config-locking
+  - id: r.config-locking
     level: MUST
     text: WrapInProxyProto must hold the config write lock for the duration of the
       call, and the installed Policy must take the config read lock around its reads
       of Behavior and AuthorizedAddrs, so that SetAuthorizedAddrs can update the list
       while the listener is serving.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/proxyutil/proxyutil.go
-    - method:16304eba8afdeca2dfd5b2edf506aedf
+    codeRefs:
+    - function:bc8a41e1f897c27f5611df7fa195c96f
     - struct:5d637bf772e385dfacc87f0d9ea70390
-    id: r.parse-authorized-addrs
+  - id: r.parse-authorized-addrs
     level: MUST
     text: ProxyProtoConfig.SetAuthorizedAddrs must parse its argument with parseutil.ParseAddrs
       and assign the result to the AuthorizedAddrs field. When parsing fails it must
       return that error and leave the existing AuthorizedAddrs value unchanged; on
       success it returns nil.
-  - codeRefs:
-    - function:bc8a41e1f897c27f5611df7fa195c96f
-    id: r.unmatched-fallback
+    codeRefs:
+    - file:third_party/openbao/internal/helper/proxyutil/proxyutil.go
+    - method:16304eba8afdeca2dfd5b2edf506aedf
+    - struct:5d637bf772e385dfacc87f0d9ea70390
+  - id: r.unmatched-fallback
     level: MUST
     text: Within that Policy, an address not covered by AuthorizedAddrs must return
       proxyproto.IGNORE when Behavior is allow_authorized, and proxyproto.REJECT with
       an error when Behavior is deny_unauthorized.
-  - codeRefs:
+    codeRefs:
     - function:bc8a41e1f897c27f5611df7fa195c96f
-    id: r.use-always
+  - id: r.use-always
     level: MUST
     text: For Behavior use_always, WrapInProxyProto must return a proxyproto.Listener
       over the given listener with ReadHeaderTimeout set to 10 seconds and no Policy,
       so PROXY headers are accepted unconditionally.
-  upstream: self
+    codeRefs:
+    - function:bc8a41e1f897c27f5611df7fa195c96f
+  interfaces:
+  - name: ProxyProtoConfig
+    kind: struct
+    signature: type ProxyProtoConfig struct { sync.RWMutex; Behavior string; AuthorizedAddrs
+      []*sockaddr.SockAddrMarshaler `json:"authorized_addrs"` }
+    file: third_party/openbao/internal/helper/proxyutil/proxyutil.go
+  - name: ProxyProtoConfig.SetAuthorizedAddrs
+    kind: method
+    signature: func (p *ProxyProtoConfig) SetAuthorizedAddrs(addrs any) error
+    file: third_party/openbao/internal/helper/proxyutil/proxyutil.go
+  - name: WrapInProxyProto
+    kind: function
+    signature: func WrapInProxyProto(listener net.Listener, config *ProxyProtoConfig)
+      (net.Listener, error)
+    file: third_party/openbao/internal/helper/proxyutil/proxyutil.go
+codeRefIndex:
+- file:third_party/openbao/internal/helper/proxyutil/proxyutil.go proxyutil.go@third_party/openbao/internal/helper/proxyutil/proxyutil.go
+- function:bc8a41e1f897c27f5611df7fa195c96f WrapInProxyProto@third_party/openbao/internal/helper/proxyutil/proxyutil.go:39
+- method:16304eba8afdeca2dfd5b2edf506aedf ProxyProtoConfig.SetAuthorizedAddrs@third_party/openbao/internal/helper/proxyutil/proxyutil.go:25
+- struct:5d637bf772e385dfacc87f0d9ea70390 ProxyProtoConfig@third_party/openbao/internal/helper/proxyutil/proxyutil.go:19

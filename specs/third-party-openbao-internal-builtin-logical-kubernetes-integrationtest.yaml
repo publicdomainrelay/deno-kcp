@@ -1,18 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/creds_integration_test.go
-  creds_integration_test.go@third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/creds_integration_test.go
-- file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/helpers.go
-  helpers.go@third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/helpers.go
-- file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/integration_test.go
-  integration_test.go@third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/integration_test.go
-- file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/wal_rollback_test.go
-  wal_rollback_test.go@third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/wal_rollback_test.go
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-builtin-logical-kubernetes-integrationtest
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'The context exists so the Kubernetes secrets engine can be tested end to
     end against a live cluster instead of in isolation: it configures the backend,
     writes roles, requests credentials, then reads the resulting Kubernetes objects
@@ -23,127 +16,124 @@ spec:
     after its minimum age. The environment contract (kubectl version, cluster namespace,
     CA, host, super and broken JWTs) is established once in `TestMain` so every test
     shares it.'
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/creds_integration_test.go
-    id: r.audience-handling
+  - id: r.audience-handling
     level: MUST
     text: TestCreds_audiences must verify the audiences configured on the role reach
       the issued Kubernetes token, decoding the JWT and comparing its audience claim
       with the expected list.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/helpers.go
-    id: r.creds-response-shape
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/creds_integration_test.go
+  - id: r.creds-response-shape
     level: MUST
     text: verifyCredsResponse and verifyCredsResponseGenerated must assert the creds
       secret reports the expected LeaseDuration, Renewable false, and that service_account_name
       and service_account_namespace match the request (the generated variant only
       requires the name to contain the requested value).
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/helpers.go
-    id: r.k8s-client-from-env
+  - id: r.k8s-client-from-env
     level: MUST
     text: Helper newK8sClient must build a `kubernetes.Interface` from a rest.Config
       whose Host comes from KUBE_HOST, whose CAData comes from KUBERNETES_CA, and
       whose BearerToken is the passed token, failing the test when client construction
       errors.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/integration_test.go
-    id: r.kubectl-version-floor
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/helpers.go
+  - id: r.kubectl-version-floor
     level: MUST
     text: TestMain must verify the installed kubectl before running tests and panic
       when its client GitVersion is less than v1.24.0, because the tests use `kubectl
       create token`.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/integration_test.go
-    id: r.mount-and-namespace-helpers
+  - id: r.mount-and-namespace-helpers
     level: MUST
     text: mountHelper must mount the Kubernetes secrets engine at a unique random
       path and return that path with a cleanup function, and namespaceHelper must
       create a fresh Kubernetes namespace via the backend and return a client scoped
       to it plus a delete function, so each test gets isolated state.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/creds_integration_test.go
-    id: r.namespace-selection-rules
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/integration_test.go
+  - id: r.namespace-selection-rules
     level: MUST
     text: 'TestCreds_kubernetes_namespace must table-drive namespace acceptance: a
       wildcard or single allowed namespace with a matching or omitted kubernetes_namespace
       succeeds, while a wildcard with kubernetes_namespace omitted, a namespace selector
       that does not match, or more than one allowed namespace with kubernetes_namespace
       omitted must make creds creation fail.'
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/integration_test.go
-    id: r.opt-in-gate
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/creds_integration_test.go
+  - id: r.opt-in-gate
     level: MUST
     text: 'The package must run nothing unless the INTEGRATION_TESTS environment variable
       is non-empty: TestMain checks it and only then proceeds to `m.Run`, so an unset
       variable leaves the suite a no-op.'
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/wal_rollback_test.go
-    id: r.polling-backoff
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/integration_test.go
+  - id: r.polling-backoff
     level: MUST
     text: checkObjects must retry its existence checks with exponential backoff whose
       Multiplier is set to 1 (no real backoff, to keep the test fast) bounded by a
       max elapsed time, and checkRoleExists, checkRoleBindingExists and checkServiceAccountExists
       must treat a nil list response as an error.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/helpers.go
-    id: r.rbac-object-verification
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/wal_rollback_test.go
+  - id: r.rbac-object-verification
     level: MUST
     text: verifyRole, verifyBinding and verifyServiceAccount must read the Role or
       ClusterRole, the RoleBinding or ClusterRoleBinding, and the ServiceAccount named
       by the creds response's service_account_name, and compare their labels, annotations,
       rules and subjects against the role configuration with standard labels merged
       in.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/integration_test.go
-    id: r.role-crud-round-trip
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/helpers.go
+  - id: r.role-crud-round-trip
     level: MAY
     text: TestConfig and the role tests in integration_test.go should confirm the
       config endpoint strips write-only fields on read, and that writing, updating,
       reading and listing a role returns the expected map including defaults for unset
       fields.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/creds_integration_test.go
-    id: r.role-type-and-rules-normalization
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/integration_test.go
+  - id: r.role-type-and-rules-normalization
     level: MUST
     text: TestCreds_generated_role_rules and TestCreds_kubernetes_role_name must assert
       generated_role_rules accepted as YAML or JSON is stored verbatim, that kubernetes_role_type
       is normalized case-insensitively to Role or ClusterRole, and that name_template
       and kubernetes_role_name round-trip through the roles endpoint.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/integration_test.go
-    id: r.testmain-environment-wiring
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/creds_integration_test.go
+  - id: r.testmain-environment-wiring
     level: MUST
     text: When INTEGRATION_TESTS is set, TestMain must set BAO_ADDR to http://127.0.0.1:38300
       and BAO_TOKEN to root, and must set KUBERNETES_CA, KUBE_HOST (derived from KIND_CLUSTER_NAME),
       SUPER_JWT and BROKEN_JWT from the cluster before running the tests.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/helpers.go
-    id: r.token-authorization-checks
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/integration_test.go
+  - id: r.token-authorization-checks
     level: MUST
     text: testRoleBindingToken and testClusterRoleBindingToken must use the issued
       service_account_token to list pods in its namespace (expecting success for the
       allowed count) and must confirm listing pods or deployments in the default namespace
       is forbidden; testTokenRevoked must confirm the token stops working after revocation.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/creds_integration_test.go
-    id: r.ttl-resolution
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/helpers.go
+  - id: r.ttl-resolution
     level: MUST
     text: 'TestCreds_ttl must assert the returned LeaseDuration follows: an explicit
       creds ttl wins, otherwise token_default_ttl applies, capped by token_max_ttl
       and by the system max TTL of 2764800 seconds, and must confirm the Kubernetes
       token''s own expiry matches the lease duration.'
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/integration_test.go
-    id: r.viability-endpoint
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/creds_integration_test.go
+  - id: r.viability-endpoint
     level: MUST
     text: TestCheckViability must read the mounted backend's `/check` endpoint raw
       and assert it answers HTTP 204 No Content.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/wal_rollback_test.go
-    id: r.wal-rollback-cleanup
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/integration_test.go
+  - id: r.wal-rollback-cleanup
     level: MUST
     text: TestCreds_wal_rollback must configure the mount with the BROKEN_JWT service
       account JWT, assert creds creation fails with a forbidden error naming the broken-jwt
@@ -151,10 +141,20 @@ spec:
       do exist immediately after the failure while the ServiceAccount never does,
       and that all created objects are gone once the WAL minimum age (10 seconds in
       tests) has passed.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/wal_rollback_test.go
-    id: r.wal-test-opt-in
+  - id: r.wal-test-opt-in
     level: MUST
     text: TestCreds_wal_rollback must skip when the K8S_WAL_TEST environment variable
       is not defined, so the rollback test is opt-in on top of the package gate.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/wal_rollback_test.go
+codeRefIndex:
+- file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/creds_integration_test.go
+  creds_integration_test.go@third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/creds_integration_test.go
+- file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/helpers.go
+  helpers.go@third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/helpers.go
+- file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/integration_test.go
+  integration_test.go@third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/integration_test.go
+- file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/wal_rollback_test.go
+  wal_rollback_test.go@third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/wal_rollback_test.go

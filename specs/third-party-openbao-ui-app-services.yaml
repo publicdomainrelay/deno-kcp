@@ -1,4 +1,244 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-ui-app-services
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'The context exists to describe the shared behavior that every route and
+    component in the OpenBao UI inherits from injected services, so a reader can reason
+    about path normalization, downloads, flash messaging, and the client-side query
+    cache without reading each template or route. It documents the contract of the
+    service layer: what each exported function and service method accepts, what side
+    effects it has on the browser, and what state it keeps between queries.'
+  requirements:
+  - id: r.download-extension-helpers
+    level: MUST
+    text: 'DownloadService exposes extension-specific conveniences that delegate to
+      download: csv passes csv, pem passes pem, and miscExtension passes a caller-supplied
+      extension, so callers never build the extension string or MIME type themselves.'
+    codeRefs:
+    - method:0d4b3ee147f38cd03ea91be129338068
+    - method:47d7d7e5d087ac0ef9513bbef7f1315b
+    - method:4f54f7642bf1a445c771a915fbe5efa6
+  - id: r.download-filename-mime
+    level: MUST
+    text: DownloadService.download builds the downloaded filename by replacing runs
+      of whitespace with hyphens and appending the extension; when the supplied filename
+      is empty it falls back to vault-data- followed by the current time in ISO 8601
+      form and the extension. It resolves the MIME type from the extension map and
+      falls back to text/plain for unknown extensions.
+    codeRefs:
+    - class:af275923a92a215608382fe97f2d8688
+    - method:553396a9b18635bfe20efb25b62687af
+  - id: r.download-side-effect
+    level: MUST
+    text: 'DownloadService.download performs the download through the browser DOM:
+      it creates a File from the content with the resolved MIME type, creates an anchor
+      element, sets its download and object URL href, appends it to the document body,
+      clicks it, revokes the object URL and removes the element, then returns the
+      formatted filename.'
+    codeRefs:
+    - file:third_party/openbao/ui/app/services/download.ts
+    - method:553396a9b18635bfe20efb25b62687af
+  - id: r.flash-messages-service
+    level: SHOULD
+    text: FlashMessageService is the application's flash message service, extending
+      the FlashMessages base class so components and routes can inject it under the
+      standard service name.
+    codeRefs:
+    - class:67c07d2c6e37cd165e8ed870559d4a05
+    - file:third_party/openbao/ui/app/services/flash-messages.ts
+  - id: r.path-normalization
+    level: MUST
+    text: 'Path helpers normalize operator input: sanitizePath removes surrounding
+      whitespace and strips all leading and trailing slashes from a path, and ensureTrailingSlash
+      appends a trailing slash to a path whose last segment ends in a word character.'
+    codeRefs:
+    - file:third_party/openbao/ui/app/services/console.js
+    - function:13427f18672747a5391378ed973ed72c
+    - function:1ccafafd972835ba6fc1aa854f9a8539
+  - id: r.store-dataset-lifecycle
+    level: MUST
+    text: 'The store caches query results as datasets keyed by model name and query:
+      storeDataset records a response for a model and query, optionally as an array,
+      getDataset reads it back, clearDataset drops every dataset for a model name,
+      and clearAllDatasets drops all cached datasets at once.'
+    codeRefs:
+    - function:170ada2c881e4ec2bd0421ea0ab6ae79
+    - function:462bf0f233dd05ba72aea4202092c4a5
+    - function:8126ae3de73956609cc9a5437da35520
+    - function:9eea2287c14c0ff7e08400fee8e94cc2
+  - id: r.store-lazy-caches
+    level: MUST
+    text: The store keeps a per-model lazy cache map that is created on first access;
+      setLazyCacheForModel writes a value under a model name and key, getLazyCacheForModel
+      reads it back, lazyCacheForModel returns the whole cache for a model, and lazyCaches
+      exposes the collection of all of them.
+    codeRefs:
+    - function:c5b6ec8dec93ae551039dd0b25c0bc5d
+    - function:c6141d39afac5de27458e8202f626ce7
+    - function:d38f98216d8dca73ed692421bcc7a205
+    - function:e62fc0bd114d913a87f99a9db56abc29
+  - id: r.store-model-name-key
+    level: MUST
+    text: The store normalizes a model name before use as a cache dimension and derives
+      a cache key from a query object, so that equivalent model and query inputs address
+      the same cached dataset entry.
+    codeRefs:
+    - file:third_party/openbao/ui/app/services/store.js
+    - function:6671fd9bfb9f840f19fce39ba116ac2c
+    - function:8d239422baacb069c43a54b81f511395
+  - id: r.store-pagination-query
+    level: MUST
+    text: The store runs paginated queries per model type, fetching a page for a model
+      name and query and assembling the response from cached or freshly fetched records,
+      with a filter step that narrows a dataset by the given filter.
+    codeRefs:
+    - function:221954b4abb9b85de706d8aa5bc37257
+    - function:39c2f6bbcb266757380c50615a00a1e0
+    - function:6d0ebc7db29f257eb139aad2cbea6b1b
+    - function:8336f37e1dc58f0cf182787323887f80
+  - id: r.store-unload
+    level: MUST
+    text: 'The store can release cached records without clearing datasets: unloadAll
+      unloads every cached record for a model name and unloadRecord unloads a single
+      record passed to it.'
+    codeRefs:
+    - function:1ed8b09033f376e25bfe671b5916cad1
+    - function:c3528d5b23da120dd766143027ca2a39
+  - id: r.supporting-services
+    level: MUST
+    text: 'The service layer also registers the remaining application services: authentication,
+      console, CSP event reporting, current cluster, host routing, namespace, permissions,
+      replication mode, secret mount path, path help generated item model and version,
+      each as its own module under app/services so routes can inject them independently.'
+    codeRefs:
+    - file:third_party/openbao/ui/app/services/auth.js
+    - file:third_party/openbao/ui/app/services/csp-event.js
+    - file:third_party/openbao/ui/app/services/current-cluster.js
+    - file:third_party/openbao/ui/app/services/host-router.js
+    - file:third_party/openbao/ui/app/services/namespace.js
+    - file:third_party/openbao/ui/app/services/path-help.js
+    - file:third_party/openbao/ui/app/services/permissions.js
+    - file:third_party/openbao/ui/app/services/replication-mode.js
+    - file:third_party/openbao/ui/app/services/secret-mount-path.js
+    - file:third_party/openbao/ui/app/services/version.js
+    - file:third_party/openbao/ui/app/services/wizard.js
+  interfaces:
+  - name: DownloadService
+    kind: class
+    signature: class DownloadService extends Service
+    file: third_party/openbao/ui/app/services/download.ts
+  - name: DownloadService.csv
+    kind: method
+    signature: 'csv(filename: string, content: string)'
+    file: third_party/openbao/ui/app/services/download.ts
+  - name: DownloadService.download
+    kind: method
+    signature: 'download(filename: string, content: string, extension: string)'
+    file: third_party/openbao/ui/app/services/download.ts
+  - name: DownloadService.miscExtension
+    kind: method
+    signature: 'miscExtension(filename: string, content: string, extension: string)'
+    file: third_party/openbao/ui/app/services/download.ts
+  - name: DownloadService.pem
+    kind: method
+    signature: 'pem(filename: string, content: string)'
+    file: third_party/openbao/ui/app/services/download.ts
+  - name: FlashMessageService
+    kind: class
+    signature: class FlashMessageService extends FlashMessages
+    file: third_party/openbao/ui/app/services/flash-messages.ts
+  - name: GeneratedItemModel
+    kind: class
+    signature: GeneratedItemModel()
+    file: third_party/openbao/ui/app/services/path-help.js
+  - name: HostRouterService
+    kind: class
+    signature: HostRouterService()
+    file: third_party/openbao/ui/app/services/host-router.js
+  - name: SecretMountPath
+    kind: class
+    signature: SecretMountPath()
+    file: third_party/openbao/ui/app/services/secret-mount-path.js
+  - name: VersionService
+    kind: class
+    signature: VersionService()
+    file: third_party/openbao/ui/app/services/version.js
+  - name: clearAllDatasets
+    kind: function
+    signature: clearAllDatasets()
+    file: third_party/openbao/ui/app/services/store.js
+  - name: clearDataset
+    kind: function
+    signature: clearDataset(modelName)
+    file: third_party/openbao/ui/app/services/store.js
+  - name: constructResponse
+    kind: function
+    signature: constructResponse(modelName, query)
+    file: third_party/openbao/ui/app/services/store.js
+  - name: ensureTrailingSlash
+    kind: function
+    signature: ensureTrailingSlash(path)
+    file: third_party/openbao/ui/app/services/console.js
+  - name: fetchPage
+    kind: function
+    signature: fetchPage(modelName, query)
+    file: third_party/openbao/ui/app/services/store.js
+  - name: filterData
+    kind: function
+    signature: filterData(filter, dataset)
+    file: third_party/openbao/ui/app/services/store.js
+  - name: getDataset
+    kind: function
+    signature: getDataset(modelName, query)
+    file: third_party/openbao/ui/app/services/store.js
+  - name: getLazyCacheForModel
+    kind: function
+    signature: getLazyCacheForModel(modelName, key)
+    file: third_party/openbao/ui/app/services/store.js
+  - name: keyForCache
+    kind: function
+    signature: keyForCache(query)
+    file: third_party/openbao/ui/app/services/store.js
+  - name: lazyCacheForModel
+    kind: function
+    signature: lazyCacheForModel(modelName)
+    file: third_party/openbao/ui/app/services/store.js
+  - name: lazyCaches
+    kind: function
+    signature: lazyCaches()
+    file: third_party/openbao/ui/app/services/store.js
+  - name: lazyPaginatedQuery
+    kind: function
+    signature: lazyPaginatedQuery(modelType, query)
+    file: third_party/openbao/ui/app/services/store.js
+  - name: normalizeModelName
+    kind: function
+    signature: normalizeModelName(modelName)
+    file: third_party/openbao/ui/app/services/store.js
+  - name: sanitizePath
+    kind: function
+    signature: sanitizePath(path)
+    file: third_party/openbao/ui/app/services/console.js
+  - name: setLazyCacheForModel
+    kind: function
+    signature: setLazyCacheForModel(modelName, key, value)
+    file: third_party/openbao/ui/app/services/store.js
+  - name: storeDataset
+    kind: function
+    signature: storeDataset(modelName, query, response, array)
+    file: third_party/openbao/ui/app/services/store.js
+  - name: unloadAll
+    kind: function
+    signature: unloadAll(modelName)
+    file: third_party/openbao/ui/app/services/store.js
+  - name: unloadRecord
+    kind: function
+    signature: unloadRecord(record)
+    file: third_party/openbao/ui/app/services/store.js
 codeRefIndex:
 - class:67c07d2c6e37cd165e8ed870559d4a05 FlashMessageService@third_party/openbao/ui/app/services/flash-messages.ts:13
 - class:af275923a92a215608382fe97f2d8688 DownloadService@third_party/openbao/ui/app/services/download.ts:26
@@ -39,243 +279,3 @@ codeRefIndex:
 - method:47d7d7e5d087ac0ef9513bbef7f1315b DownloadService.miscExtension@third_party/openbao/ui/app/services/download.ts:62
 - method:4f54f7642bf1a445c771a915fbe5efa6 DownloadService.csv@third_party/openbao/ui/app/services/download.ts:54
 - method:553396a9b18635bfe20efb25b62687af DownloadService.download@third_party/openbao/ui/app/services/download.ts:27
-kind: SystemContext
-metadata:
-  name: third-party-openbao-ui-app-services
-  namespace: default
-spec:
-  intent: 'The context exists to describe the shared behavior that every route and
-    component in the OpenBao UI inherits from injected services, so a reader can reason
-    about path normalization, downloads, flash messaging, and the client-side query
-    cache without reading each template or route. It documents the contract of the
-    service layer: what each exported function and service method accepts, what side
-    effects it has on the browser, and what state it keeps between queries.'
-  interfaces:
-  - file: third_party/openbao/ui/app/services/download.ts
-    kind: class
-    name: DownloadService
-    signature: class DownloadService extends Service
-  - file: third_party/openbao/ui/app/services/download.ts
-    kind: method
-    name: DownloadService.csv
-    signature: 'csv(filename: string, content: string)'
-  - file: third_party/openbao/ui/app/services/download.ts
-    kind: method
-    name: DownloadService.download
-    signature: 'download(filename: string, content: string, extension: string)'
-  - file: third_party/openbao/ui/app/services/download.ts
-    kind: method
-    name: DownloadService.miscExtension
-    signature: 'miscExtension(filename: string, content: string, extension: string)'
-  - file: third_party/openbao/ui/app/services/download.ts
-    kind: method
-    name: DownloadService.pem
-    signature: 'pem(filename: string, content: string)'
-  - file: third_party/openbao/ui/app/services/flash-messages.ts
-    kind: class
-    name: FlashMessageService
-    signature: class FlashMessageService extends FlashMessages
-  - file: third_party/openbao/ui/app/services/path-help.js
-    kind: class
-    name: GeneratedItemModel
-    signature: GeneratedItemModel()
-  - file: third_party/openbao/ui/app/services/host-router.js
-    kind: class
-    name: HostRouterService
-    signature: HostRouterService()
-  - file: third_party/openbao/ui/app/services/secret-mount-path.js
-    kind: class
-    name: SecretMountPath
-    signature: SecretMountPath()
-  - file: third_party/openbao/ui/app/services/version.js
-    kind: class
-    name: VersionService
-    signature: VersionService()
-  - file: third_party/openbao/ui/app/services/store.js
-    kind: function
-    name: clearAllDatasets
-    signature: clearAllDatasets()
-  - file: third_party/openbao/ui/app/services/store.js
-    kind: function
-    name: clearDataset
-    signature: clearDataset(modelName)
-  - file: third_party/openbao/ui/app/services/store.js
-    kind: function
-    name: constructResponse
-    signature: constructResponse(modelName, query)
-  - file: third_party/openbao/ui/app/services/console.js
-    kind: function
-    name: ensureTrailingSlash
-    signature: ensureTrailingSlash(path)
-  - file: third_party/openbao/ui/app/services/store.js
-    kind: function
-    name: fetchPage
-    signature: fetchPage(modelName, query)
-  - file: third_party/openbao/ui/app/services/store.js
-    kind: function
-    name: filterData
-    signature: filterData(filter, dataset)
-  - file: third_party/openbao/ui/app/services/store.js
-    kind: function
-    name: getDataset
-    signature: getDataset(modelName, query)
-  - file: third_party/openbao/ui/app/services/store.js
-    kind: function
-    name: getLazyCacheForModel
-    signature: getLazyCacheForModel(modelName, key)
-  - file: third_party/openbao/ui/app/services/store.js
-    kind: function
-    name: keyForCache
-    signature: keyForCache(query)
-  - file: third_party/openbao/ui/app/services/store.js
-    kind: function
-    name: lazyCacheForModel
-    signature: lazyCacheForModel(modelName)
-  - file: third_party/openbao/ui/app/services/store.js
-    kind: function
-    name: lazyCaches
-    signature: lazyCaches()
-  - file: third_party/openbao/ui/app/services/store.js
-    kind: function
-    name: lazyPaginatedQuery
-    signature: lazyPaginatedQuery(modelType, query)
-  - file: third_party/openbao/ui/app/services/store.js
-    kind: function
-    name: normalizeModelName
-    signature: normalizeModelName(modelName)
-  - file: third_party/openbao/ui/app/services/console.js
-    kind: function
-    name: sanitizePath
-    signature: sanitizePath(path)
-  - file: third_party/openbao/ui/app/services/store.js
-    kind: function
-    name: setLazyCacheForModel
-    signature: setLazyCacheForModel(modelName, key, value)
-  - file: third_party/openbao/ui/app/services/store.js
-    kind: function
-    name: storeDataset
-    signature: storeDataset(modelName, query, response, array)
-  - file: third_party/openbao/ui/app/services/store.js
-    kind: function
-    name: unloadAll
-    signature: unloadAll(modelName)
-  - file: third_party/openbao/ui/app/services/store.js
-    kind: function
-    name: unloadRecord
-    signature: unloadRecord(record)
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - method:0d4b3ee147f38cd03ea91be129338068
-    - method:47d7d7e5d087ac0ef9513bbef7f1315b
-    - method:4f54f7642bf1a445c771a915fbe5efa6
-    id: r.download-extension-helpers
-    level: MUST
-    text: 'DownloadService exposes extension-specific conveniences that delegate to
-      download: csv passes csv, pem passes pem, and miscExtension passes a caller-supplied
-      extension, so callers never build the extension string or MIME type themselves.'
-  - codeRefs:
-    - class:af275923a92a215608382fe97f2d8688
-    - method:553396a9b18635bfe20efb25b62687af
-    id: r.download-filename-mime
-    level: MUST
-    text: DownloadService.download builds the downloaded filename by replacing runs
-      of whitespace with hyphens and appending the extension; when the supplied filename
-      is empty it falls back to vault-data- followed by the current time in ISO 8601
-      form and the extension. It resolves the MIME type from the extension map and
-      falls back to text/plain for unknown extensions.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/services/download.ts
-    - method:553396a9b18635bfe20efb25b62687af
-    id: r.download-side-effect
-    level: MUST
-    text: 'DownloadService.download performs the download through the browser DOM:
-      it creates a File from the content with the resolved MIME type, creates an anchor
-      element, sets its download and object URL href, appends it to the document body,
-      clicks it, revokes the object URL and removes the element, then returns the
-      formatted filename.'
-  - codeRefs:
-    - class:67c07d2c6e37cd165e8ed870559d4a05
-    - file:third_party/openbao/ui/app/services/flash-messages.ts
-    id: r.flash-messages-service
-    level: SHOULD
-    text: FlashMessageService is the application's flash message service, extending
-      the FlashMessages base class so components and routes can inject it under the
-      standard service name.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/services/console.js
-    - function:13427f18672747a5391378ed973ed72c
-    - function:1ccafafd972835ba6fc1aa854f9a8539
-    id: r.path-normalization
-    level: MUST
-    text: 'Path helpers normalize operator input: sanitizePath removes surrounding
-      whitespace and strips all leading and trailing slashes from a path, and ensureTrailingSlash
-      appends a trailing slash to a path whose last segment ends in a word character.'
-  - codeRefs:
-    - function:170ada2c881e4ec2bd0421ea0ab6ae79
-    - function:462bf0f233dd05ba72aea4202092c4a5
-    - function:8126ae3de73956609cc9a5437da35520
-    - function:9eea2287c14c0ff7e08400fee8e94cc2
-    id: r.store-dataset-lifecycle
-    level: MUST
-    text: 'The store caches query results as datasets keyed by model name and query:
-      storeDataset records a response for a model and query, optionally as an array,
-      getDataset reads it back, clearDataset drops every dataset for a model name,
-      and clearAllDatasets drops all cached datasets at once.'
-  - codeRefs:
-    - function:c5b6ec8dec93ae551039dd0b25c0bc5d
-    - function:c6141d39afac5de27458e8202f626ce7
-    - function:d38f98216d8dca73ed692421bcc7a205
-    - function:e62fc0bd114d913a87f99a9db56abc29
-    id: r.store-lazy-caches
-    level: MUST
-    text: The store keeps a per-model lazy cache map that is created on first access;
-      setLazyCacheForModel writes a value under a model name and key, getLazyCacheForModel
-      reads it back, lazyCacheForModel returns the whole cache for a model, and lazyCaches
-      exposes the collection of all of them.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/services/store.js
-    - function:6671fd9bfb9f840f19fce39ba116ac2c
-    - function:8d239422baacb069c43a54b81f511395
-    id: r.store-model-name-key
-    level: MUST
-    text: The store normalizes a model name before use as a cache dimension and derives
-      a cache key from a query object, so that equivalent model and query inputs address
-      the same cached dataset entry.
-  - codeRefs:
-    - function:221954b4abb9b85de706d8aa5bc37257
-    - function:39c2f6bbcb266757380c50615a00a1e0
-    - function:6d0ebc7db29f257eb139aad2cbea6b1b
-    - function:8336f37e1dc58f0cf182787323887f80
-    id: r.store-pagination-query
-    level: MUST
-    text: The store runs paginated queries per model type, fetching a page for a model
-      name and query and assembling the response from cached or freshly fetched records,
-      with a filter step that narrows a dataset by the given filter.
-  - codeRefs:
-    - function:1ed8b09033f376e25bfe671b5916cad1
-    - function:c3528d5b23da120dd766143027ca2a39
-    id: r.store-unload
-    level: MUST
-    text: 'The store can release cached records without clearing datasets: unloadAll
-      unloads every cached record for a model name and unloadRecord unloads a single
-      record passed to it.'
-  - codeRefs:
-    - file:third_party/openbao/ui/app/services/auth.js
-    - file:third_party/openbao/ui/app/services/csp-event.js
-    - file:third_party/openbao/ui/app/services/current-cluster.js
-    - file:third_party/openbao/ui/app/services/host-router.js
-    - file:third_party/openbao/ui/app/services/namespace.js
-    - file:third_party/openbao/ui/app/services/path-help.js
-    - file:third_party/openbao/ui/app/services/permissions.js
-    - file:third_party/openbao/ui/app/services/replication-mode.js
-    - file:third_party/openbao/ui/app/services/secret-mount-path.js
-    - file:third_party/openbao/ui/app/services/version.js
-    - file:third_party/openbao/ui/app/services/wizard.js
-    id: r.supporting-services
-    level: MUST
-    text: 'The service layer also registers the remaining application services: authentication,
-      console, CSP event reporting, current cluster, host routing, namespace, permissions,
-      replication mode, secret mount path, path help generated item model and version,
-      each as its own module under app/services so routes can inject them independently.'
-  upstream: self

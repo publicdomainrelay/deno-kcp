@@ -1,13 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/ui/app/models/database/connection.js connection.js@third_party/openbao/ui/app/models/database/connection.js
-- file:third_party/openbao/ui/app/models/database/credential.js credential.js@third_party/openbao/ui/app/models/database/credential.js
-- file:third_party/openbao/ui/app/models/database/role.js role.js@third_party/openbao/ui/app/models/database/role.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-app-models-database
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'This context exists so the UI database models can be described and regenerated
     as a unit: the connection form, the role form and the credential read-model that
     the database secrets engine routes render. It records the attribute surfaces each
@@ -15,11 +13,8 @@ spec:
     model serve every supported database plugin, the special-casing that hides revocation
     statements for elasticsearch, and the capability aliases templates read instead
     of calling the API directly.'
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/ui/app/models/database/connection.js
-    id: r.connection-attributes
+  - id: r.connection-attributes
     level: MUST
     text: The database connection model must declare connection attributes covering
       the required name and plugin_name, the common connection_url, url, username
@@ -29,18 +24,18 @@ spec:
       verify_connection defaulting to true, insecure defaulting to false, password_policy,
       username_template, write_concern and root_rotation_statements; backend and allowed_roles
       are read-only.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/models/database/connection.js
-    id: r.connection-capabilities
+  - id: r.connection-capabilities
     level: MUST
     text: 'The connection model must expose capabilities through lazyCapabilities
       paths so templates can gate actions: canEdit and canDelete alias the update
       and delete rights on `${backend}/config/${id}`, canReset covers update-or-create
       on `${backend}/reset/${id}`, canRotateRoot covers update-or-create on `${backend}/rotate-root/${id}`,
       and canAddRole covers create on either `${backend}/role/*` or `${backend}/static-role/*`.'
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/models/database/connection.js
-    id: r.connection-plugin-metadata
+  - id: r.connection-plugin-metadata
     level: MUST
     text: 'The connection model must derive its form metadata from the plugin selected
       in plugin_name: isAvailablePlugin reports whether plugin_name matches an entry
@@ -52,17 +47,17 @@ spec:
       ''default'') and returns null when plugin_name is empty, and statementFields
       returns the plugin''s statements-group fields or just root_rotation_statements
       when plugin_name is empty.'
-  - codeRefs:
-    - file:third_party/openbao/ui/app/models/database/credential.js
-    id: r.credential-fields
+    codeRefs:
+    - file:third_party/openbao/ui/app/models/database/connection.js
+  - id: r.credential-fields
     level: MUST
     text: The credential model must be a flat Ember Data model declaring the generated-credential
       response fields username, password, leaseId, leaseDuration, lastVaultRotation,
       rotationPeriod, ttl and roleType as attributes, with no computed properties
       or capability paths.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/models/database/role.js
-    id: r.role-capabilities
+    codeRefs:
+    - file:third_party/openbao/ui/app/models/database/credential.js
+  - id: r.role-capabilities
     level: MUST
     text: 'The role model must expose capability aliases over lazyCapabilities paths:
       canEditRole and canDelete from `${backend}/${path}/${id}`, canCreateDynamic
@@ -70,9 +65,9 @@ spec:
       canGenerateCredentials from read on `${backend}/creds/${id}`, canGetCredentials
       from read on `${backend}/static-creds/${id}`, canUpdateDb from update on `${backend}/config/${database[0]}`,
       and canRotateRoleCredentials from update on `${backend}/rotate-role/${id}`.'
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/models/database/role.js
-    id: r.role-form-fields
+  - id: r.role-form-fields
     level: MUST
     text: 'The role model must compute its form metadata: fieldAttrs covers name,
       database and type for the create and edit form; showFields covers name, database,
@@ -81,9 +76,9 @@ spec:
       roleSettingAttrs expands the full role-settings field list, including the JSON-edit
       creation_statement and revocation_statement, and leaves the choice of which
       to display to DatabaseRoleSettingForm.'
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/models/database/role.js
-    id: r.role-id-prefix-and-attributes
+  - id: r.role-id-prefix-and-attributes
     level: MUST
     text: The database role model must set idPrefix to 'role/' and declare a read-only
       backend, the role name, a searchSelect database attribute limited to one existing
@@ -92,4 +87,9 @@ spec:
       defaulting to '24h', and array attributes for creation_statements, revocation_statements,
       rotation_statements, rollback_statements and renew_statements plus the JSON-edit
       creation_statement and revocation_statement variants.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/ui/app/models/database/role.js
+codeRefIndex:
+- file:third_party/openbao/ui/app/models/database/connection.js connection.js@third_party/openbao/ui/app/models/database/connection.js
+- file:third_party/openbao/ui/app/models/database/credential.js credential.js@third_party/openbao/ui/app/models/database/credential.js
+- file:third_party/openbao/ui/app/models/database/role.js role.js@third_party/openbao/ui/app/models/database/role.js

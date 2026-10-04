@@ -1,4 +1,431 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-sdk-helper-pluginutil
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'This context exists so the rest of deno-kcp can host and drive OpenBao
+    plugins without depending on an out-of-tree copy of the SDK. It fixes the plugin-side
+    contract: how the host learns whether a plugin supports multiplexing, how a plugin
+    reads the mlock and metadata-mode environment flags, how run options are assembled
+    into a go-plugin client, and which interfaces a caller must supply (Looker, RunnerUtil,
+    PluginClient) or consume (PluginRunner). The context is a vendored third-party
+    package, so it should be read as a frozen compatibility surface — the requirements
+    below record what the code does today rather than what it ought to do, and the
+    generated protobuf files pin the wire form of the MultiplexingSupport RPC.'
+  requirements:
+  - id: r.behaviour-pinned-by-tests
+    level: SHOULD
+    text: multiplexing_test.go pins the multiplexing negotiation behaviour and run_config_test.go
+      pins the RunOpt assembly, so changes to the opt-out list, the Unimplemented
+      fallback, or the option-to-field mapping must keep those tests passing.
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/pluginutil/multiplexing_test.go
+    - file:third_party/openbao/sdk/helper/pluginutil/run_config_test.go
+  - id: r.ctx-cancel-helper
+    level: SHOULD
+    text: CtxCancelIfCanceled returns a channel that is closed once ctxCanceler is
+      done, calling the supplied context.CancelFunc at that point and exiting the
+      goroutine, so a plugin launched against a cancellable context is torn down when
+      the parent context ends.
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/pluginutil/runner.go
+    - function:570753949cd6d5e387e7a564f98be5d6
+  - id: r.looker-lookup
+    level: MUST
+    text: Looker resolves a plugin by name and plugin type into a PluginRunner, and
+      LookupPluginVersion resolves the same but pins an explicit version string, so
+      callers can select either the default or a specific installed plugin version.
+    codeRefs:
+    - method:02fa2407e98e9363b04a7b3ebf023be0
+    - method:a55fe72e70ea9eafaa20d8c4726a8801
+    - struct:e9065d8ca9f63d400343f72ca75a1691
+  - id: r.metadata-mode-env-gate
+    level: MUST
+    text: InMetadataMode reports the plugin as running in metadata mode exactly when
+      the PluginMetadataModeEnv Bao variable reads "true", and false otherwise.
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/pluginutil/env.go
+    - function:1d28340916bd885f2bd904029a7bd930
+  - id: r.mlock-env-gate
+    level: MUST
+    text: OptionallyEnableMlock reads the PluginMlockEnabled Bao variable and calls
+      mlock.LockMemory only when that variable equals the literal string "true"; in
+      every other case it returns nil without locking.
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/pluginutil/env.go
+    - function:82f5b8a574d5603675f1d6b78f5b9506
+  - id: r.multiplex-id-from-context
+    level: MUST
+    text: GetMultiplexIDFromContext extracts the multiplexing identifier carried on
+      the context and returns it as a string, returning an error when the context
+      holds no such value.
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/pluginutil/multiplexing.go
+    - function:614468a9e8c6f55bdcdbca753fe26d0e
+  - id: r.multiplexing-degrades-to-false
+    level: MUST
+    text: When the MultiplexingSupport RPC is not opted out, MultiplexingSupported
+      sends a MultiplexingSupportRequest through NewPluginMultiplexingClient and returns
+      the Supported field of the response; a gRPC codes.Unimplemented status and a
+      nil response both collapse to (false, nil) rather than an error, while any other
+      RPC error is propagated.
+    codeRefs:
+    - function:48c88e80e6fb0d2b6f42b45a18b0614a
+    - method:1e59d39b4632029e10a4d2ba09c3cc9f
+    - method:5b05646c21c4754e0e45a517995ac4b0
+  - id: r.multiplexing-negotiation
+    level: MUST
+    text: MultiplexingSupported returns an error when the gRPC client connection is
+      nil; otherwise it splits the PluginMultiplexingOptOut Bao variable on commas
+      and returns false when the caller-supplied plugin name appears in that list,
+      so a named plugin can opt out of multiplexing before any RPC is attempted.
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/pluginutil/multiplexing.go
+    - function:48c88e80e6fb0d2b6f42b45a18b0614a
+  - id: r.multiplexing-registration
+    level: MUST
+    text: RegisterPluginMultiplexingServer registers a PluginMultiplexingServer implementation
+      against a grpc.ServiceRegistrar under the service name recorded in the generated
+      descriptor, and UnimplementedPluginMultiplexingServer.MultiplexingSupport answers
+      the codes.Unimplemented error so an embedding server that does not override
+      it degrades to the not-multiplexed path.
+    codeRefs:
+    - function:d3eeb60152564378665bccceb0b98323
+    - interface:2663b27c152935bcf4cd53bc0ceee9fc
+    - method:56a84b6a5e369922debbf43b0e6c0af5
+  - id: r.multiplexing-server-answers-supported
+    level: MUST
+    text: PluginMultiplexingServerImpl.MultiplexingSupport ignores both its context
+      and request arguments and replies with a MultiplexingSupportResponse whose Supported
+      field is copied from the receiver's Supported field, so registering the implementation
+      advertises the plugin's multiplexing capability.
+    codeRefs:
+    - method:744d2b2e4bec2ee4aa46fa13453c3e60
+    - struct:6eaa8a254538ef2f2b5f3a526a2b7e08
+  - id: r.plugin-client-contract
+    level: MUST
+    text: PluginClient exposes Conn, which returns the underlying grpc.ClientConnInterface
+      for direct RPC use, and Reload, which asks the host to restart the plugin process;
+      PluginRunner.Run and PluginRunner.RunMetadataMode both launch a plugin from
+      a wrapper, plugin sets, handshake config, environment slice and logger, with
+      the metadata-mode variant starting the process in the metadata mode used for
+      plugin introspection.
+    codeRefs:
+    - interface:cbb69c7b9c94c7db8a5792145ca6aa26
+    - method:2e98f1de279766b21b10c81f1be8b497
+    - method:2fadc1892af1cd8c869a9ed2460491a8
+    - method:4b35c36f0d40317a160a7260e04786de
+    - method:9c74ad39e6d13e04922868bde41f5dd3
+  - id: r.protobuf-message-contract
+    level: MUST
+    text: MultiplexingSupportRequest and MultiplexingSupportResponse implement the
+      protobuf message surface — Reset, String, ProtoMessage, ProtoReflect and Descriptor
+      — and MultiplexingSupportResponse additionally exposes GetSupported, which returns
+      the Supported bool with a false value for a nil receiver so callers can read
+      the flag without a nil check.
+    codeRefs:
+    - method:5b05646c21c4754e0e45a517995ac4b0
+    - struct:832343878007224f9216f719d373c4a2
+    - struct:dda575f64eb8ea023c2fcfc7dfc1f8c4
+  - id: r.run-config-builds-client
+    level: MUST
+    text: PluginRunner.RunConfig applies each supplied RunOpt to a PluginClientConfig
+      and delegates to RunnerUtil.NewPluginClient, returning the resulting PluginClient
+      as a go-plugin client or the error from the runner, so the caller never has
+      to construct the config struct by hand.
+    codeRefs:
+    - method:0117e69146f6720229df4b635e2aa83c
+    - method:70cf41d2274e5b816d9c7fc7c8a2ac96
+    - struct:64f39a7b53db0745bafd968deff64aa8
+  - id: r.run-opt-options
+    level: MUST
+    text: RunOpt is a functional-option type over PluginClientConfig, and the constructors
+      Env, Runner, PluginSets, HandshakeConfig, Logger, MetadataMode, AutoMTLS and
+      MLock each mutate exactly their matching field — the environment slice, the
+      RunnerUtil wrapper, the per-protocol plugin sets, the handshake config, the
+      logger, the metadata-mode flag, the auto-mTLS flag and the mlock flag — leaving
+      every other field untouched.
+    codeRefs:
+    - function:116a783b6b861d4bd625df8e0334a94d
+    - function:4865f54d34162b4eca80a8e2631e4167
+    - function:5aa4380bca3b1928c1b116b21d4bfdf4
+    - function:6f5bc79892dd4f74f85dfcbbca6f62c7
+    - function:97e626f0ec471ddba7eea78743c78d31
+    - function:9e11ba299d75d1cfa994fd23fd4ca10c
+    - function:9fd220a7179b845fe2608c8684c73aca
+    - function:e24349af21ae65ddae4c8f90ee2cd46d
+    - type_alias:cff08e0e12fd187b4aea42d230d2fe3a
+  - id: r.runner-util-contract
+    level: MUST
+    text: 'RunnerUtil is the host-side contract a caller must satisfy to launch plugins:
+      NewPluginClient returns a PluginClient for a config and context, ResponseWrapData
+      produces a wrapping.ResponseWrapInfo for a data map with a TTL and a JWT flag,
+      MlockEnabled reports whether memory locking is on, and VaultVersion returns
+      the host version string; LookRunnerUtil is the intersection of Looker and RunnerUtil,
+      so a plugin host must supply both lookup and launch behaviour.'
+    codeRefs:
+    - interface:78ed783a494ecc5b382ce9e517b15538
+    - interface:b5c78d1a3643602257c44aba69db60ef
+    - interface:f9cc8171d1cffc85a4a61a0c963fd2ac
+    - method:5e5bca3b1e05b7d98b3572c4764f4851
+    - method:afb47878fa376ef45130df9c35175284
+    - method:f5df2b2dbd22801a7f4a26b2e5a0fe76
+  - id: r.tls-transport
+    level: SHOULD
+    text: tls.go supplies the TLS helper used by the plugin transport so plugin RPCs
+      are wrapped with the SDK's certificate handling rather than a bare connection.
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/pluginutil/tls.go
+  interfaces:
+  - name: AutoMTLS
+    kind: function
+    signature: func AutoMTLS(autoMTLS bool) RunOpt
+    file: third_party/openbao/sdk/helper/pluginutil/run_config.go
+  - name: CtxCancelIfCanceled
+    kind: function
+    signature: func CtxCancelIfCanceled(f context.CancelFunc, ctxCanceler context.Context)
+      chan struct{}
+    file: third_party/openbao/sdk/helper/pluginutil/runner.go
+  - name: Env
+    kind: function
+    signature: func Env(env ...string) RunOpt
+    file: third_party/openbao/sdk/helper/pluginutil/run_config.go
+  - name: GetMultiplexIDFromContext
+    kind: function
+    signature: func GetMultiplexIDFromContext(ctx context.Context) (string, error)
+    file: third_party/openbao/sdk/helper/pluginutil/multiplexing.go
+  - name: HandshakeConfig
+    kind: function
+    signature: func HandshakeConfig(hs plugin.HandshakeConfig) RunOpt
+    file: third_party/openbao/sdk/helper/pluginutil/run_config.go
+  - name: InMetadataMode
+    kind: function
+    signature: func InMetadataMode() bool
+    file: third_party/openbao/sdk/helper/pluginutil/env.go
+  - name: Logger
+    kind: function
+    signature: func Logger(logger log.Logger) RunOpt
+    file: third_party/openbao/sdk/helper/pluginutil/run_config.go
+  - name: LookRunnerUtil
+    kind: interface
+    signature: type LookRunnerUtil interface
+    file: third_party/openbao/sdk/helper/pluginutil/runner.go
+  - name: Looker
+    kind: interface
+    signature: type Looker interface
+    file: third_party/openbao/sdk/helper/pluginutil/runner.go
+  - name: Looker.LookupPlugin
+    kind: method
+    signature: LookupPlugin(ctx context.Context, pluginName string, pluginType consts.PluginType)
+      (*PluginRunner, error)
+    file: third_party/openbao/sdk/helper/pluginutil/runner.go
+  - name: Looker.LookupPluginVersion
+    kind: method
+    signature: LookupPluginVersion(ctx context.Context, pluginName string, pluginType
+      consts.PluginType, version string) (*PluginRunner, error)
+    file: third_party/openbao/sdk/helper/pluginutil/runner.go
+  - name: MLock
+    kind: function
+    signature: func MLock(mlock bool) RunOpt
+    file: third_party/openbao/sdk/helper/pluginutil/run_config.go
+  - name: MetadataMode
+    kind: function
+    signature: func MetadataMode(isMetadataMode bool) RunOpt
+    file: third_party/openbao/sdk/helper/pluginutil/run_config.go
+  - name: MultiplexingSupportRequest
+    kind: struct
+    signature: type MultiplexingSupportRequest struct
+    file: third_party/openbao/sdk/helper/pluginutil/multiplexing.pb.go
+  - name: MultiplexingSupportRequest.Descriptor
+    kind: method
+    signature: func (*MultiplexingSupportRequest) Descriptor() ([]byte, []int)
+    file: third_party/openbao/sdk/helper/pluginutil/multiplexing.pb.go
+  - name: MultiplexingSupportRequest.ProtoMessage
+    kind: method
+    signature: func (*MultiplexingSupportRequest) ProtoMessage()
+    file: third_party/openbao/sdk/helper/pluginutil/multiplexing.pb.go
+  - name: MultiplexingSupportRequest.ProtoReflect
+    kind: method
+    signature: func (x *MultiplexingSupportRequest) ProtoReflect() protoreflect.Message
+    file: third_party/openbao/sdk/helper/pluginutil/multiplexing.pb.go
+  - name: MultiplexingSupportRequest.Reset
+    kind: method
+    signature: func (x *MultiplexingSupportRequest) Reset()
+    file: third_party/openbao/sdk/helper/pluginutil/multiplexing.pb.go
+  - name: MultiplexingSupportRequest.String
+    kind: method
+    signature: func (x *MultiplexingSupportRequest) String() string
+    file: third_party/openbao/sdk/helper/pluginutil/multiplexing.pb.go
+  - name: MultiplexingSupportResponse
+    kind: struct
+    signature: type MultiplexingSupportResponse struct
+    file: third_party/openbao/sdk/helper/pluginutil/multiplexing.pb.go
+  - name: MultiplexingSupportResponse.Descriptor
+    kind: method
+    signature: func (*MultiplexingSupportResponse) Descriptor() ([]byte, []int)
+    file: third_party/openbao/sdk/helper/pluginutil/multiplexing.pb.go
+  - name: MultiplexingSupportResponse.GetSupported
+    kind: method
+    signature: func (x *MultiplexingSupportResponse) GetSupported() bool
+    file: third_party/openbao/sdk/helper/pluginutil/multiplexing.pb.go
+  - name: MultiplexingSupportResponse.ProtoMessage
+    kind: method
+    signature: func (*MultiplexingSupportResponse) ProtoMessage()
+    file: third_party/openbao/sdk/helper/pluginutil/multiplexing.pb.go
+  - name: MultiplexingSupportResponse.ProtoReflect
+    kind: method
+    signature: func (x *MultiplexingSupportResponse) ProtoReflect() protoreflect.Message
+    file: third_party/openbao/sdk/helper/pluginutil/multiplexing.pb.go
+  - name: MultiplexingSupportResponse.Reset
+    kind: method
+    signature: func (x *MultiplexingSupportResponse) Reset()
+    file: third_party/openbao/sdk/helper/pluginutil/multiplexing.pb.go
+  - name: MultiplexingSupportResponse.String
+    kind: method
+    signature: func (x *MultiplexingSupportResponse) String() string
+    file: third_party/openbao/sdk/helper/pluginutil/multiplexing.pb.go
+  - name: MultiplexingSupported
+    kind: function
+    signature: func MultiplexingSupported(ctx context.Context, cc grpc.ClientConnInterface,
+      name string) (bool, error)
+    file: third_party/openbao/sdk/helper/pluginutil/multiplexing.go
+  - name: NewPluginMultiplexingClient
+    kind: function
+    signature: func NewPluginMultiplexingClient(cc grpc.ClientConnInterface) PluginMultiplexingClient
+    file: third_party/openbao/sdk/helper/pluginutil/multiplexing_grpc.pb.go
+  - name: OptionallyEnableMlock
+    kind: function
+    signature: func OptionallyEnableMlock() error
+    file: third_party/openbao/sdk/helper/pluginutil/env.go
+  - name: PluginClient
+    kind: interface
+    signature: type PluginClient interface
+    file: third_party/openbao/sdk/helper/pluginutil/runner.go
+  - name: PluginClient.Conn
+    kind: method
+    signature: Conn() grpc.ClientConnInterface
+    file: third_party/openbao/sdk/helper/pluginutil/runner.go
+  - name: PluginClient.Reload
+    kind: method
+    signature: Reload() error
+    file: third_party/openbao/sdk/helper/pluginutil/runner.go
+  - name: PluginClientConfig
+    kind: struct
+    signature: type PluginClientConfig struct
+    file: third_party/openbao/sdk/helper/pluginutil/run_config.go
+  - name: PluginMultiplexingClient
+    kind: interface
+    signature: type PluginMultiplexingClient interface
+    file: third_party/openbao/sdk/helper/pluginutil/multiplexing_grpc.pb.go
+  - name: PluginMultiplexingClient.MultiplexingSupport
+    kind: method
+    signature: MultiplexingSupport(ctx context.Context, in *MultiplexingSupportRequest,
+      opts ...grpc.CallOption) (*MultiplexingSupportResponse, error)
+    file: third_party/openbao/sdk/helper/pluginutil/multiplexing_grpc.pb.go
+  - name: PluginMultiplexingServer
+    kind: interface
+    signature: type PluginMultiplexingServer interface
+    file: third_party/openbao/sdk/helper/pluginutil/multiplexing_grpc.pb.go
+  - name: PluginMultiplexingServer.MultiplexingSupport
+    kind: method
+    signature: MultiplexingSupport(context.Context, *MultiplexingSupportRequest) (*MultiplexingSupportResponse,
+      error)
+    file: third_party/openbao/sdk/helper/pluginutil/multiplexing_grpc.pb.go
+  - name: PluginMultiplexingServerImpl
+    kind: struct
+    signature: type PluginMultiplexingServerImpl struct
+    file: third_party/openbao/sdk/helper/pluginutil/multiplexing.go
+  - name: PluginMultiplexingServerImpl.MultiplexingSupport
+    kind: method
+    signature: func (pm PluginMultiplexingServerImpl) MultiplexingSupport(_ context.Context,
+      _ *MultiplexingSupportRequest) (*MultiplexingSupportResponse, error)
+    file: third_party/openbao/sdk/helper/pluginutil/multiplexing.go
+  - name: PluginRunner
+    kind: struct
+    signature: type PluginRunner struct
+    file: third_party/openbao/sdk/helper/pluginutil/runner.go
+  - name: PluginRunner.Run
+    kind: method
+    signature: func (r *PluginRunner) Run(ctx context.Context, wrapper RunnerUtil,
+      pluginSets map[int]plugin.PluginSet, hs plugin.HandshakeConfig, env []string,
+      logger log.Logger) (*plugin.Client, error)
+    file: third_party/openbao/sdk/helper/pluginutil/runner.go
+  - name: PluginRunner.RunConfig
+    kind: method
+    signature: func (r *PluginRunner) RunConfig(ctx context.Context, opts ...RunOpt)
+      (*plugin.Client, error)
+    file: third_party/openbao/sdk/helper/pluginutil/run_config.go
+  - name: PluginRunner.RunMetadataMode
+    kind: method
+    signature: func (r *PluginRunner) RunMetadataMode(ctx context.Context, wrapper
+      RunnerUtil, pluginSets map[int]plugin.PluginSet, hs plugin.HandshakeConfig,
+      env []string, logger log.Logger) (*plugin.Client, error)
+    file: third_party/openbao/sdk/helper/pluginutil/runner.go
+  - name: PluginSets
+    kind: function
+    signature: func PluginSets(pluginSets map[int]plugin.PluginSet) RunOpt
+    file: third_party/openbao/sdk/helper/pluginutil/run_config.go
+  - name: RegisterPluginMultiplexingServer
+    kind: function
+    signature: func RegisterPluginMultiplexingServer(s grpc.ServiceRegistrar, srv
+      PluginMultiplexingServer)
+    file: third_party/openbao/sdk/helper/pluginutil/multiplexing_grpc.pb.go
+  - name: RunOpt
+    kind: type_alias
+    signature: type RunOpt func(*PluginClientConfig)
+    file: third_party/openbao/sdk/helper/pluginutil/run_config.go
+  - name: Runner
+    kind: function
+    signature: func Runner(wrapper RunnerUtil) RunOpt
+    file: third_party/openbao/sdk/helper/pluginutil/run_config.go
+  - name: RunnerUtil
+    kind: interface
+    signature: type RunnerUtil interface
+    file: third_party/openbao/sdk/helper/pluginutil/runner.go
+  - name: RunnerUtil.MlockEnabled
+    kind: method
+    signature: MlockEnabled() bool
+    file: third_party/openbao/sdk/helper/pluginutil/runner.go
+  - name: RunnerUtil.NewPluginClient
+    kind: method
+    signature: NewPluginClient(ctx context.Context, config PluginClientConfig) (PluginClient,
+      error)
+    file: third_party/openbao/sdk/helper/pluginutil/runner.go
+  - name: RunnerUtil.ResponseWrapData
+    kind: method
+    signature: ResponseWrapData(ctx context.Context, data map[string]any, ttl time.Duration,
+      jwt bool) (*wrapping.ResponseWrapInfo, error)
+    file: third_party/openbao/sdk/helper/pluginutil/runner.go
+  - name: RunnerUtil.VaultVersion
+    kind: method
+    signature: VaultVersion(ctx context.Context) (string, error)
+    file: third_party/openbao/sdk/helper/pluginutil/runner.go
+  - name: UnimplementedPluginMultiplexingServer
+    kind: struct
+    signature: type UnimplementedPluginMultiplexingServer struct
+    file: third_party/openbao/sdk/helper/pluginutil/multiplexing_grpc.pb.go
+  - name: UnimplementedPluginMultiplexingServer.MultiplexingSupport
+    kind: method
+    signature: func (UnimplementedPluginMultiplexingServer) MultiplexingSupport(context.Context,
+      *MultiplexingSupportRequest) (*MultiplexingSupportResponse, error)
+    file: third_party/openbao/sdk/helper/pluginutil/multiplexing_grpc.pb.go
+  - name: UnsafePluginMultiplexingServer
+    kind: interface
+    signature: type UnsafePluginMultiplexingServer interface
+    file: third_party/openbao/sdk/helper/pluginutil/multiplexing_grpc.pb.go
+  - name: VersionedPlugin
+    kind: struct
+    signature: type VersionedPlugin struct
+    file: third_party/openbao/sdk/helper/pluginutil/runner.go
+  - name: pluginMultiplexingClient.MultiplexingSupport
+    kind: method
+    signature: func (c *pluginMultiplexingClient) MultiplexingSupport(ctx context.Context,
+      in *MultiplexingSupportRequest, opts ...grpc.CallOption) (*MultiplexingSupportResponse,
+      error)
+    file: third_party/openbao/sdk/helper/pluginutil/multiplexing_grpc.pb.go
 codeRefIndex:
 - file:third_party/openbao/sdk/helper/pluginutil/env.go env.go@third_party/openbao/sdk/helper/pluginutil/env.go
 - file:third_party/openbao/sdk/helper/pluginutil/multiplexing.go multiplexing.go@third_party/openbao/sdk/helper/pluginutil/multiplexing.go
@@ -49,430 +476,3 @@ codeRefIndex:
 - struct:dda575f64eb8ea023c2fcfc7dfc1f8c4 MultiplexingSupportRequest@third_party/openbao/sdk/helper/pluginutil/multiplexing.pb.go:27
 - struct:e9065d8ca9f63d400343f72ca75a1691 VersionedPlugin@third_party/openbao/sdk/helper/pluginutil/runner.go:98
 - type_alias:cff08e0e12fd187b4aea42d230d2fe3a RunOpt@third_party/openbao/sdk/helper/pluginutil/run_config.go:133
-kind: SystemContext
-metadata:
-  name: third-party-openbao-sdk-helper-pluginutil
-  namespace: default
-spec:
-  intent: 'This context exists so the rest of deno-kcp can host and drive OpenBao
-    plugins without depending on an out-of-tree copy of the SDK. It fixes the plugin-side
-    contract: how the host learns whether a plugin supports multiplexing, how a plugin
-    reads the mlock and metadata-mode environment flags, how run options are assembled
-    into a go-plugin client, and which interfaces a caller must supply (Looker, RunnerUtil,
-    PluginClient) or consume (PluginRunner). The context is a vendored third-party
-    package, so it should be read as a frozen compatibility surface — the requirements
-    below record what the code does today rather than what it ought to do, and the
-    generated protobuf files pin the wire form of the MultiplexingSupport RPC.'
-  interfaces:
-  - file: third_party/openbao/sdk/helper/pluginutil/run_config.go
-    kind: function
-    name: AutoMTLS
-    signature: func AutoMTLS(autoMTLS bool) RunOpt
-  - file: third_party/openbao/sdk/helper/pluginutil/runner.go
-    kind: function
-    name: CtxCancelIfCanceled
-    signature: func CtxCancelIfCanceled(f context.CancelFunc, ctxCanceler context.Context)
-      chan struct{}
-  - file: third_party/openbao/sdk/helper/pluginutil/run_config.go
-    kind: function
-    name: Env
-    signature: func Env(env ...string) RunOpt
-  - file: third_party/openbao/sdk/helper/pluginutil/multiplexing.go
-    kind: function
-    name: GetMultiplexIDFromContext
-    signature: func GetMultiplexIDFromContext(ctx context.Context) (string, error)
-  - file: third_party/openbao/sdk/helper/pluginutil/run_config.go
-    kind: function
-    name: HandshakeConfig
-    signature: func HandshakeConfig(hs plugin.HandshakeConfig) RunOpt
-  - file: third_party/openbao/sdk/helper/pluginutil/env.go
-    kind: function
-    name: InMetadataMode
-    signature: func InMetadataMode() bool
-  - file: third_party/openbao/sdk/helper/pluginutil/run_config.go
-    kind: function
-    name: Logger
-    signature: func Logger(logger log.Logger) RunOpt
-  - file: third_party/openbao/sdk/helper/pluginutil/runner.go
-    kind: interface
-    name: LookRunnerUtil
-    signature: type LookRunnerUtil interface
-  - file: third_party/openbao/sdk/helper/pluginutil/runner.go
-    kind: interface
-    name: Looker
-    signature: type Looker interface
-  - file: third_party/openbao/sdk/helper/pluginutil/runner.go
-    kind: method
-    name: Looker.LookupPlugin
-    signature: LookupPlugin(ctx context.Context, pluginName string, pluginType consts.PluginType)
-      (*PluginRunner, error)
-  - file: third_party/openbao/sdk/helper/pluginutil/runner.go
-    kind: method
-    name: Looker.LookupPluginVersion
-    signature: LookupPluginVersion(ctx context.Context, pluginName string, pluginType
-      consts.PluginType, version string) (*PluginRunner, error)
-  - file: third_party/openbao/sdk/helper/pluginutil/run_config.go
-    kind: function
-    name: MLock
-    signature: func MLock(mlock bool) RunOpt
-  - file: third_party/openbao/sdk/helper/pluginutil/run_config.go
-    kind: function
-    name: MetadataMode
-    signature: func MetadataMode(isMetadataMode bool) RunOpt
-  - file: third_party/openbao/sdk/helper/pluginutil/multiplexing.pb.go
-    kind: struct
-    name: MultiplexingSupportRequest
-    signature: type MultiplexingSupportRequest struct
-  - file: third_party/openbao/sdk/helper/pluginutil/multiplexing.pb.go
-    kind: method
-    name: MultiplexingSupportRequest.Descriptor
-    signature: func (*MultiplexingSupportRequest) Descriptor() ([]byte, []int)
-  - file: third_party/openbao/sdk/helper/pluginutil/multiplexing.pb.go
-    kind: method
-    name: MultiplexingSupportRequest.ProtoMessage
-    signature: func (*MultiplexingSupportRequest) ProtoMessage()
-  - file: third_party/openbao/sdk/helper/pluginutil/multiplexing.pb.go
-    kind: method
-    name: MultiplexingSupportRequest.ProtoReflect
-    signature: func (x *MultiplexingSupportRequest) ProtoReflect() protoreflect.Message
-  - file: third_party/openbao/sdk/helper/pluginutil/multiplexing.pb.go
-    kind: method
-    name: MultiplexingSupportRequest.Reset
-    signature: func (x *MultiplexingSupportRequest) Reset()
-  - file: third_party/openbao/sdk/helper/pluginutil/multiplexing.pb.go
-    kind: method
-    name: MultiplexingSupportRequest.String
-    signature: func (x *MultiplexingSupportRequest) String() string
-  - file: third_party/openbao/sdk/helper/pluginutil/multiplexing.pb.go
-    kind: struct
-    name: MultiplexingSupportResponse
-    signature: type MultiplexingSupportResponse struct
-  - file: third_party/openbao/sdk/helper/pluginutil/multiplexing.pb.go
-    kind: method
-    name: MultiplexingSupportResponse.Descriptor
-    signature: func (*MultiplexingSupportResponse) Descriptor() ([]byte, []int)
-  - file: third_party/openbao/sdk/helper/pluginutil/multiplexing.pb.go
-    kind: method
-    name: MultiplexingSupportResponse.GetSupported
-    signature: func (x *MultiplexingSupportResponse) GetSupported() bool
-  - file: third_party/openbao/sdk/helper/pluginutil/multiplexing.pb.go
-    kind: method
-    name: MultiplexingSupportResponse.ProtoMessage
-    signature: func (*MultiplexingSupportResponse) ProtoMessage()
-  - file: third_party/openbao/sdk/helper/pluginutil/multiplexing.pb.go
-    kind: method
-    name: MultiplexingSupportResponse.ProtoReflect
-    signature: func (x *MultiplexingSupportResponse) ProtoReflect() protoreflect.Message
-  - file: third_party/openbao/sdk/helper/pluginutil/multiplexing.pb.go
-    kind: method
-    name: MultiplexingSupportResponse.Reset
-    signature: func (x *MultiplexingSupportResponse) Reset()
-  - file: third_party/openbao/sdk/helper/pluginutil/multiplexing.pb.go
-    kind: method
-    name: MultiplexingSupportResponse.String
-    signature: func (x *MultiplexingSupportResponse) String() string
-  - file: third_party/openbao/sdk/helper/pluginutil/multiplexing.go
-    kind: function
-    name: MultiplexingSupported
-    signature: func MultiplexingSupported(ctx context.Context, cc grpc.ClientConnInterface,
-      name string) (bool, error)
-  - file: third_party/openbao/sdk/helper/pluginutil/multiplexing_grpc.pb.go
-    kind: function
-    name: NewPluginMultiplexingClient
-    signature: func NewPluginMultiplexingClient(cc grpc.ClientConnInterface) PluginMultiplexingClient
-  - file: third_party/openbao/sdk/helper/pluginutil/env.go
-    kind: function
-    name: OptionallyEnableMlock
-    signature: func OptionallyEnableMlock() error
-  - file: third_party/openbao/sdk/helper/pluginutil/runner.go
-    kind: interface
-    name: PluginClient
-    signature: type PluginClient interface
-  - file: third_party/openbao/sdk/helper/pluginutil/runner.go
-    kind: method
-    name: PluginClient.Conn
-    signature: Conn() grpc.ClientConnInterface
-  - file: third_party/openbao/sdk/helper/pluginutil/runner.go
-    kind: method
-    name: PluginClient.Reload
-    signature: Reload() error
-  - file: third_party/openbao/sdk/helper/pluginutil/run_config.go
-    kind: struct
-    name: PluginClientConfig
-    signature: type PluginClientConfig struct
-  - file: third_party/openbao/sdk/helper/pluginutil/multiplexing_grpc.pb.go
-    kind: interface
-    name: PluginMultiplexingClient
-    signature: type PluginMultiplexingClient interface
-  - file: third_party/openbao/sdk/helper/pluginutil/multiplexing_grpc.pb.go
-    kind: method
-    name: PluginMultiplexingClient.MultiplexingSupport
-    signature: MultiplexingSupport(ctx context.Context, in *MultiplexingSupportRequest,
-      opts ...grpc.CallOption) (*MultiplexingSupportResponse, error)
-  - file: third_party/openbao/sdk/helper/pluginutil/multiplexing_grpc.pb.go
-    kind: interface
-    name: PluginMultiplexingServer
-    signature: type PluginMultiplexingServer interface
-  - file: third_party/openbao/sdk/helper/pluginutil/multiplexing_grpc.pb.go
-    kind: method
-    name: PluginMultiplexingServer.MultiplexingSupport
-    signature: MultiplexingSupport(context.Context, *MultiplexingSupportRequest) (*MultiplexingSupportResponse,
-      error)
-  - file: third_party/openbao/sdk/helper/pluginutil/multiplexing.go
-    kind: struct
-    name: PluginMultiplexingServerImpl
-    signature: type PluginMultiplexingServerImpl struct
-  - file: third_party/openbao/sdk/helper/pluginutil/multiplexing.go
-    kind: method
-    name: PluginMultiplexingServerImpl.MultiplexingSupport
-    signature: func (pm PluginMultiplexingServerImpl) MultiplexingSupport(_ context.Context,
-      _ *MultiplexingSupportRequest) (*MultiplexingSupportResponse, error)
-  - file: third_party/openbao/sdk/helper/pluginutil/runner.go
-    kind: struct
-    name: PluginRunner
-    signature: type PluginRunner struct
-  - file: third_party/openbao/sdk/helper/pluginutil/runner.go
-    kind: method
-    name: PluginRunner.Run
-    signature: func (r *PluginRunner) Run(ctx context.Context, wrapper RunnerUtil,
-      pluginSets map[int]plugin.PluginSet, hs plugin.HandshakeConfig, env []string,
-      logger log.Logger) (*plugin.Client, error)
-  - file: third_party/openbao/sdk/helper/pluginutil/run_config.go
-    kind: method
-    name: PluginRunner.RunConfig
-    signature: func (r *PluginRunner) RunConfig(ctx context.Context, opts ...RunOpt)
-      (*plugin.Client, error)
-  - file: third_party/openbao/sdk/helper/pluginutil/runner.go
-    kind: method
-    name: PluginRunner.RunMetadataMode
-    signature: func (r *PluginRunner) RunMetadataMode(ctx context.Context, wrapper
-      RunnerUtil, pluginSets map[int]plugin.PluginSet, hs plugin.HandshakeConfig,
-      env []string, logger log.Logger) (*plugin.Client, error)
-  - file: third_party/openbao/sdk/helper/pluginutil/run_config.go
-    kind: function
-    name: PluginSets
-    signature: func PluginSets(pluginSets map[int]plugin.PluginSet) RunOpt
-  - file: third_party/openbao/sdk/helper/pluginutil/multiplexing_grpc.pb.go
-    kind: function
-    name: RegisterPluginMultiplexingServer
-    signature: func RegisterPluginMultiplexingServer(s grpc.ServiceRegistrar, srv
-      PluginMultiplexingServer)
-  - file: third_party/openbao/sdk/helper/pluginutil/run_config.go
-    kind: type_alias
-    name: RunOpt
-    signature: type RunOpt func(*PluginClientConfig)
-  - file: third_party/openbao/sdk/helper/pluginutil/run_config.go
-    kind: function
-    name: Runner
-    signature: func Runner(wrapper RunnerUtil) RunOpt
-  - file: third_party/openbao/sdk/helper/pluginutil/runner.go
-    kind: interface
-    name: RunnerUtil
-    signature: type RunnerUtil interface
-  - file: third_party/openbao/sdk/helper/pluginutil/runner.go
-    kind: method
-    name: RunnerUtil.MlockEnabled
-    signature: MlockEnabled() bool
-  - file: third_party/openbao/sdk/helper/pluginutil/runner.go
-    kind: method
-    name: RunnerUtil.NewPluginClient
-    signature: NewPluginClient(ctx context.Context, config PluginClientConfig) (PluginClient,
-      error)
-  - file: third_party/openbao/sdk/helper/pluginutil/runner.go
-    kind: method
-    name: RunnerUtil.ResponseWrapData
-    signature: ResponseWrapData(ctx context.Context, data map[string]any, ttl time.Duration,
-      jwt bool) (*wrapping.ResponseWrapInfo, error)
-  - file: third_party/openbao/sdk/helper/pluginutil/runner.go
-    kind: method
-    name: RunnerUtil.VaultVersion
-    signature: VaultVersion(ctx context.Context) (string, error)
-  - file: third_party/openbao/sdk/helper/pluginutil/multiplexing_grpc.pb.go
-    kind: struct
-    name: UnimplementedPluginMultiplexingServer
-    signature: type UnimplementedPluginMultiplexingServer struct
-  - file: third_party/openbao/sdk/helper/pluginutil/multiplexing_grpc.pb.go
-    kind: method
-    name: UnimplementedPluginMultiplexingServer.MultiplexingSupport
-    signature: func (UnimplementedPluginMultiplexingServer) MultiplexingSupport(context.Context,
-      *MultiplexingSupportRequest) (*MultiplexingSupportResponse, error)
-  - file: third_party/openbao/sdk/helper/pluginutil/multiplexing_grpc.pb.go
-    kind: interface
-    name: UnsafePluginMultiplexingServer
-    signature: type UnsafePluginMultiplexingServer interface
-  - file: third_party/openbao/sdk/helper/pluginutil/runner.go
-    kind: struct
-    name: VersionedPlugin
-    signature: type VersionedPlugin struct
-  - file: third_party/openbao/sdk/helper/pluginutil/multiplexing_grpc.pb.go
-    kind: method
-    name: pluginMultiplexingClient.MultiplexingSupport
-    signature: func (c *pluginMultiplexingClient) MultiplexingSupport(ctx context.Context,
-      in *MultiplexingSupportRequest, opts ...grpc.CallOption) (*MultiplexingSupportResponse,
-      error)
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/pluginutil/multiplexing_test.go
-    - file:third_party/openbao/sdk/helper/pluginutil/run_config_test.go
-    id: r.behaviour-pinned-by-tests
-    level: SHOULD
-    text: multiplexing_test.go pins the multiplexing negotiation behaviour and run_config_test.go
-      pins the RunOpt assembly, so changes to the opt-out list, the Unimplemented
-      fallback, or the option-to-field mapping must keep those tests passing.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/pluginutil/runner.go
-    - function:570753949cd6d5e387e7a564f98be5d6
-    id: r.ctx-cancel-helper
-    level: SHOULD
-    text: CtxCancelIfCanceled returns a channel that is closed once ctxCanceler is
-      done, calling the supplied context.CancelFunc at that point and exiting the
-      goroutine, so a plugin launched against a cancellable context is torn down when
-      the parent context ends.
-  - codeRefs:
-    - method:02fa2407e98e9363b04a7b3ebf023be0
-    - method:a55fe72e70ea9eafaa20d8c4726a8801
-    - struct:e9065d8ca9f63d400343f72ca75a1691
-    id: r.looker-lookup
-    level: MUST
-    text: Looker resolves a plugin by name and plugin type into a PluginRunner, and
-      LookupPluginVersion resolves the same but pins an explicit version string, so
-      callers can select either the default or a specific installed plugin version.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/pluginutil/env.go
-    - function:1d28340916bd885f2bd904029a7bd930
-    id: r.metadata-mode-env-gate
-    level: MUST
-    text: InMetadataMode reports the plugin as running in metadata mode exactly when
-      the PluginMetadataModeEnv Bao variable reads "true", and false otherwise.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/pluginutil/env.go
-    - function:82f5b8a574d5603675f1d6b78f5b9506
-    id: r.mlock-env-gate
-    level: MUST
-    text: OptionallyEnableMlock reads the PluginMlockEnabled Bao variable and calls
-      mlock.LockMemory only when that variable equals the literal string "true"; in
-      every other case it returns nil without locking.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/pluginutil/multiplexing.go
-    - function:614468a9e8c6f55bdcdbca753fe26d0e
-    id: r.multiplex-id-from-context
-    level: MUST
-    text: GetMultiplexIDFromContext extracts the multiplexing identifier carried on
-      the context and returns it as a string, returning an error when the context
-      holds no such value.
-  - codeRefs:
-    - function:48c88e80e6fb0d2b6f42b45a18b0614a
-    - method:1e59d39b4632029e10a4d2ba09c3cc9f
-    - method:5b05646c21c4754e0e45a517995ac4b0
-    id: r.multiplexing-degrades-to-false
-    level: MUST
-    text: When the MultiplexingSupport RPC is not opted out, MultiplexingSupported
-      sends a MultiplexingSupportRequest through NewPluginMultiplexingClient and returns
-      the Supported field of the response; a gRPC codes.Unimplemented status and a
-      nil response both collapse to (false, nil) rather than an error, while any other
-      RPC error is propagated.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/pluginutil/multiplexing.go
-    - function:48c88e80e6fb0d2b6f42b45a18b0614a
-    id: r.multiplexing-negotiation
-    level: MUST
-    text: MultiplexingSupported returns an error when the gRPC client connection is
-      nil; otherwise it splits the PluginMultiplexingOptOut Bao variable on commas
-      and returns false when the caller-supplied plugin name appears in that list,
-      so a named plugin can opt out of multiplexing before any RPC is attempted.
-  - codeRefs:
-    - function:d3eeb60152564378665bccceb0b98323
-    - interface:2663b27c152935bcf4cd53bc0ceee9fc
-    - method:56a84b6a5e369922debbf43b0e6c0af5
-    id: r.multiplexing-registration
-    level: MUST
-    text: RegisterPluginMultiplexingServer registers a PluginMultiplexingServer implementation
-      against a grpc.ServiceRegistrar under the service name recorded in the generated
-      descriptor, and UnimplementedPluginMultiplexingServer.MultiplexingSupport answers
-      the codes.Unimplemented error so an embedding server that does not override
-      it degrades to the not-multiplexed path.
-  - codeRefs:
-    - method:744d2b2e4bec2ee4aa46fa13453c3e60
-    - struct:6eaa8a254538ef2f2b5f3a526a2b7e08
-    id: r.multiplexing-server-answers-supported
-    level: MUST
-    text: PluginMultiplexingServerImpl.MultiplexingSupport ignores both its context
-      and request arguments and replies with a MultiplexingSupportResponse whose Supported
-      field is copied from the receiver's Supported field, so registering the implementation
-      advertises the plugin's multiplexing capability.
-  - codeRefs:
-    - interface:cbb69c7b9c94c7db8a5792145ca6aa26
-    - method:2e98f1de279766b21b10c81f1be8b497
-    - method:2fadc1892af1cd8c869a9ed2460491a8
-    - method:4b35c36f0d40317a160a7260e04786de
-    - method:9c74ad39e6d13e04922868bde41f5dd3
-    id: r.plugin-client-contract
-    level: MUST
-    text: PluginClient exposes Conn, which returns the underlying grpc.ClientConnInterface
-      for direct RPC use, and Reload, which asks the host to restart the plugin process;
-      PluginRunner.Run and PluginRunner.RunMetadataMode both launch a plugin from
-      a wrapper, plugin sets, handshake config, environment slice and logger, with
-      the metadata-mode variant starting the process in the metadata mode used for
-      plugin introspection.
-  - codeRefs:
-    - method:5b05646c21c4754e0e45a517995ac4b0
-    - struct:832343878007224f9216f719d373c4a2
-    - struct:dda575f64eb8ea023c2fcfc7dfc1f8c4
-    id: r.protobuf-message-contract
-    level: MUST
-    text: MultiplexingSupportRequest and MultiplexingSupportResponse implement the
-      protobuf message surface — Reset, String, ProtoMessage, ProtoReflect and Descriptor
-      — and MultiplexingSupportResponse additionally exposes GetSupported, which returns
-      the Supported bool with a false value for a nil receiver so callers can read
-      the flag without a nil check.
-  - codeRefs:
-    - method:0117e69146f6720229df4b635e2aa83c
-    - method:70cf41d2274e5b816d9c7fc7c8a2ac96
-    - struct:64f39a7b53db0745bafd968deff64aa8
-    id: r.run-config-builds-client
-    level: MUST
-    text: PluginRunner.RunConfig applies each supplied RunOpt to a PluginClientConfig
-      and delegates to RunnerUtil.NewPluginClient, returning the resulting PluginClient
-      as a go-plugin client or the error from the runner, so the caller never has
-      to construct the config struct by hand.
-  - codeRefs:
-    - function:116a783b6b861d4bd625df8e0334a94d
-    - function:4865f54d34162b4eca80a8e2631e4167
-    - function:5aa4380bca3b1928c1b116b21d4bfdf4
-    - function:6f5bc79892dd4f74f85dfcbbca6f62c7
-    - function:97e626f0ec471ddba7eea78743c78d31
-    - function:9e11ba299d75d1cfa994fd23fd4ca10c
-    - function:9fd220a7179b845fe2608c8684c73aca
-    - function:e24349af21ae65ddae4c8f90ee2cd46d
-    - type_alias:cff08e0e12fd187b4aea42d230d2fe3a
-    id: r.run-opt-options
-    level: MUST
-    text: RunOpt is a functional-option type over PluginClientConfig, and the constructors
-      Env, Runner, PluginSets, HandshakeConfig, Logger, MetadataMode, AutoMTLS and
-      MLock each mutate exactly their matching field — the environment slice, the
-      RunnerUtil wrapper, the per-protocol plugin sets, the handshake config, the
-      logger, the metadata-mode flag, the auto-mTLS flag and the mlock flag — leaving
-      every other field untouched.
-  - codeRefs:
-    - interface:78ed783a494ecc5b382ce9e517b15538
-    - interface:b5c78d1a3643602257c44aba69db60ef
-    - interface:f9cc8171d1cffc85a4a61a0c963fd2ac
-    - method:5e5bca3b1e05b7d98b3572c4764f4851
-    - method:afb47878fa376ef45130df9c35175284
-    - method:f5df2b2dbd22801a7f4a26b2e5a0fe76
-    id: r.runner-util-contract
-    level: MUST
-    text: 'RunnerUtil is the host-side contract a caller must satisfy to launch plugins:
-      NewPluginClient returns a PluginClient for a config and context, ResponseWrapData
-      produces a wrapping.ResponseWrapInfo for a data map with a TTL and a JWT flag,
-      MlockEnabled reports whether memory locking is on, and VaultVersion returns
-      the host version string; LookRunnerUtil is the intersection of Looker and RunnerUtil,
-      so a plugin host must supply both lookup and launch behaviour.'
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/pluginutil/tls.go
-    id: r.tls-transport
-    level: SHOULD
-    text: tls.go supplies the TLS helper used by the plugin transport so plugin RPCs
-      are wrapped with the SDK's certificate handling rather than a bare connection.
-  upstream: self

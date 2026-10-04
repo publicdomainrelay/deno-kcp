@@ -1,11 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/ui/lib/open-api-explorer/addon/routes/index.js index.js@third_party/openbao/ui/lib/open-api-explorer/addon/routes/index.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-lib-open-api-explorer-addon-routes
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'This context exists so the OpenBao API explorer route warns users, before
     any interaction, about the side effects of the explorer''s "Try it out" feature.
     It is the route-level guard for a UI whose requests act on a real OpenBao server
@@ -13,49 +13,49 @@ spec:
     rather than after a request is issued. The empty model hook is part of the same
     intent: it keeps the explorer''s own query-param state from being clobbered by
     an inherited parent model.'
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/ui/lib/open-api-explorer/addon/routes/index.js
-    id: r.after-model-warning
+  - id: r.after-model-warning
     level: MUST
     text: The route's afterModel hook calls this.flashMessages.warning exactly once
       with the warning text and the options sticky true and preformatted true, so
       the notice persists and renders with its line breaks intact.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/open-api-explorer/addon/routes/index.js
-    id: r.default-route-extension
+  - id: r.default-route-extension
     level: MUST
     text: The module default-exports a single Ember Route instance created by Route.extend,
       which becomes the open-api-explorer index route; the route object is the only
       thing the module exports.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/open-api-explorer/addon/routes/index.js
-    id: r.flash-messages-service-injection
+  - id: r.flash-messages-service-injection
     level: MUST
     text: The route injects the flashMessages service with the service() injector
       imported from @ember/service under the property name flashMessages, so that
       afterModel can push a warning into the application's flash message queue.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/open-api-explorer/addon/routes/index.js
-    id: r.license-header
+  - id: r.license-header
     level: MUST
     text: The file carries the HashiCorp copyright header and the SPDX-License-Identifier
       MPL-2.0 comment at the top, as required for vendored OpenBao source.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/open-api-explorer/addon/routes/index.js
-    id: r.no-op-model-hook
+  - id: r.no-op-model-hook
     level: MUST
     text: The route defines an empty model hook that returns nothing, so Ember does
       not reuse the parent route's model, which would conflict with this route's query
       params.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/open-api-explorer/addon/routes/index.js
-    id: r.warning-content
+  - id: r.warning-content
     level: MUST
     text: The warning text states that the "Try it out" functionality in the API explorer
       makes requests to the OpenBao server on the user's behalf, that if the token
       has the proper capabilities this will create and delete items on the OpenBao
       server, and that the token will also be shown on the screen in the example curl
       command output.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/ui/lib/open-api-explorer/addon/routes/index.js
+codeRefIndex:
+- file:third_party/openbao/ui/lib/open-api-explorer/addon/routes/index.js index.js@third_party/openbao/ui/lib/open-api-explorer/addon/routes/index.js

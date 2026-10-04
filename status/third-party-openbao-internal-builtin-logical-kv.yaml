@@ -1,18 +1,21 @@
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 8b76ce45b3c1ff117fda142ba6f3a7c9c6508efb487db225842f9d5f6b0f9e1a
+realizedSpecHash: 1d02f07642a5ee4826977f95f1abe00fffea555e6cfed0b45363411008b52ec0
 conditions:
-- message: 'undeclared: KeyMetadata.Descriptor, KeyMetadata.ProtoMessage, KeyMetadata.ProtoReflect,
+- type: CodeSynced
+  status: "False"
+  reason: InterfacesMissing
+  message: 'undeclared: KeyMetadata.Descriptor, KeyMetadata.ProtoMessage, KeyMetadata.ProtoReflect,
     KeyMetadata.Reset, KeyMetadata.String, VersionMetadata.Descriptor, VersionMetadata.ProtoMessage,
     VersionMetadata.ProtoReflect, VersionMetadata.Reset, VersionMetadata.String'
-  reason: InterfacesMissing
+- type: Drifted
   status: "False"
-  type: CodeSynced
-- message: observed facts match the synced fingerprint
   reason: FingerprintEqual
-  status: "False"
-  type: Drifted
-- message: the spec passes the validator
-  reason: ValidatorPassed
+  message: observed facts match the synced fingerprint
+- type: SpecValid
   status: "True"
-  type: SpecValid
+  reason: ValidatorPassed
+  message: the spec passes the validator
 observed:
   files:
   - third_party/openbao/internal/builtin/logical/kv/backend.go
@@ -35,433 +38,430 @@ observed:
   - third_party/openbao/internal/builtin/logical/kv/types.pb.go
   - third_party/openbao/internal/builtin/logical/kv/upgrade.go
   - third_party/openbao/internal/builtin/logical/kv/upgrade_test.go
-  fingerprint: 8b76ce45b3c1ff117fda142ba6f3a7c9c6508efb487db225842f9d5f6b0f9e1a
   interfaces:
-  - codegraphId: function:5fcdf7982ae03bba4203bc39c5406900
-    file: third_party/openbao/internal/builtin/logical/kv/backend.go
+  - name: Factory
     kind: function
+    signature: (ctx context.Context, conf *logical.BackendConfig) (logical.Backend,
+      error)
+    file: third_party/openbao/internal/builtin/logical/kv/backend.go
     line: 79
-    name: Factory
+    codegraphId: function:5fcdf7982ae03bba4203bc39c5406900
+  - name: VersionedKVFactory
+    kind: function
     signature: (ctx context.Context, conf *logical.BackendConfig) (logical.Backend,
       error)
-  - codegraphId: function:84e679d44e00f2f0fa66550bce1db1bc
     file: third_party/openbao/internal/builtin/logical/kv/backend.go
-    kind: function
     line: 98
-    name: VersionedKVFactory
-    signature: (ctx context.Context, conf *logical.BackendConfig) (logical.Backend,
-      error)
-  - codegraphId: method:f5909d260f563448d984345fbd09d030
-    file: third_party/openbao/internal/builtin/logical/kv/backend.go
+    codegraphId: function:84e679d44e00f2f0fa66550bce1db1bc
+  - name: versionedKVBackend.Cleanup
     kind: method
-    line: 214
-    name: versionedKVBackend.Cleanup
     signature: (ctx context.Context)
-  - codegraphId: method:ecb117f78d684863ae523519b5e3af95
     file: third_party/openbao/internal/builtin/logical/kv/backend.go
+    line: 214
+    codegraphId: method:f5909d260f563448d984345fbd09d030
+  - name: versionedKVBackend.Invalidate
     kind: method
-    line: 222
-    name: versionedKVBackend.Invalidate
     signature: (ctx context.Context, key string)
-  - codegraphId: method:0fbd0f3cf35d1f1d1ec161fc87fe3661
     file: third_party/openbao/internal/builtin/logical/kv/backend.go
+    line: 222
+    codegraphId: method:ecb117f78d684863ae523519b5e3af95
+  - name: versionedKVBackend.Salt
     kind: method
-    line: 241
-    name: versionedKVBackend.Salt
     signature: (ctx context.Context, s logical.Storage) (*salt.Salt, error)
-  - codegraphId: method:8c335d66de99d3f69de17e0138118ac1
-    file: third_party/openbao/internal/builtin/logical/kv/delete_version_after.go
+    file: third_party/openbao/internal/builtin/logical/kv/backend.go
+    line: 241
+    codegraphId: method:0fbd0f3cf35d1f1d1ec161fc87fe3661
+  - name: deleteVersionAfterGetter.GetDeleteVersionAfter
     kind: method
-    line: 27
-    name: deleteVersionAfterGetter.GetDeleteVersionAfter
     signature: () *durationpb.Duration
-  - codegraphId: method:48872ceadb4870f7b55413de370307f4
     file: third_party/openbao/internal/builtin/logical/kv/delete_version_after.go
-    kind: method
-    line: 47
-    name: Configuration.IsDeleteVersionAfterDisabled
-    signature: () bool
-  - codegraphId: method:63a13ea1b4728b1bba83a69cf1ee2620
-    file: third_party/openbao/internal/builtin/logical/kv/delete_version_after.go
-    kind: method
-    line: 52
-    name: Configuration.DisableDeleteVersionAfter
-    signature: ()
-  - codegraphId: method:1a0d09d668b21f82b5e0182563b41385
-    file: third_party/openbao/internal/builtin/logical/kv/delete_version_after.go
-    kind: method
-    line: 58
-    name: Configuration.ResetDeleteVersionAfter
-    signature: ()
-  - codegraphId: interface:53ea5d2d60b2adc53a6ac04664c96914
-    file: third_party/openbao/internal/builtin/logical/kv/passthrough.go
-    kind: interface
-    line: 17
-    name: Passthrough
-  - codegraphId: function:90356317fc490e84ebfd192e84cb6157
-    file: third_party/openbao/internal/builtin/logical/kv/passthrough.go
-    kind: function
     line: 27
-    name: PassthroughBackendFactory
+    codegraphId: method:8c335d66de99d3f69de17e0138118ac1
+  - name: Configuration.IsDeleteVersionAfterDisabled
+    kind: method
+    signature: () bool
+    file: third_party/openbao/internal/builtin/logical/kv/delete_version_after.go
+    line: 47
+    codegraphId: method:48872ceadb4870f7b55413de370307f4
+  - name: Configuration.DisableDeleteVersionAfter
+    kind: method
+    signature: ()
+    file: third_party/openbao/internal/builtin/logical/kv/delete_version_after.go
+    line: 52
+    codegraphId: method:63a13ea1b4728b1bba83a69cf1ee2620
+  - name: Configuration.ResetDeleteVersionAfter
+    kind: method
+    signature: ()
+    file: third_party/openbao/internal/builtin/logical/kv/delete_version_after.go
+    line: 58
+    codegraphId: method:1a0d09d668b21f82b5e0182563b41385
+  - name: Passthrough
+    kind: interface
+    file: third_party/openbao/internal/builtin/logical/kv/passthrough.go
+    line: 17
+    codegraphId: interface:53ea5d2d60b2adc53a6ac04664c96914
+  - name: PassthroughBackendFactory
+    kind: function
     signature: (ctx context.Context, conf *logical.BackendConfig) (logical.Backend,
       error)
-  - codegraphId: function:d43fb0f0c8c3c2c25ec72221964346b4
     file: third_party/openbao/internal/builtin/logical/kv/passthrough.go
+    line: 27
+    codegraphId: function:90356317fc490e84ebfd192e84cb6157
+  - name: LeasedPassthroughBackendFactory
     kind: function
+    signature: (ctx context.Context, conf *logical.BackendConfig) (logical.Backend,
+      error)
+    file: third_party/openbao/internal/builtin/logical/kv/passthrough.go
     line: 33
-    name: LeasedPassthroughBackendFactory
-    signature: (ctx context.Context, conf *logical.BackendConfig) (logical.Backend,
-      error)
-  - codegraphId: function:778fef452fd9feebfb8741bdccad3f35
-    file: third_party/openbao/internal/builtin/logical/kv/passthrough.go
+    codegraphId: function:d43fb0f0c8c3c2c25ec72221964346b4
+  - name: LeaseSwitchedPassthroughBackend
     kind: function
-    line: 39
-    name: LeaseSwitchedPassthroughBackend
     signature: (ctx context.Context, conf *logical.BackendConfig, leases bool) (logical.Backend,
       error)
-  - codegraphId: struct:a99b80262036efd07220ce3d5cec7438
     file: third_party/openbao/internal/builtin/logical/kv/passthrough.go
+    line: 39
+    codegraphId: function:778fef452fd9feebfb8741bdccad3f35
+  - name: PassthroughBackend
     kind: struct
-    line: 122
-    name: PassthroughBackend
-  - codegraphId: method:c5e0e72d4faa4d927a79851e31cdc6fe
     file: third_party/openbao/internal/builtin/logical/kv/passthrough.go
+    line: 122
+    codegraphId: struct:a99b80262036efd07220ce3d5cec7438
+  - name: PassthroughBackend.GeneratesLeases
     kind: method
-    line: 206
-    name: PassthroughBackend.GeneratesLeases
     signature: () bool
-  - codegraphId: method:1a6df70c296f2a6e7d8aa4a3d3d5abb2
-    file: third_party/openbao/internal/builtin/logical/kv/path_data.go
+    file: third_party/openbao/internal/builtin/logical/kv/passthrough.go
+    line: 206
+    codegraphId: method:c5e0e72d4faa4d927a79851e31cdc6fe
+  - name: KeyMetadata.AddVersion
     kind: method
-    line: 680
-    name: KeyMetadata.AddVersion
     signature: (createdTime, deletionTime *timestamppb.Timestamp, configMaxVersions
       uint32) (*VersionMetadata, uint64)
-  - codegraphId: struct:602c72e936a6725a7d0d8bf7a7d02223
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    file: third_party/openbao/internal/builtin/logical/kv/path_data.go
+    line: 680
+    codegraphId: method:1a6df70c296f2a6e7d8aa4a3d3d5abb2
+  - name: Configuration
     kind: struct
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 27
-    name: Configuration
-  - codegraphId: method:846b341836637f13f26955fcb8f60911
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: struct:602c72e936a6725a7d0d8bf7a7d02223
+  - name: Configuration.Reset
     kind: method
+    signature: ()
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 37
-    name: Configuration.Reset
-    signature: ()
-  - codegraphId: method:a4e433cbb2f0b255377aeb087262842d
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: method:846b341836637f13f26955fcb8f60911
+  - name: Configuration.String
     kind: method
+    signature: () string
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 44
-    name: Configuration.String
-    signature: () string
-  - codegraphId: method:7b042dd4f0a69c5d18a91bd7dcac61ed
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: method:a4e433cbb2f0b255377aeb087262842d
+  - name: Configuration.ProtoMessage
     kind: method
+    signature: ()
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 48
-    name: Configuration.ProtoMessage
-    signature: ()
-  - codegraphId: method:c095ed7b9c7da8c3cd0a61c11192fa48
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: method:7b042dd4f0a69c5d18a91bd7dcac61ed
+  - name: Configuration.ProtoReflect
     kind: method
+    signature: () protoreflect.Message
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 50
-    name: Configuration.ProtoReflect
-    signature: () protoreflect.Message
-  - codegraphId: method:2e1528ea4c97b2e57195886dd7e3f097
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: method:c095ed7b9c7da8c3cd0a61c11192fa48
+  - name: Configuration.Descriptor
     kind: method
+    signature: () ([]byte, []int)
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 63
-    name: Configuration.Descriptor
-    signature: () ([]byte, []int)
-  - codegraphId: method:f3a70af10d3f80a7e3e6a73554de9223
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: method:2e1528ea4c97b2e57195886dd7e3f097
+  - name: Configuration.GetMaxVersions
     kind: method
+    signature: () uint32
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 67
-    name: Configuration.GetMaxVersions
-    signature: () uint32
-  - codegraphId: method:43c8a046b7f3e9d4474ff332247435b4
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: method:f3a70af10d3f80a7e3e6a73554de9223
+  - name: Configuration.GetCasRequired
     kind: method
+    signature: () bool
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 74
-    name: Configuration.GetCasRequired
-    signature: () bool
-  - codegraphId: method:5cdd63e5d66feecd8add8f17b2ad22c1
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: method:43c8a046b7f3e9d4474ff332247435b4
+  - name: Configuration.GetDeleteVersionAfter
     kind: method
+    signature: () *durationpb.Duration
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 81
-    name: Configuration.GetDeleteVersionAfter
-    signature: () *durationpb.Duration
-  - codegraphId: method:5b122daa4a84b8f06fb18c8d59a921ab
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: method:5cdd63e5d66feecd8add8f17b2ad22c1
+  - name: Configuration.GetMetadataCasRequired
     kind: method
+    signature: () bool
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 88
-    name: Configuration.GetMetadataCasRequired
-    signature: () bool
-  - codegraphId: struct:1b3bc262aee3825d7be629949168940b
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: method:5b122daa4a84b8f06fb18c8d59a921ab
+  - name: VersionMetadata
     kind: struct
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 95
-    name: VersionMetadata
-  - codegraphId: method:c1c9afa75c58ecce1069992d3b190581
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: struct:1b3bc262aee3825d7be629949168940b
+  - name: VersionMetadata.Reset
     kind: method
+    signature: ()
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 110
-    name: VersionMetadata.Reset
-    signature: ()
-  - codegraphId: method:99cc5db77d89bb7d039ec99dcca44aab
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: method:c1c9afa75c58ecce1069992d3b190581
+  - name: VersionMetadata.String
     kind: method
+    signature: () string
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 117
-    name: VersionMetadata.String
-    signature: () string
-  - codegraphId: method:b129d9b05c6b193d332c8b829bf2da58
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: method:99cc5db77d89bb7d039ec99dcca44aab
+  - name: VersionMetadata.ProtoMessage
     kind: method
+    signature: ()
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 121
-    name: VersionMetadata.ProtoMessage
-    signature: ()
-  - codegraphId: method:e1e5d2eeb3401fa58534e8d6e408b9f0
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: method:b129d9b05c6b193d332c8b829bf2da58
+  - name: VersionMetadata.ProtoReflect
     kind: method
+    signature: () protoreflect.Message
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 123
-    name: VersionMetadata.ProtoReflect
-    signature: () protoreflect.Message
-  - codegraphId: method:fc5aa69f946d89f46f6ed2c95656e091
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: method:e1e5d2eeb3401fa58534e8d6e408b9f0
+  - name: VersionMetadata.Descriptor
     kind: method
+    signature: () ([]byte, []int)
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 136
-    name: VersionMetadata.Descriptor
-    signature: () ([]byte, []int)
-  - codegraphId: method:8f53bbd4a8bf9299292fb50cab63aff7
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: method:fc5aa69f946d89f46f6ed2c95656e091
+  - name: VersionMetadata.GetCreatedTime
     kind: method
+    signature: () *timestamppb.Timestamp
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 140
-    name: VersionMetadata.GetCreatedTime
-    signature: () *timestamppb.Timestamp
-  - codegraphId: method:f9d661b94003b422417cdedcfa5f644e
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: method:8f53bbd4a8bf9299292fb50cab63aff7
+  - name: VersionMetadata.GetDeletionTime
     kind: method
+    signature: () *timestamppb.Timestamp
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 147
-    name: VersionMetadata.GetDeletionTime
-    signature: () *timestamppb.Timestamp
-  - codegraphId: method:6e3e20ca59f6690b6e50bc3f72ce286c
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: method:f9d661b94003b422417cdedcfa5f644e
+  - name: VersionMetadata.GetDestroyed
     kind: method
+    signature: () bool
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 154
-    name: VersionMetadata.GetDestroyed
-    signature: () bool
-  - codegraphId: struct:fc97c951480eea58123fbac86e4df12b
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: method:6e3e20ca59f6690b6e50bc3f72ce286c
+  - name: KeyMetadata
     kind: struct
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 161
-    name: KeyMetadata
-  - codegraphId: method:d259d1234d212deb23c7c7ee2e3e77c1
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: struct:fc97c951480eea58123fbac86e4df12b
+  - name: KeyMetadata.Reset
     kind: method
+    signature: ()
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 201
-    name: KeyMetadata.Reset
-    signature: ()
-  - codegraphId: method:d7c636e642654138c746ab4586d79003
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: method:d259d1234d212deb23c7c7ee2e3e77c1
+  - name: KeyMetadata.String
     kind: method
+    signature: () string
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 208
-    name: KeyMetadata.String
-    signature: () string
-  - codegraphId: method:8d0936cdaa58603a7954b6024e1549fe
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: method:d7c636e642654138c746ab4586d79003
+  - name: KeyMetadata.ProtoMessage
     kind: method
+    signature: ()
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 212
-    name: KeyMetadata.ProtoMessage
-    signature: ()
-  - codegraphId: method:a9b4aef3f81f6e5a9aea62587d7e8ace
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: method:8d0936cdaa58603a7954b6024e1549fe
+  - name: KeyMetadata.ProtoReflect
     kind: method
+    signature: () protoreflect.Message
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 214
-    name: KeyMetadata.ProtoReflect
-    signature: () protoreflect.Message
-  - codegraphId: method:aa1cdb0e656d72d5ae7c760258b737bc
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: method:a9b4aef3f81f6e5a9aea62587d7e8ace
+  - name: KeyMetadata.Descriptor
     kind: method
+    signature: () ([]byte, []int)
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 227
-    name: KeyMetadata.Descriptor
-    signature: () ([]byte, []int)
-  - codegraphId: method:82171a9381c918072e55f4ed4e84ffbc
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: method:aa1cdb0e656d72d5ae7c760258b737bc
+  - name: KeyMetadata.GetKey
     kind: method
+    signature: () string
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 231
-    name: KeyMetadata.GetKey
-    signature: () string
-  - codegraphId: method:4b18eb3baf24c04dcb2c0cf759e72258
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: method:82171a9381c918072e55f4ed4e84ffbc
+  - name: KeyMetadata.GetVersions
     kind: method
-    line: 238
-    name: KeyMetadata.GetVersions
     signature: () map[uint64]*VersionMetadata
-  - codegraphId: method:d52f89735b4f3b670dfb0b1d5e56467d
     file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    line: 238
+    codegraphId: method:4b18eb3baf24c04dcb2c0cf759e72258
+  - name: KeyMetadata.GetCurrentVersion
     kind: method
+    signature: () uint64
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 245
-    name: KeyMetadata.GetCurrentVersion
-    signature: () uint64
-  - codegraphId: method:599e5305ed222a21773656d9594cda2b
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: method:d52f89735b4f3b670dfb0b1d5e56467d
+  - name: KeyMetadata.GetOldestVersion
     kind: method
+    signature: () uint64
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 252
-    name: KeyMetadata.GetOldestVersion
-    signature: () uint64
-  - codegraphId: method:a21b2c5485cab131adc3cf2a04a0e9ea
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: method:599e5305ed222a21773656d9594cda2b
+  - name: KeyMetadata.GetCreatedTime
     kind: method
+    signature: () *timestamppb.Timestamp
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 259
-    name: KeyMetadata.GetCreatedTime
-    signature: () *timestamppb.Timestamp
-  - codegraphId: method:606040021e37bd3e65d345ea731b3d56
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: method:a21b2c5485cab131adc3cf2a04a0e9ea
+  - name: KeyMetadata.GetUpdatedTime
     kind: method
+    signature: () *timestamppb.Timestamp
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 266
-    name: KeyMetadata.GetUpdatedTime
-    signature: () *timestamppb.Timestamp
-  - codegraphId: method:7deebc1dc53eab132b93c07fcababccb
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: method:606040021e37bd3e65d345ea731b3d56
+  - name: KeyMetadata.GetMaxVersions
     kind: method
-    line: 273
-    name: KeyMetadata.GetMaxVersions
     signature: () uint32
-  - codegraphId: method:eb870a03eaf63bab618862c1b0ab492e
     file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    line: 273
+    codegraphId: method:7deebc1dc53eab132b93c07fcababccb
+  - name: KeyMetadata.GetCasRequired
     kind: method
+    signature: () bool
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 280
-    name: KeyMetadata.GetCasRequired
-    signature: () bool
-  - codegraphId: method:6b7e6753958bec9efd0313a905dbd46c
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: method:eb870a03eaf63bab618862c1b0ab492e
+  - name: KeyMetadata.GetDeleteVersionAfter
     kind: method
-    line: 287
-    name: KeyMetadata.GetDeleteVersionAfter
     signature: () *durationpb.Duration
-  - codegraphId: method:552c18fc7b690674e73a188a6bb7a53b
     file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    line: 287
+    codegraphId: method:6b7e6753958bec9efd0313a905dbd46c
+  - name: KeyMetadata.GetCustomMetadata
     kind: method
-    line: 294
-    name: KeyMetadata.GetCustomMetadata
     signature: () map[string]string
-  - codegraphId: method:a0e0be89cf372ba2f4bb0f95cde274ea
     file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    line: 294
+    codegraphId: method:552c18fc7b690674e73a188a6bb7a53b
+  - name: KeyMetadata.GetMetadataCasRequired
     kind: method
+    signature: () bool
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 301
-    name: KeyMetadata.GetMetadataCasRequired
-    signature: () bool
-  - codegraphId: method:dd046bc715a2d8e1856735b93b03b883
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: method:a0e0be89cf372ba2f4bb0f95cde274ea
+  - name: KeyMetadata.GetCurrentMetadataVersion
     kind: method
-    line: 308
-    name: KeyMetadata.GetCurrentMetadataVersion
     signature: () uint64
-  - codegraphId: struct:9592f5063b50dc739a3be3a50f36d882
     file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    line: 308
+    codegraphId: method:dd046bc715a2d8e1856735b93b03b883
+  - name: Version
     kind: struct
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 315
-    name: Version
-  - codegraphId: method:ef5b13a286b983407729c9344ac69dd2
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: struct:9592f5063b50dc739a3be3a50f36d882
+  - name: Version.Reset
     kind: method
+    signature: ()
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 330
-    name: Version.Reset
-    signature: ()
-  - codegraphId: method:9284be90de62c1fb86b620e5a3aa9896
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: method:ef5b13a286b983407729c9344ac69dd2
+  - name: Version.String
     kind: method
+    signature: () string
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 337
-    name: Version.String
-    signature: () string
-  - codegraphId: method:8bbde907bd9a9bc983d7c5c5094bf345
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: method:9284be90de62c1fb86b620e5a3aa9896
+  - name: Version.ProtoMessage
     kind: method
+    signature: ()
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 341
-    name: Version.ProtoMessage
-    signature: ()
-  - codegraphId: method:855d84f70d5f68a2d29756b7f5fa4b82
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: method:8bbde907bd9a9bc983d7c5c5094bf345
+  - name: Version.ProtoReflect
     kind: method
+    signature: () protoreflect.Message
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 343
-    name: Version.ProtoReflect
-    signature: () protoreflect.Message
-  - codegraphId: method:387b489521011740f0200739fd7d428c
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: method:855d84f70d5f68a2d29756b7f5fa4b82
+  - name: Version.Descriptor
     kind: method
+    signature: () ([]byte, []int)
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 356
-    name: Version.Descriptor
-    signature: () ([]byte, []int)
-  - codegraphId: method:3dc9638c8f97f4ba51a1290d931e5183
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: method:387b489521011740f0200739fd7d428c
+  - name: Version.GetData
     kind: method
-    line: 360
-    name: Version.GetData
     signature: () []byte
-  - codegraphId: method:4a69613ad0bf60102650a922b801e483
     file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    line: 360
+    codegraphId: method:3dc9638c8f97f4ba51a1290d931e5183
+  - name: Version.GetCreatedTime
     kind: method
+    signature: () *timestamppb.Timestamp
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 367
-    name: Version.GetCreatedTime
-    signature: () *timestamppb.Timestamp
-  - codegraphId: method:0731b8446cfba4fcbe3a49dc76d27c73
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: method:4a69613ad0bf60102650a922b801e483
+  - name: Version.GetDeletionTime
     kind: method
+    signature: () *timestamppb.Timestamp
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 374
-    name: Version.GetDeletionTime
-    signature: () *timestamppb.Timestamp
-  - codegraphId: struct:4a39071bd81f485ebf4ebb1c70817103
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: method:0731b8446cfba4fcbe3a49dc76d27c73
+  - name: UpgradeInfo
     kind: struct
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 381
-    name: UpgradeInfo
-  - codegraphId: method:e06caf3f6ee0c953c0be27871c21559a
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: struct:4a39071bd81f485ebf4ebb1c70817103
+  - name: UpgradeInfo.Reset
     kind: method
+    signature: ()
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
     line: 392
-    name: UpgradeInfo.Reset
-    signature: ()
-  - codegraphId: method:89dcd6635c798fc4953abf8dd1e584e0
-    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    codegraphId: method:e06caf3f6ee0c953c0be27871c21559a
+  - name: UpgradeInfo.String
     kind: method
-    line: 399
-    name: UpgradeInfo.String
     signature: () string
-  - codegraphId: method:0672e4f40697d72f6b93499722d1d493
     file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    line: 399
+    codegraphId: method:89dcd6635c798fc4953abf8dd1e584e0
+  - name: UpgradeInfo.ProtoMessage
     kind: method
-    line: 403
-    name: UpgradeInfo.ProtoMessage
     signature: ()
-  - codegraphId: method:518d8a394a16d00318365fe3a893d0f3
     file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    line: 403
+    codegraphId: method:0672e4f40697d72f6b93499722d1d493
+  - name: UpgradeInfo.ProtoReflect
     kind: method
-    line: 405
-    name: UpgradeInfo.ProtoReflect
     signature: () protoreflect.Message
-  - codegraphId: method:6b6969f27db13b68a72517d8e7d97187
     file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    line: 405
+    codegraphId: method:518d8a394a16d00318365fe3a893d0f3
+  - name: UpgradeInfo.Descriptor
     kind: method
-    line: 418
-    name: UpgradeInfo.Descriptor
     signature: () ([]byte, []int)
-  - codegraphId: method:6c4cece2ad1f07035c21e58b88820c58
     file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    line: 418
+    codegraphId: method:6b6969f27db13b68a72517d8e7d97187
+  - name: UpgradeInfo.GetStartedTime
     kind: method
-    line: 422
-    name: UpgradeInfo.GetStartedTime
     signature: () *timestamppb.Timestamp
-  - codegraphId: method:37f0bb7dc1e0d867af2f2979d72969e3
     file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    line: 422
+    codegraphId: method:6c4cece2ad1f07035c21e58b88820c58
+  - name: UpgradeInfo.GetDone
     kind: method
-    line: 429
-    name: UpgradeInfo.GetDone
     signature: () bool
-  - codegraphId: method:fdd05a5d8c350a1c63d475834bfa2416
-    file: third_party/openbao/internal/builtin/logical/kv/upgrade.go
+    file: third_party/openbao/internal/builtin/logical/kv/types.pb.go
+    line: 429
+    codegraphId: method:37f0bb7dc1e0d867af2f2979d72969e3
+  - name: versionedKVBackend.Upgrade
     kind: method
-    line: 68
-    name: versionedKVBackend.Upgrade
     signature: (ctx context.Context, s logical.Storage) error
-realizedSpecHash: 1d02f07642a5ee4826977f95f1abe00fffea555e6cfed0b45363411008b52ec0
-syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-syncedFingerprint: 8b76ce45b3c1ff117fda142ba6f3a7c9c6508efb487db225842f9d5f6b0f9e1a
+    file: third_party/openbao/internal/builtin/logical/kv/upgrade.go
+    line: 68
+    codegraphId: method:fdd05a5d8c350a1c63d475834bfa2416
+  fingerprint: 8b76ce45b3c1ff117fda142ba6f3a7c9c6508efb487db225842f9d5f6b0f9e1a

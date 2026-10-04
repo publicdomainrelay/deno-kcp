@@ -1,53 +1,53 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- class:24bac0dcfdbe6512952bea4c1f647223 PkiIssuerIndexController@third_party/openbao/ui/lib/pki/addon/controllers/issuers/index.js:11
-- file:third_party/openbao/ui/lib/pki/addon/controllers/issuers/index.js index.js@third_party/openbao/ui/lib/pki/addon/controllers/issuers/index.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-lib-pki-addon-controllers-issuers
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: The context exists to specify the small Ember controller that backs the
     PKI issuers index page in OpenBao's web UI, so that the mountPoint lookup and
     the deferred link-click close behavior are captured as explicit obligations rather
     than implied by a two-method class.
-  interfaces:
-  - file: third_party/openbao/ui/lib/pki/addon/controllers/issuers/index.js
-    kind: class
-    name: PkiIssuerIndexController
-    signature: class PkiIssuerIndexController extends Controller
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - class:24bac0dcfdbe6512952bea4c1f647223
-    - file:third_party/openbao/ui/lib/pki/addon/controllers/issuers/index.js
-    id: r.action-decorated-handler
+  - id: r.action-decorated-handler
     level: MUST
     text: onLinkClick must be decorated with @action so Ember binds it correctly when
       referenced from a template click handler.
-  - codeRefs:
+    codeRefs:
     - class:24bac0dcfdbe6512952bea4c1f647223
     - file:third_party/openbao/ui/lib/pki/addon/controllers/issuers/index.js
-    id: r.defer-link-click-close
+  - id: r.defer-link-click-close
     level: MUST
     text: onLinkClick must accept the passed object D and close the UI element by
       invoking D.actions.close() inside Ember's next() scheduler rather than synchronously,
       so that passing D.actions through a click handler does not break production
       builds.
-  - codeRefs:
+    codeRefs:
     - class:24bac0dcfdbe6512952bea4c1f647223
     - file:third_party/openbao/ui/lib/pki/addon/controllers/issuers/index.js
-    id: r.extend-ember-controller
+  - id: r.extend-ember-controller
     level: MUST
     text: PkiIssuerIndexController must extend Ember's Controller base class and be
       exported as the default export of the issuers index controller module, so Ember's
       resolver can bind it to the issuers/index route.
-  - codeRefs:
+    codeRefs:
     - class:24bac0dcfdbe6512952bea4c1f647223
     - file:third_party/openbao/ui/lib/pki/addon/controllers/issuers/index.js
-    id: r.mount-point-from-owner
+  - id: r.mount-point-from-owner
     level: MUST
     text: The mountPoint getter must return the Ember owner's mountPoint obtained
       via getOwner(this), so the controller exposes the engine mount path of the surrounding
       addon.
-  upstream: self
+    codeRefs:
+    - class:24bac0dcfdbe6512952bea4c1f647223
+    - file:third_party/openbao/ui/lib/pki/addon/controllers/issuers/index.js
+  interfaces:
+  - name: PkiIssuerIndexController
+    kind: class
+    signature: class PkiIssuerIndexController extends Controller
+    file: third_party/openbao/ui/lib/pki/addon/controllers/issuers/index.js
+codeRefIndex:
+- class:24bac0dcfdbe6512952bea4c1f647223 PkiIssuerIndexController@third_party/openbao/ui/lib/pki/addon/controllers/issuers/index.js:11
+- file:third_party/openbao/ui/lib/pki/addon/controllers/issuers/index.js index.js@third_party/openbao/ui/lib/pki/addon/controllers/issuers/index.js

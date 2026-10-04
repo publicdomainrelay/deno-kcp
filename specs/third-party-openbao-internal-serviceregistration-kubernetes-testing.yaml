@@ -1,4 +1,131 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-internal-serviceregistration-kubernetes-testing
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: This context exists so the Kubernetes service-registration client and retry
+    handler can be tested without a real cluster. Server gives tests a live HTTP endpoint
+    that mimics the Kubernetes pod API, State lets tests assert which patches arrived,
+    and Conf supplies the client configuration pointing at that endpoint. It is a
+    test-support package, so its contract is what the OpenBao kubernetes client tests
+    depend on.
+  requirements:
+  - id: r.close-cleans-up
+    level: MUST
+    text: 'closeFunc runs every registered closer: it closes the httptest server and
+      removes the temporary token and CA certificate files created by Server, so a
+      test leaves no files or listeners behind.'
+    codeRefs:
+    - function:9e2d0b2ccabf947a47f73dd077e2cd28
+  - id: r.conf-fields
+    level: MUST
+    text: Conf carries ClientScheme, PathToTokenFile, PathToRootCAFile, ServiceHost
+      and ServicePort. Server sets ClientScheme to "http://", writes the expected
+      token and CA certificate into temp files and points PathToTokenFile and PathToRootCAFile
+      at them, and points ServiceHost and ServicePort at the running test server.
+    codeRefs:
+    - struct:228e3f72d1b3b05693c0021e9a24d507
+  - id: r.forced-gateway-timeout
+    level: MAY
+    text: When the ReturnGatewayTimeouts flag is set, the handler answers 504 immediately
+      and ignores the request path and method, letting tests exercise client retry
+      behaviour on gateway timeouts.
+    codeRefs:
+    - file:third_party/openbao/internal/serviceregistration/kubernetes/testing/testserver.go
+  - id: r.get-pod-response
+    level: MUST
+    text: A GET against the expected namespace and pod answers 200 with the canned
+      pod response body.
+    codeRefs:
+    - function:9e2d0b2ccabf947a47f73dd077e2cd28
+  - id: r.patch-records-state
+    level: MUST
+    text: A PATCH against the expected namespace and pod decodes the JSON body into
+      a list of patches, stores each patch in the State under its "path" value, and
+      answers 200 with the canned update response body. A body that fails to decode
+      gets 400 with the path and decode error.
+    codeRefs:
+    - function:9e2d0b2ccabf947a47f73dd077e2cd28
+    - struct:3b7e4297c5a53545975fbf67b10cde5e
+  - id: r.path-parse-error
+    level: MUST
+    text: If the request path cannot be parsed into namespace and pod name, the handler
+      answers 400 and writes the unparseable path and the parse error into the body.
+    codeRefs:
+    - function:9e2d0b2ccabf947a47f73dd077e2cd28
+  - id: r.server-returns-harness
+    level: MUST
+    text: Server takes a *testing.T and returns a State recorder, a Conf populated
+      with connection settings, and a closeFunc. It starts an httptest server, derives
+      ServiceHost and ServicePort by splitting the server URL on "://" and then on
+      ":", and fails the test via t.Fatal if the URL does not have exactly those two
+      fields.
+    codeRefs:
+    - file:third_party/openbao/internal/serviceregistration/kubernetes/testing/testserver.go
+    - function:9e2d0b2ccabf947a47f73dd077e2cd28
+  - id: r.state-get
+    level: MUST
+    text: State.Get returns the recorded patch stored under the given key, and nil
+      when no patch was recorded for that key, letting tests assert on the contents
+      of a specific label or annotation patch.
+    codeRefs:
+    - method:fded460c7078778ffea2cd85a93b850d
+    - struct:3b7e4297c5a53545975fbf67b10cde5e
+  - id: r.state-num-patches
+    level: MUST
+    text: State.NumPatches returns how many patches the server has recorded, counted
+      from the concurrent map that store writes into, so tests can wait for an expected
+      number of client updates.
+    codeRefs:
+    - method:0c3997c13b4dce8a1355a9af3c12aa0a
+    - struct:3b7e4297c5a53545975fbf67b10cde5e
+  - id: r.temp-file-errors-fatal
+    level: MUST
+    text: Any failure to create, write or close the temporary token or CA certificate
+      file must call closeFunc to release already-acquired resources and then fail
+      the test with t.Fatal.
+    codeRefs:
+    - function:9e2d0b2ccabf947a47f73dd077e2cd28
+    - struct:228e3f72d1b3b05693c0021e9a24d507
+  - id: r.unexpected-method
+    level: MUST
+    text: Any method other than GET or PATCH against the expected pod gets 400 with
+      a message naming the unexpected method.
+    codeRefs:
+    - function:9e2d0b2ccabf947a47f73dd077e2cd28
+  - id: r.unknown-pod-not-found
+    level: MUST
+    text: A request whose namespace or pod name does not match ExpectedNamespace and
+      ExpectedPodName gets 404 with the canned not-found response body, regardless
+      of method.
+    codeRefs:
+    - function:9e2d0b2ccabf947a47f73dd077e2cd28
+  interfaces:
+  - name: Conf
+    kind: struct
+    signature: type Conf struct { ClientScheme, PathToTokenFile, PathToRootCAFile,
+      ServiceHost, ServicePort string }
+    file: third_party/openbao/internal/serviceregistration/kubernetes/testing/testserver.go
+  - name: Server
+    kind: function
+    signature: func Server(t *testing.T) (testState *State, testConf *Conf, closeFunc
+      func())
+    file: third_party/openbao/internal/serviceregistration/kubernetes/testing/testserver.go
+  - name: State
+    kind: struct
+    signature: type State struct
+    file: third_party/openbao/internal/serviceregistration/kubernetes/testing/testserver.go
+  - name: State.Get
+    kind: method
+    signature: func (s *State) Get(key string) map[string]any
+    file: third_party/openbao/internal/serviceregistration/kubernetes/testing/testserver.go
+  - name: State.NumPatches
+    kind: method
+    signature: func (s *State) NumPatches() int
+    file: third_party/openbao/internal/serviceregistration/kubernetes/testing/testserver.go
 codeRefIndex:
 - file:third_party/openbao/internal/serviceregistration/kubernetes/testing/testserver.go
   testserver.go@third_party/openbao/internal/serviceregistration/kubernetes/testing/testserver.go
@@ -7,130 +134,3 @@ codeRefIndex:
 - method:fded460c7078778ffea2cd85a93b850d State.Get@third_party/openbao/internal/serviceregistration/kubernetes/testing/testserver.go:192
 - struct:228e3f72d1b3b05693c0021e9a24d507 Conf@third_party/openbao/internal/serviceregistration/kubernetes/testing/testserver.go:61
 - struct:3b7e4297c5a53545975fbf67b10cde5e State@third_party/openbao/internal/serviceregistration/kubernetes/testing/testserver.go:178
-kind: SystemContext
-metadata:
-  name: third-party-openbao-internal-serviceregistration-kubernetes-testing
-  namespace: default
-spec:
-  intent: This context exists so the Kubernetes service-registration client and retry
-    handler can be tested without a real cluster. Server gives tests a live HTTP endpoint
-    that mimics the Kubernetes pod API, State lets tests assert which patches arrived,
-    and Conf supplies the client configuration pointing at that endpoint. It is a
-    test-support package, so its contract is what the OpenBao kubernetes client tests
-    depend on.
-  interfaces:
-  - file: third_party/openbao/internal/serviceregistration/kubernetes/testing/testserver.go
-    kind: struct
-    name: Conf
-    signature: type Conf struct { ClientScheme, PathToTokenFile, PathToRootCAFile,
-      ServiceHost, ServicePort string }
-  - file: third_party/openbao/internal/serviceregistration/kubernetes/testing/testserver.go
-    kind: function
-    name: Server
-    signature: func Server(t *testing.T) (testState *State, testConf *Conf, closeFunc
-      func())
-  - file: third_party/openbao/internal/serviceregistration/kubernetes/testing/testserver.go
-    kind: struct
-    name: State
-    signature: type State struct
-  - file: third_party/openbao/internal/serviceregistration/kubernetes/testing/testserver.go
-    kind: method
-    name: State.Get
-    signature: func (s *State) Get(key string) map[string]any
-  - file: third_party/openbao/internal/serviceregistration/kubernetes/testing/testserver.go
-    kind: method
-    name: State.NumPatches
-    signature: func (s *State) NumPatches() int
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - function:9e2d0b2ccabf947a47f73dd077e2cd28
-    id: r.close-cleans-up
-    level: MUST
-    text: 'closeFunc runs every registered closer: it closes the httptest server and
-      removes the temporary token and CA certificate files created by Server, so a
-      test leaves no files or listeners behind.'
-  - codeRefs:
-    - struct:228e3f72d1b3b05693c0021e9a24d507
-    id: r.conf-fields
-    level: MUST
-    text: Conf carries ClientScheme, PathToTokenFile, PathToRootCAFile, ServiceHost
-      and ServicePort. Server sets ClientScheme to "http://", writes the expected
-      token and CA certificate into temp files and points PathToTokenFile and PathToRootCAFile
-      at them, and points ServiceHost and ServicePort at the running test server.
-  - codeRefs:
-    - file:third_party/openbao/internal/serviceregistration/kubernetes/testing/testserver.go
-    id: r.forced-gateway-timeout
-    level: MAY
-    text: When the ReturnGatewayTimeouts flag is set, the handler answers 504 immediately
-      and ignores the request path and method, letting tests exercise client retry
-      behaviour on gateway timeouts.
-  - codeRefs:
-    - function:9e2d0b2ccabf947a47f73dd077e2cd28
-    id: r.get-pod-response
-    level: MUST
-    text: A GET against the expected namespace and pod answers 200 with the canned
-      pod response body.
-  - codeRefs:
-    - function:9e2d0b2ccabf947a47f73dd077e2cd28
-    - struct:3b7e4297c5a53545975fbf67b10cde5e
-    id: r.patch-records-state
-    level: MUST
-    text: A PATCH against the expected namespace and pod decodes the JSON body into
-      a list of patches, stores each patch in the State under its "path" value, and
-      answers 200 with the canned update response body. A body that fails to decode
-      gets 400 with the path and decode error.
-  - codeRefs:
-    - function:9e2d0b2ccabf947a47f73dd077e2cd28
-    id: r.path-parse-error
-    level: MUST
-    text: If the request path cannot be parsed into namespace and pod name, the handler
-      answers 400 and writes the unparseable path and the parse error into the body.
-  - codeRefs:
-    - file:third_party/openbao/internal/serviceregistration/kubernetes/testing/testserver.go
-    - function:9e2d0b2ccabf947a47f73dd077e2cd28
-    id: r.server-returns-harness
-    level: MUST
-    text: Server takes a *testing.T and returns a State recorder, a Conf populated
-      with connection settings, and a closeFunc. It starts an httptest server, derives
-      ServiceHost and ServicePort by splitting the server URL on "://" and then on
-      ":", and fails the test via t.Fatal if the URL does not have exactly those two
-      fields.
-  - codeRefs:
-    - method:fded460c7078778ffea2cd85a93b850d
-    - struct:3b7e4297c5a53545975fbf67b10cde5e
-    id: r.state-get
-    level: MUST
-    text: State.Get returns the recorded patch stored under the given key, and nil
-      when no patch was recorded for that key, letting tests assert on the contents
-      of a specific label or annotation patch.
-  - codeRefs:
-    - method:0c3997c13b4dce8a1355a9af3c12aa0a
-    - struct:3b7e4297c5a53545975fbf67b10cde5e
-    id: r.state-num-patches
-    level: MUST
-    text: State.NumPatches returns how many patches the server has recorded, counted
-      from the concurrent map that store writes into, so tests can wait for an expected
-      number of client updates.
-  - codeRefs:
-    - function:9e2d0b2ccabf947a47f73dd077e2cd28
-    - struct:228e3f72d1b3b05693c0021e9a24d507
-    id: r.temp-file-errors-fatal
-    level: MUST
-    text: Any failure to create, write or close the temporary token or CA certificate
-      file must call closeFunc to release already-acquired resources and then fail
-      the test with t.Fatal.
-  - codeRefs:
-    - function:9e2d0b2ccabf947a47f73dd077e2cd28
-    id: r.unexpected-method
-    level: MUST
-    text: Any method other than GET or PATCH against the expected pod gets 400 with
-      a message naming the unexpected method.
-  - codeRefs:
-    - function:9e2d0b2ccabf947a47f73dd077e2cd28
-    id: r.unknown-pod-not-found
-    level: MUST
-    text: A request whose namespace or pod name does not match ExpectedNamespace and
-      ExpectedPodName gets 404 with the canned not-found response body, regardless
-      of method.
-  upstream: self

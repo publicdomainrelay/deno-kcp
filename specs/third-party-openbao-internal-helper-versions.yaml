@@ -1,14 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/internal/helper/versions/version.go version.go@third_party/openbao/internal/helper/versions/version.go
-- file:third_party/openbao/internal/helper/versions/version_test.go version_test.go@third_party/openbao/internal/helper/versions/version_test.go
-- function:1ea364583023f055fbce35602b2f3f9d GetBuiltinVersion@third_party/openbao/internal/helper/versions/version.go:22
-- function:f639e0b5f55bb30e45c28d43ebe2f8d6 IsBuiltinVersion@third_party/openbao/internal/helper/versions/version.go:30
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-helper-versions
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'The context exists so that the builtin-version helpers used across OpenBao
     can be described and depended on without reading the source: one function that
     names the version every builtin plugin reports, and one predicate that recognises
@@ -16,49 +13,52 @@ spec:
     marker test (dot-split metadata, exact identifier match, never a substring match,
     non-semver input is not builtin) so callers that classify plugin versions keep
     consistent behavior.'
-  interfaces:
-  - file: third_party/openbao/internal/helper/versions/version.go
-    kind: function
-    name: GetBuiltinVersion
-    signature: func GetBuiltinVersion(pluginType consts.PluginType, pluginName string)
-      string
-  - file: third_party/openbao/internal/helper/versions/version.go
-    kind: function
-    name: IsBuiltinVersion
-    signature: func IsBuiltinVersion(v string) bool
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/versions/version.go
-    - function:1ea364583023f055fbce35602b2f3f9d
-    id: r.get-builtin-version-returns-default
+  - id: r.get-builtin-version-returns-default
     level: MUST
     text: GetBuiltinVersion must return the constant DefaultBuiltinVersion for every
       input; the pluginType and pluginName arguments are accepted but ignored, so
       all builtin plugins report one shared version string.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/helper/versions/version.go
-    - function:f639e0b5f55bb30e45c28d43ebe2f8d6
-    id: r.is-builtin-version-matches-metadata-identifier
+    - function:1ea364583023f055fbce35602b2f3f9d
+  - id: r.is-builtin-version-matches-metadata-identifier
     level: MUST
     text: For a valid semantic version, IsBuiltinVersion must split the version's
       metadata section on '.' and return true only when the identifier BuiltinMetadata
       is one of the resulting parts, so metadata such as "builtin.bao", "other.builtin"
       or "builtin.anythingelse" counts as builtin while "builtinbutnot" and a version
       with no metadata do not.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/helper/versions/version.go
     - function:f639e0b5f55bb30e45c28d43ebe2f8d6
-    id: r.is-builtin-version-parses-semver
+  - id: r.is-builtin-version-parses-semver
     level: MUST
     text: IsBuiltinVersion must return false when the input string is not a valid
       semantic version, and must not panic or error on such input.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/versions/version_test.go
-    id: r.is-builtin-version-table-test
+    codeRefs:
+    - file:third_party/openbao/internal/helper/versions/version.go
+    - function:f639e0b5f55bb30e45c28d43ebe2f8d6
+  - id: r.is-builtin-version-table-test
     level: SHOULD
     text: TestIsBuiltinVersion should keep the table of version/builtin pairs covering
       both accepted metadata placements, the substring-but-not-identifier negative
       case, a version with no metadata, and a non-semver string, asserting each expected
       result.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/internal/helper/versions/version_test.go
+  interfaces:
+  - name: GetBuiltinVersion
+    kind: function
+    signature: func GetBuiltinVersion(pluginType consts.PluginType, pluginName string)
+      string
+    file: third_party/openbao/internal/helper/versions/version.go
+  - name: IsBuiltinVersion
+    kind: function
+    signature: func IsBuiltinVersion(v string) bool
+    file: third_party/openbao/internal/helper/versions/version.go
+codeRefIndex:
+- file:third_party/openbao/internal/helper/versions/version.go version.go@third_party/openbao/internal/helper/versions/version.go
+- file:third_party/openbao/internal/helper/versions/version_test.go version_test.go@third_party/openbao/internal/helper/versions/version_test.go
+- function:1ea364583023f055fbce35602b2f3f9d GetBuiltinVersion@third_party/openbao/internal/helper/versions/version.go:22
+- function:f639e0b5f55bb30e45c28d43ebe2f8d6 IsBuiltinVersion@third_party/openbao/internal/helper/versions/version.go:30

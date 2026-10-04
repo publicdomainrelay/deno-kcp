@@ -1,13 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- class:c54f0a4df0f27bc8cff3a755b9e76744 PkiEngine@third_party/openbao/ui/lib/pki/addon/engine.js:15
-- file:third_party/openbao/ui/lib/pki/addon/engine.js engine.js@third_party/openbao/ui/lib/pki/addon/engine.js
-- file:third_party/openbao/ui/lib/pki/addon/routes.js routes.js@third_party/openbao/ui/lib/pki/addon/routes.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-lib-pki-addon
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'This context exists so the PKI addon can be mounted as a lazy, isolated
     Ember engine inside the wider OpenBao UI host application. Separating the engine
     class in engine.js from the route map in routes.js lets the host mount the whole
@@ -16,60 +14,62 @@ spec:
     references declared rather than discovered at runtime. The engine fixes exactly
     three things at load time: the module namespace it resolves from, the Resolver
     for that namespace, and what it needs from the host.'
-  interfaces:
-  - file: third_party/openbao/ui/lib/pki/addon/engine.js
-    kind: class
-    name: PkiEngine
-    signature: class PkiEngine extends Engine
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - class:c54f0a4df0f27bc8cff3a755b9e76744
-    - file:third_party/openbao/ui/lib/pki/addon/engine.js
-    id: r.engine-extends-ember-engine
+  - id: r.engine-extends-ember-engine
     level: MUST
     text: PkiEngine MUST be the default export of engine.js and MUST extend the Engine
       base class imported from @ember/engine, so the host application can mount the
       PKI addon as an engine rather than as a plain application module.
-  - codeRefs:
+    codeRefs:
     - class:c54f0a4df0f27bc8cff3a755b9e76744
     - file:third_party/openbao/ui/lib/pki/addon/engine.js
-    id: r.engine-external-routes
+  - id: r.engine-external-routes
     level: MUST
     text: PkiEngine MUST declare dependencies.externalRoutes as secrets, secretsListRootConfiguration
       and externalMountIssuer, so links made from inside the engine to those host
       application routes resolve instead of failing at transition time.
-  - codeRefs:
+    codeRefs:
+    - class:c54f0a4df0f27bc8cff3a755b9e76744
     - file:third_party/openbao/ui/lib/pki/addon/engine.js
-    id: r.engine-loads-initializers
+  - id: r.engine-loads-initializers
     level: MUST
     text: engine.js MUST call loadInitializers with PkiEngine and the resolved modulePrefix
       after the class definition, so the addon's initializers run when the engine
       is booted by the host.
-  - codeRefs:
-    - class:c54f0a4df0f27bc8cff3a755b9e76744
+    codeRefs:
     - file:third_party/openbao/ui/lib/pki/addon/engine.js
-    id: r.engine-module-prefix-and-resolver
+  - id: r.engine-module-prefix-and-resolver
     level: MUST
     text: PkiEngine MUST assign modulePrefix, read from the addon config at ./config/environment,
       to its modulePrefix property and MUST assign the ember-resolver Resolver to
       its Resolver property, so the engine looks up its own components, routes and
       models in the addon namespace instead of the host application's.
-  - codeRefs:
+    codeRefs:
     - class:c54f0a4df0f27bc8cff3a755b9e76744
     - file:third_party/openbao/ui/lib/pki/addon/engine.js
-    id: r.engine-service-dependencies
+  - id: r.engine-service-dependencies
     level: MUST
     text: PkiEngine MUST declare dependencies.services as the nine host services auth,
       download, flash-messages, namespace, path-help, host-router, secret-mount-path,
       store and version, because a service the addon injects but does not name here
       is not available to it inside the engine.
-  - codeRefs:
+    codeRefs:
+    - class:c54f0a4df0f27bc8cff3a755b9e76744
     - file:third_party/openbao/ui/lib/pki/addon/engine.js
-    - file:third_party/openbao/ui/lib/pki/addon/routes.js
-    id: r.route-map-separate-file
+  - id: r.route-map-separate-file
     level: MUST
     text: The addon's route map MUST be declared in routes.js, kept in a separate
       file from the engine class in engine.js, so changes to the URL structure do
       not touch the engine's module prefix, resolver or dependency configuration.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/ui/lib/pki/addon/engine.js
+    - file:third_party/openbao/ui/lib/pki/addon/routes.js
+  interfaces:
+  - name: PkiEngine
+    kind: class
+    signature: class PkiEngine extends Engine
+    file: third_party/openbao/ui/lib/pki/addon/engine.js
+codeRefIndex:
+- class:c54f0a4df0f27bc8cff3a755b9e76744 PkiEngine@third_party/openbao/ui/lib/pki/addon/engine.js:15
+- file:third_party/openbao/ui/lib/pki/addon/engine.js engine.js@third_party/openbao/ui/lib/pki/addon/engine.js
+- file:third_party/openbao/ui/lib/pki/addon/routes.js routes.js@third_party/openbao/ui/lib/pki/addon/routes.js

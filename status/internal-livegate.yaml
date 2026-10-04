@@ -1,40 +1,40 @@
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 1f5e7afa7913dc5790af85ee66f79aaa210b6bb9ddef897827f906b3b49ed735
+realizedSpecHash: e319a42f890d2547284aec62b32b3e65a9a544d4056477a393b248a0816ca554
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
+- type: CodeSynced
+  status: "True"
   reason: InterfacesObserved
-  status: "True"
-  type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+  message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+- type: Drifted
   status: "False"
-  type: Drifted
-- message: the spec passes the validator
-  reason: ValidatorPassed
+  reason: FingerprintEqual
+  message: observed facts match the synced fingerprint
+- type: SpecValid
   status: "True"
-  type: SpecValid
+  reason: ValidatorPassed
+  message: the spec passes the validator
 observed:
   files:
   - internal/livegate/livegate.go
-  fingerprint: 1f5e7afa7913dc5790af85ee66f79aaa210b6bb9ddef897827f906b3b49ed735
   interfaces:
-  - codegraphId: function:0e31bdc8610f1db91dd40606eac8d2a2
-    file: internal/livegate/livegate.go
+  - name: RequiresLive
     kind: function
-    line: 8
-    name: RequiresLive
     signature: () bool
-  - codegraphId: function:cc9c12855dee252d71eac5766360e2f9
     file: internal/livegate/livegate.go
+    line: 8
+    codegraphId: function:0e31bdc8610f1db91dd40606eac8d2a2
+  - name: Require
     kind: function
+    signature: (t *testing.T, format string, args ...any)
+    file: internal/livegate/livegate.go
     line: 12
-    name: Require
-    signature: (t *testing.T, format string, args ...any)
-  - codegraphId: function:105aa5910047c1743f2bbed1f73895c8
-    file: internal/livegate/livegate.go
+    codegraphId: function:cc9c12855dee252d71eac5766360e2f9
+  - name: Short
     kind: function
-    line: 20
-    name: Short
     signature: (t *testing.T, format string, args ...any)
-realizedSpecHash: e319a42f890d2547284aec62b32b3e65a9a544d4056477a393b248a0816ca554
-syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-syncedFingerprint: 1f5e7afa7913dc5790af85ee66f79aaa210b6bb9ddef897827f906b3b49ed735
+    file: internal/livegate/livegate.go
+    line: 20
+    codegraphId: function:105aa5910047c1743f2bbed1f73895c8
+  fingerprint: 1f5e7afa7913dc5790af85ee66f79aaa210b6bb9ddef897827f906b3b49ed735

@@ -1,113 +1,113 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/ui/app/machines/auth-machine.js auth-machine.js@third_party/openbao/ui/app/machines/auth-machine.js
-- file:third_party/openbao/ui/app/machines/policies-machine.js policies-machine.js@third_party/openbao/ui/app/machines/policies-machine.js
-- file:third_party/openbao/ui/app/machines/secrets-machine.js secrets-machine.js@third_party/openbao/ui/app/machines/secrets-machine.js
-- file:third_party/openbao/ui/app/machines/tools-machine.js tools-machine.js@third_party/openbao/ui/app/machines/tools-machine.js
-- file:third_party/openbao/ui/app/machines/tutorial-machine.js tutorial-machine.js@third_party/openbao/ui/app/machines/tutorial-machine.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-app-machines
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: These modules exist to declare, as data rather than as code, the step graph
     of every OpenBao UI setup wizard flow. Keeping the transitions in plain configuration
     objects lets one generic wizard engine walk any flow, render the right component
     at each level, and drive route changes, so a new wizard step is added by editing
     a config rather than by writing new control logic. This context is the declarative
     half of that engine; the effect handlers and renderers it names are supplied elsewhere.
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/ui/app/machines/auth-machine.js
-    - file:third_party/openbao/ui/app/machines/policies-machine.js
-    - file:third_party/openbao/ui/app/machines/secrets-machine.js
-    - file:third_party/openbao/ui/app/machines/tools-machine.js
-    id: r.complete-state
+  - id: r.complete-state
     level: MUST
     text: Every machine has a terminal complete state whose entry runs the completeFeature
       action, so finished flows notify the engine and finish.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/machines/auth-machine.js
     - file:third_party/openbao/ui/app/machines/policies-machine.js
     - file:third_party/openbao/ui/app/machines/secrets-machine.js
     - file:third_party/openbao/ui/app/machines/tools-machine.js
-    - file:third_party/openbao/ui/app/machines/tutorial-machine.js
-    id: r.default-export-statechart
+  - id: r.default-export-statechart
     level: MUST
     text: Each machine module default-exports a state-chart object carrying a `key`
       string, an `initial` state name and a `states` map, so the wizard engine can
       instantiate any flow from configuration alone.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/machines/auth-machine.js
+    - file:third_party/openbao/ui/app/machines/policies-machine.js
     - file:third_party/openbao/ui/app/machines/secrets-machine.js
+    - file:third_party/openbao/ui/app/machines/tools-machine.js
     - file:third_party/openbao/ui/app/machines/tutorial-machine.js
-    id: r.entry-effects
+  - id: r.entry-effects
     level: MUST
     text: Every state declares its side effects in an `onEntry` list of effect descriptors
       or bare action names, so entering a state performs renders, route transitions
       and named actions without the state itself holding logic.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/machines/auth-machine.js
     - file:third_party/openbao/ui/app/machines/secrets-machine.js
-    id: r.global-reset-done
+    - file:third_party/openbao/ui/app/machines/tutorial-machine.js
+  - id: r.global-reset-done
     level: SHOULD
     text: auth-machine.js and secrets-machine.js declare top-level RESET, DONE and
       ERROR (secrets only) transitions, so a global event can reset a flow to idle
       or force it to complete from any state.
-  - codeRefs:
+    codeRefs:
+    - file:third_party/openbao/ui/app/machines/auth-machine.js
     - file:third_party/openbao/ui/app/machines/secrets-machine.js
-    id: r.guarded-transitions
+  - id: r.guarded-transitions
     level: MUST
     text: Transitions may branch on a `cond` predicate over the backend type, so secrets-machine.js
       routes to the details step only when the chosen type is in the list returned
       by supportedSecretBackends() and to the list step otherwise, and further branches
       per type to connection, role, secret, encryption, provider or list.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/machines/auth-machine.js
-    - file:third_party/openbao/ui/app/machines/tutorial-machine.js
-    id: r.render-levels
+    codeRefs:
+    - file:third_party/openbao/ui/app/machines/secrets-machine.js
+  - id: r.render-levels
     level: MUST
     text: Render effects name a `level` (feature, step, detail or tutorial) together
       with a `component` path, and a null component clears that level, so the wizard
       engine can paint and clear each display layer independently.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/machines/secrets-machine.js
-    id: r.repeat-transitions
+    codeRefs:
+    - file:third_party/openbao/ui/app/machines/auth-machine.js
+    - file:third_party/openbao/ui/app/machines/tutorial-machine.js
+  - id: r.repeat-transitions
     level: SHOULD
     text: secrets-machine.js display state answers a REPEAT event with a type-guarded
       branch that routes back to the create-root route for the current backend type,
       passing itemType=provider in the query params for keymgmt.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/machines/auth-machine.js
-    - file:third_party/openbao/ui/app/machines/policies-machine.js
+    codeRefs:
     - file:third_party/openbao/ui/app/machines/secrets-machine.js
-    - file:third_party/openbao/ui/app/machines/tools-machine.js
-    id: r.route-transitions
+  - id: r.route-transitions
     level: MUST
     text: State entry emits routeTransition effects naming the target route and its
       params, so entering a wizard step navigates the host application to the matching
       route.
-  - codeRefs:
+    codeRefs:
+    - file:third_party/openbao/ui/app/machines/auth-machine.js
+    - file:third_party/openbao/ui/app/machines/policies-machine.js
     - file:third_party/openbao/ui/app/machines/secrets-machine.js
-    id: r.supported-backends-at-load
+    - file:third_party/openbao/ui/app/machines/tools-machine.js
+  - id: r.supported-backends-at-load
     level: MUST
     text: secrets-machine.js calls supportedSecretBackends() once at import time and
       closes over the resulting array in its guard functions, so backend support is
       fixed at module load rather than re-evaluated per transition.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/machines/tools-machine.js
-    id: r.tools-sequence
+    codeRefs:
+    - file:third_party/openbao/ui/app/machines/secrets-machine.js
+  - id: r.tools-sequence
     level: MUST
     text: tools-machine.js models the wrap, wrapped, lookup, info, rewrap, rewrapped,
       unwrap and unwrapped sequence, advancing on LOOKUP, CONTINUE, REWRAP and UNWRAP
       events before reaching complete.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/machines/tutorial-machine.js
-    id: r.tutorial-lifecycle
+    codeRefs:
+    - file:third_party/openbao/ui/app/machines/tools-machine.js
+  - id: r.tutorial-lifecycle
     level: MUST
     text: tutorial-machine.js models a nested init/active flow with DISMISS, DONE
       and PAUSE transitions and dismissed, paused and complete states whose entries
       clear the feature, step and detail render levels and run handleDismissed, handlePaused
       and handleResume actions.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/ui/app/machines/tutorial-machine.js
+codeRefIndex:
+- file:third_party/openbao/ui/app/machines/auth-machine.js auth-machine.js@third_party/openbao/ui/app/machines/auth-machine.js
+- file:third_party/openbao/ui/app/machines/policies-machine.js policies-machine.js@third_party/openbao/ui/app/machines/policies-machine.js
+- file:third_party/openbao/ui/app/machines/secrets-machine.js secrets-machine.js@third_party/openbao/ui/app/machines/secrets-machine.js
+- file:third_party/openbao/ui/app/machines/tools-machine.js tools-machine.js@third_party/openbao/ui/app/machines/tools-machine.js
+- file:third_party/openbao/ui/app/machines/tutorial-machine.js tutorial-machine.js@third_party/openbao/ui/app/machines/tutorial-machine.js

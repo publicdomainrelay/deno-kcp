@@ -1,29 +1,19 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/internal/command/agent/exec/test-app/main.go main.go@third_party/openbao/internal/command/agent/exec/test-app/main.go
-- struct:0a00dc15d8f4fe8252f48269139c1da8 Response@third_party/openbao/internal/command/agent/exec/test-app/main.go:43
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-command-agent-exec-test-app
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'The context exists to pin down the observable contract of the exec test
     app so that the agent exec server behavior it verifies stays describable: which
     flags configure the process, how long it may live, how it reacts to signals, what
     it serves over HTTP, and what exit code it reports. It is a test fixture, so its
     requirements are the fixture''s guarantees to the test that drives it, not production
     behavior.'
-  interfaces:
-  - file: third_party/openbao/internal/command/agent/exec/test-app/main.go
-    kind: struct
-    name: Response
-    signature: type Response struct { EnvironmentVariables map[string]string `json:"environment_variables"`;
-      ProcessID int `json:"process_id"` }
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agent/exec/test-app/main.go
-    id: r.flag-config-surface
+  - id: r.flag-config-surface
     level: MUST
     text: 'Configuration is parsed by the standard flag package in init, with no environment
       variables backing any option: --port (uint, default 34000) sets the HTTP listen
@@ -32,36 +22,46 @@ spec:
       SIGTERM as the stop signal; --stop-after (duration, default 0) stops the process
       after that duration; --exit-code (int, default 0) sets the code returned at
       exit.'
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/command/agent/exec/test-app/main.go
-    id: r.http-endpoint
+  - id: r.http-endpoint
     level: MUST
     text: run serves HTTP on the address ":" plus the port flag, with read, write
       and idle timeouts of 20 seconds each; the handler encodes a fresh Response of
       the current environment and PID as JSON with status 200 and Content-Type application/json,
       honoring a query parameter pretty=1 by indenting the output with two spaces.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/command/agent/exec/test-app/main.go
-    - struct:0a00dc15d8f4fe8252f48269139c1da8
-    id: r.response-shape
+  - id: r.response-shape
     level: MUST
     text: The Response struct carries the process environment as a map of variable
       name to value under the JSON key environment_variables and the current process
       identifier under the JSON key process_id.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/command/agent/exec/test-app/main.go
-    id: r.shutdown-and-exit
+    - struct:0a00dc15d8f4fe8252f48269139c1da8
+  - id: r.shutdown-and-exit
     level: MUST
     text: After a stop condition the HTTP server is shut down gracefully, a failing
       ListenAndServe returns an error unless it is http.ErrServerClosed, and main
       exits with the --exit-code value, logging an error and exiting through log.Fatalf
       when run returns an error.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/command/agent/exec/test-app/main.go
-    id: r.stop-conditions
+  - id: r.stop-conditions
     level: MUST
     text: 'The process stops on whichever comes first: a 60 second context timeout,
       the configured stop signal, or the --stop-after duration elapsing; on a stop
       signal it sleeps for --sleep-after-stop-signal when that value is positive before
       continuing.'
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/internal/command/agent/exec/test-app/main.go
+  interfaces:
+  - name: Response
+    kind: struct
+    signature: type Response struct { EnvironmentVariables map[string]string `json:"environment_variables"`;
+      ProcessID int `json:"process_id"` }
+    file: third_party/openbao/internal/command/agent/exec/test-app/main.go
+codeRefIndex:
+- file:third_party/openbao/internal/command/agent/exec/test-app/main.go main.go@third_party/openbao/internal/command/agent/exec/test-app/main.go
+- struct:0a00dc15d8f4fe8252f48269139c1da8 Response@third_party/openbao/internal/command/agent/exec/test-app/main.go:43

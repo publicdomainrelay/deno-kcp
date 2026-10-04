@@ -1,4 +1,184 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-sdk-physical-file
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: This context exists to pin down the behaviour of the file physical backend
+    that deno-kcp vendors from the OpenBao SDK, so that the storage contract it offers
+    to the rest of the system is explicit rather than inferred from the Go source.
+    It matters because the backend is deprecated but still reachable through the physical.Backend
+    interface, so its construction rules, path safety checks and not-found semantics
+    must stay fixed while the surrounding tree changes.
+  requirements:
+  - id: r.backend-implements-physical-backend
+    level: MUST
+    text: FileBackend must satisfy the physical.Backend interface and NewFileBackend
+      must be usable as a factory that returns a physical.Backend, so callers select
+      the file backend through the SDK storage interface rather than a concrete type.
+    codeRefs:
+    - function:5928099dab2401f1ce6d627c360788ab
+    - struct:f97cbbb490e02fba40d62fc63b49a6bb
+  - id: r.construct-requires-path
+    level: MUST
+    text: NewFileBackend must read the "path" key from the configuration map and return
+      a nil backend together with the error "'path' must be set" when that key is
+      absent; otherwise it constructs a FileBackend rooted at that path.
+    codeRefs:
+    - file:third_party/openbao/sdk/physical/file/file.go
+    - function:5928099dab2401f1ce6d627c360788ab
+  - id: r.delete-delegates-internal
+    level: MUST
+    text: Delete must return whatever DeleteInternal returns for the same context
+      and path, adding no behaviour of its own beyond the semaphore and lock bracketing.
+    codeRefs:
+    - method:549203c34572c9fddea69fe42798a23e
+    - method:599ec27aef47db9557c6304417ab5567
+  - id: r.deprecation-warning
+    level: MUST
+    text: When the logger passed to NewFileBackend is not nil, construction must emit
+      a warning that the file physical backend is deprecated and that operators should
+      run bao operator migrate to move to a supported storage backend by v2.7.0.
+    codeRefs:
+    - function:5928099dab2401f1ce6d627c360788ab
+  - id: r.get-decodes-entry
+    level: MUST
+    text: When the file exists and is non-empty, GetInternal must open it, JSON-decode
+      its contents into a fileEntry, and return a physical.Entry whose Key is the
+      original logical key and whose Value is the decoded value, closing the file
+      handle on the way out.
+    codeRefs:
+    - method:28cb36e96f79e69c49344b9e1145e48f
+  - id: r.get-honours-context
+    level: MUST
+    text: After a successful decode GetInternal must select on ctx.Done() and return
+      ctx.Err() when the context has been cancelled, taking the default branch otherwise.
+    codeRefs:
+    - method:28cb36e96f79e69c49344b9e1145e48f
+  - id: r.get-missing-and-empty-file
+    level: MUST
+    text: GetInternal must expand the logical key into a directory and file name,
+      join them, and return a nil entry with a nil error both when the file does not
+      exist and when it exists with size zero; in the zero-size case it must make
+      a best-effort removal of the file and ignore the removal error.
+    codeRefs:
+    - method:28cb36e96f79e69c49344b9e1145e48f
+  - id: r.list-pagination-surface
+    level: MUST
+    text: List must delegate to ListInternal and ListPage must delegate to ListPageInternal,
+      forwarding the prefix, the after cursor and the limit so that paginated and
+      unpaginated listings stay consistent with one another.
+    codeRefs:
+    - method:0e5a66a1ca3f5d50f9f2b8f5ba1fb395
+    - method:2934e1f3503031ec5c839a5bc5a7254d
+    - method:d9f6481e4bcc5bd49efcc51e1fd2e740
+    - method:f2158a69453454f476c45266d23a6beb
+  - id: r.path-validation-rejects-parent-refs
+    level: MUST
+    text: validatePath must reject any path whose text contains ".." by returning
+      consts.ErrPathContainsParentReferences, and GetInternal must call that validation
+      before touching the filesystem and propagate its error unchanged to the caller.
+    codeRefs:
+    - file:third_party/openbao/sdk/physical/file/file.go
+    - method:28cb36e96f79e69c49344b9e1145e48f
+  - id: r.permit-pool-sizing
+    level: MUST
+    text: The constructed backend must carry a permit pool created by physical.NewPermitPool
+      with physical.DefaultParallelOperations, so that concurrency is bounded by the
+      SDK default rather than by the caller.
+    codeRefs:
+    - function:5928099dab2401f1ce6d627c360788ab
+    - struct:f97cbbb490e02fba40d62fc63b49a6bb
+  - id: r.public-methods-serialize
+    level: MUST
+    text: Each public entry point (Delete, Get, Put, List, ListPage) must acquire
+      a permit from the pool, defer its release, take the backend write lock, defer
+      the unlock, and then delegate the work to the matching Internal method, so that
+      no two public operations touch the filesystem concurrently.
+    codeRefs:
+    - method:549203c34572c9fddea69fe42798a23e
+    - method:599ec27aef47db9557c6304417ab5567
+    - method:8a4e549a0d3b349730977b89514322f9
+    - method:d9f6481e4bcc5bd49efcc51e1fd2e740
+  - id: r.read-write-symmetric-entry-type
+    level: MUST
+    text: Put must persist entries through PutInternal using the same JSON file entry
+      representation that GetInternal decodes, so that a value written by Put is returned
+      unchanged by Get for the same key.
+    codeRefs:
+    - method:28cb36e96f79e69c49344b9e1145e48f
+    - method:2ec2fa72c6f199918e53b34c2a6c9378
+    - method:8a4e549a0d3b349730977b89514322f9
+  - id: r.test-coverage
+    level: SHOULD
+    text: file_test.go should continue to cover base64 URL encoding of keys, path
+      validation and general backend behaviour through TestFileBackend_Base64URLEncoding,
+      TestFileBackend_ValidatePath and TestFileBackend, each constructing its backend
+      with NewFileBackend.
+    codeRefs:
+    - file:third_party/openbao/sdk/physical/file/file_test.go
+    - function:5928099dab2401f1ce6d627c360788ab
+  interfaces:
+  - name: FileBackend
+    kind: struct
+    signature: type FileBackend struct
+    file: third_party/openbao/sdk/physical/file/file.go
+  - name: FileBackend.Delete
+    kind: method
+    signature: func (b *FileBackend) Delete(ctx context.Context, path string) error
+    file: third_party/openbao/sdk/physical/file/file.go
+  - name: FileBackend.DeleteInternal
+    kind: method
+    signature: func (b *FileBackend) DeleteInternal(ctx context.Context, path string)
+      error
+    file: third_party/openbao/sdk/physical/file/file.go
+  - name: FileBackend.Get
+    kind: method
+    signature: func (b *FileBackend) Get(ctx context.Context, k string) (*physical.Entry,
+      error)
+    file: third_party/openbao/sdk/physical/file/file.go
+  - name: FileBackend.GetInternal
+    kind: method
+    signature: func (b *FileBackend) GetInternal(ctx context.Context, k string) (*physical.Entry,
+      error)
+    file: third_party/openbao/sdk/physical/file/file.go
+  - name: FileBackend.List
+    kind: method
+    signature: func (b *FileBackend) List(ctx context.Context, prefix string) ([]string,
+      error)
+    file: third_party/openbao/sdk/physical/file/file.go
+  - name: FileBackend.ListInternal
+    kind: method
+    signature: func (b *FileBackend) ListInternal(ctx context.Context, prefix string)
+      ([]string, error)
+    file: third_party/openbao/sdk/physical/file/file.go
+  - name: FileBackend.ListPage
+    kind: method
+    signature: func (b *FileBackend) ListPage(ctx context.Context, prefix string,
+      after string, limit int) ([]string, error)
+    file: third_party/openbao/sdk/physical/file/file.go
+  - name: FileBackend.ListPageInternal
+    kind: method
+    signature: func (b *FileBackend) ListPageInternal(ctx context.Context, prefix
+      string, after string, limit int) ([]string, error)
+    file: third_party/openbao/sdk/physical/file/file.go
+  - name: FileBackend.Put
+    kind: method
+    signature: func (b *FileBackend) Put(ctx context.Context, entry *physical.Entry)
+      error
+    file: third_party/openbao/sdk/physical/file/file.go
+  - name: FileBackend.PutInternal
+    kind: method
+    signature: func (b *FileBackend) PutInternal(ctx context.Context, entry *physical.Entry)
+      error
+    file: third_party/openbao/sdk/physical/file/file.go
+  - name: NewFileBackend
+    kind: function
+    signature: func NewFileBackend(conf map[string]string, logger log.Logger) (physical.Backend,
+      error)
+    file: third_party/openbao/sdk/physical/file/file.go
 codeRefIndex:
 - file:third_party/openbao/sdk/physical/file/file.go file.go@third_party/openbao/sdk/physical/file/file.go
 - file:third_party/openbao/sdk/physical/file/file_test.go file_test.go@third_party/openbao/sdk/physical/file/file_test.go
@@ -13,183 +193,3 @@ codeRefIndex:
 - method:d9f6481e4bcc5bd49efcc51e1fd2e740 FileBackend.List@third_party/openbao/sdk/physical/file/file.go:276
 - method:f2158a69453454f476c45266d23a6beb FileBackend.ListInternal@third_party/openbao/sdk/physical/file/file.go:296
 - struct:f97cbbb490e02fba40d62fc63b49a6bb FileBackend@third_party/openbao/sdk/physical/file/file.go:37
-kind: SystemContext
-metadata:
-  name: third-party-openbao-sdk-physical-file
-  namespace: default
-spec:
-  intent: This context exists to pin down the behaviour of the file physical backend
-    that deno-kcp vendors from the OpenBao SDK, so that the storage contract it offers
-    to the rest of the system is explicit rather than inferred from the Go source.
-    It matters because the backend is deprecated but still reachable through the physical.Backend
-    interface, so its construction rules, path safety checks and not-found semantics
-    must stay fixed while the surrounding tree changes.
-  interfaces:
-  - file: third_party/openbao/sdk/physical/file/file.go
-    kind: struct
-    name: FileBackend
-    signature: type FileBackend struct
-  - file: third_party/openbao/sdk/physical/file/file.go
-    kind: method
-    name: FileBackend.Delete
-    signature: func (b *FileBackend) Delete(ctx context.Context, path string) error
-  - file: third_party/openbao/sdk/physical/file/file.go
-    kind: method
-    name: FileBackend.DeleteInternal
-    signature: func (b *FileBackend) DeleteInternal(ctx context.Context, path string)
-      error
-  - file: third_party/openbao/sdk/physical/file/file.go
-    kind: method
-    name: FileBackend.Get
-    signature: func (b *FileBackend) Get(ctx context.Context, k string) (*physical.Entry,
-      error)
-  - file: third_party/openbao/sdk/physical/file/file.go
-    kind: method
-    name: FileBackend.GetInternal
-    signature: func (b *FileBackend) GetInternal(ctx context.Context, k string) (*physical.Entry,
-      error)
-  - file: third_party/openbao/sdk/physical/file/file.go
-    kind: method
-    name: FileBackend.List
-    signature: func (b *FileBackend) List(ctx context.Context, prefix string) ([]string,
-      error)
-  - file: third_party/openbao/sdk/physical/file/file.go
-    kind: method
-    name: FileBackend.ListInternal
-    signature: func (b *FileBackend) ListInternal(ctx context.Context, prefix string)
-      ([]string, error)
-  - file: third_party/openbao/sdk/physical/file/file.go
-    kind: method
-    name: FileBackend.ListPage
-    signature: func (b *FileBackend) ListPage(ctx context.Context, prefix string,
-      after string, limit int) ([]string, error)
-  - file: third_party/openbao/sdk/physical/file/file.go
-    kind: method
-    name: FileBackend.ListPageInternal
-    signature: func (b *FileBackend) ListPageInternal(ctx context.Context, prefix
-      string, after string, limit int) ([]string, error)
-  - file: third_party/openbao/sdk/physical/file/file.go
-    kind: method
-    name: FileBackend.Put
-    signature: func (b *FileBackend) Put(ctx context.Context, entry *physical.Entry)
-      error
-  - file: third_party/openbao/sdk/physical/file/file.go
-    kind: method
-    name: FileBackend.PutInternal
-    signature: func (b *FileBackend) PutInternal(ctx context.Context, entry *physical.Entry)
-      error
-  - file: third_party/openbao/sdk/physical/file/file.go
-    kind: function
-    name: NewFileBackend
-    signature: func NewFileBackend(conf map[string]string, logger log.Logger) (physical.Backend,
-      error)
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - function:5928099dab2401f1ce6d627c360788ab
-    - struct:f97cbbb490e02fba40d62fc63b49a6bb
-    id: r.backend-implements-physical-backend
-    level: MUST
-    text: FileBackend must satisfy the physical.Backend interface and NewFileBackend
-      must be usable as a factory that returns a physical.Backend, so callers select
-      the file backend through the SDK storage interface rather than a concrete type.
-  - codeRefs:
-    - file:third_party/openbao/sdk/physical/file/file.go
-    - function:5928099dab2401f1ce6d627c360788ab
-    id: r.construct-requires-path
-    level: MUST
-    text: NewFileBackend must read the "path" key from the configuration map and return
-      a nil backend together with the error "'path' must be set" when that key is
-      absent; otherwise it constructs a FileBackend rooted at that path.
-  - codeRefs:
-    - method:549203c34572c9fddea69fe42798a23e
-    - method:599ec27aef47db9557c6304417ab5567
-    id: r.delete-delegates-internal
-    level: MUST
-    text: Delete must return whatever DeleteInternal returns for the same context
-      and path, adding no behaviour of its own beyond the semaphore and lock bracketing.
-  - codeRefs:
-    - function:5928099dab2401f1ce6d627c360788ab
-    id: r.deprecation-warning
-    level: MUST
-    text: When the logger passed to NewFileBackend is not nil, construction must emit
-      a warning that the file physical backend is deprecated and that operators should
-      run bao operator migrate to move to a supported storage backend by v2.7.0.
-  - codeRefs:
-    - method:28cb36e96f79e69c49344b9e1145e48f
-    id: r.get-decodes-entry
-    level: MUST
-    text: When the file exists and is non-empty, GetInternal must open it, JSON-decode
-      its contents into a fileEntry, and return a physical.Entry whose Key is the
-      original logical key and whose Value is the decoded value, closing the file
-      handle on the way out.
-  - codeRefs:
-    - method:28cb36e96f79e69c49344b9e1145e48f
-    id: r.get-honours-context
-    level: MUST
-    text: After a successful decode GetInternal must select on ctx.Done() and return
-      ctx.Err() when the context has been cancelled, taking the default branch otherwise.
-  - codeRefs:
-    - method:28cb36e96f79e69c49344b9e1145e48f
-    id: r.get-missing-and-empty-file
-    level: MUST
-    text: GetInternal must expand the logical key into a directory and file name,
-      join them, and return a nil entry with a nil error both when the file does not
-      exist and when it exists with size zero; in the zero-size case it must make
-      a best-effort removal of the file and ignore the removal error.
-  - codeRefs:
-    - method:0e5a66a1ca3f5d50f9f2b8f5ba1fb395
-    - method:2934e1f3503031ec5c839a5bc5a7254d
-    - method:d9f6481e4bcc5bd49efcc51e1fd2e740
-    - method:f2158a69453454f476c45266d23a6beb
-    id: r.list-pagination-surface
-    level: MUST
-    text: List must delegate to ListInternal and ListPage must delegate to ListPageInternal,
-      forwarding the prefix, the after cursor and the limit so that paginated and
-      unpaginated listings stay consistent with one another.
-  - codeRefs:
-    - file:third_party/openbao/sdk/physical/file/file.go
-    - method:28cb36e96f79e69c49344b9e1145e48f
-    id: r.path-validation-rejects-parent-refs
-    level: MUST
-    text: validatePath must reject any path whose text contains ".." by returning
-      consts.ErrPathContainsParentReferences, and GetInternal must call that validation
-      before touching the filesystem and propagate its error unchanged to the caller.
-  - codeRefs:
-    - function:5928099dab2401f1ce6d627c360788ab
-    - struct:f97cbbb490e02fba40d62fc63b49a6bb
-    id: r.permit-pool-sizing
-    level: MUST
-    text: The constructed backend must carry a permit pool created by physical.NewPermitPool
-      with physical.DefaultParallelOperations, so that concurrency is bounded by the
-      SDK default rather than by the caller.
-  - codeRefs:
-    - method:549203c34572c9fddea69fe42798a23e
-    - method:599ec27aef47db9557c6304417ab5567
-    - method:8a4e549a0d3b349730977b89514322f9
-    - method:d9f6481e4bcc5bd49efcc51e1fd2e740
-    id: r.public-methods-serialize
-    level: MUST
-    text: Each public entry point (Delete, Get, Put, List, ListPage) must acquire
-      a permit from the pool, defer its release, take the backend write lock, defer
-      the unlock, and then delegate the work to the matching Internal method, so that
-      no two public operations touch the filesystem concurrently.
-  - codeRefs:
-    - method:28cb36e96f79e69c49344b9e1145e48f
-    - method:2ec2fa72c6f199918e53b34c2a6c9378
-    - method:8a4e549a0d3b349730977b89514322f9
-    id: r.read-write-symmetric-entry-type
-    level: MUST
-    text: Put must persist entries through PutInternal using the same JSON file entry
-      representation that GetInternal decodes, so that a value written by Put is returned
-      unchanged by Get for the same key.
-  - codeRefs:
-    - file:third_party/openbao/sdk/physical/file/file_test.go
-    - function:5928099dab2401f1ce6d627c360788ab
-    id: r.test-coverage
-    level: SHOULD
-    text: file_test.go should continue to cover base64 URL encoding of keys, path
-      validation and general backend behaviour through TestFileBackend_Base64URLEncoding,
-      TestFileBackend_ValidatePath and TestFileBackend, each constructing its backend
-      with NewFileBackend.
-  upstream: self

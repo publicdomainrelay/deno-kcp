@@ -1,14 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/internal/command/agent/internal/ctmanager/runner_config.go
-  runner_config.go@third_party/openbao/internal/command/agent/internal/ctmanager/runner_config.go
-- function:1b37cd3c984608ba4dcf87320814df1c NewConfig@third_party/openbao/internal/command/agent/internal/ctmanager/runner_config.go:24
-- struct:4c8cbdd73f6d08a26c1eabfb4a993eec ManagerConfig@third_party/openbao/internal/command/agent/internal/ctmanager/runner_config.go:15
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-command-agent-internal-ctmanager
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'This context exists to record the configuration surface of the consul-template
     runner inside the OpenBao agent: which agent-level settings map onto which ctconfig.Config
     fields, which values are forced rather than inherited from the environment, what
@@ -16,130 +13,133 @@ spec:
     is vendored third-party code under third_party/openbao, carried in this repository
     unchanged, so the spec describes the upstream behavior as observed rather than
     any local design choice.'
-  interfaces:
-  - file: third_party/openbao/internal/command/agent/internal/ctmanager/runner_config.go
-    kind: struct
-    name: ManagerConfig
-    signature: type ManagerConfig struct { AgentConfig *config.Config; Namespace string;
-      LogLevel hclog.Level; LogWriter io.Writer }
-  - file: third_party/openbao/internal/command/agent/internal/ctmanager/runner_config.go
-    kind: function
-    name: NewConfig
-    signature: func NewConfig(mc ManagerConfig, templates ctconfig.TemplateConfigs)
-      (*ctconfig.Config, error)
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agent/internal/ctmanager/runner_config.go
-    - function:1b37cd3c984608ba4dcf87320814df1c
-    id: r.autoauth-backoff-sync
+  - id: r.autoauth-backoff-sync
     level: MUST
     text: When auto-auth is configured with a method, a positive MinBackoff must be
       copied into Vault.Retry.Backoff and a positive MaxBackoff into Vault.Retry.MaxBackoff,
       so consul-template's retry follows the auto-auth initial backoff.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/command/agent/internal/ctmanager/runner_config.go
     - function:1b37cd3c984608ba4dcf87320814df1c
-    id: r.cache-branch-address
+  - id: r.cache-branch-address
     level: MUST
     text: When the cache is present and valid, the in-process dialer must be installed
       on Vault.Transport.CustomDialer, creating the TransportConfig if it is nil,
       and Vault.Address must be forced to "http://127.0.0.1:8200" so the HTTP client
       does not default to https.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/command/agent/internal/ctmanager/runner_config.go
     - function:1b37cd3c984608ba4dcf87320814df1c
-    id: r.cache-dialer-required
+  - id: r.cache-dialer-required
     level: MUST
     text: When the agent config has a non-nil Cache whose InProcDialer is nil, NewConfig
       must return the error "missing in-process dialer configuration" instead of a
       config.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/command/agent/internal/ctmanager/runner_config.go
     - function:1b37cd3c984608ba4dcf87320814df1c
-    id: r.connection-tuning
+  - id: r.connection-tuning
     level: MUST
     text: DisableIdleConnsTemplating must set Vault.Transport.MaxIdleConns to -1,
       and DisableKeepAlivesTemplating must set Vault.Transport.DisableKeepAlives to
       true, each independently of the other.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/command/agent/internal/ctmanager/runner_config.go
     - function:1b37cd3c984608ba4dcf87320814df1c
-    id: r.default-config-base
+  - id: r.default-config-base
     level: MUST
     text: NewConfig must start from ctconfig.DefaultConfig and replace its Templates
       field with a copy of the passed TemplateConfigs, so callers cannot mutate the
       caller-owned template set through the returned config.
-  - codeRefs:
+    codeRefs:
+    - file:third_party/openbao/internal/command/agent/internal/ctmanager/runner_config.go
     - function:1b37cd3c984608ba4dcf87320814df1c
-    - struct:4c8cbdd73f6d08a26c1eabfb4a993eec
-    id: r.finalize-before-logging
+  - id: r.finalize-before-logging
     level: MUST
     text: conf.Finalize() must be called after the Vault, transport and retry fields
       are set, and the log level must then be derived from ManagerConfig.LogLevel
       before logging is configured.
-  - codeRefs:
+    codeRefs:
     - function:1b37cd3c984608ba4dcf87320814df1c
     - struct:4c8cbdd73f6d08a26c1eabfb4a993eec
-    id: r.logging-setup
+  - id: r.logging-setup
     level: MUST
     text: ctlogging must be set up with the converted log level string and ManagerConfig.LogWriter,
       and any error from that setup must be returned to the caller rather than swallowed.
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agent/internal/ctmanager/runner_config.go
+    codeRefs:
+    - function:1b37cd3c984608ba4dcf87320814df1c
     - struct:4c8cbdd73f6d08a26c1eabfb4a993eec
-    id: r.manager-config-inputs
+  - id: r.manager-config-inputs
     level: MUST
     text: 'ManagerConfig must carry exactly the inputs NewConfig reads: the agent
       config pointer holding Vault, cache, template, auto-auth and transport-tuning
       settings; the namespace; the hclog level; and the log writer.'
-  - codeRefs:
-    - function:1b37cd3c984608ba4dcf87320814df1c
+    codeRefs:
+    - file:third_party/openbao/internal/command/agent/internal/ctmanager/runner_config.go
     - struct:4c8cbdd73f6d08a26c1eabfb4a993eec
-    id: r.namespace-conditional
+  - id: r.namespace-conditional
     level: MUST
     text: Vault.Namespace must be set from ManagerConfig.Namespace only when that
       field is not the empty string; an empty namespace leaves the field untouched.
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agent/internal/ctmanager/runner_config.go
+    codeRefs:
     - function:1b37cd3c984608ba4dcf87320814df1c
-    id: r.retry-attempts
+    - struct:4c8cbdd73f6d08a26c1eabfb4a993eec
+  - id: r.retry-attempts
     level: MUST
     text: Retry attempts must default to ctconfig.DefaultRetryAttempts and be overridden
       by the agent's Vault.Retry.NumRetries when both the Vault block and its Retry
       block are non-nil; Vault.Retry must then be set with those attempts and Enabled
       equal to attempts greater than zero.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/command/agent/internal/ctmanager/runner_config.go
     - function:1b37cd3c984608ba4dcf87320814df1c
-    id: r.ssl-default-disabled
+  - id: r.ssl-default-disabled
     level: MUST
     text: Before the transport branches run, the Vault SSL block must be set to a
       disabled configuration with Enabled false, Verify false, and empty Cert, Key,
       CaCert, CaPath and ServerName values.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/command/agent/internal/ctmanager/runner_config.go
     - function:1b37cd3c984608ba4dcf87320814df1c
-    id: r.static-secret-lease
+  - id: r.static-secret-lease
     level: MUST
     text: When the agent has a non-nil TemplateConfig with a non-zero StaticSecretRenderInt,
       that value must become Vault.DefaultLeaseDuration; otherwise the consul-template
       default stays in place.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/command/agent/internal/ctmanager/runner_config.go
     - function:1b37cd3c984608ba4dcf87320814df1c
-    id: r.tls-branch
+  - id: r.tls-branch
     level: MUST
     text: When there is no cache and the Vault address starts with "https" or a CA
       cert is configured, the SSL block must be rebuilt as enabled, with Verify set
       to the inverse of Vault.TLSSkipVerify and Cert, Key, CaCert, CaPath and ServerName
       taken from the agent's Vault client TLS settings.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/command/agent/internal/ctmanager/runner_config.go
     - function:1b37cd3c984608ba4dcf87320814df1c
-    id: r.vault-environment-isolation
+  - id: r.vault-environment-isolation
     level: MUST
     text: The Vault section must always set RenewToken to false, Token to the empty
       string, and Address to the agent config's Vault address, so no token, renew
       behavior or address is picked up from the environment.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/internal/command/agent/internal/ctmanager/runner_config.go
+    - function:1b37cd3c984608ba4dcf87320814df1c
+  interfaces:
+  - name: ManagerConfig
+    kind: struct
+    signature: type ManagerConfig struct { AgentConfig *config.Config; Namespace string;
+      LogLevel hclog.Level; LogWriter io.Writer }
+    file: third_party/openbao/internal/command/agent/internal/ctmanager/runner_config.go
+  - name: NewConfig
+    kind: function
+    signature: func NewConfig(mc ManagerConfig, templates ctconfig.TemplateConfigs)
+      (*ctconfig.Config, error)
+    file: third_party/openbao/internal/command/agent/internal/ctmanager/runner_config.go
+codeRefIndex:
+- file:third_party/openbao/internal/command/agent/internal/ctmanager/runner_config.go
+  runner_config.go@third_party/openbao/internal/command/agent/internal/ctmanager/runner_config.go
+- function:1b37cd3c984608ba4dcf87320814df1c NewConfig@third_party/openbao/internal/command/agent/internal/ctmanager/runner_config.go:24
+- struct:4c8cbdd73f6d08a26c1eabfb4a993eec ManagerConfig@third_party/openbao/internal/command/agent/internal/ctmanager/runner_config.go:15

@@ -1,40 +1,40 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- class:fc70b09ee2eb2abdc09304e862957362 PkiRolesIndexController@third_party/openbao/ui/lib/pki/addon/controllers/roles/index.js:9
-- file:third_party/openbao/ui/lib/pki/addon/controllers/roles/index.js index.js@third_party/openbao/ui/lib/pki/addon/controllers/roles/index.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-lib-pki-addon-controllers-roles
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'The context exists to capture the contract of the PKI roles index controller:
     a route-scoped Ember controller whose only responsibility is to hand templates
     the mount point of the PKI engine the roles list belongs to. It is a small, single-purpose
     read-only surface — the list itself, filtering, and role data come from the route
     and model, while this controller only answers which mount is this, so links and
     API paths can be built relative to the correct engine.'
-  interfaces:
-  - file: third_party/openbao/ui/lib/pki/addon/controllers/roles/index.js
-    kind: class
-    name: PkiRolesIndexController
-    signature: export default class PkiRolesIndexController extends Controller
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - class:fc70b09ee2eb2abdc09304e862957362
-    - file:third_party/openbao/ui/lib/pki/addon/controllers/roles/index.js
-    id: r.default-export-controller-class
+  - id: r.default-export-controller-class
     level: MUST
     text: The module third_party/openbao/ui/lib/pki/addon/controllers/roles/index.js
       must default-export a single class PkiRolesIndexController that extends Ember's
       Controller, so the roles index route resolves it as its controller.
-  - codeRefs:
+    codeRefs:
     - class:fc70b09ee2eb2abdc09304e862957362
     - file:third_party/openbao/ui/lib/pki/addon/controllers/roles/index.js
-    id: r.mount-point-getter
+  - id: r.mount-point-getter
     level: MUST
     text: PkiRolesIndexController must expose a getter mountPoint that obtains the
       controller's owner via getOwner(this) and returns that owner's mountPoint property,
       so consumers read the PKI engine mount path without the controller storing any
       mount state of its own.
-  upstream: self
+    codeRefs:
+    - class:fc70b09ee2eb2abdc09304e862957362
+    - file:third_party/openbao/ui/lib/pki/addon/controllers/roles/index.js
+  interfaces:
+  - name: PkiRolesIndexController
+    kind: class
+    signature: export default class PkiRolesIndexController extends Controller
+    file: third_party/openbao/ui/lib/pki/addon/controllers/roles/index.js
+codeRefIndex:
+- class:fc70b09ee2eb2abdc09304e862957362 PkiRolesIndexController@third_party/openbao/ui/lib/pki/addon/controllers/roles/index.js:9
+- file:third_party/openbao/ui/lib/pki/addon/controllers/roles/index.js index.js@third_party/openbao/ui/lib/pki/addon/controllers/roles/index.js

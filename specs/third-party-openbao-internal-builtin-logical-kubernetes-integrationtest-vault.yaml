@@ -1,4 +1,87 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-internal-builtin-logical-kubernetes-integrationtest-vault
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'These are test-fixture manifests, not application code: they exist so the
+    kubernetes secrets-engine integration tests have a real cluster with known ServiceAccounts,
+    known RBAC grants, and a host-reachable Vault. The split is deliberate — hostPortPatch
+    is applied over the Vault helm chart, testServiceAccounts creates the subjects,
+    testRoles declares the permissions, and testBindings attaches them, so a test
+    can assert behaviour for a privileged ServiceAccount, an under-privileged one,
+    and a token-creating one.'
+  requirements:
+  - id: r.broken-secrets-abilities-role
+    level: MUST
+    text: testRoles.yaml declares ClusterRole k8s-secrets-abilities-broken with the
+      same grants as k8s-secrets-abilities except it omits the serviceaccounts create
+      and delete verbs, so a creds/ call fails partway and tests can exercise WAL
+      plus ownerRef rollback of orphaned Kubernetes objects.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/vault/testRoles.yaml
+  - id: r.cluster-role-bindings
+    level: MUST
+    text: 'testBindings.yaml binds the cluster roles to the ServiceAccounts in namespace
+      test: ClusterRoleBinding k8s-secrets-abilities-binding binds k8s-secrets-abilities
+      to test-token-create, vault and super-jwt; test-clusterrole-abilities binds
+      test-cluster-role-list-pods to test-token-create, vault and broken-jwt; test-capabilities
+      binds the test-capabilities ClusterRole to super-jwt; and k8s-secrets-abilities-binding-broken
+      binds k8s-secrets-abilities-broken to broken-jwt alone.'
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/vault/testBindings.yaml
+  - id: r.hostport-patch
+    level: MUST
+    text: hostPortPatch.yaml is a strategic-merge patch over the Vault workload spec.template.spec
+      that targets the container named vault and sets its port named http to hostPort
+      8200 and containerPort 8200, so kind can forward host traffic to the Vault container;
+      the file header points at the Makefile setup-integration-test target as its
+      consumer.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/vault/hostPortPatch.yaml
+  - id: r.inspection-roles
+    level: MUST
+    text: testRoles.yaml declares ClusterRole test-capabilities granting get and list
+      on serviceaccounts and on rolebindings, roles, clusterrolebindings and clusterroles,
+      and declares pod-listing roles test-role-list-pods (namespaced Role in namespace
+      test) and test-cluster-role-list-pods (ClusterRole), both granting list on pods,
+      so tests can inspect the objects they create.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/vault/testRoles.yaml
+  - id: r.role-binding
+    level: MUST
+    text: testBindings.yaml declares namespaced RoleBinding test-role-abilities in
+      namespace test that references Role test-role-list-pods and takes ServiceAccounts
+      sample-app and broken-jwt as subjects.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/vault/testBindings.yaml
+  - id: r.role-subject-names
+    level: MUST
+    text: Every subject named in the bindings must match a ServiceAccount declared
+      in testServiceAccounts.yaml, and every roleRef must match a role declared in
+      testRoles.yaml, so the fixture set applies without dangling references on a
+      fresh test namespace.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/vault/testBindings.yaml
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/vault/testRoles.yaml
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/vault/testServiceAccounts.yaml
+  - id: r.secrets-abilities-role
+    level: MUST
+    text: testRoles.yaml declares ClusterRole k8s-secrets-abilities granting create
+      on serviceaccounts/token, get on namespaces, create and delete on serviceaccounts,
+      and create and delete on rolebindings, roles, clusterrolebindings and clusterroles,
+      so a bound ServiceAccount can stand in for what the secrets engine needs.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/vault/testRoles.yaml
+  - id: r.test-service-accounts
+    level: MUST
+    text: 'testServiceAccounts.yaml declares four ServiceAccounts, all in namespace
+      test: test-token-create, sample-app, super-jwt and broken-jwt; these are the
+      subjects the bindings attach roles to.'
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/vault/testServiceAccounts.yaml
 codeRefIndex:
 - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/vault/hostPortPatch.yaml
   hostPortPatch.yaml@third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/vault/hostPortPatch.yaml
@@ -8,86 +91,3 @@ codeRefIndex:
   testRoles.yaml@third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/vault/testRoles.yaml
 - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/vault/testServiceAccounts.yaml
   testServiceAccounts.yaml@third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/vault/testServiceAccounts.yaml
-kind: SystemContext
-metadata:
-  name: third-party-openbao-internal-builtin-logical-kubernetes-integrationtest-vault
-  namespace: default
-spec:
-  intent: 'These are test-fixture manifests, not application code: they exist so the
-    kubernetes secrets-engine integration tests have a real cluster with known ServiceAccounts,
-    known RBAC grants, and a host-reachable Vault. The split is deliberate — hostPortPatch
-    is applied over the Vault helm chart, testServiceAccounts creates the subjects,
-    testRoles declares the permissions, and testBindings attaches them, so a test
-    can assert behaviour for a privileged ServiceAccount, an under-privileged one,
-    and a token-creating one.'
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/vault/testRoles.yaml
-    id: r.broken-secrets-abilities-role
-    level: MUST
-    text: testRoles.yaml declares ClusterRole k8s-secrets-abilities-broken with the
-      same grants as k8s-secrets-abilities except it omits the serviceaccounts create
-      and delete verbs, so a creds/ call fails partway and tests can exercise WAL
-      plus ownerRef rollback of orphaned Kubernetes objects.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/vault/testBindings.yaml
-    id: r.cluster-role-bindings
-    level: MUST
-    text: 'testBindings.yaml binds the cluster roles to the ServiceAccounts in namespace
-      test: ClusterRoleBinding k8s-secrets-abilities-binding binds k8s-secrets-abilities
-      to test-token-create, vault and super-jwt; test-clusterrole-abilities binds
-      test-cluster-role-list-pods to test-token-create, vault and broken-jwt; test-capabilities
-      binds the test-capabilities ClusterRole to super-jwt; and k8s-secrets-abilities-binding-broken
-      binds k8s-secrets-abilities-broken to broken-jwt alone.'
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/vault/hostPortPatch.yaml
-    id: r.hostport-patch
-    level: MUST
-    text: hostPortPatch.yaml is a strategic-merge patch over the Vault workload spec.template.spec
-      that targets the container named vault and sets its port named http to hostPort
-      8200 and containerPort 8200, so kind can forward host traffic to the Vault container;
-      the file header points at the Makefile setup-integration-test target as its
-      consumer.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/vault/testRoles.yaml
-    id: r.inspection-roles
-    level: MUST
-    text: testRoles.yaml declares ClusterRole test-capabilities granting get and list
-      on serviceaccounts and on rolebindings, roles, clusterrolebindings and clusterroles,
-      and declares pod-listing roles test-role-list-pods (namespaced Role in namespace
-      test) and test-cluster-role-list-pods (ClusterRole), both granting list on pods,
-      so tests can inspect the objects they create.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/vault/testBindings.yaml
-    id: r.role-binding
-    level: MUST
-    text: testBindings.yaml declares namespaced RoleBinding test-role-abilities in
-      namespace test that references Role test-role-list-pods and takes ServiceAccounts
-      sample-app and broken-jwt as subjects.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/vault/testBindings.yaml
-    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/vault/testRoles.yaml
-    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/vault/testServiceAccounts.yaml
-    id: r.role-subject-names
-    level: MUST
-    text: Every subject named in the bindings must match a ServiceAccount declared
-      in testServiceAccounts.yaml, and every roleRef must match a role declared in
-      testRoles.yaml, so the fixture set applies without dangling references on a
-      fresh test namespace.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/vault/testRoles.yaml
-    id: r.secrets-abilities-role
-    level: MUST
-    text: testRoles.yaml declares ClusterRole k8s-secrets-abilities granting create
-      on serviceaccounts/token, get on namespaces, create and delete on serviceaccounts,
-      and create and delete on rolebindings, roles, clusterrolebindings and clusterroles,
-      so a bound ServiceAccount can stand in for what the secrets engine needs.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/vault/testServiceAccounts.yaml
-    id: r.test-service-accounts
-    level: MUST
-    text: 'testServiceAccounts.yaml declares four ServiceAccounts, all in namespace
-      test: test-token-create, sample-app, super-jwt and broken-jwt; these are the
-      subjects the bindings attach roles to.'
-  upstream: self

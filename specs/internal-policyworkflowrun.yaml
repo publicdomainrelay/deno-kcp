@@ -1,28 +1,204 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:internal/policyworkflowrun/policyworkflowrun.go policyworkflowrun.go@internal/policyworkflowrun/policyworkflowrun.go
-- file:internal/policyworkflowrun/policyworkflowrun_test.go policyworkflowrun_test.go@internal/policyworkflowrun/policyworkflowrun_test.go
-- function:5365b491262d3c8638b4a45db22fc36e New@internal/policyworkflowrun/policyworkflowrun.go:114
-- method:76266912e5bed07cf34b1126aad5c33b Reconciler.Reconcile@internal/policyworkflowrun/policyworkflowrun.go:124
-- struct:2605e325b5ce4d8a38ae867d7b08178b RunObservation@internal/policyworkflowrun/policyworkflowrun.go:28
-- struct:30ba817e4728c201876b801d6ab2334e Options@internal/policyworkflowrun/policyworkflowrun.go:104
-- struct:8c9b381b504c108fe27f810920616d23 Admission@internal/policyworkflowrun/policyworkflowrun.go:40
-- struct:b66ec1a8abbbf54f699b1689a5d827fb Result@internal/policyworkflowrun/policyworkflowrun.go:72
-- struct:c8b0144b7a7dfafc8abd4dcdf36838ca Observed@internal/policyworkflowrun/policyworkflowrun.go:48
-- type_alias:0d84b5d35fb4e8418432c2610ef317b0 Op@internal/policyworkflowrun/policyworkflowrun.go:60
-- type_alias:9dfd60ec68bf9ea12c085e274c36feb8 RunState@internal/policyworkflowrun/policyworkflowrun.go:18
 kind: SystemContext
 metadata:
   name: internal-policyworkflowrun
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
+  orchestrator: sc.deno-kcp-provider
+  dependsOn:
+  - sc.api-v1alpha1
+  intent: This context exists so the PolicyWorkflowRun state machine is testable and
+    separable from the Kubernetes client. Reconcile only reads the observed world
+    and writes a Result, so callers translate Op verbs, status fields and flags into
+    API calls. Keeping the decision here means the retry, backoff, TTL, cancel, suspend
+    and deadline rules live in one place with explicit preconditions and errors, and
+    the provider layer stays a thin adapter.
+  requirements:
+  - id: r.admission-gate
+    level: MUST
+    text: With no Run observation, a present Admission with Allowed false MUST hold
+      the run in PolicyWorkflowPending with Active zero, the Complete condition false
+      using the admission reason or the fallback "Queued", and a requeue; otherwise
+      the run starts.
+    codeRefs:
+    - method:76266912e5bed07cf34b1126aad5c33b
+    - struct:8c9b381b504c108fe27f810920616d23
+  - id: r.cancel
+    level: MUST
+    text: Spec.Cancel MUST stop a running run with OpStopRun, zero Active, set phase
+      PolicyWorkflowCancelled with RunID cleared and CompletionTime set, mark the
+      Cancelled and Complete conditions true, remove the finalizer and requeue.
+    codeRefs:
+    - method:76266912e5bed07cf34b1126aad5c33b
+  - id: r.context-respected
+    level: MUST
+    text: Reconcile returns ctx.Err() before deciding anything once the context is
+      done, and fills Observed.Now from the reconciler clock when the caller leaves
+      it zero.
+    codeRefs:
+    - method:76266912e5bed07cf34b1126aad5c33b
+  - id: r.deadline
+    level: MUST
+    text: When Spec.ActiveDeadlineSeconds is set and Now is not before Status.StartTime
+      plus that deadline, the run MUST be stopped, the phase set to PolicyWorkflowFailed
+      with RunID cleared and CompletionTime set, Failed raised to at least 1, the
+      Failed and Complete conditions set with reason DeadlineExceeded, and a requeue
+      scheduled.
+    codeRefs:
+    - method:76266912e5bed07cf34b1126aad5c33b
+  - id: r.defaults-filled
+    level: MUST
+    text: New replaces a nil Options.Now with time.Now and a zero Options.DefaultBackoffLimit
+      with the package constant DefaultBackoffLimit (6).
+    codeRefs:
+    - function:5365b491262d3c8638b4a45db22fc36e
+    - struct:30ba817e4728c201876b801d6ab2334e
+  - id: r.deletion-teardown
+    level: MUST
+    text: A non-nil DeletionTimestamp MUST produce a teardown that stops a running
+      run (OpStopRun), zeroes Active, cancels into Cancelled when the phase is not
+      terminal, appends OpRemoveFinalizer, sets RemoveFinalizer and requeues after
+      RequeueAfter.
+    codeRefs:
+    - method:76266912e5bed07cf34b1126aad5c33b
+    - type_alias:9dfd60ec68bf9ea12c085e274c36feb8
+  - id: r.failed-retry-backoff
+    level: MUST
+    text: A RunFailed observation MUST zero Active, clear RunID, copy the exit status,
+      and increment Failed and Retries; while the incremented Retries does not exceed
+      the limit (Spec.BackoffLimit when set, else the reconciler DefaultBackoffLimit)
+      the phase returns to PolicyWorkflowPending with the Complete condition false
+      and reason Retrying, and once it exceeds the limit the phase is PolicyWorkflowFailed
+      with CompletionTime and Failed and Complete conditions true with reason BackoffLimitExceeded.
+    codeRefs:
+    - method:76266912e5bed07cf34b1126aad5c33b
+  - id: r.name-required
+    level: MUST
+    text: 'Reconcile returns the error "policyworkflowrun: observed run has no name"
+      and an empty Result when Observed.WorkflowRun has an empty Name.'
+    codeRefs:
+    - file:internal/policyworkflowrun/policyworkflowrun.go
+    - method:76266912e5bed07cf34b1126aad5c33b
+  - id: r.running-observation
+    level: MUST
+    text: A RunRunning observation MUST set phase PolicyWorkflowRunning, record the
+      observation run id and start time, set Active 1, set the Complete condition
+      false with reason Running, and requeue.
+    codeRefs:
+    - method:76266912e5bed07cf34b1126aad5c33b
+    - struct:2605e325b5ce4d8a38ae867d7b08178b
+  - id: r.start-run
+    level: MUST
+    text: Starting a run MUST set phase PolicyWorkflowRunning with Active 1 and a
+      StartTime, append OpStartRun to the ops, set the Complete condition false with
+      reason Running, and requeue after RequeueAfter.
+    codeRefs:
+    - method:76266912e5bed07cf34b1126aad5c33b
+    - type_alias:0d84b5d35fb4e8418432c2610ef317b0
+  - id: r.state-required
+    level: MUST
+    text: 'A Run observation whose State matches none of RunRunning, RunSucceeded
+      or RunFailed MUST produce the error "policyworkflowrun: run observation has
+      no state" and an empty Result.'
+    codeRefs:
+    - method:76266912e5bed07cf34b1126aad5c33b
+    - type_alias:9dfd60ec68bf9ea12c085e274c36feb8
+  - id: r.status-carried
+    level: MUST
+    text: Reconcile starts from a Result that carries phase, run id, start time, completion
+      time, active, succeeded, failed, retries, exit status, outputs and a copy of
+      the conditions from the existing WorkflowRun status.
+    codeRefs:
+    - method:76266912e5bed07cf34b1126aad5c33b
+    - struct:b66ec1a8abbbf54f699b1689a5d827fb
+  - id: r.succeeded-observation
+    level: MUST
+    text: A RunSucceeded observation MUST set phase PolicyWorkflowSucceeded with Active
+      zero, Succeeded 1, the run id, exit status and outputs copied from the observation,
+      CompletionTime set, and the Complete condition true with reason Complete.
+    codeRefs:
+    - method:76266912e5bed07cf34b1126aad5c33b
+  - id: r.suspend
+    level: MUST
+    text: Spec.Suspend MUST stop a running run with OpStopRun and clear the run id,
+      set phase PolicyWorkflowPending with Active zero, set the Suspended condition
+      true, and requeue after RequeueAfter.
+    codeRefs:
+    - method:76266912e5bed07cf34b1126aad5c33b
+  - id: r.terminal-finish
+    level: MUST
+    text: 'A terminal phase (Succeeded, Failed or Cancelled) MUST go to finish: delete
+      the object with OpDelete once CompletionTime plus the effective TTL is reached
+      (spec TTLSecondsAfterFinished, else Observed.EffectiveTTLSeconds), otherwise
+      requeue for the remaining time; with no TTL or no completion time it returns
+      unchanged.'
+    codeRefs:
+    - method:76266912e5bed07cf34b1126aad5c33b
+    - struct:c8b0144b7a7dfafc8abd4dcdf36838ca
+  interfaces:
+  - name: Admission
+    kind: struct
+    signature: type Admission struct { Allowed bool; Reason string; Message string
+      }
+    file: internal/policyworkflowrun/policyworkflowrun.go
+  - name: New
+    kind: function
+    signature: func New(opts Options) *Reconciler
+    file: internal/policyworkflowrun/policyworkflowrun.go
+  - name: Observed
+    kind: struct
+    signature: type Observed struct { WorkflowRun v1alpha1.PolicyWorkflowRun; Run
+      *RunObservation; Admission *Admission; EffectiveTTLSeconds *int64; Now time.Time
+      }
+    file: internal/policyworkflowrun/policyworkflowrun.go
+  - name: Op
+    kind: type_alias
+    signature: type Op string
+    file: internal/policyworkflowrun/policyworkflowrun.go
+  - name: Options
+    kind: struct
+    signature: type Options struct { Now func() time.Time; DefaultBackoffLimit int32
+      }
+    file: internal/policyworkflowrun/policyworkflowrun.go
+  - name: Reconciler
+    kind: struct
+    signature: type Reconciler struct { opts Options }
+    file: internal/policyworkflowrun/policyworkflowrun.go
+  - name: Reconciler.Reconcile
+    kind: method
+    signature: func (r *Reconciler) Reconcile(ctx context.Context, o Observed) (Result,
+      error)
+    file: internal/policyworkflowrun/policyworkflowrun.go
+  - name: Result
+    kind: struct
+    signature: type Result struct { Phase v1alpha1.PolicyWorkflowPhase; RunID string;
+      StartTime *metav1.Time; CompletionTime *metav1.Time; Active int32; Succeeded
+      int32; Failed int32; Retries int32; ExitStatus string; Outputs map[string]string;
+      Conditions []metav1.Condition; Ops []Op; RequeueAfter time.Duration; RemoveFinalizer
+      bool; Delete bool }
+    file: internal/policyworkflowrun/policyworkflowrun.go
+  - name: RunObservation
+    kind: struct
+    signature: type RunObservation struct { RunID string; State RunState; ExitStatus
+      string; Outputs map[string]string; Message string }
+    file: internal/policyworkflowrun/policyworkflowrun.go
+  - name: RunState
+    kind: type_alias
+    signature: type RunState string
+    file: internal/policyworkflowrun/policyworkflowrun.go
   arch:
+    id: sc.kind.policyworkflowrun
+    kind: node
+    section: system_contexts
+    form: list
+    parent: sc.deno-kcp
+    slot: overlay[4]
+    orchestrator: sc.deno-kcp-provider
     code:
     - file:internal/policyworkflowrun/policyworkflowrun.go
     - file:internal/policyworkflowrun/policyworkflowrun_test.go
-    form: list
-    id: sc.kind.policyworkflowrun
-    kind: node
     node:
       axis: one_shot
       cancellation:
@@ -179,191 +355,15 @@ spec:
             decides: none
             when: on_terminal
         types: api/v1alpha1/types_policyworkflowrun.go
-    orchestrator: sc.deno-kcp-provider
-    parent: sc.deno-kcp
-    section: system_contexts
-    slot: overlay[4]
-  dependsOn:
-  - sc.api-v1alpha1
-  intent: This context exists so the PolicyWorkflowRun state machine is testable and
-    separable from the Kubernetes client. Reconcile only reads the observed world
-    and writes a Result, so callers translate Op verbs, status fields and flags into
-    API calls. Keeping the decision here means the retry, backoff, TTL, cancel, suspend
-    and deadline rules live in one place with explicit preconditions and errors, and
-    the provider layer stays a thin adapter.
-  interfaces:
-  - file: internal/policyworkflowrun/policyworkflowrun.go
-    kind: struct
-    name: Admission
-    signature: type Admission struct { Allowed bool; Reason string; Message string
-      }
-  - file: internal/policyworkflowrun/policyworkflowrun.go
-    kind: function
-    name: New
-    signature: func New(opts Options) *Reconciler
-  - file: internal/policyworkflowrun/policyworkflowrun.go
-    kind: struct
-    name: Observed
-    signature: type Observed struct { WorkflowRun v1alpha1.PolicyWorkflowRun; Run
-      *RunObservation; Admission *Admission; EffectiveTTLSeconds *int64; Now time.Time
-      }
-  - file: internal/policyworkflowrun/policyworkflowrun.go
-    kind: type_alias
-    name: Op
-    signature: type Op string
-  - file: internal/policyworkflowrun/policyworkflowrun.go
-    kind: struct
-    name: Options
-    signature: type Options struct { Now func() time.Time; DefaultBackoffLimit int32
-      }
-  - file: internal/policyworkflowrun/policyworkflowrun.go
-    kind: struct
-    name: Reconciler
-    signature: type Reconciler struct { opts Options }
-  - file: internal/policyworkflowrun/policyworkflowrun.go
-    kind: method
-    name: Reconciler.Reconcile
-    signature: func (r *Reconciler) Reconcile(ctx context.Context, o Observed) (Result,
-      error)
-  - file: internal/policyworkflowrun/policyworkflowrun.go
-    kind: struct
-    name: Result
-    signature: type Result struct { Phase v1alpha1.PolicyWorkflowPhase; RunID string;
-      StartTime *metav1.Time; CompletionTime *metav1.Time; Active int32; Succeeded
-      int32; Failed int32; Retries int32; ExitStatus string; Outputs map[string]string;
-      Conditions []metav1.Condition; Ops []Op; RequeueAfter time.Duration; RemoveFinalizer
-      bool; Delete bool }
-  - file: internal/policyworkflowrun/policyworkflowrun.go
-    kind: struct
-    name: RunObservation
-    signature: type RunObservation struct { RunID string; State RunState; ExitStatus
-      string; Outputs map[string]string; Message string }
-  - file: internal/policyworkflowrun/policyworkflowrun.go
-    kind: type_alias
-    name: RunState
-    signature: type RunState string
-  orchestrator: sc.deno-kcp-provider
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - method:76266912e5bed07cf34b1126aad5c33b
-    - struct:8c9b381b504c108fe27f810920616d23
-    id: r.admission-gate
-    level: MUST
-    text: With no Run observation, a present Admission with Allowed false MUST hold
-      the run in PolicyWorkflowPending with Active zero, the Complete condition false
-      using the admission reason or the fallback "Queued", and a requeue; otherwise
-      the run starts.
-  - codeRefs:
-    - method:76266912e5bed07cf34b1126aad5c33b
-    id: r.cancel
-    level: MUST
-    text: Spec.Cancel MUST stop a running run with OpStopRun, zero Active, set phase
-      PolicyWorkflowCancelled with RunID cleared and CompletionTime set, mark the
-      Cancelled and Complete conditions true, remove the finalizer and requeue.
-  - codeRefs:
-    - method:76266912e5bed07cf34b1126aad5c33b
-    id: r.context-respected
-    level: MUST
-    text: Reconcile returns ctx.Err() before deciding anything once the context is
-      done, and fills Observed.Now from the reconciler clock when the caller leaves
-      it zero.
-  - codeRefs:
-    - method:76266912e5bed07cf34b1126aad5c33b
-    id: r.deadline
-    level: MUST
-    text: When Spec.ActiveDeadlineSeconds is set and Now is not before Status.StartTime
-      plus that deadline, the run MUST be stopped, the phase set to PolicyWorkflowFailed
-      with RunID cleared and CompletionTime set, Failed raised to at least 1, the
-      Failed and Complete conditions set with reason DeadlineExceeded, and a requeue
-      scheduled.
-  - codeRefs:
-    - function:5365b491262d3c8638b4a45db22fc36e
-    - struct:30ba817e4728c201876b801d6ab2334e
-    id: r.defaults-filled
-    level: MUST
-    text: New replaces a nil Options.Now with time.Now and a zero Options.DefaultBackoffLimit
-      with the package constant DefaultBackoffLimit (6).
-  - codeRefs:
-    - method:76266912e5bed07cf34b1126aad5c33b
-    - type_alias:9dfd60ec68bf9ea12c085e274c36feb8
-    id: r.deletion-teardown
-    level: MUST
-    text: A non-nil DeletionTimestamp MUST produce a teardown that stops a running
-      run (OpStopRun), zeroes Active, cancels into Cancelled when the phase is not
-      terminal, appends OpRemoveFinalizer, sets RemoveFinalizer and requeues after
-      RequeueAfter.
-  - codeRefs:
-    - method:76266912e5bed07cf34b1126aad5c33b
-    id: r.failed-retry-backoff
-    level: MUST
-    text: A RunFailed observation MUST zero Active, clear RunID, copy the exit status,
-      and increment Failed and Retries; while the incremented Retries does not exceed
-      the limit (Spec.BackoffLimit when set, else the reconciler DefaultBackoffLimit)
-      the phase returns to PolicyWorkflowPending with the Complete condition false
-      and reason Retrying, and once it exceeds the limit the phase is PolicyWorkflowFailed
-      with CompletionTime and Failed and Complete conditions true with reason BackoffLimitExceeded.
-  - codeRefs:
-    - file:internal/policyworkflowrun/policyworkflowrun.go
-    - method:76266912e5bed07cf34b1126aad5c33b
-    id: r.name-required
-    level: MUST
-    text: 'Reconcile returns the error "policyworkflowrun: observed run has no name"
-      and an empty Result when Observed.WorkflowRun has an empty Name.'
-  - codeRefs:
-    - method:76266912e5bed07cf34b1126aad5c33b
-    - struct:2605e325b5ce4d8a38ae867d7b08178b
-    id: r.running-observation
-    level: MUST
-    text: A RunRunning observation MUST set phase PolicyWorkflowRunning, record the
-      observation run id and start time, set Active 1, set the Complete condition
-      false with reason Running, and requeue.
-  - codeRefs:
-    - method:76266912e5bed07cf34b1126aad5c33b
-    - type_alias:0d84b5d35fb4e8418432c2610ef317b0
-    id: r.start-run
-    level: MUST
-    text: Starting a run MUST set phase PolicyWorkflowRunning with Active 1 and a
-      StartTime, append OpStartRun to the ops, set the Complete condition false with
-      reason Running, and requeue after RequeueAfter.
-  - codeRefs:
-    - method:76266912e5bed07cf34b1126aad5c33b
-    - type_alias:9dfd60ec68bf9ea12c085e274c36feb8
-    id: r.state-required
-    level: MUST
-    text: 'A Run observation whose State matches none of RunRunning, RunSucceeded
-      or RunFailed MUST produce the error "policyworkflowrun: run observation has
-      no state" and an empty Result.'
-  - codeRefs:
-    - method:76266912e5bed07cf34b1126aad5c33b
-    - struct:b66ec1a8abbbf54f699b1689a5d827fb
-    id: r.status-carried
-    level: MUST
-    text: Reconcile starts from a Result that carries phase, run id, start time, completion
-      time, active, succeeded, failed, retries, exit status, outputs and a copy of
-      the conditions from the existing WorkflowRun status.
-  - codeRefs:
-    - method:76266912e5bed07cf34b1126aad5c33b
-    id: r.succeeded-observation
-    level: MUST
-    text: A RunSucceeded observation MUST set phase PolicyWorkflowSucceeded with Active
-      zero, Succeeded 1, the run id, exit status and outputs copied from the observation,
-      CompletionTime set, and the Complete condition true with reason Complete.
-  - codeRefs:
-    - method:76266912e5bed07cf34b1126aad5c33b
-    id: r.suspend
-    level: MUST
-    text: Spec.Suspend MUST stop a running run with OpStopRun and clear the run id,
-      set phase PolicyWorkflowPending with Active zero, set the Suspended condition
-      true, and requeue after RequeueAfter.
-  - codeRefs:
-    - method:76266912e5bed07cf34b1126aad5c33b
-    - struct:c8b0144b7a7dfafc8abd4dcdf36838ca
-    id: r.terminal-finish
-    level: MUST
-    text: 'A terminal phase (Succeeded, Failed or Cancelled) MUST go to finish: delete
-      the object with OpDelete once CompletionTime plus the effective TTL is reached
-      (spec TTLSecondsAfterFinished, else Observed.EffectiveTTLSeconds), otherwise
-      requeue for the remaining time; with no TTL or no completion time it returns
-      unchanged.'
-  upstream: self
+codeRefIndex:
+- file:internal/policyworkflowrun/policyworkflowrun.go policyworkflowrun.go@internal/policyworkflowrun/policyworkflowrun.go
+- file:internal/policyworkflowrun/policyworkflowrun_test.go policyworkflowrun_test.go@internal/policyworkflowrun/policyworkflowrun_test.go
+- function:5365b491262d3c8638b4a45db22fc36e New@internal/policyworkflowrun/policyworkflowrun.go:114
+- method:76266912e5bed07cf34b1126aad5c33b Reconciler.Reconcile@internal/policyworkflowrun/policyworkflowrun.go:124
+- struct:2605e325b5ce4d8a38ae867d7b08178b RunObservation@internal/policyworkflowrun/policyworkflowrun.go:28
+- struct:30ba817e4728c201876b801d6ab2334e Options@internal/policyworkflowrun/policyworkflowrun.go:104
+- struct:8c9b381b504c108fe27f810920616d23 Admission@internal/policyworkflowrun/policyworkflowrun.go:40
+- struct:b66ec1a8abbbf54f699b1689a5d827fb Result@internal/policyworkflowrun/policyworkflowrun.go:72
+- struct:c8b0144b7a7dfafc8abd4dcdf36838ca Observed@internal/policyworkflowrun/policyworkflowrun.go:48
+- type_alias:0d84b5d35fb4e8418432c2610ef317b0 Op@internal/policyworkflowrun/policyworkflowrun.go:60
+- type_alias:9dfd60ec68bf9ea12c085e274c36feb8 RunState@internal/policyworkflowrun/policyworkflowrun.go:18

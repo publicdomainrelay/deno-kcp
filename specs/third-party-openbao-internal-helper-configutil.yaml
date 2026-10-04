@@ -1,4 +1,374 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-internal-helper-configutil
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: This context exists so a reader or agent can work on the shared-config layer
+    of the OpenBao server without reading fourteen files. It states the parsing contract
+    for every shared config stanza (shared options, seals, listeners, user lockouts,
+    telemetry, response headers), the validation and lint contract that reports unused
+    keys with source positions, and the merge and sanitize contract used when several
+    config files are combined and when parsed config is logged. Each requirement names
+    the exported entry point that carries it, so a change to a parser or validator
+    can be checked against the behaviour the package promises.
+  requirements:
+  - id: r.config-error
+    level: MUST
+    text: ConfigError must carry the problem text and the file position where the
+      offending key was written, must satisfy the error interface through Error, and
+      must render the same located message through String, so validation errors can
+      be printed and wrapped as ordinary errors.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/configutil/lint.go
+    - method:45418d60631816c60f3d1a5f0c0d46ba
+    - method:863010fc3d10b12ed4744af29674264a
+    - struct:84e66809f5b9059cdeb57184cb41309f
+  - id: r.custom-response-headers
+    level: MUST
+    text: ParseCustomResponseHeaders must build a map from status code to header name/value
+      map, must return the default Strict-Transport-Security header when the input
+      is nil, must add Strict-Transport-Security to the default entry when the input
+      omits it, must reject input that is not a slice of maps or whose header value
+      is not a single map, and must reject an unknown status code with an error naming
+      that code.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/configutil/http_response_headers.go
+    - function:ad21829897e52ff55f5c9d66fe0c6a88
+  - id: r.encrypt-decrypt
+    level: MUST
+    text: 'EncryptDecrypt must run the given raw string through the wrapping.Wrapper
+      for both directions: encrypt when decrypt is false, decrypt when decrypt is
+      true, and, when strip is set, remove the wrapper''s version prefix from the
+      result so the value is readable by tools that do not know the wrapper format.'
+    codeRefs:
+    - file:third_party/openbao/internal/helper/configutil/encrypt_decrypt.go
+    - function:105fc35b9336fe2384c8bc4ec6296298
+  - id: r.kms-gostring
+    level: MUST
+    text: KMS.GoString must render a KMS for logging and error messages, exposing
+      type, purpose, disabled flag and health check settings while keeping the KMS
+      Config map out of the rendered form.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/configutil/kms.go
+    - method:718a8e21ce1943a1ec0a025e1bbaea43
+  - id: r.listener-gostring
+    level: SHOULD
+    text: Listener.GoString must render a listener for logging, showing its type and
+      raw config so operators can see which listener stanza was parsed.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/configutil/listener.go
+    - method:7174d250cff915fe8613079c4c153028
+  - id: r.listener-validate
+    level: MUST
+    text: Listener.Validate must return the configuration errors found in a listener
+      under the given config path, so the server can report an invalid listener with
+      the file position the user wrote it at.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/configutil/listener.go
+    - method:ec04b6dd0fde338221ba2de35dbfd8ab
+  - id: r.merge-shared-config
+    level: MUST
+    text: SharedConfig.Merge must fold one shared config into another, filling only
+      fields the receiver leaves zero or empty and returning the merged *SharedConfig,
+      so later config files override earlier ones only where the later file actually
+      sets a value.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/configutil/merge.go
+    - method:3a541cae658e9b501a97bcfc32cc5882
+  - id: r.parse-kmses
+    level: MUST
+    text: ParseKMSes must parse hsm and seal stanzas into a []*KMS, must reject more
+      KMS blocks than the block type permits, must parse purpose as a comma-separated
+      string slice with each entry lower-cased, must parse disabled as a bool defaulting
+      to false and health check settings with health_check_enabled defaulting to true,
+      and must reject any remaining value that is not a string.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/configutil/kms.go
+    - function:1ef1977e32c1b866e0ae56bacdcfe142
+    - struct:bee252964a822afcacf869c84b293248
+  - id: r.parse-listeners
+    level: MUST
+    text: ParseListeners must read the listener stanzas from an already-parsed AST
+      object list into SharedConfig.Listeners, must reject listener blocks whose type
+      or count is not permitted, and must fail the whole parse rather than accept
+      a partially valid listener.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/configutil/listener.go
+    - function:ad1fa2941b767b001c84d87304b05e93
+    - struct:30d9de86e173f6b9e4e8461f3667ab64
+  - id: r.parse-shared-config
+    level: MUST
+    text: ParseConfig must decode an HCL or JSON document into a *SharedConfig, must
+      fail when the document's root is not an object, must fail when disable_mlock
+      is present but not true, and must record each parsed key in FoundKeys and delete
+      it from UnusedKeys so unused-key linting sees only keys the server ignored.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/configutil/config.go
+    - function:77fb544202bb8532bb23c6ca1a880a12
+    - struct:fce4c4fc8f1f5e067009fff9beb4ec03
+  - id: r.parse-single-ip-template
+    level: MUST
+    text: ParseSingleIPTemplate must render a go-sockaddr template string to a single
+      IP address, returning an error when the template cannot be rendered or does
+      not resolve to exactly one address, so addresses such as api_addr and cluster_addr
+      can be templated.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/configutil/listener.go
+    - function:97bf02a0c2bada84b295d6fdb511e60d
+  - id: r.parse-user-lockouts
+    level: MUST
+    text: ParseUserLockouts must read the user_lockout stanzas into SharedConfig.UserLockouts,
+      keyed by auth method type, must accept only the auth methods GetSupportedUserLockoutsAuthMethods
+      reports, and must parse lockout threshold, duration, counter reset and disable
+      flag for each entry.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/configutil/userlockout.go
+    - function:bea73cf5a0d9564ea42718d1714c2b7e
+    - struct:6ea0537903ada49c640d6f30dab3ce0f
+  - id: r.sanitized-config-map
+    level: MUST
+    text: SharedConfig.Sanitized must return nil for a nil receiver, otherwise a map
+      of the core options (default_max_request_duration, log_level, log_format, pid_file,
+      cluster_name) with optional log rotation fields, listeners, user lockouts, seals
+      and telemetry added only when present, and must replace the circonus API token
+      with an empty string so parsed config can be logged without leaking it.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/configutil/config.go
+    - method:aa5e6acfac4c7338e2cd5c1cc3039af8
+  - id: r.setup-telemetry
+    level: MUST
+    text: SetupTelemetry must build the metrics sinks from SetupTelemetryOpts and
+      return the in-memory sink, the cluster metric sink, a bool reporting whether
+      the cluster sink is usable, and an error, so the server can start metrics from
+      the parsed telemetry stanza.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/configutil/telemetry.go
+    - function:b24ca91d4246209aa7376606a368ae71
+    - struct:5f845f43816f72fa6ac585be93cdb02e
+  - id: r.supported-lockout-auth-methods
+    level: MUST
+    text: GetSupportedUserLockoutsAuthMethods must return the fixed list of auth method
+      type strings for which a user_lockout stanza is legal, and ParseUserLockouts
+      must reject a stanza whose type is absent from that list.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/configutil/userlockout.go
+    - function:b1e6e342299e667aa7b190951c4c2f78
+  - id: r.telemetry-gostring
+    level: SHOULD
+    text: Telemetry.GoString must render the telemetry settings for logging without
+      printing secret material such as the circonus API token.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/configutil/telemetry.go
+    - method:06b3b98e173778274bdc6e6a9ba4d800
+  - id: r.telemetry-validate-and-parse
+    level: MUST
+    text: Telemetry.Validate must check a parsed telemetry stanza against the supported
+      backends and their required options and return the resulting []ConfigError tagged
+      with the given source, so an unusable telemetry block fails the parse with a
+      located message.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/configutil/telemetry.go
+    - method:e975de05e86e938e1977f1a2fa845aa2
+    - struct:4e12c84860b9039cd52dc4818c970dd8
+  - id: r.underscore-to-camel-case
+    level: MUST
+    text: UnderscoreToCamelCase must convert an HCL key such as default_max_request_duration
+      into the CamelCase struct field name used to match it, so the linter can map
+      an unused key to the field that would have consumed it.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/configutil/lint.go
+    - function:f5089c82048c4cea033334fe34b63869
+  - id: r.unused-field-difference
+    level: MUST
+    text: UnusedFieldDifference must return only the keys of the first map that are
+      absent from the second map and from foundKeys, so keys satisfied elsewhere in
+      the parse are dropped from the unused-key report.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/configutil/lint.go
+    - function:7824b2d2889493796c34348fb087bf9c
+  - id: r.valid-status-code
+    level: MUST
+    text: IsValidStatusCode must report whether a status-code string names one of
+      the HTTP status codes the server accepts in the custom response header stanza,
+      and ParseCustomResponseHeaders must consult it before storing any entry.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/configutil/http_response_headers.go
+    - function:5df91abbbc37bcb098ea3934303d853c
+  - id: r.validatable-config-interface
+    level: MUST
+    text: ValidatableConfig must declare Validate() []ConfigError, and config sections
+      such as Listener and Telemetry must implement it so the server can validate
+      any section through the same interface.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/configutil/lint.go
+    - interface:40d27ad81527a8b72d5d7340ac3da553
+    - method:b791b9f161fdf8e9e7baaea392cc8814
+  - id: r.validate-unused-fields
+    level: MUST
+    text: ValidateUnusedFields must turn an UnusedKeyMap into a []ConfigError, one
+      error per unused key, each carrying the source file path the key was read from,
+      so the server can tell the user which config keys were never consumed.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/configutil/lint.go
+    - function:889db6405dcc67df264d39f6652243bf
+    - type_alias:4fbf332dae9c39abacc69e9919849795
+  interfaces:
+  - name: AgentAPI
+    kind: struct
+    signature: type AgentAPI struct
+    file: third_party/openbao/internal/helper/configutil/listener.go
+  - name: ConfigError
+    kind: struct
+    signature: type ConfigError struct
+    file: third_party/openbao/internal/helper/configutil/lint.go
+  - name: ConfigError.Error
+    kind: method
+    signature: func (e ConfigError) Error() string
+    file: third_party/openbao/internal/helper/configutil/lint.go
+  - name: ConfigError.String
+    kind: method
+    signature: func (e ConfigError) String() string
+    file: third_party/openbao/internal/helper/configutil/lint.go
+  - name: EncryptDecrypt
+    kind: function
+    signature: func EncryptDecrypt(rawStr string, decrypt, strip bool, wrapper wrapping.Wrapper)
+      (string, error)
+    file: third_party/openbao/internal/helper/configutil/encrypt_decrypt.go
+  - name: GetSupportedUserLockoutsAuthMethods
+    kind: function
+    signature: func GetSupportedUserLockoutsAuthMethods() []string
+    file: third_party/openbao/internal/helper/configutil/userlockout.go
+  - name: IsValidStatusCode
+    kind: function
+    signature: func IsValidStatusCode(sc string) bool
+    file: third_party/openbao/internal/helper/configutil/http_response_headers.go
+  - name: KMS
+    kind: struct
+    signature: type KMS struct
+    file: third_party/openbao/internal/helper/configutil/kms.go
+  - name: KMS.GoString
+    kind: method
+    signature: func (k *KMS) GoString() string
+    file: third_party/openbao/internal/helper/configutil/kms.go
+  - name: Listener
+    kind: struct
+    signature: type Listener struct
+    file: third_party/openbao/internal/helper/configutil/listener.go
+  - name: Listener.GoString
+    kind: method
+    signature: func (l *Listener) GoString() string
+    file: third_party/openbao/internal/helper/configutil/listener.go
+  - name: Listener.Validate
+    kind: method
+    signature: func (l *Listener) Validate(path string) []ConfigError
+    file: third_party/openbao/internal/helper/configutil/listener.go
+  - name: ListenerInFlightRequestLogging
+    kind: struct
+    signature: type ListenerInFlightRequestLogging struct
+    file: third_party/openbao/internal/helper/configutil/listener.go
+  - name: ListenerProfiling
+    kind: struct
+    signature: type ListenerProfiling struct
+    file: third_party/openbao/internal/helper/configutil/listener.go
+  - name: ListenerTelemetry
+    kind: struct
+    signature: type ListenerTelemetry struct
+    file: third_party/openbao/internal/helper/configutil/listener.go
+  - name: ParseConfig
+    kind: function
+    signature: func ParseConfig(d string) (*SharedConfig, error)
+    file: third_party/openbao/internal/helper/configutil/config.go
+  - name: ParseCustomResponseHeaders
+    kind: function
+    signature: func ParseCustomResponseHeaders(responseHeaders any) (map[string]map[string]string,
+      error)
+    file: third_party/openbao/internal/helper/configutil/http_response_headers.go
+  - name: ParseKMSes
+    kind: function
+    signature: func ParseKMSes(d string) ([]*KMS, error)
+    file: third_party/openbao/internal/helper/configutil/kms.go
+  - name: ParseListeners
+    kind: function
+    signature: func ParseListeners(result *SharedConfig, list *ast.ObjectList) error
+    file: third_party/openbao/internal/helper/configutil/listener.go
+  - name: ParseSingleIPTemplate
+    kind: function
+    signature: func ParseSingleIPTemplate(ipTmpl string) (string, error)
+    file: third_party/openbao/internal/helper/configutil/listener.go
+  - name: ParseUserLockouts
+    kind: function
+    signature: func ParseUserLockouts(result *SharedConfig, list *ast.ObjectList)
+      error
+    file: third_party/openbao/internal/helper/configutil/userlockout.go
+  - name: ProxyAPI
+    kind: struct
+    signature: type ProxyAPI struct
+    file: third_party/openbao/internal/helper/configutil/listener.go
+  - name: SetupTelemetry
+    kind: function
+    signature: func SetupTelemetry(opts *SetupTelemetryOpts) (*metrics.InmemSink,
+      *metricsutil.ClusterMetricSink, bool, error)
+    file: third_party/openbao/internal/helper/configutil/telemetry.go
+  - name: SetupTelemetryOpts
+    kind: struct
+    signature: type SetupTelemetryOpts struct
+    file: third_party/openbao/internal/helper/configutil/telemetry.go
+  - name: SharedConfig
+    kind: struct
+    signature: type SharedConfig struct
+    file: third_party/openbao/internal/helper/configutil/config.go
+  - name: SharedConfig.Merge
+    kind: method
+    signature: func (c *SharedConfig) Merge(c2 *SharedConfig) *SharedConfig
+    file: third_party/openbao/internal/helper/configutil/merge.go
+  - name: SharedConfig.Sanitized
+    kind: method
+    signature: func (c *SharedConfig) Sanitized() map[string]any
+    file: third_party/openbao/internal/helper/configutil/config.go
+  - name: Telemetry
+    kind: struct
+    signature: type Telemetry struct
+    file: third_party/openbao/internal/helper/configutil/telemetry.go
+  - name: Telemetry.GoString
+    kind: method
+    signature: func (t *Telemetry) GoString() string
+    file: third_party/openbao/internal/helper/configutil/telemetry.go
+  - name: Telemetry.Validate
+    kind: method
+    signature: func (t *Telemetry) Validate(source string) []ConfigError
+    file: third_party/openbao/internal/helper/configutil/telemetry.go
+  - name: UnderscoreToCamelCase
+    kind: function
+    signature: func UnderscoreToCamelCase(s string) string
+    file: third_party/openbao/internal/helper/configutil/lint.go
+  - name: UnusedFieldDifference
+    kind: function
+    signature: func UnusedFieldDifference(a, b UnusedKeyMap, foundKeys []string) UnusedKeyMap
+    file: third_party/openbao/internal/helper/configutil/lint.go
+  - name: UnusedKeyMap
+    kind: type_alias
+    signature: type UnusedKeyMap
+    file: third_party/openbao/internal/helper/configutil/lint.go
+  - name: UserLockout
+    kind: struct
+    signature: type UserLockout struct
+    file: third_party/openbao/internal/helper/configutil/userlockout.go
+  - name: ValidatableConfig
+    kind: interface
+    signature: type ValidatableConfig interface
+    file: third_party/openbao/internal/helper/configutil/lint.go
+  - name: ValidatableConfig.Validate
+    kind: method
+    signature: func (c ValidatableConfig) Validate() []ConfigError
+    file: third_party/openbao/internal/helper/configutil/lint.go
+  - name: ValidateUnusedFields
+    kind: function
+    signature: func ValidateUnusedFields(unusedKeyPositions UnusedKeyMap, sourceFilePath
+      string) []ConfigError
+    file: third_party/openbao/internal/helper/configutil/lint.go
 codeRefIndex:
 - file:third_party/openbao/internal/helper/configutil/config.go config.go@third_party/openbao/internal/helper/configutil/config.go
 - file:third_party/openbao/internal/helper/configutil/config_test.go config_test.go@third_party/openbao/internal/helper/configutil/config_test.go
@@ -46,373 +416,3 @@ codeRefIndex:
 - struct:bee252964a822afcacf869c84b293248 KMS@third_party/openbao/internal/helper/configutil/kms.go:20
 - struct:fce4c4fc8f1f5e067009fff9beb4ec03 SharedConfig@third_party/openbao/internal/helper/configutil/config.go:24
 - type_alias:4fbf332dae9c39abacc69e9919849795 UnusedKeyMap@third_party/openbao/internal/helper/configutil/lint.go:14
-kind: SystemContext
-metadata:
-  name: third-party-openbao-internal-helper-configutil
-  namespace: default
-spec:
-  intent: This context exists so a reader or agent can work on the shared-config layer
-    of the OpenBao server without reading fourteen files. It states the parsing contract
-    for every shared config stanza (shared options, seals, listeners, user lockouts,
-    telemetry, response headers), the validation and lint contract that reports unused
-    keys with source positions, and the merge and sanitize contract used when several
-    config files are combined and when parsed config is logged. Each requirement names
-    the exported entry point that carries it, so a change to a parser or validator
-    can be checked against the behaviour the package promises.
-  interfaces:
-  - file: third_party/openbao/internal/helper/configutil/listener.go
-    kind: struct
-    name: AgentAPI
-    signature: type AgentAPI struct
-  - file: third_party/openbao/internal/helper/configutil/lint.go
-    kind: struct
-    name: ConfigError
-    signature: type ConfigError struct
-  - file: third_party/openbao/internal/helper/configutil/lint.go
-    kind: method
-    name: ConfigError.Error
-    signature: func (e ConfigError) Error() string
-  - file: third_party/openbao/internal/helper/configutil/lint.go
-    kind: method
-    name: ConfigError.String
-    signature: func (e ConfigError) String() string
-  - file: third_party/openbao/internal/helper/configutil/encrypt_decrypt.go
-    kind: function
-    name: EncryptDecrypt
-    signature: func EncryptDecrypt(rawStr string, decrypt, strip bool, wrapper wrapping.Wrapper)
-      (string, error)
-  - file: third_party/openbao/internal/helper/configutil/userlockout.go
-    kind: function
-    name: GetSupportedUserLockoutsAuthMethods
-    signature: func GetSupportedUserLockoutsAuthMethods() []string
-  - file: third_party/openbao/internal/helper/configutil/http_response_headers.go
-    kind: function
-    name: IsValidStatusCode
-    signature: func IsValidStatusCode(sc string) bool
-  - file: third_party/openbao/internal/helper/configutil/kms.go
-    kind: struct
-    name: KMS
-    signature: type KMS struct
-  - file: third_party/openbao/internal/helper/configutil/kms.go
-    kind: method
-    name: KMS.GoString
-    signature: func (k *KMS) GoString() string
-  - file: third_party/openbao/internal/helper/configutil/listener.go
-    kind: struct
-    name: Listener
-    signature: type Listener struct
-  - file: third_party/openbao/internal/helper/configutil/listener.go
-    kind: method
-    name: Listener.GoString
-    signature: func (l *Listener) GoString() string
-  - file: third_party/openbao/internal/helper/configutil/listener.go
-    kind: method
-    name: Listener.Validate
-    signature: func (l *Listener) Validate(path string) []ConfigError
-  - file: third_party/openbao/internal/helper/configutil/listener.go
-    kind: struct
-    name: ListenerInFlightRequestLogging
-    signature: type ListenerInFlightRequestLogging struct
-  - file: third_party/openbao/internal/helper/configutil/listener.go
-    kind: struct
-    name: ListenerProfiling
-    signature: type ListenerProfiling struct
-  - file: third_party/openbao/internal/helper/configutil/listener.go
-    kind: struct
-    name: ListenerTelemetry
-    signature: type ListenerTelemetry struct
-  - file: third_party/openbao/internal/helper/configutil/config.go
-    kind: function
-    name: ParseConfig
-    signature: func ParseConfig(d string) (*SharedConfig, error)
-  - file: third_party/openbao/internal/helper/configutil/http_response_headers.go
-    kind: function
-    name: ParseCustomResponseHeaders
-    signature: func ParseCustomResponseHeaders(responseHeaders any) (map[string]map[string]string,
-      error)
-  - file: third_party/openbao/internal/helper/configutil/kms.go
-    kind: function
-    name: ParseKMSes
-    signature: func ParseKMSes(d string) ([]*KMS, error)
-  - file: third_party/openbao/internal/helper/configutil/listener.go
-    kind: function
-    name: ParseListeners
-    signature: func ParseListeners(result *SharedConfig, list *ast.ObjectList) error
-  - file: third_party/openbao/internal/helper/configutil/listener.go
-    kind: function
-    name: ParseSingleIPTemplate
-    signature: func ParseSingleIPTemplate(ipTmpl string) (string, error)
-  - file: third_party/openbao/internal/helper/configutil/userlockout.go
-    kind: function
-    name: ParseUserLockouts
-    signature: func ParseUserLockouts(result *SharedConfig, list *ast.ObjectList)
-      error
-  - file: third_party/openbao/internal/helper/configutil/listener.go
-    kind: struct
-    name: ProxyAPI
-    signature: type ProxyAPI struct
-  - file: third_party/openbao/internal/helper/configutil/telemetry.go
-    kind: function
-    name: SetupTelemetry
-    signature: func SetupTelemetry(opts *SetupTelemetryOpts) (*metrics.InmemSink,
-      *metricsutil.ClusterMetricSink, bool, error)
-  - file: third_party/openbao/internal/helper/configutil/telemetry.go
-    kind: struct
-    name: SetupTelemetryOpts
-    signature: type SetupTelemetryOpts struct
-  - file: third_party/openbao/internal/helper/configutil/config.go
-    kind: struct
-    name: SharedConfig
-    signature: type SharedConfig struct
-  - file: third_party/openbao/internal/helper/configutil/merge.go
-    kind: method
-    name: SharedConfig.Merge
-    signature: func (c *SharedConfig) Merge(c2 *SharedConfig) *SharedConfig
-  - file: third_party/openbao/internal/helper/configutil/config.go
-    kind: method
-    name: SharedConfig.Sanitized
-    signature: func (c *SharedConfig) Sanitized() map[string]any
-  - file: third_party/openbao/internal/helper/configutil/telemetry.go
-    kind: struct
-    name: Telemetry
-    signature: type Telemetry struct
-  - file: third_party/openbao/internal/helper/configutil/telemetry.go
-    kind: method
-    name: Telemetry.GoString
-    signature: func (t *Telemetry) GoString() string
-  - file: third_party/openbao/internal/helper/configutil/telemetry.go
-    kind: method
-    name: Telemetry.Validate
-    signature: func (t *Telemetry) Validate(source string) []ConfigError
-  - file: third_party/openbao/internal/helper/configutil/lint.go
-    kind: function
-    name: UnderscoreToCamelCase
-    signature: func UnderscoreToCamelCase(s string) string
-  - file: third_party/openbao/internal/helper/configutil/lint.go
-    kind: function
-    name: UnusedFieldDifference
-    signature: func UnusedFieldDifference(a, b UnusedKeyMap, foundKeys []string) UnusedKeyMap
-  - file: third_party/openbao/internal/helper/configutil/lint.go
-    kind: type_alias
-    name: UnusedKeyMap
-    signature: type UnusedKeyMap
-  - file: third_party/openbao/internal/helper/configutil/userlockout.go
-    kind: struct
-    name: UserLockout
-    signature: type UserLockout struct
-  - file: third_party/openbao/internal/helper/configutil/lint.go
-    kind: interface
-    name: ValidatableConfig
-    signature: type ValidatableConfig interface
-  - file: third_party/openbao/internal/helper/configutil/lint.go
-    kind: method
-    name: ValidatableConfig.Validate
-    signature: func (c ValidatableConfig) Validate() []ConfigError
-  - file: third_party/openbao/internal/helper/configutil/lint.go
-    kind: function
-    name: ValidateUnusedFields
-    signature: func ValidateUnusedFields(unusedKeyPositions UnusedKeyMap, sourceFilePath
-      string) []ConfigError
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/configutil/lint.go
-    - method:45418d60631816c60f3d1a5f0c0d46ba
-    - method:863010fc3d10b12ed4744af29674264a
-    - struct:84e66809f5b9059cdeb57184cb41309f
-    id: r.config-error
-    level: MUST
-    text: ConfigError must carry the problem text and the file position where the
-      offending key was written, must satisfy the error interface through Error, and
-      must render the same located message through String, so validation errors can
-      be printed and wrapped as ordinary errors.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/configutil/http_response_headers.go
-    - function:ad21829897e52ff55f5c9d66fe0c6a88
-    id: r.custom-response-headers
-    level: MUST
-    text: ParseCustomResponseHeaders must build a map from status code to header name/value
-      map, must return the default Strict-Transport-Security header when the input
-      is nil, must add Strict-Transport-Security to the default entry when the input
-      omits it, must reject input that is not a slice of maps or whose header value
-      is not a single map, and must reject an unknown status code with an error naming
-      that code.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/configutil/encrypt_decrypt.go
-    - function:105fc35b9336fe2384c8bc4ec6296298
-    id: r.encrypt-decrypt
-    level: MUST
-    text: 'EncryptDecrypt must run the given raw string through the wrapping.Wrapper
-      for both directions: encrypt when decrypt is false, decrypt when decrypt is
-      true, and, when strip is set, remove the wrapper''s version prefix from the
-      result so the value is readable by tools that do not know the wrapper format.'
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/configutil/kms.go
-    - method:718a8e21ce1943a1ec0a025e1bbaea43
-    id: r.kms-gostring
-    level: MUST
-    text: KMS.GoString must render a KMS for logging and error messages, exposing
-      type, purpose, disabled flag and health check settings while keeping the KMS
-      Config map out of the rendered form.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/configutil/listener.go
-    - method:7174d250cff915fe8613079c4c153028
-    id: r.listener-gostring
-    level: SHOULD
-    text: Listener.GoString must render a listener for logging, showing its type and
-      raw config so operators can see which listener stanza was parsed.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/configutil/listener.go
-    - method:ec04b6dd0fde338221ba2de35dbfd8ab
-    id: r.listener-validate
-    level: MUST
-    text: Listener.Validate must return the configuration errors found in a listener
-      under the given config path, so the server can report an invalid listener with
-      the file position the user wrote it at.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/configutil/merge.go
-    - method:3a541cae658e9b501a97bcfc32cc5882
-    id: r.merge-shared-config
-    level: MUST
-    text: SharedConfig.Merge must fold one shared config into another, filling only
-      fields the receiver leaves zero or empty and returning the merged *SharedConfig,
-      so later config files override earlier ones only where the later file actually
-      sets a value.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/configutil/kms.go
-    - function:1ef1977e32c1b866e0ae56bacdcfe142
-    - struct:bee252964a822afcacf869c84b293248
-    id: r.parse-kmses
-    level: MUST
-    text: ParseKMSes must parse hsm and seal stanzas into a []*KMS, must reject more
-      KMS blocks than the block type permits, must parse purpose as a comma-separated
-      string slice with each entry lower-cased, must parse disabled as a bool defaulting
-      to false and health check settings with health_check_enabled defaulting to true,
-      and must reject any remaining value that is not a string.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/configutil/listener.go
-    - function:ad1fa2941b767b001c84d87304b05e93
-    - struct:30d9de86e173f6b9e4e8461f3667ab64
-    id: r.parse-listeners
-    level: MUST
-    text: ParseListeners must read the listener stanzas from an already-parsed AST
-      object list into SharedConfig.Listeners, must reject listener blocks whose type
-      or count is not permitted, and must fail the whole parse rather than accept
-      a partially valid listener.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/configutil/config.go
-    - function:77fb544202bb8532bb23c6ca1a880a12
-    - struct:fce4c4fc8f1f5e067009fff9beb4ec03
-    id: r.parse-shared-config
-    level: MUST
-    text: ParseConfig must decode an HCL or JSON document into a *SharedConfig, must
-      fail when the document's root is not an object, must fail when disable_mlock
-      is present but not true, and must record each parsed key in FoundKeys and delete
-      it from UnusedKeys so unused-key linting sees only keys the server ignored.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/configutil/listener.go
-    - function:97bf02a0c2bada84b295d6fdb511e60d
-    id: r.parse-single-ip-template
-    level: MUST
-    text: ParseSingleIPTemplate must render a go-sockaddr template string to a single
-      IP address, returning an error when the template cannot be rendered or does
-      not resolve to exactly one address, so addresses such as api_addr and cluster_addr
-      can be templated.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/configutil/userlockout.go
-    - function:bea73cf5a0d9564ea42718d1714c2b7e
-    - struct:6ea0537903ada49c640d6f30dab3ce0f
-    id: r.parse-user-lockouts
-    level: MUST
-    text: ParseUserLockouts must read the user_lockout stanzas into SharedConfig.UserLockouts,
-      keyed by auth method type, must accept only the auth methods GetSupportedUserLockoutsAuthMethods
-      reports, and must parse lockout threshold, duration, counter reset and disable
-      flag for each entry.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/configutil/config.go
-    - method:aa5e6acfac4c7338e2cd5c1cc3039af8
-    id: r.sanitized-config-map
-    level: MUST
-    text: SharedConfig.Sanitized must return nil for a nil receiver, otherwise a map
-      of the core options (default_max_request_duration, log_level, log_format, pid_file,
-      cluster_name) with optional log rotation fields, listeners, user lockouts, seals
-      and telemetry added only when present, and must replace the circonus API token
-      with an empty string so parsed config can be logged without leaking it.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/configutil/telemetry.go
-    - function:b24ca91d4246209aa7376606a368ae71
-    - struct:5f845f43816f72fa6ac585be93cdb02e
-    id: r.setup-telemetry
-    level: MUST
-    text: SetupTelemetry must build the metrics sinks from SetupTelemetryOpts and
-      return the in-memory sink, the cluster metric sink, a bool reporting whether
-      the cluster sink is usable, and an error, so the server can start metrics from
-      the parsed telemetry stanza.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/configutil/userlockout.go
-    - function:b1e6e342299e667aa7b190951c4c2f78
-    id: r.supported-lockout-auth-methods
-    level: MUST
-    text: GetSupportedUserLockoutsAuthMethods must return the fixed list of auth method
-      type strings for which a user_lockout stanza is legal, and ParseUserLockouts
-      must reject a stanza whose type is absent from that list.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/configutil/telemetry.go
-    - method:06b3b98e173778274bdc6e6a9ba4d800
-    id: r.telemetry-gostring
-    level: SHOULD
-    text: Telemetry.GoString must render the telemetry settings for logging without
-      printing secret material such as the circonus API token.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/configutil/telemetry.go
-    - method:e975de05e86e938e1977f1a2fa845aa2
-    - struct:4e12c84860b9039cd52dc4818c970dd8
-    id: r.telemetry-validate-and-parse
-    level: MUST
-    text: Telemetry.Validate must check a parsed telemetry stanza against the supported
-      backends and their required options and return the resulting []ConfigError tagged
-      with the given source, so an unusable telemetry block fails the parse with a
-      located message.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/configutil/lint.go
-    - function:f5089c82048c4cea033334fe34b63869
-    id: r.underscore-to-camel-case
-    level: MUST
-    text: UnderscoreToCamelCase must convert an HCL key such as default_max_request_duration
-      into the CamelCase struct field name used to match it, so the linter can map
-      an unused key to the field that would have consumed it.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/configutil/lint.go
-    - function:7824b2d2889493796c34348fb087bf9c
-    id: r.unused-field-difference
-    level: MUST
-    text: UnusedFieldDifference must return only the keys of the first map that are
-      absent from the second map and from foundKeys, so keys satisfied elsewhere in
-      the parse are dropped from the unused-key report.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/configutil/http_response_headers.go
-    - function:5df91abbbc37bcb098ea3934303d853c
-    id: r.valid-status-code
-    level: MUST
-    text: IsValidStatusCode must report whether a status-code string names one of
-      the HTTP status codes the server accepts in the custom response header stanza,
-      and ParseCustomResponseHeaders must consult it before storing any entry.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/configutil/lint.go
-    - interface:40d27ad81527a8b72d5d7340ac3da553
-    - method:b791b9f161fdf8e9e7baaea392cc8814
-    id: r.validatable-config-interface
-    level: MUST
-    text: ValidatableConfig must declare Validate() []ConfigError, and config sections
-      such as Listener and Telemetry must implement it so the server can validate
-      any section through the same interface.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/configutil/lint.go
-    - function:889db6405dcc67df264d39f6652243bf
-    - type_alias:4fbf332dae9c39abacc69e9919849795
-    id: r.validate-unused-fields
-    level: MUST
-    text: ValidateUnusedFields must turn an UnusedKeyMap into a []ConfigError, one
-      error per unused key, each carrying the source file path the key was read from,
-      so the server can tell the user which config keys were never consumed.
-  upstream: self

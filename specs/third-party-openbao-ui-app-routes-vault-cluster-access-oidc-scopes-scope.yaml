@@ -1,4 +1,69 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-ui-app-routes-vault-cluster-access-oidc-scopes-scope
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'These modules exist to give the OIDC scope details and edit URLs a resolvable
+    route class in the Ember router map. The context documents that the two classes
+    are intentionally empty Route subclasses: any behavior seen on those screens comes
+    from the Route superclass and the corresponding controllers and templates, not
+    from route-level code. The spec fixes that contract so later edits know an empty
+    subclass is the current, deliberate state rather than an unfinished stub.'
+  requirements:
+  - id: r.details-route-is-empty-route-subclass
+    level: MUST
+    text: details.js MUST declare OidcScopeDetailsRoute as a class extending Ember's
+      Route with an empty body, so the OIDC scope details route inherits every hook
+      and lifecycle method from Route and overrides none of them.
+    codeRefs:
+    - class:5a8f356e26bdd7490c8fc016980b263b
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope/details.js
+  - id: r.edit-route-is-empty-route-subclass
+    level: MUST
+    text: edit.js MUST declare OidcScopeEditRoute as a class extending Ember's Route
+      with an empty body, so the OIDC scope edit route inherits every hook and lifecycle
+      method from Route and overrides none of them.
+    codeRefs:
+    - class:f84eedeee8c419f5ccb0c11400b1b8f8
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope/edit.js
+  - id: r.one-route-class-per-module
+    level: MUST
+    text: Each route file MUST contain only its single route class and MUST NOT declare
+      model, beforeModel, afterModel, setupController, redirect or action members,
+      so scope data loading and mutation stay in the controller and adapter layers
+      instead of route-level code.
+    codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope/details.js
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope/edit.js
+  - id: r.route-paths-map-to-scope-subscreens
+    level: SHOULD
+    text: The two classes SHOULD remain placed under the scopes/scope directory so
+      the router nests the details and edit screens beneath a single OIDC scope belonging
+      to a vault cluster, matching the router map that resolves them.
+    codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope/details.js
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope/edit.js
+  - id: r.routes-exported-as-default
+    level: MUST
+    text: Each route module MUST expose its class as the module's default export,
+      because the Ember resolver locates route classes by file path and default export
+      rather than by named import; OidcScopeDetailsRoute is the default export of
+      details.js and OidcScopeEditRoute is the default export of edit.js.
+    codeRefs:
+    - class:5a8f356e26bdd7490c8fc016980b263b
+    - class:f84eedeee8c419f5ccb0c11400b1b8f8
+  interfaces:
+  - name: OidcScopeDetailsRoute
+    kind: class
+    signature: export default class OidcScopeDetailsRoute extends Route {}
+    file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope/details.js
+  - name: OidcScopeEditRoute
+    kind: class
+    signature: export default class OidcScopeEditRoute extends Route {}
+    file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope/edit.js
 codeRefIndex:
 - class:5a8f356e26bdd7490c8fc016980b263b OidcScopeDetailsRoute@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope/details.js:8
 - class:f84eedeee8c419f5ccb0c11400b1b8f8 OidcScopeEditRoute@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope/edit.js:8
@@ -6,68 +71,3 @@ codeRefIndex:
   details.js@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope/details.js
 - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope/edit.js
   edit.js@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope/edit.js
-kind: SystemContext
-metadata:
-  name: third-party-openbao-ui-app-routes-vault-cluster-access-oidc-scopes-scope
-  namespace: default
-spec:
-  intent: 'These modules exist to give the OIDC scope details and edit URLs a resolvable
-    route class in the Ember router map. The context documents that the two classes
-    are intentionally empty Route subclasses: any behavior seen on those screens comes
-    from the Route superclass and the corresponding controllers and templates, not
-    from route-level code. The spec fixes that contract so later edits know an empty
-    subclass is the current, deliberate state rather than an unfinished stub.'
-  interfaces:
-  - file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope/details.js
-    kind: class
-    name: OidcScopeDetailsRoute
-    signature: export default class OidcScopeDetailsRoute extends Route {}
-  - file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope/edit.js
-    kind: class
-    name: OidcScopeEditRoute
-    signature: export default class OidcScopeEditRoute extends Route {}
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - class:5a8f356e26bdd7490c8fc016980b263b
-    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope/details.js
-    id: r.details-route-is-empty-route-subclass
-    level: MUST
-    text: details.js MUST declare OidcScopeDetailsRoute as a class extending Ember's
-      Route with an empty body, so the OIDC scope details route inherits every hook
-      and lifecycle method from Route and overrides none of them.
-  - codeRefs:
-    - class:f84eedeee8c419f5ccb0c11400b1b8f8
-    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope/edit.js
-    id: r.edit-route-is-empty-route-subclass
-    level: MUST
-    text: edit.js MUST declare OidcScopeEditRoute as a class extending Ember's Route
-      with an empty body, so the OIDC scope edit route inherits every hook and lifecycle
-      method from Route and overrides none of them.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope/details.js
-    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope/edit.js
-    id: r.one-route-class-per-module
-    level: MUST
-    text: Each route file MUST contain only its single route class and MUST NOT declare
-      model, beforeModel, afterModel, setupController, redirect or action members,
-      so scope data loading and mutation stay in the controller and adapter layers
-      instead of route-level code.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope/details.js
-    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope/edit.js
-    id: r.route-paths-map-to-scope-subscreens
-    level: SHOULD
-    text: The two classes SHOULD remain placed under the scopes/scope directory so
-      the router nests the details and edit screens beneath a single OIDC scope belonging
-      to a vault cluster, matching the router map that resolves them.
-  - codeRefs:
-    - class:5a8f356e26bdd7490c8fc016980b263b
-    - class:f84eedeee8c419f5ccb0c11400b1b8f8
-    id: r.routes-exported-as-default
-    level: MUST
-    text: Each route module MUST expose its class as the module's default export,
-      because the Ember resolver locates route classes by file path and default export
-      rather than by named import; OidcScopeDetailsRoute is the default export of
-      details.js and OidcScopeEditRoute is the default export of edit.js.
-  upstream: self

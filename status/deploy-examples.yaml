@@ -1,16 +1,19 @@
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 423f8fa7af1031b92964578daf36d08f89f0d1f32fcc332951a69e20ea357cbc
+realizedSpecHash: 913fc8a4c48ff382e23e1ee6748c7878f3fcb0e9e5cd0a47b0a1056fc0acf63f
 conditions:
-- message: 'missing: exampleByName, exampleFiles, exampleFilesOnDisk'
+- type: CodeSynced
+  status: "False"
   reason: InterfacesMissing
+  message: 'missing: exampleByName, exampleFiles, exampleFilesOnDisk'
+- type: Drifted
   status: "False"
-  type: CodeSynced
-- message: observed facts match the synced fingerprint
   reason: FingerprintEqual
-  status: "False"
-  type: Drifted
-- message: the spec passes the validator
-  reason: ValidatorPassed
+  message: observed facts match the synced fingerprint
+- type: SpecValid
   status: "True"
-  type: SpecValid
+  reason: ValidatorPassed
+  message: the spec passes the validator
 observed:
   files:
   - deploy/examples/deno-job.yaml
@@ -24,6 +27,3 @@ observed:
   - deploy/examples/policyworkflowpod.yaml
   - deploy/examples/runtrigger.yaml
   fingerprint: 423f8fa7af1031b92964578daf36d08f89f0d1f32fcc332951a69e20ea357cbc
-realizedSpecHash: 913fc8a4c48ff382e23e1ee6748c7878f3fcb0e9e5cd0a47b0a1056fc0acf63f
-syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-syncedFingerprint: 423f8fa7af1031b92964578daf36d08f89f0d1f32fcc332951a69e20ea357cbc

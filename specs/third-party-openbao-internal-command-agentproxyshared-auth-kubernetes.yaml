@@ -1,4 +1,136 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-internal-command-agentproxyshared-auth-kubernetes
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'The context exists so that an OpenBao agent can authenticate to an OpenBao
+    server with a Kubernetes service account token. It is the Kubernetes implementation
+    of the shared auth.AuthMethod interface the agentproxyshared auth package declares:
+    the constructor turns agent configuration into a method object, and the method
+    object supplies the login request the agent sends. Because the plugin is vendored
+    third-party code inside deno-kcp, the specification records the observed contract
+    of that plugin rather than any locally authored behavior.'
+  requirements:
+  - id: r.authenticate-builds-login-request
+    level: MUST
+    text: kubernetesMethod.Authenticate traces "beginning authentication", reads the
+      JWT, and returns the path fmt.Sprintf("%s/login", k.mountPath) with a nil http.Header
+      and a body map holding the keys "role" and "jwt" (the stored role and the JWT
+      string).
+    codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go
+    - method:f80a23c01970f9ec5b0b63d5aadc409f
+  - id: r.authenticate-jwt-read-error
+    level: MUST
+    text: 'When reading the JWT fails, kubernetesMethod.Authenticate returns empty
+      path, nil header, nil body and an error wrapped as "error reading JWT with Kubernetes
+      Auth: %w" over the readJWT failure, so no login request is issued.'
+    codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go
+    - method:f80a23c01970f9ec5b0b63d5aadc409f
+  - id: r.constructor-copies-logger-and-mount
+    level: MUST
+    text: NewKubernetesAuthMethod carries the Logger and MountPath from the supplied
+      AuthConfig onto the returned kubernetesMethod, so later logging and login path
+      construction use the agent's values rather than package defaults.
+    codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go
+    - function:662cee05789c54192c8afe7da9a01545
+  - id: r.constructor-validates-config
+    level: MUST
+    text: NewKubernetesAuthMethod rejects a nil *auth.AuthConfig with the error "empty
+      config" and a config whose Config map is nil with the error "empty config data";
+      it never returns a partially built method on those paths.
+    codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go
+    - function:662cee05789c54192c8afe7da9a01545
+  - id: r.cred-success-noop
+    level: MUST
+    text: 'kubernetesMethod.CredSuccess has an empty body: a successful credential
+      fetch triggers no state change, no cache update and no side effect on the method.'
+    codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go
+    - method:803ebafa8f0153e48e3b463bf0a8d692
+  - id: r.implements-auth-method
+    level: MUST
+    text: 'kubernetesMethod satisfies the auth.AuthMethod interface of the agentproxyshared
+      auth package: NewKubernetesAuthMethod returns it as an auth.AuthMethod, so Authenticate,
+      NewCreds, CredSuccess and Shutdown must keep the signatures that interface declares.'
+    codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go
+    - function:662cee05789c54192c8afe7da9a01545
+    - method:803ebafa8f0153e48e3b463bf0a8d692
+    - method:f25ad26825ee628d87faab8aef7dfac3
+    - method:f80a23c01970f9ec5b0b63d5aadc409f
+    - method:f92c67aafe17516364b2ccda9028bc4f
+  - id: r.new-creds-never-signals
+    level: MUST
+    text: kubernetesMethod.NewCreds returns a nil channel, so the method never asks
+      the agent to re-authenticate on a credential change; the service account token
+      is treated as non-rotating.
+    codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go
+    - method:f25ad26825ee628d87faab8aef7dfac3
+  - id: r.role-required-string
+    level: MUST
+    text: 'NewKubernetesAuthMethod requires the config map key "role": a missing key
+      yields "missing ''role'' value", a value that is not a string yields "could
+      not convert ''role'' config value to string", and an empty string yields "''role''
+      value is empty". Only when a non-empty string role is present does it store
+      the role on the method.'
+    codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go
+    - function:662cee05789c54192c8afe7da9a01545
+  - id: r.shutdown-noop
+    level: MUST
+    text: 'kubernetesMethod.Shutdown has an empty body: it releases no resources and
+      closes nothing, so shutdown of the agent leaves the method''s fields untouched.'
+    codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go
+    - method:f92c67aafe17516364b2ccda9028bc4f
+  - id: r.test-covers-constructor
+    level: MUST
+    text: kubernetes_test.go exercises the constructor through TestKubernetesAuth_basic,
+      which calls NewKubernetesAuthMethod, so configuration validation behavior stays
+      covered by a test.
+    codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes_test.go
+    - function:662cee05789c54192c8afe7da9a01545
+  - id: r.token-path-optional-string
+    level: MUST
+    text: 'The config map key "token_path" is optional: when absent the constructor
+      leaves tokenPath empty so the default service account token is used, and when
+      present it must be a string or the constructor returns "could not convert ''token_path''
+      config value to string".'
+    codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go
+    - function:662cee05789c54192c8afe7da9a01545
+  interfaces:
+  - name: NewKubernetesAuthMethod
+    kind: function
+    signature: func NewKubernetesAuthMethod(conf *auth.AuthConfig) (auth.AuthMethod,
+      error)
+    file: third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go
+  - name: kubernetesMethod.Authenticate
+    kind: method
+    signature: func (k *kubernetesMethod) Authenticate(ctx context.Context, client
+      *api.Client) (string, http.Header, map[string]any, error)
+    file: third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go
+  - name: kubernetesMethod.CredSuccess
+    kind: method
+    signature: func (k *kubernetesMethod) CredSuccess()
+    file: third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go
+  - name: kubernetesMethod.NewCreds
+    kind: method
+    signature: func (k *kubernetesMethod) NewCreds() chan struct{}
+    file: third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go
+  - name: kubernetesMethod.Shutdown
+    kind: method
+    signature: func (k *kubernetesMethod) Shutdown()
+    file: third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go
 codeRefIndex:
 - file:third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go
   kubernetes.go@third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go
@@ -9,135 +141,3 @@ codeRefIndex:
 - method:f25ad26825ee628d87faab8aef7dfac3 kubernetesMethod.NewCreds@third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go:91
 - method:f80a23c01970f9ec5b0b63d5aadc409f kubernetesMethod.Authenticate@third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go:77
 - method:f92c67aafe17516364b2ccda9028bc4f kubernetesMethod.Shutdown@third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go:98
-kind: SystemContext
-metadata:
-  name: third-party-openbao-internal-command-agentproxyshared-auth-kubernetes
-  namespace: default
-spec:
-  intent: 'The context exists so that an OpenBao agent can authenticate to an OpenBao
-    server with a Kubernetes service account token. It is the Kubernetes implementation
-    of the shared auth.AuthMethod interface the agentproxyshared auth package declares:
-    the constructor turns agent configuration into a method object, and the method
-    object supplies the login request the agent sends. Because the plugin is vendored
-    third-party code inside deno-kcp, the specification records the observed contract
-    of that plugin rather than any locally authored behavior.'
-  interfaces:
-  - file: third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go
-    kind: function
-    name: NewKubernetesAuthMethod
-    signature: func NewKubernetesAuthMethod(conf *auth.AuthConfig) (auth.AuthMethod,
-      error)
-  - file: third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go
-    kind: method
-    name: kubernetesMethod.Authenticate
-    signature: func (k *kubernetesMethod) Authenticate(ctx context.Context, client
-      *api.Client) (string, http.Header, map[string]any, error)
-  - file: third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go
-    kind: method
-    name: kubernetesMethod.CredSuccess
-    signature: func (k *kubernetesMethod) CredSuccess()
-  - file: third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go
-    kind: method
-    name: kubernetesMethod.NewCreds
-    signature: func (k *kubernetesMethod) NewCreds() chan struct{}
-  - file: third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go
-    kind: method
-    name: kubernetesMethod.Shutdown
-    signature: func (k *kubernetesMethod) Shutdown()
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go
-    - method:f80a23c01970f9ec5b0b63d5aadc409f
-    id: r.authenticate-builds-login-request
-    level: MUST
-    text: kubernetesMethod.Authenticate traces "beginning authentication", reads the
-      JWT, and returns the path fmt.Sprintf("%s/login", k.mountPath) with a nil http.Header
-      and a body map holding the keys "role" and "jwt" (the stored role and the JWT
-      string).
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go
-    - method:f80a23c01970f9ec5b0b63d5aadc409f
-    id: r.authenticate-jwt-read-error
-    level: MUST
-    text: 'When reading the JWT fails, kubernetesMethod.Authenticate returns empty
-      path, nil header, nil body and an error wrapped as "error reading JWT with Kubernetes
-      Auth: %w" over the readJWT failure, so no login request is issued.'
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go
-    - function:662cee05789c54192c8afe7da9a01545
-    id: r.constructor-copies-logger-and-mount
-    level: MUST
-    text: NewKubernetesAuthMethod carries the Logger and MountPath from the supplied
-      AuthConfig onto the returned kubernetesMethod, so later logging and login path
-      construction use the agent's values rather than package defaults.
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go
-    - function:662cee05789c54192c8afe7da9a01545
-    id: r.constructor-validates-config
-    level: MUST
-    text: NewKubernetesAuthMethod rejects a nil *auth.AuthConfig with the error "empty
-      config" and a config whose Config map is nil with the error "empty config data";
-      it never returns a partially built method on those paths.
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go
-    - method:803ebafa8f0153e48e3b463bf0a8d692
-    id: r.cred-success-noop
-    level: MUST
-    text: 'kubernetesMethod.CredSuccess has an empty body: a successful credential
-      fetch triggers no state change, no cache update and no side effect on the method.'
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go
-    - function:662cee05789c54192c8afe7da9a01545
-    - method:803ebafa8f0153e48e3b463bf0a8d692
-    - method:f25ad26825ee628d87faab8aef7dfac3
-    - method:f80a23c01970f9ec5b0b63d5aadc409f
-    - method:f92c67aafe17516364b2ccda9028bc4f
-    id: r.implements-auth-method
-    level: MUST
-    text: 'kubernetesMethod satisfies the auth.AuthMethod interface of the agentproxyshared
-      auth package: NewKubernetesAuthMethod returns it as an auth.AuthMethod, so Authenticate,
-      NewCreds, CredSuccess and Shutdown must keep the signatures that interface declares.'
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go
-    - method:f25ad26825ee628d87faab8aef7dfac3
-    id: r.new-creds-never-signals
-    level: MUST
-    text: kubernetesMethod.NewCreds returns a nil channel, so the method never asks
-      the agent to re-authenticate on a credential change; the service account token
-      is treated as non-rotating.
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go
-    - function:662cee05789c54192c8afe7da9a01545
-    id: r.role-required-string
-    level: MUST
-    text: 'NewKubernetesAuthMethod requires the config map key "role": a missing key
-      yields "missing ''role'' value", a value that is not a string yields "could
-      not convert ''role'' config value to string", and an empty string yields "''role''
-      value is empty". Only when a non-empty string role is present does it store
-      the role on the method.'
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go
-    - method:f92c67aafe17516364b2ccda9028bc4f
-    id: r.shutdown-noop
-    level: MUST
-    text: 'kubernetesMethod.Shutdown has an empty body: it releases no resources and
-      closes nothing, so shutdown of the agent leaves the method''s fields untouched.'
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes_test.go
-    - function:662cee05789c54192c8afe7da9a01545
-    id: r.test-covers-constructor
-    level: MUST
-    text: kubernetes_test.go exercises the constructor through TestKubernetesAuth_basic,
-      which calls NewKubernetesAuthMethod, so configuration validation behavior stays
-      covered by a test.
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agentproxyshared/auth/kubernetes/kubernetes.go
-    - function:662cee05789c54192c8afe7da9a01545
-    id: r.token-path-optional-string
-    level: MUST
-    text: 'The config map key "token_path" is optional: when absent the constructor
-      leaves tokenPath empty so the default service account token is used, and when
-      present it must be a string or the constructor returns "could not convert ''token_path''
-      config value to string".'
-  upstream: self

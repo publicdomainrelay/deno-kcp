@@ -1,4 +1,256 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-internal-helper-storagepacker
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'The context exists to specify the storagepacker helper as a self-contained
+    unit inside third_party/openbao: its public API surface (StoragePacker methods,
+    NewStoragePacker, and the generated Item and Bucket protobuf types), the bucket-key
+    derivation rule, the locking discipline around bucket reads and writes, and the
+    decompress/unmarshal path that every accessor shares. Downstream OpenBao identity
+    code (entity, group and local alias packers in internal/vault/identity) depends
+    on this contract, so the spec fixes what those callers may rely on: identifier-to-bucket
+    mapping, nil-on-missing read semantics, the WithStorage delegation pattern, and
+    the batching behaviour of multi-item deletes.'
+  requirements:
+  - id: r.bucket-key-derivation
+    level: MUST
+    text: BucketKey maps an item ID to a bucket key by writing the ID into an MD5
+      hash, taking the first digest byte as an unsigned index, and returning viewPrefix
+      concatenated with the decimal form of that index; when the hash write fails
+      or writes fewer bytes than the input, it returns the empty string.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/storagepacker/storagepacker.go
+    - method:6ac054bf900c8bf5d29f5e78a2b77532
+  - id: r.bucket-read
+    level: MUST
+    text: GetBucketWithStorage rejects an empty bucket key with the error "missing
+      bucket key", takes a read lock on the key, returns nil with no error when storage
+      holds no entry, decompresses the stored value with compressutil.Decompress while
+      falling back to the raw value when the payload is reported uncompressed, and
+      unmarshals the result into a Bucket; each failure is wrapped with the prefix
+      "failed to read packed storage entry", "failed to decompress packed storage
+      entry" or "failed to decode packed storage entry".
+    codeRefs:
+    - file:third_party/openbao/internal/helper/storagepacker/storagepacker.go
+    - method:4ea68f2b375a5eea6b98426d184a0d6f
+  - id: r.constructor
+    level: MUST
+    text: NewStoragePacker builds a StoragePacker from a storage view, a logger and
+      a view prefix, allocating the per-key lock slice used to serialize bucket access,
+      and returns an error when construction cannot complete.
+    codeRefs:
+    - function:4892f08282d073624e43f94ce475fee6
+    - struct:0f854771b8ae5763bc97cb1892ca0543
+  - id: r.item-access-and-put
+    level: MUST
+    text: GetItemWithStorage resolves an item ID to its bucket through BucketKey and
+      returns the stored Item or nil, and PutItemWithStorage writes an item into the
+      bucket selected by its ID, taking the same per-bucket lock so a read never observes
+      a partially written bucket; StoragePacker.GetItem and StoragePacker.PutItem
+      apply these against the packer's own view.
+    codeRefs:
+    - method:1159578d7a4da3a9fd69f7f0e4306da1
+    - method:2cfbb5f821065e71d5924e7165ee98f9
+    - method:7e26b61e01086a228327a23a0b563a8b
+    - method:9e2ec9cf1ba6e22915319d5d5005eefa
+  - id: r.multi-delete-batching
+    level: MUST
+    text: DeleteMultipleItemsWithStorage measures elapsed time under the metric key
+      storage_packer/delete_items, returns nil immediately for an empty ID list, substitutes
+      a null logger when the supplied logger is nil, groups the item IDs by their
+      bucket key so each bucket is locked exactly once, skips buckets missing from
+      storage after logging a warning, and removes the requested items from each bucket
+      before writing it back; DeleteItem, DeleteItemWithStorage, DeleteMultipleItems
+      and DeleteMultipleItemsWithStorage are the single-item and multi-item entry
+      points over this behaviour.
+    codeRefs:
+    - method:1546f4edd249d0d3695dd4c507553908
+    - method:321be0b131494579b3aa1319e004d6a7
+    - method:66509edfc33ffcf1d787d17b0fb16637
+    - method:bab2d31f24172605e8831608bac645b9
+  - id: r.protobuf-messages
+    level: MUST
+    text: 'Item and Bucket are generated protobuf messages: each provides Reset, String,
+      ProtoMessage, ProtoReflect and Descriptor, Item exposes GetID and GetMessage
+      returning the stored Any payload, and Bucket exposes GetKey, GetItems and GetItemMap
+      returning its key, repeated items and ID-to-Any map, so a bucket round-trips
+      through proto.Unmarshal on read and proto.Marshal on write.'
+    codeRefs:
+    - method:42f3f9816b6a170b513393fffff43893
+    - method:76bff3d9582c9ee1235c855401a80d84
+    - method:83e51dd628dadb708809a6bf4cf9db29
+    - method:adfd6fa74f9b4444771acf4ae78c244c
+    - method:c071787e1e36cf1ccf963bf9475cbad7
+    - struct:9454ff7b70791135edc179fc55d3dab1
+    - struct:f591721ec484a2e5c1dd5e3324c995e9
+  - id: r.storage-view-access
+    level: MUST
+    text: StoragePacker.View returns the logical.Storage view the packer was constructed
+      with, and every non-WithStorage accessor delegates to its WithStorage counterpart
+      using that same view, so callers that supply no view observe the constructor-supplied
+      one.
+    codeRefs:
+    - method:592d9a518c0875805f12e02d90a339ac
+    - method:a8c57b82f9f33f23ee6e78eab5d295d0
+    - struct:0f854771b8ae5763bc97cb1892ca0543
+  - id: r.swap-item
+    level: MUST
+    text: SwapItem removes the item stored under the old ID and stores the supplied
+      item in its place, so a caller can change an item's identity key without leaving
+      the previous entry behind.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/storagepacker/storagepacker.go
+    - method:611e4ddd411a973ce4af46b88d4fa0c4
+  - id: r.test-coverage
+    level: SHOULD
+    text: storagepacker_test.go should exercise the packer's bucket key derivation,
+      get, put, swap and delete paths against a test storage backend so the locking
+      and compression behaviour stays covered.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/storagepacker/storagepacker_test.go
+  interfaces:
+  - name: Bucket
+    kind: struct
+    signature: type Bucket struct
+    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
+  - name: Bucket.Descriptor
+    kind: method
+    signature: func (*Bucket) Descriptor() ([]byte, []int)
+    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
+  - name: Bucket.GetItemMap
+    kind: method
+    signature: func (x *Bucket) GetItemMap() map[string]*anypb.Any
+    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
+  - name: Bucket.GetItems
+    kind: method
+    signature: func (x *Bucket) GetItems() []*Item
+    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
+  - name: Bucket.GetKey
+    kind: method
+    signature: func (x *Bucket) GetKey() string
+    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
+  - name: Bucket.ProtoMessage
+    kind: method
+    signature: func (*Bucket) ProtoMessage()
+    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
+  - name: Bucket.ProtoReflect
+    kind: method
+    signature: func (x *Bucket) ProtoReflect() protoreflect.Message
+    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
+  - name: Bucket.Reset
+    kind: method
+    signature: func (x *Bucket) Reset()
+    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
+  - name: Bucket.String
+    kind: method
+    signature: func (x *Bucket) String() string
+    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
+  - name: Item
+    kind: struct
+    signature: type Item struct
+    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
+  - name: Item.Descriptor
+    kind: method
+    signature: func (*Item) Descriptor() ([]byte, []int)
+    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
+  - name: Item.GetID
+    kind: method
+    signature: func (x *Item) GetID() string
+    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
+  - name: Item.GetMessage
+    kind: method
+    signature: func (x *Item) GetMessage() *anypb.Any
+    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
+  - name: Item.ProtoMessage
+    kind: method
+    signature: func (*Item) ProtoMessage()
+    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
+  - name: Item.ProtoReflect
+    kind: method
+    signature: func (x *Item) ProtoReflect() protoreflect.Message
+    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
+  - name: Item.Reset
+    kind: method
+    signature: func (x *Item) Reset()
+    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
+  - name: Item.String
+    kind: method
+    signature: func (x *Item) String() string
+    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
+  - name: NewStoragePacker
+    kind: function
+    signature: func NewStoragePacker(view logical.Storage, logger hclog.Logger, viewPrefix
+      string) (*StoragePacker, error)
+    file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
+  - name: StoragePacker
+    kind: struct
+    signature: type StoragePacker struct
+    file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
+  - name: StoragePacker.BucketKey
+    kind: method
+    signature: func (s *StoragePacker) BucketKey(itemID string) string
+    file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
+  - name: StoragePacker.DeleteItem
+    kind: method
+    signature: func (s *StoragePacker) DeleteItem(ctx context.Context, itemID string)
+      error
+    file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
+  - name: StoragePacker.DeleteItemWithStorage
+    kind: method
+    signature: func (s *StoragePacker) DeleteItemWithStorage(ctx context.Context,
+      view logical.Storage, itemID string) error
+    file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
+  - name: StoragePacker.DeleteMultipleItems
+    kind: method
+    signature: func (s *StoragePacker) DeleteMultipleItems(ctx context.Context, logger
+      hclog.Logger, itemIDs []string) error
+    file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
+  - name: StoragePacker.DeleteMultipleItemsWithStorage
+    kind: method
+    signature: func (s *StoragePacker) DeleteMultipleItemsWithStorage(ctx context.Context,
+      logger hclog.Logger, view logical.Storage, itemIDs []string) error
+    file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
+  - name: StoragePacker.GetBucket
+    kind: method
+    signature: func (s *StoragePacker) GetBucket(ctx context.Context, key string)
+      (*Bucket, error)
+    file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
+  - name: StoragePacker.GetBucketWithStorage
+    kind: method
+    signature: func (s *StoragePacker) GetBucketWithStorage(ctx context.Context, view
+      logical.Storage, key string) (*Bucket, error)
+    file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
+  - name: StoragePacker.GetItem
+    kind: method
+    signature: func (s *StoragePacker) GetItem(itemID string) (*Item, error)
+    file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
+  - name: StoragePacker.GetItemWithStorage
+    kind: method
+    signature: func (s *StoragePacker) GetItemWithStorage(view logical.Storage, itemID
+      string) (*Item, error)
+    file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
+  - name: StoragePacker.PutItem
+    kind: method
+    signature: func (s *StoragePacker) PutItem(ctx context.Context, item *Item) error
+    file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
+  - name: StoragePacker.PutItemWithStorage
+    kind: method
+    signature: func (s *StoragePacker) PutItemWithStorage(ctx context.Context, view
+      logical.Storage, item *Item) error
+    file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
+  - name: StoragePacker.SwapItem
+    kind: method
+    signature: func (s *StoragePacker) SwapItem(ctx context.Context, oldId string,
+      item *Item) error
+    file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
+  - name: StoragePacker.View
+    kind: method
+    signature: func (s *StoragePacker) View() logical.Storage
+    file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
 codeRefIndex:
 - file:third_party/openbao/internal/helper/storagepacker/storagepacker.go storagepacker.go@third_party/openbao/internal/helper/storagepacker/storagepacker.go
 - file:third_party/openbao/internal/helper/storagepacker/storagepacker_test.go storagepacker_test.go@third_party/openbao/internal/helper/storagepacker/storagepacker_test.go
@@ -25,255 +277,3 @@ codeRefIndex:
 - struct:0f854771b8ae5763bc97cb1892ca0543 StoragePacker@third_party/openbao/internal/helper/storagepacker/storagepacker.go:32
 - struct:9454ff7b70791135edc179fc55d3dab1 Item@third_party/openbao/internal/helper/storagepacker/types.pb.go:29
 - struct:f591721ec484a2e5c1dd5e3324c995e9 Bucket@third_party/openbao/internal/helper/storagepacker/types.pb.go:93
-kind: SystemContext
-metadata:
-  name: third-party-openbao-internal-helper-storagepacker
-  namespace: default
-spec:
-  intent: 'The context exists to specify the storagepacker helper as a self-contained
-    unit inside third_party/openbao: its public API surface (StoragePacker methods,
-    NewStoragePacker, and the generated Item and Bucket protobuf types), the bucket-key
-    derivation rule, the locking discipline around bucket reads and writes, and the
-    decompress/unmarshal path that every accessor shares. Downstream OpenBao identity
-    code (entity, group and local alias packers in internal/vault/identity) depends
-    on this contract, so the spec fixes what those callers may rely on: identifier-to-bucket
-    mapping, nil-on-missing read semantics, the WithStorage delegation pattern, and
-    the batching behaviour of multi-item deletes.'
-  interfaces:
-  - file: third_party/openbao/internal/helper/storagepacker/types.pb.go
-    kind: struct
-    name: Bucket
-    signature: type Bucket struct
-  - file: third_party/openbao/internal/helper/storagepacker/types.pb.go
-    kind: method
-    name: Bucket.Descriptor
-    signature: func (*Bucket) Descriptor() ([]byte, []int)
-  - file: third_party/openbao/internal/helper/storagepacker/types.pb.go
-    kind: method
-    name: Bucket.GetItemMap
-    signature: func (x *Bucket) GetItemMap() map[string]*anypb.Any
-  - file: third_party/openbao/internal/helper/storagepacker/types.pb.go
-    kind: method
-    name: Bucket.GetItems
-    signature: func (x *Bucket) GetItems() []*Item
-  - file: third_party/openbao/internal/helper/storagepacker/types.pb.go
-    kind: method
-    name: Bucket.GetKey
-    signature: func (x *Bucket) GetKey() string
-  - file: third_party/openbao/internal/helper/storagepacker/types.pb.go
-    kind: method
-    name: Bucket.ProtoMessage
-    signature: func (*Bucket) ProtoMessage()
-  - file: third_party/openbao/internal/helper/storagepacker/types.pb.go
-    kind: method
-    name: Bucket.ProtoReflect
-    signature: func (x *Bucket) ProtoReflect() protoreflect.Message
-  - file: third_party/openbao/internal/helper/storagepacker/types.pb.go
-    kind: method
-    name: Bucket.Reset
-    signature: func (x *Bucket) Reset()
-  - file: third_party/openbao/internal/helper/storagepacker/types.pb.go
-    kind: method
-    name: Bucket.String
-    signature: func (x *Bucket) String() string
-  - file: third_party/openbao/internal/helper/storagepacker/types.pb.go
-    kind: struct
-    name: Item
-    signature: type Item struct
-  - file: third_party/openbao/internal/helper/storagepacker/types.pb.go
-    kind: method
-    name: Item.Descriptor
-    signature: func (*Item) Descriptor() ([]byte, []int)
-  - file: third_party/openbao/internal/helper/storagepacker/types.pb.go
-    kind: method
-    name: Item.GetID
-    signature: func (x *Item) GetID() string
-  - file: third_party/openbao/internal/helper/storagepacker/types.pb.go
-    kind: method
-    name: Item.GetMessage
-    signature: func (x *Item) GetMessage() *anypb.Any
-  - file: third_party/openbao/internal/helper/storagepacker/types.pb.go
-    kind: method
-    name: Item.ProtoMessage
-    signature: func (*Item) ProtoMessage()
-  - file: third_party/openbao/internal/helper/storagepacker/types.pb.go
-    kind: method
-    name: Item.ProtoReflect
-    signature: func (x *Item) ProtoReflect() protoreflect.Message
-  - file: third_party/openbao/internal/helper/storagepacker/types.pb.go
-    kind: method
-    name: Item.Reset
-    signature: func (x *Item) Reset()
-  - file: third_party/openbao/internal/helper/storagepacker/types.pb.go
-    kind: method
-    name: Item.String
-    signature: func (x *Item) String() string
-  - file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
-    kind: function
-    name: NewStoragePacker
-    signature: func NewStoragePacker(view logical.Storage, logger hclog.Logger, viewPrefix
-      string) (*StoragePacker, error)
-  - file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
-    kind: struct
-    name: StoragePacker
-    signature: type StoragePacker struct
-  - file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
-    kind: method
-    name: StoragePacker.BucketKey
-    signature: func (s *StoragePacker) BucketKey(itemID string) string
-  - file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
-    kind: method
-    name: StoragePacker.DeleteItem
-    signature: func (s *StoragePacker) DeleteItem(ctx context.Context, itemID string)
-      error
-  - file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
-    kind: method
-    name: StoragePacker.DeleteItemWithStorage
-    signature: func (s *StoragePacker) DeleteItemWithStorage(ctx context.Context,
-      view logical.Storage, itemID string) error
-  - file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
-    kind: method
-    name: StoragePacker.DeleteMultipleItems
-    signature: func (s *StoragePacker) DeleteMultipleItems(ctx context.Context, logger
-      hclog.Logger, itemIDs []string) error
-  - file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
-    kind: method
-    name: StoragePacker.DeleteMultipleItemsWithStorage
-    signature: func (s *StoragePacker) DeleteMultipleItemsWithStorage(ctx context.Context,
-      logger hclog.Logger, view logical.Storage, itemIDs []string) error
-  - file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
-    kind: method
-    name: StoragePacker.GetBucket
-    signature: func (s *StoragePacker) GetBucket(ctx context.Context, key string)
-      (*Bucket, error)
-  - file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
-    kind: method
-    name: StoragePacker.GetBucketWithStorage
-    signature: func (s *StoragePacker) GetBucketWithStorage(ctx context.Context, view
-      logical.Storage, key string) (*Bucket, error)
-  - file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
-    kind: method
-    name: StoragePacker.GetItem
-    signature: func (s *StoragePacker) GetItem(itemID string) (*Item, error)
-  - file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
-    kind: method
-    name: StoragePacker.GetItemWithStorage
-    signature: func (s *StoragePacker) GetItemWithStorage(view logical.Storage, itemID
-      string) (*Item, error)
-  - file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
-    kind: method
-    name: StoragePacker.PutItem
-    signature: func (s *StoragePacker) PutItem(ctx context.Context, item *Item) error
-  - file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
-    kind: method
-    name: StoragePacker.PutItemWithStorage
-    signature: func (s *StoragePacker) PutItemWithStorage(ctx context.Context, view
-      logical.Storage, item *Item) error
-  - file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
-    kind: method
-    name: StoragePacker.SwapItem
-    signature: func (s *StoragePacker) SwapItem(ctx context.Context, oldId string,
-      item *Item) error
-  - file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
-    kind: method
-    name: StoragePacker.View
-    signature: func (s *StoragePacker) View() logical.Storage
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/storagepacker/storagepacker.go
-    - method:6ac054bf900c8bf5d29f5e78a2b77532
-    id: r.bucket-key-derivation
-    level: MUST
-    text: BucketKey maps an item ID to a bucket key by writing the ID into an MD5
-      hash, taking the first digest byte as an unsigned index, and returning viewPrefix
-      concatenated with the decimal form of that index; when the hash write fails
-      or writes fewer bytes than the input, it returns the empty string.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/storagepacker/storagepacker.go
-    - method:4ea68f2b375a5eea6b98426d184a0d6f
-    id: r.bucket-read
-    level: MUST
-    text: GetBucketWithStorage rejects an empty bucket key with the error "missing
-      bucket key", takes a read lock on the key, returns nil with no error when storage
-      holds no entry, decompresses the stored value with compressutil.Decompress while
-      falling back to the raw value when the payload is reported uncompressed, and
-      unmarshals the result into a Bucket; each failure is wrapped with the prefix
-      "failed to read packed storage entry", "failed to decompress packed storage
-      entry" or "failed to decode packed storage entry".
-  - codeRefs:
-    - function:4892f08282d073624e43f94ce475fee6
-    - struct:0f854771b8ae5763bc97cb1892ca0543
-    id: r.constructor
-    level: MUST
-    text: NewStoragePacker builds a StoragePacker from a storage view, a logger and
-      a view prefix, allocating the per-key lock slice used to serialize bucket access,
-      and returns an error when construction cannot complete.
-  - codeRefs:
-    - method:1159578d7a4da3a9fd69f7f0e4306da1
-    - method:2cfbb5f821065e71d5924e7165ee98f9
-    - method:7e26b61e01086a228327a23a0b563a8b
-    - method:9e2ec9cf1ba6e22915319d5d5005eefa
-    id: r.item-access-and-put
-    level: MUST
-    text: GetItemWithStorage resolves an item ID to its bucket through BucketKey and
-      returns the stored Item or nil, and PutItemWithStorage writes an item into the
-      bucket selected by its ID, taking the same per-bucket lock so a read never observes
-      a partially written bucket; StoragePacker.GetItem and StoragePacker.PutItem
-      apply these against the packer's own view.
-  - codeRefs:
-    - method:1546f4edd249d0d3695dd4c507553908
-    - method:321be0b131494579b3aa1319e004d6a7
-    - method:66509edfc33ffcf1d787d17b0fb16637
-    - method:bab2d31f24172605e8831608bac645b9
-    id: r.multi-delete-batching
-    level: MUST
-    text: DeleteMultipleItemsWithStorage measures elapsed time under the metric key
-      storage_packer/delete_items, returns nil immediately for an empty ID list, substitutes
-      a null logger when the supplied logger is nil, groups the item IDs by their
-      bucket key so each bucket is locked exactly once, skips buckets missing from
-      storage after logging a warning, and removes the requested items from each bucket
-      before writing it back; DeleteItem, DeleteItemWithStorage, DeleteMultipleItems
-      and DeleteMultipleItemsWithStorage are the single-item and multi-item entry
-      points over this behaviour.
-  - codeRefs:
-    - method:42f3f9816b6a170b513393fffff43893
-    - method:76bff3d9582c9ee1235c855401a80d84
-    - method:83e51dd628dadb708809a6bf4cf9db29
-    - method:adfd6fa74f9b4444771acf4ae78c244c
-    - method:c071787e1e36cf1ccf963bf9475cbad7
-    - struct:9454ff7b70791135edc179fc55d3dab1
-    - struct:f591721ec484a2e5c1dd5e3324c995e9
-    id: r.protobuf-messages
-    level: MUST
-    text: 'Item and Bucket are generated protobuf messages: each provides Reset, String,
-      ProtoMessage, ProtoReflect and Descriptor, Item exposes GetID and GetMessage
-      returning the stored Any payload, and Bucket exposes GetKey, GetItems and GetItemMap
-      returning its key, repeated items and ID-to-Any map, so a bucket round-trips
-      through proto.Unmarshal on read and proto.Marshal on write.'
-  - codeRefs:
-    - method:592d9a518c0875805f12e02d90a339ac
-    - method:a8c57b82f9f33f23ee6e78eab5d295d0
-    - struct:0f854771b8ae5763bc97cb1892ca0543
-    id: r.storage-view-access
-    level: MUST
-    text: StoragePacker.View returns the logical.Storage view the packer was constructed
-      with, and every non-WithStorage accessor delegates to its WithStorage counterpart
-      using that same view, so callers that supply no view observe the constructor-supplied
-      one.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/storagepacker/storagepacker.go
-    - method:611e4ddd411a973ce4af46b88d4fa0c4
-    id: r.swap-item
-    level: MUST
-    text: SwapItem removes the item stored under the old ID and stores the supplied
-      item in its place, so a caller can change an item's identity key without leaving
-      the previous entry behind.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/storagepacker/storagepacker_test.go
-    id: r.test-coverage
-    level: SHOULD
-    text: storagepacker_test.go should exercise the packer's bucket key derivation,
-      get, put, swap and delete paths against a test storage backend so the locking
-      and compression behaviour stays covered.
-  upstream: self

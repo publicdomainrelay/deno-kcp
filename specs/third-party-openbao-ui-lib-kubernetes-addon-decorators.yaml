@@ -1,13 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/ui/lib/kubernetes/addon/decorators/fetch-config.js fetch-config.js@third_party/openbao/ui/lib/kubernetes/addon/decorators/fetch-config.js
-- function:d90c137b6b5934dba9fdb7039bd644df withConfig@third_party/openbao/ui/lib/kubernetes/addon/decorators/fetch-config.js:14
-- function:f77d15cc82e182359a209a7b5b1bb19c decorator@third_party/openbao/ui/lib/kubernetes/addon/decorators/fetch-config.js:15
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-lib-kubernetes-addon-decorators
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'The context exists to specify the Kubernetes engine''s configuration-fetch
     decorator for the OpenBao web UI. Routes that need the Kubernetes secrets engine
     config to be loaded before they render — configuration, configure, overview, and
@@ -18,75 +16,77 @@ spec:
     degradation of the route when the backend is unreachable or unauthorized. The
     RRoute prototype check is part of its contract: applying it to a non-Route class
     must warn and be a no-op, never a runtime crash.'
-  interfaces:
-  - file: third_party/openbao/ui/lib/kubernetes/addon/decorators/fetch-config.js
-    kind: function
-    name: decorator
-    signature: function decorator(SuperClass)
-  - file: third_party/openbao/ui/lib/kubernetes/addon/decorators/fetch-config.js
-    kind: function
-    name: withConfig
-    signature: export function withConfig()
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/ui/lib/kubernetes/addon/decorators/fetch-config.js
-    - function:f77d15cc82e182359a209a7b5b1bb19c
-    id: r.404-prompt-and-other-errors-retained
+  - id: r.404-prompt-and-other-errors-retained
     level: MUST
     text: 'On query rejection the hook must branch on error.httpStatus: a 404 must
       set promptConfig to true to trigger the configuration call to action, while
       any other status must assign the error to configError; neither branch may rethrow,
       so a permission failure or transport error does not abort the route.'
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/kubernetes/addon/decorators/fetch-config.js
     - function:f77d15cc82e182359a209a7b5b1bb19c
-    id: r.backend-from-secret-mount-path
+  - id: r.backend-from-secret-mount-path
     level: MUST
     text: beforeModel must call super.beforeModel with the forwarded arguments, then
       resolve the backend name from this.secretMountPath.get() and use that value
       as both the record id and the query parameter for the Kubernetes config lookup.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/kubernetes/addon/decorators/fetch-config.js
     - function:f77d15cc82e182359a209a7b5b1bb19c
-    id: r.cache-first-record-read
+  - id: r.cache-first-record-read
     level: MUST
     text: beforeModel must first attempt this.store.peekRecord('kubernetes/config',
       backend); when a cached record is returned it must assign it to configModel
       and set promptConfig to false without issuing a network query.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/kubernetes/addon/decorators/fetch-config.js
-    - function:d90c137b6b5934dba9fdb7039bd644df
-    id: r.decorator-factory-config
+    - function:f77d15cc82e182359a209a7b5b1bb19c
+  - id: r.decorator-factory-config
     level: SHOULD
     text: withConfig must remain a zero-argument factory that returns the decorator
       closure, so it can be applied in the class decorator position on Route subclasses
       without passing configuration.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/kubernetes/addon/decorators/fetch-config.js
-    - function:f77d15cc82e182359a209a7b5b1bb19c
-    id: r.decorator-state-defaults
+    - function:d90c137b6b5934dba9fdb7039bd644df
+  - id: r.decorator-state-defaults
     level: MUST
     text: The returned FetchConfig subclass must declare the fields configModel, configError
       and promptConfig, defaulting to null, null and false, so consumers can read
       them before beforeModel resolves.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/kubernetes/addon/decorators/fetch-config.js
     - function:f77d15cc82e182359a209a7b5b1bb19c
-    id: r.query-on-cache-miss
+  - id: r.query-on-cache-miss
     level: MUST
     text: When no cached record is present, beforeModel must call this.store.queryRecord('kubernetes/config',
       { backend }) and, on success, store the returned record in configModel and set
       promptConfig to false; the promise must be returned from beforeModel so the
       route transition waits on it.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/kubernetes/addon/decorators/fetch-config.js
     - function:f77d15cc82e182359a209a7b5b1bb19c
-    id: r.route-only-application
+  - id: r.route-only-application
     level: MUST
     text: The decorator must test the target with Object.prototype.isPrototypeOf.call(Route,
       SuperClass); if the target is not an Ember Route subclass it must log the message
       'withConfig decorator must be used on an instance of ember Route class. Decorator
       not applied to returned class' via console.error and return the SuperClass unchanged,
       applying no behavior.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/ui/lib/kubernetes/addon/decorators/fetch-config.js
+    - function:f77d15cc82e182359a209a7b5b1bb19c
+  interfaces:
+  - name: decorator
+    kind: function
+    signature: function decorator(SuperClass)
+    file: third_party/openbao/ui/lib/kubernetes/addon/decorators/fetch-config.js
+  - name: withConfig
+    kind: function
+    signature: export function withConfig()
+    file: third_party/openbao/ui/lib/kubernetes/addon/decorators/fetch-config.js
+codeRefIndex:
+- file:third_party/openbao/ui/lib/kubernetes/addon/decorators/fetch-config.js fetch-config.js@third_party/openbao/ui/lib/kubernetes/addon/decorators/fetch-config.js
+- function:d90c137b6b5934dba9fdb7039bd644df withConfig@third_party/openbao/ui/lib/kubernetes/addon/decorators/fetch-config.js:14
+- function:f77d15cc82e182359a209a7b5b1bb19c decorator@third_party/openbao/ui/lib/kubernetes/addon/decorators/fetch-config.js:15

@@ -1,16 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- class:73d79690266dec4d2b8c7d767ecc39fd PkiCertificateBaseModel@third_party/openbao/ui/app/models/pki/certificate/base.js:25
-- class:d9bf28875adf418b55f62af0f1482ec2 PkiCertificateSignModel@third_party/openbao/ui/app/models/pki/certificate/sign.js:25
-- class:faa9db3f9cbc0e1a9048f3325f7e5526 PkiCertificateGenerateModel@third_party/openbao/ui/app/models/pki/certificate/generate.js:36
-- file:third_party/openbao/ui/app/models/pki/certificate/base.js base.js@third_party/openbao/ui/app/models/pki/certificate/base.js
-- file:third_party/openbao/ui/app/models/pki/certificate/generate.js generate.js@third_party/openbao/ui/app/models/pki/certificate/generate.js
-- file:third_party/openbao/ui/app/models/pki/certificate/sign.js sign.js@third_party/openbao/ui/app/models/pki/certificate/sign.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-app-models-pki-certificate
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'This context exists to describe the data models that back the OpenBao PKI
     engine''s certificate generate and sign workflows in the bundled UI. The three
     classes are the request/response shape the UI sends to and reads from the PKI
@@ -19,25 +14,8 @@ spec:
     endpoint and the sign endpoint respectively. Consumers use these models to render
     forms, build help links against the active backend mount, and decide whether a
     displayed certificate offers revocation.'
-  interfaces:
-  - file: third_party/openbao/ui/app/models/pki/certificate/base.js
-    kind: class
-    name: PkiCertificateBaseModel
-    signature: PkiCertificateBaseModel()
-  - file: third_party/openbao/ui/app/models/pki/certificate/generate.js
-    kind: class
-    name: PkiCertificateGenerateModel
-    signature: PkiCertificateGenerateModel()
-  - file: third_party/openbao/ui/app/models/pki/certificate/sign.js
-    kind: class
-    name: PkiCertificateSignModel
-    signature: PkiCertificateSignModel()
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - class:73d79690266dec4d2b8c7d767ecc39fd
-    - file:third_party/openbao/ui/app/models/pki/certificate/base.js
-    id: r.base-model-fields
+  - id: r.base-model-fields
     level: MUST
     text: PkiCertificateBaseModel holds the certificate request attributes commonName,
       altNames, ipSans, uriSans, otherSans, excludeCnFromSans, customTtl and parsedCertificate,
@@ -45,68 +23,90 @@ spec:
       caChain, expiration, issuingCa, serialNumber and revocationTime, so that one
       model instance carries both the request sent to the PKI mount and the material
       returned by it.
-  - codeRefs:
-    - class:d9bf28875adf418b55f62af0f1482ec2
-    - class:faa9db3f9cbc0e1a9048f3325f7e5526
-    id: r.consumed-by-role-generate
+    codeRefs:
+    - class:73d79690266dec4d2b8c7d767ecc39fd
+    - file:third_party/openbao/ui/app/models/pki/certificate/base.js
+  - id: r.consumed-by-role-generate
     level: MUST
     text: The generate and sign models are consumed by the pki-role-generate component,
       which uses them to drive certificate issuance and signing from a PKI role page.
-  - codeRefs:
+    codeRefs:
+    - class:d9bf28875adf418b55f62af0f1482ec2
     - class:faa9db3f9cbc0e1a9048f3325f7e5526
-    - file:third_party/openbao/ui/app/models/pki/certificate/generate.js
-    id: r.generate-role
+  - id: r.generate-role
     level: MUST
     text: PkiCertificateGenerateModel extends PkiCertificateBaseModel and adds the
       role attribute naming the PKI role to issue the certificate against, which the
       model uses to form the request URL.
-  - codeRefs:
-    - class:73d79690266dec4d2b8c7d767ecc39fd
+    codeRefs:
     - class:faa9db3f9cbc0e1a9048f3325f7e5526
     - file:third_party/openbao/ui/app/models/pki/certificate/generate.js
-    id: r.help-url
+  - id: r.help-url
     level: MUST
     text: PkiCertificateBaseModel provides getHelpUrl for the mounted backend, and
       each subclass overrides it so the help link matches its own endpoint; PkiCertificateGenerateModel.getHelpUrl
       returns the path `/v1/${backend}/issue/example?help=1` for the backend passed
       in.
-  - codeRefs:
+    codeRefs:
     - class:73d79690266dec4d2b8c7d767ecc39fd
-    - file:third_party/openbao/ui/app/models/pki/certificate/base.js
-    id: r.mount-path-and-backend
+    - class:faa9db3f9cbc0e1a9048f3325f7e5526
+    - file:third_party/openbao/ui/app/models/pki/certificate/generate.js
+  - id: r.mount-path-and-backend
     level: MUST
     text: PkiCertificateBaseModel exposes secretMountPath and derives the backend
       path from it through the backend method, so that the same model serves any PKI
       mount the user has open.
-  - codeRefs:
+    codeRefs:
     - class:73d79690266dec4d2b8c7d767ecc39fd
     - file:third_party/openbao/ui/app/models/pki/certificate/base.js
-    id: r.openapi-mode
+  - id: r.openapi-mode
     level: SHOULD
     text: PkiCertificateBaseModel exposes useOpenAPI alongside backend, so the UI
       can select an OpenAPI-driven code path for the certificate model.
-  - codeRefs:
+    codeRefs:
     - class:73d79690266dec4d2b8c7d767ecc39fd
     - file:third_party/openbao/ui/app/models/pki/certificate/base.js
-    id: r.revocation
+  - id: r.revocation
     level: MUST
     text: PkiCertificateBaseModel exposes revokePath and the canRevoke method so the
       certificate details view can decide whether the displayed certificate may be
       revoked and against which path.
-  - codeRefs:
-    - class:d9bf28875adf418b55f62af0f1482ec2
-    - file:third_party/openbao/ui/app/models/pki/certificate/sign.js
-    id: r.sign-role-csr
+    codeRefs:
+    - class:73d79690266dec4d2b8c7d767ecc39fd
+    - file:third_party/openbao/ui/app/models/pki/certificate/base.js
+  - id: r.sign-role-csr
     level: MUST
     text: PkiCertificateSignModel extends PkiCertificateBaseModel and adds the role,
       csr and removeRootsFromChain attributes, so a signing request carries the target
       role, the submitted certificate signing request, and whether roots are stripped
       from the returned chain.
-  - codeRefs:
+    codeRefs:
     - class:d9bf28875adf418b55f62af0f1482ec2
     - file:third_party/openbao/ui/app/models/pki/certificate/sign.js
-    id: r.sign-validations
+  - id: r.sign-validations
     level: SHOULD
     text: PkiCertificateSignModel participates in model validation, so the role and
       csr fields are checked through ModelValidations before the sign request is submitted.
-  upstream: self
+    codeRefs:
+    - class:d9bf28875adf418b55f62af0f1482ec2
+    - file:third_party/openbao/ui/app/models/pki/certificate/sign.js
+  interfaces:
+  - name: PkiCertificateBaseModel
+    kind: class
+    signature: PkiCertificateBaseModel()
+    file: third_party/openbao/ui/app/models/pki/certificate/base.js
+  - name: PkiCertificateGenerateModel
+    kind: class
+    signature: PkiCertificateGenerateModel()
+    file: third_party/openbao/ui/app/models/pki/certificate/generate.js
+  - name: PkiCertificateSignModel
+    kind: class
+    signature: PkiCertificateSignModel()
+    file: third_party/openbao/ui/app/models/pki/certificate/sign.js
+codeRefIndex:
+- class:73d79690266dec4d2b8c7d767ecc39fd PkiCertificateBaseModel@third_party/openbao/ui/app/models/pki/certificate/base.js:25
+- class:d9bf28875adf418b55f62af0f1482ec2 PkiCertificateSignModel@third_party/openbao/ui/app/models/pki/certificate/sign.js:25
+- class:faa9db3f9cbc0e1a9048f3325f7e5526 PkiCertificateGenerateModel@third_party/openbao/ui/app/models/pki/certificate/generate.js:36
+- file:third_party/openbao/ui/app/models/pki/certificate/base.js base.js@third_party/openbao/ui/app/models/pki/certificate/base.js
+- file:third_party/openbao/ui/app/models/pki/certificate/generate.js generate.js@third_party/openbao/ui/app/models/pki/certificate/generate.js
+- file:third_party/openbao/ui/app/models/pki/certificate/sign.js sign.js@third_party/openbao/ui/app/models/pki/certificate/sign.js

@@ -1,12 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/internal/vault/policy/policytest/acl.go acl.go@third_party/openbao/internal/vault/policy/policytest/acl.go
-- function:c661ac0e792f811fac9344e9db3e2bbf TestLayeredACL@third_party/openbao/internal/vault/policy/policytest/acl.go:12
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-vault-policy-policytest
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'This context exists to pin the observable behaviour of layered Vault ACL
     evaluation: an ACL assembled from several stacked policies must allow, deny or
     grant root privileges on exactly the paths and operations the table lists. It
@@ -14,39 +13,31 @@ spec:
     it and run the identical suite against ACLs they build by different construction
     paths, which keeps layered-policy resolution honest across callers without duplicating
     the expectation table.'
-  interfaces:
-  - file: third_party/openbao/internal/vault/policy/policytest/acl.go
-    kind: function
-    name: TestLayeredACL
-    signature: func TestLayeredACL(t *testing.T, acl *policy.ACL, ns *namespace.Namespace)
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - function:c661ac0e792f811fac9344e9db3e2bbf
-    id: r.baseline-not-root
+  - id: r.baseline-not-root
     level: MUST
     text: Before the case table runs, a read request for path sys/mount/foo must be
       evaluated through acl.AllowOperation with a namespace-scoped context and the
       root-privilege argument false, and the result must not report RootPrivs; a root
       result fails the test with "unexpected root".
-  - codeRefs:
-    - file:third_party/openbao/internal/vault/policy/policytest/acl.go
+    codeRefs:
     - function:c661ac0e792f811fac9344e9db3e2bbf
-    id: r.caller-supplied-acl
+  - id: r.caller-supplied-acl
     level: MUST
     text: TestLayeredACL must accept the ACL and namespace under test as parameters
       rather than constructing them, so any caller can run the same suite against
       an ACL it built by its own layering path.
-  - codeRefs:
+    codeRefs:
+    - file:third_party/openbao/internal/vault/policy/policytest/acl.go
     - function:c661ac0e792f811fac9344e9db3e2bbf
-    id: r.case-table
+  - id: r.case-table
     level: MUST
     text: The suite must carry a table of 26 cases, each fixing a logical.Operation,
       a path, an expected Allowed value and an expected RootPrivs value; 11 cases
       expect allowed, 15 expect denied, and 5 expect root privileges.
-  - codeRefs:
+    codeRefs:
     - function:c661ac0e792f811fac9344e9db3e2bbf
-    id: r.covered-semantics
+  - id: r.covered-semantics
     level: MUST
     text: 'The table must cover the layered-policy semantics it documents: the root
       path denied read but allowed help without root privileges, wildcard grants under
@@ -54,18 +45,27 @@ spec:
       next to an allowed sys/seal update with root privileges, hidden dev/hide/ segments
       denied, stage/aws/policy/foo denied for update, and read/list/update/create/patch
       all denied on paths no policy names (foo/bar and baz/quux).'
-  - codeRefs:
+    codeRefs:
     - function:c661ac0e792f811fac9344e9db3e2bbf
-    id: r.fresh-request-per-case
+  - id: r.fresh-request-per-case
     level: MUST
     text: Each case must build its own logical.Request and namespace context, set
       the case operation and path on it, and call acl.AllowOperation with the root-privilege
       argument false, so no request state leaks between cases.
-  - codeRefs:
+    codeRefs:
     - function:c661ac0e792f811fac9344e9db3e2bbf
-    id: r.mismatch-fails
+  - id: r.mismatch-fails
     level: MUST
     text: A case must fail the test when the observed Allowed value differs from the
       expected one, and separately when the observed RootPrivs value differs, reporting
       the case and both observed values in the fatal message.
-  upstream: self
+    codeRefs:
+    - function:c661ac0e792f811fac9344e9db3e2bbf
+  interfaces:
+  - name: TestLayeredACL
+    kind: function
+    signature: func TestLayeredACL(t *testing.T, acl *policy.ACL, ns *namespace.Namespace)
+    file: third_party/openbao/internal/vault/policy/policytest/acl.go
+codeRefIndex:
+- file:third_party/openbao/internal/vault/policy/policytest/acl.go acl.go@third_party/openbao/internal/vault/policy/policytest/acl.go
+- function:c661ac0e792f811fac9344e9db3e2bbf TestLayeredACL@third_party/openbao/internal/vault/policy/policytest/acl.go:12

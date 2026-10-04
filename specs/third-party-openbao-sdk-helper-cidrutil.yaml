@@ -1,4 +1,128 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-sdk-helper-cidrutil
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'The context exists so the host project can reuse OpenBao''s reviewed CIDR-whitelisting
+    logic instead of reimplementing address containment and canonical-form checks.
+    It centralizes the policy decisions that matter for access control: an empty whitelist
+    means allow, an unparseable remote address means deny, and a CIDR that is not
+    in canonical form is rejected rather than silently widened. Recording these functions
+    as a spec makes their exact error strings, boundary conditions, and subset semantics
+    visible to callers elsewhere in the repository.'
+  requirements:
+  - id: r.ip-belongs-to-cidr
+    level: MUST
+    text: IPBelongsToCIDR must return the error "missing IP address" for an empty
+      ipAddr, the error "invalid IP address" when net.ParseIP yields nil, must propagate
+      the error from net.ParseCIDR for a malformed cidr, and must return true only
+      when the parsed network contains the parsed IP, otherwise false with a nil error.
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/cidrutil/cidr.go
+    - function:f5c6c9fd9c53539248a91a63f53e512c
+  - id: r.ip-belongs-to-cidr-blocks
+    level: MUST
+    text: IPBelongsToCIDRBlocksSlice must reject an empty ipAddr with "missing IP
+      address", reject an empty cidrs slice with "missing CIDR blocks to be checked
+      against", reject an unparsable IP with "invalid IP address", and must otherwise
+      delegate to IPBelongsToCIDR for each block in order, propagating any error and
+      returning true at the first block that contains the address, false with nil
+      error if none match.
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/cidrutil/cidr.go
+    - function:357ae319a33e6e9a2fd0984bfe837712
+  - id: r.remote-addr-whitelist
+    level: MUST
+    text: RemoteAddrIsOk must return true when boundCIDRs is empty, because an absent
+      whitelist imposes no restriction; it must parse remoteAddr with sockaddr.NewSockAddr
+      and return false when parsing fails, erring on the side of less access; when
+      a whitelist is present it must return true only if some entry satisfies isIPAddr
+      and Contains(remoteSockAddr), and false otherwise.
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/cidrutil/cidr.go
+    - function:ba2624e1c8f91fe295d81a0f05ff20ea
+  - id: r.subset
+    level: MUST
+    text: Subset must return "missing CIDR to be checked against" for an empty cidr1
+      and "missing CIDR that needs to be checked" for an empty cidr2; it must parse
+      both as CIDRs, wrapping failures as "failed to parse the CIDR to be checked
+      against" and "failed to parse the CIDR that needs to be checked"; it must reject
+      a CIDR whose mask length is zero as "not in its canonical form" unless the address
+      is the IPv4 or IPv6 zero address; it must return false when maskLen2 is smaller
+      than maskLen1, and otherwise decide containment by testing whether the second
+      network's address belongs to cidr1.
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/cidrutil/cidr.go
+    - function:3a6bc9d19a63e95e73e639bd3289094b
+  - id: r.subset-blocks
+    level: MUST
+    text: SubsetBlocks must return "missing CIDR blocks to be checked against" for
+      an empty cidrBlocks1 and "missing CIDR blocks that needs to be checked" for
+      an empty cidrBlocks2, then must require every element of cidrBlocks2 to be a
+      subset of at least one element of cidrBlocks1 as judged by Subset, propagating
+      Subset errors, returning false with a nil error when any element matches no
+      block, and true with a nil error only when all elements are covered.
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/cidrutil/cidr.go
+    - function:fd151dfd0382f7f91302bb3dd916ece3
+  - id: r.test-coverage
+    level: SHOULD
+    text: The package should keep its table-driven tests in cidr_test.go, covering
+      the positive and negative paths of each exported function, including the empty-argument
+      error cases, the invalid-IP and invalid-CIDR parse failures, and the non-canonical
+      CIDR rejection in Subset, so the error strings above stay pinned.
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/cidrutil/cidr_test.go
+  - id: r.validate-cidr-list-slice
+    level: MUST
+    text: ValidateCIDRListSlice must return "missing CIDR blocks that needs validation"
+      for an empty slice, and must otherwise run net.ParseCIDR on every element after
+      strings.TrimSpace, returning false with the parse error for the first invalid
+      block and true with a nil error when all blocks parse.
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/cidrutil/cidr.go
+    - function:e8374bafdac2a1b932fad1971e866422
+  - id: r.validate-cidr-list-string
+    level: MUST
+    text: ValidateCIDRListString must return "missing CIDR list that needs validation"
+      for an empty cidrList and "missing separator" for an empty separator, then must
+      split the string with strutil.ParseDedupLowercaseAndSortStrings and pass the
+      resulting slice to ValidateCIDRListSlice, returning that function's result unchanged.
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/cidrutil/cidr.go
+    - function:945af157aa61736f4e38b7868aedba90
+  interfaces:
+  - name: IPBelongsToCIDR
+    kind: function
+    signature: (ipAddr string, cidr string) (bool, error)
+    file: third_party/openbao/sdk/helper/cidrutil/cidr.go
+  - name: IPBelongsToCIDRBlocksSlice
+    kind: function
+    signature: (ipAddr string, cidrs []string) (bool, error)
+    file: third_party/openbao/sdk/helper/cidrutil/cidr.go
+  - name: RemoteAddrIsOk
+    kind: function
+    signature: (remoteAddr string, boundCIDRs []*sockaddr.SockAddrMarshaler) bool
+    file: third_party/openbao/sdk/helper/cidrutil/cidr.go
+  - name: Subset
+    kind: function
+    signature: (cidr1, cidr2 string) (bool, error)
+    file: third_party/openbao/sdk/helper/cidrutil/cidr.go
+  - name: SubsetBlocks
+    kind: function
+    signature: (cidrBlocks1, cidrBlocks2 []string) (bool, error)
+    file: third_party/openbao/sdk/helper/cidrutil/cidr.go
+  - name: ValidateCIDRListSlice
+    kind: function
+    signature: (cidrBlocks []string) (bool, error)
+    file: third_party/openbao/sdk/helper/cidrutil/cidr.go
+  - name: ValidateCIDRListString
+    kind: function
+    signature: (cidrList string, separator string) (bool, error)
+    file: third_party/openbao/sdk/helper/cidrutil/cidr.go
 codeRefIndex:
 - file:third_party/openbao/sdk/helper/cidrutil/cidr.go cidr.go@third_party/openbao/sdk/helper/cidrutil/cidr.go
 - file:third_party/openbao/sdk/helper/cidrutil/cidr_test.go cidr_test.go@third_party/openbao/sdk/helper/cidrutil/cidr_test.go
@@ -9,127 +133,3 @@ codeRefIndex:
 - function:e8374bafdac2a1b932fad1971e866422 ValidateCIDRListSlice@third_party/openbao/sdk/helper/cidrutil/cidr.go:110
 - function:f5c6c9fd9c53539248a91a63f53e512c IPBelongsToCIDR@third_party/openbao/sdk/helper/cidrutil/cidr.go:44
 - function:fd151dfd0382f7f91302bb3dd916ece3 SubsetBlocks@third_party/openbao/sdk/helper/cidrutil/cidr.go:191
-kind: SystemContext
-metadata:
-  name: third-party-openbao-sdk-helper-cidrutil
-  namespace: default
-spec:
-  intent: 'The context exists so the host project can reuse OpenBao''s reviewed CIDR-whitelisting
-    logic instead of reimplementing address containment and canonical-form checks.
-    It centralizes the policy decisions that matter for access control: an empty whitelist
-    means allow, an unparseable remote address means deny, and a CIDR that is not
-    in canonical form is rejected rather than silently widened. Recording these functions
-    as a spec makes their exact error strings, boundary conditions, and subset semantics
-    visible to callers elsewhere in the repository.'
-  interfaces:
-  - file: third_party/openbao/sdk/helper/cidrutil/cidr.go
-    kind: function
-    name: IPBelongsToCIDR
-    signature: (ipAddr string, cidr string) (bool, error)
-  - file: third_party/openbao/sdk/helper/cidrutil/cidr.go
-    kind: function
-    name: IPBelongsToCIDRBlocksSlice
-    signature: (ipAddr string, cidrs []string) (bool, error)
-  - file: third_party/openbao/sdk/helper/cidrutil/cidr.go
-    kind: function
-    name: RemoteAddrIsOk
-    signature: (remoteAddr string, boundCIDRs []*sockaddr.SockAddrMarshaler) bool
-  - file: third_party/openbao/sdk/helper/cidrutil/cidr.go
-    kind: function
-    name: Subset
-    signature: (cidr1, cidr2 string) (bool, error)
-  - file: third_party/openbao/sdk/helper/cidrutil/cidr.go
-    kind: function
-    name: SubsetBlocks
-    signature: (cidrBlocks1, cidrBlocks2 []string) (bool, error)
-  - file: third_party/openbao/sdk/helper/cidrutil/cidr.go
-    kind: function
-    name: ValidateCIDRListSlice
-    signature: (cidrBlocks []string) (bool, error)
-  - file: third_party/openbao/sdk/helper/cidrutil/cidr.go
-    kind: function
-    name: ValidateCIDRListString
-    signature: (cidrList string, separator string) (bool, error)
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/cidrutil/cidr.go
-    - function:f5c6c9fd9c53539248a91a63f53e512c
-    id: r.ip-belongs-to-cidr
-    level: MUST
-    text: IPBelongsToCIDR must return the error "missing IP address" for an empty
-      ipAddr, the error "invalid IP address" when net.ParseIP yields nil, must propagate
-      the error from net.ParseCIDR for a malformed cidr, and must return true only
-      when the parsed network contains the parsed IP, otherwise false with a nil error.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/cidrutil/cidr.go
-    - function:357ae319a33e6e9a2fd0984bfe837712
-    id: r.ip-belongs-to-cidr-blocks
-    level: MUST
-    text: IPBelongsToCIDRBlocksSlice must reject an empty ipAddr with "missing IP
-      address", reject an empty cidrs slice with "missing CIDR blocks to be checked
-      against", reject an unparsable IP with "invalid IP address", and must otherwise
-      delegate to IPBelongsToCIDR for each block in order, propagating any error and
-      returning true at the first block that contains the address, false with nil
-      error if none match.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/cidrutil/cidr.go
-    - function:ba2624e1c8f91fe295d81a0f05ff20ea
-    id: r.remote-addr-whitelist
-    level: MUST
-    text: RemoteAddrIsOk must return true when boundCIDRs is empty, because an absent
-      whitelist imposes no restriction; it must parse remoteAddr with sockaddr.NewSockAddr
-      and return false when parsing fails, erring on the side of less access; when
-      a whitelist is present it must return true only if some entry satisfies isIPAddr
-      and Contains(remoteSockAddr), and false otherwise.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/cidrutil/cidr.go
-    - function:3a6bc9d19a63e95e73e639bd3289094b
-    id: r.subset
-    level: MUST
-    text: Subset must return "missing CIDR to be checked against" for an empty cidr1
-      and "missing CIDR that needs to be checked" for an empty cidr2; it must parse
-      both as CIDRs, wrapping failures as "failed to parse the CIDR to be checked
-      against" and "failed to parse the CIDR that needs to be checked"; it must reject
-      a CIDR whose mask length is zero as "not in its canonical form" unless the address
-      is the IPv4 or IPv6 zero address; it must return false when maskLen2 is smaller
-      than maskLen1, and otherwise decide containment by testing whether the second
-      network's address belongs to cidr1.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/cidrutil/cidr.go
-    - function:fd151dfd0382f7f91302bb3dd916ece3
-    id: r.subset-blocks
-    level: MUST
-    text: SubsetBlocks must return "missing CIDR blocks to be checked against" for
-      an empty cidrBlocks1 and "missing CIDR blocks that needs to be checked" for
-      an empty cidrBlocks2, then must require every element of cidrBlocks2 to be a
-      subset of at least one element of cidrBlocks1 as judged by Subset, propagating
-      Subset errors, returning false with a nil error when any element matches no
-      block, and true with a nil error only when all elements are covered.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/cidrutil/cidr_test.go
-    id: r.test-coverage
-    level: SHOULD
-    text: The package should keep its table-driven tests in cidr_test.go, covering
-      the positive and negative paths of each exported function, including the empty-argument
-      error cases, the invalid-IP and invalid-CIDR parse failures, and the non-canonical
-      CIDR rejection in Subset, so the error strings above stay pinned.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/cidrutil/cidr.go
-    - function:e8374bafdac2a1b932fad1971e866422
-    id: r.validate-cidr-list-slice
-    level: MUST
-    text: ValidateCIDRListSlice must return "missing CIDR blocks that needs validation"
-      for an empty slice, and must otherwise run net.ParseCIDR on every element after
-      strings.TrimSpace, returning false with the parse error for the first invalid
-      block and true with a nil error when all blocks parse.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/cidrutil/cidr.go
-    - function:945af157aa61736f4e38b7868aedba90
-    id: r.validate-cidr-list-string
-    level: MUST
-    text: ValidateCIDRListString must return "missing CIDR list that needs validation"
-      for an empty cidrList and "missing separator" for an empty separator, then must
-      split the string with strutil.ParseDedupLowercaseAndSortStrings and pass the
-      resulting slice to ValidateCIDRListSlice, returning that function's result unchanged.
-  upstream: self

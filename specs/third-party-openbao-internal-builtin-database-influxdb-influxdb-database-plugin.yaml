@@ -1,13 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/internal/builtin/database/influxdb/influxdb-database-plugin/main.go
-  main.go@third_party/openbao/internal/builtin/database/influxdb/influxdb-database-plugin/main.go
-- function:f651226c34d4c2f0a60a69441979ba54 Run@third_party/openbao/internal/builtin/database/influxdb/influxdb-database-plugin/main.go:23
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-builtin-database-influxdb-influxdb-database-plugin
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'This context exists to describe the standalone, self-contained main package
     that OpenBao builds into the influxdb-database-plugin binary. It matters because
     the plugin is compiled and shipped as a separate process that OpenBao''s database
@@ -17,31 +15,33 @@ spec:
     flags, and no error paths, and all InfluxDB-specific behavior (connection handling,
     credential templating, user lifecycle) lives in the imported influxdb package
     rather than here.'
-  interfaces:
-  - file: third_party/openbao/internal/builtin/database/influxdb/influxdb-database-plugin/main.go
-    kind: function
-    name: Run
-    signature: func Run() error
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/database/influxdb/influxdb-database-plugin/main.go
-    id: r.main-invokes-run
+  - id: r.main-invokes-run
     level: MUST
     text: The package's main function must invoke Run so the binary enters the plugin
       serve loop at startup.
-  - codeRefs:
-    - function:f651226c34d4c2f0a60a69441979ba54
-    id: r.run-returns-nil
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/database/influxdb/influxdb-database-plugin/main.go
+  - id: r.run-returns-nil
     level: MUST
     text: Run must return a nil error after ServeMultiplex returns; it has no failure
       path of its own.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/database/influxdb/influxdb-database-plugin/main.go
+    codeRefs:
     - function:f651226c34d4c2f0a60a69441979ba54
-    id: r.run-starts-multiplex-server
+  - id: r.run-starts-multiplex-server
     level: MUST
     text: Run must instantiate the InfluxDB database plugin by calling dbplugin.ServeMultiplex
       with influxdb.New as the plugin factory, so the process serves the dbplugin
       multiplex RPC protocol.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/database/influxdb/influxdb-database-plugin/main.go
+    - function:f651226c34d4c2f0a60a69441979ba54
+  interfaces:
+  - name: Run
+    kind: function
+    signature: func Run() error
+    file: third_party/openbao/internal/builtin/database/influxdb/influxdb-database-plugin/main.go
+codeRefIndex:
+- file:third_party/openbao/internal/builtin/database/influxdb/influxdb-database-plugin/main.go
+  main.go@third_party/openbao/internal/builtin/database/influxdb/influxdb-database-plugin/main.go
+- function:f651226c34d4c2f0a60a69441979ba54 Run@third_party/openbao/internal/builtin/database/influxdb/influxdb-database-plugin/main.go:23

@@ -1,18 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item/create.js
-  create.js@third_party/openbao/ui/app/routes/vault/cluster/access/method/item/create.js
-- file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item/edit.js
-  edit.js@third_party/openbao/ui/app/routes/vault/cluster/access/method/item/edit.js
-- file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item/list.js
-  list.js@third_party/openbao/ui/app/routes/vault/cluster/access/method/item/list.js
-- file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item/show.js
-  show.js@third_party/openbao/ui/app/routes/vault/cluster/access/method/item/show.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-app-routes-vault-cluster-access-method-item
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'This context exists so the vault cluster access UI can present create,
     list, show, and edit pages for the items that belong to a given auth method (users,
     groups, roles of that method, for example) without writing a separate route per
@@ -22,127 +15,134 @@ spec:
     as adapter context. The model-name derivation, the singularize step, the data.keys
     response path, and the transition guards form the contract the item templates
     and controllers depend on.'
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item/create.js
-    id: r.create-controller-state
+  - id: r.create-controller-state
     level: MUST
     text: The create route's setupController must set the controller's itemType to
       the singularized item type, mode to the literal string 'create', method to the
       auth method path param, and methodModel to the parent vault.cluster.access.method
       model.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item/create.js
-    id: r.create-dirty-transition-guard
+  - id: r.create-dirty-transition-guard
     level: MUST
     text: The create route's willTransition action must allow the transition when
       there is no current model or the model has no dirty attributes, and otherwise
       show a window.confirm warning that unsaved changes will be discarded, returning
       true on confirmation and aborting the transition on cancellation.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item/create.js
-    id: r.create-exit-cleanup
+  - id: r.create-exit-cleanup
     level: MUST
     text: When the create route is exited, resetController must invoke controller.cleanupModel
       when that method is present, using an optional call so a controller without
       it does not throw.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item/create.js
-    id: r.create-model-type-derivation
+  - id: r.create-model-type-derivation
     level: MUST
     text: The create route's model hook must read item_type from the vault.cluster.access.method.item
       params and the type and path params from the vault.cluster.access.method route,
       derive the Ember Data model name as `generated-${singularize(itemType)}-${type}`,
       and create a record of that type carrying itemType, method, and adapterOptions.path
       set to `${method}/${itemType}`.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item/edit.js
-    id: r.edit-controller-state
+    codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item/create.js
+  - id: r.edit-controller-state
     level: MUST
     text: The edit route's setupController must set the controller's itemType to the
       singularized item type and methodModel to the parent vault.cluster.access.method
       model.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item/edit.js
-    id: r.edit-dirty-transition-guard
+  - id: r.edit-dirty-transition-guard
     level: MUST
     text: The edit route's willTransition action must allow the transition when there
       is no current model or the model has no dirty attributes, and otherwise confirm
       with the user that unsaved changes will be discarded, allowing the transition
       on confirmation and aborting it on cancellation.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item/edit.js
-    id: r.edit-exit-cleanup
+  - id: r.edit-exit-cleanup
     level: MUST
     text: When the edit route is exited, resetController must invoke controller.cleanupModel
       when that method is present, using an optional call.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item/edit.js
-    id: r.edit-model-query
+  - id: r.edit-model-query
     level: MUST
     text: The edit route's model hook must take item_id from params, derive the model
       name as `generated-${singularize(itemType)}-${methodModel.type}`, and issue
       store.queryRecord for that type with id set to item_id and authMethodPath set
       to the parent method model's id.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item/list.js
-    id: r.list-controller-state
+    codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item/edit.js
+  - id: r.list-controller-state
     level: MUST
     text: The list route's setupController must set the controller's itemType to the
       raw item type and methodModel to the parent method model, and set filter to
       the pageFilter param or an empty string when absent, and page to the resolved
       model's meta.currentPage or 1 when absent.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item/list.js
-    id: r.list-exit-reset
+  - id: r.list-exit-reset
     level: MUST
     text: When the list route is exited, resetController must clear the controller's
       pageFilter and filter to null.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item/list.js
-    id: r.list-model-query
+  - id: r.list-model-query
     level: MUST
     text: The list route's model hook must build the model name `generated-${singularize(itemType)}-${type}`
       from the item params and the parent method model, issue store.lazyPaginatedQuery
       with responsePath 'data.keys', the current page and pageFilter, type set to
       the raw item type and id set to the auth method path, and resolve to an empty
       array when the query fails with httpStatus 404 while rethrowing any other error.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item/list.js
-    id: r.list-path-help-filtering
+  - id: r.list-path-help-filtering
     level: MUST
     text: The list route's setupController must call pathHelp.getPaths with the method
       model's apiPath, the auth method path, and the item type, and set the controller's
       paths to only those returned paths that have navigation truthy and whose itemType
       list includes the current item type.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item/list.js
-    id: r.list-query-params
+  - id: r.list-query-params
     level: MUST
     text: The list route must declare page and pageFilter as query params, both with
       refreshModel set to true so a change to either re-runs the model hook.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item/list.js
-    id: r.list-transition-and-reload
+  - id: r.list-transition-and-reload
     level: MUST
     text: The list route's willTransition action must scroll the window to the top
       and clear all store datasets when the transition target is a different route,
       and its reload action must clear all store datasets and then refresh the route.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item/show.js
-    id: r.show-controller-state
+    codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item/list.js
+  - id: r.show-controller-state
     level: MUST
     text: The show route's setupController must set the controller's itemType to the
       singularized item type and methodModel to the parent vault.cluster.access.method
       model.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item/show.js
-    id: r.show-model-query
+  - id: r.show-model-query
     level: MUST
     text: The show route's model hook must take item_id from params, derive the model
       name as `generated-${singularize(itemType)}-${methodModel.type}`, and issue
       store.queryRecord with id set to item_id and authMethodPath set to the parent
       method model's id; unlike edit, show must not install a dirty-attribute transition
       guard or an exit cleanup.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item/show.js
+codeRefIndex:
+- file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item/create.js
+  create.js@third_party/openbao/ui/app/routes/vault/cluster/access/method/item/create.js
+- file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item/edit.js
+  edit.js@third_party/openbao/ui/app/routes/vault/cluster/access/method/item/edit.js
+- file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item/list.js
+  list.js@third_party/openbao/ui/app/routes/vault/cluster/access/method/item/list.js
+- file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item/show.js
+  show.js@third_party/openbao/ui/app/routes/vault/cluster/access/method/item/show.js

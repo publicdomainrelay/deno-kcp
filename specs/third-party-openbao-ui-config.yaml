@@ -1,40 +1,35 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/ui/config/content-security-policy.js content-security-policy.js@third_party/openbao/ui/config/content-security-policy.js
-- file:third_party/openbao/ui/config/environment.js environment.js@third_party/openbao/ui/config/environment.js
-- file:third_party/openbao/ui/config/targets.js targets.js@third_party/openbao/ui/config/targets.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-config
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: The context exists so the environment-dependent build knobs of the OpenBao
     UI — the ENV object ember-cli reads, the Content-Security-Policy directive map
     the CSP plugin enforces, and the browserslist targets the build compiles against
     — have one declarative, auditable home. Recording the exact contract of each module
     keeps changes to the vendored UI reviewable, so a reviewer can see when a policy
     directive, an endpoint list, or an environment branch moves.
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/ui/config/environment.js
-    id: r.app-endpoint-lists
+  - id: r.app-endpoint-lists
     level: MUST
     text: The returned ENV.APP must carry POLLING_URLS ['sys/health', 'sys/seal-status']
       for the endpoints the UI polls, NAMESPACE_ROOT_URLS ['sys/health', 'sys/seal-status',
       'sys/internal/counters/config'] for the endpoints that always resolve against
       the root namespace, and DEFAULT_PAGE_SIZE 100 as the client-side pagination
       default.
-  - codeRefs:
-    - file:third_party/openbao/ui/config/targets.js
-    id: r.browser-targets
+    codeRefs:
+    - file:third_party/openbao/ui/config/environment.js
+  - id: r.browser-targets
     level: MUST
     text: targets.js must export a browsers list of 'last 1 Chrome versions', 'last
       1 Firefox versions', and 'last 1 Safari versions' as the browserslist targets
       the build compiles the UI against.
-  - codeRefs:
-    - file:third_party/openbao/ui/config/content-security-policy.js
-    id: r.csp-config
+    codeRefs:
+    - file:third_party/openbao/ui/config/targets.js
+  - id: r.csp-config
     level: MUST
     text: 'content-security-policy.js must export a function of the environment name
       that returns the ember-cli-content-security-policy config: delivery [''header'',
@@ -42,9 +37,9 @@ spec:
       reportOnly false, and the directive map default-src ''none''; script-src, font-src,
       connect-src, media-src ''self''; img-src ''self'' plus data:; style-src ''unsafe-inline''
       plus ''self''; form-action ''none''.'
-  - codeRefs:
-    - file:third_party/openbao/ui/config/environment.js
-    id: r.environment-branches
+    codeRefs:
+    - file:third_party/openbao/ui/config/content-security-policy.js
+  - id: r.environment-branches
     level: MUST
     text: The function must branch on the environment name. In development it sets
       ENV.APP.LOG_TRANSITIONS true and, only when process.env.MIRAGE_DEV_HANDLER is
@@ -53,27 +48,32 @@ spec:
       and ENV.APP.LOG_VIEW_LOOKUPS false, flashMessageDefaults.timeout 50, and ember-cli-mirage
       enabled false. In every environment except production it lowers ENV.APP.DEFAULT_PAGE_SIZE
       to 15.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/config/environment.js
-    id: r.environment-exports-env-function
+  - id: r.environment-exports-env-function
     level: MUST
     text: environment.js must export a function that takes the Ember environment name
       (development, test, or production) and returns the ENV object, setting modulePrefix
       'vault', the environment name back on ENV.environment, rootURL '/ui/', serviceWorkerScope
       '/v1/sys/storage/raft/snapshot', locationType 'history', and EmberENV.EXTEND_PROTOTYPES
       with Date false and String false so neither prototype is extended.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/config/environment.js
-    id: r.flash-message-defaults
+  - id: r.flash-message-defaults
     level: MUST
     text: The returned ENV must set flashMessageDefaults to timeout 7000 and sticky
       false as the baseline notification behavior, which the test branch then overrides
       to a 50 ms timeout.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/config/environment.js
-    id: r.welcome-message-env
+  - id: r.welcome-message-env
     level: MUST
     text: The returned ENV must set welcomeMessage from process.env.UI_AUTH_WELCOME
       so the login welcome text comes from the deployment environment and not from
       the build.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/ui/config/environment.js
+codeRefIndex:
+- file:third_party/openbao/ui/config/content-security-policy.js content-security-policy.js@third_party/openbao/ui/config/content-security-policy.js
+- file:third_party/openbao/ui/config/environment.js environment.js@third_party/openbao/ui/config/environment.js
+- file:third_party/openbao/ui/config/targets.js targets.js@third_party/openbao/ui/config/targets.js

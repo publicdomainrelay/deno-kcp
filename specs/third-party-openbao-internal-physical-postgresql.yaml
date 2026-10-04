@@ -1,4 +1,279 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-internal-physical-postgresql
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: The context exists so the repository carries a self-contained, buildable
+    copy of the OpenBao PostgreSQL storage driver rather than importing it from an
+    external module. It records the backend's configuration entry point, its physical.Backend
+    read and write surface, its transaction surface, its HA lock surface, and its
+    replication-index semantics, plus the test helpers the package's test file depends
+    on. Describing it here lets other parts of the repository see exactly which storage
+    guarantees the vendored driver offers without reading the vendored source.
+  requirements:
+  - id: r.active-node-lock
+    level: MUST
+    text: RegisterActiveNodeLock lets the backend take ownership of the lock instance
+      that represents this node, so later lock checks consult the registered lock
+      instead of the default.
+    codeRefs:
+    - method:6cad18e49e3431e07b874533cfee2073
+  - id: r.applied-index
+    level: MUST
+    text: AppliedReplicationIndex reads the current PostgreSQL WAL LSN with the lsn
+      index query and returns it as a string, wrapping a query failure as a getting
+      WAL LSN error.
+    codeRefs:
+    - method:68ab16bb6bfac8f9a92bd6e2cf9ed2a2
+  - id: r.backend-construction
+    level: MUST
+    text: NewPostgreSQLBackend takes a string-to-string configuration map and a logger
+      and returns a physical.Backend implementation, or an error when the configuration
+      cannot be used to reach the database.
+    codeRefs:
+    - function:08a0572b2b555e808a568079a0851101
+    - struct:5bde59ab44ad6f3e3ad7304470df2314
+  - id: r.basic-read-write
+    level: MUST
+    text: PostgreSQLBackend stores each entry under a path derived from the full path
+      by splitting and hashing it, so Put writes the entry value at that key, Get
+      returns the entry for a full path, and Delete removes the row for a full path.
+    codeRefs:
+    - method:0000381cc721ee6432f04901bd6791f7
+    - method:af03dc7cb686c930110d537a0574ca9f
+    - method:bd16c63ca59a7954fd1f61597809dcc4
+  - id: r.ha-lock
+    level: MUST
+    text: LockWith returns a physical.Lock for a key and value pair, and HAEnabled
+      reports whether the backend runs in high-availability mode so the caller knows
+      locking is meaningful.
+    codeRefs:
+    - method:19be9e462678b02a5d4f2415000888d2
+    - method:e96d833040a42b79023bf6fd33334009
+    - struct:7dde23d46da28ce4dfd7b89df5f14c69
+  - id: r.index-compare
+    level: MUST
+    text: GreaterEqualReplicationIndex parses both LSN arguments and reports whether
+      the left LSN is greater than or equal to the right one, returning a parse error
+      naming the offending side when an LSN is malformed.
+    codeRefs:
+    - method:6ad2c3b35a0b36ec21ea54728707ee0a
+  - id: r.lock-acquire-release
+    level: MUST
+    text: PostgreSQLLock.Lock blocks until the lock is acquired or stopCh closes,
+      returning a channel that reports loss of the lock, and PostgreSQLLock.Unlock
+      releases the held lock.
+    codeRefs:
+    - method:192628e65f5b77c7df2ac7508a836acf
+    - method:55b19d7b367f73868807c08961160741
+  - id: r.lock-inspection
+    level: MUST
+    text: PostgreSQLLock.Value reports whether the lock is held and by which value,
+      and PostgreSQLLock.IsActivelyHeld reports whether the lock row currently exists
+      and was recently renewed.
+    codeRefs:
+    - method:c966d8f858bd6852c8f7b694fc2ecc28
+    - method:cc88a3a37c461351272682574e8e5d05
+  - id: r.lsn-format
+    level: MUST
+    text: An LSN must contain exactly one slash; its log file number and byte offset
+      are both parsed as hexadecimal 32-bit values and combined as log file number
+      shifted left 32 bits or-ed with the byte offset, and any other shape is rejected
+      as an error.
+    codeRefs:
+    - file:third_party/openbao/internal/physical/postgresql/index.go
+    - method:6ad2c3b35a0b36ec21ea54728707ee0a
+  - id: r.prefix-listing
+    level: MUST
+    text: PostgreSQLBackend lists the child keys under a prefix as sorted path strings,
+      and ListPage returns at most limit of them starting strictly after the after
+      token so callers can page through a large prefix.
+    codeRefs:
+    - method:2676c4f536dcb702d9b6440a4a0dab14
+    - method:e3bce0ea8240f41a505cbfc2827311ff
+  - id: r.schema-setup
+    level: MUST
+    text: SetupDatabaseObjects creates the entry table, its constraint and its index
+      plus the HA lock table and constraint against a backend's client, and SetupDatabaseObjectsWithClient
+      performs the same creation given a client and explicit object names.
+    codeRefs:
+    - function:3d3280124ea5f6af84087b4581714571
+    - function:d6102f3f94bcbb3b936b5abf0c759eda
+  - id: r.test-backends
+    level: MUST
+    text: GetTestPostgreSQLBackend returns a physical.Backend wired to a test database
+      together with a cleanup function, and GetTestReplicatedPostgreSQLBackend returns
+      a primary and a secondary backend by name with a cleanup function for replication
+      tests.
+    codeRefs:
+    - function:88f2a443af52f35240ae32fae2ad240c
+    - function:cbeaf4f781e114e66e84bc5ed1c390d6
+  - id: r.test-skip
+    level: SHOULD
+    text: The test helpers skip the calling test when no PostgreSQL connection settings
+      are available in the environment, so the package's tests run without a database
+      rather than failing.
+    codeRefs:
+    - file:third_party/openbao/internal/physical/postgresql/testing.go
+  - id: r.transaction-finish
+    level: MUST
+    text: Commit makes the transaction's writes durable and Rollback discards them,
+      and both close the underlying SQL transaction.
+    codeRefs:
+    - method:52a8f4f10eda5f16c99139d884dd42f2
+    - method:c48c8feb6cc20849481c652c0ea17d16
+  - id: r.transaction-open
+    level: MUST
+    text: PostgreSQLBackend opens a read-write SQL transaction through BeginTx and
+      a read-only one through BeginReadOnlyTx, each returning a physical.Transaction
+      backed by PostgreSQLBackendTransaction over the same database client.
+    codeRefs:
+    - method:2ba56e9e1f43bbe7cf58705a03d5117b
+    - method:97bd0df384588c9d2a7384aaf9898812
+    - struct:1bf3e14c67fbffac5cf1d89908880397
+  - id: r.transaction-operations
+    level: MUST
+    text: PostgreSQLBackendTransaction applies Put, Delete, Get, List and ListPage
+      on the open transaction, so reads see the transaction's own uncommitted writes
+      and all statements run on one connection.
+    codeRefs:
+    - method:039c3fc1bb85ea295bea2429c6b2ad59
+    - method:2b07670b1f9c7b61335983a6351d37b2
+    - method:acecf2989fb52e674d44e14400b67dc0
+    - method:b357c3eae2fcc718b3aef8632e7b9ec2
+    - method:bc939ff14b265610696ce803016fe183
+  interfaces:
+  - name: GetTestPostgreSQLBackend
+    kind: function
+    signature: (t *testing.T, logger log.Logger) (physical.Backend, func())
+    file: third_party/openbao/internal/physical/postgresql/testing.go
+  - name: GetTestReplicatedPostgreSQLBackend
+    kind: function
+    signature: (t *testing.T, name string, logger log.Logger) (physical.Backend, physical.Backend,
+      func())
+    file: third_party/openbao/internal/physical/postgresql/testing.go
+  - name: NewPostgreSQLBackend
+    kind: function
+    signature: (conf map[string]string, logger log.Logger) (physical.Backend, error)
+    file: third_party/openbao/internal/physical/postgresql/postgresql.go
+  - name: PostgreSQLBackend
+    kind: struct
+    signature: ()
+    file: third_party/openbao/internal/physical/postgresql/postgresql.go
+  - name: PostgreSQLBackend.AppliedReplicationIndex
+    kind: method
+    signature: (ctx context.Context) (string, error)
+    file: third_party/openbao/internal/physical/postgresql/index.go
+  - name: PostgreSQLBackend.BeginReadOnlyTx
+    kind: method
+    signature: (ctx context.Context) (physical.Transaction, error)
+    file: third_party/openbao/internal/physical/postgresql/transaction.go
+  - name: PostgreSQLBackend.BeginTx
+    kind: method
+    signature: (ctx context.Context) (physical.Transaction, error)
+    file: third_party/openbao/internal/physical/postgresql/transaction.go
+  - name: PostgreSQLBackend.Delete
+    kind: method
+    signature: (ctx context.Context, fullPath string) error
+    file: third_party/openbao/internal/physical/postgresql/postgresql.go
+  - name: PostgreSQLBackend.Get
+    kind: method
+    signature: (ctx context.Context, fullPath string) (*physical.Entry, error)
+    file: third_party/openbao/internal/physical/postgresql/postgresql.go
+  - name: PostgreSQLBackend.GreaterEqualReplicationIndex
+    kind: method
+    signature: (ctx context.Context, left string, right string) (bool, error)
+    file: third_party/openbao/internal/physical/postgresql/index.go
+  - name: PostgreSQLBackend.HAEnabled
+    kind: method
+    signature: () bool
+    file: third_party/openbao/internal/physical/postgresql/postgresql.go
+  - name: PostgreSQLBackend.List
+    kind: method
+    signature: (ctx context.Context, prefix string) ([]string, error)
+    file: third_party/openbao/internal/physical/postgresql/postgresql.go
+  - name: PostgreSQLBackend.ListPage
+    kind: method
+    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
+      error)
+    file: third_party/openbao/internal/physical/postgresql/postgresql.go
+  - name: PostgreSQLBackend.LockWith
+    kind: method
+    signature: (key, value string) (physical.Lock, error)
+    file: third_party/openbao/internal/physical/postgresql/postgresql.go
+  - name: PostgreSQLBackend.Put
+    kind: method
+    signature: (ctx context.Context, entry *physical.Entry) error
+    file: third_party/openbao/internal/physical/postgresql/postgresql.go
+  - name: PostgreSQLBackend.RegisterActiveNodeLock
+    kind: method
+    signature: (l physical.Lock) error
+    file: third_party/openbao/internal/physical/postgresql/postgresql.go
+  - name: PostgreSQLBackendTransaction
+    kind: struct
+    signature: ()
+    file: third_party/openbao/internal/physical/postgresql/transaction.go
+  - name: PostgreSQLBackendTransaction.Commit
+    kind: method
+    signature: (ctx context.Context) error
+    file: third_party/openbao/internal/physical/postgresql/transaction.go
+  - name: PostgreSQLBackendTransaction.Delete
+    kind: method
+    signature: (ctx context.Context, fullPath string) error
+    file: third_party/openbao/internal/physical/postgresql/transaction.go
+  - name: PostgreSQLBackendTransaction.Get
+    kind: method
+    signature: (ctx context.Context, fullPath string) (*physical.Entry, error)
+    file: third_party/openbao/internal/physical/postgresql/transaction.go
+  - name: PostgreSQLBackendTransaction.List
+    kind: method
+    signature: (ctx context.Context, prefix string) ([]string, error)
+    file: third_party/openbao/internal/physical/postgresql/transaction.go
+  - name: PostgreSQLBackendTransaction.ListPage
+    kind: method
+    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
+      error)
+    file: third_party/openbao/internal/physical/postgresql/transaction.go
+  - name: PostgreSQLBackendTransaction.Put
+    kind: method
+    signature: (ctx context.Context, entry *physical.Entry) error
+    file: third_party/openbao/internal/physical/postgresql/transaction.go
+  - name: PostgreSQLBackendTransaction.Rollback
+    kind: method
+    signature: (ctx context.Context) error
+    file: third_party/openbao/internal/physical/postgresql/transaction.go
+  - name: PostgreSQLLock
+    kind: struct
+    signature: ()
+    file: third_party/openbao/internal/physical/postgresql/postgresql.go
+  - name: PostgreSQLLock.IsActivelyHeld
+    kind: method
+    signature: (ctx context.Context) (bool, error)
+    file: third_party/openbao/internal/physical/postgresql/postgresql.go
+  - name: PostgreSQLLock.Lock
+    kind: method
+    signature: (stopCh <-chan struct{}) (<-chan struct{}, error)
+    file: third_party/openbao/internal/physical/postgresql/postgresql.go
+  - name: PostgreSQLLock.Unlock
+    kind: method
+    signature: () error
+    file: third_party/openbao/internal/physical/postgresql/postgresql.go
+  - name: PostgreSQLLock.Value
+    kind: method
+    signature: () (bool, string, error)
+    file: third_party/openbao/internal/physical/postgresql/postgresql.go
+  - name: SetupDatabaseObjects
+    kind: function
+    signature: (t *testing.T, pg *PostgreSQLBackend)
+    file: third_party/openbao/internal/physical/postgresql/testing.go
+  - name: SetupDatabaseObjectsWithClient
+    kind: function
+    signature: (client *sql.DB, table string, constraint string, index string, haTable
+      string, haTableConstraint string) error
+    file: third_party/openbao/internal/physical/postgresql/testing.go
 codeRefIndex:
 - file:third_party/openbao/internal/physical/postgresql/index.go index.go@third_party/openbao/internal/physical/postgresql/index.go
 - file:third_party/openbao/internal/physical/postgresql/postgresql.go postgresql.go@third_party/openbao/internal/physical/postgresql/postgresql.go
@@ -36,278 +311,3 @@ codeRefIndex:
 - struct:1bf3e14c67fbffac5cf1d89908880397 PostgreSQLBackendTransaction@third_party/openbao/internal/physical/postgresql/transaction.go:16
 - struct:5bde59ab44ad6f3e3ad7304470df2314 PostgreSQLBackend@third_party/openbao/internal/physical/postgresql/postgresql.go:59
 - struct:7dde23d46da28ce4dfd7b89df5f14c69 PostgreSQLLock@third_party/openbao/internal/physical/postgresql/postgresql.go:91
-kind: SystemContext
-metadata:
-  name: third-party-openbao-internal-physical-postgresql
-  namespace: default
-spec:
-  intent: The context exists so the repository carries a self-contained, buildable
-    copy of the OpenBao PostgreSQL storage driver rather than importing it from an
-    external module. It records the backend's configuration entry point, its physical.Backend
-    read and write surface, its transaction surface, its HA lock surface, and its
-    replication-index semantics, plus the test helpers the package's test file depends
-    on. Describing it here lets other parts of the repository see exactly which storage
-    guarantees the vendored driver offers without reading the vendored source.
-  interfaces:
-  - file: third_party/openbao/internal/physical/postgresql/testing.go
-    kind: function
-    name: GetTestPostgreSQLBackend
-    signature: (t *testing.T, logger log.Logger) (physical.Backend, func())
-  - file: third_party/openbao/internal/physical/postgresql/testing.go
-    kind: function
-    name: GetTestReplicatedPostgreSQLBackend
-    signature: (t *testing.T, name string, logger log.Logger) (physical.Backend, physical.Backend,
-      func())
-  - file: third_party/openbao/internal/physical/postgresql/postgresql.go
-    kind: function
-    name: NewPostgreSQLBackend
-    signature: (conf map[string]string, logger log.Logger) (physical.Backend, error)
-  - file: third_party/openbao/internal/physical/postgresql/postgresql.go
-    kind: struct
-    name: PostgreSQLBackend
-    signature: ()
-  - file: third_party/openbao/internal/physical/postgresql/index.go
-    kind: method
-    name: PostgreSQLBackend.AppliedReplicationIndex
-    signature: (ctx context.Context) (string, error)
-  - file: third_party/openbao/internal/physical/postgresql/transaction.go
-    kind: method
-    name: PostgreSQLBackend.BeginReadOnlyTx
-    signature: (ctx context.Context) (physical.Transaction, error)
-  - file: third_party/openbao/internal/physical/postgresql/transaction.go
-    kind: method
-    name: PostgreSQLBackend.BeginTx
-    signature: (ctx context.Context) (physical.Transaction, error)
-  - file: third_party/openbao/internal/physical/postgresql/postgresql.go
-    kind: method
-    name: PostgreSQLBackend.Delete
-    signature: (ctx context.Context, fullPath string) error
-  - file: third_party/openbao/internal/physical/postgresql/postgresql.go
-    kind: method
-    name: PostgreSQLBackend.Get
-    signature: (ctx context.Context, fullPath string) (*physical.Entry, error)
-  - file: third_party/openbao/internal/physical/postgresql/index.go
-    kind: method
-    name: PostgreSQLBackend.GreaterEqualReplicationIndex
-    signature: (ctx context.Context, left string, right string) (bool, error)
-  - file: third_party/openbao/internal/physical/postgresql/postgresql.go
-    kind: method
-    name: PostgreSQLBackend.HAEnabled
-    signature: () bool
-  - file: third_party/openbao/internal/physical/postgresql/postgresql.go
-    kind: method
-    name: PostgreSQLBackend.List
-    signature: (ctx context.Context, prefix string) ([]string, error)
-  - file: third_party/openbao/internal/physical/postgresql/postgresql.go
-    kind: method
-    name: PostgreSQLBackend.ListPage
-    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
-      error)
-  - file: third_party/openbao/internal/physical/postgresql/postgresql.go
-    kind: method
-    name: PostgreSQLBackend.LockWith
-    signature: (key, value string) (physical.Lock, error)
-  - file: third_party/openbao/internal/physical/postgresql/postgresql.go
-    kind: method
-    name: PostgreSQLBackend.Put
-    signature: (ctx context.Context, entry *physical.Entry) error
-  - file: third_party/openbao/internal/physical/postgresql/postgresql.go
-    kind: method
-    name: PostgreSQLBackend.RegisterActiveNodeLock
-    signature: (l physical.Lock) error
-  - file: third_party/openbao/internal/physical/postgresql/transaction.go
-    kind: struct
-    name: PostgreSQLBackendTransaction
-    signature: ()
-  - file: third_party/openbao/internal/physical/postgresql/transaction.go
-    kind: method
-    name: PostgreSQLBackendTransaction.Commit
-    signature: (ctx context.Context) error
-  - file: third_party/openbao/internal/physical/postgresql/transaction.go
-    kind: method
-    name: PostgreSQLBackendTransaction.Delete
-    signature: (ctx context.Context, fullPath string) error
-  - file: third_party/openbao/internal/physical/postgresql/transaction.go
-    kind: method
-    name: PostgreSQLBackendTransaction.Get
-    signature: (ctx context.Context, fullPath string) (*physical.Entry, error)
-  - file: third_party/openbao/internal/physical/postgresql/transaction.go
-    kind: method
-    name: PostgreSQLBackendTransaction.List
-    signature: (ctx context.Context, prefix string) ([]string, error)
-  - file: third_party/openbao/internal/physical/postgresql/transaction.go
-    kind: method
-    name: PostgreSQLBackendTransaction.ListPage
-    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
-      error)
-  - file: third_party/openbao/internal/physical/postgresql/transaction.go
-    kind: method
-    name: PostgreSQLBackendTransaction.Put
-    signature: (ctx context.Context, entry *physical.Entry) error
-  - file: third_party/openbao/internal/physical/postgresql/transaction.go
-    kind: method
-    name: PostgreSQLBackendTransaction.Rollback
-    signature: (ctx context.Context) error
-  - file: third_party/openbao/internal/physical/postgresql/postgresql.go
-    kind: struct
-    name: PostgreSQLLock
-    signature: ()
-  - file: third_party/openbao/internal/physical/postgresql/postgresql.go
-    kind: method
-    name: PostgreSQLLock.IsActivelyHeld
-    signature: (ctx context.Context) (bool, error)
-  - file: third_party/openbao/internal/physical/postgresql/postgresql.go
-    kind: method
-    name: PostgreSQLLock.Lock
-    signature: (stopCh <-chan struct{}) (<-chan struct{}, error)
-  - file: third_party/openbao/internal/physical/postgresql/postgresql.go
-    kind: method
-    name: PostgreSQLLock.Unlock
-    signature: () error
-  - file: third_party/openbao/internal/physical/postgresql/postgresql.go
-    kind: method
-    name: PostgreSQLLock.Value
-    signature: () (bool, string, error)
-  - file: third_party/openbao/internal/physical/postgresql/testing.go
-    kind: function
-    name: SetupDatabaseObjects
-    signature: (t *testing.T, pg *PostgreSQLBackend)
-  - file: third_party/openbao/internal/physical/postgresql/testing.go
-    kind: function
-    name: SetupDatabaseObjectsWithClient
-    signature: (client *sql.DB, table string, constraint string, index string, haTable
-      string, haTableConstraint string) error
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - method:6cad18e49e3431e07b874533cfee2073
-    id: r.active-node-lock
-    level: MUST
-    text: RegisterActiveNodeLock lets the backend take ownership of the lock instance
-      that represents this node, so later lock checks consult the registered lock
-      instead of the default.
-  - codeRefs:
-    - method:68ab16bb6bfac8f9a92bd6e2cf9ed2a2
-    id: r.applied-index
-    level: MUST
-    text: AppliedReplicationIndex reads the current PostgreSQL WAL LSN with the lsn
-      index query and returns it as a string, wrapping a query failure as a getting
-      WAL LSN error.
-  - codeRefs:
-    - function:08a0572b2b555e808a568079a0851101
-    - struct:5bde59ab44ad6f3e3ad7304470df2314
-    id: r.backend-construction
-    level: MUST
-    text: NewPostgreSQLBackend takes a string-to-string configuration map and a logger
-      and returns a physical.Backend implementation, or an error when the configuration
-      cannot be used to reach the database.
-  - codeRefs:
-    - method:0000381cc721ee6432f04901bd6791f7
-    - method:af03dc7cb686c930110d537a0574ca9f
-    - method:bd16c63ca59a7954fd1f61597809dcc4
-    id: r.basic-read-write
-    level: MUST
-    text: PostgreSQLBackend stores each entry under a path derived from the full path
-      by splitting and hashing it, so Put writes the entry value at that key, Get
-      returns the entry for a full path, and Delete removes the row for a full path.
-  - codeRefs:
-    - method:19be9e462678b02a5d4f2415000888d2
-    - method:e96d833040a42b79023bf6fd33334009
-    - struct:7dde23d46da28ce4dfd7b89df5f14c69
-    id: r.ha-lock
-    level: MUST
-    text: LockWith returns a physical.Lock for a key and value pair, and HAEnabled
-      reports whether the backend runs in high-availability mode so the caller knows
-      locking is meaningful.
-  - codeRefs:
-    - method:6ad2c3b35a0b36ec21ea54728707ee0a
-    id: r.index-compare
-    level: MUST
-    text: GreaterEqualReplicationIndex parses both LSN arguments and reports whether
-      the left LSN is greater than or equal to the right one, returning a parse error
-      naming the offending side when an LSN is malformed.
-  - codeRefs:
-    - method:192628e65f5b77c7df2ac7508a836acf
-    - method:55b19d7b367f73868807c08961160741
-    id: r.lock-acquire-release
-    level: MUST
-    text: PostgreSQLLock.Lock blocks until the lock is acquired or stopCh closes,
-      returning a channel that reports loss of the lock, and PostgreSQLLock.Unlock
-      releases the held lock.
-  - codeRefs:
-    - method:c966d8f858bd6852c8f7b694fc2ecc28
-    - method:cc88a3a37c461351272682574e8e5d05
-    id: r.lock-inspection
-    level: MUST
-    text: PostgreSQLLock.Value reports whether the lock is held and by which value,
-      and PostgreSQLLock.IsActivelyHeld reports whether the lock row currently exists
-      and was recently renewed.
-  - codeRefs:
-    - file:third_party/openbao/internal/physical/postgresql/index.go
-    - method:6ad2c3b35a0b36ec21ea54728707ee0a
-    id: r.lsn-format
-    level: MUST
-    text: An LSN must contain exactly one slash; its log file number and byte offset
-      are both parsed as hexadecimal 32-bit values and combined as log file number
-      shifted left 32 bits or-ed with the byte offset, and any other shape is rejected
-      as an error.
-  - codeRefs:
-    - method:2676c4f536dcb702d9b6440a4a0dab14
-    - method:e3bce0ea8240f41a505cbfc2827311ff
-    id: r.prefix-listing
-    level: MUST
-    text: PostgreSQLBackend lists the child keys under a prefix as sorted path strings,
-      and ListPage returns at most limit of them starting strictly after the after
-      token so callers can page through a large prefix.
-  - codeRefs:
-    - function:3d3280124ea5f6af84087b4581714571
-    - function:d6102f3f94bcbb3b936b5abf0c759eda
-    id: r.schema-setup
-    level: MUST
-    text: SetupDatabaseObjects creates the entry table, its constraint and its index
-      plus the HA lock table and constraint against a backend's client, and SetupDatabaseObjectsWithClient
-      performs the same creation given a client and explicit object names.
-  - codeRefs:
-    - function:88f2a443af52f35240ae32fae2ad240c
-    - function:cbeaf4f781e114e66e84bc5ed1c390d6
-    id: r.test-backends
-    level: MUST
-    text: GetTestPostgreSQLBackend returns a physical.Backend wired to a test database
-      together with a cleanup function, and GetTestReplicatedPostgreSQLBackend returns
-      a primary and a secondary backend by name with a cleanup function for replication
-      tests.
-  - codeRefs:
-    - file:third_party/openbao/internal/physical/postgresql/testing.go
-    id: r.test-skip
-    level: SHOULD
-    text: The test helpers skip the calling test when no PostgreSQL connection settings
-      are available in the environment, so the package's tests run without a database
-      rather than failing.
-  - codeRefs:
-    - method:52a8f4f10eda5f16c99139d884dd42f2
-    - method:c48c8feb6cc20849481c652c0ea17d16
-    id: r.transaction-finish
-    level: MUST
-    text: Commit makes the transaction's writes durable and Rollback discards them,
-      and both close the underlying SQL transaction.
-  - codeRefs:
-    - method:2ba56e9e1f43bbe7cf58705a03d5117b
-    - method:97bd0df384588c9d2a7384aaf9898812
-    - struct:1bf3e14c67fbffac5cf1d89908880397
-    id: r.transaction-open
-    level: MUST
-    text: PostgreSQLBackend opens a read-write SQL transaction through BeginTx and
-      a read-only one through BeginReadOnlyTx, each returning a physical.Transaction
-      backed by PostgreSQLBackendTransaction over the same database client.
-  - codeRefs:
-    - method:039c3fc1bb85ea295bea2429c6b2ad59
-    - method:2b07670b1f9c7b61335983a6351d37b2
-    - method:acecf2989fb52e674d44e14400b67dc0
-    - method:b357c3eae2fcc718b3aef8632e7b9ec2
-    - method:bc939ff14b265610696ce803016fe183
-    id: r.transaction-operations
-    level: MUST
-    text: PostgreSQLBackendTransaction applies Put, Delete, Get, List and ListPage
-      on the open transaction, so reads see the transaction's own uncommitted writes
-      and all statements run on one connection.
-  upstream: self

@@ -1,91 +1,91 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- class:0c231d92d2ed3d2fb91e19247e23cb12 KubernetesRolesRoute@third_party/openbao/ui/lib/kubernetes/addon/routes/roles/index.js:12
-- class:42e8a3960e1f95ab7d2b43366f5be9de KubernetesRolesCreateRoute@third_party/openbao/ui/lib/kubernetes/addon/routes/roles/create.js:9
-- file:third_party/openbao/ui/lib/kubernetes/addon/routes/roles/create.js create.js@third_party/openbao/ui/lib/kubernetes/addon/routes/roles/create.js
-- file:third_party/openbao/ui/lib/kubernetes/addon/routes/roles/index.js index.js@third_party/openbao/ui/lib/kubernetes/addon/routes/roles/index.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-lib-kubernetes-addon-routes-roles
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'This context exists to specify the routing and data-loading behaviour of
     the Kubernetes roles section of the OpenBao UI addon: how the roles index route
     discovers and filters roles for a mounted secrets backend, how the create route
     prepares a new empty role record, and how each route sets up the controller with
     the right breadcrumbs. It gives a downstream reader or generator the contract
     each route must satisfy without needing to read the whole UI addon.'
-  interfaces:
-  - file: third_party/openbao/ui/lib/kubernetes/addon/routes/roles/create.js
-    kind: class
-    name: KubernetesRolesCreateRoute
-    signature: class KubernetesRolesCreateRoute extends Route
-  - file: third_party/openbao/ui/lib/kubernetes/addon/routes/roles/index.js
-    kind: class
-    name: KubernetesRolesRoute
-    signature: class KubernetesRolesRoute extends Route
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - class:42e8a3960e1f95ab7d2b43366f5be9de
-    - file:third_party/openbao/ui/lib/kubernetes/addon/routes/roles/create.js
-    id: r.roles-create-breadcrumbs
+  - id: r.roles-create-breadcrumbs
     level: MUST
     text: 'KubernetesRolesCreateRoute.setupController must call super.setupController
       and then set controller.breadcrumbs to three entries: the backend as an ''overview''
       route link with models [resolvedModel.backend], ''roles'' as a ''roles'' route
       link with models [resolvedModel.backend], and a final unlinked ''create'' entry.'
-  - codeRefs:
+    codeRefs:
     - class:42e8a3960e1f95ab7d2b43366f5be9de
     - file:third_party/openbao/ui/lib/kubernetes/addon/routes/roles/create.js
-    id: r.roles-create-model-new-record
+  - id: r.roles-create-model-new-record
     level: MUST
     text: KubernetesRolesCreateRoute.model must read the backend path from the secretMountPath
       service and return a newly created, unsaved 'kubernetes/role' record whose backend
       attribute is that path, so the create form edits an unpersisted role.
-  - codeRefs:
-    - class:0c231d92d2ed3d2fb91e19247e23cb12
-    - file:third_party/openbao/ui/lib/kubernetes/addon/routes/roles/index.js
-    id: r.roles-index-404-becomes-empty
+    codeRefs:
+    - class:42e8a3960e1f95ab7d2b43366f5be9de
+    - file:third_party/openbao/ui/lib/kubernetes/addon/routes/roles/create.js
+  - id: r.roles-index-404-becomes-empty
     level: MUST
     text: When the roles query rejects with an error whose httpStatus is 404, KubernetesRolesRoute.model
       must resolve to an empty array instead of failing; any other error must be rethrown
       so the route still fails for genuine errors.
-  - codeRefs:
+    codeRefs:
     - class:0c231d92d2ed3d2fb91e19247e23cb12
     - file:third_party/openbao/ui/lib/kubernetes/addon/routes/roles/index.js
-    id: r.roles-index-breadcrumbs
+  - id: r.roles-index-breadcrumbs
     level: MUST
     text: KubernetesRolesRoute.setupController must call super.setupController and
       then set controller.breadcrumbs to a secrets entry (label 'secrets', route 'secrets',
       linkExternal true) followed by an entry labelled with resolvedModel.backend.id.
-  - codeRefs:
+    codeRefs:
     - class:0c231d92d2ed3d2fb91e19247e23cb12
     - file:third_party/openbao/ui/lib/kubernetes/addon/routes/roles/index.js
-    id: r.roles-index-model-queries-store
+  - id: r.roles-index-model-queries-store
     level: MUST
     text: KubernetesRolesRoute.model must read the pageFilter value from transition.to.queryParams
       and query the store for 'kubernetes/role' records with backend set to the value
       returned by the secretMountPath service; when pageFilter is present it must
       filter the resolved models to those whose name lowercased contains the pageFilter
       lowercased, otherwise it must return all models unchanged.
-  - codeRefs:
+    codeRefs:
     - class:0c231d92d2ed3d2fb91e19247e23cb12
     - file:third_party/openbao/ui/lib/kubernetes/addon/routes/roles/index.js
-    id: r.roles-index-model-returns-hash
+  - id: r.roles-index-model-returns-hash
     level: MUST
     text: KubernetesRolesRoute.model must return a hash containing backend (the result
       of modelFor('application')), promptConfig, and the roles promise, so the controller
       receives the application model, the prompt configuration, and the role list
       together.
-  - codeRefs:
+    codeRefs:
     - class:0c231d92d2ed3d2fb91e19247e23cb12
-    - class:42e8a3960e1f95ab7d2b43366f5be9de
-    - file:third_party/openbao/ui/lib/kubernetes/addon/routes/roles/create.js
     - file:third_party/openbao/ui/lib/kubernetes/addon/routes/roles/index.js
-    id: r.roles-routes-inject-services
+  - id: r.roles-routes-inject-services
     level: MUST
     text: Both KubernetesRolesRoute and KubernetesRolesCreateRoute must inject the
       store and secretMountPath services, and both must extend the shared Route base
       class so the default route hooks remain available.
-  upstream: self
+    codeRefs:
+    - class:0c231d92d2ed3d2fb91e19247e23cb12
+    - class:42e8a3960e1f95ab7d2b43366f5be9de
+    - file:third_party/openbao/ui/lib/kubernetes/addon/routes/roles/create.js
+    - file:third_party/openbao/ui/lib/kubernetes/addon/routes/roles/index.js
+  interfaces:
+  - name: KubernetesRolesCreateRoute
+    kind: class
+    signature: class KubernetesRolesCreateRoute extends Route
+    file: third_party/openbao/ui/lib/kubernetes/addon/routes/roles/create.js
+  - name: KubernetesRolesRoute
+    kind: class
+    signature: class KubernetesRolesRoute extends Route
+    file: third_party/openbao/ui/lib/kubernetes/addon/routes/roles/index.js
+codeRefIndex:
+- class:0c231d92d2ed3d2fb91e19247e23cb12 KubernetesRolesRoute@third_party/openbao/ui/lib/kubernetes/addon/routes/roles/index.js:12
+- class:42e8a3960e1f95ab7d2b43366f5be9de KubernetesRolesCreateRoute@third_party/openbao/ui/lib/kubernetes/addon/routes/roles/create.js:9
+- file:third_party/openbao/ui/lib/kubernetes/addon/routes/roles/create.js create.js@third_party/openbao/ui/lib/kubernetes/addon/routes/roles/create.js
+- file:third_party/openbao/ui/lib/kubernetes/addon/routes/roles/index.js index.js@third_party/openbao/ui/lib/kubernetes/addon/routes/roles/index.js

@@ -1,34 +1,34 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/internal/vault/external_tests/userpass_binary/ip_token_binding_test.go
-  ip_token_binding_test.go@third_party/openbao/internal/vault/external_tests/userpass_binary/ip_token_binding_test.go
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-vault-external-tests-userpass-binary
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'This context exists to name and delimit the IP-token-binding external test
     of the userpass auth method, so that the spec records the file as part of the
     repository without inventing an API. It is a documentation anchor: the file is
     a test, it exports no interface, and everything it exercises is reached through
     helpers defined elsewhere. Keeping it as its own context stops the exported-interface
     description from being padded with symbols that the observed facts do not support.'
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/internal/vault/external_tests/userpass_binary/ip_token_binding_test.go
-    id: r.ip-token-binding-external-test-present
+  - id: r.ip-token-binding-external-test-present
     level: MUST
     text: The repository must carry third_party/openbao/internal/vault/external_tests/userpass_binary/ip_token_binding_test.go
       as part of the userpass_binary external test set, so that the IP-token-binding
       behavior of the userpass auth method has a dedicated test file inside the vendored
       tree.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/userpass_binary/ip_token_binding_test.go
-    id: r.no-exported-interface
+  - id: r.no-exported-interface
     level: MUST
     text: 'The context must expose no exported interface: the observed facts list
       the file alone and no function, type, method, constant or variable, so other
       packages may depend on this path only as a test target and never import a symbol
       from it.'
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/userpass_binary/ip_token_binding_test.go
+codeRefIndex:
+- file:third_party/openbao/internal/vault/external_tests/userpass_binary/ip_token_binding_test.go
+  ip_token_binding_test.go@third_party/openbao/internal/vault/external_tests/userpass_binary/ip_token_binding_test.go

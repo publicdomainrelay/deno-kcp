@@ -1,99 +1,99 @@
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 24fd090e5cc1de36f1bca85dfa01fd2176d77b05b8464baf7b6306fb05a9a3cf
+realizedSpecHash: 7b67862de5658b7e3e4c0cbde635991bfa8b3fcc6cf1ec816fe1e9fe3a7674a5
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
+- type: CodeSynced
+  status: "True"
   reason: InterfacesObserved
-  status: "True"
-  type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+  message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+- type: Drifted
   status: "False"
-  type: Drifted
-- message: the spec passes the validator
-  reason: ValidatorPassed
+  reason: FingerprintEqual
+  message: observed facts match the synced fingerprint
+- type: SpecValid
   status: "True"
-  type: SpecValid
+  reason: ValidatorPassed
+  message: the spec passes the validator
 observed:
   files:
   - third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
   - third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb_test.go
   - third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index.go
   - third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index_test.go
-  fingerprint: 24fd090e5cc1de36f1bca85dfa01fd2176d77b05b8464baf7b6306fb05a9a3cf
   interfaces:
-  - codegraphId: struct:04503da514b04d1fa5c8af50f9ef21c3
-    file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
+  - name: CacheMemDB
     kind: struct
+    file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
     line: 19
-    name: CacheMemDB
-  - codegraphId: function:1e6beeceeb5446601c2b1c949124f9f5
-    file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
+    codegraphId: struct:04503da514b04d1fa5c8af50f9ef21c3
+  - name: New
     kind: function
-    line: 24
-    name: New
     signature: () (*CacheMemDB, error)
-  - codegraphId: method:2e90880633b025054f046238565aea5c
     file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
+    line: 24
+    codegraphId: function:1e6beeceeb5446601c2b1c949124f9f5
+  - name: CacheMemDB.Get
     kind: method
-    line: 132
-    name: CacheMemDB.Get
     signature: (indexName string, indexValues ...any) (*Index, error)
-  - codegraphId: method:3d90db1ee13b0be4f60726597bedfac5
     file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
+    line: 132
+    codegraphId: method:2e90880633b025054f046238565aea5c
+  - name: CacheMemDB.Set
     kind: method
-    line: 157
-    name: CacheMemDB.Set
     signature: (index *Index) error
-  - codegraphId: method:a0fc3c92721e7b8f8fb4a741adcba5de
     file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
+    line: 157
+    codegraphId: method:3d90db1ee13b0be4f60726597bedfac5
+  - name: CacheMemDB.GetByPrefix
     kind: method
-    line: 176
-    name: CacheMemDB.GetByPrefix
     signature: (indexName string, indexValues ...any) ([]*Index, error)
-  - codegraphId: method:4e832c6e65f6084ed6dd9c2fe12febf7
     file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
+    line: 176
+    codegraphId: method:a0fc3c92721e7b8f8fb4a741adcba5de
+  - name: CacheMemDB.Evict
     kind: method
-    line: 209
-    name: CacheMemDB.Evict
     signature: (indexName string, indexValues ...any) error
-  - codegraphId: method:5a9cd13b2fb712d346e9e7eae4bb3a84
     file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
+    line: 209
+    codegraphId: method:4e832c6e65f6084ed6dd9c2fe12febf7
+  - name: CacheMemDB.Flush
     kind: method
-    line: 232
-    name: CacheMemDB.Flush
     signature: () error
-  - codegraphId: struct:c93eea47213b832b39d7deb030c51ba4
-    file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index.go
+    file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
+    line: 232
+    codegraphId: method:5a9cd13b2fb712d346e9e7eae4bb3a84
+  - name: Index
     kind: struct
+    file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index.go
     line: 15
-    name: Index
-  - codegraphId: type_alias:9cc4f0cb4f80eaff6afa843a7e490231
-    file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index.go
+    codegraphId: struct:c93eea47213b832b39d7deb030c51ba4
+  - name: IndexName
     kind: type_alias
+    file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index.go
     line: 76
-    name: IndexName
-  - codegraphId: struct:c6a4bec231f98a1052acdb4de21aad04
-    file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index.go
+    codegraphId: type_alias:9cc4f0cb4f80eaff6afa843a7e490231
+  - name: ContextInfo
     kind: struct
+    file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index.go
     line: 116
-    name: ContextInfo
-  - codegraphId: function:1245e3729c3b85f45bc7bcf8ee367e0f
-    file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index.go
+    codegraphId: struct:c6a4bec231f98a1052acdb4de21aad04
+  - name: NewContextInfo
     kind: function
-    line: 122
-    name: NewContextInfo
     signature: (ctx context.Context) *ContextInfo
-  - codegraphId: method:9f12c46bc5e7d967f7d50c07c11c3766
     file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index.go
+    line: 122
+    codegraphId: function:1245e3729c3b85f45bc7bcf8ee367e0f
+  - name: Index.Serialize
     kind: method
-    line: 134
-    name: Index.Serialize
     signature: () ([]byte, error)
-  - codegraphId: function:e0584361bcee3f77f6466eddde165222
     file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index.go
+    line: 134
+    codegraphId: method:9f12c46bc5e7d967f7d50c07c11c3766
+  - name: Deserialize
     kind: function
-    line: 147
-    name: Deserialize
     signature: (indexBytes []byte) (*Index, error)
-realizedSpecHash: 7b67862de5658b7e3e4c0cbde635991bfa8b3fcc6cf1ec816fe1e9fe3a7674a5
-syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-syncedFingerprint: 24fd090e5cc1de36f1bca85dfa01fd2176d77b05b8464baf7b6306fb05a9a3cf
+    file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index.go
+    line: 147
+    codegraphId: function:e0584361bcee3f77f6466eddde165222
+  fingerprint: 24fd090e5cc1de36f1bca85dfa01fd2176d77b05b8464baf7b6306fb05a9a3cf

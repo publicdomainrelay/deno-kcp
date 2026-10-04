@@ -1,4 +1,138 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-sdk-plugin-mock
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'The context exists so that OpenBao''s plugin framework can be tested without
+    a real secrets engine. A host that mounts this backend gets deterministic answers
+    on every path, and a transport under test gets every error shape the plugin RPC
+    layer must round-trip. It is test scaffolding that is shipped as a plugin: the
+    backend deliberately keeps a mutable internal value so the Invalidate callback
+    has something observable to destroy, deliberately returns each error family from
+    errors/type, and deliberately reports its type through FactoryType so that both
+    logical and other backend types can be constructed from one implementation.'
+  requirements:
+  - id: r.backend-behaviour-is-tested
+    level: SHOULD
+    text: The mock backend's paths, invalidate behaviour and error responses are exercised
+      by backend_test.go, so changes to the path table or the error switch are caught
+      before the plugin host is affected.
+    codeRefs:
+    - file:third_party/openbao/sdk/plugin/mock/backend_test.go
+  - id: r.backend-registers-all-mock-paths
+    level: MUST
+    text: Backend returns a backend whose embedded framework.Backend registers, in
+      one PathAppend, the error paths, the kv paths, and the internal, special and
+      raw paths; declares PathsSpecial Unauthenticated as "special"; takes Invalidate
+      from the backend's own invalidate method; ships an empty Secrets list; and reports
+      BackendType logical.TypeLogical.
+    codeRefs:
+    - file:third_party/openbao/sdk/plugin/mock/backend.go
+    - function:7aad236747ab98eb8b7854bb33bc0161
+  - id: r.error-paths-produce-each-error-kind
+    level: MUST
+    text: The error paths expose errors/rpc and errors/kill as reads and errors/type
+      as a create or update taking an integer err_type; a request without err_type
+      returns rpc.ErrShutdown, and an err_type value selects one of the plugin error
+      kinds — plain error, errutil.UserError, errutil.InternalError, logical.CodedError(403),
+      logical.StatusBadRequest, ErrUnsupportedOperation, ErrUnsupportedPath, ErrInvalidRequest,
+      ErrPermissionDenied or ErrMultiAuthzPending — each message being "test".
+    codeRefs:
+    - file:third_party/openbao/sdk/plugin/mock/path_errors.go
+  - id: r.factory-sets-up-backend
+    level: MUST
+    text: Factory builds a fresh backend with Backend() and calls Setup with the caller's
+      context and BackendConfig, returning the backend on success and the Setup error
+      unchanged on failure, so the mock is mountable through logical.Factory.
+    codeRefs:
+    - file:third_party/openbao/sdk/plugin/mock/backend.go
+    - function:29b5ac0aa3f1bb58f9485724fcaa3bfa
+  - id: r.factory-type-overrides-backend-type
+    level: MUST
+    text: FactoryType takes a logical.BackendType and returns a logical.Factory closure
+      that builds a backend, assigns that type to b.BackendType before Setup, and
+      returns the Setup error unchanged on failure, so one mock can be constructed
+      as any backend type.
+    codeRefs:
+    - file:third_party/openbao/sdk/plugin/mock/backend.go
+    - function:a116aae3917b0ad8d5f9b043180984a3
+  - id: r.internal-path-round-trips-value
+    level: MUST
+    text: The internal path accepts an update that stores the string value field into
+      the backend's internal field and returns no response, and a read that returns
+      the stored internal value under the "value" key, so a caller can observe what
+      invalidate wiped.
+    codeRefs:
+    - file:third_party/openbao/sdk/plugin/mock/path_internal.go
+  - id: r.invalidate-clears-internal-value
+    level: MUST
+    text: The backend's invalidate callback clears the backend's internal string field
+      to the empty string when the invalidated key is "internal" and leaves it untouched
+      for any other key, giving the framework's Invalidate hook an observable effect.
+    codeRefs:
+    - file:third_party/openbao/sdk/plugin/mock/backend.go
+    - file:third_party/openbao/sdk/plugin/mock/path_internal.go
+  - id: r.kv-string-crud-and-list
+    level: MUST
+    text: The kv paths list the "kv/" prefix through Storage.List and, for a generic
+      key segment, declare key, value and version fields with an existence check that
+      reports presence by whether Storage.Get returns a non-nil entry; the read callback
+      returns the stored bytes as the value plus the requested version, create and
+      update both write the value to the request path, and delete removes that path
+      from storage.
+    codeRefs:
+    - file:third_party/openbao/sdk/plugin/mock/path_kv.go
+  - id: r.new-returns-backend-as-any
+    level: MUST
+    text: New returns the result of Backend() as an any with a nil error, so a builtin
+      backend plugin entrypoint can expose the mock without the logical.Backend interface,
+      and it never fails.
+    codeRefs:
+    - file:third_party/openbao/sdk/plugin/mock/backend.go
+    - function:52321948a6b6882db51cccc986e38ba8
+  - id: r.raw-returns-fixed-http-response
+    level: MUST
+    text: A read of the raw path returns the literal body "Response" as logical.HTTPRawBody
+      with content type text/plain and status 200, so the plugin RPC layer's raw response
+      marshalling can be exercised.
+    codeRefs:
+    - file:third_party/openbao/sdk/plugin/mock/path_raw.go
+  - id: r.running-version-from-environment
+    level: MUST
+    text: Backend reports RunningVersion "v0.0.0+mock" by default, and overrides it
+      with the value of the TESTING_MOCK_VAULT_PLUGIN_VERSION environment variable
+      read through api.ReadBaoVariable whenever that variable is non-empty, so tests
+      can fake a plugin version.
+    codeRefs:
+    - file:third_party/openbao/sdk/plugin/mock/backend.go
+  - id: r.special-path-is-unauthenticated
+    level: MUST
+    text: 'A read of the special path returns {"data": "foo"}, and that path is listed
+      under PathsSpecial.Unauthenticated so it can be reached without a token.'
+    codeRefs:
+    - file:third_party/openbao/sdk/plugin/mock/backend.go
+    - file:third_party/openbao/sdk/plugin/mock/path_special.go
+  interfaces:
+  - name: Backend
+    kind: function
+    signature: func Backend() *backend
+    file: third_party/openbao/sdk/plugin/mock/backend.go
+  - name: Factory
+    kind: function
+    signature: func Factory(ctx context.Context, conf *logical.BackendConfig) (logical.Backend,
+      error)
+    file: third_party/openbao/sdk/plugin/mock/backend.go
+  - name: FactoryType
+    kind: function
+    signature: func FactoryType(backendType logical.BackendType) logical.Factory
+    file: third_party/openbao/sdk/plugin/mock/backend.go
+  - name: New
+    kind: function
+    signature: func New() (any, error)
+    file: third_party/openbao/sdk/plugin/mock/backend.go
 codeRefIndex:
 - file:third_party/openbao/sdk/plugin/mock/backend.go backend.go@third_party/openbao/sdk/plugin/mock/backend.go
 - file:third_party/openbao/sdk/plugin/mock/backend_test.go backend_test.go@third_party/openbao/sdk/plugin/mock/backend_test.go
@@ -11,137 +145,3 @@ codeRefIndex:
 - function:52321948a6b6882db51cccc986e38ba8 New@third_party/openbao/sdk/plugin/mock/backend.go:18
 - function:7aad236747ab98eb8b7854bb33bc0161 Backend@third_party/openbao/sdk/plugin/mock/backend.go:45
 - function:a116aae3917b0ad8d5f9b043180984a3 FactoryType@third_party/openbao/sdk/plugin/mock/backend.go:33
-kind: SystemContext
-metadata:
-  name: third-party-openbao-sdk-plugin-mock
-  namespace: default
-spec:
-  intent: 'The context exists so that OpenBao''s plugin framework can be tested without
-    a real secrets engine. A host that mounts this backend gets deterministic answers
-    on every path, and a transport under test gets every error shape the plugin RPC
-    layer must round-trip. It is test scaffolding that is shipped as a plugin: the
-    backend deliberately keeps a mutable internal value so the Invalidate callback
-    has something observable to destroy, deliberately returns each error family from
-    errors/type, and deliberately reports its type through FactoryType so that both
-    logical and other backend types can be constructed from one implementation.'
-  interfaces:
-  - file: third_party/openbao/sdk/plugin/mock/backend.go
-    kind: function
-    name: Backend
-    signature: func Backend() *backend
-  - file: third_party/openbao/sdk/plugin/mock/backend.go
-    kind: function
-    name: Factory
-    signature: func Factory(ctx context.Context, conf *logical.BackendConfig) (logical.Backend,
-      error)
-  - file: third_party/openbao/sdk/plugin/mock/backend.go
-    kind: function
-    name: FactoryType
-    signature: func FactoryType(backendType logical.BackendType) logical.Factory
-  - file: third_party/openbao/sdk/plugin/mock/backend.go
-    kind: function
-    name: New
-    signature: func New() (any, error)
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - file:third_party/openbao/sdk/plugin/mock/backend_test.go
-    id: r.backend-behaviour-is-tested
-    level: SHOULD
-    text: The mock backend's paths, invalidate behaviour and error responses are exercised
-      by backend_test.go, so changes to the path table or the error switch are caught
-      before the plugin host is affected.
-  - codeRefs:
-    - file:third_party/openbao/sdk/plugin/mock/backend.go
-    - function:7aad236747ab98eb8b7854bb33bc0161
-    id: r.backend-registers-all-mock-paths
-    level: MUST
-    text: Backend returns a backend whose embedded framework.Backend registers, in
-      one PathAppend, the error paths, the kv paths, and the internal, special and
-      raw paths; declares PathsSpecial Unauthenticated as "special"; takes Invalidate
-      from the backend's own invalidate method; ships an empty Secrets list; and reports
-      BackendType logical.TypeLogical.
-  - codeRefs:
-    - file:third_party/openbao/sdk/plugin/mock/path_errors.go
-    id: r.error-paths-produce-each-error-kind
-    level: MUST
-    text: The error paths expose errors/rpc and errors/kill as reads and errors/type
-      as a create or update taking an integer err_type; a request without err_type
-      returns rpc.ErrShutdown, and an err_type value selects one of the plugin error
-      kinds — plain error, errutil.UserError, errutil.InternalError, logical.CodedError(403),
-      logical.StatusBadRequest, ErrUnsupportedOperation, ErrUnsupportedPath, ErrInvalidRequest,
-      ErrPermissionDenied or ErrMultiAuthzPending — each message being "test".
-  - codeRefs:
-    - file:third_party/openbao/sdk/plugin/mock/backend.go
-    - function:29b5ac0aa3f1bb58f9485724fcaa3bfa
-    id: r.factory-sets-up-backend
-    level: MUST
-    text: Factory builds a fresh backend with Backend() and calls Setup with the caller's
-      context and BackendConfig, returning the backend on success and the Setup error
-      unchanged on failure, so the mock is mountable through logical.Factory.
-  - codeRefs:
-    - file:third_party/openbao/sdk/plugin/mock/backend.go
-    - function:a116aae3917b0ad8d5f9b043180984a3
-    id: r.factory-type-overrides-backend-type
-    level: MUST
-    text: FactoryType takes a logical.BackendType and returns a logical.Factory closure
-      that builds a backend, assigns that type to b.BackendType before Setup, and
-      returns the Setup error unchanged on failure, so one mock can be constructed
-      as any backend type.
-  - codeRefs:
-    - file:third_party/openbao/sdk/plugin/mock/path_internal.go
-    id: r.internal-path-round-trips-value
-    level: MUST
-    text: The internal path accepts an update that stores the string value field into
-      the backend's internal field and returns no response, and a read that returns
-      the stored internal value under the "value" key, so a caller can observe what
-      invalidate wiped.
-  - codeRefs:
-    - file:third_party/openbao/sdk/plugin/mock/backend.go
-    - file:third_party/openbao/sdk/plugin/mock/path_internal.go
-    id: r.invalidate-clears-internal-value
-    level: MUST
-    text: The backend's invalidate callback clears the backend's internal string field
-      to the empty string when the invalidated key is "internal" and leaves it untouched
-      for any other key, giving the framework's Invalidate hook an observable effect.
-  - codeRefs:
-    - file:third_party/openbao/sdk/plugin/mock/path_kv.go
-    id: r.kv-string-crud-and-list
-    level: MUST
-    text: The kv paths list the "kv/" prefix through Storage.List and, for a generic
-      key segment, declare key, value and version fields with an existence check that
-      reports presence by whether Storage.Get returns a non-nil entry; the read callback
-      returns the stored bytes as the value plus the requested version, create and
-      update both write the value to the request path, and delete removes that path
-      from storage.
-  - codeRefs:
-    - file:third_party/openbao/sdk/plugin/mock/backend.go
-    - function:52321948a6b6882db51cccc986e38ba8
-    id: r.new-returns-backend-as-any
-    level: MUST
-    text: New returns the result of Backend() as an any with a nil error, so a builtin
-      backend plugin entrypoint can expose the mock without the logical.Backend interface,
-      and it never fails.
-  - codeRefs:
-    - file:third_party/openbao/sdk/plugin/mock/path_raw.go
-    id: r.raw-returns-fixed-http-response
-    level: MUST
-    text: A read of the raw path returns the literal body "Response" as logical.HTTPRawBody
-      with content type text/plain and status 200, so the plugin RPC layer's raw response
-      marshalling can be exercised.
-  - codeRefs:
-    - file:third_party/openbao/sdk/plugin/mock/backend.go
-    id: r.running-version-from-environment
-    level: MUST
-    text: Backend reports RunningVersion "v0.0.0+mock" by default, and overrides it
-      with the value of the TESTING_MOCK_VAULT_PLUGIN_VERSION environment variable
-      read through api.ReadBaoVariable whenever that variable is non-empty, so tests
-      can fake a plugin version.
-  - codeRefs:
-    - file:third_party/openbao/sdk/plugin/mock/backend.go
-    - file:third_party/openbao/sdk/plugin/mock/path_special.go
-    id: r.special-path-is-unauthenticated
-    level: MUST
-    text: 'A read of the special path returns {"data": "foo"}, and that path is listed
-      under PathsSpecial.Unauthenticated so it can be reached without a token.'
-  upstream: self

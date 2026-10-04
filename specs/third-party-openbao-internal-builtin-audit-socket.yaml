@@ -1,4 +1,119 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-internal-builtin-audit-socket
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'The context exists so the socket audit device has a specification anchored
+    to its real Go symbols: one exported factory, one exported Backend type, and the
+    eight methods that make the type usable as an audit.Backend. It names the entry
+    points a caller or a sibling audit device (file, http, syslog) would rely on,
+    and records the signatures those callers can depend on without reading the file.'
+  requirements:
+  - id: r.backend-implements-audit-interface
+    level: MUST
+    text: Backend must satisfy the audit.Backend interface by providing LogRequest,
+      LogResponse, LogTestMessage, GetHash, Reload, Salt and Invalidate, so it can
+      be registered as an audit device next to the file, http and syslog backends.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/audit/socket/backend.go
+    - struct:32c0a542ae36b6f7aaa1f74ad620868c
+  - id: r.factory-constructs-backend
+    level: MUST
+    text: Factory takes a context and an *audit.BackendConfig and returns an audit.Backend
+      together with an error, constructing the socket Backend from the supplied configuration
+      and returning an error rather than a partially usable backend when construction
+      fails.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/audit/socket/backend.go
+    - function:6a2ce28d7941107c5315180d60d656c8
+  - id: r.get-hash
+    level: MUST
+    text: GetHash takes a context and a data string, resolves the backend salt and
+      returns the salted hash of the data as a string with an error, so sensitive
+      values are logged hashed.
+    codeRefs:
+    - method:a27ee23fac47f3d28cc2753042623d74
+  - id: r.invalidate-releases
+    level: MUST
+    text: Invalidate takes a context and returns nothing, releasing the socket connection
+      and the resources the backend holds so a shut-down backend leaves nothing open.
+    codeRefs:
+    - method:0dfcd89cec84f44a84b27c82ec48575f
+  - id: r.log-request
+    level: MUST
+    text: LogRequest takes a context and a *logical.LogInput, formats the request
+      audit entry and writes it to the socket, returning an error when the entry cannot
+      be formatted or delivered.
+    codeRefs:
+    - method:89d687803ddb57ed9fd8d62eb1c1495b
+  - id: r.log-response
+    level: MUST
+    text: LogResponse takes a context and a *logical.LogInput, formats the response
+      audit entry and writes it to the socket, returning an error when the entry cannot
+      be formatted or delivered.
+    codeRefs:
+    - method:1ec3d615174a0753435662e932df070e
+  - id: r.log-test-message
+    level: MUST
+    text: LogTestMessage takes a context, a *logical.LogInput and a map of configuration
+      overrides, and writes a test audit entry to the socket, reporting an error when
+      the test entry cannot be emitted.
+    codeRefs:
+    - method:fde4a897fbd4681c9fb6c3298b434091
+  - id: r.reload-reconnects
+    level: SHOULD
+    text: Reload takes a context and returns an error, re-establishing the socket
+      connection so a backend whose peer went away resumes logging without a restart.
+    codeRefs:
+    - method:2e21d6fb3ce37ab7b6b7283ff6020452
+  - id: r.salt-accessor
+    level: MUST
+    text: Salt takes a context and returns the backend's *salt.Salt with an error,
+      providing the salt that GetHash and the audit formatter hash accessor and sensitive
+      values with.
+    codeRefs:
+    - method:2846f8c3e19e3776184a1b969555c3fa
+  interfaces:
+  - name: Backend
+    kind: struct
+    signature: type Backend struct
+    file: third_party/openbao/internal/builtin/audit/socket/backend.go
+  - name: Backend.GetHash
+    kind: method
+    signature: (ctx context.Context, data string) (string, error)
+    file: third_party/openbao/internal/builtin/audit/socket/backend.go
+  - name: Backend.Invalidate
+    kind: method
+    signature: (_ context.Context)
+    file: third_party/openbao/internal/builtin/audit/socket/backend.go
+  - name: Backend.LogRequest
+    kind: method
+    signature: (ctx context.Context, in *logical.LogInput) error
+    file: third_party/openbao/internal/builtin/audit/socket/backend.go
+  - name: Backend.LogResponse
+    kind: method
+    signature: (ctx context.Context, in *logical.LogInput) error
+    file: third_party/openbao/internal/builtin/audit/socket/backend.go
+  - name: Backend.LogTestMessage
+    kind: method
+    signature: (ctx context.Context, in *logical.LogInput, config map[string]string)
+      error
+    file: third_party/openbao/internal/builtin/audit/socket/backend.go
+  - name: Backend.Reload
+    kind: method
+    signature: (ctx context.Context) error
+    file: third_party/openbao/internal/builtin/audit/socket/backend.go
+  - name: Backend.Salt
+    kind: method
+    signature: (ctx context.Context) (*salt.Salt, error)
+    file: third_party/openbao/internal/builtin/audit/socket/backend.go
+  - name: Factory
+    kind: function
+    signature: (ctx context.Context, conf *audit.BackendConfig) (audit.Backend, error)
+    file: third_party/openbao/internal/builtin/audit/socket/backend.go
 codeRefIndex:
 - file:third_party/openbao/internal/builtin/audit/socket/backend.go backend.go@third_party/openbao/internal/builtin/audit/socket/backend.go
 - function:6a2ce28d7941107c5315180d60d656c8 Factory@third_party/openbao/internal/builtin/audit/socket/backend.go:23
@@ -10,118 +125,3 @@ codeRefIndex:
 - method:a27ee23fac47f3d28cc2753042623d74 Backend.GetHash@third_party/openbao/internal/builtin/audit/socket/backend.go:134
 - method:fde4a897fbd4681c9fb6c3298b434091 Backend.LogTestMessage@third_party/openbao/internal/builtin/audit/socket/backend.go:188
 - struct:32c0a542ae36b6f7aaa1f74ad620868c Backend@third_party/openbao/internal/builtin/audit/socket/backend.go:114
-kind: SystemContext
-metadata:
-  name: third-party-openbao-internal-builtin-audit-socket
-  namespace: default
-spec:
-  intent: 'The context exists so the socket audit device has a specification anchored
-    to its real Go symbols: one exported factory, one exported Backend type, and the
-    eight methods that make the type usable as an audit.Backend. It names the entry
-    points a caller or a sibling audit device (file, http, syslog) would rely on,
-    and records the signatures those callers can depend on without reading the file.'
-  interfaces:
-  - file: third_party/openbao/internal/builtin/audit/socket/backend.go
-    kind: struct
-    name: Backend
-    signature: type Backend struct
-  - file: third_party/openbao/internal/builtin/audit/socket/backend.go
-    kind: method
-    name: Backend.GetHash
-    signature: (ctx context.Context, data string) (string, error)
-  - file: third_party/openbao/internal/builtin/audit/socket/backend.go
-    kind: method
-    name: Backend.Invalidate
-    signature: (_ context.Context)
-  - file: third_party/openbao/internal/builtin/audit/socket/backend.go
-    kind: method
-    name: Backend.LogRequest
-    signature: (ctx context.Context, in *logical.LogInput) error
-  - file: third_party/openbao/internal/builtin/audit/socket/backend.go
-    kind: method
-    name: Backend.LogResponse
-    signature: (ctx context.Context, in *logical.LogInput) error
-  - file: third_party/openbao/internal/builtin/audit/socket/backend.go
-    kind: method
-    name: Backend.LogTestMessage
-    signature: (ctx context.Context, in *logical.LogInput, config map[string]string)
-      error
-  - file: third_party/openbao/internal/builtin/audit/socket/backend.go
-    kind: method
-    name: Backend.Reload
-    signature: (ctx context.Context) error
-  - file: third_party/openbao/internal/builtin/audit/socket/backend.go
-    kind: method
-    name: Backend.Salt
-    signature: (ctx context.Context) (*salt.Salt, error)
-  - file: third_party/openbao/internal/builtin/audit/socket/backend.go
-    kind: function
-    name: Factory
-    signature: (ctx context.Context, conf *audit.BackendConfig) (audit.Backend, error)
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/audit/socket/backend.go
-    - struct:32c0a542ae36b6f7aaa1f74ad620868c
-    id: r.backend-implements-audit-interface
-    level: MUST
-    text: Backend must satisfy the audit.Backend interface by providing LogRequest,
-      LogResponse, LogTestMessage, GetHash, Reload, Salt and Invalidate, so it can
-      be registered as an audit device next to the file, http and syslog backends.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/audit/socket/backend.go
-    - function:6a2ce28d7941107c5315180d60d656c8
-    id: r.factory-constructs-backend
-    level: MUST
-    text: Factory takes a context and an *audit.BackendConfig and returns an audit.Backend
-      together with an error, constructing the socket Backend from the supplied configuration
-      and returning an error rather than a partially usable backend when construction
-      fails.
-  - codeRefs:
-    - method:a27ee23fac47f3d28cc2753042623d74
-    id: r.get-hash
-    level: MUST
-    text: GetHash takes a context and a data string, resolves the backend salt and
-      returns the salted hash of the data as a string with an error, so sensitive
-      values are logged hashed.
-  - codeRefs:
-    - method:0dfcd89cec84f44a84b27c82ec48575f
-    id: r.invalidate-releases
-    level: MUST
-    text: Invalidate takes a context and returns nothing, releasing the socket connection
-      and the resources the backend holds so a shut-down backend leaves nothing open.
-  - codeRefs:
-    - method:89d687803ddb57ed9fd8d62eb1c1495b
-    id: r.log-request
-    level: MUST
-    text: LogRequest takes a context and a *logical.LogInput, formats the request
-      audit entry and writes it to the socket, returning an error when the entry cannot
-      be formatted or delivered.
-  - codeRefs:
-    - method:1ec3d615174a0753435662e932df070e
-    id: r.log-response
-    level: MUST
-    text: LogResponse takes a context and a *logical.LogInput, formats the response
-      audit entry and writes it to the socket, returning an error when the entry cannot
-      be formatted or delivered.
-  - codeRefs:
-    - method:fde4a897fbd4681c9fb6c3298b434091
-    id: r.log-test-message
-    level: MUST
-    text: LogTestMessage takes a context, a *logical.LogInput and a map of configuration
-      overrides, and writes a test audit entry to the socket, reporting an error when
-      the test entry cannot be emitted.
-  - codeRefs:
-    - method:2e21d6fb3ce37ab7b6b7283ff6020452
-    id: r.reload-reconnects
-    level: SHOULD
-    text: Reload takes a context and returns an error, re-establishing the socket
-      connection so a backend whose peer went away resumes logging without a restart.
-  - codeRefs:
-    - method:2846f8c3e19e3776184a1b969555c3fa
-    id: r.salt-accessor
-    level: MUST
-    text: Salt takes a context and returns the backend's *salt.Salt with an error,
-      providing the salt that GetHash and the audit formatter hash accessor and sensitive
-      values with.
-  upstream: self

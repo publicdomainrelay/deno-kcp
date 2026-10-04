@@ -1,11 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/ui/app/components/basic-dropdown/trigger.js trigger.js@third_party/openbao/ui/app/components/basic-dropdown/trigger.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-app-components-basic-dropdown
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'The context records the local customization the application applies on
     top of the third-party `ember-basic-dropdown` addon. The addon trigger renders
     no `type` attribute, and a button inside a form defaults to `type="submit"`, so
@@ -13,36 +13,36 @@ spec:
     trigger and declaring `attributeBindings: [''type'']` lets a caller pass `type="button"`
     and get a plain toggle. The file stays a minimal vendored passthrough so addon
     upgrades remain cheap.'
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/ui/app/components/basic-dropdown/trigger.js
-    id: r.bind-type-attribute
+  - id: r.bind-type-attribute
     level: MUST
     text: 'The extended class must declare `attributeBindings: [''type'']` so that
       a `type` property passed to the component renders as the `type` HTML attribute
       on the trigger element, letting a button trigger inside a form be set to `type="button"`
       instead of defaulting to submit.'
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/components/basic-dropdown/trigger.js
-    id: r.extend-addon-trigger
+  - id: r.extend-addon-trigger
     level: MUST
     text: The module's default export must be an Ember component class produced by
       calling `extend` on the default export of `ember-basic-dropdown/components/basic-dropdown/trigger`,
       so the local component inherits the addon trigger's dropdown open, close, and
       focus behavior unchanged.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/components/basic-dropdown/trigger.js
-    id: r.license-header
+  - id: r.license-header
     level: MUST
     text: 'The file must keep the HashiCorp copyright notice and the `SPDX-License-Identifier:
       MPL-2.0` header comment, since it is vendored third-party source under the third_party
       tree.'
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/components/basic-dropdown/trigger.js
-    id: r.no-further-overrides
+  - id: r.no-further-overrides
     level: SHOULD
     text: The subclass should add no properties or methods beyond the `attributeBindings`
       override, keeping this file a minimal vendored passthrough of the addon trigger
       so addon upgrades stay cheap.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/ui/app/components/basic-dropdown/trigger.js
+codeRefIndex:
+- file:third_party/openbao/ui/app/components/basic-dropdown/trigger.js trigger.js@third_party/openbao/ui/app/components/basic-dropdown/trigger.js

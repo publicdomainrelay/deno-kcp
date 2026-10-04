@@ -1,4 +1,375 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-internal-vault-quotas
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'This context exists so that the vault can enforce per-request quotas, chiefly
+    rate limits, without the request path knowing how rules are stored or matched.
+    It gives the rest of the vault one registry object, Manager, that owns the lifecycle
+    of quota rules: creation and persistence, lookup by ID, name or request factors,
+    matching of an incoming Request to the rule that governs it, evaluation of that
+    rule into a Response, and cleanup when mounts, namespaces or backends go away.
+    The Quota interface keeps the rule kinds pluggable, and the configuration surface
+    (audit logging, response headers, exempt paths) lets operators tune the rate limit
+    behavior at runtime.'
+  requirements:
+  - id: r.access-quota-id
+    level: MUST
+    text: The Access interface exposes QuotaID so a request's resolved identity can
+      be mapped to a quota rule; the concrete access value returns that identifier.
+    codeRefs:
+    - interface:e266dbf69d4ac222bf687dadffbaa42f
+    - method:192f69f4eaba60df7f6560c98cb1d092
+    - method:27f0d881c669ea2b6d6f0e19af0e3d55
+  - id: r.lease-action-string
+    level: SHOULD
+    text: 'LeaseAction.String renders a lease action as its text form: loaded, created,
+      deleted or allow for known values, and "unknown" for any other value.'
+    codeRefs:
+    - method:a9d201befac661a69c7fdf217110386d
+    - type_alias:cba292b7229f22fd6fd25e02b615fd46
+  - id: r.lease-information
+    level: MAY
+    text: QuotaLeaseInformation carries lease bookkeeping for a quota evaluation alongside
+      the Response returned to the caller.
+    codeRefs:
+    - struct:2d6122a7ef8f9a5b01e6187d6a70c0fd
+    - struct:c0a6c0995d3acceff4f387d7ae2e064b
+  - id: r.manager-construction
+    level: MUST
+    text: NewManager returns a Manager bound to a logger, a cluster metric sink and
+      a deadlock-detection flag; DetectDeadlocks reports whether deadlock detection
+      was requested at construction.
+    codeRefs:
+    - function:3bc9e607eb7a16b985d7f82a699a5886
+    - method:51fa587878c4d978c636415b5f56acda
+    - struct:4bc76bbeaaee8e6dba7dbdc519269617
+  - id: r.query-and-apply-quota
+    level: MUST
+    text: QueryQuota selects the quota rule that governs a Request, QueryResolveRoleQuotas
+      reports whether role quotas must be resolved for the request, and ApplyQuota
+      evaluates the governing rule and returns a Response describing the outcome.
+    codeRefs:
+    - method:09025260cc516c79f082580f11156d23
+    - method:1da5112b6ebd64a311fa1ef933e7fddb
+    - method:b629803ef457140097c89b3efb6d62f4
+    - struct:2d6122a7ef8f9a5b01e6187d6a70c0fd
+  - id: r.quota-clone
+    level: MUST
+    text: Quota.Clone returns a copy of the calling rule so callers can mutate a rule
+      without altering the stored instance; RateLimitQuota.Clone provides that copy
+      for the rate limit rule type.
+    codeRefs:
+    - method:1889682ba37f711e3025b8b70ff041f5
+    - method:c55f949286b0a87e53f569e3ac02360c
+  - id: r.quota-crud
+    level: MUST
+    text: 'Manager persists, reads and removes quota rules: SetQuota stores a rule
+      under its type, LoadQuota loads one by type and name, DeleteQuota removes one,
+      and QuotaNames lists the rule names registered for a given type.'
+    codeRefs:
+    - method:013497d025f117fe4d3a813d236e75ac
+    - method:44976361c652e12e6e1fee5ebc749f36
+    - method:7be34ff186980b2afbc84e3c823ad56e
+    - method:bf638c54088bc6262e2aed76b6ac10a2
+  - id: r.quota-interface-contract
+    level: MUST
+    text: 'Every quota rule satisfies the Quota interface: it can evaluate a request
+      through allow, report its identifier and name, report whether it is inheritable,
+      be initialized with a logger and metric sink, be closed on deletion, be cloned,
+      and have its mount and namespace paths rewritten. RateLimitQuota is the concrete
+      implementation of that interface.'
+    codeRefs:
+    - interface:7e7585dad23c0d68c364c80d6698b10a
+    - method:5faea9a09230ae3b432bc3d22e1f7a17
+    - method:6a6445f5fe3ac0b57c1fb2ba82e5012b
+    - struct:63f533788346571e878c46f017f38560
+  - id: r.quota-lookup-by-factor
+    level: MUST
+    text: Manager resolves a quota rule by identifier, by name, or by request factors
+      (namespace path, mount path, path suffix and role), returning the matching rule
+      or an error when no rule matches.
+    codeRefs:
+    - method:2c83757b5a79968be050786b05670fe8
+    - method:be48f82547148750ae4ee3d2d3c2d5f3
+    - method:c86ef90ba96d7f49920d4d31f83ef623
+  - id: r.quota-storage-path
+    level: MUST
+    text: QuotaStoragePath derives the storage location of a quota rule from its type
+      and name, and the manager reads and writes rule definitions at that path so
+      persistence survives restart.
+    codeRefs:
+    - function:1e822443d40412d154744c5b32332eda
+    - method:013497d025f117fe4d3a813d236e75ac
+    - method:bf638c54088bc6262e2aed76b6ac10a2
+  - id: r.quota-type-string
+    level: SHOULD
+    text: Type.String renders a quota type as its text form so the type can be used
+      as a key and in operator-facing output.
+    codeRefs:
+    - method:32814d5f932975ee37cfda321e8d95b8
+    - type_alias:b08f41bcf2bf58c8ef3c82577df07a1c
+  - id: r.rate-limit-config-toggles
+    level: MUST
+    text: 'Manager holds the rate limit runtime configuration: setters and getters
+      for audit logging and response headers, an exempt-path set whose membership
+      RateLimitPathExempt answers, persisted configuration read by LoadConfig and
+      exposed by Config.'
+    codeRefs:
+    - method:19933149ad04d389e6caa100f7215da9
+    - method:3bb069fa0ea4c484313ac0c5c2ad2e88
+    - method:500ac6a4a3a78cded562f9c91b005150
+    - method:7418e5e959ef5d904f6d78a0bfc3b45d
+    - method:8b54eff50e5e03d3214089771328e86e
+    - method:c9cf9904e263d5ff89ea47ff55050f6d
+    - method:cb783e8155dd305bbfea9ee5229c8710
+    - method:f9239888f983b595326d21505cf80491
+    - struct:5a4302c1b207fb70ff9e1274770131a5
+  - id: r.rate-limit-construction
+    level: MUST
+    text: NewRateLimitQuota constructs a rate limit rule from a name, namespace path,
+      mount path, path suffix, role, rate, interval, block duration and inheritable
+      flag, returning the rule the manager will register.
+    codeRefs:
+    - function:d0b2b03b55f13ab460ea4e664ce940f3
+    - struct:63f533788346571e878c46f017f38560
+  - id: r.request-factors
+    level: MUST
+    text: Request carries the namespace path, mount path, path suffix, role and client
+      identity that quota matching consumes, so QueryQuota and ApplyQuota can decide
+      which rule applies and whether the request is allowed.
+    codeRefs:
+    - method:1da5112b6ebd64a311fa1ef933e7fddb
+    - method:b629803ef457140097c89b3efb6d62f4
+    - struct:9594830c07145c9bbed56079a8d77e8a
+  - id: r.setup-reset-invalidate
+    level: SHOULD
+    text: Setup loads the manager's quota and configuration state from vault storage,
+      Reset clears that in-memory state, and Invalidate drops a single cached entry
+      identified by key.
+    codeRefs:
+    - method:79662e1afc452a3e9e2538caffc51845
+    - method:cf7f686d2dfa1c564bffb7aa7d7b300c
+    - method:f5d707e5396670f5d2682ec388669191
+  - id: r.topology-change-hooks
+    level: MUST
+    text: When a mount is remounted, a namespace is deleted, or a backend is disabled,
+      the manager rewrites the mount and namespace paths of affected quota rules or
+      removes rules that no longer have a target.
+    codeRefs:
+    - method:66b1b119e79a1b5ba6f538084e5c4476
+    - method:b2cee10169fbabe08791515449d8d52a
+    - method:c70a2234c6bdd81db6b24c1879443480
+  interfaces:
+  - name: Access
+    kind: interface
+    signature: type Access interface { QuotaID() string }
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: Access.QuotaID
+    kind: method
+    signature: QuotaID() string
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: Config
+    kind: struct
+    signature: type Config struct
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: LeaseAction
+    kind: type_alias
+    signature: type LeaseAction uint32
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: LeaseAction.String
+    kind: method
+    signature: func (la LeaseAction) String() string
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: Manager
+    kind: struct
+    signature: type Manager struct
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: Manager.ApplyQuota
+    kind: method
+    signature: func (m *Manager) ApplyQuota(ctx context.Context, req *Request) (Response,
+      error)
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: Manager.Config
+    kind: method
+    signature: func (m *Manager) Config() *Config
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: Manager.DeleteQuota
+    kind: method
+    signature: func (m *Manager) DeleteQuota(ctx context.Context, qType string, name
+      string) error
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: Manager.DetectDeadlocks
+    kind: method
+    signature: func (m *Manager) DetectDeadlocks() bool
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: Manager.HandleBackendDisabling
+    kind: method
+    signature: func (m *Manager) HandleBackendDisabling(ctx context.Context, nsPath,
+      mountPath string) error
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: Manager.HandleNamespaceDeletion
+    kind: method
+    signature: func (m *Manager) HandleNamespaceDeletion(ctx context.Context, nsPath
+      string) error
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: Manager.HandleRemount
+    kind: method
+    signature: func (m *Manager) HandleRemount(ctx context.Context, from, to namespace.MountPathDetails)
+      error
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: Manager.Invalidate
+    kind: method
+    signature: func (m *Manager) Invalidate(ctx context.Context, key string) error
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: Manager.LoadConfig
+    kind: method
+    signature: func (m *Manager) LoadConfig(ctx context.Context) (*Config, error)
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: Manager.LoadQuota
+    kind: method
+    signature: func (m *Manager) LoadQuota(ctx context.Context, qType, name string)
+      (Quota, error)
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: Manager.QueryQuota
+    kind: method
+    signature: func (m *Manager) QueryQuota(req *Request) (Quota, error)
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: Manager.QueryResolveRoleQuotas
+    kind: method
+    signature: func (m *Manager) QueryResolveRoleQuotas(req *Request) (bool, error)
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: Manager.QuotaByFactors
+    kind: method
+    signature: func (m *Manager) QuotaByFactors(ctx context.Context, qType, nsPath,
+      mountPath, pathSuffix, role string) (Quota, error)
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: Manager.QuotaByID
+    kind: method
+    signature: func (m *Manager) QuotaByID(qType string, id string) (Quota, error)
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: Manager.QuotaByName
+    kind: method
+    signature: func (m *Manager) QuotaByName(qType string, name string) (Quota, error)
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: Manager.QuotaNames
+    kind: method
+    signature: func (m *Manager) QuotaNames(qType Type) ([]string, error)
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: Manager.RateLimitAuditLoggingEnabled
+    kind: method
+    signature: func (m *Manager) RateLimitAuditLoggingEnabled() bool
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: Manager.RateLimitPathExempt
+    kind: method
+    signature: func (m *Manager) RateLimitPathExempt(path string) bool
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: Manager.RateLimitResponseHeadersEnabled
+    kind: method
+    signature: func (m *Manager) RateLimitResponseHeadersEnabled() bool
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: Manager.Reset
+    kind: method
+    signature: func (m *Manager) Reset() error
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: Manager.SetEnableRateLimitAuditLogging
+    kind: method
+    signature: func (m *Manager) SetEnableRateLimitAuditLogging(val bool)
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: Manager.SetEnableRateLimitResponseHeaders
+    kind: method
+    signature: func (m *Manager) SetEnableRateLimitResponseHeaders(val bool)
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: Manager.SetQuota
+    kind: method
+    signature: func (m *Manager) SetQuota(ctx context.Context, qType string, quota
+      Quota) error
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: Manager.SetRateLimitExemptPaths
+    kind: method
+    signature: func (m *Manager) SetRateLimitExemptPaths(vals []string)
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: Manager.Setup
+    kind: method
+    signature: func (m *Manager) Setup(ctx context.Context, storage logical.Storage)
+      error
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: NewManager
+    kind: function
+    signature: func NewManager(logger log.Logger, ms *metricsutil.ClusterMetricSink,
+      detectDeadlocks bool) (*Manager, error)
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: NewRateLimitQuota
+    kind: function
+    signature: func NewRateLimitQuota(name, nsPath, mountPath, pathSuffix, role string,
+      rate float64, interval, block time.Duration, inheritable bool) *RateLimitQuota
+    file: third_party/openbao/internal/vault/quotas/quotas_rate_limit.go
+  - name: Quota
+    kind: interface
+    signature: type Quota interface { allow(context.Context, *Request) (Response,
+      error); quotaID() string; QuotaName() string; IsInheritable() bool; initialize(log.Logger,
+      *metricsutil.ClusterMetricSink) error; close(context.Context) error; Clone()
+      Quota; handleRemount(string, string) }
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: Quota.Clone
+    kind: method
+    signature: Clone() Quota
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: Quota.IsInheritable
+    kind: method
+    signature: IsInheritable() bool
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: Quota.QuotaName
+    kind: method
+    signature: QuotaName() string
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: QuotaLeaseInformation
+    kind: struct
+    signature: type QuotaLeaseInformation struct
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: QuotaStoragePath
+    kind: function
+    signature: func QuotaStoragePath(quotaType, name string) string
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: RateLimitQuota
+    kind: struct
+    signature: type RateLimitQuota struct
+    file: third_party/openbao/internal/vault/quotas/quotas_rate_limit.go
+  - name: RateLimitQuota.Clone
+    kind: method
+    signature: func (rlq *RateLimitQuota) Clone() Quota
+    file: third_party/openbao/internal/vault/quotas/quotas_rate_limit.go
+  - name: RateLimitQuota.IsInheritable
+    kind: method
+    signature: func (rlq *RateLimitQuota) IsInheritable() bool
+    file: third_party/openbao/internal/vault/quotas/quotas_rate_limit.go
+  - name: RateLimitQuota.QuotaName
+    kind: method
+    signature: func (rlq *RateLimitQuota) QuotaName() string
+    file: third_party/openbao/internal/vault/quotas/quotas_rate_limit.go
+  - name: Request
+    kind: struct
+    signature: type Request struct
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: Response
+    kind: struct
+    signature: type Response struct
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: Type
+    kind: type_alias
+    signature: type Type string
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: Type.String
+    kind: method
+    signature: func (t Type) String() string
+    file: third_party/openbao/internal/vault/quotas/quotas.go
+  - name: access.QuotaID
+    kind: method
+    signature: QuotaID() string
+    file: third_party/openbao/internal/vault/quotas/quotas.go
 codeRefIndex:
 - file:third_party/openbao/internal/vault/quotas/quotas.go quotas.go@third_party/openbao/internal/vault/quotas/quotas.go
 - file:third_party/openbao/internal/vault/quotas/quotas_rate_limit.go quotas_rate_limit.go@third_party/openbao/internal/vault/quotas/quotas_rate_limit.go
@@ -50,374 +421,3 @@ codeRefIndex:
 - struct:c0a6c0995d3acceff4f387d7ae2e064b QuotaLeaseInformation@third_party/openbao/internal/vault/quotas/quotas.go:180
 - type_alias:b08f41bcf2bf58c8ef3c82577df07a1c Type@third_party/openbao/internal/vault/quotas/quotas.go:24
 - type_alias:cba292b7229f22fd6fd25e02b615fd46 LeaseAction@third_party/openbao/internal/vault/quotas/quotas.go:38
-kind: SystemContext
-metadata:
-  name: third-party-openbao-internal-vault-quotas
-  namespace: default
-spec:
-  intent: 'This context exists so that the vault can enforce per-request quotas, chiefly
-    rate limits, without the request path knowing how rules are stored or matched.
-    It gives the rest of the vault one registry object, Manager, that owns the lifecycle
-    of quota rules: creation and persistence, lookup by ID, name or request factors,
-    matching of an incoming Request to the rule that governs it, evaluation of that
-    rule into a Response, and cleanup when mounts, namespaces or backends go away.
-    The Quota interface keeps the rule kinds pluggable, and the configuration surface
-    (audit logging, response headers, exempt paths) lets operators tune the rate limit
-    behavior at runtime.'
-  interfaces:
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: interface
-    name: Access
-    signature: type Access interface { QuotaID() string }
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: method
-    name: Access.QuotaID
-    signature: QuotaID() string
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: struct
-    name: Config
-    signature: type Config struct
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: type_alias
-    name: LeaseAction
-    signature: type LeaseAction uint32
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: method
-    name: LeaseAction.String
-    signature: func (la LeaseAction) String() string
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: struct
-    name: Manager
-    signature: type Manager struct
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: method
-    name: Manager.ApplyQuota
-    signature: func (m *Manager) ApplyQuota(ctx context.Context, req *Request) (Response,
-      error)
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: method
-    name: Manager.Config
-    signature: func (m *Manager) Config() *Config
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: method
-    name: Manager.DeleteQuota
-    signature: func (m *Manager) DeleteQuota(ctx context.Context, qType string, name
-      string) error
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: method
-    name: Manager.DetectDeadlocks
-    signature: func (m *Manager) DetectDeadlocks() bool
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: method
-    name: Manager.HandleBackendDisabling
-    signature: func (m *Manager) HandleBackendDisabling(ctx context.Context, nsPath,
-      mountPath string) error
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: method
-    name: Manager.HandleNamespaceDeletion
-    signature: func (m *Manager) HandleNamespaceDeletion(ctx context.Context, nsPath
-      string) error
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: method
-    name: Manager.HandleRemount
-    signature: func (m *Manager) HandleRemount(ctx context.Context, from, to namespace.MountPathDetails)
-      error
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: method
-    name: Manager.Invalidate
-    signature: func (m *Manager) Invalidate(ctx context.Context, key string) error
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: method
-    name: Manager.LoadConfig
-    signature: func (m *Manager) LoadConfig(ctx context.Context) (*Config, error)
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: method
-    name: Manager.LoadQuota
-    signature: func (m *Manager) LoadQuota(ctx context.Context, qType, name string)
-      (Quota, error)
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: method
-    name: Manager.QueryQuota
-    signature: func (m *Manager) QueryQuota(req *Request) (Quota, error)
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: method
-    name: Manager.QueryResolveRoleQuotas
-    signature: func (m *Manager) QueryResolveRoleQuotas(req *Request) (bool, error)
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: method
-    name: Manager.QuotaByFactors
-    signature: func (m *Manager) QuotaByFactors(ctx context.Context, qType, nsPath,
-      mountPath, pathSuffix, role string) (Quota, error)
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: method
-    name: Manager.QuotaByID
-    signature: func (m *Manager) QuotaByID(qType string, id string) (Quota, error)
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: method
-    name: Manager.QuotaByName
-    signature: func (m *Manager) QuotaByName(qType string, name string) (Quota, error)
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: method
-    name: Manager.QuotaNames
-    signature: func (m *Manager) QuotaNames(qType Type) ([]string, error)
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: method
-    name: Manager.RateLimitAuditLoggingEnabled
-    signature: func (m *Manager) RateLimitAuditLoggingEnabled() bool
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: method
-    name: Manager.RateLimitPathExempt
-    signature: func (m *Manager) RateLimitPathExempt(path string) bool
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: method
-    name: Manager.RateLimitResponseHeadersEnabled
-    signature: func (m *Manager) RateLimitResponseHeadersEnabled() bool
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: method
-    name: Manager.Reset
-    signature: func (m *Manager) Reset() error
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: method
-    name: Manager.SetEnableRateLimitAuditLogging
-    signature: func (m *Manager) SetEnableRateLimitAuditLogging(val bool)
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: method
-    name: Manager.SetEnableRateLimitResponseHeaders
-    signature: func (m *Manager) SetEnableRateLimitResponseHeaders(val bool)
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: method
-    name: Manager.SetQuota
-    signature: func (m *Manager) SetQuota(ctx context.Context, qType string, quota
-      Quota) error
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: method
-    name: Manager.SetRateLimitExemptPaths
-    signature: func (m *Manager) SetRateLimitExemptPaths(vals []string)
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: method
-    name: Manager.Setup
-    signature: func (m *Manager) Setup(ctx context.Context, storage logical.Storage)
-      error
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: function
-    name: NewManager
-    signature: func NewManager(logger log.Logger, ms *metricsutil.ClusterMetricSink,
-      detectDeadlocks bool) (*Manager, error)
-  - file: third_party/openbao/internal/vault/quotas/quotas_rate_limit.go
-    kind: function
-    name: NewRateLimitQuota
-    signature: func NewRateLimitQuota(name, nsPath, mountPath, pathSuffix, role string,
-      rate float64, interval, block time.Duration, inheritable bool) *RateLimitQuota
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: interface
-    name: Quota
-    signature: type Quota interface { allow(context.Context, *Request) (Response,
-      error); quotaID() string; QuotaName() string; IsInheritable() bool; initialize(log.Logger,
-      *metricsutil.ClusterMetricSink) error; close(context.Context) error; Clone()
-      Quota; handleRemount(string, string) }
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: method
-    name: Quota.Clone
-    signature: Clone() Quota
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: method
-    name: Quota.IsInheritable
-    signature: IsInheritable() bool
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: method
-    name: Quota.QuotaName
-    signature: QuotaName() string
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: struct
-    name: QuotaLeaseInformation
-    signature: type QuotaLeaseInformation struct
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: function
-    name: QuotaStoragePath
-    signature: func QuotaStoragePath(quotaType, name string) string
-  - file: third_party/openbao/internal/vault/quotas/quotas_rate_limit.go
-    kind: struct
-    name: RateLimitQuota
-    signature: type RateLimitQuota struct
-  - file: third_party/openbao/internal/vault/quotas/quotas_rate_limit.go
-    kind: method
-    name: RateLimitQuota.Clone
-    signature: func (rlq *RateLimitQuota) Clone() Quota
-  - file: third_party/openbao/internal/vault/quotas/quotas_rate_limit.go
-    kind: method
-    name: RateLimitQuota.IsInheritable
-    signature: func (rlq *RateLimitQuota) IsInheritable() bool
-  - file: third_party/openbao/internal/vault/quotas/quotas_rate_limit.go
-    kind: method
-    name: RateLimitQuota.QuotaName
-    signature: func (rlq *RateLimitQuota) QuotaName() string
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: struct
-    name: Request
-    signature: type Request struct
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: struct
-    name: Response
-    signature: type Response struct
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: type_alias
-    name: Type
-    signature: type Type string
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: method
-    name: Type.String
-    signature: func (t Type) String() string
-  - file: third_party/openbao/internal/vault/quotas/quotas.go
-    kind: method
-    name: access.QuotaID
-    signature: QuotaID() string
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - interface:e266dbf69d4ac222bf687dadffbaa42f
-    - method:192f69f4eaba60df7f6560c98cb1d092
-    - method:27f0d881c669ea2b6d6f0e19af0e3d55
-    id: r.access-quota-id
-    level: MUST
-    text: The Access interface exposes QuotaID so a request's resolved identity can
-      be mapped to a quota rule; the concrete access value returns that identifier.
-  - codeRefs:
-    - method:a9d201befac661a69c7fdf217110386d
-    - type_alias:cba292b7229f22fd6fd25e02b615fd46
-    id: r.lease-action-string
-    level: SHOULD
-    text: 'LeaseAction.String renders a lease action as its text form: loaded, created,
-      deleted or allow for known values, and "unknown" for any other value.'
-  - codeRefs:
-    - struct:2d6122a7ef8f9a5b01e6187d6a70c0fd
-    - struct:c0a6c0995d3acceff4f387d7ae2e064b
-    id: r.lease-information
-    level: MAY
-    text: QuotaLeaseInformation carries lease bookkeeping for a quota evaluation alongside
-      the Response returned to the caller.
-  - codeRefs:
-    - function:3bc9e607eb7a16b985d7f82a699a5886
-    - method:51fa587878c4d978c636415b5f56acda
-    - struct:4bc76bbeaaee8e6dba7dbdc519269617
-    id: r.manager-construction
-    level: MUST
-    text: NewManager returns a Manager bound to a logger, a cluster metric sink and
-      a deadlock-detection flag; DetectDeadlocks reports whether deadlock detection
-      was requested at construction.
-  - codeRefs:
-    - method:09025260cc516c79f082580f11156d23
-    - method:1da5112b6ebd64a311fa1ef933e7fddb
-    - method:b629803ef457140097c89b3efb6d62f4
-    - struct:2d6122a7ef8f9a5b01e6187d6a70c0fd
-    id: r.query-and-apply-quota
-    level: MUST
-    text: QueryQuota selects the quota rule that governs a Request, QueryResolveRoleQuotas
-      reports whether role quotas must be resolved for the request, and ApplyQuota
-      evaluates the governing rule and returns a Response describing the outcome.
-  - codeRefs:
-    - method:1889682ba37f711e3025b8b70ff041f5
-    - method:c55f949286b0a87e53f569e3ac02360c
-    id: r.quota-clone
-    level: MUST
-    text: Quota.Clone returns a copy of the calling rule so callers can mutate a rule
-      without altering the stored instance; RateLimitQuota.Clone provides that copy
-      for the rate limit rule type.
-  - codeRefs:
-    - method:013497d025f117fe4d3a813d236e75ac
-    - method:44976361c652e12e6e1fee5ebc749f36
-    - method:7be34ff186980b2afbc84e3c823ad56e
-    - method:bf638c54088bc6262e2aed76b6ac10a2
-    id: r.quota-crud
-    level: MUST
-    text: 'Manager persists, reads and removes quota rules: SetQuota stores a rule
-      under its type, LoadQuota loads one by type and name, DeleteQuota removes one,
-      and QuotaNames lists the rule names registered for a given type.'
-  - codeRefs:
-    - interface:7e7585dad23c0d68c364c80d6698b10a
-    - method:5faea9a09230ae3b432bc3d22e1f7a17
-    - method:6a6445f5fe3ac0b57c1fb2ba82e5012b
-    - struct:63f533788346571e878c46f017f38560
-    id: r.quota-interface-contract
-    level: MUST
-    text: 'Every quota rule satisfies the Quota interface: it can evaluate a request
-      through allow, report its identifier and name, report whether it is inheritable,
-      be initialized with a logger and metric sink, be closed on deletion, be cloned,
-      and have its mount and namespace paths rewritten. RateLimitQuota is the concrete
-      implementation of that interface.'
-  - codeRefs:
-    - method:2c83757b5a79968be050786b05670fe8
-    - method:be48f82547148750ae4ee3d2d3c2d5f3
-    - method:c86ef90ba96d7f49920d4d31f83ef623
-    id: r.quota-lookup-by-factor
-    level: MUST
-    text: Manager resolves a quota rule by identifier, by name, or by request factors
-      (namespace path, mount path, path suffix and role), returning the matching rule
-      or an error when no rule matches.
-  - codeRefs:
-    - function:1e822443d40412d154744c5b32332eda
-    - method:013497d025f117fe4d3a813d236e75ac
-    - method:bf638c54088bc6262e2aed76b6ac10a2
-    id: r.quota-storage-path
-    level: MUST
-    text: QuotaStoragePath derives the storage location of a quota rule from its type
-      and name, and the manager reads and writes rule definitions at that path so
-      persistence survives restart.
-  - codeRefs:
-    - method:32814d5f932975ee37cfda321e8d95b8
-    - type_alias:b08f41bcf2bf58c8ef3c82577df07a1c
-    id: r.quota-type-string
-    level: SHOULD
-    text: Type.String renders a quota type as its text form so the type can be used
-      as a key and in operator-facing output.
-  - codeRefs:
-    - method:19933149ad04d389e6caa100f7215da9
-    - method:3bb069fa0ea4c484313ac0c5c2ad2e88
-    - method:500ac6a4a3a78cded562f9c91b005150
-    - method:7418e5e959ef5d904f6d78a0bfc3b45d
-    - method:8b54eff50e5e03d3214089771328e86e
-    - method:c9cf9904e263d5ff89ea47ff55050f6d
-    - method:cb783e8155dd305bbfea9ee5229c8710
-    - method:f9239888f983b595326d21505cf80491
-    - struct:5a4302c1b207fb70ff9e1274770131a5
-    id: r.rate-limit-config-toggles
-    level: MUST
-    text: 'Manager holds the rate limit runtime configuration: setters and getters
-      for audit logging and response headers, an exempt-path set whose membership
-      RateLimitPathExempt answers, persisted configuration read by LoadConfig and
-      exposed by Config.'
-  - codeRefs:
-    - function:d0b2b03b55f13ab460ea4e664ce940f3
-    - struct:63f533788346571e878c46f017f38560
-    id: r.rate-limit-construction
-    level: MUST
-    text: NewRateLimitQuota constructs a rate limit rule from a name, namespace path,
-      mount path, path suffix, role, rate, interval, block duration and inheritable
-      flag, returning the rule the manager will register.
-  - codeRefs:
-    - method:1da5112b6ebd64a311fa1ef933e7fddb
-    - method:b629803ef457140097c89b3efb6d62f4
-    - struct:9594830c07145c9bbed56079a8d77e8a
-    id: r.request-factors
-    level: MUST
-    text: Request carries the namespace path, mount path, path suffix, role and client
-      identity that quota matching consumes, so QueryQuota and ApplyQuota can decide
-      which rule applies and whether the request is allowed.
-  - codeRefs:
-    - method:79662e1afc452a3e9e2538caffc51845
-    - method:cf7f686d2dfa1c564bffb7aa7d7b300c
-    - method:f5d707e5396670f5d2682ec388669191
-    id: r.setup-reset-invalidate
-    level: SHOULD
-    text: Setup loads the manager's quota and configuration state from vault storage,
-      Reset clears that in-memory state, and Invalidate drops a single cached entry
-      identified by key.
-  - codeRefs:
-    - method:66b1b119e79a1b5ba6f538084e5c4476
-    - method:b2cee10169fbabe08791515449d8d52a
-    - method:c70a2234c6bdd81db6b24c1879443480
-    id: r.topology-change-hooks
-    level: MUST
-    text: When a mount is remounted, a namespace is deleted, or a backend is disabled,
-      the manager rewrites the mount and namespace paths of affected quota rules or
-      removes rules that no longer have a target.
-  upstream: self

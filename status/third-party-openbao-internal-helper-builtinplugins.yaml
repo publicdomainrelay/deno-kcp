@@ -1,53 +1,53 @@
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 3a0f837969b26b411b3f5e31306246b320d2c4babd5c89fbf796387025c7ffaf
+realizedSpecHash: 8d6729833ef47315ed954bde365138d5015553fb0f185fbb242537626383f77f
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
+- type: CodeSynced
+  status: "True"
   reason: InterfacesObserved
-  status: "True"
-  type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+  message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+- type: Drifted
   status: "False"
-  type: Drifted
-- message: the spec passes the validator
-  reason: ValidatorPassed
+  reason: FingerprintEqual
+  message: observed facts match the synced fingerprint
+- type: SpecValid
   status: "True"
-  type: SpecValid
+  reason: ValidatorPassed
+  message: the spec passes the validator
 observed:
   files:
   - third_party/openbao/internal/helper/builtinplugins/registry.go
   - third_party/openbao/internal/helper/builtinplugins/registry_test.go
-  fingerprint: 3a0f837969b26b411b3f5e31306246b320d2c4babd5c89fbf796387025c7ffaf
   interfaces:
-  - codegraphId: type_alias:f05ff2dd7360b0020cc866b46e434703
-    file: third_party/openbao/internal/helper/builtinplugins/registry.go
+  - name: BuiltinFactory
     kind: type_alias
+    file: third_party/openbao/internal/helper/builtinplugins/registry.go
     line: 38
-    name: BuiltinFactory
-  - codegraphId: method:b90fa5e560e9c3a6dd1a421c0cae9e35
-    file: third_party/openbao/internal/helper/builtinplugins/registry.go
+    codegraphId: type_alias:f05ff2dd7360b0020cc866b46e434703
+  - name: registry.Get
     kind: method
-    line: 106
-    name: registry.Get
     signature: (name string, pluginType consts.PluginType) (func() (any, error), bool)
-  - codegraphId: method:7009fa0b248f9892a4636e7bb62f619b
     file: third_party/openbao/internal/helper/builtinplugins/registry.go
+    line: 106
+    codegraphId: method:b90fa5e560e9c3a6dd1a421c0cae9e35
+  - name: registry.Keys
     kind: method
-    line: 128
-    name: registry.Keys
     signature: (pluginType consts.PluginType) []string
-  - codegraphId: method:df1edaefd7afbff8f01427741ebda7bb
     file: third_party/openbao/internal/helper/builtinplugins/registry.go
+    line: 128
+    codegraphId: method:7009fa0b248f9892a4636e7bb62f619b
+  - name: registry.Contains
     kind: method
-    line: 147
-    name: registry.Contains
     signature: (name string, pluginType consts.PluginType) bool
-  - codegraphId: method:5202e75fa5e63c649bc628d07fd71ead
     file: third_party/openbao/internal/helper/builtinplugins/registry.go
+    line: 147
+    codegraphId: method:df1edaefd7afbff8f01427741ebda7bb
+  - name: registry.DeprecationStatus
     kind: method
-    line: 152
-    name: registry.DeprecationStatus
     signature: (name string, pluginType consts.PluginType) (consts.DeprecationStatus,
       bool)
-realizedSpecHash: 8d6729833ef47315ed954bde365138d5015553fb0f185fbb242537626383f77f
-syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-syncedFingerprint: 3a0f837969b26b411b3f5e31306246b320d2c4babd5c89fbf796387025c7ffaf
+    file: third_party/openbao/internal/helper/builtinplugins/registry.go
+    line: 152
+    codegraphId: method:5202e75fa5e63c649bc628d07fd71ead
+  fingerprint: 3a0f837969b26b411b3f5e31306246b320d2c4babd5c89fbf796387025c7ffaf

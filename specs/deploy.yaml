@@ -1,29 +1,161 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:deploy/denojob-apiresourceschema.yaml denojob-apiresourceschema.yaml@deploy/denojob-apiresourceschema.yaml
-- file:deploy/denopod-apiresourceschema.yaml denopod-apiresourceschema.yaml@deploy/denopod-apiresourceschema.yaml
-- file:deploy/denorun-apiresourceschema.yaml denorun-apiresourceschema.yaml@deploy/denorun-apiresourceschema.yaml
-- file:deploy/denoruntime-apiexport.yaml denoruntime-apiexport.yaml@deploy/denoruntime-apiexport.yaml
-- file:deploy/openbao-apiresourceschema.yaml openbao-apiresourceschema.yaml@deploy/openbao-apiresourceschema.yaml
-- file:deploy/policyengine-apiresourceschema.yaml policyengine-apiresourceschema.yaml@deploy/policyengine-apiresourceschema.yaml
-- file:deploy/policyworkflowpod-apiresourceschema.yaml policyworkflowpod-apiresourceschema.yaml@deploy/policyworkflowpod-apiresourceschema.yaml
-- file:deploy/policyworkflowrun-apiexport.yaml policyworkflowrun-apiexport.yaml@deploy/policyworkflowrun-apiexport.yaml
-- file:deploy/policyworkflowrun-apiresourceschema.yaml policyworkflowrun-apiresourceschema.yaml@deploy/policyworkflowrun-apiresourceschema.yaml
-- file:deploy/runtrigger-apiresourceschema.yaml runtrigger-apiresourceschema.yaml@deploy/runtrigger-apiresourceschema.yaml
-- file:deploy/workspacetype-denoruntime.yaml workspacetype-denoruntime.yaml@deploy/workspacetype-denoruntime.yaml
-- file:deploy/workspacetype-workflow.yaml workspacetype-workflow.yaml@deploy/workspacetype-workflow.yaml
 kind: SystemContext
 metadata:
   name: deploy
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'This context exists so the deno.computer API surface can be installed into
+    a local kcp instance as declarative YAML: the APIResourceSchemas are the single
+    definition of each kind''s spec and status, the APIExports are what tenant workspaces
+    bind to, and the WorkspaceTypes are what gives a tenant workspace that binding
+    by default. Tooling and scripts consume these files by path, so the file names,
+    schema names, kind names, shortNames and phase enums are a contract and not decoration.'
+  requirements:
+  - id: r.api-group-version-scope
+    level: MUST
+    text: Every APIResourceSchema declares group deno.computer, scope Namespaced,
+      and a single v1alpha1 version that is both served and stored.
+    codeRefs:
+    - file:deploy/denojob-apiresourceschema.yaml
+    - file:deploy/denopod-apiresourceschema.yaml
+    - file:deploy/denorun-apiresourceschema.yaml
+    - file:deploy/openbao-apiresourceschema.yaml
+    - file:deploy/policyengine-apiresourceschema.yaml
+    - file:deploy/policyworkflowpod-apiresourceschema.yaml
+    - file:deploy/policyworkflowrun-apiresourceschema.yaml
+    - file:deploy/runtrigger-apiresourceschema.yaml
+  - id: r.apiexport-denoruntime
+    level: MUST
+    text: APIExport denoruntime lists denopods, denoruns, denojobs, runtriggers, policyengines,
+      policyworkflowpods and openbaos in group deno.computer, each pointing at its
+      versioned APIResourceSchema name with CRD storage.
+    codeRefs:
+    - file:deploy/denoruntime-apiexport.yaml
+  - id: r.apiexport-policyworkflowruns
+    level: MUST
+    text: APIExport policyworkflowruns publishes the single policyworkflowruns resource
+      in group deno.computer against schema v1alpha1-4.policyworkflowruns.deno.computer.
+    codeRefs:
+    - file:deploy/policyworkflowrun-apiexport.yaml
+  - id: r.names-block
+    level: MUST
+    text: 'Each schema spec.names declares kind, listKind, plural, singular and shortNames:
+      DenoPod/dpod, DenoRun/drun, DenoJob/djob, RunTrigger/rtrig, PolicyEngine/peng,
+      PolicyWorkflowPod/pwpod, PolicyWorkflowRun/pwr, OpenBao/obao.'
+    codeRefs:
+    - file:deploy/denojob-apiresourceschema.yaml
+    - file:deploy/denopod-apiresourceschema.yaml
+    - file:deploy/denorun-apiresourceschema.yaml
+    - file:deploy/openbao-apiresourceschema.yaml
+    - file:deploy/policyengine-apiresourceschema.yaml
+    - file:deploy/policyworkflowpod-apiresourceschema.yaml
+    - file:deploy/policyworkflowrun-apiresourceschema.yaml
+    - file:deploy/runtrigger-apiresourceschema.yaml
+  - id: r.phase-enums
+    level: MUST
+    text: 'Status phase enums are fixed per kind: DenoPod, DenoRun and DenoJob use
+      Pending/Running/Succeeded/Failed; RunTrigger uses Pending/Triggered/Skipped/Failed;
+      PolicyEngine and PolicyWorkflowPod use Pending/Running/Failed; PolicyWorkflowRun
+      uses Pending/Running/Succeeded/Failed/Cancelled; OpenBao carries no phase and
+      reports ready plus message instead.'
+    codeRefs:
+    - file:deploy/denojob-apiresourceschema.yaml
+    - file:deploy/denopod-apiresourceschema.yaml
+    - file:deploy/denorun-apiresourceschema.yaml
+    - file:deploy/openbao-apiresourceschema.yaml
+    - file:deploy/policyengine-apiresourceschema.yaml
+    - file:deploy/policyworkflowpod-apiresourceschema.yaml
+    - file:deploy/policyworkflowrun-apiresourceschema.yaml
+    - file:deploy/runtrigger-apiresourceschema.yaml
+  - id: r.required-spec-fields
+    level: MUST
+    text: 'Required spec fields are exactly: DenoPod script; DenoRun script; DenoJob
+      template; RunTrigger policyWorkflowPod and jobTemplate; PolicyWorkflowPod workflow
+      and policyEngine; OpenBao namespace. PolicyEngine and PolicyWorkflowRun declare
+      no required spec fields.'
+    codeRefs:
+    - file:deploy/denojob-apiresourceschema.yaml
+    - file:deploy/denopod-apiresourceschema.yaml
+    - file:deploy/denorun-apiresourceschema.yaml
+    - file:deploy/openbao-apiresourceschema.yaml
+    - file:deploy/policyengine-apiresourceschema.yaml
+    - file:deploy/policyworkflowpod-apiresourceschema.yaml
+    - file:deploy/policyworkflowrun-apiresourceschema.yaml
+    - file:deploy/runtrigger-apiresourceschema.yaml
+  - id: r.schema-names-versioned
+    level: MUST
+    text: 'Each schema metadata.name is the versioned resource string v1alpha1-N.<plural>.deno.computer,
+      with N unique per kind: openbaos 1, denoruns 2, policyengines 2, denopods 3,
+      runtriggers 3, denojobs 4, policyworkflowruns 4, policyworkflowpods 5.'
+    codeRefs:
+    - file:deploy/denojob-apiresourceschema.yaml
+    - file:deploy/denopod-apiresourceschema.yaml
+    - file:deploy/denorun-apiresourceschema.yaml
+    - file:deploy/openbao-apiresourceschema.yaml
+    - file:deploy/policyengine-apiresourceschema.yaml
+    - file:deploy/policyworkflowpod-apiresourceschema.yaml
+    - file:deploy/policyworkflowrun-apiresourceschema.yaml
+    - file:deploy/runtrigger-apiresourceschema.yaml
+  - id: r.status-conditions
+    level: SHOULD
+    text: Each kind's status carries a conditions array of objects with x-kubernetes-preserve-unknown-fields,
+      so standard condition sets can be added without a schema change.
+    codeRefs:
+    - file:deploy/denojob-apiresourceschema.yaml
+    - file:deploy/denopod-apiresourceschema.yaml
+    - file:deploy/denorun-apiresourceschema.yaml
+    - file:deploy/openbao-apiresourceschema.yaml
+    - file:deploy/policyengine-apiresourceschema.yaml
+    - file:deploy/policyworkflowpod-apiresourceschema.yaml
+    - file:deploy/policyworkflowrun-apiresourceschema.yaml
+    - file:deploy/runtrigger-apiresourceschema.yaml
+  - id: r.status-subresource
+    level: MUST
+    text: Every schema version enables subresources.status, so phase and conditions
+      are written by the provider and not by the tenant.
+    codeRefs:
+    - file:deploy/denojob-apiresourceschema.yaml
+    - file:deploy/denopod-apiresourceschema.yaml
+    - file:deploy/denorun-apiresourceschema.yaml
+    - file:deploy/openbao-apiresourceschema.yaml
+    - file:deploy/policyengine-apiresourceschema.yaml
+    - file:deploy/policyworkflowpod-apiresourceschema.yaml
+    - file:deploy/policyworkflowrun-apiresourceschema.yaml
+    - file:deploy/runtrigger-apiresourceschema.yaml
+  - id: r.validate-cross-check
+    level: SHOULD
+    text: 'The deploy manifests stay consistent with the Go types: validate.py maps
+      each sc.kind.* to its schema file and each APIExport to its export file, then
+      checks upstream api.short against names.shortNames[0], api.resource against
+      names.plural, and upstream phases and conditions against the Go Phase* and Condition*
+      constants.'
+    codeRefs:
+    - file:deploy/denoruntime-apiexport.yaml
+    - file:deploy/policyworkflowrun-apiexport.yaml
+  - id: r.workspacetype-denoruntime
+    level: MUST
+    text: WorkspaceType denoruntime extends workflow and universal from root and defaults
+      both API bindings, policyworkflowruns and denoruntime, at path root:deno-provider.
+    codeRefs:
+    - file:deploy/workspacetype-denoruntime.yaml
+  - id: r.workspacetype-workflow
+    level: MUST
+    text: WorkspaceType workflow extends universal from root and defaults the API
+      binding for export policyworkflowruns at path root:deno-provider.
+    codeRefs:
+    - file:deploy/workspacetype-workflow.yaml
   arch:
+    id: ov.apiexport-vw
+    kind: node
+    section: system_contexts
+    form: list
+    parent: sc.kcp.apiexport-vw
+    slot: overlay[1]
     code:
     - file:deploy/denoruntime-apiexport.yaml
     - file:deploy/policyworkflowrun-apiexport.yaml
-    form: list
-    id: ov.apiexport-vw
-    kind: node
     node:
       data:
         client_host: <endpoint url>/clusters/*
@@ -39,148 +171,16 @@ spec:
       - deploy/denoruntime-apiexport.yaml
       - deploy/policyworkflowrun-apiexport.yaml
       - internal/provider/watch.go
-    parent: sc.kcp.apiexport-vw
-    section: system_contexts
-    slot: overlay[1]
-  intent: 'This context exists so the deno.computer API surface can be installed into
-    a local kcp instance as declarative YAML: the APIResourceSchemas are the single
-    definition of each kind''s spec and status, the APIExports are what tenant workspaces
-    bind to, and the WorkspaceTypes are what gives a tenant workspace that binding
-    by default. Tooling and scripts consume these files by path, so the file names,
-    schema names, kind names, shortNames and phase enums are a contract and not decoration.'
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - file:deploy/denojob-apiresourceschema.yaml
-    - file:deploy/denopod-apiresourceschema.yaml
-    - file:deploy/denorun-apiresourceschema.yaml
-    - file:deploy/openbao-apiresourceschema.yaml
-    - file:deploy/policyengine-apiresourceschema.yaml
-    - file:deploy/policyworkflowpod-apiresourceschema.yaml
-    - file:deploy/policyworkflowrun-apiresourceschema.yaml
-    - file:deploy/runtrigger-apiresourceschema.yaml
-    id: r.api-group-version-scope
-    level: MUST
-    text: Every APIResourceSchema declares group deno.computer, scope Namespaced,
-      and a single v1alpha1 version that is both served and stored.
-  - codeRefs:
-    - file:deploy/denoruntime-apiexport.yaml
-    id: r.apiexport-denoruntime
-    level: MUST
-    text: APIExport denoruntime lists denopods, denoruns, denojobs, runtriggers, policyengines,
-      policyworkflowpods and openbaos in group deno.computer, each pointing at its
-      versioned APIResourceSchema name with CRD storage.
-  - codeRefs:
-    - file:deploy/policyworkflowrun-apiexport.yaml
-    id: r.apiexport-policyworkflowruns
-    level: MUST
-    text: APIExport policyworkflowruns publishes the single policyworkflowruns resource
-      in group deno.computer against schema v1alpha1-4.policyworkflowruns.deno.computer.
-  - codeRefs:
-    - file:deploy/denojob-apiresourceschema.yaml
-    - file:deploy/denopod-apiresourceschema.yaml
-    - file:deploy/denorun-apiresourceschema.yaml
-    - file:deploy/openbao-apiresourceschema.yaml
-    - file:deploy/policyengine-apiresourceschema.yaml
-    - file:deploy/policyworkflowpod-apiresourceschema.yaml
-    - file:deploy/policyworkflowrun-apiresourceschema.yaml
-    - file:deploy/runtrigger-apiresourceschema.yaml
-    id: r.names-block
-    level: MUST
-    text: 'Each schema spec.names declares kind, listKind, plural, singular and shortNames:
-      DenoPod/dpod, DenoRun/drun, DenoJob/djob, RunTrigger/rtrig, PolicyEngine/peng,
-      PolicyWorkflowPod/pwpod, PolicyWorkflowRun/pwr, OpenBao/obao.'
-  - codeRefs:
-    - file:deploy/denojob-apiresourceschema.yaml
-    - file:deploy/denopod-apiresourceschema.yaml
-    - file:deploy/denorun-apiresourceschema.yaml
-    - file:deploy/openbao-apiresourceschema.yaml
-    - file:deploy/policyengine-apiresourceschema.yaml
-    - file:deploy/policyworkflowpod-apiresourceschema.yaml
-    - file:deploy/policyworkflowrun-apiresourceschema.yaml
-    - file:deploy/runtrigger-apiresourceschema.yaml
-    id: r.phase-enums
-    level: MUST
-    text: 'Status phase enums are fixed per kind: DenoPod, DenoRun and DenoJob use
-      Pending/Running/Succeeded/Failed; RunTrigger uses Pending/Triggered/Skipped/Failed;
-      PolicyEngine and PolicyWorkflowPod use Pending/Running/Failed; PolicyWorkflowRun
-      uses Pending/Running/Succeeded/Failed/Cancelled; OpenBao carries no phase and
-      reports ready plus message instead.'
-  - codeRefs:
-    - file:deploy/denojob-apiresourceschema.yaml
-    - file:deploy/denopod-apiresourceschema.yaml
-    - file:deploy/denorun-apiresourceschema.yaml
-    - file:deploy/openbao-apiresourceschema.yaml
-    - file:deploy/policyengine-apiresourceschema.yaml
-    - file:deploy/policyworkflowpod-apiresourceschema.yaml
-    - file:deploy/policyworkflowrun-apiresourceschema.yaml
-    - file:deploy/runtrigger-apiresourceschema.yaml
-    id: r.required-spec-fields
-    level: MUST
-    text: 'Required spec fields are exactly: DenoPod script; DenoRun script; DenoJob
-      template; RunTrigger policyWorkflowPod and jobTemplate; PolicyWorkflowPod workflow
-      and policyEngine; OpenBao namespace. PolicyEngine and PolicyWorkflowRun declare
-      no required spec fields.'
-  - codeRefs:
-    - file:deploy/denojob-apiresourceschema.yaml
-    - file:deploy/denopod-apiresourceschema.yaml
-    - file:deploy/denorun-apiresourceschema.yaml
-    - file:deploy/openbao-apiresourceschema.yaml
-    - file:deploy/policyengine-apiresourceschema.yaml
-    - file:deploy/policyworkflowpod-apiresourceschema.yaml
-    - file:deploy/policyworkflowrun-apiresourceschema.yaml
-    - file:deploy/runtrigger-apiresourceschema.yaml
-    id: r.schema-names-versioned
-    level: MUST
-    text: 'Each schema metadata.name is the versioned resource string v1alpha1-N.<plural>.deno.computer,
-      with N unique per kind: openbaos 1, denoruns 2, policyengines 2, denopods 3,
-      runtriggers 3, denojobs 4, policyworkflowruns 4, policyworkflowpods 5.'
-  - codeRefs:
-    - file:deploy/denojob-apiresourceschema.yaml
-    - file:deploy/denopod-apiresourceschema.yaml
-    - file:deploy/denorun-apiresourceschema.yaml
-    - file:deploy/openbao-apiresourceschema.yaml
-    - file:deploy/policyengine-apiresourceschema.yaml
-    - file:deploy/policyworkflowpod-apiresourceschema.yaml
-    - file:deploy/policyworkflowrun-apiresourceschema.yaml
-    - file:deploy/runtrigger-apiresourceschema.yaml
-    id: r.status-conditions
-    level: SHOULD
-    text: Each kind's status carries a conditions array of objects with x-kubernetes-preserve-unknown-fields,
-      so standard condition sets can be added without a schema change.
-  - codeRefs:
-    - file:deploy/denojob-apiresourceschema.yaml
-    - file:deploy/denopod-apiresourceschema.yaml
-    - file:deploy/denorun-apiresourceschema.yaml
-    - file:deploy/openbao-apiresourceschema.yaml
-    - file:deploy/policyengine-apiresourceschema.yaml
-    - file:deploy/policyworkflowpod-apiresourceschema.yaml
-    - file:deploy/policyworkflowrun-apiresourceschema.yaml
-    - file:deploy/runtrigger-apiresourceschema.yaml
-    id: r.status-subresource
-    level: MUST
-    text: Every schema version enables subresources.status, so phase and conditions
-      are written by the provider and not by the tenant.
-  - codeRefs:
-    - file:deploy/denoruntime-apiexport.yaml
-    - file:deploy/policyworkflowrun-apiexport.yaml
-    id: r.validate-cross-check
-    level: SHOULD
-    text: 'The deploy manifests stay consistent with the Go types: validate.py maps
-      each sc.kind.* to its schema file and each APIExport to its export file, then
-      checks upstream api.short against names.shortNames[0], api.resource against
-      names.plural, and upstream phases and conditions against the Go Phase* and Condition*
-      constants.'
-  - codeRefs:
-    - file:deploy/workspacetype-denoruntime.yaml
-    id: r.workspacetype-denoruntime
-    level: MUST
-    text: WorkspaceType denoruntime extends workflow and universal from root and defaults
-      both API bindings, policyworkflowruns and denoruntime, at path root:deno-provider.
-  - codeRefs:
-    - file:deploy/workspacetype-workflow.yaml
-    id: r.workspacetype-workflow
-    level: MUST
-    text: WorkspaceType workflow extends universal from root and defaults the API
-      binding for export policyworkflowruns at path root:deno-provider.
-  upstream: self
+codeRefIndex:
+- file:deploy/denojob-apiresourceschema.yaml denojob-apiresourceschema.yaml@deploy/denojob-apiresourceschema.yaml
+- file:deploy/denopod-apiresourceschema.yaml denopod-apiresourceschema.yaml@deploy/denopod-apiresourceschema.yaml
+- file:deploy/denorun-apiresourceschema.yaml denorun-apiresourceschema.yaml@deploy/denorun-apiresourceschema.yaml
+- file:deploy/denoruntime-apiexport.yaml denoruntime-apiexport.yaml@deploy/denoruntime-apiexport.yaml
+- file:deploy/openbao-apiresourceschema.yaml openbao-apiresourceschema.yaml@deploy/openbao-apiresourceschema.yaml
+- file:deploy/policyengine-apiresourceschema.yaml policyengine-apiresourceschema.yaml@deploy/policyengine-apiresourceschema.yaml
+- file:deploy/policyworkflowpod-apiresourceschema.yaml policyworkflowpod-apiresourceschema.yaml@deploy/policyworkflowpod-apiresourceschema.yaml
+- file:deploy/policyworkflowrun-apiexport.yaml policyworkflowrun-apiexport.yaml@deploy/policyworkflowrun-apiexport.yaml
+- file:deploy/policyworkflowrun-apiresourceschema.yaml policyworkflowrun-apiresourceschema.yaml@deploy/policyworkflowrun-apiresourceschema.yaml
+- file:deploy/runtrigger-apiresourceschema.yaml runtrigger-apiresourceschema.yaml@deploy/runtrigger-apiresourceschema.yaml
+- file:deploy/workspacetype-denoruntime.yaml workspacetype-denoruntime.yaml@deploy/workspacetype-denoruntime.yaml
+- file:deploy/workspacetype-workflow.yaml workspacetype-workflow.yaml@deploy/workspacetype-workflow.yaml

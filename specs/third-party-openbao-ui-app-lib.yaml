@@ -1,4 +1,195 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-ui-app-lib
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'The context exists so the OpenBao UI console and capability wiring keep
+    one shared, testable implementation instead of logic duplicated inside components.
+    console-helpers.ts turns a typed command line into a method, path, flags and data,
+    executes it against injected command functions, and renders the result or error
+    for the console panel; parseCommand is the single gate that rejects unsupported
+    verbs. capabilities.js lets models declare capability-backed relationships declaratively
+    and then resolves them during JSON:API deserialization. The utility files exist
+    to serve those flows and the wider UI: tokenizing arguments, mapping keys to browser
+    keycodes, editing secret key/value pairs, building path trees for secret listings,
+    naming routes, and persisting tokens and other state across local storage, memory
+    storage and a token-specific store.'
+  requirements:
+  - id: r.arg-tokenizing
+    level: MUST
+    text: arg-tokenizer.js must export argTokenizer, the tokenizer parseCommand applies
+      to the parsed command line to produce the argument array it then splits into
+      method, path, flags and data.
+    codeRefs:
+    - file:third_party/openbao/ui/app/lib/arg-tokenizer.js
+    - function:bb893ad89e9b560c41c0475b947a3790
+  - id: r.capability-decorator
+    level: MUST
+    text: 'capability must return a property decorator that records the supplied template
+      function in the class''s relatedCapabilities map under the decorated property
+      name (creating that map when absent) and then applies belongsTo(''capabilities'',
+      { async: true, inverse: null }) to the property.'
+    codeRefs:
+    - file:third_party/openbao/ui/app/lib/capabilities.js
+    - function:aa199a2dd08646d7f4d49ea43394054f
+  - id: r.capability-relationships
+    level: MUST
+    text: addCapabilityRelationships must rewrite a JSON:API document so that every
+      declared capability in the capabilities map becomes a relationship of type 'capabilities'
+      whose id is the template function evaluated against the record context (id plus
+      attributes); it must recurse over array payloads, assert that each capability
+      value is a function with the message 'expected value of <name> to be a function
+      but found <type>.', and preserve the included member when the input carried
+      one.
+    codeRefs:
+    - file:third_party/openbao/ui/app/lib/capabilities.js
+    - function:f49f0a10d08ff839bef469674043b877
+  - id: r.console-command-parse
+    level: MUST
+    text: parseCommand must tokenize the raw command, drop a leading 'vault' or 'bao'
+      word, take the next token as the method, treat every later token starting with
+      '-' as a flag, take the first remaining non-flag token as the path, send every
+      further non-flag token to the data array after collapsing 'key=value' on the
+      first '=' and discarding empty split parts, and throw an Error with the message
+      'invalid command' when the method is not in supportedCommands.
+    codeRefs:
+    - file:third_party/openbao/ui/app/lib/console-helpers.ts
+    - function:bb893ad89e9b560c41c0475b947a3790
+  - id: r.console-data-extraction
+    level: MUST
+    text: extractDataFromStrings must return an empty object for missing input and
+      otherwise split each entry on the first '=', skip entries whose key is empty,
+      store the value (empty string when absent), and turn a repeated key into an
+      array that appends each later value.
+    codeRefs:
+    - file:third_party/openbao/ui/app/lib/console-helpers.ts
+    - function:8b4b12610ee75167ed0231e6992b193e
+  - id: r.console-error-logging
+    level: MUST
+    text: logFromError must build an error entry whose content names the vault path
+      and the verb clause chosen for the method (read, kv-get, write, list or delete),
+      appends the failing URL and HTTP status, and appends the joined error strings
+      when the first error is a string.
+    codeRefs:
+    - file:third_party/openbao/ui/app/lib/console-helpers.ts
+    - function:2168844ebbaa634936076f9249fdabb5
+  - id: r.console-flag-extraction
+    level: MUST
+    text: extractFlagsFromStrings must turn the raw flag tokens and the command method
+      into a Flags object that the console form can display and the request layer
+      can consume.
+    codeRefs:
+    - file:third_party/openbao/ui/app/lib/console-helpers.ts
+    - function:bff7baa2d52b0353ad5e2f16c5abab2e
+  - id: r.console-history-navigation
+    level: MUST
+    text: shiftCommandIndex must map a key code and the current position to the next
+      position in the command history log, so arrow-key navigation moves through previously
+      entered commands.
+    codeRefs:
+    - file:third_party/openbao/ui/app/lib/console-helpers.ts
+    - function:542d981636dbdfda76097facbd3abb14
+  - id: r.console-input-error-formatting
+    level: SHOULD
+    text: formattedErrorFromInput must produce the error output shown when a command
+      fails before a request is made, using the path, method, flags and data array
+      that the user typed.
+    codeRefs:
+    - file:third_party/openbao/ui/app/lib/console-helpers.ts
+    - function:435813ba50f28460ab1065f023b0bcb8
+  - id: r.console-response-logging
+    level: SHOULD
+    text: logFromResponse must format a console log entry from the API response together
+      with the request path, method and flags, so the console panel shows the result
+      of a successful command.
+    codeRefs:
+    - file:third_party/openbao/ui/app/lib/console-helpers.ts
+    - function:1f596e6119a3a455d61f7ae0fc8207aa
+  - id: r.console-ui-execution
+    level: MUST
+    text: executeUICommand must run the supplied command through the injected commandFns
+      and report with a boolean return whether the command was handled, while sending
+      all user-facing output through the injected logAndOutput callable.
+    codeRefs:
+    - file:third_party/openbao/ui/app/lib/console-helpers.ts
+    - function:83d46fae698e4b8ffd40b88724fb26f3
+  - id: r.key-utilities
+    level: MAY
+    text: key-utils.js and keycodes.js must provide the key handling helpers and key
+      code constants that UI components use to identify keyboard input, including
+      the key codes consumed by shiftCommandIndex.
+    codeRefs:
+    - file:third_party/openbao/ui/app/lib/key-utils.js
+    - file:third_party/openbao/ui/app/lib/keycodes.js
+    - function:542d981636dbdfda76097facbd3abb14
+  - id: r.route-paths
+    level: MAY
+    text: route-paths.js must define the shared UI route path strings so links and
+      redirects name the same route targets instead of repeating literals.
+    codeRefs:
+    - file:third_party/openbao/ui/app/lib/route-paths.js
+  - id: r.secret-object-and-tree
+    level: MAY
+    text: kv-object.js must model a secret's key/value pairs for UI editing, and path-to-tree.js
+      must turn a flat list of secret paths into the nested tree the list views render.
+    codeRefs:
+    - file:third_party/openbao/ui/app/lib/kv-object.js
+    - file:third_party/openbao/ui/app/lib/path-to-tree.js
+  - id: r.storage-adapters
+    level: SHOULD
+    text: local-storage.js, memory-storage.js and token-storage.js must supply the
+      interchangeable persistence adapters the UI uses for tokens and other state,
+      so storage can be swapped between the browser's local storage and an in-memory
+      store.
+    codeRefs:
+    - file:third_party/openbao/ui/app/lib/local-storage.js
+    - file:third_party/openbao/ui/app/lib/memory-storage.js
+    - file:third_party/openbao/ui/app/lib/token-storage.js
+  interfaces:
+  - name: addCapabilityRelationships
+    kind: function
+    signature: (capabilities, jsonAPIDoc)
+    file: third_party/openbao/ui/app/lib/capabilities.js
+  - name: capability
+    kind: function
+    signature: (templateFn)
+    file: third_party/openbao/ui/app/lib/capabilities.js
+  - name: executeUICommand
+    kind: function
+    signature: '(command: string, logAndOutput: CallableFunction, commandFns: CommandFns):
+      boolean'
+    file: third_party/openbao/ui/app/lib/console-helpers.ts
+  - name: extractDataFromStrings
+    kind: function
+    signature: '(dataArray: string[]): DataObj'
+    file: third_party/openbao/ui/app/lib/console-helpers.ts
+  - name: extractFlagsFromStrings
+    kind: function
+    signature: '(flagArray: string[], method: string): Flags'
+    file: third_party/openbao/ui/app/lib/console-helpers.ts
+  - name: formattedErrorFromInput
+    kind: function
+    signature: '(path: string, method: string, flags: Flags, dataArray: string[])'
+    file: third_party/openbao/ui/app/lib/console-helpers.ts
+  - name: logFromError
+    kind: function
+    signature: '(error: CustomError, vaultPath: string, method: string)'
+    file: third_party/openbao/ui/app/lib/console-helpers.ts
+  - name: logFromResponse
+    kind: function
+    signature: '(response: LogResponse, path: string, method: string, flags: Flags)'
+    file: third_party/openbao/ui/app/lib/console-helpers.ts
+  - name: parseCommand
+    kind: function
+    signature: '(command: string): ParsedCommand'
+    file: third_party/openbao/ui/app/lib/console-helpers.ts
+  - name: shiftCommandIndex
+    kind: function
+    signature: '(keyCode: number, history: CommandLog[], index: number)'
+    file: third_party/openbao/ui/app/lib/console-helpers.ts
 codeRefIndex:
 - file:third_party/openbao/ui/app/lib/arg-tokenizer.js arg-tokenizer.js@third_party/openbao/ui/app/lib/arg-tokenizer.js
 - file:third_party/openbao/ui/app/lib/capabilities.js capabilities.js@third_party/openbao/ui/app/lib/capabilities.js
@@ -21,194 +212,3 @@ codeRefIndex:
 - function:bb893ad89e9b560c41c0475b947a3790 parseCommand@third_party/openbao/ui/app/lib/console-helpers.ts:98
 - function:bff7baa2d52b0353ad5e2f16c5abab2e extractFlagsFromStrings@third_party/openbao/ui/app/lib/console-helpers.ts:49
 - function:f49f0a10d08ff839bef469674043b877 addCapabilityRelationships@third_party/openbao/ui/app/lib/capabilities.js:60
-kind: SystemContext
-metadata:
-  name: third-party-openbao-ui-app-lib
-  namespace: default
-spec:
-  intent: 'The context exists so the OpenBao UI console and capability wiring keep
-    one shared, testable implementation instead of logic duplicated inside components.
-    console-helpers.ts turns a typed command line into a method, path, flags and data,
-    executes it against injected command functions, and renders the result or error
-    for the console panel; parseCommand is the single gate that rejects unsupported
-    verbs. capabilities.js lets models declare capability-backed relationships declaratively
-    and then resolves them during JSON:API deserialization. The utility files exist
-    to serve those flows and the wider UI: tokenizing arguments, mapping keys to browser
-    keycodes, editing secret key/value pairs, building path trees for secret listings,
-    naming routes, and persisting tokens and other state across local storage, memory
-    storage and a token-specific store.'
-  interfaces:
-  - file: third_party/openbao/ui/app/lib/capabilities.js
-    kind: function
-    name: addCapabilityRelationships
-    signature: (capabilities, jsonAPIDoc)
-  - file: third_party/openbao/ui/app/lib/capabilities.js
-    kind: function
-    name: capability
-    signature: (templateFn)
-  - file: third_party/openbao/ui/app/lib/console-helpers.ts
-    kind: function
-    name: executeUICommand
-    signature: '(command: string, logAndOutput: CallableFunction, commandFns: CommandFns):
-      boolean'
-  - file: third_party/openbao/ui/app/lib/console-helpers.ts
-    kind: function
-    name: extractDataFromStrings
-    signature: '(dataArray: string[]): DataObj'
-  - file: third_party/openbao/ui/app/lib/console-helpers.ts
-    kind: function
-    name: extractFlagsFromStrings
-    signature: '(flagArray: string[], method: string): Flags'
-  - file: third_party/openbao/ui/app/lib/console-helpers.ts
-    kind: function
-    name: formattedErrorFromInput
-    signature: '(path: string, method: string, flags: Flags, dataArray: string[])'
-  - file: third_party/openbao/ui/app/lib/console-helpers.ts
-    kind: function
-    name: logFromError
-    signature: '(error: CustomError, vaultPath: string, method: string)'
-  - file: third_party/openbao/ui/app/lib/console-helpers.ts
-    kind: function
-    name: logFromResponse
-    signature: '(response: LogResponse, path: string, method: string, flags: Flags)'
-  - file: third_party/openbao/ui/app/lib/console-helpers.ts
-    kind: function
-    name: parseCommand
-    signature: '(command: string): ParsedCommand'
-  - file: third_party/openbao/ui/app/lib/console-helpers.ts
-    kind: function
-    name: shiftCommandIndex
-    signature: '(keyCode: number, history: CommandLog[], index: number)'
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - file:third_party/openbao/ui/app/lib/arg-tokenizer.js
-    - function:bb893ad89e9b560c41c0475b947a3790
-    id: r.arg-tokenizing
-    level: MUST
-    text: arg-tokenizer.js must export argTokenizer, the tokenizer parseCommand applies
-      to the parsed command line to produce the argument array it then splits into
-      method, path, flags and data.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/lib/capabilities.js
-    - function:aa199a2dd08646d7f4d49ea43394054f
-    id: r.capability-decorator
-    level: MUST
-    text: 'capability must return a property decorator that records the supplied template
-      function in the class''s relatedCapabilities map under the decorated property
-      name (creating that map when absent) and then applies belongsTo(''capabilities'',
-      { async: true, inverse: null }) to the property.'
-  - codeRefs:
-    - file:third_party/openbao/ui/app/lib/capabilities.js
-    - function:f49f0a10d08ff839bef469674043b877
-    id: r.capability-relationships
-    level: MUST
-    text: addCapabilityRelationships must rewrite a JSON:API document so that every
-      declared capability in the capabilities map becomes a relationship of type 'capabilities'
-      whose id is the template function evaluated against the record context (id plus
-      attributes); it must recurse over array payloads, assert that each capability
-      value is a function with the message 'expected value of <name> to be a function
-      but found <type>.', and preserve the included member when the input carried
-      one.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/lib/console-helpers.ts
-    - function:bb893ad89e9b560c41c0475b947a3790
-    id: r.console-command-parse
-    level: MUST
-    text: parseCommand must tokenize the raw command, drop a leading 'vault' or 'bao'
-      word, take the next token as the method, treat every later token starting with
-      '-' as a flag, take the first remaining non-flag token as the path, send every
-      further non-flag token to the data array after collapsing 'key=value' on the
-      first '=' and discarding empty split parts, and throw an Error with the message
-      'invalid command' when the method is not in supportedCommands.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/lib/console-helpers.ts
-    - function:8b4b12610ee75167ed0231e6992b193e
-    id: r.console-data-extraction
-    level: MUST
-    text: extractDataFromStrings must return an empty object for missing input and
-      otherwise split each entry on the first '=', skip entries whose key is empty,
-      store the value (empty string when absent), and turn a repeated key into an
-      array that appends each later value.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/lib/console-helpers.ts
-    - function:2168844ebbaa634936076f9249fdabb5
-    id: r.console-error-logging
-    level: MUST
-    text: logFromError must build an error entry whose content names the vault path
-      and the verb clause chosen for the method (read, kv-get, write, list or delete),
-      appends the failing URL and HTTP status, and appends the joined error strings
-      when the first error is a string.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/lib/console-helpers.ts
-    - function:bff7baa2d52b0353ad5e2f16c5abab2e
-    id: r.console-flag-extraction
-    level: MUST
-    text: extractFlagsFromStrings must turn the raw flag tokens and the command method
-      into a Flags object that the console form can display and the request layer
-      can consume.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/lib/console-helpers.ts
-    - function:542d981636dbdfda76097facbd3abb14
-    id: r.console-history-navigation
-    level: MUST
-    text: shiftCommandIndex must map a key code and the current position to the next
-      position in the command history log, so arrow-key navigation moves through previously
-      entered commands.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/lib/console-helpers.ts
-    - function:435813ba50f28460ab1065f023b0bcb8
-    id: r.console-input-error-formatting
-    level: SHOULD
-    text: formattedErrorFromInput must produce the error output shown when a command
-      fails before a request is made, using the path, method, flags and data array
-      that the user typed.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/lib/console-helpers.ts
-    - function:1f596e6119a3a455d61f7ae0fc8207aa
-    id: r.console-response-logging
-    level: SHOULD
-    text: logFromResponse must format a console log entry from the API response together
-      with the request path, method and flags, so the console panel shows the result
-      of a successful command.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/lib/console-helpers.ts
-    - function:83d46fae698e4b8ffd40b88724fb26f3
-    id: r.console-ui-execution
-    level: MUST
-    text: executeUICommand must run the supplied command through the injected commandFns
-      and report with a boolean return whether the command was handled, while sending
-      all user-facing output through the injected logAndOutput callable.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/lib/key-utils.js
-    - file:third_party/openbao/ui/app/lib/keycodes.js
-    - function:542d981636dbdfda76097facbd3abb14
-    id: r.key-utilities
-    level: MAY
-    text: key-utils.js and keycodes.js must provide the key handling helpers and key
-      code constants that UI components use to identify keyboard input, including
-      the key codes consumed by shiftCommandIndex.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/lib/route-paths.js
-    id: r.route-paths
-    level: MAY
-    text: route-paths.js must define the shared UI route path strings so links and
-      redirects name the same route targets instead of repeating literals.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/lib/kv-object.js
-    - file:third_party/openbao/ui/app/lib/path-to-tree.js
-    id: r.secret-object-and-tree
-    level: MAY
-    text: kv-object.js must model a secret's key/value pairs for UI editing, and path-to-tree.js
-      must turn a flat list of secret paths into the nested tree the list views render.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/lib/local-storage.js
-    - file:third_party/openbao/ui/app/lib/memory-storage.js
-    - file:third_party/openbao/ui/app/lib/token-storage.js
-    id: r.storage-adapters
-    level: SHOULD
-    text: local-storage.js, memory-storage.js and token-storage.js must supply the
-      interchangeable persistence adapters the UI uses for tokens and other state,
-      so storage can be swapped between the browser's local storage and an in-memory
-      store.
-  upstream: self

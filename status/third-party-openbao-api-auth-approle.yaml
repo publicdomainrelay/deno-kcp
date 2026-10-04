@@ -1,62 +1,62 @@
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 0f78bb3e819e8f0d381000efd590bc490d15fad3942337dd0fabafccf6fa1135
+realizedSpecHash: c38aac068f5804b32b27be3787e978108aee3dd9b6e7b001bff7cf8a132c2265
 conditions:
-- message: 'missing: AppRoleAuth.readSecretIDFromFile, SecretID.validate'
+- type: CodeSynced
+  status: "False"
   reason: InterfacesMissing
+  message: 'missing: AppRoleAuth.readSecretIDFromFile, SecretID.validate'
+- type: Drifted
   status: "False"
-  type: CodeSynced
-- message: observed facts match the synced fingerprint
   reason: FingerprintEqual
-  status: "False"
-  type: Drifted
-- message: the spec passes the validator
-  reason: ValidatorPassed
+  message: observed facts match the synced fingerprint
+- type: SpecValid
   status: "True"
-  type: SpecValid
+  reason: ValidatorPassed
+  message: the spec passes the validator
 observed:
   files:
   - third_party/openbao/api/auth/approle/approle.go
   - third_party/openbao/api/auth/approle/approle_test.go
-  fingerprint: 0f78bb3e819e8f0d381000efd590bc490d15fad3942337dd0fabafccf6fa1135
   interfaces:
-  - codegraphId: struct:c3b9a9c281a7dab56060d3c1d0f103f3
-    file: third_party/openbao/api/auth/approle/approle.go
+  - name: AppRoleAuth
     kind: struct
+    file: third_party/openbao/api/auth/approle/approle.go
     line: 17
-    name: AppRoleAuth
-  - codegraphId: struct:fdf7d8abfcfc08357b55b8a35bd83ff6
-    file: third_party/openbao/api/auth/approle/approle.go
+    codegraphId: struct:c3b9a9c281a7dab56060d3c1d0f103f3
+  - name: SecretID
     kind: struct
+    file: third_party/openbao/api/auth/approle/approle.go
     line: 33
-    name: SecretID
-  - codegraphId: type_alias:de2ec0e4cb842660b1b1f573ff29926d
-    file: third_party/openbao/api/auth/approle/approle.go
+    codegraphId: struct:fdf7d8abfcfc08357b55b8a35bd83ff6
+  - name: LoginOption
     kind: type_alias
-    line: 43
-    name: LoginOption
-  - codegraphId: function:0c0251b3ee8a686ab995281e430c7e47
     file: third_party/openbao/api/auth/approle/approle.go
+    line: 43
+    codegraphId: type_alias:de2ec0e4cb842660b1b1f573ff29926d
+  - name: NewAppRoleAuth
     kind: function
-    line: 60
-    name: NewAppRoleAuth
     signature: (roleID string, secretID *SecretID, opts ...LoginOption) (*AppRoleAuth,
       error)
-  - codegraphId: method:4a1253c4affe90d74083c66b48949310
     file: third_party/openbao/api/auth/approle/approle.go
+    line: 60
+    codegraphId: function:0c0251b3ee8a686ab995281e430c7e47
+  - name: AppRoleAuth.Login
     kind: method
-    line: 106
-    name: AppRoleAuth.Login
     signature: (ctx context.Context, client *api.Client) (*api.Secret, error)
-  - codegraphId: function:b150309c06eb8e362fc9a3720b1bbc68
     file: third_party/openbao/api/auth/approle/approle.go
+    line: 106
+    codegraphId: method:4a1253c4affe90d74083c66b48949310
+  - name: WithMountPath
     kind: function
-    line: 154
-    name: WithMountPath
     signature: (mountPath string) LoginOption
-  - codegraphId: function:cf9e6e345dad7784ebf823bf8dc110b4
     file: third_party/openbao/api/auth/approle/approle.go
+    line: 154
+    codegraphId: function:b150309c06eb8e362fc9a3720b1bbc68
+  - name: WithWrappingToken
     kind: function
-    line: 161
-    name: WithWrappingToken
     signature: () LoginOption
-realizedSpecHash: c38aac068f5804b32b27be3787e978108aee3dd9b6e7b001bff7cf8a132c2265
-syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-syncedFingerprint: 0f78bb3e819e8f0d381000efd590bc490d15fad3942337dd0fabafccf6fa1135
+    file: third_party/openbao/api/auth/approle/approle.go
+    line: 161
+    codegraphId: function:cf9e6e345dad7784ebf823bf8dc110b4
+  fingerprint: 0f78bb3e819e8f0d381000efd590bc490d15fad3942337dd0fabafccf6fa1135

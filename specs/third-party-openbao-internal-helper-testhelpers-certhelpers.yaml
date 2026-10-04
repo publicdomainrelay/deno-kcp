@@ -1,4 +1,155 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-internal-helper-testhelpers-certhelpers
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'This context exists so tests across the OpenBao tree can mint certificates
+    without hand-rolling crypto: a builder plus functional options gives one call
+    site per test, with sensible expiry, key usage and CA/leaf defaults, and fatal
+    test errors instead of returned errors. The spec records that option-modelled
+    construction surface and the defaults NewCert applies so the helper can be reimplemented
+    or consumed without guessing.'
+  requirements:
+  - id: r.ca-key-usage
+    level: MUST
+    text: 'The IsCA option selects CA mode at signing time: when isCA is true the
+      template gets IsCA true, KeyUsage KeyUsageCertSign|KeyUsageCRLSign and nil ExtKeyUsage;
+      when false it gets KeyUsageDigitalSignature|KeyUsageKeyEncipherment|KeyUsageKeyAgreement
+      and ExtKeyUsage of ExtKeyUsageServerAuth and ExtKeyUsageClientAuth.'
+    codeRefs:
+    - function:ba14bfcf89be60541e660e91618adde5
+    - function:e7d25a125028fef3c7ce142e78914556
+  - id: r.common-name-option
+    level: MUST
+    text: 'The CommonName option writes its argument into the template subject: builder.tmpl.Subject.CommonName
+      = cn, and returns nil.'
+    codeRefs:
+    - function:da8e2a9ace006853fdc96ae3cd8b0522
+    - struct:576e3ddf52962507a08e20c949294f33
+  - id: r.functional-option-type
+    level: MUST
+    text: 'CertOpt is a functional option: a function taking *CertBuilder and returning
+      error. NewCert applies every supplied option in order against the builder and
+      calls t.Fatalf("Failed to set up certificate builder: %s", err) when an option
+      returns an error, so a bad option aborts the test rather than yielding a partial
+      certificate.'
+    codeRefs:
+    - function:ba14bfcf89be60541e660e91618adde5
+    - struct:576e3ddf52962507a08e20c949294f33
+    - type_alias:58ce3dbc3f3f3df27d047a4a912f1cc3
+  - id: r.parent-option
+    level: MUST
+    text: The Parent option takes an already-built Certificate, copies that certificate's
+      private key into builder.parentKey and its template into builder.parentTmpl,
+      so the new certificate is signed by the given parent.
+    codeRefs:
+    - function:2d3e71f42de5bb606c06078e564f8379
+    - struct:4db8c96e0691cdb162f1ff6ace58b44b
+    - struct:50fe4797bed2b9be3b54634e6bc67ca0
+  - id: r.pem-accessors
+    level: MUST
+    text: 'The returned Certificate exposes its material as PEM byte slices: CombinedPEM
+      returns certificate and private key combined, PrivateKeyPEM returns the private
+      key alone.'
+    codeRefs:
+    - method:43ebb92b6c0a8befd331a9e064f87241
+    - method:d2ffb05b814d24a1181c39c645216b13
+    - struct:50fe4797bed2b9be3b54634e6bc67ca0
+  - id: r.private-key-generation
+    level: MUST
+    text: NewPrivateKey generates a fresh private key for the test, returns it wrapped
+      in a KeyWrapper, and calls t.Fatal on generation failure; NewCert always generates
+      its key through it.
+    codeRefs:
+    - function:ba14bfcf89be60541e660e91618adde5
+    - function:f6820c0de554a96474cd1033517b2aa3
+    - struct:4db8c96e0691cdb162f1ff6ace58b44b
+  - id: r.self-sign-option
+    level: MUST
+    text: The SelfSign option sets the builder's selfSign flag; when set, NewCert
+      overrides both parent and signing key so the certificate's own template is the
+      parent and the newly generated private key is the signing key.
+    codeRefs:
+    - function:790cd7f7c5568c8259fc5eae54c9b02d
+    - function:ba14bfcf89be60541e660e91618adde5
+    - struct:576e3ddf52962507a08e20c949294f33
+  - id: r.subject-alternative-names
+    level: SHOULD
+    text: The IP and DNS options are variadic string options that record additional
+      subject alternative names for the certificate being built.
+    codeRefs:
+    - function:a4f577e331cf0b11e3543d87d3db2d15
+    - function:c6b33833eae21a3f06ab755ecbe53241
+  - id: r.template-defaults
+    level: MUST
+    text: NewCert starts from an x509.Certificate template with a generated serial
+      number, a generated common name, NotBefore one hour in the past and NotAfter
+      one hour in the future, IsCA false, BasicConstraintsValid true, and it sets
+      SubjectKeyId from the public key of the freshly generated private key before
+      signing.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
+    - function:ba14bfcf89be60541e660e91618adde5
+  interfaces:
+  - name: CertBuilder
+    kind: struct
+    signature: type CertBuilder struct
+    file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
+  - name: CertOpt
+    kind: type_alias
+    signature: type CertOpt func(*CertBuilder) error
+    file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
+  - name: Certificate
+    kind: struct
+    signature: type Certificate struct
+    file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
+  - name: Certificate.CombinedPEM
+    kind: method
+    signature: func (c Certificate) CombinedPEM() []byte
+    file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
+  - name: Certificate.PrivateKeyPEM
+    kind: method
+    signature: func (c Certificate) PrivateKeyPEM() []byte
+    file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
+  - name: CommonName
+    kind: function
+    signature: func CommonName(cn string) CertOpt
+    file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
+  - name: DNS
+    kind: function
+    signature: func DNS(dns ...string) CertOpt
+    file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
+  - name: IP
+    kind: function
+    signature: func IP(ip ...string) CertOpt
+    file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
+  - name: IsCA
+    kind: function
+    signature: func IsCA(isCA bool) CertOpt
+    file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
+  - name: KeyWrapper
+    kind: struct
+    signature: type KeyWrapper struct
+    file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
+  - name: NewCert
+    kind: function
+    signature: func NewCert(t *testing.T, opts ...CertOpt) (cert Certificate)
+    file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
+  - name: NewPrivateKey
+    kind: function
+    signature: func NewPrivateKey(t *testing.T) (key KeyWrapper)
+    file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
+  - name: Parent
+    kind: function
+    signature: func Parent(parent Certificate) CertOpt
+    file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
+  - name: SelfSign
+    kind: function
+    signature: func SelfSign() CertOpt
+    file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
 codeRefIndex:
 - file:third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
   cert_helpers.go@third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
@@ -16,154 +167,3 @@ codeRefIndex:
 - struct:50fe4797bed2b9be3b54634e6bc67ca0 Certificate@third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go:192
 - struct:576e3ddf52962507a08e20c949294f33 CertBuilder@third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go:23
 - type_alias:58ce3dbc3f3f3df27d047a4a912f1cc3 CertOpt@third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go:33
-kind: SystemContext
-metadata:
-  name: third-party-openbao-internal-helper-testhelpers-certhelpers
-  namespace: default
-spec:
-  intent: 'This context exists so tests across the OpenBao tree can mint certificates
-    without hand-rolling crypto: a builder plus functional options gives one call
-    site per test, with sensible expiry, key usage and CA/leaf defaults, and fatal
-    test errors instead of returned errors. The spec records that option-modelled
-    construction surface and the defaults NewCert applies so the helper can be reimplemented
-    or consumed without guessing.'
-  interfaces:
-  - file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
-    kind: struct
-    name: CertBuilder
-    signature: type CertBuilder struct
-  - file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
-    kind: type_alias
-    name: CertOpt
-    signature: type CertOpt func(*CertBuilder) error
-  - file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
-    kind: struct
-    name: Certificate
-    signature: type Certificate struct
-  - file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
-    kind: method
-    name: Certificate.CombinedPEM
-    signature: func (c Certificate) CombinedPEM() []byte
-  - file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
-    kind: method
-    name: Certificate.PrivateKeyPEM
-    signature: func (c Certificate) PrivateKeyPEM() []byte
-  - file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
-    kind: function
-    name: CommonName
-    signature: func CommonName(cn string) CertOpt
-  - file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
-    kind: function
-    name: DNS
-    signature: func DNS(dns ...string) CertOpt
-  - file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
-    kind: function
-    name: IP
-    signature: func IP(ip ...string) CertOpt
-  - file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
-    kind: function
-    name: IsCA
-    signature: func IsCA(isCA bool) CertOpt
-  - file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
-    kind: struct
-    name: KeyWrapper
-    signature: type KeyWrapper struct
-  - file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
-    kind: function
-    name: NewCert
-    signature: func NewCert(t *testing.T, opts ...CertOpt) (cert Certificate)
-  - file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
-    kind: function
-    name: NewPrivateKey
-    signature: func NewPrivateKey(t *testing.T) (key KeyWrapper)
-  - file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
-    kind: function
-    name: Parent
-    signature: func Parent(parent Certificate) CertOpt
-  - file: third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
-    kind: function
-    name: SelfSign
-    signature: func SelfSign() CertOpt
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - function:ba14bfcf89be60541e660e91618adde5
-    - function:e7d25a125028fef3c7ce142e78914556
-    id: r.ca-key-usage
-    level: MUST
-    text: 'The IsCA option selects CA mode at signing time: when isCA is true the
-      template gets IsCA true, KeyUsage KeyUsageCertSign|KeyUsageCRLSign and nil ExtKeyUsage;
-      when false it gets KeyUsageDigitalSignature|KeyUsageKeyEncipherment|KeyUsageKeyAgreement
-      and ExtKeyUsage of ExtKeyUsageServerAuth and ExtKeyUsageClientAuth.'
-  - codeRefs:
-    - function:da8e2a9ace006853fdc96ae3cd8b0522
-    - struct:576e3ddf52962507a08e20c949294f33
-    id: r.common-name-option
-    level: MUST
-    text: 'The CommonName option writes its argument into the template subject: builder.tmpl.Subject.CommonName
-      = cn, and returns nil.'
-  - codeRefs:
-    - function:ba14bfcf89be60541e660e91618adde5
-    - struct:576e3ddf52962507a08e20c949294f33
-    - type_alias:58ce3dbc3f3f3df27d047a4a912f1cc3
-    id: r.functional-option-type
-    level: MUST
-    text: 'CertOpt is a functional option: a function taking *CertBuilder and returning
-      error. NewCert applies every supplied option in order against the builder and
-      calls t.Fatalf("Failed to set up certificate builder: %s", err) when an option
-      returns an error, so a bad option aborts the test rather than yielding a partial
-      certificate.'
-  - codeRefs:
-    - function:2d3e71f42de5bb606c06078e564f8379
-    - struct:4db8c96e0691cdb162f1ff6ace58b44b
-    - struct:50fe4797bed2b9be3b54634e6bc67ca0
-    id: r.parent-option
-    level: MUST
-    text: The Parent option takes an already-built Certificate, copies that certificate's
-      private key into builder.parentKey and its template into builder.parentTmpl,
-      so the new certificate is signed by the given parent.
-  - codeRefs:
-    - method:43ebb92b6c0a8befd331a9e064f87241
-    - method:d2ffb05b814d24a1181c39c645216b13
-    - struct:50fe4797bed2b9be3b54634e6bc67ca0
-    id: r.pem-accessors
-    level: MUST
-    text: 'The returned Certificate exposes its material as PEM byte slices: CombinedPEM
-      returns certificate and private key combined, PrivateKeyPEM returns the private
-      key alone.'
-  - codeRefs:
-    - function:ba14bfcf89be60541e660e91618adde5
-    - function:f6820c0de554a96474cd1033517b2aa3
-    - struct:4db8c96e0691cdb162f1ff6ace58b44b
-    id: r.private-key-generation
-    level: MUST
-    text: NewPrivateKey generates a fresh private key for the test, returns it wrapped
-      in a KeyWrapper, and calls t.Fatal on generation failure; NewCert always generates
-      its key through it.
-  - codeRefs:
-    - function:790cd7f7c5568c8259fc5eae54c9b02d
-    - function:ba14bfcf89be60541e660e91618adde5
-    - struct:576e3ddf52962507a08e20c949294f33
-    id: r.self-sign-option
-    level: MUST
-    text: The SelfSign option sets the builder's selfSign flag; when set, NewCert
-      overrides both parent and signing key so the certificate's own template is the
-      parent and the newly generated private key is the signing key.
-  - codeRefs:
-    - function:a4f577e331cf0b11e3543d87d3db2d15
-    - function:c6b33833eae21a3f06ab755ecbe53241
-    id: r.subject-alternative-names
-    level: SHOULD
-    text: The IP and DNS options are variadic string options that record additional
-      subject alternative names for the certificate being built.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/testhelpers/certhelpers/cert_helpers.go
-    - function:ba14bfcf89be60541e660e91618adde5
-    id: r.template-defaults
-    level: MUST
-    text: NewCert starts from an x509.Certificate template with a generated serial
-      number, a generated common name, NotBefore one hour in the past and NotAfter
-      one hour in the future, IsCA false, BasicConstraintsValid true, and it sets
-      SubjectKeyId from the public key of the freshly generated private key before
-      signing.
-  upstream: self

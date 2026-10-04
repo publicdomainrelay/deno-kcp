@@ -1,39 +1,39 @@
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 8e264fc8e6f970df3e348903c8f2a7715611dd877f9d77f860b0f2c7de5e5aff
+realizedSpecHash: 5e201cddf3b5971b5d681e4e035b64777c56245eda6bfc2938be012824ee2810
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
+- type: CodeSynced
+  status: "True"
   reason: InterfacesObserved
-  status: "True"
-  type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+  message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+- type: Drifted
   status: "False"
-  type: Drifted
-- message: the spec passes the validator
-  reason: ValidatorPassed
+  reason: FingerprintEqual
+  message: observed facts match the synced fingerprint
+- type: SpecValid
   status: "True"
-  type: SpecValid
+  reason: ValidatorPassed
+  message: the spec passes the validator
 observed:
   files:
   - third_party/openbao/internal/helper/testhelpers/mysql/mysqlhelper.go
-  fingerprint: 8e264fc8e6f970df3e348903c8f2a7715611dd877f9d77f860b0f2c7de5e5aff
   interfaces:
-  - codegraphId: struct:f5374581f30f9f80a49e719a95f6d25f
-    file: third_party/openbao/internal/helper/testhelpers/mysql/mysqlhelper.go
+  - name: Config
     kind: struct
+    file: third_party/openbao/internal/helper/testhelpers/mysql/mysqlhelper.go
     line: 17
-    name: Config
-  - codegraphId: function:5bb34b89c4a7b9aafbb8201734a768a5
-    file: third_party/openbao/internal/helper/testhelpers/mysql/mysqlhelper.go
+    codegraphId: struct:f5374581f30f9f80a49e719a95f6d25f
+  - name: PrepareTestContainer
     kind: function
-    line: 24
-    name: PrepareTestContainer
     signature: (t *testing.T, legacy bool, pw string) (func(), string)
-  - codegraphId: function:49b703949fe78718321a963bd7dc8e5f
     file: third_party/openbao/internal/helper/testhelpers/mysql/mysqlhelper.go
+    line: 24
+    codegraphId: function:5bb34b89c4a7b9aafbb8201734a768a5
+  - name: TestCredsExist
     kind: function
-    line: 65
-    name: TestCredsExist
     signature: (t testing.TB, connURL, username, password string) error
-realizedSpecHash: 5e201cddf3b5971b5d681e4e035b64777c56245eda6bfc2938be012824ee2810
-syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-syncedFingerprint: 8e264fc8e6f970df3e348903c8f2a7715611dd877f9d77f860b0f2c7de5e5aff
+    file: third_party/openbao/internal/helper/testhelpers/mysql/mysqlhelper.go
+    line: 65
+    codegraphId: function:49b703949fe78718321a963bd7dc8e5f
+  fingerprint: 8e264fc8e6f970df3e348903c8f2a7715611dd877f9d77f860b0f2c7de5e5aff

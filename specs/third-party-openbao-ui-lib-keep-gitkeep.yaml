@@ -1,56 +1,56 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/ui/lib/keep-gitkeep/index.js index.js@third_party/openbao/ui/lib/keep-gitkeep/index.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-lib-keep-gitkeep
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: Provide a durable placeholder mechanism so that the gitignored OpenBao/Vault
     web UI output directory is still tracked in git as a directory. The addon hooks
     into the Ember build pipeline and recreates an empty .gitkeep in the build output
     directory on every build, which matters because git cannot track empty directories
     and the downstream Go build expects that folder structure to exist.
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/ui/lib/keep-gitkeep/index.js
-    id: r.addon-name-from-package
+  - id: r.addon-name-from-package
     level: MUST
     text: The exported addon's name must be read from the addon's own package.json
       rather than hard-coded, so the addon registers under the name declared by its
       package metadata.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/keep-gitkeep/index.js
-    id: r.developing-addon-true
+  - id: r.developing-addon-true
     level: MUST
     text: isDevelopingAddon must return true, which keeps this vendored placeholder
       addon treated as an in-development addon during the build.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/keep-gitkeep/index.js
-    id: r.no-other-side-effects
+  - id: r.no-other-side-effects
     level: SHOULD
     text: The addon must not perform any file write or other side effect outside postBuild,
       so the only effect of including it in the UI build is the .gitkeep placeholder.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/keep-gitkeep/index.js
-    id: r.strict-mode-commonjs
+  - id: r.strict-mode-commonjs
     level: SHOULD
     text: The module must remain a strict-mode CommonJS module that exports a single
       addon object via module.exports, matching the Ember CLI addon contract used
       by the rest of the vendored OpenBao UI libraries.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/keep-gitkeep/index.js
-    id: r.vendored-license-header
+  - id: r.vendored-license-header
     level: MUST
     text: The file must retain the HashiCorp copyright notice and the SPDX-License-Identifier
       MPL-2.0 header, because this is vendored third-party code and the license attribution
       must not be stripped.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/keep-gitkeep/index.js
-    id: r.write-gitkeep-after-build
+  - id: r.write-gitkeep-after-build
     level: MUST
     text: After the UI build completes, the addon must synchronously write an empty
       .gitkeep file into the build result directory, so that the gitignored output
       folder structure survives into a published or packaged build.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/ui/lib/keep-gitkeep/index.js
+codeRefIndex:
+- file:third_party/openbao/ui/lib/keep-gitkeep/index.js index.js@third_party/openbao/ui/lib/keep-gitkeep/index.js

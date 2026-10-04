@@ -1,4 +1,202 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-internal-builtin-plugin
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: This context exists so OpenBao can mount a plugin as a builtin logical backend
+    without paying plugin startup cost until the mount is first used. It resolves
+    a plugin by name, type and version from the backend config, validates at load
+    time that the lazily started plugin still matches the type and special paths observed
+    in metadata mode, and survives plugin crashes by relaunching and retrying the
+    failed method exactly once.
+  requirements:
+  - id: r.config-stored-for-deferred-start
+    level: MUST
+    text: Backend must store the passed logical.BackendConfig on the returned PluginBackend
+      as config, because startBackend later reads plugin_name, plugin_type, plugin_version
+      and System from it instead of from the caller.
+    codeRefs:
+    - function:279285827f28c5fefc4e75c39b7fc39b
+    - struct:aac12544428d4d44fc72971986a2d518
+  - id: r.initialize-deferred
+    level: MUST
+    text: PluginBackend.Initialize must be a no-op returning nil, because startBackend
+      calls the real backend Initialize explicitly with a logical.InitializationRequest
+      carrying the request storage after the plugin process starts.
+    codeRefs:
+    - method:9eff9c5894c27395cd43737fb5d364a4
+    - struct:aac12544428d4d44fc72971986a2d518
+  - id: r.lazy-load-on-request
+    level: MUST
+    text: HandleRequest and HandleExistenceCheck must route through lazyLoadBackend,
+      which takes the read lock, starts the plugin only when loaded is false, releases
+      the read lock, takes the write lock, re-checks loaded after the lock upgrade
+      so concurrent first requests start the plugin once, then runs the method wrapper.
+    codeRefs:
+    - method:25485adf3c6948547038555a16260759
+    - method:e9311d1022b961fc21571d99db324f56
+    - struct:aac12544428d4d44fc72971986a2d518
+  - id: r.lazy-load-test-contract
+    level: SHOULD
+    text: TestBackend_lazyLoad must show that a normal lazy load invokes the method
+      wrapper once and leaves canary empty, that a wrapper returning plugin.ErrPluginShutdown
+      invokes it twice and leaves a non-empty canary, and that the replaced placeholder
+      is cleaned but never set up or initialized while the newly started backend is
+      set up and initialized.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/plugin/backend_lazyLoad_test.go
+  - id: r.metadata-mode-probe
+    level: MUST
+    text: Backend must start the plugin with bplugin.NewBackendWithVersion in metadata
+      mode (isMetadataMode true) using plugin_name, the parsed type, conf.System,
+      conf and plugin_version, call Setup on it (cleaning it up and returning on error),
+      read SpecialPaths, Type and, when it implements logical.PluginVersioner, its
+      PluginVersion().Version, then Cleanup the probe process and install a placeholder
+      framework.Backend carrying those three values so the plugin is not yet loaded.
+    codeRefs:
+    - function:279285827f28c5fefc4e75c39b7fc39b
+    - struct:aac12544428d4d44fc72971986a2d518
+  - id: r.mismatch-guard
+    level: MUST
+    text: While the backend has not yet been loaded, startBackend must refuse a plugin
+      whose Type differs from the metadata probe by cleaning up the new process, logging
+      a warning with the plugin name and ErrMismatchType, and returning ErrMismatchType,
+      and must likewise refuse a plugin whose SpecialPaths are not reflect.DeepEqual
+      to the probe with ErrMismatchPaths.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/plugin/backend.go
+    - struct:aac12544428d4d44fc72971986a2d518
+  - id: r.plugin-name-required
+    level: MUST
+    text: Factory must reject a config that has no "plugin_name" key, returning the
+      error "plugin_name not provided" before attempting to start any backend.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/plugin/backend.go
+    - function:54cad82c274bb42c350b1fc292eccfd2
+  - id: r.plugin-type-parsed
+    level: MUST
+    text: Backend and startBackend must parse conf.Config["plugin_type"] with consts.ParsePluginType
+      and return that error unchanged when the type string is invalid.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/plugin/backend.go
+    - function:279285827f28c5fefc4e75c39b7fc39b
+  - id: r.plugin-version-delegation
+    level: MUST
+    text: PluginVersion must return the wrapped backend's PluginVersion when it implements
+      logical.PluginVersioner, and logical.EmptyPluginVersion otherwise, and must
+      not take the read lock; PluginBackend must satisfy logical.PluginVersioner via
+      the compile-time assertion var _ logical.PluginVersioner = (*PluginBackend)(nil).
+    codeRefs:
+    - method:eb22d417068f282674a039b8d17d06a4
+    - struct:aac12544428d4d44fc72971986a2d518
+  - id: r.read-locked-accessors
+    level: MUST
+    text: SpecialPaths, System, Logger, Cleanup, InvalidateKey, Setup and Type must
+      each take the PluginBackend read lock for the duration of the delegated call
+      so the wrapped backend pointer can be swapped under lock without races.
+    codeRefs:
+    - method:1827cfcd152d3afd0a38f2a6e8f0fc68
+    - method:1d5b59bbcacffc0d501f10e5157bc440
+    - method:2ca5bfb1f82e31c97888163ed21ba51a
+    - method:5720d926d077fea76c8590513e3d5138
+    - method:5dbccf29070dfb9dc7c08eea2b372bb7
+    - method:740d924e05ea66e53ffa1d14d8a26c4e
+    - method:dccf4dff09449e12f867f360073b5537
+  - id: r.reload-on-shutdown
+    level: MUST
+    text: When the method wrapper fails with an error whose string equals rpc.ErrShutdown.Error()
+      or with bplugin.ErrPluginShutdown, lazyLoadBackend must restart the plugin once
+      under the write lock, guarded by comparing the canary captured before the call
+      against the current canary so only the first observer reloads, set a fresh UUID
+      canary, then retry the method wrapper exactly once under the read lock.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/plugin/backend.go
+    - struct:aac12544428d4d44fc72971986a2d518
+  - id: r.setup-delegates
+    level: SHOULD
+    text: Setup must delegate under the read lock to the currently wrapped backend,
+      so a plugin that Factory already loaded receives the backend config directly
+      while an unloaded placeholder only records it.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/plugin/backend.go
+    - method:1d5b59bbcacffc0d501f10e5157bc440
+  - id: r.v5-then-v1-fallback
+    level: MUST
+    text: 'Factory must first call v5.Backend and, on success, call Setup on it and
+      return it; when the v5 backend fails it must append that error to a multierror
+      and fall back to Backend, returning fmt.Errorf("invalid backend version: %s",
+      merr) if the fallback also fails, or merr.ErrorOrNil() if the fallback''s Setup
+      fails.'
+    codeRefs:
+    - function:279285827f28c5fefc4e75c39b7fc39b
+    - function:54cad82c274bb42c350b1fc292eccfd2
+  interfaces:
+  - name: Backend
+    kind: function
+    signature: func Backend(ctx context.Context, conf *logical.BackendConfig) (*PluginBackend,
+      error)
+    file: third_party/openbao/internal/builtin/plugin/backend.go
+  - name: Factory
+    kind: function
+    signature: func Factory(ctx context.Context, conf *logical.BackendConfig) (logical.Backend,
+      error)
+    file: third_party/openbao/internal/builtin/plugin/backend.go
+  - name: PluginBackend
+    kind: struct
+    signature: type PluginBackend struct { Backend logical.Backend; sync.RWMutex;
+      config *logical.BackendConfig; canary string; loaded bool }
+    file: third_party/openbao/internal/builtin/plugin/backend.go
+  - name: PluginBackend.Cleanup
+    kind: method
+    signature: func (b *PluginBackend) Cleanup(ctx context.Context)
+    file: third_party/openbao/internal/builtin/plugin/backend.go
+  - name: PluginBackend.HandleExistenceCheck
+    kind: method
+    signature: func (b *PluginBackend) HandleExistenceCheck(ctx context.Context, req
+      *logical.Request) (checkFound bool, exists bool, err error)
+    file: third_party/openbao/internal/builtin/plugin/backend.go
+  - name: PluginBackend.HandleRequest
+    kind: method
+    signature: func (b *PluginBackend) HandleRequest(ctx context.Context, req *logical.Request)
+      (resp *logical.Response, err error)
+    file: third_party/openbao/internal/builtin/plugin/backend.go
+  - name: PluginBackend.Initialize
+    kind: method
+    signature: func (b *PluginBackend) Initialize(ctx context.Context, req *logical.InitializationRequest)
+      error
+    file: third_party/openbao/internal/builtin/plugin/backend.go
+  - name: PluginBackend.InvalidateKey
+    kind: method
+    signature: func (b *PluginBackend) InvalidateKey(ctx context.Context, key string)
+    file: third_party/openbao/internal/builtin/plugin/backend.go
+  - name: PluginBackend.Logger
+    kind: method
+    signature: func (b *PluginBackend) Logger() log.Logger
+    file: third_party/openbao/internal/builtin/plugin/backend.go
+  - name: PluginBackend.PluginVersion
+    kind: method
+    signature: func (b *PluginBackend) PluginVersion() logical.PluginVersion
+    file: third_party/openbao/internal/builtin/plugin/backend.go
+  - name: PluginBackend.Setup
+    kind: method
+    signature: func (b *PluginBackend) Setup(ctx context.Context, config *logical.BackendConfig)
+      error
+    file: third_party/openbao/internal/builtin/plugin/backend.go
+  - name: PluginBackend.SpecialPaths
+    kind: method
+    signature: func (b *PluginBackend) SpecialPaths() *logical.Paths
+    file: third_party/openbao/internal/builtin/plugin/backend.go
+  - name: PluginBackend.System
+    kind: method
+    signature: func (b *PluginBackend) System() logical.SystemView
+    file: third_party/openbao/internal/builtin/plugin/backend.go
+  - name: PluginBackend.Type
+    kind: method
+    signature: func (b *PluginBackend) Type() logical.BackendType
+    file: third_party/openbao/internal/builtin/plugin/backend.go
 codeRefIndex:
 - file:third_party/openbao/internal/builtin/plugin/backend.go backend.go@third_party/openbao/internal/builtin/plugin/backend.go
 - file:third_party/openbao/internal/builtin/plugin/backend_lazyLoad_test.go backend_lazyLoad_test.go@third_party/openbao/internal/builtin/plugin/backend_lazyLoad_test.go
@@ -17,201 +215,3 @@ codeRefIndex:
 - method:e9311d1022b961fc21571d99db324f56 PluginBackend.HandleRequest@third_party/openbao/internal/builtin/plugin/backend.go:221
 - method:eb22d417068f282674a039b8d17d06a4 PluginBackend.PluginVersion@third_party/openbao/internal/builtin/plugin/backend.go:298
 - struct:aac12544428d4d44fc72971986a2d518 PluginBackend@third_party/openbao/internal/builtin/plugin/backend.go:107
-kind: SystemContext
-metadata:
-  name: third-party-openbao-internal-builtin-plugin
-  namespace: default
-spec:
-  intent: This context exists so OpenBao can mount a plugin as a builtin logical backend
-    without paying plugin startup cost until the mount is first used. It resolves
-    a plugin by name, type and version from the backend config, validates at load
-    time that the lazily started plugin still matches the type and special paths observed
-    in metadata mode, and survives plugin crashes by relaunching and retrying the
-    failed method exactly once.
-  interfaces:
-  - file: third_party/openbao/internal/builtin/plugin/backend.go
-    kind: function
-    name: Backend
-    signature: func Backend(ctx context.Context, conf *logical.BackendConfig) (*PluginBackend,
-      error)
-  - file: third_party/openbao/internal/builtin/plugin/backend.go
-    kind: function
-    name: Factory
-    signature: func Factory(ctx context.Context, conf *logical.BackendConfig) (logical.Backend,
-      error)
-  - file: third_party/openbao/internal/builtin/plugin/backend.go
-    kind: struct
-    name: PluginBackend
-    signature: type PluginBackend struct { Backend logical.Backend; sync.RWMutex;
-      config *logical.BackendConfig; canary string; loaded bool }
-  - file: third_party/openbao/internal/builtin/plugin/backend.go
-    kind: method
-    name: PluginBackend.Cleanup
-    signature: func (b *PluginBackend) Cleanup(ctx context.Context)
-  - file: third_party/openbao/internal/builtin/plugin/backend.go
-    kind: method
-    name: PluginBackend.HandleExistenceCheck
-    signature: func (b *PluginBackend) HandleExistenceCheck(ctx context.Context, req
-      *logical.Request) (checkFound bool, exists bool, err error)
-  - file: third_party/openbao/internal/builtin/plugin/backend.go
-    kind: method
-    name: PluginBackend.HandleRequest
-    signature: func (b *PluginBackend) HandleRequest(ctx context.Context, req *logical.Request)
-      (resp *logical.Response, err error)
-  - file: third_party/openbao/internal/builtin/plugin/backend.go
-    kind: method
-    name: PluginBackend.Initialize
-    signature: func (b *PluginBackend) Initialize(ctx context.Context, req *logical.InitializationRequest)
-      error
-  - file: third_party/openbao/internal/builtin/plugin/backend.go
-    kind: method
-    name: PluginBackend.InvalidateKey
-    signature: func (b *PluginBackend) InvalidateKey(ctx context.Context, key string)
-  - file: third_party/openbao/internal/builtin/plugin/backend.go
-    kind: method
-    name: PluginBackend.Logger
-    signature: func (b *PluginBackend) Logger() log.Logger
-  - file: third_party/openbao/internal/builtin/plugin/backend.go
-    kind: method
-    name: PluginBackend.PluginVersion
-    signature: func (b *PluginBackend) PluginVersion() logical.PluginVersion
-  - file: third_party/openbao/internal/builtin/plugin/backend.go
-    kind: method
-    name: PluginBackend.Setup
-    signature: func (b *PluginBackend) Setup(ctx context.Context, config *logical.BackendConfig)
-      error
-  - file: third_party/openbao/internal/builtin/plugin/backend.go
-    kind: method
-    name: PluginBackend.SpecialPaths
-    signature: func (b *PluginBackend) SpecialPaths() *logical.Paths
-  - file: third_party/openbao/internal/builtin/plugin/backend.go
-    kind: method
-    name: PluginBackend.System
-    signature: func (b *PluginBackend) System() logical.SystemView
-  - file: third_party/openbao/internal/builtin/plugin/backend.go
-    kind: method
-    name: PluginBackend.Type
-    signature: func (b *PluginBackend) Type() logical.BackendType
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - function:279285827f28c5fefc4e75c39b7fc39b
-    - struct:aac12544428d4d44fc72971986a2d518
-    id: r.config-stored-for-deferred-start
-    level: MUST
-    text: Backend must store the passed logical.BackendConfig on the returned PluginBackend
-      as config, because startBackend later reads plugin_name, plugin_type, plugin_version
-      and System from it instead of from the caller.
-  - codeRefs:
-    - method:9eff9c5894c27395cd43737fb5d364a4
-    - struct:aac12544428d4d44fc72971986a2d518
-    id: r.initialize-deferred
-    level: MUST
-    text: PluginBackend.Initialize must be a no-op returning nil, because startBackend
-      calls the real backend Initialize explicitly with a logical.InitializationRequest
-      carrying the request storage after the plugin process starts.
-  - codeRefs:
-    - method:25485adf3c6948547038555a16260759
-    - method:e9311d1022b961fc21571d99db324f56
-    - struct:aac12544428d4d44fc72971986a2d518
-    id: r.lazy-load-on-request
-    level: MUST
-    text: HandleRequest and HandleExistenceCheck must route through lazyLoadBackend,
-      which takes the read lock, starts the plugin only when loaded is false, releases
-      the read lock, takes the write lock, re-checks loaded after the lock upgrade
-      so concurrent first requests start the plugin once, then runs the method wrapper.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/plugin/backend_lazyLoad_test.go
-    id: r.lazy-load-test-contract
-    level: SHOULD
-    text: TestBackend_lazyLoad must show that a normal lazy load invokes the method
-      wrapper once and leaves canary empty, that a wrapper returning plugin.ErrPluginShutdown
-      invokes it twice and leaves a non-empty canary, and that the replaced placeholder
-      is cleaned but never set up or initialized while the newly started backend is
-      set up and initialized.
-  - codeRefs:
-    - function:279285827f28c5fefc4e75c39b7fc39b
-    - struct:aac12544428d4d44fc72971986a2d518
-    id: r.metadata-mode-probe
-    level: MUST
-    text: Backend must start the plugin with bplugin.NewBackendWithVersion in metadata
-      mode (isMetadataMode true) using plugin_name, the parsed type, conf.System,
-      conf and plugin_version, call Setup on it (cleaning it up and returning on error),
-      read SpecialPaths, Type and, when it implements logical.PluginVersioner, its
-      PluginVersion().Version, then Cleanup the probe process and install a placeholder
-      framework.Backend carrying those three values so the plugin is not yet loaded.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/plugin/backend.go
-    - struct:aac12544428d4d44fc72971986a2d518
-    id: r.mismatch-guard
-    level: MUST
-    text: While the backend has not yet been loaded, startBackend must refuse a plugin
-      whose Type differs from the metadata probe by cleaning up the new process, logging
-      a warning with the plugin name and ErrMismatchType, and returning ErrMismatchType,
-      and must likewise refuse a plugin whose SpecialPaths are not reflect.DeepEqual
-      to the probe with ErrMismatchPaths.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/plugin/backend.go
-    - function:54cad82c274bb42c350b1fc292eccfd2
-    id: r.plugin-name-required
-    level: MUST
-    text: Factory must reject a config that has no "plugin_name" key, returning the
-      error "plugin_name not provided" before attempting to start any backend.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/plugin/backend.go
-    - function:279285827f28c5fefc4e75c39b7fc39b
-    id: r.plugin-type-parsed
-    level: MUST
-    text: Backend and startBackend must parse conf.Config["plugin_type"] with consts.ParsePluginType
-      and return that error unchanged when the type string is invalid.
-  - codeRefs:
-    - method:eb22d417068f282674a039b8d17d06a4
-    - struct:aac12544428d4d44fc72971986a2d518
-    id: r.plugin-version-delegation
-    level: MUST
-    text: PluginVersion must return the wrapped backend's PluginVersion when it implements
-      logical.PluginVersioner, and logical.EmptyPluginVersion otherwise, and must
-      not take the read lock; PluginBackend must satisfy logical.PluginVersioner via
-      the compile-time assertion var _ logical.PluginVersioner = (*PluginBackend)(nil).
-  - codeRefs:
-    - method:1827cfcd152d3afd0a38f2a6e8f0fc68
-    - method:1d5b59bbcacffc0d501f10e5157bc440
-    - method:2ca5bfb1f82e31c97888163ed21ba51a
-    - method:5720d926d077fea76c8590513e3d5138
-    - method:5dbccf29070dfb9dc7c08eea2b372bb7
-    - method:740d924e05ea66e53ffa1d14d8a26c4e
-    - method:dccf4dff09449e12f867f360073b5537
-    id: r.read-locked-accessors
-    level: MUST
-    text: SpecialPaths, System, Logger, Cleanup, InvalidateKey, Setup and Type must
-      each take the PluginBackend read lock for the duration of the delegated call
-      so the wrapped backend pointer can be swapped under lock without races.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/plugin/backend.go
-    - struct:aac12544428d4d44fc72971986a2d518
-    id: r.reload-on-shutdown
-    level: MUST
-    text: When the method wrapper fails with an error whose string equals rpc.ErrShutdown.Error()
-      or with bplugin.ErrPluginShutdown, lazyLoadBackend must restart the plugin once
-      under the write lock, guarded by comparing the canary captured before the call
-      against the current canary so only the first observer reloads, set a fresh UUID
-      canary, then retry the method wrapper exactly once under the read lock.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/plugin/backend.go
-    - method:1d5b59bbcacffc0d501f10e5157bc440
-    id: r.setup-delegates
-    level: SHOULD
-    text: Setup must delegate under the read lock to the currently wrapped backend,
-      so a plugin that Factory already loaded receives the backend config directly
-      while an unloaded placeholder only records it.
-  - codeRefs:
-    - function:279285827f28c5fefc4e75c39b7fc39b
-    - function:54cad82c274bb42c350b1fc292eccfd2
-    id: r.v5-then-v1-fallback
-    level: MUST
-    text: 'Factory must first call v5.Backend and, on success, call Setup on it and
-      return it; when the v5 backend fails it must append that error to a multierror
-      and fall back to Backend, returning fmt.Errorf("invalid backend version: %s",
-      merr) if the fallback also fails, or merr.ErrorOrNil() if the fallback''s Setup
-      fails.'
-  upstream: self

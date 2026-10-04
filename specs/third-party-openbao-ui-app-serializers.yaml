@@ -1,4 +1,177 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-ui-app-serializers
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'This context exists so the OpenBao UI''s serializer behaviour is described
+    independently of the vendored UI source, which lives in third_party and is not
+    authored here. It records what each serializer must do to the API payloads so
+    the contract between the OpenBao HTTP API and the Ember Data store stays visible:
+    id normalization for namespaces, version-object-to-array conversion and rotation
+    timestamps for keymgmt keys, and payload rewriting for MFA login enforcements.
+    Anyone touching the vendored UI, or porting this behaviour to another client,
+    needs this description because the third-party tree is otherwise undifferentiated.'
+  requirements:
+  - id: r.application-base-serializer
+    level: MUST
+    text: The serializers directory must provide application.js as the shared ApplicationSerializer
+      base that the concrete serializers in the directory extend, so per-model serializers
+      only override the normalisation hooks they need.
+    codeRefs:
+    - file:third_party/openbao/ui/app/serializers/application.js
+  - id: r.keymgmt-key-normalize-list
+    level: MUST
+    text: KeymgmtKeySerializer.normalizeItems must map an array payload of keys to
+      records of {id, name, backend} where name is taken from the key id and backend
+      from payload.backend, and must pass anything else through unchanged.
+    codeRefs:
+    - class:681132b4a34a8a0d53b5e8a78ec4359b
+    - file:third_party/openbao/ui/app/serializers/mfa-method.js
+  - id: r.keymgmt-key-normalize-versions
+    level: MUST
+    text: KeymgmtKeySerializer.normalizeItems must convert normalized.versions from
+      an object keyed by version number into an array of entries that each spread
+      the version data and add the parsed integer version as id, and must return the
+      payload with versions replaced by that array plus created set from the first
+      version's creation_time and last_rotated from the last version's creation_time.
+    codeRefs:
+    - class:681132b4a34a8a0d53b5e8a78ec4359b
+    - file:third_party/openbao/ui/app/serializers/mfa-method.js
+  - id: r.keymgmt-key-serialize
+    level: MUST
+    text: KeymgmtKeySerializer.serialize must return the superclass serialization,
+      so key records are written with the default attribute mapping.
+    codeRefs:
+    - class:681132b4a34a8a0d53b5e8a78ec4359b
+    - file:third_party/openbao/ui/app/serializers/mfa-method.js
+  - id: r.mfa-login-enforcement-has-many
+    level: MUST
+    text: MfaLoginEnforcementSerializer.transformHasManyKeys must rewrite the raw
+      has-many keys in the incoming data into the destination structure Ember Data
+      expects for the enforcement's related records.
+    codeRefs:
+    - class:d94a61dedff298090c7cbfe1b78fb069
+    - file:third_party/openbao/ui/app/serializers/mfa-login-enforcement.js
+  - id: r.mfa-login-enforcement-normalize
+    level: MUST
+    text: MfaLoginEnforcementSerializer.normalize must run the incoming model data
+      through normalizeItems before deferring to the superclass normalizer, so payload
+      reshaping happens on every read.
+    codeRefs:
+    - class:d94a61dedff298090c7cbfe1b78fb069
+    - file:third_party/openbao/ui/app/serializers/mfa-login-enforcement.js
+  - id: r.mfa-login-enforcement-normalize-items
+    level: MUST
+    text: MfaLoginEnforcementSerializer.normalizeItems must transform the payload's
+      keys the same way for single-record and list responses, so both shapes reach
+      the store identically.
+    codeRefs:
+    - class:d94a61dedff298090c7cbfe1b78fb069
+    - file:third_party/openbao/ui/app/serializers/mfa-login-enforcement.js
+  - id: r.mfa-login-enforcement-primary-key
+    level: MUST
+    text: MfaLoginEnforcementSerializer must declare primaryKey so Ember Data identifies
+      an MFA login enforcement record by the key the API uses rather than the default.
+    codeRefs:
+    - class:d94a61dedff298090c7cbfe1b78fb069
+    - file:third_party/openbao/ui/app/serializers/mfa-login-enforcement.js
+  - id: r.mfa-login-enforcement-serialize
+    level: MUST
+    text: MfaLoginEnforcementSerializer.serialize must produce the outbound snapshot
+      form the MFA login enforcement endpoints accept when a record is created or
+      updated.
+    codeRefs:
+    - class:d94a61dedff298090c7cbfe1b78fb069
+    - file:third_party/openbao/ui/app/serializers/mfa-login-enforcement.js
+  - id: r.namespace-attrs-path
+    level: MUST
+    text: NamespaceSerializer must declare attrs so that the path attribute is not
+      serialized back to the server; path is used for reading and identifying a namespace,
+      not for writing it.
+    codeRefs:
+    - class:5f8ac7300368de40c7fbff9d16a45232
+    - file:third_party/openbao/ui/app/serializers/namespace.js
+  - id: r.namespace-normalize-list
+    level: MUST
+    text: NamespaceSerializer.normalizeList must map payload.data.keys into records
+      carrying the full key as path and the key with its trailing slash removed as
+      id, and must pass payload.data through unchanged when no keys array is present.
+    codeRefs:
+    - class:5f8ac7300368de40c7fbff9d16a45232
+    - file:third_party/openbao/ui/app/serializers/namespace.js
+  - id: r.namespace-normalize-response
+    level: MUST
+    text: NamespaceSerializer.normalizeResponse must build the id from the given id,
+      payload.id or empty string with any trailing slash stripped; for the deleteRecord
+      and createRecord request types, which return no body, it must synthesize a payload
+      of {id, path} instead of normalising a list, and otherwise delegate to normalizeList,
+      then hand the result to the superclass normalizer.
+    codeRefs:
+    - class:5f8ac7300368de40c7fbff9d16a45232
+    - file:third_party/openbao/ui/app/serializers/namespace.js
+  - id: r.remaining-model-serializers
+    level: MUST
+    text: 'The remaining modules must supply pass-through or attribute-mapped serializers
+      for their models: capabilities, cluster, config, lease, license, mount config,
+      node, path filter config, policy, server, and SSH.'
+    codeRefs:
+    - file:third_party/openbao/ui/app/serializers/capabilities.js
+    - file:third_party/openbao/ui/app/serializers/license.js
+    - file:third_party/openbao/ui/app/serializers/mount-config.js
+    - file:third_party/openbao/ui/app/serializers/path-filter-config.js
+  - id: r.replication-serializers
+    level: MUST
+    text: The replication attributes and replication mode serializers must map the
+      cluster replication status responses into the models the replication screens
+      read.
+    codeRefs:
+    - file:third_party/openbao/ui/app/serializers/replication-attributes.js
+    - file:third_party/openbao/ui/app/serializers/replication-mode.js
+  - id: r.role-serializer-family
+    level: MUST
+    text: The role serializers must cover the generic role plus the AWS and SSH role
+      variants, each reshaping its engine-specific response attributes for the shared
+      role model.
+    codeRefs:
+    - file:third_party/openbao/ui/app/serializers/role-aws.js
+    - file:third_party/openbao/ui/app/serializers/role-ssh.js
+    - file:third_party/openbao/ui/app/serializers/role.js
+  - id: r.secret-serializer-versions
+    level: MUST
+    text: The secret and secret-v2 serializers must normalize the versioned secret
+      payloads the KV engines return so the versions list is usable by the store.
+    codeRefs:
+    - file:third_party/openbao/ui/app/serializers/secret-v2-version.js
+    - file:third_party/openbao/ui/app/serializers/secret-v2.js
+    - file:third_party/openbao/ui/app/serializers/secret.js
+  - id: r.serializer-per-model
+    level: MUST
+    text: The directory must hold one serializer module per API model the UI consumes,
+      covering auth methods, capabilities, clusters, config, leases, licenses, MFA
+      (method and login enforcement), mount config, namespaces, nodes, path filter
+      config, policies, replication attributes and mode, roles (generic, AWS, SSH),
+      secret engines, secrets and secret v2, servers, SSH signing and transit keys.
+    codeRefs:
+    - file:third_party/openbao/ui/app/serializers/auth-method.js
+    - file:third_party/openbao/ui/app/serializers/replication-mode.js
+    - file:third_party/openbao/ui/app/serializers/secret-engine.js
+    - file:third_party/openbao/ui/app/serializers/transit-key.js
+  interfaces:
+  - name: KeymgmtKeySerializer
+    kind: class
+    signature: ()
+    file: third_party/openbao/ui/app/serializers/mfa-method.js
+  - name: MfaLoginEnforcementSerializer
+    kind: class
+    signature: ()
+    file: third_party/openbao/ui/app/serializers/mfa-login-enforcement.js
+  - name: NamespaceSerializer
+    kind: class
+    signature: ()
+    file: third_party/openbao/ui/app/serializers/namespace.js
 codeRefIndex:
 - class:5f8ac7300368de40c7fbff9d16a45232 NamespaceSerializer@third_party/openbao/ui/app/serializers/namespace.js:8
 - class:681132b4a34a8a0d53b5e8a78ec4359b KeymgmtKeySerializer@third_party/openbao/ui/app/serializers/mfa-method.js:8
@@ -29,176 +202,3 @@ codeRefIndex:
 - file:third_party/openbao/ui/app/serializers/server.js server.js@third_party/openbao/ui/app/serializers/server.js
 - file:third_party/openbao/ui/app/serializers/ssh.js ssh.js@third_party/openbao/ui/app/serializers/ssh.js
 - file:third_party/openbao/ui/app/serializers/transit-key.js transit-key.js@third_party/openbao/ui/app/serializers/transit-key.js
-kind: SystemContext
-metadata:
-  name: third-party-openbao-ui-app-serializers
-  namespace: default
-spec:
-  intent: 'This context exists so the OpenBao UI''s serializer behaviour is described
-    independently of the vendored UI source, which lives in third_party and is not
-    authored here. It records what each serializer must do to the API payloads so
-    the contract between the OpenBao HTTP API and the Ember Data store stays visible:
-    id normalization for namespaces, version-object-to-array conversion and rotation
-    timestamps for keymgmt keys, and payload rewriting for MFA login enforcements.
-    Anyone touching the vendored UI, or porting this behaviour to another client,
-    needs this description because the third-party tree is otherwise undifferentiated.'
-  interfaces:
-  - file: third_party/openbao/ui/app/serializers/mfa-method.js
-    kind: class
-    name: KeymgmtKeySerializer
-    signature: ()
-  - file: third_party/openbao/ui/app/serializers/mfa-login-enforcement.js
-    kind: class
-    name: MfaLoginEnforcementSerializer
-    signature: ()
-  - file: third_party/openbao/ui/app/serializers/namespace.js
-    kind: class
-    name: NamespaceSerializer
-    signature: ()
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - file:third_party/openbao/ui/app/serializers/application.js
-    id: r.application-base-serializer
-    level: MUST
-    text: The serializers directory must provide application.js as the shared ApplicationSerializer
-      base that the concrete serializers in the directory extend, so per-model serializers
-      only override the normalisation hooks they need.
-  - codeRefs:
-    - class:681132b4a34a8a0d53b5e8a78ec4359b
-    - file:third_party/openbao/ui/app/serializers/mfa-method.js
-    id: r.keymgmt-key-normalize-list
-    level: MUST
-    text: KeymgmtKeySerializer.normalizeItems must map an array payload of keys to
-      records of {id, name, backend} where name is taken from the key id and backend
-      from payload.backend, and must pass anything else through unchanged.
-  - codeRefs:
-    - class:681132b4a34a8a0d53b5e8a78ec4359b
-    - file:third_party/openbao/ui/app/serializers/mfa-method.js
-    id: r.keymgmt-key-normalize-versions
-    level: MUST
-    text: KeymgmtKeySerializer.normalizeItems must convert normalized.versions from
-      an object keyed by version number into an array of entries that each spread
-      the version data and add the parsed integer version as id, and must return the
-      payload with versions replaced by that array plus created set from the first
-      version's creation_time and last_rotated from the last version's creation_time.
-  - codeRefs:
-    - class:681132b4a34a8a0d53b5e8a78ec4359b
-    - file:third_party/openbao/ui/app/serializers/mfa-method.js
-    id: r.keymgmt-key-serialize
-    level: MUST
-    text: KeymgmtKeySerializer.serialize must return the superclass serialization,
-      so key records are written with the default attribute mapping.
-  - codeRefs:
-    - class:d94a61dedff298090c7cbfe1b78fb069
-    - file:third_party/openbao/ui/app/serializers/mfa-login-enforcement.js
-    id: r.mfa-login-enforcement-has-many
-    level: MUST
-    text: MfaLoginEnforcementSerializer.transformHasManyKeys must rewrite the raw
-      has-many keys in the incoming data into the destination structure Ember Data
-      expects for the enforcement's related records.
-  - codeRefs:
-    - class:d94a61dedff298090c7cbfe1b78fb069
-    - file:third_party/openbao/ui/app/serializers/mfa-login-enforcement.js
-    id: r.mfa-login-enforcement-normalize
-    level: MUST
-    text: MfaLoginEnforcementSerializer.normalize must run the incoming model data
-      through normalizeItems before deferring to the superclass normalizer, so payload
-      reshaping happens on every read.
-  - codeRefs:
-    - class:d94a61dedff298090c7cbfe1b78fb069
-    - file:third_party/openbao/ui/app/serializers/mfa-login-enforcement.js
-    id: r.mfa-login-enforcement-normalize-items
-    level: MUST
-    text: MfaLoginEnforcementSerializer.normalizeItems must transform the payload's
-      keys the same way for single-record and list responses, so both shapes reach
-      the store identically.
-  - codeRefs:
-    - class:d94a61dedff298090c7cbfe1b78fb069
-    - file:third_party/openbao/ui/app/serializers/mfa-login-enforcement.js
-    id: r.mfa-login-enforcement-primary-key
-    level: MUST
-    text: MfaLoginEnforcementSerializer must declare primaryKey so Ember Data identifies
-      an MFA login enforcement record by the key the API uses rather than the default.
-  - codeRefs:
-    - class:d94a61dedff298090c7cbfe1b78fb069
-    - file:third_party/openbao/ui/app/serializers/mfa-login-enforcement.js
-    id: r.mfa-login-enforcement-serialize
-    level: MUST
-    text: MfaLoginEnforcementSerializer.serialize must produce the outbound snapshot
-      form the MFA login enforcement endpoints accept when a record is created or
-      updated.
-  - codeRefs:
-    - class:5f8ac7300368de40c7fbff9d16a45232
-    - file:third_party/openbao/ui/app/serializers/namespace.js
-    id: r.namespace-attrs-path
-    level: MUST
-    text: NamespaceSerializer must declare attrs so that the path attribute is not
-      serialized back to the server; path is used for reading and identifying a namespace,
-      not for writing it.
-  - codeRefs:
-    - class:5f8ac7300368de40c7fbff9d16a45232
-    - file:third_party/openbao/ui/app/serializers/namespace.js
-    id: r.namespace-normalize-list
-    level: MUST
-    text: NamespaceSerializer.normalizeList must map payload.data.keys into records
-      carrying the full key as path and the key with its trailing slash removed as
-      id, and must pass payload.data through unchanged when no keys array is present.
-  - codeRefs:
-    - class:5f8ac7300368de40c7fbff9d16a45232
-    - file:third_party/openbao/ui/app/serializers/namespace.js
-    id: r.namespace-normalize-response
-    level: MUST
-    text: NamespaceSerializer.normalizeResponse must build the id from the given id,
-      payload.id or empty string with any trailing slash stripped; for the deleteRecord
-      and createRecord request types, which return no body, it must synthesize a payload
-      of {id, path} instead of normalising a list, and otherwise delegate to normalizeList,
-      then hand the result to the superclass normalizer.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/serializers/capabilities.js
-    - file:third_party/openbao/ui/app/serializers/license.js
-    - file:third_party/openbao/ui/app/serializers/mount-config.js
-    - file:third_party/openbao/ui/app/serializers/path-filter-config.js
-    id: r.remaining-model-serializers
-    level: MUST
-    text: 'The remaining modules must supply pass-through or attribute-mapped serializers
-      for their models: capabilities, cluster, config, lease, license, mount config,
-      node, path filter config, policy, server, and SSH.'
-  - codeRefs:
-    - file:third_party/openbao/ui/app/serializers/replication-attributes.js
-    - file:third_party/openbao/ui/app/serializers/replication-mode.js
-    id: r.replication-serializers
-    level: MUST
-    text: The replication attributes and replication mode serializers must map the
-      cluster replication status responses into the models the replication screens
-      read.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/serializers/role-aws.js
-    - file:third_party/openbao/ui/app/serializers/role-ssh.js
-    - file:third_party/openbao/ui/app/serializers/role.js
-    id: r.role-serializer-family
-    level: MUST
-    text: The role serializers must cover the generic role plus the AWS and SSH role
-      variants, each reshaping its engine-specific response attributes for the shared
-      role model.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/serializers/secret-v2-version.js
-    - file:third_party/openbao/ui/app/serializers/secret-v2.js
-    - file:third_party/openbao/ui/app/serializers/secret.js
-    id: r.secret-serializer-versions
-    level: MUST
-    text: The secret and secret-v2 serializers must normalize the versioned secret
-      payloads the KV engines return so the versions list is usable by the store.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/serializers/auth-method.js
-    - file:third_party/openbao/ui/app/serializers/replication-mode.js
-    - file:third_party/openbao/ui/app/serializers/secret-engine.js
-    - file:third_party/openbao/ui/app/serializers/transit-key.js
-    id: r.serializer-per-model
-    level: MUST
-    text: The directory must hold one serializer module per API model the UI consumes,
-      covering auth methods, capabilities, clusters, config, leases, licenses, MFA
-      (method and login enforcement), mount config, namespaces, nodes, path filter
-      config, policies, replication attributes and mode, roles (generic, AWS, SSH),
-      secret engines, secrets and secret v2, servers, SSH signing and transit keys.
-  upstream: self

@@ -1,4 +1,666 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-internal-helper-identity
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'This context exists to describe the vendored OpenBao identity helper package
+    that deno-kcp carries under third_party. It is the boundary between the generated
+    protobuf identity records and the rest of the system: the storage layer clones
+    and mutates these messages, policy evaluation reads them through sentinel, and
+    the logical layer consumes them only after the ToSDK projection functions run.
+    The spec records that projection, the deep-copy semantics, the alias upsert rule
+    and the sentinel key surface, because callers outside this package depend on those
+    behaviors and on the exact set of message fields the generated types carry.'
+  requirements:
+  - id: r.alias-fields
+    level: MUST
+    text: The Alias message must expose generated getters for ID, CanonicalID, MountType,
+      MountAccessor, MountPath, Metadata, Name, CreationTime, LastUpdateTime, MergedFromCanonicalIDs,
+      NamespaceID, CustomMetadata, Local and LocalBucketKey, returning zero values
+      for a nil receiver, covering both the mount binding and the local-alias bookkeeping
+      a login alias needs.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/identity/types.pb.go
+    - method:3a59fc3ebf81f1bba50fb60f550ebe24
+    - method:4021e634dba69aab9bd00e1945126142
+    - method:4b347d858e40f0f50ab3336fd4ec802c
+    - method:5ad26193a3bd1b2aca5a138cbf6b29da
+    - method:6cc7e3b4efa9fdefe765cf2968901ccb
+    - method:814ae525e02cbc2016c4925e4ba439b9
+    - method:8bc7ccc4d133f8ce12a6a632b5156635
+    - method:927c75cc337f000f42e2c12958d0abfa
+    - method:a0271af61f4006c44e2f13a806c23d22
+    - method:a0df55e799840b6954b162cb71d10bc3
+    - method:c1e1bb7bc6558060c86c1cc8dfcb6fee
+    - method:ebda247b59160a98a607c08715bcaacd
+    - method:f0d89585347315890884585ee20888b7
+    - method:f2f95fea65ba852d35cc2c18a88a66fa
+  - id: r.clone-deep-copy
+    level: MUST
+    text: 'Clone must return a value independent of the receiver, produced by marshaling
+      the message with proto.Marshal and unmarshaling the bytes into a fresh local
+      value, so callers can mutate the copy without touching the original. A marshal
+      failure must return an error of the form "failed to marshal group/entity/alias:
+      %w" and an unmarshal failure "failed to unmarshal group/entity/alias: %w", each
+      wrapping the underlying error.'
+    codeRefs:
+    - file:third_party/openbao/internal/helper/identity/identity.go
+    - method:2ac86f8dcde200fcf7386b4ec3cd12e3
+    - method:8084eb55189c0096ec47357ee88503e1
+    - method:bfcd35be44bbca752cd28184e592c0ea
+  - id: r.clone-nil-receiver-guard
+    level: MUST
+    text: Group.Clone, Entity.Clone and Alias.Clone must return a nil result and a
+      non-nil error when the receiver is nil, so callers that clone optional records
+      never panic. Group.Clone returns the error "nil group" and Entity.Clone returns
+      "nil entity".
+    codeRefs:
+    - method:2ac86f8dcde200fcf7386b4ec3cd12e3
+    - method:8084eb55189c0096ec47357ee88503e1
+    - method:bfcd35be44bbca752cd28184e592c0ea
+  - id: r.entity-fields
+    level: MUST
+    text: The Entity message must expose generated getters for Aliases, ID, Name,
+      Metadata, CreationTime, LastUpdateTime, MergedEntityIDs, Policies, BucketKey,
+      MFASecrets, Disabled and NamespaceID, returning zero values for a nil receiver,
+      so the store can reconstruct an entity together with its alias list, its merge
+      history and its MFA configuration.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/identity/types.pb.go
+    - method:2af2e4a9f91df441c10290f6043aa7cf
+    - method:35115e00d99b877b233cd60c75025042
+    - method:37d1c651299599200a11ac10f79430d6
+    - method:3f2ff671f75ec299da3b0b43dd8e3ba4
+    - method:494eb64560312218991148e364119c70
+    - method:6697bb4e9908e9e69a325c05cce4064c
+    - method:72f4562b980b38d91fec66f54ca11d50
+    - method:8a9d7046edd691401f6fc57daa1fca33
+    - method:8a9e173ade16ae0e413f1e0955bbddd5
+    - method:a506c415639f5dd2ef4757f6d2169370
+    - method:c5c9c9956fea8c6b1a60522bff577895
+    - method:f7dc0ff82ad7c94af164e0ebd1829d2d
+  - id: r.group-fields
+    level: MUST
+    text: The Group message must expose generated getters for ID, Name, Policies,
+      ParentGroupIDs, MemberEntityIDs, Metadata, CreationTime, LastUpdateTime, ModifyIndex,
+      BucketKey, Alias, Type and NamespaceID, each returning the zero value when the
+      receiver is nil, so policy and storage code can read group relationships without
+      a nil check.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/identity/types.pb.go
+    - method:0990d3641a76b905e6a41983f8785fd5
+    - method:0cd9e5a7144fdf4f81caca70678adbb4
+    - method:0f296dfb5192107082a5c668650c5aff
+    - method:1b074507c8b2673724ee776090541db7
+    - method:3ef05e60536baf567e56b8a9497ef19b
+    - method:3f0629ced431fa65c18afd1251a88fde
+    - method:4d02e5c3f8937b92b8e9d15eaa0371d7
+    - method:897db93618ba44d838604fcc90f5dee3
+    - method:b463d3425fae3994be224c31b10027cd
+    - method:d828e830683952e35b46f84bc17300a6
+    - method:dcc092ec25f3173dd7c40098e6bbce67
+    - method:f1073a2b2e29da8a32007ed75fd6f3b2
+    - method:f335f1bc8cba50a053a953e07a30540f
+  - id: r.local-aliases-collection
+    level: MUST
+    text: The LocalAliases message must exist as a protobuf message holding a slice
+      of Aliases reachable through GetAliases, used to carry the aliases scoped to
+      a namespace as a single serializable record.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/identity/types.pb.go
+    - method:4470085374d7f4ba436e452ec8293f68
+    - struct:8dff879cc034dd7e16620035440706cd
+  - id: r.protobuf-message-contract
+    level: MUST
+    text: 'Group, LocalAliases, Entity, Alias, EntityStorageEntry and PersonaIndexEntry
+      must each implement the protobuf message contract: Reset to clear the message
+      to its zero state, String for a textual rendering, ProtoMessage as the marker
+      method, ProtoReflect returning a protoreflect.Message, and Descriptor returning
+      the compressed file descriptor bytes and the message''s index path.'
+    codeRefs:
+    - file:third_party/openbao/internal/helper/identity/types.pb.go
+    - struct:25869f1643374a790924a3e56aa00521
+    - struct:8dff879cc034dd7e16620035440706cd
+    - struct:a226a1ba122a45f0cc9af9e498c06d2d
+    - struct:b60430e25f9e3f26f4a1f53626ce91e5
+    - struct:d2ada21a134a8dfe9198be9bdf217342
+    - struct:e02f51e1da79f484b9169f9342d482f2
+  - id: r.sdk-alias-projection
+    level: MUST
+    text: ToSDKAlias must return nil for a nil input, and otherwise build a logical.Alias
+      carrying Name, ID, MountAccessor, MountType, NamespaceID and CustomMetadata
+      from the internal alias, with Metadata copied element by element into a newly
+      allocated map of the same capacity so later mutation of the SDK value does not
+      alias the internal map.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/identity/identity.go
+    - function:f0dbc95dbc4552d8b598838dc3963d39
+  - id: r.sdk-entity-projection
+    level: MUST
+    text: ToSDKEntity must return nil for a nil input; otherwise it must allocate
+      an alias slice of the same length as the entity's Aliases and convert every
+      element through ToSDKAlias, copy Metadata into a new map, and carry ID, Name,
+      Disabled, Aliases and NamespaceID onto the resulting logical.Entity.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/identity/identity.go
+    - function:2dea232655a7227c40ee3249769304c2
+    - function:f0dbc95dbc4552d8b598838dc3963d39
+  - id: r.sdk-group-projection
+    level: MUST
+    text: ToSDKGroup must return nil for a nil input and otherwise project ID, Name,
+      a copied Metadata map and NamespaceID onto a logical.Group; ToSDKGroups must
+      return nil for a nil input slice and otherwise allocate a slice of the same
+      length and map each element through ToSDKGroup in order, so index correspondence
+      with the input is preserved.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/identity/identity.go
+    - function:565b69f3842b1e6add6876bc37af887b
+    - function:a56aa82127d755b088d2dbb960f2f300
+  - id: r.sentinel-get-by-key
+    level: MUST
+    text: Entity.SentinelGet, Alias.SentinelGet and Group.SentinelGet must return
+      the field value for a supported key and report an unrecognized key as an error
+      rather than falling through with a nil value and no error, so policy evaluation
+      never silently reads a missing field as nil.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/identity/sentinel.go
+    - method:33086909f4c7f44a4b4eba7b3b0e83d9
+    - method:6ae4bc5f65012623a31e1cfaabd3050c
+    - method:d95c1751f424e3ac61122deedc655301
+  - id: r.sentinel-keys-enumeration
+    level: MUST
+    text: Entity.SentinelKeys, Alias.SentinelKeys and Group.SentinelKeys must each
+      return the set of field names that the matching SentinelGet accepts, so policy
+      authors can enumerate the readable surface of the record and the two methods
+      stay in agreement.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/identity/sentinel.go
+    - method:5034f8fb0e5f72abaaa5f21845549ab8
+    - method:797e06da650642e6007919dc34801e0b
+    - method:c92d6261f236d42200cd88cc48862c04
+  - id: r.storage-entry-persona-index
+    level: MUST
+    text: EntityStorageEntry must expose getters for Personas, ID, Name, Metadata,
+      CreationTime, LastUpdateTime, MergedEntityIDs, Policies, BucketKeyHash and MFASecrets,
+      and each PersonaIndexEntry must expose getters for ID, EntityID, MountType,
+      MountAccessor, MountPath, Metadata, Name, CreationTime, LastUpdateTime and MergedFromEntityIDs,
+      so the persisted storage record retains its persona index and the mount-scoped
+      fields needed to look an entity up from a login mount.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/identity/types.pb.go
+    - method:177814e65fe6a22c0b973f933ce2d751
+    - method:183fa03222159edc932ae71b61b95788
+    - method:21459f1476d4ad0526f18b0210c47f05
+    - method:257e51e5d27c25c8ffce6ebaea043727
+    - method:2a04e2723735fa06824cceb45c8497d8
+    - method:2cfe5b89173660182d2000010f7917a3
+    - method:2ea93462942a470f7d0b7eca34f7bb48
+    - method:54aeba2dba3e7531305602cfa7248af9
+    - method:56ddad86501a1ab53631528dc66dfa1b
+    - method:5d730bbdf3adcad6de7237be420c747f
+    - method:6aed99ce5896d321fca7be8e7e3c8f12
+    - method:7024fd60acce290117a30a409f784950
+    - method:784e61ea9716e6f3ac538aafd5f72193
+    - method:88970f8cfc062997f754a032d70c0303
+    - method:9627412cb745cf4af9b59e14880e2084
+    - method:9bcf62d9f2fcff6d61bb4be4f9adec2d
+    - method:b5e995a367c1b6fa25c3bd92631b72bd
+    - method:e2b8444df9419169e16809ac6fc00cab
+    - method:fc13844321d9c0fb47d34c2f8c9aeb27
+    - method:fc22643b8e673d802895b7b61efae50b
+  - id: r.upsert-alias-by-id
+    level: MUST
+    text: Entity.UpsertAlias must walk the Aliases slice and, at the first index whose
+      alias ID equals the given alias ID, overwrite that slot and return, preserving
+      the alias's position; when no ID matches it must append the alias to the end
+      of the slice. A nil alias argument must not be treated as a match.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/identity/identity.go
+    - method:f6442409507b0c8d1ce147970db45259
+  interfaces:
+  - name: Alias
+    kind: struct
+    signature: type Alias struct
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Alias.Clone
+    kind: method
+    signature: func (a *Alias) Clone() (*Alias, error)
+    file: third_party/openbao/internal/helper/identity/identity.go
+  - name: Alias.Descriptor
+    kind: method
+    signature: func (*Alias) Descriptor() ([]byte, []int)
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Alias.GetCanonicalID
+    kind: method
+    signature: func (x *Alias) GetCanonicalID() string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Alias.GetCreationTime
+    kind: method
+    signature: func (x *Alias) GetCreationTime() *timestamppb.Timestamp
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Alias.GetCustomMetadata
+    kind: method
+    signature: func (x *Alias) GetCustomMetadata() map[string]string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Alias.GetID
+    kind: method
+    signature: func (x *Alias) GetID() string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Alias.GetLastUpdateTime
+    kind: method
+    signature: func (x *Alias) GetLastUpdateTime() *timestamppb.Timestamp
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Alias.GetLocal
+    kind: method
+    signature: func (x *Alias) GetLocal() bool
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Alias.GetLocalBucketKey
+    kind: method
+    signature: func (x *Alias) GetLocalBucketKey() string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Alias.GetMergedFromCanonicalIDs
+    kind: method
+    signature: func (x *Alias) GetMergedFromCanonicalIDs() []string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Alias.GetMetadata
+    kind: method
+    signature: func (x *Alias) GetMetadata() map[string]string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Alias.GetMountAccessor
+    kind: method
+    signature: func (x *Alias) GetMountAccessor() string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Alias.GetMountPath
+    kind: method
+    signature: func (x *Alias) GetMountPath() string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Alias.GetMountType
+    kind: method
+    signature: func (x *Alias) GetMountType() string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Alias.GetName
+    kind: method
+    signature: func (x *Alias) GetName() string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Alias.GetNamespaceID
+    kind: method
+    signature: func (x *Alias) GetNamespaceID() string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Alias.ProtoMessage
+    kind: method
+    signature: func (*Alias) ProtoMessage()
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Alias.ProtoReflect
+    kind: method
+    signature: func (x *Alias) ProtoReflect() protoreflect.Message
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Alias.Reset
+    kind: method
+    signature: func (x *Alias) Reset()
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Alias.SentinelGet
+    kind: method
+    signature: func (a *Alias) SentinelGet(key string) (any, error)
+    file: third_party/openbao/internal/helper/identity/sentinel.go
+  - name: Alias.SentinelKeys
+    kind: method
+    signature: func (a *Alias) SentinelKeys() []string
+    file: third_party/openbao/internal/helper/identity/sentinel.go
+  - name: Alias.String
+    kind: method
+    signature: func (x *Alias) String() string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Entity
+    kind: struct
+    signature: type Entity struct
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Entity.Clone
+    kind: method
+    signature: func (e *Entity) Clone() (*Entity, error)
+    file: third_party/openbao/internal/helper/identity/identity.go
+  - name: Entity.Descriptor
+    kind: method
+    signature: func (*Entity) Descriptor() ([]byte, []int)
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Entity.GetAliases
+    kind: method
+    signature: func (x *Entity) GetAliases() []*Alias
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Entity.GetBucketKey
+    kind: method
+    signature: func (x *Entity) GetBucketKey() string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Entity.GetCreationTime
+    kind: method
+    signature: func (x *Entity) GetCreationTime() *timestamppb.Timestamp
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Entity.GetDisabled
+    kind: method
+    signature: func (x *Entity) GetDisabled() bool
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Entity.GetID
+    kind: method
+    signature: func (x *Entity) GetID() string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Entity.GetLastUpdateTime
+    kind: method
+    signature: func (x *Entity) GetLastUpdateTime() *timestamppb.Timestamp
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Entity.GetMFASecrets
+    kind: method
+    signature: func (x *Entity) GetMFASecrets() map[string]*mfa.Secret
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Entity.GetMergedEntityIDs
+    kind: method
+    signature: func (x *Entity) GetMergedEntityIDs() []string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Entity.GetMetadata
+    kind: method
+    signature: func (x *Entity) GetMetadata() map[string]string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Entity.GetName
+    kind: method
+    signature: func (x *Entity) GetName() string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Entity.GetNamespaceID
+    kind: method
+    signature: func (x *Entity) GetNamespaceID() string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Entity.GetPolicies
+    kind: method
+    signature: func (x *Entity) GetPolicies() []string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Entity.ProtoMessage
+    kind: method
+    signature: func (*Entity) ProtoMessage()
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Entity.ProtoReflect
+    kind: method
+    signature: func (x *Entity) ProtoReflect() protoreflect.Message
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Entity.Reset
+    kind: method
+    signature: func (x *Entity) Reset()
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Entity.SentinelGet
+    kind: method
+    signature: func (e *Entity) SentinelGet(key string) (any, error)
+    file: third_party/openbao/internal/helper/identity/sentinel.go
+  - name: Entity.SentinelKeys
+    kind: method
+    signature: func (e *Entity) SentinelKeys() []string
+    file: third_party/openbao/internal/helper/identity/sentinel.go
+  - name: Entity.String
+    kind: method
+    signature: func (x *Entity) String() string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Entity.UpsertAlias
+    kind: method
+    signature: func (e *Entity) UpsertAlias(alias *Alias)
+    file: third_party/openbao/internal/helper/identity/identity.go
+  - name: EntityStorageEntry
+    kind: struct
+    signature: type EntityStorageEntry struct
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: EntityStorageEntry.Descriptor
+    kind: method
+    signature: func (*EntityStorageEntry) Descriptor() ([]byte, []int)
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: EntityStorageEntry.GetBucketKeyHash
+    kind: method
+    signature: func (x *EntityStorageEntry) GetBucketKeyHash() string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: EntityStorageEntry.GetCreationTime
+    kind: method
+    signature: func (x *EntityStorageEntry) GetCreationTime() *timestamppb.Timestamp
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: EntityStorageEntry.GetID
+    kind: method
+    signature: func (x *EntityStorageEntry) GetID() string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: EntityStorageEntry.GetLastUpdateTime
+    kind: method
+    signature: func (x *EntityStorageEntry) GetLastUpdateTime() *timestamppb.Timestamp
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: EntityStorageEntry.GetMFASecrets
+    kind: method
+    signature: func (x *EntityStorageEntry) GetMFASecrets() map[string]*mfa.Secret
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: EntityStorageEntry.GetMergedEntityIDs
+    kind: method
+    signature: func (x *EntityStorageEntry) GetMergedEntityIDs() []string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: EntityStorageEntry.GetMetadata
+    kind: method
+    signature: func (x *EntityStorageEntry) GetMetadata() map[string]string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: EntityStorageEntry.GetName
+    kind: method
+    signature: func (x *EntityStorageEntry) GetName() string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: EntityStorageEntry.GetPersonas
+    kind: method
+    signature: func (x *EntityStorageEntry) GetPersonas() []*PersonaIndexEntry
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: EntityStorageEntry.GetPolicies
+    kind: method
+    signature: func (x *EntityStorageEntry) GetPolicies() []string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: EntityStorageEntry.ProtoMessage
+    kind: method
+    signature: func (*EntityStorageEntry) ProtoMessage()
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: EntityStorageEntry.ProtoReflect
+    kind: method
+    signature: func (x *EntityStorageEntry) ProtoReflect() protoreflect.Message
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: EntityStorageEntry.Reset
+    kind: method
+    signature: func (x *EntityStorageEntry) Reset()
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: EntityStorageEntry.String
+    kind: method
+    signature: func (x *EntityStorageEntry) String() string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Group
+    kind: struct
+    signature: type Group struct
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Group.Clone
+    kind: method
+    signature: func (g *Group) Clone() (*Group, error)
+    file: third_party/openbao/internal/helper/identity/identity.go
+  - name: Group.Descriptor
+    kind: method
+    signature: func (*Group) Descriptor() ([]byte, []int)
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Group.GetAlias
+    kind: method
+    signature: func (x *Group) GetAlias() *Alias
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Group.GetBucketKey
+    kind: method
+    signature: func (x *Group) GetBucketKey() string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Group.GetCreationTime
+    kind: method
+    signature: func (x *Group) GetCreationTime() *timestamppb.Timestamp
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Group.GetID
+    kind: method
+    signature: func (x *Group) GetID() string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Group.GetLastUpdateTime
+    kind: method
+    signature: func (x *Group) GetLastUpdateTime() *timestamppb.Timestamp
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Group.GetMemberEntityIDs
+    kind: method
+    signature: func (x *Group) GetMemberEntityIDs() []string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Group.GetMetadata
+    kind: method
+    signature: func (x *Group) GetMetadata() map[string]string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Group.GetModifyIndex
+    kind: method
+    signature: func (x *Group) GetModifyIndex() uint64
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Group.GetName
+    kind: method
+    signature: func (x *Group) GetName() string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Group.GetNamespaceID
+    kind: method
+    signature: func (x *Group) GetNamespaceID() string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Group.GetParentGroupIDs
+    kind: method
+    signature: func (x *Group) GetParentGroupIDs() []string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Group.GetPolicies
+    kind: method
+    signature: func (x *Group) GetPolicies() []string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Group.GetType
+    kind: method
+    signature: func (x *Group) GetType() string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Group.ProtoMessage
+    kind: method
+    signature: func (*Group) ProtoMessage()
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Group.ProtoReflect
+    kind: method
+    signature: func (x *Group) ProtoReflect() protoreflect.Message
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Group.Reset
+    kind: method
+    signature: func (x *Group) Reset()
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: Group.SentinelGet
+    kind: method
+    signature: func (g *Group) SentinelGet(key string) (any, error)
+    file: third_party/openbao/internal/helper/identity/sentinel.go
+  - name: Group.SentinelKeys
+    kind: method
+    signature: func (g *Group) SentinelKeys() []string
+    file: third_party/openbao/internal/helper/identity/sentinel.go
+  - name: Group.String
+    kind: method
+    signature: func (x *Group) String() string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: LocalAliases
+    kind: struct
+    signature: type LocalAliases struct
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: LocalAliases.Descriptor
+    kind: method
+    signature: func (*LocalAliases) Descriptor() ([]byte, []int)
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: LocalAliases.GetAliases
+    kind: method
+    signature: func (x *LocalAliases) GetAliases() []*Alias
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: LocalAliases.ProtoMessage
+    kind: method
+    signature: func (*LocalAliases) ProtoMessage()
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: LocalAliases.ProtoReflect
+    kind: method
+    signature: func (x *LocalAliases) ProtoReflect() protoreflect.Message
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: LocalAliases.Reset
+    kind: method
+    signature: func (x *LocalAliases) Reset()
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: LocalAliases.String
+    kind: method
+    signature: func (x *LocalAliases) String() string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: PersonaIndexEntry
+    kind: struct
+    signature: type PersonaIndexEntry struct
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: PersonaIndexEntry.Descriptor
+    kind: method
+    signature: func (*PersonaIndexEntry) Descriptor() ([]byte, []int)
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: PersonaIndexEntry.GetCreationTime
+    kind: method
+    signature: func (x *PersonaIndexEntry) GetCreationTime() *timestamppb.Timestamp
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: PersonaIndexEntry.GetEntityID
+    kind: method
+    signature: func (x *PersonaIndexEntry) GetEntityID() string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: PersonaIndexEntry.GetID
+    kind: method
+    signature: func (x *PersonaIndexEntry) GetID() string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: PersonaIndexEntry.GetLastUpdateTime
+    kind: method
+    signature: func (x *PersonaIndexEntry) GetLastUpdateTime() *timestamppb.Timestamp
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: PersonaIndexEntry.GetMergedFromEntityIDs
+    kind: method
+    signature: func (x *PersonaIndexEntry) GetMergedFromEntityIDs() []string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: PersonaIndexEntry.GetMetadata
+    kind: method
+    signature: func (x *PersonaIndexEntry) GetMetadata() map[string]string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: PersonaIndexEntry.GetMountAccessor
+    kind: method
+    signature: func (x *PersonaIndexEntry) GetMountAccessor() string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: PersonaIndexEntry.GetMountPath
+    kind: method
+    signature: func (x *PersonaIndexEntry) GetMountPath() string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: PersonaIndexEntry.GetMountType
+    kind: method
+    signature: func (x *PersonaIndexEntry) GetMountType() string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: PersonaIndexEntry.GetName
+    kind: method
+    signature: func (x *PersonaIndexEntry) GetName() string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: PersonaIndexEntry.ProtoMessage
+    kind: method
+    signature: func (*PersonaIndexEntry) ProtoMessage()
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: PersonaIndexEntry.ProtoReflect
+    kind: method
+    signature: func (x *PersonaIndexEntry) ProtoReflect() protoreflect.Message
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: PersonaIndexEntry.Reset
+    kind: method
+    signature: func (x *PersonaIndexEntry) Reset()
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: PersonaIndexEntry.String
+    kind: method
+    signature: func (x *PersonaIndexEntry) String() string
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+  - name: ToSDKAlias
+    kind: function
+    signature: func ToSDKAlias(a *Alias) *logical.Alias
+    file: third_party/openbao/internal/helper/identity/identity.go
+  - name: ToSDKEntity
+    kind: function
+    signature: func ToSDKEntity(e *Entity) *logical.Entity
+    file: third_party/openbao/internal/helper/identity/identity.go
+  - name: ToSDKGroup
+    kind: function
+    signature: func ToSDKGroup(g *Group) *logical.Group
+    file: third_party/openbao/internal/helper/identity/identity.go
+  - name: ToSDKGroups
+    kind: function
+    signature: func ToSDKGroups(groups []*Group) []*logical.Group
+    file: third_party/openbao/internal/helper/identity/identity.go
 codeRefIndex:
 - file:third_party/openbao/internal/helper/identity/identity.go identity.go@third_party/openbao/internal/helper/identity/identity.go
 - file:third_party/openbao/internal/helper/identity/sentinel.go sentinel.go@third_party/openbao/internal/helper/identity/sentinel.go
@@ -83,665 +745,3 @@ codeRefIndex:
 - struct:b60430e25f9e3f26f4a1f53626ce91e5 Alias@third_party/openbao/internal/helper/identity/types.pb.go:412
 - struct:d2ada21a134a8dfe9198be9bdf217342 Group@third_party/openbao/internal/helper/identity/types.pb.go:30
 - struct:e02f51e1da79f484b9169f9342d482f2 EntityStorageEntry@third_party/openbao/internal/helper/identity/types.pb.go:592
-kind: SystemContext
-metadata:
-  name: third-party-openbao-internal-helper-identity
-  namespace: default
-spec:
-  intent: 'This context exists to describe the vendored OpenBao identity helper package
-    that deno-kcp carries under third_party. It is the boundary between the generated
-    protobuf identity records and the rest of the system: the storage layer clones
-    and mutates these messages, policy evaluation reads them through sentinel, and
-    the logical layer consumes them only after the ToSDK projection functions run.
-    The spec records that projection, the deep-copy semantics, the alias upsert rule
-    and the sentinel key surface, because callers outside this package depend on those
-    behaviors and on the exact set of message fields the generated types carry.'
-  interfaces:
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: struct
-    name: Alias
-    signature: type Alias struct
-  - file: third_party/openbao/internal/helper/identity/identity.go
-    kind: method
-    name: Alias.Clone
-    signature: func (a *Alias) Clone() (*Alias, error)
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Alias.Descriptor
-    signature: func (*Alias) Descriptor() ([]byte, []int)
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Alias.GetCanonicalID
-    signature: func (x *Alias) GetCanonicalID() string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Alias.GetCreationTime
-    signature: func (x *Alias) GetCreationTime() *timestamppb.Timestamp
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Alias.GetCustomMetadata
-    signature: func (x *Alias) GetCustomMetadata() map[string]string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Alias.GetID
-    signature: func (x *Alias) GetID() string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Alias.GetLastUpdateTime
-    signature: func (x *Alias) GetLastUpdateTime() *timestamppb.Timestamp
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Alias.GetLocal
-    signature: func (x *Alias) GetLocal() bool
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Alias.GetLocalBucketKey
-    signature: func (x *Alias) GetLocalBucketKey() string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Alias.GetMergedFromCanonicalIDs
-    signature: func (x *Alias) GetMergedFromCanonicalIDs() []string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Alias.GetMetadata
-    signature: func (x *Alias) GetMetadata() map[string]string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Alias.GetMountAccessor
-    signature: func (x *Alias) GetMountAccessor() string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Alias.GetMountPath
-    signature: func (x *Alias) GetMountPath() string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Alias.GetMountType
-    signature: func (x *Alias) GetMountType() string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Alias.GetName
-    signature: func (x *Alias) GetName() string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Alias.GetNamespaceID
-    signature: func (x *Alias) GetNamespaceID() string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Alias.ProtoMessage
-    signature: func (*Alias) ProtoMessage()
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Alias.ProtoReflect
-    signature: func (x *Alias) ProtoReflect() protoreflect.Message
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Alias.Reset
-    signature: func (x *Alias) Reset()
-  - file: third_party/openbao/internal/helper/identity/sentinel.go
-    kind: method
-    name: Alias.SentinelGet
-    signature: func (a *Alias) SentinelGet(key string) (any, error)
-  - file: third_party/openbao/internal/helper/identity/sentinel.go
-    kind: method
-    name: Alias.SentinelKeys
-    signature: func (a *Alias) SentinelKeys() []string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Alias.String
-    signature: func (x *Alias) String() string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: struct
-    name: Entity
-    signature: type Entity struct
-  - file: third_party/openbao/internal/helper/identity/identity.go
-    kind: method
-    name: Entity.Clone
-    signature: func (e *Entity) Clone() (*Entity, error)
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Entity.Descriptor
-    signature: func (*Entity) Descriptor() ([]byte, []int)
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Entity.GetAliases
-    signature: func (x *Entity) GetAliases() []*Alias
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Entity.GetBucketKey
-    signature: func (x *Entity) GetBucketKey() string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Entity.GetCreationTime
-    signature: func (x *Entity) GetCreationTime() *timestamppb.Timestamp
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Entity.GetDisabled
-    signature: func (x *Entity) GetDisabled() bool
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Entity.GetID
-    signature: func (x *Entity) GetID() string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Entity.GetLastUpdateTime
-    signature: func (x *Entity) GetLastUpdateTime() *timestamppb.Timestamp
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Entity.GetMFASecrets
-    signature: func (x *Entity) GetMFASecrets() map[string]*mfa.Secret
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Entity.GetMergedEntityIDs
-    signature: func (x *Entity) GetMergedEntityIDs() []string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Entity.GetMetadata
-    signature: func (x *Entity) GetMetadata() map[string]string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Entity.GetName
-    signature: func (x *Entity) GetName() string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Entity.GetNamespaceID
-    signature: func (x *Entity) GetNamespaceID() string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Entity.GetPolicies
-    signature: func (x *Entity) GetPolicies() []string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Entity.ProtoMessage
-    signature: func (*Entity) ProtoMessage()
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Entity.ProtoReflect
-    signature: func (x *Entity) ProtoReflect() protoreflect.Message
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Entity.Reset
-    signature: func (x *Entity) Reset()
-  - file: third_party/openbao/internal/helper/identity/sentinel.go
-    kind: method
-    name: Entity.SentinelGet
-    signature: func (e *Entity) SentinelGet(key string) (any, error)
-  - file: third_party/openbao/internal/helper/identity/sentinel.go
-    kind: method
-    name: Entity.SentinelKeys
-    signature: func (e *Entity) SentinelKeys() []string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Entity.String
-    signature: func (x *Entity) String() string
-  - file: third_party/openbao/internal/helper/identity/identity.go
-    kind: method
-    name: Entity.UpsertAlias
-    signature: func (e *Entity) UpsertAlias(alias *Alias)
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: struct
-    name: EntityStorageEntry
-    signature: type EntityStorageEntry struct
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: EntityStorageEntry.Descriptor
-    signature: func (*EntityStorageEntry) Descriptor() ([]byte, []int)
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: EntityStorageEntry.GetBucketKeyHash
-    signature: func (x *EntityStorageEntry) GetBucketKeyHash() string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: EntityStorageEntry.GetCreationTime
-    signature: func (x *EntityStorageEntry) GetCreationTime() *timestamppb.Timestamp
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: EntityStorageEntry.GetID
-    signature: func (x *EntityStorageEntry) GetID() string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: EntityStorageEntry.GetLastUpdateTime
-    signature: func (x *EntityStorageEntry) GetLastUpdateTime() *timestamppb.Timestamp
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: EntityStorageEntry.GetMFASecrets
-    signature: func (x *EntityStorageEntry) GetMFASecrets() map[string]*mfa.Secret
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: EntityStorageEntry.GetMergedEntityIDs
-    signature: func (x *EntityStorageEntry) GetMergedEntityIDs() []string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: EntityStorageEntry.GetMetadata
-    signature: func (x *EntityStorageEntry) GetMetadata() map[string]string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: EntityStorageEntry.GetName
-    signature: func (x *EntityStorageEntry) GetName() string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: EntityStorageEntry.GetPersonas
-    signature: func (x *EntityStorageEntry) GetPersonas() []*PersonaIndexEntry
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: EntityStorageEntry.GetPolicies
-    signature: func (x *EntityStorageEntry) GetPolicies() []string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: EntityStorageEntry.ProtoMessage
-    signature: func (*EntityStorageEntry) ProtoMessage()
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: EntityStorageEntry.ProtoReflect
-    signature: func (x *EntityStorageEntry) ProtoReflect() protoreflect.Message
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: EntityStorageEntry.Reset
-    signature: func (x *EntityStorageEntry) Reset()
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: EntityStorageEntry.String
-    signature: func (x *EntityStorageEntry) String() string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: struct
-    name: Group
-    signature: type Group struct
-  - file: third_party/openbao/internal/helper/identity/identity.go
-    kind: method
-    name: Group.Clone
-    signature: func (g *Group) Clone() (*Group, error)
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Group.Descriptor
-    signature: func (*Group) Descriptor() ([]byte, []int)
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Group.GetAlias
-    signature: func (x *Group) GetAlias() *Alias
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Group.GetBucketKey
-    signature: func (x *Group) GetBucketKey() string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Group.GetCreationTime
-    signature: func (x *Group) GetCreationTime() *timestamppb.Timestamp
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Group.GetID
-    signature: func (x *Group) GetID() string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Group.GetLastUpdateTime
-    signature: func (x *Group) GetLastUpdateTime() *timestamppb.Timestamp
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Group.GetMemberEntityIDs
-    signature: func (x *Group) GetMemberEntityIDs() []string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Group.GetMetadata
-    signature: func (x *Group) GetMetadata() map[string]string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Group.GetModifyIndex
-    signature: func (x *Group) GetModifyIndex() uint64
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Group.GetName
-    signature: func (x *Group) GetName() string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Group.GetNamespaceID
-    signature: func (x *Group) GetNamespaceID() string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Group.GetParentGroupIDs
-    signature: func (x *Group) GetParentGroupIDs() []string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Group.GetPolicies
-    signature: func (x *Group) GetPolicies() []string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Group.GetType
-    signature: func (x *Group) GetType() string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Group.ProtoMessage
-    signature: func (*Group) ProtoMessage()
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Group.ProtoReflect
-    signature: func (x *Group) ProtoReflect() protoreflect.Message
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Group.Reset
-    signature: func (x *Group) Reset()
-  - file: third_party/openbao/internal/helper/identity/sentinel.go
-    kind: method
-    name: Group.SentinelGet
-    signature: func (g *Group) SentinelGet(key string) (any, error)
-  - file: third_party/openbao/internal/helper/identity/sentinel.go
-    kind: method
-    name: Group.SentinelKeys
-    signature: func (g *Group) SentinelKeys() []string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: Group.String
-    signature: func (x *Group) String() string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: struct
-    name: LocalAliases
-    signature: type LocalAliases struct
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: LocalAliases.Descriptor
-    signature: func (*LocalAliases) Descriptor() ([]byte, []int)
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: LocalAliases.GetAliases
-    signature: func (x *LocalAliases) GetAliases() []*Alias
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: LocalAliases.ProtoMessage
-    signature: func (*LocalAliases) ProtoMessage()
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: LocalAliases.ProtoReflect
-    signature: func (x *LocalAliases) ProtoReflect() protoreflect.Message
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: LocalAliases.Reset
-    signature: func (x *LocalAliases) Reset()
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: LocalAliases.String
-    signature: func (x *LocalAliases) String() string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: struct
-    name: PersonaIndexEntry
-    signature: type PersonaIndexEntry struct
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: PersonaIndexEntry.Descriptor
-    signature: func (*PersonaIndexEntry) Descriptor() ([]byte, []int)
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: PersonaIndexEntry.GetCreationTime
-    signature: func (x *PersonaIndexEntry) GetCreationTime() *timestamppb.Timestamp
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: PersonaIndexEntry.GetEntityID
-    signature: func (x *PersonaIndexEntry) GetEntityID() string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: PersonaIndexEntry.GetID
-    signature: func (x *PersonaIndexEntry) GetID() string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: PersonaIndexEntry.GetLastUpdateTime
-    signature: func (x *PersonaIndexEntry) GetLastUpdateTime() *timestamppb.Timestamp
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: PersonaIndexEntry.GetMergedFromEntityIDs
-    signature: func (x *PersonaIndexEntry) GetMergedFromEntityIDs() []string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: PersonaIndexEntry.GetMetadata
-    signature: func (x *PersonaIndexEntry) GetMetadata() map[string]string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: PersonaIndexEntry.GetMountAccessor
-    signature: func (x *PersonaIndexEntry) GetMountAccessor() string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: PersonaIndexEntry.GetMountPath
-    signature: func (x *PersonaIndexEntry) GetMountPath() string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: PersonaIndexEntry.GetMountType
-    signature: func (x *PersonaIndexEntry) GetMountType() string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: PersonaIndexEntry.GetName
-    signature: func (x *PersonaIndexEntry) GetName() string
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: PersonaIndexEntry.ProtoMessage
-    signature: func (*PersonaIndexEntry) ProtoMessage()
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: PersonaIndexEntry.ProtoReflect
-    signature: func (x *PersonaIndexEntry) ProtoReflect() protoreflect.Message
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: PersonaIndexEntry.Reset
-    signature: func (x *PersonaIndexEntry) Reset()
-  - file: third_party/openbao/internal/helper/identity/types.pb.go
-    kind: method
-    name: PersonaIndexEntry.String
-    signature: func (x *PersonaIndexEntry) String() string
-  - file: third_party/openbao/internal/helper/identity/identity.go
-    kind: function
-    name: ToSDKAlias
-    signature: func ToSDKAlias(a *Alias) *logical.Alias
-  - file: third_party/openbao/internal/helper/identity/identity.go
-    kind: function
-    name: ToSDKEntity
-    signature: func ToSDKEntity(e *Entity) *logical.Entity
-  - file: third_party/openbao/internal/helper/identity/identity.go
-    kind: function
-    name: ToSDKGroup
-    signature: func ToSDKGroup(g *Group) *logical.Group
-  - file: third_party/openbao/internal/helper/identity/identity.go
-    kind: function
-    name: ToSDKGroups
-    signature: func ToSDKGroups(groups []*Group) []*logical.Group
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/identity/types.pb.go
-    - method:3a59fc3ebf81f1bba50fb60f550ebe24
-    - method:4021e634dba69aab9bd00e1945126142
-    - method:4b347d858e40f0f50ab3336fd4ec802c
-    - method:5ad26193a3bd1b2aca5a138cbf6b29da
-    - method:6cc7e3b4efa9fdefe765cf2968901ccb
-    - method:814ae525e02cbc2016c4925e4ba439b9
-    - method:8bc7ccc4d133f8ce12a6a632b5156635
-    - method:927c75cc337f000f42e2c12958d0abfa
-    - method:a0271af61f4006c44e2f13a806c23d22
-    - method:a0df55e799840b6954b162cb71d10bc3
-    - method:c1e1bb7bc6558060c86c1cc8dfcb6fee
-    - method:ebda247b59160a98a607c08715bcaacd
-    - method:f0d89585347315890884585ee20888b7
-    - method:f2f95fea65ba852d35cc2c18a88a66fa
-    id: r.alias-fields
-    level: MUST
-    text: The Alias message must expose generated getters for ID, CanonicalID, MountType,
-      MountAccessor, MountPath, Metadata, Name, CreationTime, LastUpdateTime, MergedFromCanonicalIDs,
-      NamespaceID, CustomMetadata, Local and LocalBucketKey, returning zero values
-      for a nil receiver, covering both the mount binding and the local-alias bookkeeping
-      a login alias needs.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/identity/identity.go
-    - method:2ac86f8dcde200fcf7386b4ec3cd12e3
-    - method:8084eb55189c0096ec47357ee88503e1
-    - method:bfcd35be44bbca752cd28184e592c0ea
-    id: r.clone-deep-copy
-    level: MUST
-    text: 'Clone must return a value independent of the receiver, produced by marshaling
-      the message with proto.Marshal and unmarshaling the bytes into a fresh local
-      value, so callers can mutate the copy without touching the original. A marshal
-      failure must return an error of the form "failed to marshal group/entity/alias:
-      %w" and an unmarshal failure "failed to unmarshal group/entity/alias: %w", each
-      wrapping the underlying error.'
-  - codeRefs:
-    - method:2ac86f8dcde200fcf7386b4ec3cd12e3
-    - method:8084eb55189c0096ec47357ee88503e1
-    - method:bfcd35be44bbca752cd28184e592c0ea
-    id: r.clone-nil-receiver-guard
-    level: MUST
-    text: Group.Clone, Entity.Clone and Alias.Clone must return a nil result and a
-      non-nil error when the receiver is nil, so callers that clone optional records
-      never panic. Group.Clone returns the error "nil group" and Entity.Clone returns
-      "nil entity".
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/identity/types.pb.go
-    - method:2af2e4a9f91df441c10290f6043aa7cf
-    - method:35115e00d99b877b233cd60c75025042
-    - method:37d1c651299599200a11ac10f79430d6
-    - method:3f2ff671f75ec299da3b0b43dd8e3ba4
-    - method:494eb64560312218991148e364119c70
-    - method:6697bb4e9908e9e69a325c05cce4064c
-    - method:72f4562b980b38d91fec66f54ca11d50
-    - method:8a9d7046edd691401f6fc57daa1fca33
-    - method:8a9e173ade16ae0e413f1e0955bbddd5
-    - method:a506c415639f5dd2ef4757f6d2169370
-    - method:c5c9c9956fea8c6b1a60522bff577895
-    - method:f7dc0ff82ad7c94af164e0ebd1829d2d
-    id: r.entity-fields
-    level: MUST
-    text: The Entity message must expose generated getters for Aliases, ID, Name,
-      Metadata, CreationTime, LastUpdateTime, MergedEntityIDs, Policies, BucketKey,
-      MFASecrets, Disabled and NamespaceID, returning zero values for a nil receiver,
-      so the store can reconstruct an entity together with its alias list, its merge
-      history and its MFA configuration.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/identity/types.pb.go
-    - method:0990d3641a76b905e6a41983f8785fd5
-    - method:0cd9e5a7144fdf4f81caca70678adbb4
-    - method:0f296dfb5192107082a5c668650c5aff
-    - method:1b074507c8b2673724ee776090541db7
-    - method:3ef05e60536baf567e56b8a9497ef19b
-    - method:3f0629ced431fa65c18afd1251a88fde
-    - method:4d02e5c3f8937b92b8e9d15eaa0371d7
-    - method:897db93618ba44d838604fcc90f5dee3
-    - method:b463d3425fae3994be224c31b10027cd
-    - method:d828e830683952e35b46f84bc17300a6
-    - method:dcc092ec25f3173dd7c40098e6bbce67
-    - method:f1073a2b2e29da8a32007ed75fd6f3b2
-    - method:f335f1bc8cba50a053a953e07a30540f
-    id: r.group-fields
-    level: MUST
-    text: The Group message must expose generated getters for ID, Name, Policies,
-      ParentGroupIDs, MemberEntityIDs, Metadata, CreationTime, LastUpdateTime, ModifyIndex,
-      BucketKey, Alias, Type and NamespaceID, each returning the zero value when the
-      receiver is nil, so policy and storage code can read group relationships without
-      a nil check.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/identity/types.pb.go
-    - method:4470085374d7f4ba436e452ec8293f68
-    - struct:8dff879cc034dd7e16620035440706cd
-    id: r.local-aliases-collection
-    level: MUST
-    text: The LocalAliases message must exist as a protobuf message holding a slice
-      of Aliases reachable through GetAliases, used to carry the aliases scoped to
-      a namespace as a single serializable record.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/identity/types.pb.go
-    - struct:25869f1643374a790924a3e56aa00521
-    - struct:8dff879cc034dd7e16620035440706cd
-    - struct:a226a1ba122a45f0cc9af9e498c06d2d
-    - struct:b60430e25f9e3f26f4a1f53626ce91e5
-    - struct:d2ada21a134a8dfe9198be9bdf217342
-    - struct:e02f51e1da79f484b9169f9342d482f2
-    id: r.protobuf-message-contract
-    level: MUST
-    text: 'Group, LocalAliases, Entity, Alias, EntityStorageEntry and PersonaIndexEntry
-      must each implement the protobuf message contract: Reset to clear the message
-      to its zero state, String for a textual rendering, ProtoMessage as the marker
-      method, ProtoReflect returning a protoreflect.Message, and Descriptor returning
-      the compressed file descriptor bytes and the message''s index path.'
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/identity/identity.go
-    - function:f0dbc95dbc4552d8b598838dc3963d39
-    id: r.sdk-alias-projection
-    level: MUST
-    text: ToSDKAlias must return nil for a nil input, and otherwise build a logical.Alias
-      carrying Name, ID, MountAccessor, MountType, NamespaceID and CustomMetadata
-      from the internal alias, with Metadata copied element by element into a newly
-      allocated map of the same capacity so later mutation of the SDK value does not
-      alias the internal map.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/identity/identity.go
-    - function:2dea232655a7227c40ee3249769304c2
-    - function:f0dbc95dbc4552d8b598838dc3963d39
-    id: r.sdk-entity-projection
-    level: MUST
-    text: ToSDKEntity must return nil for a nil input; otherwise it must allocate
-      an alias slice of the same length as the entity's Aliases and convert every
-      element through ToSDKAlias, copy Metadata into a new map, and carry ID, Name,
-      Disabled, Aliases and NamespaceID onto the resulting logical.Entity.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/identity/identity.go
-    - function:565b69f3842b1e6add6876bc37af887b
-    - function:a56aa82127d755b088d2dbb960f2f300
-    id: r.sdk-group-projection
-    level: MUST
-    text: ToSDKGroup must return nil for a nil input and otherwise project ID, Name,
-      a copied Metadata map and NamespaceID onto a logical.Group; ToSDKGroups must
-      return nil for a nil input slice and otherwise allocate a slice of the same
-      length and map each element through ToSDKGroup in order, so index correspondence
-      with the input is preserved.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/identity/sentinel.go
-    - method:33086909f4c7f44a4b4eba7b3b0e83d9
-    - method:6ae4bc5f65012623a31e1cfaabd3050c
-    - method:d95c1751f424e3ac61122deedc655301
-    id: r.sentinel-get-by-key
-    level: MUST
-    text: Entity.SentinelGet, Alias.SentinelGet and Group.SentinelGet must return
-      the field value for a supported key and report an unrecognized key as an error
-      rather than falling through with a nil value and no error, so policy evaluation
-      never silently reads a missing field as nil.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/identity/sentinel.go
-    - method:5034f8fb0e5f72abaaa5f21845549ab8
-    - method:797e06da650642e6007919dc34801e0b
-    - method:c92d6261f236d42200cd88cc48862c04
-    id: r.sentinel-keys-enumeration
-    level: MUST
-    text: Entity.SentinelKeys, Alias.SentinelKeys and Group.SentinelKeys must each
-      return the set of field names that the matching SentinelGet accepts, so policy
-      authors can enumerate the readable surface of the record and the two methods
-      stay in agreement.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/identity/types.pb.go
-    - method:177814e65fe6a22c0b973f933ce2d751
-    - method:183fa03222159edc932ae71b61b95788
-    - method:21459f1476d4ad0526f18b0210c47f05
-    - method:257e51e5d27c25c8ffce6ebaea043727
-    - method:2a04e2723735fa06824cceb45c8497d8
-    - method:2cfe5b89173660182d2000010f7917a3
-    - method:2ea93462942a470f7d0b7eca34f7bb48
-    - method:54aeba2dba3e7531305602cfa7248af9
-    - method:56ddad86501a1ab53631528dc66dfa1b
-    - method:5d730bbdf3adcad6de7237be420c747f
-    - method:6aed99ce5896d321fca7be8e7e3c8f12
-    - method:7024fd60acce290117a30a409f784950
-    - method:784e61ea9716e6f3ac538aafd5f72193
-    - method:88970f8cfc062997f754a032d70c0303
-    - method:9627412cb745cf4af9b59e14880e2084
-    - method:9bcf62d9f2fcff6d61bb4be4f9adec2d
-    - method:b5e995a367c1b6fa25c3bd92631b72bd
-    - method:e2b8444df9419169e16809ac6fc00cab
-    - method:fc13844321d9c0fb47d34c2f8c9aeb27
-    - method:fc22643b8e673d802895b7b61efae50b
-    id: r.storage-entry-persona-index
-    level: MUST
-    text: EntityStorageEntry must expose getters for Personas, ID, Name, Metadata,
-      CreationTime, LastUpdateTime, MergedEntityIDs, Policies, BucketKeyHash and MFASecrets,
-      and each PersonaIndexEntry must expose getters for ID, EntityID, MountType,
-      MountAccessor, MountPath, Metadata, Name, CreationTime, LastUpdateTime and MergedFromEntityIDs,
-      so the persisted storage record retains its persona index and the mount-scoped
-      fields needed to look an entity up from a login mount.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/identity/identity.go
-    - method:f6442409507b0c8d1ce147970db45259
-    id: r.upsert-alias-by-id
-    level: MUST
-    text: Entity.UpsertAlias must walk the Aliases slice and, at the first index whose
-      alias ID equals the given alias ID, overwrite that slot and return, preserving
-      the alias's position; when no ID matches it must append the alias to the end
-      of the slice. A nil alias argument must not be treated as a match.
-  upstream: self

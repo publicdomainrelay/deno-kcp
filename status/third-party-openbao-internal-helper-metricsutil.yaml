@@ -1,17 +1,20 @@
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 7025d0516bd8e75c05f8ee0656fa40e34077a721c5d3bfa972c6a1b783646fc2
+realizedSpecHash: 105a3810731887342b25076995866a60500957c6a35adfbf6ac6f00069152d85
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
+- type: CodeSynced
+  status: "True"
   reason: InterfacesObserved
-  status: "True"
-  type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+  message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+- type: Drifted
   status: "False"
-  type: Drifted
-- message: the spec passes the validator
-  reason: ValidatorPassed
+  reason: FingerprintEqual
+  message: observed facts match the synced fingerprint
+- type: SpecValid
   status: "True"
-  type: SpecValid
+  reason: ValidatorPassed
+  message: the spec passes the validator
 observed:
   files:
   - third_party/openbao/internal/helper/metricsutil/bucket.go
@@ -22,243 +25,240 @@ observed:
   - third_party/openbao/internal/helper/metricsutil/metricsutil_test.go
   - third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
   - third_party/openbao/internal/helper/metricsutil/wrapped_metrics_test.go
-  fingerprint: 7025d0516bd8e75c05f8ee0656fa40e34077a721c5d3bfa972c6a1b783646fc2
   interfaces:
-  - codegraphId: function:5292eae29ebbbca15c235ec4603b5b98
-    file: third_party/openbao/internal/helper/metricsutil/bucket.go
+  - name: TTLBucket
     kind: function
-    line: 29
-    name: TTLBucket
     signature: (ttl time.Duration) string
-  - codegraphId: function:6f5b66a4523240a3a7f1d98dfd95eec6
     file: third_party/openbao/internal/helper/metricsutil/bucket.go
+    line: 29
+    codegraphId: function:5292eae29ebbbca15c235ec4603b5b98
+  - name: ExpiryBucket
     kind: function
-    line: 43
-    name: ExpiryBucket
     signature: (expiryTime time.Time, leaseEpsilon time.Duration, rollingWindow time.Time,
       labelNS string, useNS bool) *LeaseExpiryLabel
-  - codegraphId: struct:226b57f38bdb4a41500477483c75e593
-    file: third_party/openbao/internal/helper/metricsutil/gauge_process.go
+    file: third_party/openbao/internal/helper/metricsutil/bucket.go
+    line: 43
+    codegraphId: function:6f5b66a4523240a3a7f1d98dfd95eec6
+  - name: GaugeLabelValues
     kind: struct
+    file: third_party/openbao/internal/helper/metricsutil/gauge_process.go
     line: 19
-    name: GaugeLabelValues
-  - codegraphId: struct:1cc804e24280ed36fe54a871e72c97d3
-    file: third_party/openbao/internal/helper/metricsutil/gauge_process.go
+    codegraphId: struct:226b57f38bdb4a41500477483c75e593
+  - name: GaugeCollectionProcess
     kind: struct
-    line: 39
-    name: GaugeCollectionProcess
-  - codegraphId: function:09d38a2a272e5fc175f70fbf18d79a5c
     file: third_party/openbao/internal/helper/metricsutil/gauge_process.go
+    line: 39
+    codegraphId: struct:1cc804e24280ed36fe54a871e72c97d3
+  - name: NewGaugeCollectionProcess
     kind: function
-    line: 72
-    name: NewGaugeCollectionProcess
     signature: "(\n\tkey []string,\n\tid []Label,\n\tcollector GaugeCollector,\n\tm
       metrics.MetricSink,\n\tgaugeInterval time.Duration,\n\tmaxGaugeCardinality int,\n\tlogger
       log.Logger,\n) (*GaugeCollectionProcess, error)"
-  - codegraphId: method:5f91279461293ea622bcca95e362a485
     file: third_party/openbao/internal/helper/metricsutil/gauge_process.go
+    line: 72
+    codegraphId: function:09d38a2a272e5fc175f70fbf18d79a5c
+  - name: ClusterMetricSink.NewGaugeCollectionProcess
     kind: method
-    line: 98
-    name: ClusterMetricSink.NewGaugeCollectionProcess
     signature: "(\n\tkey []string,\n\tid []Label,\n\tcollector GaugeCollector,\n\tlogger
       log.Logger,\n) (*GaugeCollectionProcess, error)"
-  - codegraphId: method:e73fe13ede92e09e3c6eaf53c8298e50
     file: third_party/openbao/internal/helper/metricsutil/gauge_process.go
+    line: 98
+    codegraphId: method:5f91279461293ea622bcca95e362a485
+  - name: GaugeCollectionProcess.Run
     kind: method
+    signature: ()
+    file: third_party/openbao/internal/helper/metricsutil/gauge_process.go
     line: 254
-    name: GaugeCollectionProcess.Run
+    codegraphId: method:e73fe13ede92e09e3c6eaf53c8298e50
+  - name: GaugeCollectionProcess.Stop
+    kind: method
     signature: ()
-  - codegraphId: method:505da085c05d076d33e28d2c2515060d
     file: third_party/openbao/internal/helper/metricsutil/gauge_process.go
-    kind: method
     line: 281
-    name: GaugeCollectionProcess.Stop
-    signature: ()
-  - codegraphId: struct:7885e82e78865fb57f133939c1aefa3e
-    file: third_party/openbao/internal/helper/metricsutil/metricsutil.go
+    codegraphId: method:505da085c05d076d33e28d2c2515060d
+  - name: MetricsHelper
     kind: struct
+    file: third_party/openbao/internal/helper/metricsutil/metricsutil.go
     line: 39
-    name: MetricsHelper
-  - codegraphId: struct:171a486fcc6002030b8645ddc08c3b61
-    file: third_party/openbao/internal/helper/metricsutil/metricsutil.go
+    codegraphId: struct:7885e82e78865fb57f133939c1aefa3e
+  - name: GaugeMetrics
     kind: struct
+    file: third_party/openbao/internal/helper/metricsutil/metricsutil.go
     line: 45
-    name: GaugeMetrics
-  - codegraphId: struct:4981e221e11dc27b727bdebc227a5c86
-    file: third_party/openbao/internal/helper/metricsutil/metricsutil.go
+    codegraphId: struct:171a486fcc6002030b8645ddc08c3b61
+  - name: GaugeMetric
     kind: struct
+    file: third_party/openbao/internal/helper/metricsutil/metricsutil.go
     line: 53
-    name: GaugeMetric
-  - codegraphId: function:cd7219ca548a1f92b7e8cb6b8f23f79f
-    file: third_party/openbao/internal/helper/metricsutil/metricsutil.go
+    codegraphId: struct:4981e221e11dc27b727bdebc227a5c86
+  - name: NewMetricsHelper
     kind: function
-    line: 59
-    name: NewMetricsHelper
     signature: (inMem *metrics.InmemSink, enablePrometheus bool) *MetricsHelper
-  - codegraphId: function:06a1b4a9af383486f41af9ed08d00691
     file: third_party/openbao/internal/helper/metricsutil/metricsutil.go
+    line: 59
+    codegraphId: function:cd7219ca548a1f92b7e8cb6b8f23f79f
+  - name: FormatFromRequest
     kind: function
-    line: 63
-    name: FormatFromRequest
     signature: (req *logical.Request) string
-  - codegraphId: method:c5bb674e8e0fbc82c4c1be4688333167
     file: third_party/openbao/internal/helper/metricsutil/metricsutil.go
+    line: 63
+    codegraphId: function:06a1b4a9af383486f41af9ed08d00691
+  - name: MetricsHelper.AddGaugeLoopMetric
     kind: method
-    line: 81
-    name: MetricsHelper.AddGaugeLoopMetric
     signature: (key []string, val float32, labels []Label)
-  - codegraphId: method:c444b5d2a6474b9646ffda159fea1dfa
     file: third_party/openbao/internal/helper/metricsutil/metricsutil.go
+    line: 81
+    codegraphId: method:c5bb674e8e0fbc82c4c1be4688333167
+  - name: MetricsHelper.CreateMetricsCacheKeyName
     kind: method
-    line: 91
-    name: MetricsHelper.CreateMetricsCacheKeyName
     signature: (key []string, val float32, labels []Label) string
-  - codegraphId: method:8077cc54fbddffece3d556c1651d6c79
     file: third_party/openbao/internal/helper/metricsutil/metricsutil.go
-    kind: method
-    line: 101
-    name: MetricsHelper.ResponseForFormat
-    signature: (format string) *logical.Response
-  - codegraphId: method:6e37bcdfdcceb97c6b69d258897db473
-    file: third_party/openbao/internal/helper/metricsutil/metricsutil.go
-    kind: method
-    line: 118
-    name: MetricsHelper.PrometheusResponse
-    signature: () *logical.Response
-  - codegraphId: method:c9dc863e9bb7eaebbc7cc6f71ae99cdc
-    file: third_party/openbao/internal/helper/metricsutil/metricsutil.go
-    kind: method
-    line: 154
-    name: MetricsHelper.GenericResponse
-    signature: () *logical.Response
-  - codegraphId: struct:b79f2c47497ede3f59506e528ca9f65b
-    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: struct
-    line: 21
-    name: ClusterMetricSink
-  - codegraphId: struct:60f7b88d07e1b680e242a5f23aaec9b5
-    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: struct
-    line: 39
-    name: TelemetryConstConfig
-  - codegraphId: interface:3c7d7a36eafbabeb5182d01503812c9c
-    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: interface
-    line: 45
-    name: Metrics
-  - codegraphId: method:b3f08132607d29db698c021d02e07ac5
-    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: method
-    line: 46
-    name: Metrics.SetGaugeWithLabels
-    signature: (key []string, val float32, labels []Label)
-  - codegraphId: method:797f0bed7ce9d409cedb64a64f43b9bd
-    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: method
-    line: 47
-    name: Metrics.IncrCounterWithLabels
-    signature: (key []string, val float32, labels []Label)
-  - codegraphId: method:f8bae5d5eb0b1f107230b2cca91616a8
-    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: method
-    line: 48
-    name: Metrics.AddSampleWithLabels
-    signature: (key []string, val float32, labels []Label)
-  - codegraphId: method:e17167cb0abe6746a33298d92ec833e2
-    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: method
-    line: 49
-    name: Metrics.AddDurationWithLabels
-    signature: (key []string, d time.Duration, labels []Label)
-  - codegraphId: method:4cb8ce0b09df550f2a2d516246c88402
-    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: method
-    line: 50
-    name: Metrics.MeasureSinceWithLabels
-    signature: (key []string, start time.Time, labels []Label)
-  - codegraphId: struct:09c5bd6fff78a06212bdc71a3f3fe71d
-    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: struct
-    line: 57
-    name: SinkWrapper
-  - codegraphId: method:497863c2d57e7565269727bbe2bce923
-    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: method
-    line: 61
-    name: SinkWrapper.AddDurationWithLabels
-    signature: (key []string, d time.Duration, labels []Label)
-  - codegraphId: method:b5791bd39736f68d5701e7a5d42df54b
-    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: method
-    line: 66
-    name: SinkWrapper.MeasureSinceWithLabels
-    signature: (key []string, start time.Time, labels []Label)
-  - codegraphId: method:ef8c102b407bc8603e85647e49d633da
-    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: method
-    line: 77
-    name: ClusterMetricSink.SetGauge
-    signature: (key []string, val float32)
-  - codegraphId: method:d437478bf46e5f67e48f73334959c517
-    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: method
-    line: 81
-    name: ClusterMetricSink.SetGaugeWithLabels
-    signature: (key []string, val float32, labels []Label)
-  - codegraphId: method:72b053473a3b6b3fb0f40d5dd5a81b48
-    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: method
-    line: 86
-    name: ClusterMetricSink.IncrCounterWithLabels
-    signature: (key []string, val float32, labels []Label)
-  - codegraphId: method:966f82646c755e99c15bb69cf5b9e6b8
-    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: method
     line: 91
-    name: ClusterMetricSink.AddSample
-    signature: (key []string, val float32)
-  - codegraphId: method:f4e3dfdf20e02cdd97e7d09218b2dd62
-    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+    codegraphId: method:c444b5d2a6474b9646ffda159fea1dfa
+  - name: MetricsHelper.ResponseForFormat
     kind: method
-    line: 95
-    name: ClusterMetricSink.AddSampleWithLabels
+    signature: (format string) *logical.Response
+    file: third_party/openbao/internal/helper/metricsutil/metricsutil.go
+    line: 101
+    codegraphId: method:8077cc54fbddffece3d556c1651d6c79
+  - name: MetricsHelper.PrometheusResponse
+    kind: method
+    signature: () *logical.Response
+    file: third_party/openbao/internal/helper/metricsutil/metricsutil.go
+    line: 118
+    codegraphId: method:6e37bcdfdcceb97c6b69d258897db473
+  - name: MetricsHelper.GenericResponse
+    kind: method
+    signature: () *logical.Response
+    file: third_party/openbao/internal/helper/metricsutil/metricsutil.go
+    line: 154
+    codegraphId: method:c9dc863e9bb7eaebbc7cc6f71ae99cdc
+  - name: ClusterMetricSink
+    kind: struct
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+    line: 21
+    codegraphId: struct:b79f2c47497ede3f59506e528ca9f65b
+  - name: TelemetryConstConfig
+    kind: struct
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+    line: 39
+    codegraphId: struct:60f7b88d07e1b680e242a5f23aaec9b5
+  - name: Metrics
+    kind: interface
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+    line: 45
+    codegraphId: interface:3c7d7a36eafbabeb5182d01503812c9c
+  - name: Metrics.SetGaugeWithLabels
+    kind: method
     signature: (key []string, val float32, labels []Label)
-  - codegraphId: method:1eb73f58a13fd0e44ffafb2a7a451958
     file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+    line: 46
+    codegraphId: method:b3f08132607d29db698c021d02e07ac5
+  - name: Metrics.IncrCounterWithLabels
     kind: method
-    line: 100
-    name: ClusterMetricSink.AddDurationWithLabels
+    signature: (key []string, val float32, labels []Label)
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+    line: 47
+    codegraphId: method:797f0bed7ce9d409cedb64a64f43b9bd
+  - name: Metrics.AddSampleWithLabels
+    kind: method
+    signature: (key []string, val float32, labels []Label)
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+    line: 48
+    codegraphId: method:f8bae5d5eb0b1f107230b2cca91616a8
+  - name: Metrics.AddDurationWithLabels
+    kind: method
     signature: (key []string, d time.Duration, labels []Label)
-  - codegraphId: method:5d193f69089919ef07a4f325ec817cd8
     file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+    line: 49
+    codegraphId: method:e17167cb0abe6746a33298d92ec833e2
+  - name: Metrics.MeasureSinceWithLabels
     kind: method
-    line: 105
-    name: ClusterMetricSink.MeasureSinceWithLabels
     signature: (key []string, start time.Time, labels []Label)
-  - codegraphId: function:7024718abeb00db63f6a581663177485
     file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: function
-    line: 112
-    name: BlackholeSink
-    signature: () *ClusterMetricSink
-  - codegraphId: function:3eb4035e4024e3fd2fdf61d6df948613
+    line: 50
+    codegraphId: method:4cb8ce0b09df550f2a2d516246c88402
+  - name: SinkWrapper
+    kind: struct
     file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
-    kind: function
-    line: 123
-    name: NewClusterMetricSink
-    signature: (clusterName string, sink metrics.MetricSink) *ClusterMetricSink
-  - codegraphId: method:c268214f8aea3772881b0ef42a897e05
-    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+    line: 57
+    codegraphId: struct:09c5bd6fff78a06212bdc71a3f3fe71d
+  - name: SinkWrapper.AddDurationWithLabels
     kind: method
-    line: 134
-    name: ClusterMetricSink.SetDefaultClusterName
-    signature: (clusterName string)
-  - codegraphId: function:133b46b64efe1450de4300ba37c909a4
+    signature: (key []string, d time.Duration, labels []Label)
     file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+    line: 61
+    codegraphId: method:497863c2d57e7565269727bbe2bce923
+  - name: SinkWrapper.MeasureSinceWithLabels
+    kind: method
+    signature: (key []string, start time.Time, labels []Label)
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+    line: 66
+    codegraphId: method:b5791bd39736f68d5701e7a5d42df54b
+  - name: ClusterMetricSink.SetGauge
+    kind: method
+    signature: (key []string, val float32)
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+    line: 77
+    codegraphId: method:ef8c102b407bc8603e85647e49d633da
+  - name: ClusterMetricSink.SetGaugeWithLabels
+    kind: method
+    signature: (key []string, val float32, labels []Label)
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+    line: 81
+    codegraphId: method:d437478bf46e5f67e48f73334959c517
+  - name: ClusterMetricSink.IncrCounterWithLabels
+    kind: method
+    signature: (key []string, val float32, labels []Label)
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+    line: 86
+    codegraphId: method:72b053473a3b6b3fb0f40d5dd5a81b48
+  - name: ClusterMetricSink.AddSample
+    kind: method
+    signature: (key []string, val float32)
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+    line: 91
+    codegraphId: method:966f82646c755e99c15bb69cf5b9e6b8
+  - name: ClusterMetricSink.AddSampleWithLabels
+    kind: method
+    signature: (key []string, val float32, labels []Label)
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+    line: 95
+    codegraphId: method:f4e3dfdf20e02cdd97e7d09218b2dd62
+  - name: ClusterMetricSink.AddDurationWithLabels
+    kind: method
+    signature: (key []string, d time.Duration, labels []Label)
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+    line: 100
+    codegraphId: method:1eb73f58a13fd0e44ffafb2a7a451958
+  - name: ClusterMetricSink.MeasureSinceWithLabels
+    kind: method
+    signature: (key []string, start time.Time, labels []Label)
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+    line: 105
+    codegraphId: method:5d193f69089919ef07a4f325ec817cd8
+  - name: BlackholeSink
     kind: function
-    line: 145
-    name: NamespaceLabel
+    signature: () *ClusterMetricSink
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+    line: 112
+    codegraphId: function:7024718abeb00db63f6a581663177485
+  - name: NewClusterMetricSink
+    kind: function
+    signature: (clusterName string, sink metrics.MetricSink) *ClusterMetricSink
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+    line: 123
+    codegraphId: function:3eb4035e4024e3fd2fdf61d6df948613
+  - name: ClusterMetricSink.SetDefaultClusterName
+    kind: method
+    signature: (clusterName string)
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+    line: 134
+    codegraphId: method:c268214f8aea3772881b0ef42a897e05
+  - name: NamespaceLabel
+    kind: function
     signature: (ns *namespace.Namespace) metrics.Label
-realizedSpecHash: 105a3810731887342b25076995866a60500957c6a35adfbf6ac6f00069152d85
-syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-syncedFingerprint: 7025d0516bd8e75c05f8ee0656fa40e34077a721c5d3bfa972c6a1b783646fc2
+    file: third_party/openbao/internal/helper/metricsutil/wrapped_metrics.go
+    line: 145
+    codegraphId: function:133b46b64efe1450de4300ba37c909a4
+  fingerprint: 7025d0516bd8e75c05f8ee0656fa40e34077a721c5d3bfa972c6a1b783646fc2

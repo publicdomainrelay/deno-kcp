@@ -1,12 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- class:fa1e6bf6840a2041d782e2d621e3dd2f OidcConfigureRoute@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/index.js:9
-- file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/index.js index.js@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/index.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-app-routes-vault-cluster-access-oidc
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'This context exists to record the OIDC access index route of the OpenBao
     UI: the page a user reaches under a cluster''s access section for OIDC. Its purpose
     is to decide, before the index template renders, whether any OIDC clients already
@@ -15,51 +14,52 @@ spec:
     place to present the first-time setup call to action. Documenting it makes that
     redirect contract, the injected services it depends on, and its error-swallowing
     rule explicit for anyone changing the OIDC routing tree or the oidc/client adapter.'
-  interfaces:
-  - file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/index.js
-    kind: class
-    name: OidcConfigureRoute
-    signature: export default class OidcConfigureRoute extends Route
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - class:fa1e6bf6840a2041d782e2d621e3dd2f
-    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/index.js
-    id: r.before-model-queries-oidc-clients
+  - id: r.before-model-queries-oidc-clients
     level: MUST
     text: The beforeModel hook must query the oidc/client model through the store
       service with an empty query object and return the resulting promise, so the
       redirect decision happens before the index route renders.
-  - codeRefs:
+    codeRefs:
     - class:fa1e6bf6840a2041d782e2d621e3dd2f
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/index.js
-    id: r.default-export-route-subclass
+  - id: r.default-export-route-subclass
     level: MUST
     text: The module must default-export a class named OidcConfigureRoute that extends
       Ember's Route, so the Ember router can resolve it as the route handler for vault.cluster.access.oidc.index.
-  - codeRefs:
+    codeRefs:
     - class:fa1e6bf6840a2041d782e2d621e3dd2f
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/index.js
-    id: r.inject-store-and-router-services
+  - id: r.inject-store-and-router-services
     level: MUST
     text: The route must declare injected Ember services named store and router via
       the service decorator, because the redirect logic reads the oidc/client model
       through store and performs the transition through router.
-  - codeRefs:
+    codeRefs:
     - class:fa1e6bf6840a2041d782e2d621e3dd2f
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/index.js
-    id: r.swallow-query-error
+  - id: r.swallow-query-error
     level: MUST
     text: When the oidc/client query rejects, the hook must catch the error and swallow
       it without rethrowing or transitioning, so the 404 the adapter raises for an
       empty client collection leaves the user on the index route that shows the first-time
       configuration call to action.
-  - codeRefs:
+    codeRefs:
     - class:fa1e6bf6840a2041d782e2d621e3dd2f
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/index.js
-    id: r.transition-to-clients-on-success
+  - id: r.transition-to-clients-on-success
     level: MUST
     text: When the oidc/client query resolves, the hook must call router.transitionTo
       with the route name vault.cluster.access.oidc.clients, sending the user to the
       client list instead of the OIDC index page.
-  upstream: self
+    codeRefs:
+    - class:fa1e6bf6840a2041d782e2d621e3dd2f
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/index.js
+  interfaces:
+  - name: OidcConfigureRoute
+    kind: class
+    signature: export default class OidcConfigureRoute extends Route
+    file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/index.js
+codeRefIndex:
+- class:fa1e6bf6840a2041d782e2d621e3dd2f OidcConfigureRoute@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/index.js:9
+- file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/index.js index.js@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/index.js

@@ -1,4 +1,235 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-internal-physical-pebbledb
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: This context exists so the OpenBao physical storage layer has a PebbleDB-backed
+    implementation with real interactive transactions. The package adapts Pebble's
+    non-interactive, snapshot-based API to the physical.Backend and physical.TransactionalBackend
+    contracts, including the conflict detection and rollback semantics those contracts
+    promise. It exists because Pebble offers no check-and-set primitive of its own;
+    rather than taking a global write lock, the code tracks each transaction's reads,
+    writes and list results and invalidates on conflicts, so parallel writers can
+    proceed until an actual overlap is proven.
+  requirements:
+  - id: r.backend-list-delegates-to-page
+    level: MUST
+    text: Backend.List must return exactly the result of ListPage with an empty after
+      cursor and a limit of zero, and Backend.ListPage must build a physical.Lister
+      over a Pebble iterator bounded below by the lister's seek prefix, close that
+      iterator when finished, and return the paged results.
+    codeRefs:
+    - file:third_party/openbao/internal/physical/pebbledb/pebbledb.go
+    - method:774e86fbd360912cad1a10d400d0f39b
+    - method:7e4a6fed4eb00d6d80349157c4a2c49f
+  - id: r.backend-missing-key-returns-nil
+    level: MUST
+    text: Backend.Get must delegate to getInternal and return a nil entry with a nil
+      error when Pebble reports pebble.ErrNotFound, returning a wrapped "failed to
+      get entry" error for any other read failure and the raw context error when the
+      context is already cancelled.
+    codeRefs:
+    - file:third_party/openbao/internal/physical/pebbledb/pebbledb.go
+    - method:582b6a9b30aafd6a0cfebbcedc9eb51e
+  - id: r.backend-satisfies-physical-contracts
+    level: MUST
+    text: Backend must satisfy both the physical.Backend and physical.TransactionalBackend
+      interfaces, asserted at compile time by the blank var declarations in the package.
+    codeRefs:
+    - file:third_party/openbao/internal/physical/pebbledb/pebbledb.go
+    - struct:64e9da1ba91b782b9c857aec6be369fe
+  - id: r.backend-tests-exercise-contracts
+    level: SHOULD
+    text: The package tests should build a Backend with only the path configuration
+      set to ":memory:" and run physical.ExerciseBackend plus physical.ExerciseTransactionalBackend
+      against it to cover the plain and transactional storage contracts.
+    codeRefs:
+    - file:third_party/openbao/internal/physical/pebbledb/pebbledb_test.go
+    - function:4e5dcdd5f2abc4aa3c33c11926d21824
+  - id: r.backend-writes-are-synchronous
+    level: MUST
+    text: 'Backend.Put and Backend.Delete must hold the Backend read lock across the
+      write, perform the mutation with pebble.WriteOptions{Sync: true}, and on success
+      notify every live transaction in the txns weak map through notifyWrite with
+      the written key and whether it was a delete.'
+    codeRefs:
+    - file:third_party/openbao/internal/physical/pebbledb/pebbledb.go
+    - method:0a6bc5f75cd1c5f31fc6e63235b4961f
+    - method:1a19c9c93e054c2bc4d4f32d8f3b0be5
+  - id: r.commit-conflict-and-batch
+    level: MUST
+    text: 'Transaction.Commit must take the parent write lock then the transaction
+      lock in that order, return physical.ErrTransactionAlreadyCommitted when already
+      committed, stop the runtime cleanup and close the snapshot, re-confirm every
+      recorded parallel write, return physical.ErrTransactionCommitFailure when the
+      transaction is conflicted, return nil without writing when there are no buffered
+      updates, and otherwise apply all buffered puts and deletes to one Pebble batch
+      committed with Sync: true and notify the other transactions of the writes.'
+    codeRefs:
+    - file:third_party/openbao/internal/physical/pebbledb/pebbledb.go
+    - method:6dac6582539d5a94bcb41bf43e62de95
+  - id: r.conflict-detection-rules
+    level: MUST
+    text: A transaction must be marked conflicted when a notified write names a key
+      it has read or buffered for write, when a notified delete names a key present
+      in a recorded list result, or when a notified write names a key absent from
+      a recorded list result that had room to include it; a fully complete list (zero
+      limit) must decide the outcome directly, and once a transaction is conflicted
+      further notifications must be ignored.
+    codeRefs:
+    - file:third_party/openbao/internal/physical/pebbledb/pebbledb.go
+    - struct:ac8b705b9a4deecccca12f8a32a1a185
+  - id: r.newbackend-config-surface
+    level: MUST
+    text: NewBackend must read the configuration map key "path" and fail with the
+      error "missing or empty parameter 'path'" when it is absent or empty; it must
+      read the optional key "read_only", parsing it with parseutil.ParseBool and reporting
+      "failed to parse 'read_only' parameter" wrapped around the parse error, defaulting
+      to false when the key is absent. When path equals ":memory:" the path must be
+      blanked and the Pebble database opened on vfs.NewMem(); otherwise the directory
+      must be created with os.MkdirAll at mode 0o700 before opening, and a failure
+      must be reported as "failed to create 'path'". Opening failure must be reported
+      as "failed to open database".
+    codeRefs:
+    - file:third_party/openbao/internal/physical/pebbledb/pebbledb.go
+    - function:4e5dcdd5f2abc4aa3c33c11926d21824
+  - id: r.rollback-discards
+    level: MUST
+    text: Transaction.Rollback must take the parent write lock then the transaction
+      lock, return physical.ErrTransactionAlreadyCommitted when already committed,
+      otherwise stop the cleanup, close the snapshot, and clear the update, list,
+      read and parallel-write state while marking the transaction committed so later
+      operations fail with physical.ErrTransactionAlreadyCommitted.
+    codeRefs:
+    - file:third_party/openbao/internal/physical/pebbledb/pebbledb.go
+    - method:97a0f8be20d3c790695085214a4d514d
+  - id: r.transaction-list-merges-buffered-updates
+    level: MUST
+    text: Transaction.List must delegate to Transaction.ListPage with an empty after
+      cursor and a zero limit; ListPage must page the snapshot through a lister whose
+      Deleted callback reports true for keys buffered as nil deletes and whose Inserted
+      sequence yields keys buffered as non-nil updates, return the merged key list,
+      and record the present keys under the lister prefix, after cursor and limit
+      for later conflict detection, keeping only a zero-limit entry when one exists.
+    codeRefs:
+    - file:third_party/openbao/internal/physical/pebbledb/pebbledb.go
+    - method:1b39ede6501920f6c2197334bae696a3
+    - method:655385b17b4cc342b9af9503545ef2fc
+  - id: r.transaction-read-your-writes
+    level: MUST
+    text: Transaction.Get must return physical.ErrTransactionAlreadyCommitted once
+      the transaction is committed, honor context cancellation, return a clone of
+      the buffered update when the key is present in the updates map, and otherwise
+      read through the parent against the transaction snapshot; for a writable transaction
+      the read key must be recorded in the reads set so later writes can conflict
+      with it.
+    codeRefs:
+    - file:third_party/openbao/internal/physical/pebbledb/pebbledb.go
+    - method:cdc415683ebe756e5332f5e577d194ad
+  - id: r.transaction-registry-weak-cleanup
+    level: MUST
+    text: BeginTx must create a writable transaction and BeginReadOnlyTx a non-writable
+      one; both must go through beginTx, which under the Backend write lock assigns
+      a fresh uuid, opens a Pebble snapshot, constructs the transaction's update,
+      read, list and parallel-write maps, stores a weak pointer in the txns map, and
+      registers a runtime cleanup that removes the entry from txns and closes the
+      snapshot when the transaction is garbage collected.
+    codeRefs:
+    - file:third_party/openbao/internal/physical/pebbledb/pebbledb.go
+    - method:2a74a0335f48c5696635a94407bca130
+    - method:a7d26c5a8e8a5e1070c77fa16f48fc73
+  - id: r.transaction-writability-guard
+    level: MUST
+    text: Transaction.Put must return physical.ErrTransactionReadOnly on a non-writable
+      transaction and physical.ErrTransactionAlreadyCommitted after commit, otherwise
+      buffer a clone of the entry in the updates map; Transaction.Delete must apply
+      the same two guards and then record a nil update for the key to mark it deleted.
+    codeRefs:
+    - file:third_party/openbao/internal/physical/pebbledb/pebbledb.go
+    - method:7fae113aa764210e8a5c669ae34995c2
+    - method:d53d2588b9c8cdb9560f7d1c44250931
+  interfaces:
+  - name: Backend
+    kind: struct
+    signature: type Backend struct
+    file: third_party/openbao/internal/physical/pebbledb/pebbledb.go
+  - name: Backend.BeginReadOnlyTx
+    kind: method
+    signature: func (b *Backend) BeginReadOnlyTx(ctx context.Context) (physical.Transaction,
+      error)
+    file: third_party/openbao/internal/physical/pebbledb/pebbledb.go
+  - name: Backend.BeginTx
+    kind: method
+    signature: func (b *Backend) BeginTx(ctx context.Context) (physical.Transaction,
+      error)
+    file: third_party/openbao/internal/physical/pebbledb/pebbledb.go
+  - name: Backend.Delete
+    kind: method
+    signature: func (b *Backend) Delete(ctx context.Context, key string) error
+    file: third_party/openbao/internal/physical/pebbledb/pebbledb.go
+  - name: Backend.Get
+    kind: method
+    signature: func (b *Backend) Get(ctx context.Context, key string) (*physical.Entry,
+      error)
+    file: third_party/openbao/internal/physical/pebbledb/pebbledb.go
+  - name: Backend.List
+    kind: method
+    signature: func (b *Backend) List(ctx context.Context, prefix string) ([]string,
+      error)
+    file: third_party/openbao/internal/physical/pebbledb/pebbledb.go
+  - name: Backend.ListPage
+    kind: method
+    signature: func (b *Backend) ListPage(ctx context.Context, prefix string, after
+      string, limit int) ([]string, error)
+    file: third_party/openbao/internal/physical/pebbledb/pebbledb.go
+  - name: Backend.Put
+    kind: method
+    signature: func (b *Backend) Put(ctx context.Context, entry *physical.Entry) error
+    file: third_party/openbao/internal/physical/pebbledb/pebbledb.go
+  - name: NewBackend
+    kind: function
+    signature: func NewBackend(conf map[string]string, logger log.Logger) (physical.Backend,
+      error)
+    file: third_party/openbao/internal/physical/pebbledb/pebbledb.go
+  - name: Transaction
+    kind: struct
+    signature: type Transaction struct
+    file: third_party/openbao/internal/physical/pebbledb/pebbledb.go
+  - name: Transaction.Commit
+    kind: method
+    signature: func (t *Transaction) Commit(ctx context.Context) error
+    file: third_party/openbao/internal/physical/pebbledb/pebbledb.go
+  - name: Transaction.Delete
+    kind: method
+    signature: func (t *Transaction) Delete(ctx context.Context, key string) error
+    file: third_party/openbao/internal/physical/pebbledb/pebbledb.go
+  - name: Transaction.Get
+    kind: method
+    signature: func (t *Transaction) Get(ctx context.Context, key string) (*physical.Entry,
+      error)
+    file: third_party/openbao/internal/physical/pebbledb/pebbledb.go
+  - name: Transaction.List
+    kind: method
+    signature: func (t *Transaction) List(ctx context.Context, prefix string) ([]string,
+      error)
+    file: third_party/openbao/internal/physical/pebbledb/pebbledb.go
+  - name: Transaction.ListPage
+    kind: method
+    signature: func (t *Transaction) ListPage(ctx context.Context, prefix string,
+      after string, limit int) ([]string, error)
+    file: third_party/openbao/internal/physical/pebbledb/pebbledb.go
+  - name: Transaction.Put
+    kind: method
+    signature: func (t *Transaction) Put(ctx context.Context, entry *physical.Entry)
+      error
+    file: third_party/openbao/internal/physical/pebbledb/pebbledb.go
+  - name: Transaction.Rollback
+    kind: method
+    signature: func (t *Transaction) Rollback(ctx context.Context) error
+    file: third_party/openbao/internal/physical/pebbledb/pebbledb.go
 codeRefIndex:
 - file:third_party/openbao/internal/physical/pebbledb/pebbledb.go pebbledb.go@third_party/openbao/internal/physical/pebbledb/pebbledb.go
 - file:third_party/openbao/internal/physical/pebbledb/pebbledb_test.go pebbledb_test.go@third_party/openbao/internal/physical/pebbledb/pebbledb_test.go
@@ -19,234 +250,3 @@ codeRefIndex:
 - method:d53d2588b9c8cdb9560f7d1c44250931 Transaction.Delete@third_party/openbao/internal/physical/pebbledb/pebbledb.go:436
 - struct:64e9da1ba91b782b9c857aec6be369fe Backend@third_party/openbao/internal/physical/pebbledb/pebbledb.go:46
 - struct:ac8b705b9a4deecccca12f8a32a1a185 Transaction@third_party/openbao/internal/physical/pebbledb/pebbledb.go:239
-kind: SystemContext
-metadata:
-  name: third-party-openbao-internal-physical-pebbledb
-  namespace: default
-spec:
-  intent: This context exists so the OpenBao physical storage layer has a PebbleDB-backed
-    implementation with real interactive transactions. The package adapts Pebble's
-    non-interactive, snapshot-based API to the physical.Backend and physical.TransactionalBackend
-    contracts, including the conflict detection and rollback semantics those contracts
-    promise. It exists because Pebble offers no check-and-set primitive of its own;
-    rather than taking a global write lock, the code tracks each transaction's reads,
-    writes and list results and invalidates on conflicts, so parallel writers can
-    proceed until an actual overlap is proven.
-  interfaces:
-  - file: third_party/openbao/internal/physical/pebbledb/pebbledb.go
-    kind: struct
-    name: Backend
-    signature: type Backend struct
-  - file: third_party/openbao/internal/physical/pebbledb/pebbledb.go
-    kind: method
-    name: Backend.BeginReadOnlyTx
-    signature: func (b *Backend) BeginReadOnlyTx(ctx context.Context) (physical.Transaction,
-      error)
-  - file: third_party/openbao/internal/physical/pebbledb/pebbledb.go
-    kind: method
-    name: Backend.BeginTx
-    signature: func (b *Backend) BeginTx(ctx context.Context) (physical.Transaction,
-      error)
-  - file: third_party/openbao/internal/physical/pebbledb/pebbledb.go
-    kind: method
-    name: Backend.Delete
-    signature: func (b *Backend) Delete(ctx context.Context, key string) error
-  - file: third_party/openbao/internal/physical/pebbledb/pebbledb.go
-    kind: method
-    name: Backend.Get
-    signature: func (b *Backend) Get(ctx context.Context, key string) (*physical.Entry,
-      error)
-  - file: third_party/openbao/internal/physical/pebbledb/pebbledb.go
-    kind: method
-    name: Backend.List
-    signature: func (b *Backend) List(ctx context.Context, prefix string) ([]string,
-      error)
-  - file: third_party/openbao/internal/physical/pebbledb/pebbledb.go
-    kind: method
-    name: Backend.ListPage
-    signature: func (b *Backend) ListPage(ctx context.Context, prefix string, after
-      string, limit int) ([]string, error)
-  - file: third_party/openbao/internal/physical/pebbledb/pebbledb.go
-    kind: method
-    name: Backend.Put
-    signature: func (b *Backend) Put(ctx context.Context, entry *physical.Entry) error
-  - file: third_party/openbao/internal/physical/pebbledb/pebbledb.go
-    kind: function
-    name: NewBackend
-    signature: func NewBackend(conf map[string]string, logger log.Logger) (physical.Backend,
-      error)
-  - file: third_party/openbao/internal/physical/pebbledb/pebbledb.go
-    kind: struct
-    name: Transaction
-    signature: type Transaction struct
-  - file: third_party/openbao/internal/physical/pebbledb/pebbledb.go
-    kind: method
-    name: Transaction.Commit
-    signature: func (t *Transaction) Commit(ctx context.Context) error
-  - file: third_party/openbao/internal/physical/pebbledb/pebbledb.go
-    kind: method
-    name: Transaction.Delete
-    signature: func (t *Transaction) Delete(ctx context.Context, key string) error
-  - file: third_party/openbao/internal/physical/pebbledb/pebbledb.go
-    kind: method
-    name: Transaction.Get
-    signature: func (t *Transaction) Get(ctx context.Context, key string) (*physical.Entry,
-      error)
-  - file: third_party/openbao/internal/physical/pebbledb/pebbledb.go
-    kind: method
-    name: Transaction.List
-    signature: func (t *Transaction) List(ctx context.Context, prefix string) ([]string,
-      error)
-  - file: third_party/openbao/internal/physical/pebbledb/pebbledb.go
-    kind: method
-    name: Transaction.ListPage
-    signature: func (t *Transaction) ListPage(ctx context.Context, prefix string,
-      after string, limit int) ([]string, error)
-  - file: third_party/openbao/internal/physical/pebbledb/pebbledb.go
-    kind: method
-    name: Transaction.Put
-    signature: func (t *Transaction) Put(ctx context.Context, entry *physical.Entry)
-      error
-  - file: third_party/openbao/internal/physical/pebbledb/pebbledb.go
-    kind: method
-    name: Transaction.Rollback
-    signature: func (t *Transaction) Rollback(ctx context.Context) error
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - file:third_party/openbao/internal/physical/pebbledb/pebbledb.go
-    - method:774e86fbd360912cad1a10d400d0f39b
-    - method:7e4a6fed4eb00d6d80349157c4a2c49f
-    id: r.backend-list-delegates-to-page
-    level: MUST
-    text: Backend.List must return exactly the result of ListPage with an empty after
-      cursor and a limit of zero, and Backend.ListPage must build a physical.Lister
-      over a Pebble iterator bounded below by the lister's seek prefix, close that
-      iterator when finished, and return the paged results.
-  - codeRefs:
-    - file:third_party/openbao/internal/physical/pebbledb/pebbledb.go
-    - method:582b6a9b30aafd6a0cfebbcedc9eb51e
-    id: r.backend-missing-key-returns-nil
-    level: MUST
-    text: Backend.Get must delegate to getInternal and return a nil entry with a nil
-      error when Pebble reports pebble.ErrNotFound, returning a wrapped "failed to
-      get entry" error for any other read failure and the raw context error when the
-      context is already cancelled.
-  - codeRefs:
-    - file:third_party/openbao/internal/physical/pebbledb/pebbledb.go
-    - struct:64e9da1ba91b782b9c857aec6be369fe
-    id: r.backend-satisfies-physical-contracts
-    level: MUST
-    text: Backend must satisfy both the physical.Backend and physical.TransactionalBackend
-      interfaces, asserted at compile time by the blank var declarations in the package.
-  - codeRefs:
-    - file:third_party/openbao/internal/physical/pebbledb/pebbledb_test.go
-    - function:4e5dcdd5f2abc4aa3c33c11926d21824
-    id: r.backend-tests-exercise-contracts
-    level: SHOULD
-    text: The package tests should build a Backend with only the path configuration
-      set to ":memory:" and run physical.ExerciseBackend plus physical.ExerciseTransactionalBackend
-      against it to cover the plain and transactional storage contracts.
-  - codeRefs:
-    - file:third_party/openbao/internal/physical/pebbledb/pebbledb.go
-    - method:0a6bc5f75cd1c5f31fc6e63235b4961f
-    - method:1a19c9c93e054c2bc4d4f32d8f3b0be5
-    id: r.backend-writes-are-synchronous
-    level: MUST
-    text: 'Backend.Put and Backend.Delete must hold the Backend read lock across the
-      write, perform the mutation with pebble.WriteOptions{Sync: true}, and on success
-      notify every live transaction in the txns weak map through notifyWrite with
-      the written key and whether it was a delete.'
-  - codeRefs:
-    - file:third_party/openbao/internal/physical/pebbledb/pebbledb.go
-    - method:6dac6582539d5a94bcb41bf43e62de95
-    id: r.commit-conflict-and-batch
-    level: MUST
-    text: 'Transaction.Commit must take the parent write lock then the transaction
-      lock in that order, return physical.ErrTransactionAlreadyCommitted when already
-      committed, stop the runtime cleanup and close the snapshot, re-confirm every
-      recorded parallel write, return physical.ErrTransactionCommitFailure when the
-      transaction is conflicted, return nil without writing when there are no buffered
-      updates, and otherwise apply all buffered puts and deletes to one Pebble batch
-      committed with Sync: true and notify the other transactions of the writes.'
-  - codeRefs:
-    - file:third_party/openbao/internal/physical/pebbledb/pebbledb.go
-    - struct:ac8b705b9a4deecccca12f8a32a1a185
-    id: r.conflict-detection-rules
-    level: MUST
-    text: A transaction must be marked conflicted when a notified write names a key
-      it has read or buffered for write, when a notified delete names a key present
-      in a recorded list result, or when a notified write names a key absent from
-      a recorded list result that had room to include it; a fully complete list (zero
-      limit) must decide the outcome directly, and once a transaction is conflicted
-      further notifications must be ignored.
-  - codeRefs:
-    - file:third_party/openbao/internal/physical/pebbledb/pebbledb.go
-    - function:4e5dcdd5f2abc4aa3c33c11926d21824
-    id: r.newbackend-config-surface
-    level: MUST
-    text: NewBackend must read the configuration map key "path" and fail with the
-      error "missing or empty parameter 'path'" when it is absent or empty; it must
-      read the optional key "read_only", parsing it with parseutil.ParseBool and reporting
-      "failed to parse 'read_only' parameter" wrapped around the parse error, defaulting
-      to false when the key is absent. When path equals ":memory:" the path must be
-      blanked and the Pebble database opened on vfs.NewMem(); otherwise the directory
-      must be created with os.MkdirAll at mode 0o700 before opening, and a failure
-      must be reported as "failed to create 'path'". Opening failure must be reported
-      as "failed to open database".
-  - codeRefs:
-    - file:third_party/openbao/internal/physical/pebbledb/pebbledb.go
-    - method:97a0f8be20d3c790695085214a4d514d
-    id: r.rollback-discards
-    level: MUST
-    text: Transaction.Rollback must take the parent write lock then the transaction
-      lock, return physical.ErrTransactionAlreadyCommitted when already committed,
-      otherwise stop the cleanup, close the snapshot, and clear the update, list,
-      read and parallel-write state while marking the transaction committed so later
-      operations fail with physical.ErrTransactionAlreadyCommitted.
-  - codeRefs:
-    - file:third_party/openbao/internal/physical/pebbledb/pebbledb.go
-    - method:1b39ede6501920f6c2197334bae696a3
-    - method:655385b17b4cc342b9af9503545ef2fc
-    id: r.transaction-list-merges-buffered-updates
-    level: MUST
-    text: Transaction.List must delegate to Transaction.ListPage with an empty after
-      cursor and a zero limit; ListPage must page the snapshot through a lister whose
-      Deleted callback reports true for keys buffered as nil deletes and whose Inserted
-      sequence yields keys buffered as non-nil updates, return the merged key list,
-      and record the present keys under the lister prefix, after cursor and limit
-      for later conflict detection, keeping only a zero-limit entry when one exists.
-  - codeRefs:
-    - file:third_party/openbao/internal/physical/pebbledb/pebbledb.go
-    - method:cdc415683ebe756e5332f5e577d194ad
-    id: r.transaction-read-your-writes
-    level: MUST
-    text: Transaction.Get must return physical.ErrTransactionAlreadyCommitted once
-      the transaction is committed, honor context cancellation, return a clone of
-      the buffered update when the key is present in the updates map, and otherwise
-      read through the parent against the transaction snapshot; for a writable transaction
-      the read key must be recorded in the reads set so later writes can conflict
-      with it.
-  - codeRefs:
-    - file:third_party/openbao/internal/physical/pebbledb/pebbledb.go
-    - method:2a74a0335f48c5696635a94407bca130
-    - method:a7d26c5a8e8a5e1070c77fa16f48fc73
-    id: r.transaction-registry-weak-cleanup
-    level: MUST
-    text: BeginTx must create a writable transaction and BeginReadOnlyTx a non-writable
-      one; both must go through beginTx, which under the Backend write lock assigns
-      a fresh uuid, opens a Pebble snapshot, constructs the transaction's update,
-      read, list and parallel-write maps, stores a weak pointer in the txns map, and
-      registers a runtime cleanup that removes the entry from txns and closes the
-      snapshot when the transaction is garbage collected.
-  - codeRefs:
-    - file:third_party/openbao/internal/physical/pebbledb/pebbledb.go
-    - method:7fae113aa764210e8a5c669ae34995c2
-    - method:d53d2588b9c8cdb9560f7d1c44250931
-    id: r.transaction-writability-guard
-    level: MUST
-    text: Transaction.Put must return physical.ErrTransactionReadOnly on a non-writable
-      transaction and physical.ErrTransactionAlreadyCommitted after commit, otherwise
-      buffer a clone of the entry in the updates map; Transaction.Delete must apply
-      the same two guards and then record a nil update for the key to mark it deleted.
-  upstream: self

@@ -1,71 +1,71 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/ui/app/routes/vault/cluster/policy/edit.js edit.js@third_party/openbao/ui/app/routes/vault/cluster/policy/edit.js
-- file:third_party/openbao/ui/app/routes/vault/cluster/policy/index.js index.js@third_party/openbao/ui/app/routes/vault/cluster/policy/index.js
-- file:third_party/openbao/ui/app/routes/vault/cluster/policy/show.js show.js@third_party/openbao/ui/app/routes/vault/cluster/policy/show.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-app-routes-vault-cluster-policy
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'The context exists so the generated specification records the observable
     navigation, data-loading, and unsaved-change behavior of the OpenBao policy UI
     routes without depending on the surrounding Ember application code. It describes
     what the routes must do: which transitions they force, which Ember Data records
     they fetch, what they set on the controller, and when they protect the user from
     losing dirty form state.'
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/ui/app/routes/vault/cluster/policy/edit.js
-    id: r.policy-edit-guards-dirty-transition
+  - id: r.policy-edit-guards-dirty-transition
     level: MUST
     text: The policy edit route must extend the show route and, in its willTransition
       action, allow the transition when there is no current model or the model has
       no dirty attributes, allow it when the user confirms the unsaved-changes window.confirm
       prompt, and otherwise abort the transition and return false so dirty policy
       edits are not lost.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/routes/vault/cluster/policy/index.js
-    id: r.policy-index-redirects-to-acl-list
+    codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/policy/edit.js
+  - id: r.policy-index-redirects-to-acl-list
     level: MUST
     text: The policy index route must redirect on beforeModel to the vault.cluster.policies
       route passing 'acl' as the model, so that visiting the bare policy path always
       lands on the ACL policy list.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/routes/vault/cluster/policy/show.js
-    id: r.policy-show-cleanup-on-exit
+    codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/policy/index.js
+  - id: r.policy-show-cleanup-on-exit
     level: MUST
     text: When the show route is exited, resetController must call cleanupModel on
       the controller if that method is present, so policy state is released on navigation
       away.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/routes/vault/cluster/policy/show.js
-    id: r.policy-show-derives-type-from-parent-params
+  - id: r.policy-show-derives-type-from-parent-params
     level: MUST
     text: The policy show route must derive the active policy type from the type param
       of the parent vault.cluster.policy route, and that derived value must drive
       the root-redirect check, the store addresses used in the model hook, and the
       policyType property set on the controller.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/routes/vault/cluster/policy/show.js
-    id: r.policy-show-loads-policy-and-capabilities
+  - id: r.policy-show-loads-policy-and-capabilities
     level: MUST
     text: 'The show route model hook must return an RSVP hash that resolves two records
       concurrently: the policy record found at the address policy/<type> with the
       policy_name param as its id, and the capabilities record found at sys/policies/<type>/<policy_name>.'
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/routes/vault/cluster/policy/show.js
-    id: r.policy-show-populates-controller
+  - id: r.policy-show-populates-controller
     level: MUST
     text: The show route setupController hook must set the controller's model to the
       resolved policy record, capabilities to the resolved capabilities record, and
       policyType to the derived policy type.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/routes/vault/cluster/policy/show.js
-    id: r.policy-show-redirects-root-acl
+  - id: r.policy-show-redirects-root-acl
     level: MUST
     text: In beforeModel, when the derived policy type is 'acl' and the policy_name
       param is 'root', the show route must not render the detail view and must transition
       to the vault.cluster.policies route with 'acl'.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/policy/show.js
+codeRefIndex:
+- file:third_party/openbao/ui/app/routes/vault/cluster/policy/edit.js edit.js@third_party/openbao/ui/app/routes/vault/cluster/policy/edit.js
+- file:third_party/openbao/ui/app/routes/vault/cluster/policy/index.js index.js@third_party/openbao/ui/app/routes/vault/cluster/policy/index.js
+- file:third_party/openbao/ui/app/routes/vault/cluster/policy/show.js show.js@third_party/openbao/ui/app/routes/vault/cluster/policy/show.js

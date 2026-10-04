@@ -1,17 +1,20 @@
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 8f3fb9d807ec4d7fe5ff60005ea74b7ea2ad681133eeb26d0d86a7924c699698
+realizedSpecHash: 13f8f19f3330814d89a46bc0a4c32ac249b98016e450dd0a1c7404a8fd4c063f
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
+- type: CodeSynced
+  status: "True"
   reason: InterfacesObserved
-  status: "True"
-  type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+  message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+- type: Drifted
   status: "False"
-  type: Drifted
-- message: the spec passes the validator
-  reason: ValidatorPassed
+  reason: FingerprintEqual
+  message: observed facts match the synced fingerprint
+- type: SpecValid
   status: "True"
-  type: SpecValid
+  reason: ValidatorPassed
+  message: the spec passes the validator
 observed:
   files:
   - third_party/openbao/internal/command/agent/approle_end_to_end_test.go
@@ -22,14 +25,11 @@ observed:
   - third_party/openbao/internal/command/agent/jwt_end_to_end_test.go
   - third_party/openbao/internal/command/agent/testing.go
   - third_party/openbao/internal/command/agent/token_file_end_to_end_test.go
-  fingerprint: 8f3fb9d807ec4d7fe5ff60005ea74b7ea2ad681133eeb26d0d86a7924c699698
   interfaces:
-  - codegraphId: function:b694f010cebc494d1fe128a22732b5e2
-    file: third_party/openbao/internal/command/agent/testing.go
+  - name: GetTestJWT
     kind: function
-    line: 22
-    name: GetTestJWT
     signature: (t *testing.T) (string, *ecdsa.PrivateKey)
-realizedSpecHash: 13f8f19f3330814d89a46bc0a4c32ac249b98016e450dd0a1c7404a8fd4c063f
-syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-syncedFingerprint: 8f3fb9d807ec4d7fe5ff60005ea74b7ea2ad681133eeb26d0d86a7924c699698
+    file: third_party/openbao/internal/command/agent/testing.go
+    line: 22
+    codegraphId: function:b694f010cebc494d1fe128a22732b5e2
+  fingerprint: 8f3fb9d807ec4d7fe5ff60005ea74b7ea2ad681133eeb26d0d86a7924c699698

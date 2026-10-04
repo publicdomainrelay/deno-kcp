@@ -1,17 +1,20 @@
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: f522124947d6c429ce56a3c309543935c90d180b025744325aba1ebbec503bcb
+realizedSpecHash: 1d696d8e6c3c91932e3a2eebc28f2103daf8433300abe19042a8679322ed63bd
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
+- type: CodeSynced
+  status: "True"
   reason: InterfacesObserved
-  status: "True"
-  type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+  message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+- type: Drifted
   status: "False"
-  type: Drifted
-- message: the spec passes the validator
-  reason: ValidatorPassed
+  reason: FingerprintEqual
+  message: observed facts match the synced fingerprint
+- type: SpecValid
   status: "True"
-  type: SpecValid
+  reason: ValidatorPassed
+  message: the spec passes the validator
 observed:
   files:
   - third_party/openbao/internal/vault/diagnose/file_checks.go
@@ -31,397 +34,394 @@ observed:
   - third_party/openbao/internal/vault/diagnose/storage_checks_test.go
   - third_party/openbao/internal/vault/diagnose/tls_verification.go
   - third_party/openbao/internal/vault/diagnose/tls_verification_test.go
-  fingerprint: f522124947d6c429ce56a3c309543935c90d180b025744325aba1ebbec503bcb
   interfaces:
-  - codegraphId: function:d368a4338e647d90288973a3a9067f69
-    file: third_party/openbao/internal/vault/diagnose/file_checks.go
+  - name: IsDir
     kind: function
+    signature: (info fs.FileInfo) bool
+    file: third_party/openbao/internal/vault/diagnose/file_checks.go
     line: 19
-    name: IsDir
-    signature: (info fs.FileInfo) bool
-  - codegraphId: function:31f55fc24b8fc6bf7bb9917c24a5911f
-    file: third_party/openbao/internal/vault/diagnose/file_checks.go
+    codegraphId: function:d368a4338e647d90288973a3a9067f69
+  - name: HasDB
     kind: function
-    line: 23
-    name: HasDB
     signature: (path string) bool
-  - codegraphId: function:bed795d266f0a91c52197e5fba82ef0e
     file: third_party/openbao/internal/vault/diagnose/file_checks.go
+    line: 23
+    codegraphId: function:31f55fc24b8fc6bf7bb9917c24a5911f
+  - name: CheckFilePerms
     kind: function
-    line: 33
-    name: CheckFilePerms
     signature: (info fs.FileInfo) (bool, []string)
-  - codegraphId: function:b37a1964d61f16b32a460cf05d886cfa
-    file: third_party/openbao/internal/vault/diagnose/file_checks_unix.go
+    file: third_party/openbao/internal/vault/diagnose/file_checks.go
+    line: 33
+    codegraphId: function:bed795d266f0a91c52197e5fba82ef0e
+  - name: IsOwnedByRoot
     kind: function
-    line: 15
-    name: IsOwnedByRoot
     signature: (info fs.FileInfo) bool
-  - codegraphId: struct:1c06adb419c91fce5d10626c92ad33a3
-    file: third_party/openbao/internal/vault/diagnose/helpers.go
+    file: third_party/openbao/internal/vault/diagnose/file_checks_unix.go
+    line: 15
+    codegraphId: function:b37a1964d61f16b32a460cf05d886cfa
+  - name: Session
     kind: struct
+    file: third_party/openbao/internal/vault/diagnose/helpers.go
     line: 49
-    name: Session
-  - codegraphId: function:cf5c768e70276afbcb9fd5dd5093533e
-    file: third_party/openbao/internal/vault/diagnose/helpers.go
+    codegraphId: struct:1c06adb419c91fce5d10626c92ad33a3
+  - name: New
     kind: function
-    line: 59
-    name: New
     signature: (w io.Writer) *Session
-  - codegraphId: method:f77d8586ef6dc3a929bd14a27f386559
     file: third_party/openbao/internal/vault/diagnose/helpers.go
+    line: 59
+    codegraphId: function:cf5c768e70276afbcb9fd5dd5093533e
+  - name: Session.IsSkipped
     kind: method
-    line: 78
-    name: Session.IsSkipped
     signature: (spanName string) bool
-  - codegraphId: function:ab3b84bf084e0b5a9ac52e38d6b93c97
     file: third_party/openbao/internal/vault/diagnose/helpers.go
+    line: 78
+    codegraphId: method:f77d8586ef6dc3a929bd14a27f386559
+  - name: Context
     kind: function
-    line: 83
-    name: Context
     signature: (ctx context.Context, sess *Session) context.Context
-  - codegraphId: function:01d13409a0f66c6ca7611b765edcf14a
     file: third_party/openbao/internal/vault/diagnose/helpers.go
+    line: 83
+    codegraphId: function:ab3b84bf084e0b5a9ac52e38d6b93c97
+  - name: CurrentSession
     kind: function
-    line: 88
-    name: CurrentSession
     signature: (ctx context.Context) *Session
-  - codegraphId: method:3dcb67c64bb3d49bff1f7f17e82fc953
     file: third_party/openbao/internal/vault/diagnose/helpers.go
+    line: 88
+    codegraphId: function:01d13409a0f66c6ca7611b765edcf14a
+  - name: Session.Finalize
     kind: method
-    line: 98
-    name: Session.Finalize
     signature: (ctx context.Context) *Result
-  - codegraphId: function:0b74a3974c0c64f3bdda87eaa0f44d0b
     file: third_party/openbao/internal/vault/diagnose/helpers.go
+    line: 98
+    codegraphId: method:3dcb67c64bb3d49bff1f7f17e82fc953
+  - name: StartSpan
     kind: function
-    line: 104
-    name: StartSpan
     signature: (ctx context.Context, spanName string, options ...trace.SpanStartOption)
       (context.Context, trace.Span)
-  - codegraphId: function:46916ec4481866b0eae041bb93fd8ea0
     file: third_party/openbao/internal/vault/diagnose/helpers.go
+    line: 104
+    codegraphId: function:0b74a3974c0c64f3bdda87eaa0f44d0b
+  - name: Success
     kind: function
+    signature: (ctx context.Context, message string)
+    file: third_party/openbao/internal/vault/diagnose/helpers.go
     line: 114
-    name: Success
-    signature: (ctx context.Context, message string)
-  - codegraphId: function:f6e5de7c1686a7b6e5dab6a9112ab241
-    file: third_party/openbao/internal/vault/diagnose/helpers.go
+    codegraphId: function:46916ec4481866b0eae041bb93fd8ea0
+  - name: Fail
     kind: function
+    signature: (ctx context.Context, message string)
+    file: third_party/openbao/internal/vault/diagnose/helpers.go
     line: 120
-    name: Fail
-    signature: (ctx context.Context, message string)
-  - codegraphId: function:c140c949edfe4d8950bce65adf86be21
-    file: third_party/openbao/internal/vault/diagnose/helpers.go
+    codegraphId: function:f6e5de7c1686a7b6e5dab6a9112ab241
+  - name: Error
     kind: function
-    line: 126
-    name: Error
     signature: (ctx context.Context, err error, options ...trace.EventOption) error
-  - codegraphId: function:a8c8aedc19e99ca1b0c9b5461b71533b
     file: third_party/openbao/internal/vault/diagnose/helpers.go
+    line: 126
+    codegraphId: function:c140c949edfe4d8950bce65adf86be21
+  - name: Skipped
     kind: function
-    line: 133
-    name: Skipped
     signature: (ctx context.Context, message string)
-  - codegraphId: function:4d8f11326ab7a2395b5b3ae0a85fc595
     file: third_party/openbao/internal/vault/diagnose/helpers.go
+    line: 133
+    codegraphId: function:a8c8aedc19e99ca1b0c9b5461b71533b
+  - name: Warn
     kind: function
-    line: 140
-    name: Warn
     signature: (ctx context.Context, msg string)
-  - codegraphId: function:5ba70567e9681e038bb1d42a54730c99
     file: third_party/openbao/internal/vault/diagnose/helpers.go
+    line: 140
+    codegraphId: function:4d8f11326ab7a2395b5b3ae0a85fc595
+  - name: SpotOk
     kind: function
+    signature: (ctx context.Context, checkName, message string, options ...trace.EventOption)
+    file: third_party/openbao/internal/vault/diagnose/helpers.go
     line: 147
-    name: SpotOk
-    signature: (ctx context.Context, checkName, message string, options ...trace.EventOption)
-  - codegraphId: function:63c609886747199e13e2f1e65682d21e
-    file: third_party/openbao/internal/vault/diagnose/helpers.go
+    codegraphId: function:5ba70567e9681e038bb1d42a54730c99
+  - name: SpotWarn
     kind: function
+    signature: (ctx context.Context, checkName, message string, options ...trace.EventOption)
+    file: third_party/openbao/internal/vault/diagnose/helpers.go
     line: 153
-    name: SpotWarn
-    signature: (ctx context.Context, checkName, message string, options ...trace.EventOption)
-  - codegraphId: function:5751359af658aca42f50270ee42c7467
-    file: third_party/openbao/internal/vault/diagnose/helpers.go
+    codegraphId: function:63c609886747199e13e2f1e65682d21e
+  - name: SpotError
     kind: function
-    line: 159
-    name: SpotError
     signature: (ctx context.Context, checkName string, err error, options ...trace.EventOption)
       error
-  - codegraphId: function:ece06f85d11e6dd269ec04a5f9597fd5
     file: third_party/openbao/internal/vault/diagnose/helpers.go
+    line: 159
+    codegraphId: function:5751359af658aca42f50270ee42c7467
+  - name: SpotSkipped
     kind: function
-    line: 169
-    name: SpotSkipped
     signature: (ctx context.Context, checkName, message string, options ...trace.EventOption)
-  - codegraphId: function:29950abbefb1d13b51b3748364bab5a8
     file: third_party/openbao/internal/vault/diagnose/helpers.go
+    line: 169
+    codegraphId: function:ece06f85d11e6dd269ec04a5f9597fd5
+  - name: Advice
     kind: function
-    line: 174
-    name: Advice
     signature: (message string) trace.EventOption
-  - codegraphId: function:538081c484ea52d7f375564864d27942
     file: third_party/openbao/internal/vault/diagnose/helpers.go
+    line: 174
+    codegraphId: function:29950abbefb1d13b51b3748364bab5a8
+  - name: Advise
     kind: function
-    line: 179
-    name: Advise
     signature: (ctx context.Context, message string)
-  - codegraphId: function:a0b9d3226264e0999289ee2cafa94f16
     file: third_party/openbao/internal/vault/diagnose/helpers.go
+    line: 179
+    codegraphId: function:538081c484ea52d7f375564864d27942
+  - name: SpotCheck
     kind: function
-    line: 193
-    name: SpotCheck
     signature: (ctx context.Context, checkName string, f func() error) error
-  - codegraphId: function:ed6fdfa8a802ce53f4810fe220e5f5b6
     file: third_party/openbao/internal/vault/diagnose/helpers.go
+    line: 193
+    codegraphId: function:a0b9d3226264e0999289ee2cafa94f16
+  - name: Test
     kind: function
-    line: 212
-    name: Test
     signature: (ctx context.Context, spanName string, function testFunction, options
       ...trace.SpanStartOption) error
-  - codegraphId: function:65000eb8d97b4d6d0d6e4c62e6a815b5
     file: third_party/openbao/internal/vault/diagnose/helpers.go
+    line: 212
+    codegraphId: function:ed6fdfa8a802ce53f4810fe220e5f5b6
+  - name: WithTimeout
     kind: function
-    line: 232
-    name: WithTimeout
     signature: (d time.Duration, f testFunction) testFunction
-  - codegraphId: function:fcec7c6c30100663b4c2e71f1b2f89a8
     file: third_party/openbao/internal/vault/diagnose/helpers.go
+    line: 232
+    codegraphId: function:65000eb8d97b4d6d0d6e4c62e6a815b5
+  - name: CapitalizeFirstLetter
     kind: function
-    line: 249
-    name: CapitalizeFirstLetter
     signature: (msg string) string
-  - codegraphId: method:1da3e234c00a36d41023ff633e9550b5
-    file: third_party/openbao/internal/vault/diagnose/mock_storage_backend.go
+    file: third_party/openbao/internal/vault/diagnose/helpers.go
+    line: 249
+    codegraphId: function:fcec7c6c30100663b4c2e71f1b2f89a8
+  - name: mockStorageBackend.Put
     kind: method
-    line: 57
-    name: mockStorageBackend.Put
     signature: (ctx context.Context, entry *physical.Entry) error
-  - codegraphId: method:02800c4c26a3d396bcabbd98e506d42d
     file: third_party/openbao/internal/vault/diagnose/mock_storage_backend.go
+    line: 57
+    codegraphId: method:1da3e234c00a36d41023ff633e9550b5
+  - name: mockStorageBackend.Get
     kind: method
-    line: 62
-    name: mockStorageBackend.Get
     signature: (ctx context.Context, key string) (*physical.Entry, error)
-  - codegraphId: method:3deda167c0e752d9905b9098a13aa7d7
     file: third_party/openbao/internal/vault/diagnose/mock_storage_backend.go
+    line: 62
+    codegraphId: method:02800c4c26a3d396bcabbd98e506d42d
+  - name: mockStorageBackend.Delete
     kind: method
-    line: 76
-    name: mockStorageBackend.Delete
     signature: (ctx context.Context, key string) error
-  - codegraphId: method:44b39e97bfbbb06396cba7d44366e6ff
     file: third_party/openbao/internal/vault/diagnose/mock_storage_backend.go
+    line: 76
+    codegraphId: method:3deda167c0e752d9905b9098a13aa7d7
+  - name: mockStorageBackend.List
     kind: method
-    line: 81
-    name: mockStorageBackend.List
     signature: (ctx context.Context, prefix string) ([]string, error)
-  - codegraphId: method:6790184f6d81cab01b57293f5627a265
     file: third_party/openbao/internal/vault/diagnose/mock_storage_backend.go
+    line: 81
+    codegraphId: method:44b39e97bfbbb06396cba7d44366e6ff
+  - name: mockStorageBackend.ListPage
     kind: method
-    line: 86
-    name: mockStorageBackend.ListPage
     signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
       error)
-  - codegraphId: method:fab4f2a6daad9e59d7e0a81accfbd5b1
     file: third_party/openbao/internal/vault/diagnose/mock_storage_backend.go
+    line: 86
+    codegraphId: method:6790184f6d81cab01b57293f5627a265
+  - name: mockStorageBackend.GetConfigurationOffline
     kind: method
+    signature: () (*raft.RaftConfigurationResponse, error)
+    file: third_party/openbao/internal/vault/diagnose/mock_storage_backend.go
     line: 103
-    name: mockStorageBackend.GetConfigurationOffline
-    signature: () (*raft.RaftConfigurationResponse, error)
-  - codegraphId: interface:748ebb001b9d9ed5d0f2b512c771c76e
-    file: third_party/openbao/internal/vault/diagnose/mock_storage_backend.go
+    codegraphId: method:fab4f2a6daad9e59d7e0a81accfbd5b1
+  - name: RaftConfigurableStorageBackend
     kind: interface
-    line: 126
-    name: RaftConfigurableStorageBackend
-  - codegraphId: method:2057eb4c0ffa0285063652dba6477ae5
     file: third_party/openbao/internal/vault/diagnose/mock_storage_backend.go
+    line: 126
+    codegraphId: interface:748ebb001b9d9ed5d0f2b512c771c76e
+  - name: RaftConfigurableStorageBackend.GetConfigurationOffline
     kind: method
-    line: 127
-    name: RaftConfigurableStorageBackend.GetConfigurationOffline
     signature: () (*raft.RaftConfigurationResponse, error)
-  - codegraphId: function:a397007a7d7793145f0c8425ab7c9a0d
-    file: third_party/openbao/internal/vault/diagnose/os_unix.go
+    file: third_party/openbao/internal/vault/diagnose/mock_storage_backend.go
+    line: 127
+    codegraphId: method:2057eb4c0ffa0285063652dba6477ae5
+  - name: OSChecks
     kind: function
-    line: 15
-    name: OSChecks
     signature: (ctx context.Context)
-  - codegraphId: method:4c034e8c566604fb04f16d415914f848
-    file: third_party/openbao/internal/vault/diagnose/output.go
+    file: third_party/openbao/internal/vault/diagnose/os_unix.go
+    line: 15
+    codegraphId: function:a397007a7d7793145f0c8425ab7c9a0d
+  - name: status.String
     kind: method
+    signature: () string
+    file: third_party/openbao/internal/vault/diagnose/output.go
     line: 38
-    name: status.String
-    signature: () string
-  - codegraphId: method:4d914b248d4318166c1712d0cbd09671
-    file: third_party/openbao/internal/vault/diagnose/output.go
+    codegraphId: method:4c034e8c566604fb04f16d415914f848
+  - name: status.MarshalJSON
     kind: method
-    line: 50
-    name: status.MarshalJSON
     signature: () ([]byte, error)
-  - codegraphId: struct:7f147251c25b1341197583029d1c82da
     file: third_party/openbao/internal/vault/diagnose/output.go
+    line: 50
+    codegraphId: method:4d914b248d4318166c1712d0cbd09671
+  - name: Result
     kind: struct
+    file: third_party/openbao/internal/vault/diagnose/output.go
     line: 54
-    name: Result
-  - codegraphId: method:6df80e68a9200d633d013e0c15bb946b
-    file: third_party/openbao/internal/vault/diagnose/output.go
+    codegraphId: struct:7f147251c25b1341197583029d1c82da
+  - name: Result.ZeroTimes
     kind: method
-    line: 83
-    name: Result.ZeroTimes
     signature: ()
-  - codegraphId: struct:6330959336e65f4d97e81a1c30c1a9dd
     file: third_party/openbao/internal/vault/diagnose/output.go
+    line: 83
+    codegraphId: method:6df80e68a9200d633d013e0c15bb946b
+  - name: TelemetryCollector
     kind: struct
+    file: third_party/openbao/internal/vault/diagnose/output.go
     line: 93
-    name: TelemetryCollector
-  - codegraphId: function:103414ab252298f367022fad7d289ae6
-    file: third_party/openbao/internal/vault/diagnose/output.go
+    codegraphId: struct:6330959336e65f4d97e81a1c30c1a9dd
+  - name: NewTelemetryCollector
     kind: function
-    line: 104
-    name: NewTelemetryCollector
     signature: (w io.Writer) *TelemetryCollector
-  - codegraphId: method:bd4d0f2f7dfe3fe4da946d06dbae808c
     file: third_party/openbao/internal/vault/diagnose/output.go
+    line: 104
+    codegraphId: function:103414ab252298f367022fad7d289ae6
+  - name: TelemetryCollector.OnStart
     kind: method
-    line: 113
-    name: TelemetryCollector.OnStart
     signature: (_ context.Context, s sdktrace.ReadWriteSpan)
-  - codegraphId: method:529075a31345c0c94b289211c932675c
     file: third_party/openbao/internal/vault/diagnose/output.go
+    line: 113
+    codegraphId: method:bd4d0f2f7dfe3fe4da946d06dbae808c
+  - name: TelemetryCollector.OnEnd
     kind: method
-    line: 131
-    name: TelemetryCollector.OnEnd
     signature: (e sdktrace.ReadOnlySpan)
-  - codegraphId: method:a5c403e4c4139e2dee8b8dbb1e55a102
     file: third_party/openbao/internal/vault/diagnose/output.go
+    line: 131
+    codegraphId: method:529075a31345c0c94b289211c932675c
+  - name: TelemetryCollector.Shutdown
     kind: method
+    signature: (_ context.Context) error
+    file: third_party/openbao/internal/vault/diagnose/output.go
     line: 162
-    name: TelemetryCollector.Shutdown
-    signature: (_ context.Context) error
-  - codegraphId: method:5f09cd0865a60f1926947e026c057c5a
-    file: third_party/openbao/internal/vault/diagnose/output.go
+    codegraphId: method:a5c403e4c4139e2dee8b8dbb1e55a102
+  - name: TelemetryCollector.ForceFlush
     kind: method
+    signature: (_ context.Context) error
+    file: third_party/openbao/internal/vault/diagnose/output.go
     line: 167
-    name: TelemetryCollector.ForceFlush
-    signature: (_ context.Context) error
-  - codegraphId: method:f41f2ec2ebef63c85ef87f1e3eea3c6c
-    file: third_party/openbao/internal/vault/diagnose/output.go
+    codegraphId: method:5f09cd0865a60f1926947e026c057c5a
+  - name: Result.Write
     kind: method
-    line: 301
-    name: Result.Write
     signature: (writer io.Writer, wrapLimit int) error
-  - codegraphId: method:052130a159df9fe2d5248a6ee5267a52
     file: third_party/openbao/internal/vault/diagnose/output.go
+    line: 301
+    codegraphId: method:f41f2ec2ebef63c85ef87f1e3eea3c6c
+  - name: Result.String
     kind: method
-    line: 319
-    name: Result.String
     signature: () string
-  - codegraphId: method:2a5ae63fd140010d7a12657a95f4e2ba
     file: third_party/openbao/internal/vault/diagnose/output.go
+    line: 319
+    codegraphId: method:052130a159df9fe2d5248a6ee5267a52
+  - name: Result.StringWrapped
     kind: method
-    line: 323
-    name: Result.StringWrapped
     signature: (wrapLimit int) string
-  - codegraphId: function:8e2ab71ac554ea14baa62329b33dddf9
-    file: third_party/openbao/internal/vault/diagnose/raft_checks.go
+    file: third_party/openbao/internal/vault/diagnose/output.go
+    line: 323
+    codegraphId: method:2a5ae63fd140010d7a12657a95f4e2ba
+  - name: RaftFileChecks
     kind: function
-    line: 30
-    name: RaftFileChecks
     signature: (ctx context.Context, path string)
-  - codegraphId: function:c0d7309123dbd3c7fd2393414cbb0c9f
     file: third_party/openbao/internal/vault/diagnose/raft_checks.go
+    line: 30
+    codegraphId: function:8e2ab71ac554ea14baa62329b33dddf9
+  - name: RaftStorageQuorum
     kind: function
-    line: 72
-    name: RaftStorageQuorum
     signature: (ctx context.Context, b RaftConfigurableStorageBackend) string
-  - codegraphId: function:e4561368a5d8d7d3752ca5898b503af3
-    file: third_party/openbao/internal/vault/diagnose/storage_checks.go
+    file: third_party/openbao/internal/vault/diagnose/raft_checks.go
+    line: 72
+    codegraphId: function:c0d7309123dbd3c7fd2393414cbb0c9f
+  - name: EndToEndLatencyCheckWrite
     kind: function
+    signature: (ctx context.Context, uuid string, b physical.Backend) (time.Duration,
+      error)
+    file: third_party/openbao/internal/vault/diagnose/storage_checks.go
     line: 28
-    name: EndToEndLatencyCheckWrite
+    codegraphId: function:e4561368a5d8d7d3752ca5898b503af3
+  - name: EndToEndLatencyCheckRead
+    kind: function
     signature: (ctx context.Context, uuid string, b physical.Backend) (time.Duration,
       error)
-  - codegraphId: function:3b3fc36b0a2ff553c718821131cbc9c8
     file: third_party/openbao/internal/vault/diagnose/storage_checks.go
-    kind: function
     line: 41
-    name: EndToEndLatencyCheckRead
+    codegraphId: function:3b3fc36b0a2ff553c718821131cbc9c8
+  - name: EndToEndLatencyCheckDelete
+    kind: function
     signature: (ctx context.Context, uuid string, b physical.Backend) (time.Duration,
       error)
-  - codegraphId: function:9134dea0a3098c266a4ab90fa7a14fcb
     file: third_party/openbao/internal/vault/diagnose/storage_checks.go
-    kind: function
     line: 62
-    name: EndToEndLatencyCheckDelete
-    signature: (ctx context.Context, uuid string, b physical.Backend) (time.Duration,
-      error)
-  - codegraphId: function:1f266af19e27fbcd2b424a843adab179
-    file: third_party/openbao/internal/vault/diagnose/storage_checks.go
+    codegraphId: function:9134dea0a3098c266a4ab90fa7a14fcb
+  - name: ConsulDirectAccess
     kind: function
-    line: 78
-    name: ConsulDirectAccess
     signature: (config map[string]string) string
-  - codegraphId: function:6deb04fc3ec65145725aa931037d4d78
-    file: third_party/openbao/internal/vault/diagnose/tls_verification.go
+    file: third_party/openbao/internal/vault/diagnose/storage_checks.go
+    line: 78
+    codegraphId: function:1f266af19e27fbcd2b424a843adab179
+  - name: ListenerChecks
     kind: function
-    line: 29
-    name: ListenerChecks
     signature: (ctx context.Context, listeners []*configutil.Listener) ([]string,
       []error)
-  - codegraphId: function:760ec569cefae891200beed07025f8bf
     file: third_party/openbao/internal/vault/diagnose/tls_verification.go
+    line: 29
+    codegraphId: function:6deb04fc3ec65145725aa931037d4d78
+  - name: TLSFileChecks
     kind: function
-    line: 109
-    name: TLSFileChecks
     signature: (certpath, keypath string) ([]string, error)
-  - codegraphId: function:826e56fc7b14b5f6fc32a81263476d0e
     file: third_party/openbao/internal/vault/diagnose/tls_verification.go
+    line: 109
+    codegraphId: function:760ec569cefae891200beed07025f8bf
+  - name: TLSCertCheck
     kind: function
-    line: 121
-    name: TLSCertCheck
     signature: (certpath string) ([]string, error)
-  - codegraphId: function:e025c3abc53d90ea0c5061982c5d833b
     file: third_party/openbao/internal/vault/diagnose/tls_verification.go
+    line: 121
+    codegraphId: function:826e56fc7b14b5f6fc32a81263476d0e
+  - name: ParseTLSInformation
     kind: function
-    line: 142
-    name: ParseTLSInformation
     signature: (certFilePath string) ([]*x509.Certificate, []*x509.Certificate, []*x509.Certificate,
       error)
-  - codegraphId: function:fd2d91f20b32fb9ca542cf2a7ba18fbe
     file: third_party/openbao/internal/vault/diagnose/tls_verification.go
+    line: 142
+    codegraphId: function:e025c3abc53d90ea0c5061982c5d833b
+  - name: TLSErrorChecks
     kind: function
-    line: 192
-    name: TLSErrorChecks
     signature: (leafCerts, interCerts, rootCerts []*x509.Certificate) error
-  - codegraphId: function:3c394f1d0805ac0bebd81da166d06b5b
     file: third_party/openbao/internal/vault/diagnose/tls_verification.go
+    line: 192
+    codegraphId: function:fd2d91f20b32fb9ca542cf2a7ba18fbe
+  - name: TLSFileWarningChecks
     kind: function
-    line: 269
-    name: TLSFileWarningChecks
     signature: (leafCerts, interCerts, rootCerts []*x509.Certificate) ([]string, error)
-  - codegraphId: function:48bbf8d4d546a22c96e7c0e1c26095e5
     file: third_party/openbao/internal/vault/diagnose/tls_verification.go
+    line: 269
+    codegraphId: function:3c394f1d0805ac0bebd81da166d06b5b
+  - name: NearExpiration
     kind: function
-    line: 302
-    name: NearExpiration
     signature: (c *x509.Certificate) (bool, time.Duration)
-  - codegraphId: function:ddd9f8d4cca46ff98699e6f8a39b6690
     file: third_party/openbao/internal/vault/diagnose/tls_verification.go
+    line: 302
+    codegraphId: function:48bbf8d4d546a22c96e7c0e1c26095e5
+  - name: TLSMutualExclusionCertCheck
     kind: function
-    line: 312
-    name: TLSMutualExclusionCertCheck
     signature: (l *configutil.Listener) (int, string)
-  - codegraphId: function:238970f9d548e05113b2015f954ccbf7
     file: third_party/openbao/internal/vault/diagnose/tls_verification.go
+    line: 312
+    codegraphId: function:ddd9f8d4cca46ff98699e6f8a39b6690
+  - name: TLSClientCAFileCheck
     kind: function
-    line: 322
-    name: TLSClientCAFileCheck
     signature: (l *configutil.Listener) ([]string, error)
-  - codegraphId: function:077dfce5c711ad619b614d8b9480197d
     file: third_party/openbao/internal/vault/diagnose/tls_verification.go
+    line: 322
+    codegraphId: function:238970f9d548e05113b2015f954ccbf7
+  - name: TLSCAFileCheck
     kind: function
-    line: 332
-    name: TLSCAFileCheck
     signature: (CAFilePath string) ([]string, error)
-realizedSpecHash: 1d696d8e6c3c91932e3a2eebc28f2103daf8433300abe19042a8679322ed63bd
-syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-syncedFingerprint: f522124947d6c429ce56a3c309543935c90d180b025744325aba1ebbec503bcb
+    file: third_party/openbao/internal/vault/diagnose/tls_verification.go
+    line: 332
+    codegraphId: function:077dfce5c711ad619b614d8b9480197d
+  fingerprint: f522124947d6c429ce56a3c309543935c90d180b025744325aba1ebbec503bcb

@@ -1,4 +1,430 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-internal-builtin-logical-database
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'The context exists so the database secrets engine can be described and
+    regenerated as one unit: it is the part of the vendored OpenBao tree responsible
+    for configuring database connections, issuing dynamic and static credentials through
+    database plugins, rotating root and static credentials, and revoking leases. It
+    also carries the plugin-version abstraction that lets a single backend speak to
+    both the legacy v4 database plugin interface and the v5 request/response interface,
+    plus the mock plugins the test suite relies on.'
+  requirements:
+  - id: r.backend-constructor
+    level: MUST
+    text: Backend builds a *databaseBackend from a BackendConfig, registering the
+      connection, role, static-role, credential, rotate-credentials and root-rotation
+      paths and their help and field schemas.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/database/backend.go
+    - function:69f986706c3bf46fe5958edbeabb4471
+  - id: r.client-cert-generator
+    level: SHOULD
+    text: ClientCertificateGenerator produces the client certificate material a database
+      plugin can present when the connection authenticates with TLS client certificates.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/database/credentials.go
+    - struct:e4a5d01937edb1e02b67d203fc7be2d0
+  - id: r.close-on-shutdown
+    level: MUST
+    text: CloseIfShutdown closes a plugin instance when the returned error marks the
+      backend as shutting down, so shutdown races do not surface as user-visible errors.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/database/backend.go
+    - method:78540755cd4f2e19a78cab46570fd1b1
+  - id: r.connection-cache
+    level: MUST
+    text: databaseBackend.GetConnection returns a cached dbPluginInstance for a named
+      connection, fetching and decoding the stored config first, while GetConnectionWithConfig
+      builds the instance from a supplied config without a storage read.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/database/backend.go
+    - method:97488329b00022bfba5af7b37652f4eb
+    - method:aef00ac05268ccf0fbf07b41db40bdab
+  - id: r.connection-eviction
+    level: MUST
+    text: ClearConnection and ClearConnectionId remove and close a cached plugin instance
+      by name or by name plus id so a reconfigured connection is rebuilt on next use.
+    codeRefs:
+    - method:3f5a589e335f572f15dc5553a2e340a1
+    - method:b2d5ee9d33345ba70b919f5ce735ac7a
+  - id: r.creds-create-path
+    level: MUST
+    text: The credential creation path checks the requested credential type against
+      the connection's supported types before calling the plugin, returning a lease
+      with the generated username and password.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/database/path_creds_create.go
+    - method:0ef6e016c964d2998368213081a1fe62
+  - id: r.database-config-fields
+    level: MUST
+    text: DatabaseConfig stores plugin_name, plugin_version, connection_details, allowed_roles,
+      root_credentials_rotate_statements and password_policy, so connection details
+      and the permitted roles are persisted per named connection.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/database/path_config_connection.go
+    - struct:0401dd6a3ae23898af099f2eb5049cba
+  - id: r.database-config-read
+    level: MUST
+    text: databaseBackend.DatabaseConfig reads the storage key config/<name>, errors
+      when the entry is absent or unreadable, and decodes the entry JSON into a DatabaseConfig.
+    codeRefs:
+    - method:21045c51cbf5612d8ff03b9967a11589
+    - struct:0401dd6a3ae23898af099f2eb5049cba
+  - id: r.factory-setup
+    level: MUST
+    text: Factory constructs the database backend from the logical BackendConfig and
+      runs Setup on it, returning the logical.Backend or the setup error.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/database/backend.go
+    - function:46b03c6a5071694623273c1859a79474
+  - id: r.lease-rollback
+    level: MUST
+    text: The lease rollback handler revokes the database user named in the lease
+      internal data and removes the corresponding role or static-account state, tolerating
+      leases whose credential was already deleted.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/database/rollback.go
+    - file:third_party/openbao/internal/builtin/logical/database/secret_creds.go
+  - id: r.mock-v4-plugin
+    level: MUST
+    text: 'MockDatabaseV4 implements the v4 database plugin surface for tests: Init
+      and Initialize absorb the config and report the saved config, CreateUser, RenewUser,
+      RevokeUser, SetCredentials, GenerateCredentials and RotateRootCredentials drive
+      the legacy statements, and Type and Close identify and shut down the plugin.
+      NewV4 constructs it as an any and RunV4 serves it over the plugin RPC layer
+      with the given API TLS config.'
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/database/mockv4.go
+    - function:602120409f1d3c280ad783306bdf1723
+    - function:625945c626d767c4238ce3a4d0ef9e59
+    - struct:418295cc73905726c6061955513ad876
+  - id: r.mock-v5-plugin
+    level: MUST
+    text: 'MockDatabaseV5 implements the v5 database plugin surface for tests: Initialize,
+      NewUser, UpdateUser and DeleteUser consume and return the v5 request and response
+      types, and Type and Close identify and shut down the plugin. New constructs
+      it as an any, RunV5 serves it over the plugin RPC layer, and RunV6Multiplexed
+      serves it over the multiplexed RPC layer.'
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/database/mockv5.go
+    - function:6a3315a2298212e20d7fe65e6b33d0df
+    - function:9590727b1790d44883ac5e32446d9815
+    - function:e0e35ed3467a27074242ec85380b5890
+    - struct:f8c14d24d6d75319fc8b53098335a04a
+  - id: r.new-user-password-return
+    level: MUST
+    text: databaseVersionWrapper.NewUser returns the v5 response together with the
+      generated password so the caller can hand the credential to the client without
+      a second plugin call.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/database/version_wrapper.go
+    - method:ce9c6205bf10840b0a234bb371df28d3
+  - id: r.plugin-instance-close-idempotent
+    level: MUST
+    text: dbPluginInstance.Close takes the instance lock, returns nil if the instance
+      is already marked closed, otherwise marks it closed and calls Close on the wrapped
+      database plugin exactly once.
+    codeRefs:
+    - method:3f5a589e335f572f15dc5553a2e340a1
+    - method:551f1c6ddbd5443f663240c49a3e0b01
+    - method:b2d5ee9d33345ba70b919f5ce735ac7a
+  - id: r.role-lookups
+    level: MUST
+    text: databaseBackend.Role and databaseBackend.StaticRole read a role entry and
+      a static-role entry by name from storage and return the decoded roleEntry, keeping
+      the two role kinds on separate storage prefixes.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/database/path_roles.go
+    - method:102323d53aba8f635a3085ddef98327f
+    - method:b96bd1b43f591e50a3e2239d08fc060e
+  - id: r.rotate-root-path
+    level: MUST
+    text: The rotate-root path rotates the connection's root credentials through the
+      plugin and persists the returned connection config, refusing when the connection
+      has no rotation support.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/database/path_rotate_credentials.go
+    - file:third_party/openbao/internal/builtin/logical/database/rotation.go
+  - id: r.static-account-schedule
+    level: MUST
+    text: staticAccount.NextRotationTime derives the next rotation instant and staticAccount.CredentialTTL
+      derives the credential lifetime, so static credential rotation is scheduled
+      from the stored rotation period and the credential's own TTL.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/database/path_roles.go
+    - method:0c3d1048e3c9ef9e668c347b6704756b
+    - method:8d5a1d841e800e1f4dee9f3d9db11719
+  - id: r.static-role-custom-statements
+    level: MUST
+    text: The static-role path stores and applies custom rotation and revocation statements
+      for a static account, alongside the generation and registration statements read
+      from the connection config.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/database/path_roles.go
+    - file:third_party/openbao/internal/builtin/logical/database/rotation.go
+  - id: r.supports-credential-type
+    level: MUST
+    text: DatabaseConfig.SupportsCredentialType reads the supported credential types
+      from ConnectionDetails, defaults to supporting only CredentialTypePassword when
+      the plugin did not report any types, and otherwise matches the requested type
+      against the reported list.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/database/path_config_connection.go
+    - method:0ef6e016c964d2998368213081a1fe62
+  - id: r.update-user-root-flag
+    level: MUST
+    text: databaseVersionWrapper.UpdateUser accepts an isRootUser flag and returns
+      the save-config map from the plugin, so root credential rotation and per-user
+      password change share one code path.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/database/rotation.go
+    - method:39a3a0ddef46a2ba2cf55d3230472b13
+  - id: r.version-coverage-tests
+    level: SHOULD
+    text: The test files exercise both plugin generations through the shared mocks,
+      covering connection configuration, role and static-role handling, credential
+      creation, rotation, rollback and large-scale versioning behavior.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/database/mocks_test.go
+    - file:third_party/openbao/internal/builtin/logical/database/rollback_test.go
+    - file:third_party/openbao/internal/builtin/logical/database/rotation_test.go
+    - file:third_party/openbao/internal/builtin/logical/database/versioning_large_test.go
+  - id: r.version-wrapper-lifecycle
+    level: MUST
+    text: databaseVersionWrapper reports Type, Close and PluginVersion for the wrapped
+      plugin so the backend can label, shut down and gate features by plugin version
+      without knowing which plugin generation it holds.
+    codeRefs:
+    - method:735fb3d88ff60015f26504b7c7be215a
+    - method:74e83a4bb3dc54d6be26f6256e890b49
+    - method:7b74b4c6e32ac8bf905b8accb27dc581
+  - id: r.version-wrapper-v5-api
+    level: MUST
+    text: databaseVersionWrapper exposes Initialize, NewUser, UpdateUser and DeleteUser
+      in the v5 request/response shapes, translating each request to the underlying
+      plugin version and returning the plugin's v5 response.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/database/version_wrapper.go
+    - method:3602402a0da7635c4715341b96e7c0f7
+    - method:39a3a0ddef46a2ba2cf55d3230472b13
+    - method:59161c52a0ad76f3f9625506728eb7df
+    - method:ce9c6205bf10840b0a234bb371df28d3
+  interfaces:
+  - name: Backend
+    kind: function
+    signature: func Backend(conf *logical.BackendConfig) *databaseBackend
+    file: third_party/openbao/internal/builtin/logical/database/backend.go
+  - name: ClientCertificateGenerator
+    kind: struct
+    signature: type ClientCertificateGenerator struct
+    file: third_party/openbao/internal/builtin/logical/database/credentials.go
+  - name: DatabaseConfig
+    kind: struct
+    signature: type DatabaseConfig struct
+    file: third_party/openbao/internal/builtin/logical/database/path_config_connection.go
+  - name: DatabaseConfig.SupportsCredentialType
+    kind: method
+    signature: func (c *DatabaseConfig) SupportsCredentialType(credentialType v5.CredentialType)
+      bool
+    file: third_party/openbao/internal/builtin/logical/database/path_config_connection.go
+  - name: Factory
+    kind: function
+    signature: func Factory(ctx context.Context, conf *logical.BackendConfig) (logical.Backend,
+      error)
+    file: third_party/openbao/internal/builtin/logical/database/backend.go
+  - name: MockDatabaseV4
+    kind: struct
+    signature: type MockDatabaseV4 struct
+    file: third_party/openbao/internal/builtin/logical/database/mockv4.go
+  - name: MockDatabaseV4.Close
+    kind: method
+    signature: func (m *MockDatabaseV4) Close() error
+    file: third_party/openbao/internal/builtin/logical/database/mockv4.go
+  - name: MockDatabaseV4.CreateUser
+    kind: method
+    signature: func (m *MockDatabaseV4) CreateUser(ctx context.Context, statements
+      v4.Statements, usernameConfig v4.UsernameConfig, expiration time.Time) (username
+      string, password string, err error)
+    file: third_party/openbao/internal/builtin/logical/database/mockv4.go
+  - name: MockDatabaseV4.GenerateCredentials
+    kind: method
+    signature: func (m *MockDatabaseV4) GenerateCredentials(ctx context.Context) (password
+      string, err error)
+    file: third_party/openbao/internal/builtin/logical/database/mockv4.go
+  - name: MockDatabaseV4.Init
+    kind: method
+    signature: func (m *MockDatabaseV4) Init(ctx context.Context, config map[string]any,
+      verifyConnection bool) (saveConfig map[string]any, err error)
+    file: third_party/openbao/internal/builtin/logical/database/mockv4.go
+  - name: MockDatabaseV4.Initialize
+    kind: method
+    signature: func (m *MockDatabaseV4) Initialize(ctx context.Context, config map[string]any,
+      verifyConnection bool) (err error)
+    file: third_party/openbao/internal/builtin/logical/database/mockv4.go
+  - name: MockDatabaseV4.RenewUser
+    kind: method
+    signature: func (m *MockDatabaseV4) RenewUser(ctx context.Context, statements
+      v4.Statements, username string, expiration time.Time) error
+    file: third_party/openbao/internal/builtin/logical/database/mockv4.go
+  - name: MockDatabaseV4.RevokeUser
+    kind: method
+    signature: func (m *MockDatabaseV4) RevokeUser(ctx context.Context, statements
+      v4.Statements, username string) error
+    file: third_party/openbao/internal/builtin/logical/database/mockv4.go
+  - name: MockDatabaseV4.RotateRootCredentials
+    kind: method
+    signature: func (m *MockDatabaseV4) RotateRootCredentials(ctx context.Context,
+      statements []string) (config map[string]any, err error)
+    file: third_party/openbao/internal/builtin/logical/database/mockv4.go
+  - name: MockDatabaseV4.SetCredentials
+    kind: method
+    signature: func (m *MockDatabaseV4) SetCredentials(ctx context.Context, statements
+      v4.Statements, staticConfig v4.StaticUserConfig) (username string, password
+      string, err error)
+    file: third_party/openbao/internal/builtin/logical/database/mockv4.go
+  - name: MockDatabaseV4.Type
+    kind: method
+    signature: func (m *MockDatabaseV4) Type() (string, error)
+    file: third_party/openbao/internal/builtin/logical/database/mockv4.go
+  - name: MockDatabaseV5
+    kind: struct
+    signature: type MockDatabaseV5 struct
+    file: third_party/openbao/internal/builtin/logical/database/mockv5.go
+  - name: MockDatabaseV5.Close
+    kind: method
+    signature: func (m *MockDatabaseV5) Close() error
+    file: third_party/openbao/internal/builtin/logical/database/mockv5.go
+  - name: MockDatabaseV5.DeleteUser
+    kind: method
+    signature: func (m *MockDatabaseV5) DeleteUser(ctx context.Context, req v5.DeleteUserRequest)
+      (v5.DeleteUserResponse, error)
+    file: third_party/openbao/internal/builtin/logical/database/mockv5.go
+  - name: MockDatabaseV5.Initialize
+    kind: method
+    signature: func (m *MockDatabaseV5) Initialize(ctx context.Context, req v5.InitializeRequest)
+      (v5.InitializeResponse, error)
+    file: third_party/openbao/internal/builtin/logical/database/mockv5.go
+  - name: MockDatabaseV5.NewUser
+    kind: method
+    signature: func (m *MockDatabaseV5) NewUser(ctx context.Context, req v5.NewUserRequest)
+      (v5.NewUserResponse, error)
+    file: third_party/openbao/internal/builtin/logical/database/mockv5.go
+  - name: MockDatabaseV5.Type
+    kind: method
+    signature: func (m *MockDatabaseV5) Type() (string, error)
+    file: third_party/openbao/internal/builtin/logical/database/mockv5.go
+  - name: MockDatabaseV5.UpdateUser
+    kind: method
+    signature: func (m *MockDatabaseV5) UpdateUser(ctx context.Context, req v5.UpdateUserRequest)
+      (v5.UpdateUserResponse, error)
+    file: third_party/openbao/internal/builtin/logical/database/mockv5.go
+  - name: New
+    kind: function
+    signature: func New() (any, error)
+    file: third_party/openbao/internal/builtin/logical/database/mockv5.go
+  - name: NewV4
+    kind: function
+    signature: func NewV4() (any, error)
+    file: third_party/openbao/internal/builtin/logical/database/mockv4.go
+  - name: RunV4
+    kind: function
+    signature: func RunV4(apiTLSConfig *api.TLSConfig) error
+    file: third_party/openbao/internal/builtin/logical/database/mockv4.go
+  - name: RunV5
+    kind: function
+    signature: func RunV5() error
+    file: third_party/openbao/internal/builtin/logical/database/mockv5.go
+  - name: RunV6Multiplexed
+    kind: function
+    signature: func RunV6Multiplexed() error
+    file: third_party/openbao/internal/builtin/logical/database/mockv5.go
+  - name: databaseBackend.ClearConnection
+    kind: method
+    signature: func (b *databaseBackend) ClearConnection(name string) error
+    file: third_party/openbao/internal/builtin/logical/database/backend.go
+  - name: databaseBackend.ClearConnectionId
+    kind: method
+    signature: func (b *databaseBackend) ClearConnectionId(name, id string) error
+    file: third_party/openbao/internal/builtin/logical/database/backend.go
+  - name: databaseBackend.CloseIfShutdown
+    kind: method
+    signature: func (b *databaseBackend) CloseIfShutdown(db *dbPluginInstance, err
+      error)
+    file: third_party/openbao/internal/builtin/logical/database/backend.go
+  - name: databaseBackend.DatabaseConfig
+    kind: method
+    signature: func (b *databaseBackend) DatabaseConfig(ctx context.Context, s logical.Storage,
+      name string) (*DatabaseConfig, error)
+    file: third_party/openbao/internal/builtin/logical/database/backend.go
+  - name: databaseBackend.GetConnection
+    kind: method
+    signature: func (b *databaseBackend) GetConnection(ctx context.Context, s logical.Storage,
+      name string) (*dbPluginInstance, error)
+    file: third_party/openbao/internal/builtin/logical/database/backend.go
+  - name: databaseBackend.GetConnectionWithConfig
+    kind: method
+    signature: func (b *databaseBackend) GetConnectionWithConfig(ctx context.Context,
+      name string, config *DatabaseConfig) (*dbPluginInstance, error)
+    file: third_party/openbao/internal/builtin/logical/database/backend.go
+  - name: databaseBackend.Role
+    kind: method
+    signature: func (b *databaseBackend) Role(ctx context.Context, s logical.Storage,
+      roleName string) (*roleEntry, error)
+    file: third_party/openbao/internal/builtin/logical/database/backend.go
+  - name: databaseBackend.StaticRole
+    kind: method
+    signature: func (b *databaseBackend) StaticRole(ctx context.Context, s logical.Storage,
+      roleName string) (*roleEntry, error)
+    file: third_party/openbao/internal/builtin/logical/database/backend.go
+  - name: databaseVersionWrapper.Close
+    kind: method
+    signature: func (w databaseVersionWrapper) Close() error
+    file: third_party/openbao/internal/builtin/logical/database/version_wrapper.go
+  - name: databaseVersionWrapper.DeleteUser
+    kind: method
+    signature: func (w databaseVersionWrapper) DeleteUser(ctx context.Context, req
+      v5.DeleteUserRequest) (v5.DeleteUserResponse, error)
+    file: third_party/openbao/internal/builtin/logical/database/version_wrapper.go
+  - name: databaseVersionWrapper.Initialize
+    kind: method
+    signature: func (w databaseVersionWrapper) Initialize(ctx context.Context, req
+      v5.InitializeRequest) (v5.InitializeResponse, error)
+    file: third_party/openbao/internal/builtin/logical/database/version_wrapper.go
+  - name: databaseVersionWrapper.NewUser
+    kind: method
+    signature: func (w databaseVersionWrapper) NewUser(ctx context.Context, req v5.NewUserRequest)
+      (resp v5.NewUserResponse, password string, err error)
+    file: third_party/openbao/internal/builtin/logical/database/version_wrapper.go
+  - name: databaseVersionWrapper.PluginVersion
+    kind: method
+    signature: func (w databaseVersionWrapper) PluginVersion() logical.PluginVersion
+    file: third_party/openbao/internal/builtin/logical/database/version_wrapper.go
+  - name: databaseVersionWrapper.Type
+    kind: method
+    signature: func (w databaseVersionWrapper) Type() (string, error)
+    file: third_party/openbao/internal/builtin/logical/database/version_wrapper.go
+  - name: databaseVersionWrapper.UpdateUser
+    kind: method
+    signature: func (w databaseVersionWrapper) UpdateUser(ctx context.Context, req
+      v5.UpdateUserRequest, isRootUser bool) (saveConfig map[string]any, err error)
+    file: third_party/openbao/internal/builtin/logical/database/version_wrapper.go
+  - name: dbPluginInstance.Close
+    kind: method
+    signature: func (dbi *dbPluginInstance) Close() error
+    file: third_party/openbao/internal/builtin/logical/database/backend.go
+  - name: staticAccount.CredentialTTL
+    kind: method
+    signature: func (s *staticAccount) CredentialTTL() time.Duration
+    file: third_party/openbao/internal/builtin/logical/database/path_roles.go
+  - name: staticAccount.NextRotationTime
+    kind: method
+    signature: func (s *staticAccount) NextRotationTime() time.Time
+    file: third_party/openbao/internal/builtin/logical/database/path_roles.go
 codeRefIndex:
 - file:third_party/openbao/internal/builtin/logical/database/backend.go backend.go@third_party/openbao/internal/builtin/logical/database/backend.go
 - file:third_party/openbao/internal/builtin/logical/database/backend_test.go backend_test.go@third_party/openbao/internal/builtin/logical/database/backend_test.go
@@ -57,429 +483,3 @@ codeRefIndex:
 - struct:418295cc73905726c6061955513ad876 MockDatabaseV4@third_party/openbao/internal/builtin/logical/database/mockv4.go:19
 - struct:e4a5d01937edb1e02b67d203fc7be2d0 ClientCertificateGenerator@third_party/openbao/internal/builtin/logical/database/credentials.go:180
 - struct:f8c14d24d6d75319fc8b53098335a04a MockDatabaseV5@third_party/openbao/internal/builtin/logical/database/mockv5.go:18
-kind: SystemContext
-metadata:
-  name: third-party-openbao-internal-builtin-logical-database
-  namespace: default
-spec:
-  intent: 'The context exists so the database secrets engine can be described and
-    regenerated as one unit: it is the part of the vendored OpenBao tree responsible
-    for configuring database connections, issuing dynamic and static credentials through
-    database plugins, rotating root and static credentials, and revoking leases. It
-    also carries the plugin-version abstraction that lets a single backend speak to
-    both the legacy v4 database plugin interface and the v5 request/response interface,
-    plus the mock plugins the test suite relies on.'
-  interfaces:
-  - file: third_party/openbao/internal/builtin/logical/database/backend.go
-    kind: function
-    name: Backend
-    signature: func Backend(conf *logical.BackendConfig) *databaseBackend
-  - file: third_party/openbao/internal/builtin/logical/database/credentials.go
-    kind: struct
-    name: ClientCertificateGenerator
-    signature: type ClientCertificateGenerator struct
-  - file: third_party/openbao/internal/builtin/logical/database/path_config_connection.go
-    kind: struct
-    name: DatabaseConfig
-    signature: type DatabaseConfig struct
-  - file: third_party/openbao/internal/builtin/logical/database/path_config_connection.go
-    kind: method
-    name: DatabaseConfig.SupportsCredentialType
-    signature: func (c *DatabaseConfig) SupportsCredentialType(credentialType v5.CredentialType)
-      bool
-  - file: third_party/openbao/internal/builtin/logical/database/backend.go
-    kind: function
-    name: Factory
-    signature: func Factory(ctx context.Context, conf *logical.BackendConfig) (logical.Backend,
-      error)
-  - file: third_party/openbao/internal/builtin/logical/database/mockv4.go
-    kind: struct
-    name: MockDatabaseV4
-    signature: type MockDatabaseV4 struct
-  - file: third_party/openbao/internal/builtin/logical/database/mockv4.go
-    kind: method
-    name: MockDatabaseV4.Close
-    signature: func (m *MockDatabaseV4) Close() error
-  - file: third_party/openbao/internal/builtin/logical/database/mockv4.go
-    kind: method
-    name: MockDatabaseV4.CreateUser
-    signature: func (m *MockDatabaseV4) CreateUser(ctx context.Context, statements
-      v4.Statements, usernameConfig v4.UsernameConfig, expiration time.Time) (username
-      string, password string, err error)
-  - file: third_party/openbao/internal/builtin/logical/database/mockv4.go
-    kind: method
-    name: MockDatabaseV4.GenerateCredentials
-    signature: func (m *MockDatabaseV4) GenerateCredentials(ctx context.Context) (password
-      string, err error)
-  - file: third_party/openbao/internal/builtin/logical/database/mockv4.go
-    kind: method
-    name: MockDatabaseV4.Init
-    signature: func (m *MockDatabaseV4) Init(ctx context.Context, config map[string]any,
-      verifyConnection bool) (saveConfig map[string]any, err error)
-  - file: third_party/openbao/internal/builtin/logical/database/mockv4.go
-    kind: method
-    name: MockDatabaseV4.Initialize
-    signature: func (m *MockDatabaseV4) Initialize(ctx context.Context, config map[string]any,
-      verifyConnection bool) (err error)
-  - file: third_party/openbao/internal/builtin/logical/database/mockv4.go
-    kind: method
-    name: MockDatabaseV4.RenewUser
-    signature: func (m *MockDatabaseV4) RenewUser(ctx context.Context, statements
-      v4.Statements, username string, expiration time.Time) error
-  - file: third_party/openbao/internal/builtin/logical/database/mockv4.go
-    kind: method
-    name: MockDatabaseV4.RevokeUser
-    signature: func (m *MockDatabaseV4) RevokeUser(ctx context.Context, statements
-      v4.Statements, username string) error
-  - file: third_party/openbao/internal/builtin/logical/database/mockv4.go
-    kind: method
-    name: MockDatabaseV4.RotateRootCredentials
-    signature: func (m *MockDatabaseV4) RotateRootCredentials(ctx context.Context,
-      statements []string) (config map[string]any, err error)
-  - file: third_party/openbao/internal/builtin/logical/database/mockv4.go
-    kind: method
-    name: MockDatabaseV4.SetCredentials
-    signature: func (m *MockDatabaseV4) SetCredentials(ctx context.Context, statements
-      v4.Statements, staticConfig v4.StaticUserConfig) (username string, password
-      string, err error)
-  - file: third_party/openbao/internal/builtin/logical/database/mockv4.go
-    kind: method
-    name: MockDatabaseV4.Type
-    signature: func (m *MockDatabaseV4) Type() (string, error)
-  - file: third_party/openbao/internal/builtin/logical/database/mockv5.go
-    kind: struct
-    name: MockDatabaseV5
-    signature: type MockDatabaseV5 struct
-  - file: third_party/openbao/internal/builtin/logical/database/mockv5.go
-    kind: method
-    name: MockDatabaseV5.Close
-    signature: func (m *MockDatabaseV5) Close() error
-  - file: third_party/openbao/internal/builtin/logical/database/mockv5.go
-    kind: method
-    name: MockDatabaseV5.DeleteUser
-    signature: func (m *MockDatabaseV5) DeleteUser(ctx context.Context, req v5.DeleteUserRequest)
-      (v5.DeleteUserResponse, error)
-  - file: third_party/openbao/internal/builtin/logical/database/mockv5.go
-    kind: method
-    name: MockDatabaseV5.Initialize
-    signature: func (m *MockDatabaseV5) Initialize(ctx context.Context, req v5.InitializeRequest)
-      (v5.InitializeResponse, error)
-  - file: third_party/openbao/internal/builtin/logical/database/mockv5.go
-    kind: method
-    name: MockDatabaseV5.NewUser
-    signature: func (m *MockDatabaseV5) NewUser(ctx context.Context, req v5.NewUserRequest)
-      (v5.NewUserResponse, error)
-  - file: third_party/openbao/internal/builtin/logical/database/mockv5.go
-    kind: method
-    name: MockDatabaseV5.Type
-    signature: func (m *MockDatabaseV5) Type() (string, error)
-  - file: third_party/openbao/internal/builtin/logical/database/mockv5.go
-    kind: method
-    name: MockDatabaseV5.UpdateUser
-    signature: func (m *MockDatabaseV5) UpdateUser(ctx context.Context, req v5.UpdateUserRequest)
-      (v5.UpdateUserResponse, error)
-  - file: third_party/openbao/internal/builtin/logical/database/mockv5.go
-    kind: function
-    name: New
-    signature: func New() (any, error)
-  - file: third_party/openbao/internal/builtin/logical/database/mockv4.go
-    kind: function
-    name: NewV4
-    signature: func NewV4() (any, error)
-  - file: third_party/openbao/internal/builtin/logical/database/mockv4.go
-    kind: function
-    name: RunV4
-    signature: func RunV4(apiTLSConfig *api.TLSConfig) error
-  - file: third_party/openbao/internal/builtin/logical/database/mockv5.go
-    kind: function
-    name: RunV5
-    signature: func RunV5() error
-  - file: third_party/openbao/internal/builtin/logical/database/mockv5.go
-    kind: function
-    name: RunV6Multiplexed
-    signature: func RunV6Multiplexed() error
-  - file: third_party/openbao/internal/builtin/logical/database/backend.go
-    kind: method
-    name: databaseBackend.ClearConnection
-    signature: func (b *databaseBackend) ClearConnection(name string) error
-  - file: third_party/openbao/internal/builtin/logical/database/backend.go
-    kind: method
-    name: databaseBackend.ClearConnectionId
-    signature: func (b *databaseBackend) ClearConnectionId(name, id string) error
-  - file: third_party/openbao/internal/builtin/logical/database/backend.go
-    kind: method
-    name: databaseBackend.CloseIfShutdown
-    signature: func (b *databaseBackend) CloseIfShutdown(db *dbPluginInstance, err
-      error)
-  - file: third_party/openbao/internal/builtin/logical/database/backend.go
-    kind: method
-    name: databaseBackend.DatabaseConfig
-    signature: func (b *databaseBackend) DatabaseConfig(ctx context.Context, s logical.Storage,
-      name string) (*DatabaseConfig, error)
-  - file: third_party/openbao/internal/builtin/logical/database/backend.go
-    kind: method
-    name: databaseBackend.GetConnection
-    signature: func (b *databaseBackend) GetConnection(ctx context.Context, s logical.Storage,
-      name string) (*dbPluginInstance, error)
-  - file: third_party/openbao/internal/builtin/logical/database/backend.go
-    kind: method
-    name: databaseBackend.GetConnectionWithConfig
-    signature: func (b *databaseBackend) GetConnectionWithConfig(ctx context.Context,
-      name string, config *DatabaseConfig) (*dbPluginInstance, error)
-  - file: third_party/openbao/internal/builtin/logical/database/backend.go
-    kind: method
-    name: databaseBackend.Role
-    signature: func (b *databaseBackend) Role(ctx context.Context, s logical.Storage,
-      roleName string) (*roleEntry, error)
-  - file: third_party/openbao/internal/builtin/logical/database/backend.go
-    kind: method
-    name: databaseBackend.StaticRole
-    signature: func (b *databaseBackend) StaticRole(ctx context.Context, s logical.Storage,
-      roleName string) (*roleEntry, error)
-  - file: third_party/openbao/internal/builtin/logical/database/version_wrapper.go
-    kind: method
-    name: databaseVersionWrapper.Close
-    signature: func (w databaseVersionWrapper) Close() error
-  - file: third_party/openbao/internal/builtin/logical/database/version_wrapper.go
-    kind: method
-    name: databaseVersionWrapper.DeleteUser
-    signature: func (w databaseVersionWrapper) DeleteUser(ctx context.Context, req
-      v5.DeleteUserRequest) (v5.DeleteUserResponse, error)
-  - file: third_party/openbao/internal/builtin/logical/database/version_wrapper.go
-    kind: method
-    name: databaseVersionWrapper.Initialize
-    signature: func (w databaseVersionWrapper) Initialize(ctx context.Context, req
-      v5.InitializeRequest) (v5.InitializeResponse, error)
-  - file: third_party/openbao/internal/builtin/logical/database/version_wrapper.go
-    kind: method
-    name: databaseVersionWrapper.NewUser
-    signature: func (w databaseVersionWrapper) NewUser(ctx context.Context, req v5.NewUserRequest)
-      (resp v5.NewUserResponse, password string, err error)
-  - file: third_party/openbao/internal/builtin/logical/database/version_wrapper.go
-    kind: method
-    name: databaseVersionWrapper.PluginVersion
-    signature: func (w databaseVersionWrapper) PluginVersion() logical.PluginVersion
-  - file: third_party/openbao/internal/builtin/logical/database/version_wrapper.go
-    kind: method
-    name: databaseVersionWrapper.Type
-    signature: func (w databaseVersionWrapper) Type() (string, error)
-  - file: third_party/openbao/internal/builtin/logical/database/version_wrapper.go
-    kind: method
-    name: databaseVersionWrapper.UpdateUser
-    signature: func (w databaseVersionWrapper) UpdateUser(ctx context.Context, req
-      v5.UpdateUserRequest, isRootUser bool) (saveConfig map[string]any, err error)
-  - file: third_party/openbao/internal/builtin/logical/database/backend.go
-    kind: method
-    name: dbPluginInstance.Close
-    signature: func (dbi *dbPluginInstance) Close() error
-  - file: third_party/openbao/internal/builtin/logical/database/path_roles.go
-    kind: method
-    name: staticAccount.CredentialTTL
-    signature: func (s *staticAccount) CredentialTTL() time.Duration
-  - file: third_party/openbao/internal/builtin/logical/database/path_roles.go
-    kind: method
-    name: staticAccount.NextRotationTime
-    signature: func (s *staticAccount) NextRotationTime() time.Time
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/database/backend.go
-    - function:69f986706c3bf46fe5958edbeabb4471
-    id: r.backend-constructor
-    level: MUST
-    text: Backend builds a *databaseBackend from a BackendConfig, registering the
-      connection, role, static-role, credential, rotate-credentials and root-rotation
-      paths and their help and field schemas.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/database/credentials.go
-    - struct:e4a5d01937edb1e02b67d203fc7be2d0
-    id: r.client-cert-generator
-    level: SHOULD
-    text: ClientCertificateGenerator produces the client certificate material a database
-      plugin can present when the connection authenticates with TLS client certificates.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/database/backend.go
-    - method:78540755cd4f2e19a78cab46570fd1b1
-    id: r.close-on-shutdown
-    level: MUST
-    text: CloseIfShutdown closes a plugin instance when the returned error marks the
-      backend as shutting down, so shutdown races do not surface as user-visible errors.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/database/backend.go
-    - method:97488329b00022bfba5af7b37652f4eb
-    - method:aef00ac05268ccf0fbf07b41db40bdab
-    id: r.connection-cache
-    level: MUST
-    text: databaseBackend.GetConnection returns a cached dbPluginInstance for a named
-      connection, fetching and decoding the stored config first, while GetConnectionWithConfig
-      builds the instance from a supplied config without a storage read.
-  - codeRefs:
-    - method:3f5a589e335f572f15dc5553a2e340a1
-    - method:b2d5ee9d33345ba70b919f5ce735ac7a
-    id: r.connection-eviction
-    level: MUST
-    text: ClearConnection and ClearConnectionId remove and close a cached plugin instance
-      by name or by name plus id so a reconfigured connection is rebuilt on next use.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/database/path_creds_create.go
-    - method:0ef6e016c964d2998368213081a1fe62
-    id: r.creds-create-path
-    level: MUST
-    text: The credential creation path checks the requested credential type against
-      the connection's supported types before calling the plugin, returning a lease
-      with the generated username and password.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/database/path_config_connection.go
-    - struct:0401dd6a3ae23898af099f2eb5049cba
-    id: r.database-config-fields
-    level: MUST
-    text: DatabaseConfig stores plugin_name, plugin_version, connection_details, allowed_roles,
-      root_credentials_rotate_statements and password_policy, so connection details
-      and the permitted roles are persisted per named connection.
-  - codeRefs:
-    - method:21045c51cbf5612d8ff03b9967a11589
-    - struct:0401dd6a3ae23898af099f2eb5049cba
-    id: r.database-config-read
-    level: MUST
-    text: databaseBackend.DatabaseConfig reads the storage key config/<name>, errors
-      when the entry is absent or unreadable, and decodes the entry JSON into a DatabaseConfig.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/database/backend.go
-    - function:46b03c6a5071694623273c1859a79474
-    id: r.factory-setup
-    level: MUST
-    text: Factory constructs the database backend from the logical BackendConfig and
-      runs Setup on it, returning the logical.Backend or the setup error.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/database/rollback.go
-    - file:third_party/openbao/internal/builtin/logical/database/secret_creds.go
-    id: r.lease-rollback
-    level: MUST
-    text: The lease rollback handler revokes the database user named in the lease
-      internal data and removes the corresponding role or static-account state, tolerating
-      leases whose credential was already deleted.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/database/mockv4.go
-    - function:602120409f1d3c280ad783306bdf1723
-    - function:625945c626d767c4238ce3a4d0ef9e59
-    - struct:418295cc73905726c6061955513ad876
-    id: r.mock-v4-plugin
-    level: MUST
-    text: 'MockDatabaseV4 implements the v4 database plugin surface for tests: Init
-      and Initialize absorb the config and report the saved config, CreateUser, RenewUser,
-      RevokeUser, SetCredentials, GenerateCredentials and RotateRootCredentials drive
-      the legacy statements, and Type and Close identify and shut down the plugin.
-      NewV4 constructs it as an any and RunV4 serves it over the plugin RPC layer
-      with the given API TLS config.'
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/database/mockv5.go
-    - function:6a3315a2298212e20d7fe65e6b33d0df
-    - function:9590727b1790d44883ac5e32446d9815
-    - function:e0e35ed3467a27074242ec85380b5890
-    - struct:f8c14d24d6d75319fc8b53098335a04a
-    id: r.mock-v5-plugin
-    level: MUST
-    text: 'MockDatabaseV5 implements the v5 database plugin surface for tests: Initialize,
-      NewUser, UpdateUser and DeleteUser consume and return the v5 request and response
-      types, and Type and Close identify and shut down the plugin. New constructs
-      it as an any, RunV5 serves it over the plugin RPC layer, and RunV6Multiplexed
-      serves it over the multiplexed RPC layer.'
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/database/version_wrapper.go
-    - method:ce9c6205bf10840b0a234bb371df28d3
-    id: r.new-user-password-return
-    level: MUST
-    text: databaseVersionWrapper.NewUser returns the v5 response together with the
-      generated password so the caller can hand the credential to the client without
-      a second plugin call.
-  - codeRefs:
-    - method:3f5a589e335f572f15dc5553a2e340a1
-    - method:551f1c6ddbd5443f663240c49a3e0b01
-    - method:b2d5ee9d33345ba70b919f5ce735ac7a
-    id: r.plugin-instance-close-idempotent
-    level: MUST
-    text: dbPluginInstance.Close takes the instance lock, returns nil if the instance
-      is already marked closed, otherwise marks it closed and calls Close on the wrapped
-      database plugin exactly once.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/database/path_roles.go
-    - method:102323d53aba8f635a3085ddef98327f
-    - method:b96bd1b43f591e50a3e2239d08fc060e
-    id: r.role-lookups
-    level: MUST
-    text: databaseBackend.Role and databaseBackend.StaticRole read a role entry and
-      a static-role entry by name from storage and return the decoded roleEntry, keeping
-      the two role kinds on separate storage prefixes.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/database/path_rotate_credentials.go
-    - file:third_party/openbao/internal/builtin/logical/database/rotation.go
-    id: r.rotate-root-path
-    level: MUST
-    text: The rotate-root path rotates the connection's root credentials through the
-      plugin and persists the returned connection config, refusing when the connection
-      has no rotation support.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/database/path_roles.go
-    - method:0c3d1048e3c9ef9e668c347b6704756b
-    - method:8d5a1d841e800e1f4dee9f3d9db11719
-    id: r.static-account-schedule
-    level: MUST
-    text: staticAccount.NextRotationTime derives the next rotation instant and staticAccount.CredentialTTL
-      derives the credential lifetime, so static credential rotation is scheduled
-      from the stored rotation period and the credential's own TTL.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/database/path_roles.go
-    - file:third_party/openbao/internal/builtin/logical/database/rotation.go
-    id: r.static-role-custom-statements
-    level: MUST
-    text: The static-role path stores and applies custom rotation and revocation statements
-      for a static account, alongside the generation and registration statements read
-      from the connection config.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/database/path_config_connection.go
-    - method:0ef6e016c964d2998368213081a1fe62
-    id: r.supports-credential-type
-    level: MUST
-    text: DatabaseConfig.SupportsCredentialType reads the supported credential types
-      from ConnectionDetails, defaults to supporting only CredentialTypePassword when
-      the plugin did not report any types, and otherwise matches the requested type
-      against the reported list.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/database/rotation.go
-    - method:39a3a0ddef46a2ba2cf55d3230472b13
-    id: r.update-user-root-flag
-    level: MUST
-    text: databaseVersionWrapper.UpdateUser accepts an isRootUser flag and returns
-      the save-config map from the plugin, so root credential rotation and per-user
-      password change share one code path.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/database/mocks_test.go
-    - file:third_party/openbao/internal/builtin/logical/database/rollback_test.go
-    - file:third_party/openbao/internal/builtin/logical/database/rotation_test.go
-    - file:third_party/openbao/internal/builtin/logical/database/versioning_large_test.go
-    id: r.version-coverage-tests
-    level: SHOULD
-    text: The test files exercise both plugin generations through the shared mocks,
-      covering connection configuration, role and static-role handling, credential
-      creation, rotation, rollback and large-scale versioning behavior.
-  - codeRefs:
-    - method:735fb3d88ff60015f26504b7c7be215a
-    - method:74e83a4bb3dc54d6be26f6256e890b49
-    - method:7b74b4c6e32ac8bf905b8accb27dc581
-    id: r.version-wrapper-lifecycle
-    level: MUST
-    text: databaseVersionWrapper reports Type, Close and PluginVersion for the wrapped
-      plugin so the backend can label, shut down and gate features by plugin version
-      without knowing which plugin generation it holds.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/database/version_wrapper.go
-    - method:3602402a0da7635c4715341b96e7c0f7
-    - method:39a3a0ddef46a2ba2cf55d3230472b13
-    - method:59161c52a0ad76f3f9625506728eb7df
-    - method:ce9c6205bf10840b0a234bb371df28d3
-    id: r.version-wrapper-v5-api
-    level: MUST
-    text: databaseVersionWrapper exposes Initialize, NewUser, UpdateUser and DeleteUser
-      in the v5 request/response shapes, translating each request to the underlying
-      plugin version and returning the plugin's v5 response.
-  upstream: self

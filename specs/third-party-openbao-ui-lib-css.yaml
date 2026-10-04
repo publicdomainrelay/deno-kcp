@@ -1,45 +1,45 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/ui/lib/css/index.js index.js@third_party/openbao/ui/lib/css/index.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-lib-css
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: This context exists to pin down the behavior of the vendored OpenBao UI
     stylesheet addon inside deno-kcp, so the copied third-party file is documented
     as it actually is and any change to it can be compared against a stated contract.
     It is reference material for the vendored tree, not code that deno-kcp's Go side
     calls.
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/ui/lib/css/index.js
-    id: r.developing-addon-always-true
+  - id: r.developing-addon-always-true
     level: SHOULD
     text: isDevelopingAddon returns true unconditionally, so the addon is always rebuilt
       as developing code rather than being treated as a stable dependency.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/css/index.js
-    id: r.exports-sass-svg-uri-addon
+  - id: r.exports-sass-svg-uri-addon
     level: MUST
     text: The module exports a single addon object whose name is sassSvgUri, and it
       requires broccoli-funnel, broccoli-merge-trees and path at load time under 'use
       strict'.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/css/index.js
-    id: r.included-resolves-sass-svg-uri-package
+  - id: r.included-resolves-sass-svg-uri-package
     level: MUST
     text: The included hook first calls the superclass included hook with the addon's
       arguments, then walks app = app.app while app.import is not a function, and
       stores path.dirname(require.resolve('sass-svg-uri')) in this.sassSVGURIPath,
       so later tree building knows the package location.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/css/index.js
-    id: r.tree-for-styles-funnels-package-into-app-styles
+  - id: r.tree-for-styles-funnels-package-into-app-styles
     level: MUST
     text: 'treeForStyles builds a Funnel over this.sassSVGURIPath with srcDir ''/''
       and destDir ''app/styles/sass-svg-uri'', then returns mergeTrees of that single
       tree with overwrite: true, so the resolved package''s styles land under app/styles/sass-svg-uri
       in the addon''s style tree.'
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/ui/lib/css/index.js
+codeRefIndex:
+- file:third_party/openbao/ui/lib/css/index.js index.js@third_party/openbao/ui/lib/css/index.js

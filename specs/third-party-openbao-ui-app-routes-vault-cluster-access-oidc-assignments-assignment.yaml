@@ -1,4 +1,63 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-ui-app-routes-vault-cluster-access-oidc-assignments-assignment
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'This context exists so the specification records the OIDC assignment detail
+    and edit route entry points exactly as they are: two named Ember Route subclasses
+    that act as routing anchors and carry no custom logic. It is documented because
+    downstream tooling and readers need to know that these route modules are intentionally
+    empty — any expectation of model fetching or redirect behavior must be satisfied
+    by the parent route hierarchy, mixins or the router map, not by these files.'
+  requirements:
+  - id: r.details-and-edit-are-distinct-entry-points
+    level: SHOULD
+    text: The details and edit modules should stay separate default-exported classes
+      in separate files under the assignment directory, so the router keeps two distinct
+      named entry points for viewing and editing an OIDC assignment rather than collapsing
+      them into one route.
+    codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/assignment/details.js
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/assignment/edit.js
+  - id: r.details-route-export
+    level: MUST
+    text: The module at third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/assignment/details.js
+      must export OidcAssignmentDetailsRoute as its default export, extending the
+      Ember Route base class, so the router can resolve the OIDC assignment details
+      route by module path.
+    codeRefs:
+    - class:f22d961ee62106c77d95704ec56fa00d
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/assignment/details.js
+  - id: r.edit-route-export
+    level: MUST
+    text: The module at third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/assignment/edit.js
+      must export OidcAssignmentEditRoute as its default export, extending the Ember
+      Route base class, so the router can resolve the OIDC assignment edit route by
+      module path.
+    codeRefs:
+    - class:26520e100cb539a5ed2ace4c567797c8
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/assignment/edit.js
+  - id: r.routes-declare-no-custom-behavior
+    level: MUST
+    text: 'Both route classes must remain empty of declared members: neither OidcAssignmentDetailsRoute
+      nor OidcAssignmentEditRoute defines a model hook, setupController, actions hash,
+      beforeModel, afterModel or any other own method or property, so all route behavior
+      is inherited from Ember Route and the surrounding route hierarchy.'
+    codeRefs:
+    - class:26520e100cb539a5ed2ace4c567797c8
+    - class:f22d961ee62106c77d95704ec56fa00d
+  interfaces:
+  - name: OidcAssignmentDetailsRoute
+    kind: class
+    signature: export default class OidcAssignmentDetailsRoute extends Route {}
+    file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/assignment/details.js
+  - name: OidcAssignmentEditRoute
+    kind: class
+    signature: export default class OidcAssignmentEditRoute extends Route {}
+    file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/assignment/edit.js
 codeRefIndex:
 - class:26520e100cb539a5ed2ace4c567797c8 OidcAssignmentEditRoute@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/assignment/edit.js:8
 - class:f22d961ee62106c77d95704ec56fa00d OidcAssignmentDetailsRoute@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/assignment/details.js:8
@@ -6,62 +65,3 @@ codeRefIndex:
   details.js@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/assignment/details.js
 - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/assignment/edit.js
   edit.js@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/assignment/edit.js
-kind: SystemContext
-metadata:
-  name: third-party-openbao-ui-app-routes-vault-cluster-access-oidc-assignments-assignment
-  namespace: default
-spec:
-  intent: 'This context exists so the specification records the OIDC assignment detail
-    and edit route entry points exactly as they are: two named Ember Route subclasses
-    that act as routing anchors and carry no custom logic. It is documented because
-    downstream tooling and readers need to know that these route modules are intentionally
-    empty — any expectation of model fetching or redirect behavior must be satisfied
-    by the parent route hierarchy, mixins or the router map, not by these files.'
-  interfaces:
-  - file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/assignment/details.js
-    kind: class
-    name: OidcAssignmentDetailsRoute
-    signature: export default class OidcAssignmentDetailsRoute extends Route {}
-  - file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/assignment/edit.js
-    kind: class
-    name: OidcAssignmentEditRoute
-    signature: export default class OidcAssignmentEditRoute extends Route {}
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/assignment/details.js
-    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/assignment/edit.js
-    id: r.details-and-edit-are-distinct-entry-points
-    level: SHOULD
-    text: The details and edit modules should stay separate default-exported classes
-      in separate files under the assignment directory, so the router keeps two distinct
-      named entry points for viewing and editing an OIDC assignment rather than collapsing
-      them into one route.
-  - codeRefs:
-    - class:f22d961ee62106c77d95704ec56fa00d
-    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/assignment/details.js
-    id: r.details-route-export
-    level: MUST
-    text: The module at third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/assignment/details.js
-      must export OidcAssignmentDetailsRoute as its default export, extending the
-      Ember Route base class, so the router can resolve the OIDC assignment details
-      route by module path.
-  - codeRefs:
-    - class:26520e100cb539a5ed2ace4c567797c8
-    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/assignment/edit.js
-    id: r.edit-route-export
-    level: MUST
-    text: The module at third_party/openbao/ui/app/routes/vault/cluster/access/oidc/assignments/assignment/edit.js
-      must export OidcAssignmentEditRoute as its default export, extending the Ember
-      Route base class, so the router can resolve the OIDC assignment edit route by
-      module path.
-  - codeRefs:
-    - class:26520e100cb539a5ed2ace4c567797c8
-    - class:f22d961ee62106c77d95704ec56fa00d
-    id: r.routes-declare-no-custom-behavior
-    level: MUST
-    text: 'Both route classes must remain empty of declared members: neither OidcAssignmentDetailsRoute
-      nor OidcAssignmentEditRoute defines a model hook, setupController, actions hash,
-      beforeModel, afterModel or any other own method or property, so all route behavior
-      is inherited from Ember Route and the surrounding route hierarchy.'
-  upstream: self

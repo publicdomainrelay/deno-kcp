@@ -1,80 +1,80 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- class:60a2d1758a56f82e843525ae8c37ac29 AuthConfigBase@third_party/openbao/ui/app/components/auth-config-form/config.js:26
-- file:third_party/openbao/ui/app/components/auth-config-form/config.js config.js@third_party/openbao/ui/app/components/auth-config-form/config.js
-- file:third_party/openbao/ui/app/components/auth-config-form/options.js options.js@third_party/openbao/ui/app/components/auth-config-form/options.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-app-components-auth-config-form
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'This context exists so the auth-config-form component pair has a written
     specification: the shared base component (AuthConfigBase) that configures auth
     methods and the options specialization that tunes an existing auth method. The
     spec captures the save/redirect/flash contract and the AdapterError error-handling
     split, including the option-specific token_type exclusion and manual errorMessage
     assignment, so changes to either file can be checked against the documented behavior.'
-  interfaces:
-  - file: third_party/openbao/ui/app/components/auth-config-form/config.js
-    kind: class
-    name: AuthConfigBase
-    signature: class AuthConfigBase extends Component
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - class:60a2d1758a56f82e843525ae8c37ac29
-    - file:third_party/openbao/ui/app/components/auth-config-form/config.js
-    id: r.base-component-shape
+  - id: r.base-component-shape
     level: MUST
     text: AuthConfigBase must be an Ember Component subclass with tagName set to the
       empty string, a model property defaulting to null, and injected flashMessages
       and router services.
-  - codeRefs:
+    codeRefs:
     - class:60a2d1758a56f82e843525ae8c37ac29
     - file:third_party/openbao/ui/app/components/auth-config-form/config.js
-    id: r.base-save-model
+  - id: r.base-save-model
     level: MUST
     text: AuthConfigBase.saveModel must be an ember-concurrency task wrapped in waitFor
       that yields this.model.save(); on error it must return silently when the error
       is an AdapterError and rethrow it otherwise; on success it must call transitionToSafe
       with the router and route 'vault.cluster.access.methods', then call flashMessages.success
       with 'The configuration was saved successfully.'.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/components/auth-config-form/options.js
-    id: r.options-extends-base
+    codeRefs:
+    - class:60a2d1758a56f82e843525ae8c37ac29
+    - file:third_party/openbao/ui/app/components/auth-config-form/config.js
+  - id: r.options-extends-base
     level: MUST
     text: options.js must import AuthConfigBase from './config' and export a component
       created by extending it, injecting its own flashMessages and router services.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/components/auth-config-form/options.js
-    id: r.options-post-save-navigation
+  - id: r.options-post-save-navigation
     level: MUST
     text: On a successful tune the options component must call transitionToSafe with
       the router and route 'vault.cluster.access.methods' and then call flashMessages.success
       with 'The configuration was saved successfully.', matching the base component's
       post-save behavior.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/components/auth-config-form/options.js
-    id: r.options-save-model-payload
+  - id: r.options-save-model-payload
     level: MUST
     text: The options component's saveModel task must build the payload by serializing
       this.model.config, then assign this.model.description onto it, and must delete
       the token_type key when this.model.methodType equals 'token' because token_type
       is not tuneable for the token auth method.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/components/auth-config-form/options.js
-    id: r.options-tune-and-error-message
+  - id: r.options-tune-and-error-message
     level: MUST
     text: The options saveModel task must call this.model.tune(data) with that payload;
       on an AdapterError it must return without rethrowing and must attempt to set
       this.model.errorMessage to err.errors[0] because model.save is not called and
       the model would otherwise never receive the error, wrapping that assignment
       so a failure is ignored; on any non-AdapterError it must rethrow.
-  - codeRefs:
-    - class:60a2d1758a56f82e843525ae8c37ac29
-    - file:third_party/openbao/ui/app/components/auth-config-form/config.js
-    id: r.positional-params
+    codeRefs:
+    - file:third_party/openbao/ui/app/components/auth-config-form/options.js
+  - id: r.positional-params
     level: MUST
     text: AuthConfigBase must declare the static positionalParams list as ['model'],
       so the model is passed positionally when the component is invoked.
-  upstream: self
+    codeRefs:
+    - class:60a2d1758a56f82e843525ae8c37ac29
+    - file:third_party/openbao/ui/app/components/auth-config-form/config.js
+  interfaces:
+  - name: AuthConfigBase
+    kind: class
+    signature: class AuthConfigBase extends Component
+    file: third_party/openbao/ui/app/components/auth-config-form/config.js
+codeRefIndex:
+- class:60a2d1758a56f82e843525ae8c37ac29 AuthConfigBase@third_party/openbao/ui/app/components/auth-config-form/config.js:26
+- file:third_party/openbao/ui/app/components/auth-config-form/config.js config.js@third_party/openbao/ui/app/components/auth-config-form/config.js
+- file:third_party/openbao/ui/app/components/auth-config-form/options.js options.js@third_party/openbao/ui/app/components/auth-config-form/options.js

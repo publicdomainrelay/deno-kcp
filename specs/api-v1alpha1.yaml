@@ -1,4 +1,610 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: api-v1alpha1
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: This context exists so the operator can persist and reconcile deno-kcp custom
+    resources through the Kubernetes API machinery. The package defines the on-cluster
+    schema (specs, statuses, phase enums), the list types the informers and clientsets
+    need, the kubebuilder deep-copy implementations that keep informer caches free
+    of aliasing bugs, and the bridge that turns the CRD-shaped DenoPermissions and
+    ServiceAccountRef into the denospec types the runtime layer consumes. It is the
+    shared vocabulary between the controllers, the provider registry and the denospec
+    execution library.
+  requirements:
+  - id: r.deepcopy-for-every-type
+    level: MUST
+    text: Every API type has generated DeepCopyInto and DeepCopy methods so handlers
+      and caches never share backing arrays or maps.
+    codeRefs:
+    - file:api/v1alpha1/zz_generated.deepcopy.go
+  - id: r.deepcopy-no-aliasing
+    level: MUST
+    text: Deep copy of a kind with slices such as DenoJob must not alias the source
+      slices, verified by TestDenoJobDeepCopyDoesNotAlias.
+    codeRefs:
+    - file:api/v1alpha1/deno_types_test.go
+    - method:28449716ad97a01ee9ad4a4ede89f392
+  - id: r.deepcopy-object-for-roots-and-lists
+    level: MUST
+    text: Every root kind and its List type implement DeepCopyObject returning runtime.Object
+      so they satisfy runtime.Object for the scheme and client code.
+    codeRefs:
+    - method:14ac68953d812f04afeefde4c03d0b12
+    - method:19cedd9072bab383a6d03e1c2ca6f96e
+    - method:1d9fcdc42679a9919592e4c28a3e74f8
+    - method:3178bd6762b6a7343a330a5804f732f4
+    - method:40a4bbe7776080bc239b955a5ec3c5ca
+    - method:97a18054cf35b3ba841a31198ca24b02
+    - method:a4967ab3a26c061c8378b3d92104b613
+    - method:b8e83f017166d220cee8c04269e072c7
+  - id: r.deno-permissions-conversion
+    level: MUST
+    text: DenoPermissions.DenoSpec converts the CRD permission block into the denospec.Permissions
+      struct, mapping every permission field, and returns nil for a nil receiver.
+    codeRefs:
+    - method:0dd42034ce69416d2233ce9e55bb6d3d
+    - method:4853a11212ee93729970106d66fe9a6c
+  - id: r.deno-spec-contract-tests
+    level: SHOULD
+    text: Type behaviour and deep-copy invariants stay covered by the package tests
+      in types_test.go and deno_types_test.go.
+    codeRefs:
+    - file:api/v1alpha1/deno_types_test.go
+    - file:api/v1alpha1/types_test.go
+  - id: r.group-version-registration
+    level: MUST
+    text: The v1alpha1 group-version registers every custom kind plus its list type
+      with the scheme so clients and informers can decode them.
+    codeRefs:
+    - file:api/v1alpha1/groupversion_info.go
+  - id: r.kind-root-list-spec-status
+    level: MUST
+    text: Each custom kind (DenoPod, DenoRun, DenoJob, RunTrigger, PolicyEngine, PolicyWorkflowPod,
+      PolicyWorkflowRun, OpenBao) has a root type, a matching List type, a Spec and
+      a Status struct.
+    codeRefs:
+    - file:api/v1alpha1/types_denojob.go
+    - file:api/v1alpha1/types_denopod.go
+    - file:api/v1alpha1/types_denorun.go
+    - file:api/v1alpha1/types_openbao.go
+    - file:api/v1alpha1/types_policyengine.go
+    - file:api/v1alpha1/types_policyworkflowpod.go
+    - file:api/v1alpha1/types_policyworkflowrun.go
+    - file:api/v1alpha1/types_runtrigger.go
+  - id: r.phase-enums
+    level: MUST
+    text: 'Every reconcilable kind exposes a phase string alias describing its lifecycle
+      states: DenoPodPhase, DenoRunPhase, DenoJobPhase, RunTriggerPhase, PolicyEnginePhase,
+      PolicyWorkflowPodPhase and PolicyWorkflowPhase.'
+    codeRefs:
+    - type_alias:0e2883e159e4826141f3b8dbf5a8951d
+    - type_alias:3228acbcc876296a83b038db20f5ba53
+    - type_alias:71e9ec98b426f5ba2a6f0fa861505f90
+    - type_alias:95711bd9c109c1c963d90415abeb221a
+    - type_alias:b301d0b47a8b87747f72eb4dd29c1213
+    - type_alias:cb7db6e321bd704e6960895aa2922ada
+    - type_alias:f1812e2547cdacd2b9d3b0c4591ef2e2
+  - id: r.service-account-ref-conversion
+    level: MUST
+    text: ServiceAccountRef.DenoSpec converts the CRD service-account reference into
+      denospec.ServiceAccountRef, copying name and namespace, and returns nil for
+      a nil receiver.
+    codeRefs:
+    - method:3846c936f898af39cc3e185598df8409
+    - struct:05cdd79e23617fbecdb398d34c9d5ad7
+  - id: r.shared-spec-building-blocks
+    level: MUST
+    text: Shared types ServiceAccountRef, DenoPermission, DenoPermissions, DenoPodTemplate,
+      ExecProbe, DenoRestartPolicy and ConcurrencyPolicy carry the reusable pod, permission
+      and probe configuration used across the kinds.
+    codeRefs:
+    - file:api/v1alpha1/types_shared.go
+    - struct:05cdd79e23617fbecdb398d34c9d5ad7
+    - struct:a6b2c82ee80cb3d8639351da73b016d6
+    - struct:b1b033afbaf6fab9e420675da77463a6
+    - struct:da40f37a9ba38a5f2a353dd41f480892
+    - struct:e95b0c824023d610cd8dd79e9b10330c
+    - type_alias:f1737f67a27a8469e8d83ac7bc87a249
+    - type_alias:f821022f3e38a5407c14bb767eba914b
+  interfaces:
+  - name: ConcurrencyPolicy
+    kind: type_alias
+    signature: ()
+    file: api/v1alpha1/types_shared.go
+  - name: DenoJob
+    kind: struct
+    signature: ()
+    file: api/v1alpha1/types_denojob.go
+  - name: DenoJob.DeepCopy
+    kind: method
+    signature: () *DenoJob
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: DenoJob.DeepCopyInto
+    kind: method
+    signature: (out *DenoJob)
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: DenoJob.DeepCopyObject
+    kind: method
+    signature: () runtime.Object
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: DenoJobList
+    kind: struct
+    signature: ()
+    file: api/v1alpha1/types_denojob.go
+  - name: DenoJobList.DeepCopy
+    kind: method
+    signature: () *DenoJobList
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: DenoJobList.DeepCopyInto
+    kind: method
+    signature: (out *DenoJobList)
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: DenoJobList.DeepCopyObject
+    kind: method
+    signature: () runtime.Object
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: DenoJobPhase
+    kind: type_alias
+    signature: ()
+    file: api/v1alpha1/types_denojob.go
+  - name: DenoJobSpec
+    kind: struct
+    signature: ()
+    file: api/v1alpha1/types_denojob.go
+  - name: DenoJobSpec.DeepCopyInto
+    kind: method
+    signature: (out *DenoJobSpec)
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: DenoJobStatus
+    kind: struct
+    signature: ()
+    file: api/v1alpha1/types_denojob.go
+  - name: DenoJobStatus.DeepCopyInto
+    kind: method
+    signature: (out *DenoJobStatus)
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: DenoPermission
+    kind: struct
+    signature: ()
+    file: api/v1alpha1/types_shared.go
+  - name: DenoPermission.DeepCopyInto
+    kind: method
+    signature: (out *DenoPermission)
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: DenoPermissions
+    kind: struct
+    signature: ()
+    file: api/v1alpha1/types_shared.go
+  - name: DenoPermissions.DeepCopyInto
+    kind: method
+    signature: (out *DenoPermissions)
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: DenoPermissions.DenoSpec
+    kind: method
+    signature: () *denospec.Permissions
+    file: api/v1alpha1/denospec.go
+  - name: DenoPod
+    kind: struct
+    signature: ()
+    file: api/v1alpha1/types_denopod.go
+  - name: DenoPod.DeepCopy
+    kind: method
+    signature: () *DenoPod
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: DenoPod.DeepCopyInto
+    kind: method
+    signature: (out *DenoPod)
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: DenoPod.DeepCopyObject
+    kind: method
+    signature: () runtime.Object
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: DenoPodList
+    kind: struct
+    signature: ()
+    file: api/v1alpha1/types_denopod.go
+  - name: DenoPodList.DeepCopy
+    kind: method
+    signature: () *DenoPodList
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: DenoPodList.DeepCopyInto
+    kind: method
+    signature: (out *DenoPodList)
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: DenoPodList.DeepCopyObject
+    kind: method
+    signature: () runtime.Object
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: DenoPodPhase
+    kind: type_alias
+    signature: ()
+    file: api/v1alpha1/types_denopod.go
+  - name: DenoPodSpec
+    kind: struct
+    signature: ()
+    file: api/v1alpha1/types_denopod.go
+  - name: DenoPodSpec.DeepCopyInto
+    kind: method
+    signature: (out *DenoPodSpec)
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: DenoPodStatus
+    kind: struct
+    signature: ()
+    file: api/v1alpha1/types_denopod.go
+  - name: DenoPodStatus.DeepCopyInto
+    kind: method
+    signature: (out *DenoPodStatus)
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: DenoPodTemplate
+    kind: struct
+    signature: ()
+    file: api/v1alpha1/types_shared.go
+  - name: DenoPodTemplate.DeepCopyInto
+    kind: method
+    signature: (out *DenoPodTemplate)
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: DenoRestartPolicy
+    kind: type_alias
+    signature: ()
+    file: api/v1alpha1/types_shared.go
+  - name: DenoRun
+    kind: struct
+    signature: ()
+    file: api/v1alpha1/types_denorun.go
+  - name: DenoRun.DeepCopy
+    kind: method
+    signature: () *DenoRun
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: DenoRun.DeepCopyInto
+    kind: method
+    signature: (out *DenoRun)
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: DenoRun.DeepCopyObject
+    kind: method
+    signature: () runtime.Object
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: DenoRunList
+    kind: struct
+    signature: ()
+    file: api/v1alpha1/types_denorun.go
+  - name: DenoRunList.DeepCopy
+    kind: method
+    signature: () *DenoRunList
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: DenoRunList.DeepCopyInto
+    kind: method
+    signature: (out *DenoRunList)
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: DenoRunList.DeepCopyObject
+    kind: method
+    signature: () runtime.Object
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: DenoRunPhase
+    kind: type_alias
+    signature: ()
+    file: api/v1alpha1/types_denorun.go
+  - name: DenoRunSpec
+    kind: struct
+    signature: ()
+    file: api/v1alpha1/types_denorun.go
+  - name: DenoRunSpec.DeepCopyInto
+    kind: method
+    signature: (out *DenoRunSpec)
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: DenoRunStatus
+    kind: struct
+    signature: ()
+    file: api/v1alpha1/types_denorun.go
+  - name: DenoRunStatus.DeepCopyInto
+    kind: method
+    signature: (out *DenoRunStatus)
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: ExecProbe
+    kind: struct
+    signature: ()
+    file: api/v1alpha1/types_shared.go
+  - name: ExecProbe.DeepCopyInto
+    kind: method
+    signature: (out *ExecProbe)
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: OpenBao
+    kind: struct
+    signature: ()
+    file: api/v1alpha1/types_openbao.go
+  - name: OpenBao.DeepCopy
+    kind: method
+    signature: () *OpenBao
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: OpenBao.DeepCopyInto
+    kind: method
+    signature: (out *OpenBao)
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: OpenBao.DeepCopyObject
+    kind: method
+    signature: () runtime.Object
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: OpenBaoList
+    kind: struct
+    signature: ()
+    file: api/v1alpha1/types_openbao.go
+  - name: OpenBaoList.DeepCopy
+    kind: method
+    signature: () *OpenBaoList
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: OpenBaoList.DeepCopyInto
+    kind: method
+    signature: (out *OpenBaoList)
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: OpenBaoList.DeepCopyObject
+    kind: method
+    signature: () runtime.Object
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: OpenBaoSpec
+    kind: struct
+    signature: ()
+    file: api/v1alpha1/types_openbao.go
+  - name: OpenBaoSpec.DeepCopy
+    kind: method
+    signature: () *OpenBaoSpec
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: OpenBaoSpec.DeepCopyInto
+    kind: method
+    signature: (out *OpenBaoSpec)
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: OpenBaoStatus
+    kind: struct
+    signature: ()
+    file: api/v1alpha1/types_openbao.go
+  - name: OpenBaoStatus.DeepCopy
+    kind: method
+    signature: () *OpenBaoStatus
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: OpenBaoStatus.DeepCopyInto
+    kind: method
+    signature: (out *OpenBaoStatus)
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: PolicyEngine
+    kind: struct
+    signature: ()
+    file: api/v1alpha1/types_policyengine.go
+  - name: PolicyEngine.DeepCopy
+    kind: method
+    signature: () *PolicyEngine
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: PolicyEngine.DeepCopyInto
+    kind: method
+    signature: (out *PolicyEngine)
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: PolicyEngine.DeepCopyObject
+    kind: method
+    signature: () runtime.Object
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: PolicyEngineList
+    kind: struct
+    signature: ()
+    file: api/v1alpha1/types_policyengine.go
+  - name: PolicyEngineList.DeepCopy
+    kind: method
+    signature: () *PolicyEngineList
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: PolicyEngineList.DeepCopyInto
+    kind: method
+    signature: (out *PolicyEngineList)
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: PolicyEngineList.DeepCopyObject
+    kind: method
+    signature: () runtime.Object
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: PolicyEnginePhase
+    kind: type_alias
+    signature: ()
+    file: api/v1alpha1/types_policyengine.go
+  - name: PolicyEngineSpec
+    kind: struct
+    signature: ()
+    file: api/v1alpha1/types_policyengine.go
+  - name: PolicyEngineSpec.DeepCopyInto
+    kind: method
+    signature: (out *PolicyEngineSpec)
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: PolicyEngineStatus
+    kind: struct
+    signature: ()
+    file: api/v1alpha1/types_policyengine.go
+  - name: PolicyEngineStatus.DeepCopyInto
+    kind: method
+    signature: (out *PolicyEngineStatus)
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: PolicyWorkflowPhase
+    kind: type_alias
+    signature: ()
+    file: api/v1alpha1/types_policyworkflowrun.go
+  - name: PolicyWorkflowPod
+    kind: struct
+    signature: ()
+    file: api/v1alpha1/types_policyworkflowpod.go
+  - name: PolicyWorkflowPod.DeepCopy
+    kind: method
+    signature: () *PolicyWorkflowPod
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: PolicyWorkflowPod.DeepCopyInto
+    kind: method
+    signature: (out *PolicyWorkflowPod)
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: PolicyWorkflowPod.DeepCopyObject
+    kind: method
+    signature: () runtime.Object
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: PolicyWorkflowPodList
+    kind: struct
+    signature: ()
+    file: api/v1alpha1/types_policyworkflowpod.go
+  - name: PolicyWorkflowPodList.DeepCopy
+    kind: method
+    signature: () *PolicyWorkflowPodList
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: PolicyWorkflowPodList.DeepCopyInto
+    kind: method
+    signature: (out *PolicyWorkflowPodList)
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: PolicyWorkflowPodList.DeepCopyObject
+    kind: method
+    signature: () runtime.Object
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: PolicyWorkflowPodPhase
+    kind: type_alias
+    signature: ()
+    file: api/v1alpha1/types_policyworkflowpod.go
+  - name: PolicyWorkflowPodSpec
+    kind: struct
+    signature: ()
+    file: api/v1alpha1/types_policyworkflowpod.go
+  - name: PolicyWorkflowPodSpec.DeepCopyInto
+    kind: method
+    signature: (out *PolicyWorkflowPodSpec)
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: PolicyWorkflowPodStatus
+    kind: struct
+    signature: ()
+    file: api/v1alpha1/types_policyworkflowpod.go
+  - name: PolicyWorkflowPodStatus.DeepCopyInto
+    kind: method
+    signature: (out *PolicyWorkflowPodStatus)
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: PolicyWorkflowRun
+    kind: struct
+    signature: ()
+    file: api/v1alpha1/types_policyworkflowrun.go
+  - name: PolicyWorkflowRun.DeepCopy
+    kind: method
+    signature: () *PolicyWorkflowRun
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: PolicyWorkflowRun.DeepCopyInto
+    kind: method
+    signature: (out *PolicyWorkflowRun)
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: PolicyWorkflowRun.DeepCopyObject
+    kind: method
+    signature: () runtime.Object
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: PolicyWorkflowRunList
+    kind: struct
+    signature: ()
+    file: api/v1alpha1/types_policyworkflowrun.go
+  - name: PolicyWorkflowRunList.DeepCopy
+    kind: method
+    signature: () *PolicyWorkflowRunList
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: PolicyWorkflowRunList.DeepCopyInto
+    kind: method
+    signature: (out *PolicyWorkflowRunList)
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: PolicyWorkflowRunList.DeepCopyObject
+    kind: method
+    signature: () runtime.Object
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: PolicyWorkflowRunSpec
+    kind: struct
+    signature: ()
+    file: api/v1alpha1/types_policyworkflowrun.go
+  - name: PolicyWorkflowRunSpec.DeepCopyInto
+    kind: method
+    signature: (out *PolicyWorkflowRunSpec)
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: PolicyWorkflowRunStatus
+    kind: struct
+    signature: ()
+    file: api/v1alpha1/types_policyworkflowrun.go
+  - name: PolicyWorkflowRunStatus.DeepCopyInto
+    kind: method
+    signature: (out *PolicyWorkflowRunStatus)
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: RunTrigger
+    kind: struct
+    signature: ()
+    file: api/v1alpha1/types_runtrigger.go
+  - name: RunTrigger.DeepCopy
+    kind: method
+    signature: () *RunTrigger
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: RunTrigger.DeepCopyInto
+    kind: method
+    signature: (out *RunTrigger)
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: RunTrigger.DeepCopyObject
+    kind: method
+    signature: () runtime.Object
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: RunTriggerList
+    kind: struct
+    signature: ()
+    file: api/v1alpha1/types_runtrigger.go
+  - name: RunTriggerList.DeepCopy
+    kind: method
+    signature: () *RunTriggerList
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: RunTriggerList.DeepCopyInto
+    kind: method
+    signature: (out *RunTriggerList)
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: RunTriggerList.DeepCopyObject
+    kind: method
+    signature: () runtime.Object
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: RunTriggerPhase
+    kind: type_alias
+    signature: ()
+    file: api/v1alpha1/types_runtrigger.go
+  - name: RunTriggerSpec
+    kind: struct
+    signature: ()
+    file: api/v1alpha1/types_runtrigger.go
+  - name: RunTriggerSpec.DeepCopyInto
+    kind: method
+    signature: (out *RunTriggerSpec)
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: RunTriggerStatus
+    kind: struct
+    signature: ()
+    file: api/v1alpha1/types_runtrigger.go
+  - name: RunTriggerStatus.DeepCopyInto
+    kind: method
+    signature: (out *RunTriggerStatus)
+    file: api/v1alpha1/zz_generated.deepcopy.go
+  - name: ServiceAccountRef
+    kind: struct
+    signature: ()
+    file: api/v1alpha1/types_shared.go
+  - name: ServiceAccountRef.DenoSpec
+    kind: method
+    signature: () *denospec.ServiceAccountRef
+    file: api/v1alpha1/denospec.go
+  arch:
+    id: type.ServiceAccountRef
+    kind: node
+    section: types
+    form: map
+    position: 4
+    code:
+    - file:api/v1alpha1/deno_types_test.go
+    - file:api/v1alpha1/types_shared.go
+    node:
+      code:
+        absent: api/v1alpha1/deno_types_test.go:TestServiceAccountAbsentDistinguishesFromZero
+        default: internal/provider/registry_runtime.go:DefaultServiceAccountNamespace
+        type: api/v1alpha1/types_shared.go
+      default: no_token
+      defaults:
+        namespace: default
+      fields:
+      - name
+      - namespace
+      held_by:
+      - sc.kind.policyengine.spec.serviceAccount
 codeRefIndex:
 - file:api/v1alpha1/deno_types_test.go deno_types_test.go@api/v1alpha1/deno_types_test.go
 - file:api/v1alpha1/denospec.go denospec.go@api/v1alpha1/denospec.go
@@ -30,609 +636,3 @@ codeRefIndex:
 - type_alias:f1737f67a27a8469e8d83ac7bc87a249 DenoRestartPolicy@api/v1alpha1/types_shared.go:77
 - type_alias:f1812e2547cdacd2b9d3b0c4591ef2e2 DenoRunPhase@api/v1alpha1/types_denorun.go:32
 - type_alias:f821022f3e38a5407c14bb767eba914b ConcurrencyPolicy@api/v1alpha1/types_shared.go:87
-kind: SystemContext
-metadata:
-  name: api-v1alpha1
-  namespace: default
-spec:
-  arch:
-    code:
-    - file:api/v1alpha1/deno_types_test.go
-    - file:api/v1alpha1/types_shared.go
-    form: map
-    id: type.ServiceAccountRef
-    kind: node
-    node:
-      code:
-        absent: api/v1alpha1/deno_types_test.go:TestServiceAccountAbsentDistinguishesFromZero
-        default: internal/provider/registry_runtime.go:DefaultServiceAccountNamespace
-        type: api/v1alpha1/types_shared.go
-      default: no_token
-      defaults:
-        namespace: default
-      fields:
-      - name
-      - namespace
-      held_by:
-      - sc.kind.policyengine.spec.serviceAccount
-    position: 4
-    section: types
-  intent: This context exists so the operator can persist and reconcile deno-kcp custom
-    resources through the Kubernetes API machinery. The package defines the on-cluster
-    schema (specs, statuses, phase enums), the list types the informers and clientsets
-    need, the kubebuilder deep-copy implementations that keep informer caches free
-    of aliasing bugs, and the bridge that turns the CRD-shaped DenoPermissions and
-    ServiceAccountRef into the denospec types the runtime layer consumes. It is the
-    shared vocabulary between the controllers, the provider registry and the denospec
-    execution library.
-  interfaces:
-  - file: api/v1alpha1/types_shared.go
-    kind: type_alias
-    name: ConcurrencyPolicy
-    signature: ()
-  - file: api/v1alpha1/types_denojob.go
-    kind: struct
-    name: DenoJob
-    signature: ()
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: DenoJob.DeepCopy
-    signature: () *DenoJob
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: DenoJob.DeepCopyInto
-    signature: (out *DenoJob)
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: DenoJob.DeepCopyObject
-    signature: () runtime.Object
-  - file: api/v1alpha1/types_denojob.go
-    kind: struct
-    name: DenoJobList
-    signature: ()
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: DenoJobList.DeepCopy
-    signature: () *DenoJobList
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: DenoJobList.DeepCopyInto
-    signature: (out *DenoJobList)
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: DenoJobList.DeepCopyObject
-    signature: () runtime.Object
-  - file: api/v1alpha1/types_denojob.go
-    kind: type_alias
-    name: DenoJobPhase
-    signature: ()
-  - file: api/v1alpha1/types_denojob.go
-    kind: struct
-    name: DenoJobSpec
-    signature: ()
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: DenoJobSpec.DeepCopyInto
-    signature: (out *DenoJobSpec)
-  - file: api/v1alpha1/types_denojob.go
-    kind: struct
-    name: DenoJobStatus
-    signature: ()
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: DenoJobStatus.DeepCopyInto
-    signature: (out *DenoJobStatus)
-  - file: api/v1alpha1/types_shared.go
-    kind: struct
-    name: DenoPermission
-    signature: ()
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: DenoPermission.DeepCopyInto
-    signature: (out *DenoPermission)
-  - file: api/v1alpha1/types_shared.go
-    kind: struct
-    name: DenoPermissions
-    signature: ()
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: DenoPermissions.DeepCopyInto
-    signature: (out *DenoPermissions)
-  - file: api/v1alpha1/denospec.go
-    kind: method
-    name: DenoPermissions.DenoSpec
-    signature: () *denospec.Permissions
-  - file: api/v1alpha1/types_denopod.go
-    kind: struct
-    name: DenoPod
-    signature: ()
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: DenoPod.DeepCopy
-    signature: () *DenoPod
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: DenoPod.DeepCopyInto
-    signature: (out *DenoPod)
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: DenoPod.DeepCopyObject
-    signature: () runtime.Object
-  - file: api/v1alpha1/types_denopod.go
-    kind: struct
-    name: DenoPodList
-    signature: ()
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: DenoPodList.DeepCopy
-    signature: () *DenoPodList
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: DenoPodList.DeepCopyInto
-    signature: (out *DenoPodList)
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: DenoPodList.DeepCopyObject
-    signature: () runtime.Object
-  - file: api/v1alpha1/types_denopod.go
-    kind: type_alias
-    name: DenoPodPhase
-    signature: ()
-  - file: api/v1alpha1/types_denopod.go
-    kind: struct
-    name: DenoPodSpec
-    signature: ()
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: DenoPodSpec.DeepCopyInto
-    signature: (out *DenoPodSpec)
-  - file: api/v1alpha1/types_denopod.go
-    kind: struct
-    name: DenoPodStatus
-    signature: ()
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: DenoPodStatus.DeepCopyInto
-    signature: (out *DenoPodStatus)
-  - file: api/v1alpha1/types_shared.go
-    kind: struct
-    name: DenoPodTemplate
-    signature: ()
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: DenoPodTemplate.DeepCopyInto
-    signature: (out *DenoPodTemplate)
-  - file: api/v1alpha1/types_shared.go
-    kind: type_alias
-    name: DenoRestartPolicy
-    signature: ()
-  - file: api/v1alpha1/types_denorun.go
-    kind: struct
-    name: DenoRun
-    signature: ()
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: DenoRun.DeepCopy
-    signature: () *DenoRun
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: DenoRun.DeepCopyInto
-    signature: (out *DenoRun)
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: DenoRun.DeepCopyObject
-    signature: () runtime.Object
-  - file: api/v1alpha1/types_denorun.go
-    kind: struct
-    name: DenoRunList
-    signature: ()
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: DenoRunList.DeepCopy
-    signature: () *DenoRunList
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: DenoRunList.DeepCopyInto
-    signature: (out *DenoRunList)
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: DenoRunList.DeepCopyObject
-    signature: () runtime.Object
-  - file: api/v1alpha1/types_denorun.go
-    kind: type_alias
-    name: DenoRunPhase
-    signature: ()
-  - file: api/v1alpha1/types_denorun.go
-    kind: struct
-    name: DenoRunSpec
-    signature: ()
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: DenoRunSpec.DeepCopyInto
-    signature: (out *DenoRunSpec)
-  - file: api/v1alpha1/types_denorun.go
-    kind: struct
-    name: DenoRunStatus
-    signature: ()
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: DenoRunStatus.DeepCopyInto
-    signature: (out *DenoRunStatus)
-  - file: api/v1alpha1/types_shared.go
-    kind: struct
-    name: ExecProbe
-    signature: ()
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: ExecProbe.DeepCopyInto
-    signature: (out *ExecProbe)
-  - file: api/v1alpha1/types_openbao.go
-    kind: struct
-    name: OpenBao
-    signature: ()
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: OpenBao.DeepCopy
-    signature: () *OpenBao
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: OpenBao.DeepCopyInto
-    signature: (out *OpenBao)
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: OpenBao.DeepCopyObject
-    signature: () runtime.Object
-  - file: api/v1alpha1/types_openbao.go
-    kind: struct
-    name: OpenBaoList
-    signature: ()
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: OpenBaoList.DeepCopy
-    signature: () *OpenBaoList
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: OpenBaoList.DeepCopyInto
-    signature: (out *OpenBaoList)
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: OpenBaoList.DeepCopyObject
-    signature: () runtime.Object
-  - file: api/v1alpha1/types_openbao.go
-    kind: struct
-    name: OpenBaoSpec
-    signature: ()
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: OpenBaoSpec.DeepCopy
-    signature: () *OpenBaoSpec
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: OpenBaoSpec.DeepCopyInto
-    signature: (out *OpenBaoSpec)
-  - file: api/v1alpha1/types_openbao.go
-    kind: struct
-    name: OpenBaoStatus
-    signature: ()
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: OpenBaoStatus.DeepCopy
-    signature: () *OpenBaoStatus
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: OpenBaoStatus.DeepCopyInto
-    signature: (out *OpenBaoStatus)
-  - file: api/v1alpha1/types_policyengine.go
-    kind: struct
-    name: PolicyEngine
-    signature: ()
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: PolicyEngine.DeepCopy
-    signature: () *PolicyEngine
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: PolicyEngine.DeepCopyInto
-    signature: (out *PolicyEngine)
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: PolicyEngine.DeepCopyObject
-    signature: () runtime.Object
-  - file: api/v1alpha1/types_policyengine.go
-    kind: struct
-    name: PolicyEngineList
-    signature: ()
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: PolicyEngineList.DeepCopy
-    signature: () *PolicyEngineList
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: PolicyEngineList.DeepCopyInto
-    signature: (out *PolicyEngineList)
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: PolicyEngineList.DeepCopyObject
-    signature: () runtime.Object
-  - file: api/v1alpha1/types_policyengine.go
-    kind: type_alias
-    name: PolicyEnginePhase
-    signature: ()
-  - file: api/v1alpha1/types_policyengine.go
-    kind: struct
-    name: PolicyEngineSpec
-    signature: ()
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: PolicyEngineSpec.DeepCopyInto
-    signature: (out *PolicyEngineSpec)
-  - file: api/v1alpha1/types_policyengine.go
-    kind: struct
-    name: PolicyEngineStatus
-    signature: ()
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: PolicyEngineStatus.DeepCopyInto
-    signature: (out *PolicyEngineStatus)
-  - file: api/v1alpha1/types_policyworkflowrun.go
-    kind: type_alias
-    name: PolicyWorkflowPhase
-    signature: ()
-  - file: api/v1alpha1/types_policyworkflowpod.go
-    kind: struct
-    name: PolicyWorkflowPod
-    signature: ()
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: PolicyWorkflowPod.DeepCopy
-    signature: () *PolicyWorkflowPod
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: PolicyWorkflowPod.DeepCopyInto
-    signature: (out *PolicyWorkflowPod)
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: PolicyWorkflowPod.DeepCopyObject
-    signature: () runtime.Object
-  - file: api/v1alpha1/types_policyworkflowpod.go
-    kind: struct
-    name: PolicyWorkflowPodList
-    signature: ()
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: PolicyWorkflowPodList.DeepCopy
-    signature: () *PolicyWorkflowPodList
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: PolicyWorkflowPodList.DeepCopyInto
-    signature: (out *PolicyWorkflowPodList)
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: PolicyWorkflowPodList.DeepCopyObject
-    signature: () runtime.Object
-  - file: api/v1alpha1/types_policyworkflowpod.go
-    kind: type_alias
-    name: PolicyWorkflowPodPhase
-    signature: ()
-  - file: api/v1alpha1/types_policyworkflowpod.go
-    kind: struct
-    name: PolicyWorkflowPodSpec
-    signature: ()
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: PolicyWorkflowPodSpec.DeepCopyInto
-    signature: (out *PolicyWorkflowPodSpec)
-  - file: api/v1alpha1/types_policyworkflowpod.go
-    kind: struct
-    name: PolicyWorkflowPodStatus
-    signature: ()
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: PolicyWorkflowPodStatus.DeepCopyInto
-    signature: (out *PolicyWorkflowPodStatus)
-  - file: api/v1alpha1/types_policyworkflowrun.go
-    kind: struct
-    name: PolicyWorkflowRun
-    signature: ()
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: PolicyWorkflowRun.DeepCopy
-    signature: () *PolicyWorkflowRun
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: PolicyWorkflowRun.DeepCopyInto
-    signature: (out *PolicyWorkflowRun)
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: PolicyWorkflowRun.DeepCopyObject
-    signature: () runtime.Object
-  - file: api/v1alpha1/types_policyworkflowrun.go
-    kind: struct
-    name: PolicyWorkflowRunList
-    signature: ()
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: PolicyWorkflowRunList.DeepCopy
-    signature: () *PolicyWorkflowRunList
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: PolicyWorkflowRunList.DeepCopyInto
-    signature: (out *PolicyWorkflowRunList)
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: PolicyWorkflowRunList.DeepCopyObject
-    signature: () runtime.Object
-  - file: api/v1alpha1/types_policyworkflowrun.go
-    kind: struct
-    name: PolicyWorkflowRunSpec
-    signature: ()
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: PolicyWorkflowRunSpec.DeepCopyInto
-    signature: (out *PolicyWorkflowRunSpec)
-  - file: api/v1alpha1/types_policyworkflowrun.go
-    kind: struct
-    name: PolicyWorkflowRunStatus
-    signature: ()
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: PolicyWorkflowRunStatus.DeepCopyInto
-    signature: (out *PolicyWorkflowRunStatus)
-  - file: api/v1alpha1/types_runtrigger.go
-    kind: struct
-    name: RunTrigger
-    signature: ()
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: RunTrigger.DeepCopy
-    signature: () *RunTrigger
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: RunTrigger.DeepCopyInto
-    signature: (out *RunTrigger)
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: RunTrigger.DeepCopyObject
-    signature: () runtime.Object
-  - file: api/v1alpha1/types_runtrigger.go
-    kind: struct
-    name: RunTriggerList
-    signature: ()
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: RunTriggerList.DeepCopy
-    signature: () *RunTriggerList
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: RunTriggerList.DeepCopyInto
-    signature: (out *RunTriggerList)
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: RunTriggerList.DeepCopyObject
-    signature: () runtime.Object
-  - file: api/v1alpha1/types_runtrigger.go
-    kind: type_alias
-    name: RunTriggerPhase
-    signature: ()
-  - file: api/v1alpha1/types_runtrigger.go
-    kind: struct
-    name: RunTriggerSpec
-    signature: ()
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: RunTriggerSpec.DeepCopyInto
-    signature: (out *RunTriggerSpec)
-  - file: api/v1alpha1/types_runtrigger.go
-    kind: struct
-    name: RunTriggerStatus
-    signature: ()
-  - file: api/v1alpha1/zz_generated.deepcopy.go
-    kind: method
-    name: RunTriggerStatus.DeepCopyInto
-    signature: (out *RunTriggerStatus)
-  - file: api/v1alpha1/types_shared.go
-    kind: struct
-    name: ServiceAccountRef
-    signature: ()
-  - file: api/v1alpha1/denospec.go
-    kind: method
-    name: ServiceAccountRef.DenoSpec
-    signature: () *denospec.ServiceAccountRef
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - file:api/v1alpha1/zz_generated.deepcopy.go
-    id: r.deepcopy-for-every-type
-    level: MUST
-    text: Every API type has generated DeepCopyInto and DeepCopy methods so handlers
-      and caches never share backing arrays or maps.
-  - codeRefs:
-    - file:api/v1alpha1/deno_types_test.go
-    - method:28449716ad97a01ee9ad4a4ede89f392
-    id: r.deepcopy-no-aliasing
-    level: MUST
-    text: Deep copy of a kind with slices such as DenoJob must not alias the source
-      slices, verified by TestDenoJobDeepCopyDoesNotAlias.
-  - codeRefs:
-    - method:14ac68953d812f04afeefde4c03d0b12
-    - method:19cedd9072bab383a6d03e1c2ca6f96e
-    - method:1d9fcdc42679a9919592e4c28a3e74f8
-    - method:3178bd6762b6a7343a330a5804f732f4
-    - method:40a4bbe7776080bc239b955a5ec3c5ca
-    - method:97a18054cf35b3ba841a31198ca24b02
-    - method:a4967ab3a26c061c8378b3d92104b613
-    - method:b8e83f017166d220cee8c04269e072c7
-    id: r.deepcopy-object-for-roots-and-lists
-    level: MUST
-    text: Every root kind and its List type implement DeepCopyObject returning runtime.Object
-      so they satisfy runtime.Object for the scheme and client code.
-  - codeRefs:
-    - method:0dd42034ce69416d2233ce9e55bb6d3d
-    - method:4853a11212ee93729970106d66fe9a6c
-    id: r.deno-permissions-conversion
-    level: MUST
-    text: DenoPermissions.DenoSpec converts the CRD permission block into the denospec.Permissions
-      struct, mapping every permission field, and returns nil for a nil receiver.
-  - codeRefs:
-    - file:api/v1alpha1/deno_types_test.go
-    - file:api/v1alpha1/types_test.go
-    id: r.deno-spec-contract-tests
-    level: SHOULD
-    text: Type behaviour and deep-copy invariants stay covered by the package tests
-      in types_test.go and deno_types_test.go.
-  - codeRefs:
-    - file:api/v1alpha1/groupversion_info.go
-    id: r.group-version-registration
-    level: MUST
-    text: The v1alpha1 group-version registers every custom kind plus its list type
-      with the scheme so clients and informers can decode them.
-  - codeRefs:
-    - file:api/v1alpha1/types_denojob.go
-    - file:api/v1alpha1/types_denopod.go
-    - file:api/v1alpha1/types_denorun.go
-    - file:api/v1alpha1/types_openbao.go
-    - file:api/v1alpha1/types_policyengine.go
-    - file:api/v1alpha1/types_policyworkflowpod.go
-    - file:api/v1alpha1/types_policyworkflowrun.go
-    - file:api/v1alpha1/types_runtrigger.go
-    id: r.kind-root-list-spec-status
-    level: MUST
-    text: Each custom kind (DenoPod, DenoRun, DenoJob, RunTrigger, PolicyEngine, PolicyWorkflowPod,
-      PolicyWorkflowRun, OpenBao) has a root type, a matching List type, a Spec and
-      a Status struct.
-  - codeRefs:
-    - type_alias:0e2883e159e4826141f3b8dbf5a8951d
-    - type_alias:3228acbcc876296a83b038db20f5ba53
-    - type_alias:71e9ec98b426f5ba2a6f0fa861505f90
-    - type_alias:95711bd9c109c1c963d90415abeb221a
-    - type_alias:b301d0b47a8b87747f72eb4dd29c1213
-    - type_alias:cb7db6e321bd704e6960895aa2922ada
-    - type_alias:f1812e2547cdacd2b9d3b0c4591ef2e2
-    id: r.phase-enums
-    level: MUST
-    text: 'Every reconcilable kind exposes a phase string alias describing its lifecycle
-      states: DenoPodPhase, DenoRunPhase, DenoJobPhase, RunTriggerPhase, PolicyEnginePhase,
-      PolicyWorkflowPodPhase and PolicyWorkflowPhase.'
-  - codeRefs:
-    - method:3846c936f898af39cc3e185598df8409
-    - struct:05cdd79e23617fbecdb398d34c9d5ad7
-    id: r.service-account-ref-conversion
-    level: MUST
-    text: ServiceAccountRef.DenoSpec converts the CRD service-account reference into
-      denospec.ServiceAccountRef, copying name and namespace, and returns nil for
-      a nil receiver.
-  - codeRefs:
-    - file:api/v1alpha1/types_shared.go
-    - struct:05cdd79e23617fbecdb398d34c9d5ad7
-    - struct:a6b2c82ee80cb3d8639351da73b016d6
-    - struct:b1b033afbaf6fab9e420675da77463a6
-    - struct:da40f37a9ba38a5f2a353dd41f480892
-    - struct:e95b0c824023d610cd8dd79e9b10330c
-    - type_alias:f1737f67a27a8469e8d83ac7bc87a249
-    - type_alias:f821022f3e38a5407c14bb767eba914b
-    id: r.shared-spec-building-blocks
-    level: MUST
-    text: Shared types ServiceAccountRef, DenoPermission, DenoPermissions, DenoPodTemplate,
-      ExecProbe, DenoRestartPolicy and ConcurrencyPolicy carry the reusable pod, permission
-      and probe configuration used across the kinds.
-  upstream: self

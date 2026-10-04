@@ -1,4 +1,145 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-internal-helper-hostutil
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: The context exists to describe the host information collection helper that
+    Vault/OpenBao diagnostics rely on to report the machine environment. It exists
+    so that a reader or a regenerator knows exactly which entry points the package
+    exports, what each one returns, how collection failures are represented and accumulated,
+    and how the package degrades on unsupported platforms, without having to re-read
+    the vendored third-party source.
+  requirements:
+  - id: r.collect-host-info
+    level: MUST
+    text: 'CollectHostInfo must build a HostInfo stamped with the current time in
+      UTC and fill its Host, Memory, Disk, CPU, and CPUTimes fields by calling CollectHostInfoStat,
+      CollectHostMemory, disk.PartitionsWithContext, cpu.InfoWithContext, and cpu.TimesWithContext
+      respectively. A failure in any one source must not abort the others: the failure
+      is appended to a multierror wrapped in a HostInfoError labelled with the category
+      name ("host", "memory", "disk", "cpu", "cpu_times"), the corresponding field
+      is left unset, and the partially filled HostInfo is still returned alongside
+      the aggregated error.'
+    codeRefs:
+    - file:third_party/openbao/internal/helper/hostutil/hostinfo.go
+    - function:61d7cdc83eea9ff7205895179f2252ac
+    - struct:c78d894f02c6a75cf9c18dfe4eec0a35
+    - struct:d82e9192ff68b78dfa2b195096b2dc7a
+  - id: r.collect-host-info-stat
+    level: MUST
+    text: CollectHostInfoStat must be exported as the standalone entry point that
+      returns a HostInfoStat describing the general host, so callers that need only
+      host metadata can obtain it without running the full collection.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/hostutil/hostinfo.go
+    - function:adde1148d10668fb793553e39ebe044a
+    - struct:8bc82c9291538be26dc922db9630ff7e
+  - id: r.collect-host-memory
+    level: MUST
+    text: CollectHostMemory must read virtual memory through mem.VirtualMemoryWithContext
+      and return a VirtualMemoryStat populated field by field from the gopsutil result,
+      including total, available, used, used percent, free, the BSD active/inactive/wired/laundry
+      values, the Linux buffer/cache/slab/swap/hugepage values, and commit limits.
+      It must return the underlying error unchanged with a nil result when the read
+      fails.
+    codeRefs:
+    - function:96269bbb5e7637f45dc4f9fb793bbe49
+    - struct:43f3aac19b9221371b774a6c71a272af
+  - id: r.disk-per-partition-errors
+    level: MUST
+    text: When collecting disk usage, CollectHostInfo must enumerate partitions, then
+      query usage per mountpoint, skipping a partition whose usage query fails and
+      recording that failure under a HostInfoError labelled "disk.<index>" so the
+      remaining partitions still contribute to the returned Disk slice.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/hostutil/hostinfo.go
+    - function:61d7cdc83eea9ff7205895179f2252ac
+  - id: r.host-info-error
+    level: MUST
+    text: HostInfoError must carry a Type naming the category that failed together
+      with the wrapped Err, implement the error interface so Error() reports the failure,
+      and implement WrappedErrors returning the wrapped error as a single-element
+      slice so hashcorp/go-multierror can unwrap it when the aggregated error is printed.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/hostutil/hostinfo_error.go
+    - method:285401c48151e16655d99e402398f11e
+    - method:b376ea34fe363a4f5ca9f8615a824a52
+    - struct:c78d894f02c6a75cf9c18dfe4eec0a35
+  - id: r.json-tags
+    level: MUST
+    text: HostInfo, HostInfoStat, and VirtualMemoryStat must keep the JSON struct
+      tags recorded on their fields (timestamp, cpu, cpu_times, disk, host, memory,
+      and the per-metric tags such as total, available, used, usedPercent, free) so
+      the collected host information serializes with stable key names.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/hostutil/hostinfo_util.go
+    - struct:43f3aac19b9221371b774a6c71a272af
+    - struct:8bc82c9291538be26dc922db9630ff7e
+    - struct:d82e9192ff68b78dfa2b195096b2dc7a
+  - id: r.openbsd-unsupported
+    level: MUST
+    text: On OpenBSD the package must compile against a platform-specific file that
+      replaces CollectHostInfo and CollectHostMemory with stubs returning a nil result
+      and the error "host info not supported on this platform", so the unsupported
+      platform still satisfies the same exported signatures.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/hostutil/hostinfo_openbsd.go
+  - id: r.test-coverage
+    level: SHOULD
+    text: hostinfo_test.go must exercise CollectHostInfo so the collection path, including
+      its error aggregation, is covered by the package tests.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/hostutil/hostinfo_test.go
+  interfaces:
+  - name: CollectHostInfo
+    kind: function
+    signature: func CollectHostInfo(ctx context.Context) (*HostInfo, error)
+    file: third_party/openbao/internal/helper/hostutil/hostinfo.go
+  - name: CollectHostInfoStat
+    kind: function
+    signature: func CollectHostInfoStat(ctx context.Context) (*HostInfoStat, error)
+    file: third_party/openbao/internal/helper/hostutil/hostinfo.go
+  - name: CollectHostMemory
+    kind: function
+    signature: func CollectHostMemory(ctx context.Context) (*VirtualMemoryStat, error)
+    file: third_party/openbao/internal/helper/hostutil/hostinfo.go
+  - name: HostInfo
+    kind: struct
+    signature: type HostInfo struct { Timestamp time.Time; CPU []cpu.InfoStat; CPUTimes
+      []cpu.TimesStat; Disk []*disk.UsageStat; Host *HostInfoStat; Memory *VirtualMemoryStat
+      }
+    file: third_party/openbao/internal/helper/hostutil/hostinfo.go
+  - name: HostInfoError
+    kind: struct
+    signature: type HostInfoError struct { Type string; Err error }
+    file: third_party/openbao/internal/helper/hostutil/hostinfo_error.go
+  - name: HostInfoError.Error
+    kind: method
+    signature: func (e *HostInfoError) Error() string
+    file: third_party/openbao/internal/helper/hostutil/hostinfo_error.go
+  - name: HostInfoError.WrappedErrors
+    kind: method
+    signature: func (e *HostInfoError) WrappedErrors() []error
+    file: third_party/openbao/internal/helper/hostutil/hostinfo_error.go
+  - name: HostInfoStat
+    kind: struct
+    signature: type HostInfoStat struct
+    file: third_party/openbao/internal/helper/hostutil/hostinfo_util.go
+  - name: VirtualMemoryStat
+    kind: struct
+    signature: type VirtualMemoryStat struct { Total uint64; Available uint64; Used
+      uint64; UsedPercent float64; Free uint64; Active uint64; Inactive uint64; Wired
+      uint64; Laundry uint64; Buffers uint64; Cached uint64; Writeback uint64; Dirty
+      uint64; WritebackTmp uint64; Shared uint64; Slab uint64; SReclaimable uint64;
+      SUnreclaim uint64; PageTables uint64; SwapCached uint64; CommitLimit uint64;
+      CommittedAS uint64; HighTotal uint64; HighFree uint64; LowTotal uint64; LowFree
+      uint64; SwapTotal uint64; SwapFree uint64; Mapped uint64; VMallocTotal uint64;
+      VMallocUsed uint64; VMallocChunk uint64; HugePagesTotal uint64; HugePagesFree
+      uint64; HugePageSize uint64 }
+    file: third_party/openbao/internal/helper/hostutil/hostinfo_util.go
 codeRefIndex:
 - file:third_party/openbao/internal/helper/hostutil/hostinfo.go hostinfo.go@third_party/openbao/internal/helper/hostutil/hostinfo.go
 - file:third_party/openbao/internal/helper/hostutil/hostinfo_error.go hostinfo_error.go@third_party/openbao/internal/helper/hostutil/hostinfo_error.go
@@ -14,144 +155,3 @@ codeRefIndex:
 - struct:8bc82c9291538be26dc922db9630ff7e HostInfoStat@third_party/openbao/internal/helper/hostutil/hostinfo_util.go:110
 - struct:c78d894f02c6a75cf9c18dfe4eec0a35 HostInfoError@third_party/openbao/internal/helper/hostutil/hostinfo_error.go:9
 - struct:d82e9192ff68b78dfa2b195096b2dc7a HostInfo@third_party/openbao/internal/helper/hostutil/hostinfo.go:23
-kind: SystemContext
-metadata:
-  name: third-party-openbao-internal-helper-hostutil
-  namespace: default
-spec:
-  intent: The context exists to describe the host information collection helper that
-    Vault/OpenBao diagnostics rely on to report the machine environment. It exists
-    so that a reader or a regenerator knows exactly which entry points the package
-    exports, what each one returns, how collection failures are represented and accumulated,
-    and how the package degrades on unsupported platforms, without having to re-read
-    the vendored third-party source.
-  interfaces:
-  - file: third_party/openbao/internal/helper/hostutil/hostinfo.go
-    kind: function
-    name: CollectHostInfo
-    signature: func CollectHostInfo(ctx context.Context) (*HostInfo, error)
-  - file: third_party/openbao/internal/helper/hostutil/hostinfo.go
-    kind: function
-    name: CollectHostInfoStat
-    signature: func CollectHostInfoStat(ctx context.Context) (*HostInfoStat, error)
-  - file: third_party/openbao/internal/helper/hostutil/hostinfo.go
-    kind: function
-    name: CollectHostMemory
-    signature: func CollectHostMemory(ctx context.Context) (*VirtualMemoryStat, error)
-  - file: third_party/openbao/internal/helper/hostutil/hostinfo.go
-    kind: struct
-    name: HostInfo
-    signature: type HostInfo struct { Timestamp time.Time; CPU []cpu.InfoStat; CPUTimes
-      []cpu.TimesStat; Disk []*disk.UsageStat; Host *HostInfoStat; Memory *VirtualMemoryStat
-      }
-  - file: third_party/openbao/internal/helper/hostutil/hostinfo_error.go
-    kind: struct
-    name: HostInfoError
-    signature: type HostInfoError struct { Type string; Err error }
-  - file: third_party/openbao/internal/helper/hostutil/hostinfo_error.go
-    kind: method
-    name: HostInfoError.Error
-    signature: func (e *HostInfoError) Error() string
-  - file: third_party/openbao/internal/helper/hostutil/hostinfo_error.go
-    kind: method
-    name: HostInfoError.WrappedErrors
-    signature: func (e *HostInfoError) WrappedErrors() []error
-  - file: third_party/openbao/internal/helper/hostutil/hostinfo_util.go
-    kind: struct
-    name: HostInfoStat
-    signature: type HostInfoStat struct
-  - file: third_party/openbao/internal/helper/hostutil/hostinfo_util.go
-    kind: struct
-    name: VirtualMemoryStat
-    signature: type VirtualMemoryStat struct { Total uint64; Available uint64; Used
-      uint64; UsedPercent float64; Free uint64; Active uint64; Inactive uint64; Wired
-      uint64; Laundry uint64; Buffers uint64; Cached uint64; Writeback uint64; Dirty
-      uint64; WritebackTmp uint64; Shared uint64; Slab uint64; SReclaimable uint64;
-      SUnreclaim uint64; PageTables uint64; SwapCached uint64; CommitLimit uint64;
-      CommittedAS uint64; HighTotal uint64; HighFree uint64; LowTotal uint64; LowFree
-      uint64; SwapTotal uint64; SwapFree uint64; Mapped uint64; VMallocTotal uint64;
-      VMallocUsed uint64; VMallocChunk uint64; HugePagesTotal uint64; HugePagesFree
-      uint64; HugePageSize uint64 }
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/hostutil/hostinfo.go
-    - function:61d7cdc83eea9ff7205895179f2252ac
-    - struct:c78d894f02c6a75cf9c18dfe4eec0a35
-    - struct:d82e9192ff68b78dfa2b195096b2dc7a
-    id: r.collect-host-info
-    level: MUST
-    text: 'CollectHostInfo must build a HostInfo stamped with the current time in
-      UTC and fill its Host, Memory, Disk, CPU, and CPUTimes fields by calling CollectHostInfoStat,
-      CollectHostMemory, disk.PartitionsWithContext, cpu.InfoWithContext, and cpu.TimesWithContext
-      respectively. A failure in any one source must not abort the others: the failure
-      is appended to a multierror wrapped in a HostInfoError labelled with the category
-      name ("host", "memory", "disk", "cpu", "cpu_times"), the corresponding field
-      is left unset, and the partially filled HostInfo is still returned alongside
-      the aggregated error.'
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/hostutil/hostinfo.go
-    - function:adde1148d10668fb793553e39ebe044a
-    - struct:8bc82c9291538be26dc922db9630ff7e
-    id: r.collect-host-info-stat
-    level: MUST
-    text: CollectHostInfoStat must be exported as the standalone entry point that
-      returns a HostInfoStat describing the general host, so callers that need only
-      host metadata can obtain it without running the full collection.
-  - codeRefs:
-    - function:96269bbb5e7637f45dc4f9fb793bbe49
-    - struct:43f3aac19b9221371b774a6c71a272af
-    id: r.collect-host-memory
-    level: MUST
-    text: CollectHostMemory must read virtual memory through mem.VirtualMemoryWithContext
-      and return a VirtualMemoryStat populated field by field from the gopsutil result,
-      including total, available, used, used percent, free, the BSD active/inactive/wired/laundry
-      values, the Linux buffer/cache/slab/swap/hugepage values, and commit limits.
-      It must return the underlying error unchanged with a nil result when the read
-      fails.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/hostutil/hostinfo.go
-    - function:61d7cdc83eea9ff7205895179f2252ac
-    id: r.disk-per-partition-errors
-    level: MUST
-    text: When collecting disk usage, CollectHostInfo must enumerate partitions, then
-      query usage per mountpoint, skipping a partition whose usage query fails and
-      recording that failure under a HostInfoError labelled "disk.<index>" so the
-      remaining partitions still contribute to the returned Disk slice.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/hostutil/hostinfo_error.go
-    - method:285401c48151e16655d99e402398f11e
-    - method:b376ea34fe363a4f5ca9f8615a824a52
-    - struct:c78d894f02c6a75cf9c18dfe4eec0a35
-    id: r.host-info-error
-    level: MUST
-    text: HostInfoError must carry a Type naming the category that failed together
-      with the wrapped Err, implement the error interface so Error() reports the failure,
-      and implement WrappedErrors returning the wrapped error as a single-element
-      slice so hashcorp/go-multierror can unwrap it when the aggregated error is printed.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/hostutil/hostinfo_util.go
-    - struct:43f3aac19b9221371b774a6c71a272af
-    - struct:8bc82c9291538be26dc922db9630ff7e
-    - struct:d82e9192ff68b78dfa2b195096b2dc7a
-    id: r.json-tags
-    level: MUST
-    text: HostInfo, HostInfoStat, and VirtualMemoryStat must keep the JSON struct
-      tags recorded on their fields (timestamp, cpu, cpu_times, disk, host, memory,
-      and the per-metric tags such as total, available, used, usedPercent, free) so
-      the collected host information serializes with stable key names.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/hostutil/hostinfo_openbsd.go
-    id: r.openbsd-unsupported
-    level: MUST
-    text: On OpenBSD the package must compile against a platform-specific file that
-      replaces CollectHostInfo and CollectHostMemory with stubs returning a nil result
-      and the error "host info not supported on this platform", so the unsupported
-      platform still satisfies the same exported signatures.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/hostutil/hostinfo_test.go
-    id: r.test-coverage
-    level: SHOULD
-    text: hostinfo_test.go must exercise CollectHostInfo so the collection path, including
-      its error aggregation, is covered by the package tests.
-  upstream: self

@@ -1,44 +1,44 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/ui/lib/kubernetes/config/environment.js environment.js@third_party/openbao/ui/lib/kubernetes/config/environment.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-lib-kubernetes-config
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: This context exists so the kubernetes UI app inside the vendored OpenBao
     UI library has its Ember environment configuration produced at build time. It
     is third-party code kept in-tree rather than authored here, so the specification
     records only what the file does, not how it should evolve. Anything building or
     replacing that UI app depends on this module to stamp the correct module prefix
     and environment into the build configuration.
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/ui/lib/kubernetes/config/environment.js
-    id: r.environment-passthrough
+  - id: r.environment-passthrough
     level: MUST
     text: The returned configuration object must set environment to the caller-supplied
       environment argument without altering it, so the build inherits the environment
       name it was invoked with.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/kubernetes/config/environment.js
-    id: r.exports-environment-factory
+  - id: r.exports-environment-factory
     level: MUST
     text: The module must export a single function via module.exports that accepts
       an Ember environment name and returns a fresh configuration object on every
       call.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/kubernetes/config/environment.js
-    id: r.module-prefix-kubernetes
+  - id: r.module-prefix-kubernetes
     level: MUST
     text: The returned configuration object must set modulePrefix to the literal string
       'kubernetes', so the UI app resolves its modules under that prefix.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/kubernetes/config/environment.js
-    id: r.strict-node-module
+  - id: r.strict-node-module
     level: SHOULD
     text: The file should stay a CommonJS Node module in strict mode with the eslint-env
       node directive and retain the HashiCorp copyright and MPL-2.0 SPDX header from
       its vendored origin.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/ui/lib/kubernetes/config/environment.js
+codeRefIndex:
+- file:third_party/openbao/ui/lib/kubernetes/config/environment.js environment.js@third_party/openbao/ui/lib/kubernetes/config/environment.js

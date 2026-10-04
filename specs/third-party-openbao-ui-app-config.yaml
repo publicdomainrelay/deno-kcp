@@ -1,38 +1,38 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/ui/app/config/environment.d.ts environment.d.ts@third_party/openbao/ui/app/config/environment.d.ts
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-app-config
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: It exists so the OpenBao web UI can import its build-time environment configuration
     through `import config from 'my-app/config/environment'` with full type checking
     under TypeScript. Without this declaration the Ember resolver's virtual module
     would be untyped, so every read of environment metadata would be implicit any.
     The context therefore pins the configuration surface the UI code is allowed to
     rely on.
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/ui/app/config/environment.d.ts
-    id: r.declaration-only
+  - id: r.declaration-only
     level: MUST
     text: 'The file must stay a pure type declaration: it declares `config` without
       providing a runtime value, so no JavaScript is emitted for it.'
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/config/environment.d.ts
-    id: r.declares-env-config-shape
+  - id: r.declares-env-config-shape
     level: MUST
     text: The module must declare a constant named `config` whose type holds exactly
       the keys `environment`, `modulePrefix`, `podModulePrefix`, `locationType`, `rootURL`
       and `APP`; `environment`, `modulePrefix`, `podModulePrefix` and `rootURL` must
       be strings, `locationType` must be limited to the literals 'history', 'hash',
       'none' or 'auto', and `APP` must be a record of string keys to unknown values.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/config/environment.d.ts
-    id: r.default-export
+  - id: r.default-export
     level: MUST
     text: The declared `config` constant must be the module's default export, so importers
       using `import config from 'my-app/config/environment'` receive that typed object.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/ui/app/config/environment.d.ts
+codeRefIndex:
+- file:third_party/openbao/ui/app/config/environment.d.ts environment.d.ts@third_party/openbao/ui/app/config/environment.d.ts

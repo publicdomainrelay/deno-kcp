@@ -1,37 +1,37 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- class:1f11b4591f598557944a357118cd17b7 PkiKeysIndexController@third_party/openbao/ui/lib/pki/addon/controllers/keys/index.js:9
-- file:third_party/openbao/ui/lib/pki/addon/controllers/keys/index.js index.js@third_party/openbao/ui/lib/pki/addon/controllers/keys/index.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-lib-pki-addon-controllers-keys
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: This context exists so the PKI keys index page has a controller that exposes
     the engine mount point to its route's templates. Rather than threading the mount
     path down from the route or recomputing it at each use site, the controller resolves
     it once from the Ember owner and publishes it as a property, keeping the keys
     index UI decoupled from how the PKI engine was mounted.
-  interfaces:
-  - file: third_party/openbao/ui/lib/pki/addon/controllers/keys/index.js
-    kind: class
-    name: PkiKeysIndexController
-    signature: export default class PkiKeysIndexController extends Controller
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - class:1f11b4591f598557944a357118cd17b7
-    - file:third_party/openbao/ui/lib/pki/addon/controllers/keys/index.js
-    id: r.controller-default-export
+  - id: r.controller-default-export
     level: MUST
     text: The file default-exports PkiKeysIndexController, a subclass of Ember's Controller,
       so the PKI keys index route resolves it as its controller.
-  - codeRefs:
+    codeRefs:
     - class:1f11b4591f598557944a357118cd17b7
     - file:third_party/openbao/ui/lib/pki/addon/controllers/keys/index.js
-    id: r.mount-point-from-owner
+  - id: r.mount-point-from-owner
     level: MUST
     text: PkiKeysIndexController exposes a mountPoint getter that resolves the mount
       point by calling getOwner(this).mountPoint, so consumers read the PKI engine
       mount path from the controller instead of passing it in.
-  upstream: self
+    codeRefs:
+    - class:1f11b4591f598557944a357118cd17b7
+    - file:third_party/openbao/ui/lib/pki/addon/controllers/keys/index.js
+  interfaces:
+  - name: PkiKeysIndexController
+    kind: class
+    signature: export default class PkiKeysIndexController extends Controller
+    file: third_party/openbao/ui/lib/pki/addon/controllers/keys/index.js
+codeRefIndex:
+- class:1f11b4591f598557944a357118cd17b7 PkiKeysIndexController@third_party/openbao/ui/lib/pki/addon/controllers/keys/index.js:9
+- file:third_party/openbao/ui/lib/pki/addon/controllers/keys/index.js index.js@third_party/openbao/ui/lib/pki/addon/controllers/keys/index.js

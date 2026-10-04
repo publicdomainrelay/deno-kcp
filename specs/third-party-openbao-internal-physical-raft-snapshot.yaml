@@ -1,4 +1,268 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-internal-physical-raft-snapshot
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'This context exists so the deno-kcp repository can read and write raft
+    snapshots in OpenBao''s on-disk archive format without reimplementing the format:
+    archive.go supplies the per-file checksum manifest that guards an extracted snapshot
+    tree, and snapshot.go supplies the sealed, checksummed container that wraps a
+    raft snapshot stream. It is vendored third-party code kept in tree (upstream:
+    self) so the surrounding raft physical backend can call New, Write, Verify, Parse,
+    Restore, and WriteToTempFile directly, and it exists here because the summary
+    and spec must describe that vendored surface exactly as it stands.'
+  requirements:
+  - id: r.archive-tests-cover-hashlist
+    level: SHOULD
+    text: archive_test.go must keep the hashList round trip under test, covering both
+      the encode-then-decode-and-verify success path and the failure paths for a missing
+      entry, a mismatched sum, and an unlisted file.
+    codeRefs:
+    - file:third_party/openbao/internal/physical/raft/snapshot/archive_test.go
+  - id: r.hashlist-decode-and-verify-both-directions
+    level: MUST
+    text: hashList.DecodeAndVerify must parse a SHA256SUMS-style reader line by line,
+      fail with "list missing hash for %q" when a listed file has no tracked hash,
+      fail with "hash check failed for %q" when a listed sum does not equal the tracked
+      sum, propagate the scanner error, and finally fail with "file missing for %q"
+      for any tracked file that never appeared in the listing.
+    codeRefs:
+    - file:third_party/openbao/internal/physical/raft/snapshot/archive.go
+    - method:0feb369c884ff6d26baa1e1efdca36b5
+  - id: r.hashlist-encode-sha256sums-format
+    level: MUST
+    text: hashList.Encode must compute the current sum of each tracked hash and write
+      one line per file in SHA256SUMS style, hex sum then two spaces then the file
+      name followed by a newline, returning the first write error and nil otherwise.
+    codeRefs:
+    - file:third_party/openbao/internal/physical/raft/snapshot/archive.go
+    - method:6b160675a56228edbec5b8d6a4058dfc
+  - id: r.hashlist-tracks-per-file-sha256
+    level: MUST
+    text: hashList.Add must return the existing sha256 hash already registered for
+      a file name, and must create and register a new one only when the file name
+      is not yet present, so repeated adds for the same file name accumulate into
+      one hash rather than resetting it.
+    codeRefs:
+    - file:third_party/openbao/internal/physical/raft/snapshot/archive.go
+    - method:751a69b736f1be1b6ce920fe9366485e
+  - id: r.new-snapshot-without-sealer
+    level: MUST
+    text: New must build a sealed-snapshot reader for the given logger and raft node
+      using no sealer, delegating to NewWithSealer so both constructors share one
+      code path.
+    codeRefs:
+    - file:third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+    - function:3f8d163f009271786a61fad71a6c561b
+    - function:66291c3d10223057bd5fac0fe9da1b50
+  - id: r.new-with-sealer-constructor
+    level: MUST
+    text: NewWithSealer must take the logger, the raft node, and a Sealer and return
+      a *Snapshot representing the node's latest snapshot, passing the sealer through
+      to the code that opens and unseals the snapshot bytes.
+    codeRefs:
+    - file:third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+    - function:3f8d163f009271786a61fad71a6c561b
+  - id: r.parse-streams-payload-to-writer
+    level: MUST
+    text: Parse must read a sealed snapshot archive from in, write the recovered snapshot
+      payload through to out, and return the recovered *raft.SnapshotMeta, failing
+      instead of writing when the trailer or checksum does not validate.
+    codeRefs:
+    - file:third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+    - function:5043b8d14037f37d7661ebd7ad531395
+  - id: r.restore-unsealed-and-install
+    level: MUST
+    text: Restore must read the archive from in, unseal and verify it, and install
+      the snapshot into the raft node as its new state, returning the error and leaving
+      the node unchanged when the archive is invalid.
+    codeRefs:
+    - file:third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+    - function:97decc56fc001c81ab81680efbdf428d
+  - id: r.restore-with-sealer-delegation
+    level: MUST
+    text: RestoreWithSealer must perform the same restore as Restore but with the
+      caller's Sealer used to open the archive, and Restore must be the no-sealer
+      delegate so both share one restore implementation.
+    codeRefs:
+    - file:third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+    - function:97decc56fc001c81ab81680efbdf428d
+    - function:b204c537f36efbab2b5696924a5987a8
+  - id: r.sealer-interface-round-trip
+    level: MUST
+    text: 'Sealer must be the two-method interface a caller supplies to wrap snapshot
+      bytes: Seal takes a context and plaintext and returns sealed bytes, Open takes
+      a context and sealed bytes and returns the plaintext, both returning an error
+      on failure, so a snapshot written with one sealer can be read back with the
+      matching one.'
+    codeRefs:
+    - file:third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+    - interface:45cf3a26619838a3576fcab008fb8d25
+    - method:349839e307a2f9be4e7839e04fe580d3
+    - method:d60e48d1d32c11c9fa7b515706bc4693
+  - id: r.snapshot-read-close-file-backed
+    level: MUST
+    text: 'Snapshot must satisfy the io.ReadCloser shape: Read must fill the caller''s
+      byte slice from the open snapshot file and return the byte count and error of
+      that read, and Close must close the underlying file.'
+    codeRefs:
+    - file:third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+    - method:f2e06ed5967318980f47c863ce72a9b4
+    - method:fe4f9e6b579b6edde6ac0a7ec2f0d860
+  - id: r.snapshot-size-from-file-stat
+    level: MUST
+    text: Snapshot.Size must return the size of the underlying open file as an int64,
+      surfacing the stat error instead of a size when the file cannot be stat'd.
+    codeRefs:
+    - file:third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+    - method:df9d4347382c2f75927e1a36358dc272
+  - id: r.snapshot-struct-state
+    level: MUST
+    text: Snapshot must hold exactly the open file handle, the raft index the snapshot
+      was taken at, and the checksum string, and must expose those through Size, Index,
+      and Checksum without further fields.
+    codeRefs:
+    - file:third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+    - method:77893886163706489a890546af7b7b4e
+    - method:dc2ffbee086dd70666ba54b7394d02ad
+    - method:df9d4347382c2f75927e1a36358dc272
+    - struct:8936e1d8eb04c8e5a54ce32b99043682
+  - id: r.snapshot-tests-cover-container
+    level: SHOULD
+    text: snapshot_test.go must keep the sealed snapshot container under test across
+      write, verify, parse, and restore so a sealer change that breaks the trailer
+      or the payload path fails the package's own tests.
+    codeRefs:
+    - file:third_party/openbao/internal/physical/raft/snapshot/snapshot_test.go
+  - id: r.verify-reads-trailer-only
+    level: MUST
+    text: Verify must read a sealed snapshot archive from the given reader, recover
+      and validate the trailing metadata and checksum without handing the payload
+      to raft, and return the *raft.SnapshotMeta plus an error when the archive or
+      its checksum is bad.
+    codeRefs:
+    - file:third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+    - function:b9fb8d800bb64112f19499a757d2bbb1
+  - id: r.write-sealed-snapshot-to-writer
+    level: MUST
+    text: Write must take a logger, a raft node, a Sealer, and an io.Writer, seal
+      the snapshot stream before writing it, append the snapshot metadata and checksum
+      trailer, and return the first error encountered while producing that archive.
+    codeRefs:
+    - file:third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+    - function:5706ef797e2020c0a57d334bea9d4833
+  - id: r.write-to-temp-file-return-cleanup
+    level: MUST
+    text: WriteToTempFile must extract the archived snapshot from in into a temporary
+      file using the supplied metadata, verify it on the way out, and return the open
+      *os.File together with a cleanup function the caller must invoke, plus an error
+      when extraction fails.
+    codeRefs:
+    - file:third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+    - function:2b0eaf0837ec837652fff8466604f74a
+  - id: r.write-to-temp-file-with-sealer
+    level: MUST
+    text: 'WriteToTempFileWithSealer must be the sealer-aware form of WriteToTempFile:
+      it opens the archive with the supplied Sealer, extracts the snapshot to a temporary
+      file, and returns that file, its cleanup function, and any error, with WriteToTempFile
+      delegating to it when no sealer is available.'
+    codeRefs:
+    - file:third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+    - function:2b0eaf0837ec837652fff8466604f74a
+    - function:f65e8dbee67eaa15167498204fa05073
+  interfaces:
+  - name: New
+    kind: function
+    signature: func New(logger hclog.Logger, r *raft.Raft) (*Snapshot, error)
+    file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+  - name: NewWithSealer
+    kind: function
+    signature: func NewWithSealer(logger hclog.Logger, r *raft.Raft, sealer Sealer)
+      (*Snapshot, error)
+    file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+  - name: Parse
+    kind: function
+    signature: func Parse(in io.Reader, out io.Writer) (*raft.SnapshotMeta, error)
+    file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+  - name: Restore
+    kind: function
+    signature: func Restore(logger hclog.Logger, in io.Reader, r *raft.Raft) error
+    file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+  - name: RestoreWithSealer
+    kind: function
+    signature: func RestoreWithSealer(logger hclog.Logger, in io.Reader, r *raft.Raft,
+      sealer Sealer) error
+    file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+  - name: Sealer
+    kind: interface
+    signature: type Sealer interface
+    file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+  - name: Sealer.Open
+    kind: method
+    signature: (context.Context, []byte) ([]byte, error)
+    file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+  - name: Sealer.Seal
+    kind: method
+    signature: (context.Context, []byte) ([]byte, error)
+    file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+  - name: Snapshot
+    kind: struct
+    signature: type Snapshot struct
+    file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+  - name: Snapshot.Checksum
+    kind: method
+    signature: () string
+    file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+  - name: Snapshot.Close
+    kind: method
+    signature: () error
+    file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+  - name: Snapshot.Index
+    kind: method
+    signature: () uint64
+    file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+  - name: Snapshot.Read
+    kind: method
+    signature: (p []byte) (n int, err error)
+    file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+  - name: Snapshot.Size
+    kind: method
+    signature: () (int64, error)
+    file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+  - name: Verify
+    kind: function
+    signature: func Verify(in io.Reader) (*raft.SnapshotMeta, error)
+    file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+  - name: Write
+    kind: function
+    signature: func Write(logger hclog.Logger, r *raft.Raft, sealer Sealer, w io.Writer)
+      error
+    file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+  - name: WriteToTempFile
+    kind: function
+    signature: func WriteToTempFile(logger hclog.Logger, in io.Reader, metadata *raft.SnapshotMeta)
+      (*os.File, func(), error)
+    file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+  - name: WriteToTempFileWithSealer
+    kind: function
+    signature: func WriteToTempFileWithSealer(logger hclog.Logger, in io.Reader, metadata
+      *raft.SnapshotMeta, sealer Sealer) (*os.File, func(), error)
+    file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
+  - name: hashList.Add
+    kind: method
+    signature: (file string) hash.Hash
+    file: third_party/openbao/internal/physical/raft/snapshot/archive.go
+  - name: hashList.DecodeAndVerify
+    kind: method
+    signature: (r io.Reader) error
+    file: third_party/openbao/internal/physical/raft/snapshot/archive.go
+  - name: hashList.Encode
+    kind: method
+    signature: (w io.Writer) error
+    file: third_party/openbao/internal/physical/raft/snapshot/archive.go
 codeRefIndex:
 - file:third_party/openbao/internal/physical/raft/snapshot/archive.go archive.go@third_party/openbao/internal/physical/raft/snapshot/archive.go
 - file:third_party/openbao/internal/physical/raft/snapshot/archive_test.go archive_test.go@third_party/openbao/internal/physical/raft/snapshot/archive_test.go
@@ -25,267 +289,3 @@ codeRefIndex:
 - method:f2e06ed5967318980f47c863ce72a9b4 Snapshot.Close@third_party/openbao/internal/physical/raft/snapshot/snapshot.go:197
 - method:fe4f9e6b579b6edde6ac0a7ec2f0d860 Snapshot.Read@third_party/openbao/internal/physical/raft/snapshot/snapshot.go:187
 - struct:8936e1d8eb04c8e5a54ce32b99043682 Snapshot@third_party/openbao/internal/physical/raft/snapshot/snapshot.go:26
-kind: SystemContext
-metadata:
-  name: third-party-openbao-internal-physical-raft-snapshot
-  namespace: default
-spec:
-  intent: 'This context exists so the deno-kcp repository can read and write raft
-    snapshots in OpenBao''s on-disk archive format without reimplementing the format:
-    archive.go supplies the per-file checksum manifest that guards an extracted snapshot
-    tree, and snapshot.go supplies the sealed, checksummed container that wraps a
-    raft snapshot stream. It is vendored third-party code kept in tree (upstream:
-    self) so the surrounding raft physical backend can call New, Write, Verify, Parse,
-    Restore, and WriteToTempFile directly, and it exists here because the summary
-    and spec must describe that vendored surface exactly as it stands.'
-  interfaces:
-  - file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
-    kind: function
-    name: New
-    signature: func New(logger hclog.Logger, r *raft.Raft) (*Snapshot, error)
-  - file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
-    kind: function
-    name: NewWithSealer
-    signature: func NewWithSealer(logger hclog.Logger, r *raft.Raft, sealer Sealer)
-      (*Snapshot, error)
-  - file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
-    kind: function
-    name: Parse
-    signature: func Parse(in io.Reader, out io.Writer) (*raft.SnapshotMeta, error)
-  - file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
-    kind: function
-    name: Restore
-    signature: func Restore(logger hclog.Logger, in io.Reader, r *raft.Raft) error
-  - file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
-    kind: function
-    name: RestoreWithSealer
-    signature: func RestoreWithSealer(logger hclog.Logger, in io.Reader, r *raft.Raft,
-      sealer Sealer) error
-  - file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
-    kind: interface
-    name: Sealer
-    signature: type Sealer interface
-  - file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
-    kind: method
-    name: Sealer.Open
-    signature: (context.Context, []byte) ([]byte, error)
-  - file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
-    kind: method
-    name: Sealer.Seal
-    signature: (context.Context, []byte) ([]byte, error)
-  - file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
-    kind: struct
-    name: Snapshot
-    signature: type Snapshot struct
-  - file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
-    kind: method
-    name: Snapshot.Checksum
-    signature: () string
-  - file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
-    kind: method
-    name: Snapshot.Close
-    signature: () error
-  - file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
-    kind: method
-    name: Snapshot.Index
-    signature: () uint64
-  - file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
-    kind: method
-    name: Snapshot.Read
-    signature: (p []byte) (n int, err error)
-  - file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
-    kind: method
-    name: Snapshot.Size
-    signature: () (int64, error)
-  - file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
-    kind: function
-    name: Verify
-    signature: func Verify(in io.Reader) (*raft.SnapshotMeta, error)
-  - file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
-    kind: function
-    name: Write
-    signature: func Write(logger hclog.Logger, r *raft.Raft, sealer Sealer, w io.Writer)
-      error
-  - file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
-    kind: function
-    name: WriteToTempFile
-    signature: func WriteToTempFile(logger hclog.Logger, in io.Reader, metadata *raft.SnapshotMeta)
-      (*os.File, func(), error)
-  - file: third_party/openbao/internal/physical/raft/snapshot/snapshot.go
-    kind: function
-    name: WriteToTempFileWithSealer
-    signature: func WriteToTempFileWithSealer(logger hclog.Logger, in io.Reader, metadata
-      *raft.SnapshotMeta, sealer Sealer) (*os.File, func(), error)
-  - file: third_party/openbao/internal/physical/raft/snapshot/archive.go
-    kind: method
-    name: hashList.Add
-    signature: (file string) hash.Hash
-  - file: third_party/openbao/internal/physical/raft/snapshot/archive.go
-    kind: method
-    name: hashList.DecodeAndVerify
-    signature: (r io.Reader) error
-  - file: third_party/openbao/internal/physical/raft/snapshot/archive.go
-    kind: method
-    name: hashList.Encode
-    signature: (w io.Writer) error
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - file:third_party/openbao/internal/physical/raft/snapshot/archive_test.go
-    id: r.archive-tests-cover-hashlist
-    level: SHOULD
-    text: archive_test.go must keep the hashList round trip under test, covering both
-      the encode-then-decode-and-verify success path and the failure paths for a missing
-      entry, a mismatched sum, and an unlisted file.
-  - codeRefs:
-    - file:third_party/openbao/internal/physical/raft/snapshot/archive.go
-    - method:0feb369c884ff6d26baa1e1efdca36b5
-    id: r.hashlist-decode-and-verify-both-directions
-    level: MUST
-    text: hashList.DecodeAndVerify must parse a SHA256SUMS-style reader line by line,
-      fail with "list missing hash for %q" when a listed file has no tracked hash,
-      fail with "hash check failed for %q" when a listed sum does not equal the tracked
-      sum, propagate the scanner error, and finally fail with "file missing for %q"
-      for any tracked file that never appeared in the listing.
-  - codeRefs:
-    - file:third_party/openbao/internal/physical/raft/snapshot/archive.go
-    - method:6b160675a56228edbec5b8d6a4058dfc
-    id: r.hashlist-encode-sha256sums-format
-    level: MUST
-    text: hashList.Encode must compute the current sum of each tracked hash and write
-      one line per file in SHA256SUMS style, hex sum then two spaces then the file
-      name followed by a newline, returning the first write error and nil otherwise.
-  - codeRefs:
-    - file:third_party/openbao/internal/physical/raft/snapshot/archive.go
-    - method:751a69b736f1be1b6ce920fe9366485e
-    id: r.hashlist-tracks-per-file-sha256
-    level: MUST
-    text: hashList.Add must return the existing sha256 hash already registered for
-      a file name, and must create and register a new one only when the file name
-      is not yet present, so repeated adds for the same file name accumulate into
-      one hash rather than resetting it.
-  - codeRefs:
-    - file:third_party/openbao/internal/physical/raft/snapshot/snapshot.go
-    - function:3f8d163f009271786a61fad71a6c561b
-    - function:66291c3d10223057bd5fac0fe9da1b50
-    id: r.new-snapshot-without-sealer
-    level: MUST
-    text: New must build a sealed-snapshot reader for the given logger and raft node
-      using no sealer, delegating to NewWithSealer so both constructors share one
-      code path.
-  - codeRefs:
-    - file:third_party/openbao/internal/physical/raft/snapshot/snapshot.go
-    - function:3f8d163f009271786a61fad71a6c561b
-    id: r.new-with-sealer-constructor
-    level: MUST
-    text: NewWithSealer must take the logger, the raft node, and a Sealer and return
-      a *Snapshot representing the node's latest snapshot, passing the sealer through
-      to the code that opens and unseals the snapshot bytes.
-  - codeRefs:
-    - file:third_party/openbao/internal/physical/raft/snapshot/snapshot.go
-    - function:5043b8d14037f37d7661ebd7ad531395
-    id: r.parse-streams-payload-to-writer
-    level: MUST
-    text: Parse must read a sealed snapshot archive from in, write the recovered snapshot
-      payload through to out, and return the recovered *raft.SnapshotMeta, failing
-      instead of writing when the trailer or checksum does not validate.
-  - codeRefs:
-    - file:third_party/openbao/internal/physical/raft/snapshot/snapshot.go
-    - function:97decc56fc001c81ab81680efbdf428d
-    id: r.restore-unsealed-and-install
-    level: MUST
-    text: Restore must read the archive from in, unseal and verify it, and install
-      the snapshot into the raft node as its new state, returning the error and leaving
-      the node unchanged when the archive is invalid.
-  - codeRefs:
-    - file:third_party/openbao/internal/physical/raft/snapshot/snapshot.go
-    - function:97decc56fc001c81ab81680efbdf428d
-    - function:b204c537f36efbab2b5696924a5987a8
-    id: r.restore-with-sealer-delegation
-    level: MUST
-    text: RestoreWithSealer must perform the same restore as Restore but with the
-      caller's Sealer used to open the archive, and Restore must be the no-sealer
-      delegate so both share one restore implementation.
-  - codeRefs:
-    - file:third_party/openbao/internal/physical/raft/snapshot/snapshot.go
-    - interface:45cf3a26619838a3576fcab008fb8d25
-    - method:349839e307a2f9be4e7839e04fe580d3
-    - method:d60e48d1d32c11c9fa7b515706bc4693
-    id: r.sealer-interface-round-trip
-    level: MUST
-    text: 'Sealer must be the two-method interface a caller supplies to wrap snapshot
-      bytes: Seal takes a context and plaintext and returns sealed bytes, Open takes
-      a context and sealed bytes and returns the plaintext, both returning an error
-      on failure, so a snapshot written with one sealer can be read back with the
-      matching one.'
-  - codeRefs:
-    - file:third_party/openbao/internal/physical/raft/snapshot/snapshot.go
-    - method:f2e06ed5967318980f47c863ce72a9b4
-    - method:fe4f9e6b579b6edde6ac0a7ec2f0d860
-    id: r.snapshot-read-close-file-backed
-    level: MUST
-    text: 'Snapshot must satisfy the io.ReadCloser shape: Read must fill the caller''s
-      byte slice from the open snapshot file and return the byte count and error of
-      that read, and Close must close the underlying file.'
-  - codeRefs:
-    - file:third_party/openbao/internal/physical/raft/snapshot/snapshot.go
-    - method:df9d4347382c2f75927e1a36358dc272
-    id: r.snapshot-size-from-file-stat
-    level: MUST
-    text: Snapshot.Size must return the size of the underlying open file as an int64,
-      surfacing the stat error instead of a size when the file cannot be stat'd.
-  - codeRefs:
-    - file:third_party/openbao/internal/physical/raft/snapshot/snapshot.go
-    - method:77893886163706489a890546af7b7b4e
-    - method:dc2ffbee086dd70666ba54b7394d02ad
-    - method:df9d4347382c2f75927e1a36358dc272
-    - struct:8936e1d8eb04c8e5a54ce32b99043682
-    id: r.snapshot-struct-state
-    level: MUST
-    text: Snapshot must hold exactly the open file handle, the raft index the snapshot
-      was taken at, and the checksum string, and must expose those through Size, Index,
-      and Checksum without further fields.
-  - codeRefs:
-    - file:third_party/openbao/internal/physical/raft/snapshot/snapshot_test.go
-    id: r.snapshot-tests-cover-container
-    level: SHOULD
-    text: snapshot_test.go must keep the sealed snapshot container under test across
-      write, verify, parse, and restore so a sealer change that breaks the trailer
-      or the payload path fails the package's own tests.
-  - codeRefs:
-    - file:third_party/openbao/internal/physical/raft/snapshot/snapshot.go
-    - function:b9fb8d800bb64112f19499a757d2bbb1
-    id: r.verify-reads-trailer-only
-    level: MUST
-    text: Verify must read a sealed snapshot archive from the given reader, recover
-      and validate the trailing metadata and checksum without handing the payload
-      to raft, and return the *raft.SnapshotMeta plus an error when the archive or
-      its checksum is bad.
-  - codeRefs:
-    - file:third_party/openbao/internal/physical/raft/snapshot/snapshot.go
-    - function:5706ef797e2020c0a57d334bea9d4833
-    id: r.write-sealed-snapshot-to-writer
-    level: MUST
-    text: Write must take a logger, a raft node, a Sealer, and an io.Writer, seal
-      the snapshot stream before writing it, append the snapshot metadata and checksum
-      trailer, and return the first error encountered while producing that archive.
-  - codeRefs:
-    - file:third_party/openbao/internal/physical/raft/snapshot/snapshot.go
-    - function:2b0eaf0837ec837652fff8466604f74a
-    id: r.write-to-temp-file-return-cleanup
-    level: MUST
-    text: WriteToTempFile must extract the archived snapshot from in into a temporary
-      file using the supplied metadata, verify it on the way out, and return the open
-      *os.File together with a cleanup function the caller must invoke, plus an error
-      when extraction fails.
-  - codeRefs:
-    - file:third_party/openbao/internal/physical/raft/snapshot/snapshot.go
-    - function:2b0eaf0837ec837652fff8466604f74a
-    - function:f65e8dbee67eaa15167498204fa05073
-    id: r.write-to-temp-file-with-sealer
-    level: MUST
-    text: 'WriteToTempFileWithSealer must be the sealer-aware form of WriteToTempFile:
-      it opens the archive with the supplied Sealer, extracts the snapshot to a temporary
-      file, and returns that file, its cleanup function, and any error, with WriteToTempFile
-      delegating to it when no sealer is available.'
-  upstream: self

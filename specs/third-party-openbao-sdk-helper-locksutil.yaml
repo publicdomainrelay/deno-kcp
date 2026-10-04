@@ -1,4 +1,188 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-sdk-helper-locksutil
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'This context exists so the deno-kcp repository carries the OpenBao SDK
+    locksutil package as a third_party dependency rather than fetching it at build
+    time, keeping the vendored surface and its behaviour traceable. The package gives
+    callers cancellable and key-sharded locking primitives: a context-aware mutex
+    for code that must not block past a deadline, a keyed variant for serialising
+    work per identifier without a global lock, and sharded lock arrays so many keys
+    map onto a small fixed set of locks. It is not fork-owned code; the requirement
+    set records the contract the vendored copy must satisfy so an upstream refresh
+    can be checked against it.'
+  requirements:
+  - id: r.behaviour-pinned-by-tests
+    level: SHOULD
+    text: The observable behaviour of the package stays pinned by cancel_test.go,
+      keyed_test.go and sharded_test.go, which exercise lock/unlock cycles, panic
+      on improper unlock, cancellation during acquisition under synctest, and the
+      sharded key helpers.
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/locksutil/cancel_test.go
+    - file:third_party/openbao/sdk/helper/locksutil/keyed_test.go
+    - file:third_party/openbao/sdk/helper/locksutil/sharded_test.go
+  - id: r.cancel-lock-acquire-honours-context
+    level: MUST
+    text: 'CancelLock.Lock selects between the context''s Done channel and sending
+      on the lock channel: if the context is cancelled or expires first it returns
+      ctx.Err() without taking the lock, otherwise it acquires the lock and returns
+      nil.'
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/locksutil/cancel.go
+    - method:f562c65a1598af9503938c0ecce4ec11
+  - id: r.cancel-lock-blocks-then-succeeds-after-release
+    level: MUST
+    text: A goroutine blocked in CancelLock.Lock acquires the lock once the holder
+      calls Unlock, so the lock serialises access rather than dropping waiters; cancel_test.go
+      covers this with the Wait subtest.
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/locksutil/cancel_test.go
+    - method:f562c65a1598af9503938c0ecce4ec11
+  - id: r.cancel-lock-construction
+    level: MUST
+    text: NewCancelLock returns a ready-to-use CancelLock backed by a buffered channel
+      of capacity one, so callers need no further initialisation before locking.
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/locksutil/cancel.go
+    - function:e4fcec4c3aa7e104f30b6b915c189231
+    - struct:ac01aefe4a8d0d904127b99e79b38fb8
+  - id: r.cancel-lock-unlock-panics-when-not-held
+    level: MUST
+    text: CancelLock.Unlock releases a held lock and panics when the lock is not held,
+      so a double unlock or an unlock of a fresh lock is a programmer error rather
+      than a silent no-op; cancel_test.go asserts this with require.Panics for both
+      the unlocked and the already-unlocked cases.
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/locksutil/cancel_test.go
+    - method:ebd4f3faebbbc50ee2f53630cca429f5
+  - id: r.keyed-cancel-lock-per-key-serialisation
+    level: MUST
+    text: KeyedCancelLock[K comparable] holds a sync.Mutex and a map from key to keyedCancelLockEntry;
+      Lock(ctx, key) takes the map mutex only long enough to obtain that key's CancelLock
+      and then waits on it with the caller's context, and Unlock(key) releases the
+      key's CancelLock, so unrelated keys do not block each other.
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/locksutil/keyed.go
+    - method:0fb98fe3713f16fdbba9dc486b09543a
+    - method:f1832719c3d24f064eeb4ff7fd201278
+    - struct:bc9ac4573dc471abeaf8c36976ccefd7
+  - id: r.keyed-cancel-lock-pool-and-constructor
+    level: MUST
+    text: KeyedCancelLock entries are drawn from a sync.Pool whose New function is
+      installed by resetKeyedCancelLockPool, which builds each entry from NewCancelLock,
+      and NewKeyedCancelLock returns a *KeyedCancelLock[K] with an initialised (empty)
+      key map.
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/locksutil/keyed.go
+    - function:e4fcec4c3aa7e104f30b6b915c189231
+    - function:f2bbb49ba03291c7ccef46ec3b0363d3
+  - id: r.lock-with-unlock-helpers
+    level: MUST
+    text: LockWithUnlock takes the shard lock for a key and returns a function that
+      releases it, and RLockWithUnlock does the same through the read-lock path, so
+      callers can defer the returned closure instead of pairing Lock and Unlock by
+      hand.
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/locksutil/sharded.go
+    - function:6d314051beba0cf01e864991f5a26344
+    - function:db362553e78d984bfe82c90f40de0d2e
+  - id: r.locks-for-multiple-keys
+    level: MUST
+    text: LocksForKeys maps a slice of keys to the slice of locks that covers them,
+      so a caller can acquire every shard touched by a batch of keys before mutating
+      them.
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/locksutil/sharded.go
+    - function:29a6e4967dd754d295ccbaf39ee1a6b2
+  - id: r.shard-selection-from-key
+    level: MUST
+    text: LockIndexForKey derives a uint8 shard index from a key string, and LockForKey
+      applies that index to a []*L to return the single lock responsible for the key,
+      so the same key always resolves to the same shard.
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/locksutil/sharded.go
+    - function:04b51d8d5e7522a03b8667b38333e1aa
+    - function:37c1880dccb89d208f980a32a82ec1ae
+  - id: r.sharded-lock-sets-construction
+    level: MUST
+    text: CreateLocks returns a preallocated slice of *LockEntry, and CreateGenericLocks
+      returns the same shape generically as []*L, giving callers a fixed set of shards
+      to spread keys across.
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/locksutil/sharded.go
+    - function:2da64336ba1d96cddb18545f63d42d46
+    - function:77cd1ae34f3894f6161c196393ff4f0e
+    - struct:992c54a456613c8879532a6d443346ac
+  interfaces:
+  - name: CancelLock
+    kind: struct
+    signature: type CancelLock struct
+    file: third_party/openbao/sdk/helper/locksutil/cancel.go
+  - name: CancelLock.Lock
+    kind: method
+    signature: func (l *CancelLock) Lock(ctx context.Context) error
+    file: third_party/openbao/sdk/helper/locksutil/cancel.go
+  - name: CancelLock.Unlock
+    kind: method
+    signature: func (l *CancelLock) Unlock()
+    file: third_party/openbao/sdk/helper/locksutil/cancel.go
+  - name: CreateGenericLocks
+    kind: function
+    signature: func CreateGenericLocks[L any]() []*L
+    file: third_party/openbao/sdk/helper/locksutil/sharded.go
+  - name: CreateLocks
+    kind: function
+    signature: func CreateLocks() []*LockEntry
+    file: third_party/openbao/sdk/helper/locksutil/sharded.go
+  - name: KeyedCancelLock
+    kind: struct
+    signature: type KeyedCancelLock[K comparable] struct
+    file: third_party/openbao/sdk/helper/locksutil/keyed.go
+  - name: KeyedCancelLock.Lock
+    kind: method
+    signature: func (l *KeyedCancelLock[K]) Lock(ctx context.Context, key K) error
+    file: third_party/openbao/sdk/helper/locksutil/keyed.go
+  - name: KeyedCancelLock.Unlock
+    kind: method
+    signature: func (l *KeyedCancelLock[K]) Unlock(key K)
+    file: third_party/openbao/sdk/helper/locksutil/keyed.go
+  - name: LockEntry
+    kind: struct
+    signature: type LockEntry struct
+    file: third_party/openbao/sdk/helper/locksutil/sharded.go
+  - name: LockForKey
+    kind: function
+    signature: func LockForKey[L any](locks []*L, key string) *L
+    file: third_party/openbao/sdk/helper/locksutil/sharded.go
+  - name: LockIndexForKey
+    kind: function
+    signature: func LockIndexForKey(key string) uint8
+    file: third_party/openbao/sdk/helper/locksutil/sharded.go
+  - name: LockWithUnlock
+    kind: function
+    signature: func LockWithUnlock[L any](locks []*L, key string) func()
+    file: third_party/openbao/sdk/helper/locksutil/sharded.go
+  - name: LocksForKeys
+    kind: function
+    signature: func LocksForKeys[L any](locks []*L, keys []string) []*L
+    file: third_party/openbao/sdk/helper/locksutil/sharded.go
+  - name: NewCancelLock
+    kind: function
+    signature: func NewCancelLock() CancelLock
+    file: third_party/openbao/sdk/helper/locksutil/cancel.go
+  - name: NewKeyedCancelLock
+    kind: function
+    signature: func NewKeyedCancelLock[K comparable]() *KeyedCancelLock[K]
+    file: third_party/openbao/sdk/helper/locksutil/keyed.go
+  - name: RLockWithUnlock
+    kind: function
+    signature: func RLockWithUnlock[L any](locks []*L, key string) func()
+    file: third_party/openbao/sdk/helper/locksutil/sharded.go
 codeRefIndex:
 - file:third_party/openbao/sdk/helper/locksutil/cancel.go cancel.go@third_party/openbao/sdk/helper/locksutil/cancel.go
 - file:third_party/openbao/sdk/helper/locksutil/cancel_test.go cancel_test.go@third_party/openbao/sdk/helper/locksutil/cancel_test.go
@@ -22,187 +206,3 @@ codeRefIndex:
 - struct:992c54a456613c8879532a6d443346ac LockEntry@third_party/openbao/sdk/helper/locksutil/sharded.go:17
 - struct:ac01aefe4a8d0d904127b99e79b38fb8 CancelLock@third_party/openbao/sdk/helper/locksutil/cancel.go:12
 - struct:bc9ac4573dc471abeaf8c36976ccefd7 KeyedCancelLock@third_party/openbao/sdk/helper/locksutil/keyed.go:16
-kind: SystemContext
-metadata:
-  name: third-party-openbao-sdk-helper-locksutil
-  namespace: default
-spec:
-  intent: 'This context exists so the deno-kcp repository carries the OpenBao SDK
-    locksutil package as a third_party dependency rather than fetching it at build
-    time, keeping the vendored surface and its behaviour traceable. The package gives
-    callers cancellable and key-sharded locking primitives: a context-aware mutex
-    for code that must not block past a deadline, a keyed variant for serialising
-    work per identifier without a global lock, and sharded lock arrays so many keys
-    map onto a small fixed set of locks. It is not fork-owned code; the requirement
-    set records the contract the vendored copy must satisfy so an upstream refresh
-    can be checked against it.'
-  interfaces:
-  - file: third_party/openbao/sdk/helper/locksutil/cancel.go
-    kind: struct
-    name: CancelLock
-    signature: type CancelLock struct
-  - file: third_party/openbao/sdk/helper/locksutil/cancel.go
-    kind: method
-    name: CancelLock.Lock
-    signature: func (l *CancelLock) Lock(ctx context.Context) error
-  - file: third_party/openbao/sdk/helper/locksutil/cancel.go
-    kind: method
-    name: CancelLock.Unlock
-    signature: func (l *CancelLock) Unlock()
-  - file: third_party/openbao/sdk/helper/locksutil/sharded.go
-    kind: function
-    name: CreateGenericLocks
-    signature: func CreateGenericLocks[L any]() []*L
-  - file: third_party/openbao/sdk/helper/locksutil/sharded.go
-    kind: function
-    name: CreateLocks
-    signature: func CreateLocks() []*LockEntry
-  - file: third_party/openbao/sdk/helper/locksutil/keyed.go
-    kind: struct
-    name: KeyedCancelLock
-    signature: type KeyedCancelLock[K comparable] struct
-  - file: third_party/openbao/sdk/helper/locksutil/keyed.go
-    kind: method
-    name: KeyedCancelLock.Lock
-    signature: func (l *KeyedCancelLock[K]) Lock(ctx context.Context, key K) error
-  - file: third_party/openbao/sdk/helper/locksutil/keyed.go
-    kind: method
-    name: KeyedCancelLock.Unlock
-    signature: func (l *KeyedCancelLock[K]) Unlock(key K)
-  - file: third_party/openbao/sdk/helper/locksutil/sharded.go
-    kind: struct
-    name: LockEntry
-    signature: type LockEntry struct
-  - file: third_party/openbao/sdk/helper/locksutil/sharded.go
-    kind: function
-    name: LockForKey
-    signature: func LockForKey[L any](locks []*L, key string) *L
-  - file: third_party/openbao/sdk/helper/locksutil/sharded.go
-    kind: function
-    name: LockIndexForKey
-    signature: func LockIndexForKey(key string) uint8
-  - file: third_party/openbao/sdk/helper/locksutil/sharded.go
-    kind: function
-    name: LockWithUnlock
-    signature: func LockWithUnlock[L any](locks []*L, key string) func()
-  - file: third_party/openbao/sdk/helper/locksutil/sharded.go
-    kind: function
-    name: LocksForKeys
-    signature: func LocksForKeys[L any](locks []*L, keys []string) []*L
-  - file: third_party/openbao/sdk/helper/locksutil/cancel.go
-    kind: function
-    name: NewCancelLock
-    signature: func NewCancelLock() CancelLock
-  - file: third_party/openbao/sdk/helper/locksutil/keyed.go
-    kind: function
-    name: NewKeyedCancelLock
-    signature: func NewKeyedCancelLock[K comparable]() *KeyedCancelLock[K]
-  - file: third_party/openbao/sdk/helper/locksutil/sharded.go
-    kind: function
-    name: RLockWithUnlock
-    signature: func RLockWithUnlock[L any](locks []*L, key string) func()
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/locksutil/cancel_test.go
-    - file:third_party/openbao/sdk/helper/locksutil/keyed_test.go
-    - file:third_party/openbao/sdk/helper/locksutil/sharded_test.go
-    id: r.behaviour-pinned-by-tests
-    level: SHOULD
-    text: The observable behaviour of the package stays pinned by cancel_test.go,
-      keyed_test.go and sharded_test.go, which exercise lock/unlock cycles, panic
-      on improper unlock, cancellation during acquisition under synctest, and the
-      sharded key helpers.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/locksutil/cancel.go
-    - method:f562c65a1598af9503938c0ecce4ec11
-    id: r.cancel-lock-acquire-honours-context
-    level: MUST
-    text: 'CancelLock.Lock selects between the context''s Done channel and sending
-      on the lock channel: if the context is cancelled or expires first it returns
-      ctx.Err() without taking the lock, otherwise it acquires the lock and returns
-      nil.'
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/locksutil/cancel_test.go
-    - method:f562c65a1598af9503938c0ecce4ec11
-    id: r.cancel-lock-blocks-then-succeeds-after-release
-    level: MUST
-    text: A goroutine blocked in CancelLock.Lock acquires the lock once the holder
-      calls Unlock, so the lock serialises access rather than dropping waiters; cancel_test.go
-      covers this with the Wait subtest.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/locksutil/cancel.go
-    - function:e4fcec4c3aa7e104f30b6b915c189231
-    - struct:ac01aefe4a8d0d904127b99e79b38fb8
-    id: r.cancel-lock-construction
-    level: MUST
-    text: NewCancelLock returns a ready-to-use CancelLock backed by a buffered channel
-      of capacity one, so callers need no further initialisation before locking.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/locksutil/cancel_test.go
-    - method:ebd4f3faebbbc50ee2f53630cca429f5
-    id: r.cancel-lock-unlock-panics-when-not-held
-    level: MUST
-    text: CancelLock.Unlock releases a held lock and panics when the lock is not held,
-      so a double unlock or an unlock of a fresh lock is a programmer error rather
-      than a silent no-op; cancel_test.go asserts this with require.Panics for both
-      the unlocked and the already-unlocked cases.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/locksutil/keyed.go
-    - method:0fb98fe3713f16fdbba9dc486b09543a
-    - method:f1832719c3d24f064eeb4ff7fd201278
-    - struct:bc9ac4573dc471abeaf8c36976ccefd7
-    id: r.keyed-cancel-lock-per-key-serialisation
-    level: MUST
-    text: KeyedCancelLock[K comparable] holds a sync.Mutex and a map from key to keyedCancelLockEntry;
-      Lock(ctx, key) takes the map mutex only long enough to obtain that key's CancelLock
-      and then waits on it with the caller's context, and Unlock(key) releases the
-      key's CancelLock, so unrelated keys do not block each other.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/locksutil/keyed.go
-    - function:e4fcec4c3aa7e104f30b6b915c189231
-    - function:f2bbb49ba03291c7ccef46ec3b0363d3
-    id: r.keyed-cancel-lock-pool-and-constructor
-    level: MUST
-    text: KeyedCancelLock entries are drawn from a sync.Pool whose New function is
-      installed by resetKeyedCancelLockPool, which builds each entry from NewCancelLock,
-      and NewKeyedCancelLock returns a *KeyedCancelLock[K] with an initialised (empty)
-      key map.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/locksutil/sharded.go
-    - function:6d314051beba0cf01e864991f5a26344
-    - function:db362553e78d984bfe82c90f40de0d2e
-    id: r.lock-with-unlock-helpers
-    level: MUST
-    text: LockWithUnlock takes the shard lock for a key and returns a function that
-      releases it, and RLockWithUnlock does the same through the read-lock path, so
-      callers can defer the returned closure instead of pairing Lock and Unlock by
-      hand.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/locksutil/sharded.go
-    - function:29a6e4967dd754d295ccbaf39ee1a6b2
-    id: r.locks-for-multiple-keys
-    level: MUST
-    text: LocksForKeys maps a slice of keys to the slice of locks that covers them,
-      so a caller can acquire every shard touched by a batch of keys before mutating
-      them.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/locksutil/sharded.go
-    - function:04b51d8d5e7522a03b8667b38333e1aa
-    - function:37c1880dccb89d208f980a32a82ec1ae
-    id: r.shard-selection-from-key
-    level: MUST
-    text: LockIndexForKey derives a uint8 shard index from a key string, and LockForKey
-      applies that index to a []*L to return the single lock responsible for the key,
-      so the same key always resolves to the same shard.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/locksutil/sharded.go
-    - function:2da64336ba1d96cddb18545f63d42d46
-    - function:77cd1ae34f3894f6161c196393ff4f0e
-    - struct:992c54a456613c8879532a6d443346ac
-    id: r.sharded-lock-sets-construction
-    level: MUST
-    text: CreateLocks returns a preallocated slice of *LockEntry, and CreateGenericLocks
-      returns the same shape generically as []*L, giving callers a fixed set of shards
-      to spread keys across.
-  upstream: self

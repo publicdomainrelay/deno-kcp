@@ -1,21 +1,18 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/internal/builtin/logical/totp/cmd/totp/main.go main.go@third_party/openbao/internal/builtin/logical/totp/cmd/totp/main.go
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-builtin-logical-totp-cmd-totp
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: This context exists so the TOTP logical backend can be built and run as
     an out-of-process OpenBao plugin binary. The main function adapts the TOTP secrets
     engine (totp.Factory) to the OpenBao plugin host protocol, and wires the standard
     plugin TLS handshake so the backend works both with host-driven AutoMTLS and with
     older hosts that require the plugin to fetch its own wrapped TLS certificate.
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/totp/cmd/totp/main.go
-    id: r.env-variables-read-by-tls-provider
+  - id: r.env-variables-read-by-tls-provider
     level: MUST
     text: 'The TLS provider returned for ServeOpts must read three environment variables:
       BAO_PLUGIN_AUTOMTLS_ENABLED and BAO_PLUGIN_METADATA_MODE, either of which when
@@ -23,16 +20,16 @@ spec:
       TLS itself, and BAO_UNWRAP_TOKEN, which supplies the wrapping token used to
       unwrap the host-issued server certificate and private key. When the unwrap token
       is absent or unparsable the provider returns an error instead of a TLS config.'
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/builtin/logical/totp/cmd/totp/main.go
-    id: r.failure-exits-nonzero
+  - id: r.failure-exits-nonzero
     level: MUST
     text: When plugin.ServeMultiplex returns an error, main must log the message "plugin
       shutting down" with the error attached at Error level through an hclog logger
       and terminate the process with exit status 1.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/builtin/logical/totp/cmd/totp/main.go
-    id: r.flag-configuration-surface
+  - id: r.flag-configuration-surface
     level: MUST
     text: 'main''s configuration surface is the flag set returned by api.PluginAPIClientMeta.FlagSet,
       parsed from os.Args[1:]: string flag -ca-cert (default empty), -ca-path (default
@@ -40,25 +37,28 @@ spec:
       (default empty), and boolean flag -tls-skip-verify (default false). No environment
       variable backs any of these flags; they are supplied on the command line by
       the plugin host.'
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/builtin/logical/totp/cmd/totp/main.go
-    id: r.serve-totp-backend-as-plugin
+  - id: r.serve-totp-backend-as-plugin
     level: MUST
     text: main must serve the TOTP logical backend as an OpenBao plugin by calling
       plugin.ServeMultiplex with BackendFactoryFunc set to totp.Factory, so the plugin
       host can instantiate the TOTP secrets engine over the plugin RPC channel.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/builtin/logical/totp/cmd/totp/main.go
-    id: r.tls-config-only-when-set
+  - id: r.tls-config-only-when-set
     level: SHOULD
     text: The api.TLSConfig handed to the TLS provider should be nil unless at least
       one of -ca-cert, -ca-path, -client-cert, -client-key, -tls-server-name, or -tls-skip-verify
       was set, so an unconfigured plugin uses default transport settings.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/builtin/logical/totp/cmd/totp/main.go
-    id: r.tls-provider-from-plugin-metadata
+  - id: r.tls-provider-from-plugin-metadata
     level: MUST
     text: main must pass TLSProviderFunc derived from api.VaultPluginTLSProvider(tlsConfig)
       into ServeOpts, so the plugin keeps backwards compatibility with hosts that
       do not support plugin AutoMTLS.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/totp/cmd/totp/main.go
+codeRefIndex:
+- file:third_party/openbao/internal/builtin/logical/totp/cmd/totp/main.go main.go@third_party/openbao/internal/builtin/logical/totp/cmd/totp/main.go

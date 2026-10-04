@@ -1,53 +1,32 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/sdk/helper/testhelpers/output.go output.go@third_party/openbao/sdk/helper/testhelpers/output.go
-- file:third_party/openbao/sdk/helper/testhelpers/output_test.go output_test.go@third_party/openbao/sdk/helper/testhelpers/output_test.go
-- function:1fd25832b47e8292842c30884cbefbef ToString@third_party/openbao/sdk/helper/testhelpers/output.go:64
-- function:6d32caf88011c722292cc4781033d7de StringOrDie@third_party/openbao/sdk/helper/testhelpers/output.go:74
-- function:fe6c34cd5e9cf6eebbe38b0e565c9720 ToMap@third_party/openbao/sdk/helper/testhelpers/output.go:21
 kind: SystemContext
 metadata:
   name: third-party-openbao-sdk-helper-testhelpers
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: Expose a small, dependency-light set of helpers so tests can render a struct
     or map into a stable, comparable representation without hand-writing per-type
     conversion code. The SHA-256 hashing of byte slices keeps binary values such as
     keys and tokens out of test output and gives a deterministic, fixed-width rendering,
     which makes golden comparisons and log lines safe to read and diff.
-  interfaces:
-  - file: third_party/openbao/sdk/helper/testhelpers/output.go
-    kind: function
-    name: StringOrDie
-    signature: func StringOrDie(t testing.T, in any) string
-  - file: third_party/openbao/sdk/helper/testhelpers/output.go
-    kind: function
-    name: ToMap
-    signature: func ToMap(in any) (map[string]any, error)
-  - file: third_party/openbao/sdk/helper/testhelpers/output.go
-    kind: function
-    name: ToString
-    signature: func ToString(in any) string
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/testhelpers/output.go
-    - function:6d32caf88011c722292cc4781033d7de
-    id: r.stringordie-fatal-on-error
+  - id: r.stringordie-fatal-on-error
     level: MUST
     text: StringOrDie must call t.Helper() so failures point at the caller, render
       its input through ToMap, call t.Fatal(err) when that fails, and otherwise return
       fmt.Sprintf("%v", m) of the decoded map.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/testhelpers/output_test.go
-    id: r.test-coverage
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/testhelpers/output.go
+    - function:6d32caf88011c722292cc4781033d7de
+  - id: r.test-coverage
     level: SHOULD
     text: The package should keep its ToMap behavior covered by a test in output_test.go
       so that tag selection and byte hashing stay verified.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/testhelpers/output.go
-    - function:fe6c34cd5e9cf6eebbe38b0e565c9720
-    id: r.tomap-byte-hashing
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/testhelpers/output_test.go
+  - id: r.tomap-byte-hashing
     level: MUST
     text: ToMap must run a second mapstructure decode over the intermediate map with
       a DecodeHook that detects values whose type is a slice of uint8 and replaces
@@ -56,22 +35,43 @@ spec:
       does not invoke the DecodeHook per field during struct-to-map conversion but
       does during map-to-map conversion. Errors from this second decode must be returned
       with a nil map.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/sdk/helper/testhelpers/output.go
     - function:fe6c34cd5e9cf6eebbe38b0e565c9720
-    id: r.tomap-json-tag-decoding
+  - id: r.tomap-json-tag-decoding
     level: MUST
     text: ToMap must decode its input into a map[string]any using a mapstructure decoder
       configured with TagName "json" and IgnoreUntaggedFields true, so field names
       come from json struct tags and fields without such a tag are omitted. Any error
       from constructing the decoder or decoding the input must be returned with a
       nil map.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/sdk/helper/testhelpers/output.go
-    - function:1fd25832b47e8292842c30884cbefbef
-    id: r.tostring-error-as-text
+    - function:fe6c34cd5e9cf6eebbe38b0e565c9720
+  - id: r.tostring-error-as-text
     level: MUST
     text: ToString must render its input through ToMap; when ToMap fails it must return
       err.Error() as the string, and otherwise it must return fmt.Sprintf("%v", m)
       of the decoded map.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/testhelpers/output.go
+    - function:1fd25832b47e8292842c30884cbefbef
+  interfaces:
+  - name: StringOrDie
+    kind: function
+    signature: func StringOrDie(t testing.T, in any) string
+    file: third_party/openbao/sdk/helper/testhelpers/output.go
+  - name: ToMap
+    kind: function
+    signature: func ToMap(in any) (map[string]any, error)
+    file: third_party/openbao/sdk/helper/testhelpers/output.go
+  - name: ToString
+    kind: function
+    signature: func ToString(in any) string
+    file: third_party/openbao/sdk/helper/testhelpers/output.go
+codeRefIndex:
+- file:third_party/openbao/sdk/helper/testhelpers/output.go output.go@third_party/openbao/sdk/helper/testhelpers/output.go
+- file:third_party/openbao/sdk/helper/testhelpers/output_test.go output_test.go@third_party/openbao/sdk/helper/testhelpers/output_test.go
+- function:1fd25832b47e8292842c30884cbefbef ToString@third_party/openbao/sdk/helper/testhelpers/output.go:64
+- function:6d32caf88011c722292cc4781033d7de StringOrDie@third_party/openbao/sdk/helper/testhelpers/output.go:74
+- function:fe6c34cd5e9cf6eebbe38b0e565c9720 ToMap@third_party/openbao/sdk/helper/testhelpers/output.go:21

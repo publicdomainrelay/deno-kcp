@@ -1,4 +1,78 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-ui-app-routes-vault-cluster-access-oidc-keys-key
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'This context exists to describe the per-key sub-routes of the OIDC keys
+    section: the clients tab, which needs a real model hook to fetch only the clients
+    allowed to use the key, and the details and edit tabs, which are declared only
+    so Ember''s router can resolve the leaf routes and let the shared parent key route
+    plus their templates supply the data. The three files are grouped because they
+    are siblings under the same parent resource and together define the navigable
+    surface of one OIDC key.'
+  requirements:
+  - id: r.clients-inject-store
+    level: MUST
+    text: OidcKeyClientsRoute must declare the store as an injected Ember service
+      via the @service decorator, so this.store resolves the application data store.
+    codeRefs:
+    - class:f4b4ab88db913431c8b5d03cabb44e13
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/key/clients.js
+  - id: r.clients-model-reads-parent
+    level: MUST
+    text: OidcKeyClientsRoute.model must take allowedClientIds from the modelFor('vault.cluster.access.oidc.keys.key')
+      result and use it as the query payload, so the clients list is scoped to the
+      key rather than to all OIDC clients.
+    codeRefs:
+    - class:f4b4ab88db913431c8b5d03cabb44e13
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/key/clients.js
+  - id: r.clients-query-store
+    level: MUST
+    text: The clients model hook must be async and return the awaited this.store.query('oidc/client',
+      ...) promise, passing paramKey 'client_id' together with filterFor set to allowedClientIds.
+    codeRefs:
+    - class:f4b4ab88db913431c8b5d03cabb44e13
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/key/clients.js
+  - id: r.clients-setup-controller-keyname
+    level: MUST
+    text: OidcKeyClientsRoute.setupController must call super.setupController(controller,
+      model) first and then set the controller property keyName to the name from paramsFor('vault.cluster.access.oidc.keys.key'),
+      so the template can show which key the clients belong to.
+    codeRefs:
+    - class:f4b4ab88db913431c8b5d03cabb44e13
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/key/clients.js
+  - id: r.details-empty-route
+    level: MUST
+    text: OidcKeyDetailsRoute must extend Route and add no model, setupController,
+      or other overrides, leaving data loading to the parent key route and the details
+      template.
+    codeRefs:
+    - class:309b087d4c9c4a1f0fd91dc8477e7e4a
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/key/details.js
+  - id: r.edit-empty-route
+    level: MUST
+    text: OidcKeyEditRoute must extend Route and add no model, setupController, or
+      other overrides, leaving edit-form state to the shared parent key route and
+      the edit template.
+    codeRefs:
+    - class:f183f877c86c4b5ad32e290027c24aa4
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/key/edit.js
+  interfaces:
+  - name: OidcKeyClientsRoute
+    kind: class
+    signature: class OidcKeyClientsRoute extends Route
+    file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/key/clients.js
+  - name: OidcKeyDetailsRoute
+    kind: class
+    signature: class OidcKeyDetailsRoute extends Route
+    file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/key/details.js
+  - name: OidcKeyEditRoute
+    kind: class
+    signature: class OidcKeyEditRoute extends Route
+    file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/key/edit.js
 codeRefIndex:
 - class:309b087d4c9c4a1f0fd91dc8477e7e4a OidcKeyDetailsRoute@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/key/details.js:8
 - class:f183f877c86c4b5ad32e290027c24aa4 OidcKeyEditRoute@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/key/edit.js:8
@@ -9,77 +83,3 @@ codeRefIndex:
   details.js@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/key/details.js
 - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/key/edit.js
   edit.js@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/key/edit.js
-kind: SystemContext
-metadata:
-  name: third-party-openbao-ui-app-routes-vault-cluster-access-oidc-keys-key
-  namespace: default
-spec:
-  intent: 'This context exists to describe the per-key sub-routes of the OIDC keys
-    section: the clients tab, which needs a real model hook to fetch only the clients
-    allowed to use the key, and the details and edit tabs, which are declared only
-    so Ember''s router can resolve the leaf routes and let the shared parent key route
-    plus their templates supply the data. The three files are grouped because they
-    are siblings under the same parent resource and together define the navigable
-    surface of one OIDC key.'
-  interfaces:
-  - file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/key/clients.js
-    kind: class
-    name: OidcKeyClientsRoute
-    signature: class OidcKeyClientsRoute extends Route
-  - file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/key/details.js
-    kind: class
-    name: OidcKeyDetailsRoute
-    signature: class OidcKeyDetailsRoute extends Route
-  - file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/key/edit.js
-    kind: class
-    name: OidcKeyEditRoute
-    signature: class OidcKeyEditRoute extends Route
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - class:f4b4ab88db913431c8b5d03cabb44e13
-    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/key/clients.js
-    id: r.clients-inject-store
-    level: MUST
-    text: OidcKeyClientsRoute must declare the store as an injected Ember service
-      via the @service decorator, so this.store resolves the application data store.
-  - codeRefs:
-    - class:f4b4ab88db913431c8b5d03cabb44e13
-    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/key/clients.js
-    id: r.clients-model-reads-parent
-    level: MUST
-    text: OidcKeyClientsRoute.model must take allowedClientIds from the modelFor('vault.cluster.access.oidc.keys.key')
-      result and use it as the query payload, so the clients list is scoped to the
-      key rather than to all OIDC clients.
-  - codeRefs:
-    - class:f4b4ab88db913431c8b5d03cabb44e13
-    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/key/clients.js
-    id: r.clients-query-store
-    level: MUST
-    text: The clients model hook must be async and return the awaited this.store.query('oidc/client',
-      ...) promise, passing paramKey 'client_id' together with filterFor set to allowedClientIds.
-  - codeRefs:
-    - class:f4b4ab88db913431c8b5d03cabb44e13
-    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/key/clients.js
-    id: r.clients-setup-controller-keyname
-    level: MUST
-    text: OidcKeyClientsRoute.setupController must call super.setupController(controller,
-      model) first and then set the controller property keyName to the name from paramsFor('vault.cluster.access.oidc.keys.key'),
-      so the template can show which key the clients belong to.
-  - codeRefs:
-    - class:309b087d4c9c4a1f0fd91dc8477e7e4a
-    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/key/details.js
-    id: r.details-empty-route
-    level: MUST
-    text: OidcKeyDetailsRoute must extend Route and add no model, setupController,
-      or other overrides, leaving data loading to the parent key route and the details
-      template.
-  - codeRefs:
-    - class:f183f877c86c4b5ad32e290027c24aa4
-    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/keys/key/edit.js
-    id: r.edit-empty-route
-    level: MUST
-    text: OidcKeyEditRoute must extend Route and add no model, setupController, or
-      other overrides, leaving edit-form state to the shared parent key route and
-      the edit template.
-  upstream: self

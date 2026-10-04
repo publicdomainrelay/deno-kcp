@@ -1,4 +1,253 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-internal-helper-namespace
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: The package exists so the rest of OpenBao has one place that decides what
+    a namespace path looks like and one place that carries the current namespace through
+    a call chain. Validation and canonicalization are centralized because a stray
+    slash, a reserved segment such as sys or root, a wildcard or a space would otherwise
+    silently address the wrong namespace, and because the root namespace must be the
+    empty path. Context helpers exist because namespace is per-request data threaded
+    through HTTP handlers, core and mount layers without widening every function signature;
+    the header value is kept separately so the raw client-supplied namespace header
+    survives canonicalization. UUID and ID helpers exist so leases and tokens can
+    be stamped with the namespace that owns them and checked later without a lookup.
+  requirements:
+  - id: r.canonical-path-form
+    level: MUST
+    text: Canonicalize trims a leading slash, cleans the path so duplicate slashes
+      and ../ are removed, returns the empty string when the cleaned path is ".",
+      and otherwise appends a trailing slash if absent, so every canonical namespace
+      path ends in exactly one slash and the root namespace is the empty string.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/namespace/namespace.go
+    - function:8708e9b0e42010489ce6fcf8e67536ed
+  - id: r.clone-namespace
+    level: MUST
+    text: Clone returns a new Namespace copying ID, UUID, Path, Tainted, ManuallySealed
+      and Locked, with CustomMetadata deep-copied into a fresh map so later writes
+      to the copy do not touch the original, and copies UnlockKey only when withUnlock
+      is true.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/namespace/namespace.go
+    - method:072b9dcb5fd5c8b4c062f5eaa8290865
+  - id: r.context-header
+    level: MUST
+    text: ContextWithNamespaceHeader stores the canonicalized namespace header string
+      under its own context key, separate from the namespace value; HeaderFromContext
+      returns the stored string, or the empty string for a nil context or a missing
+      value.
+    codeRefs:
+    - function:119638c93fe5943f4b7964b6c0507e08
+    - function:96be3d9a2d4656461d79fd78efbc6a6b
+  - id: r.context-namespace
+    level: MUST
+    text: ContextWithNamespace stores a namespace under a private context key; FromContext
+      returns an error for a nil context, for a missing value and for a nil stored
+      namespace, returning ErrNoNamespace ("no namespace") in the latter two cases;
+      RootContext attaches the root namespace to the given context, or to a fresh
+      background context when the given context is nil.
+    codeRefs:
+    - function:67742cbfe52aa8334c8c5414fe9d85c6
+    - function:cc7c3290d413fe4428108bdd2e9e1eca
+    - function:edd57972743df40c6b5c50c87217fb89
+  - id: r.matches-id
+    level: MUST
+    text: MatchesID splits the trailing namespace suffix off the given accessor or
+      lease identifier and reports true when that suffix equals this namespace's ID,
+      or when the suffix is absent and this namespace is the root namespace.
+    codeRefs:
+    - method:ff66d44ddb6b00f086d5fba13c922284
+  - id: r.mount-path-details
+    level: MUST
+    text: MountPathDetails pairs a namespace with a mount path; GetRelativePath strips
+      the calling namespace's path prefix from the mount's namespace path and appends
+      the mount path, and GetFullPath concatenates the mount's namespace path with
+      the mount path.
+    codeRefs:
+    - method:8e8f8737dfdc7280435a700d2bb2f70b
+    - method:e6655428f8e9ced8d271c326cedb3fce
+    - struct:5443bf7b3c772804f5855248919895d9
+  - id: r.namespace-model
+    level: MUST
+    text: A Namespace carries ID, UUID, Path, Tainted, ManuallySealed, Locked, UnlockKey
+      and CustomMetadata; Locked is excluded from JSON and the remaining fields round-trip
+      through json and mapstructure tags.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/namespace/namespace.go
+    - struct:d3c23ea7a231b1acbc9f0f948631ab62
+  - id: r.namespace-string
+    level: SHOULD
+    text: 'String renders a namespace as "ID: <id>. Path: <path>" for logs and error
+      messages.'
+    codeRefs:
+    - method:c31343f9e2d8cc12cc00b27de67c3208
+  - id: r.namespaced-uuid
+    level: MUST
+    text: GenerateUUID returns a fresh UUID, suffixed as <uuid>.<namespace ID> for
+      any non-root namespace and left bare for the root namespace; ValidateUUID parses
+      the UUID part of a candidate and fails when that part is not a valid UUID or
+      when the suffix names a namespace other than this one, treating an absent suffix
+      as valid only for the root namespace.
+    codeRefs:
+    - method:69ba4d2b355c5146e73ff755121320b1
+    - method:acf5ea946939aef3a6fc81a4a347ec29
+  - id: r.parent-relations
+    level: MUST
+    text: HasParent reports true when the possible parent path is empty (the root
+      namespace is a parent of everything), false when the child path is empty and
+      the possible parent is not, and otherwise a plain path-prefix test; ParentPath
+      and ParentOf derive the parent path from a canonicalized path, returning an
+      empty string plus true when the path has at most one segment below root and
+      an empty string plus false for the empty path.
+    codeRefs:
+    - function:5b24d4437d76109559ece4ad62ded2a0
+    - method:018bda0ff5679dab6d4588f8c112dfd3
+    - method:34da7c84f15950207de1df72a3977848
+  - id: r.parse-name
+    level: MUST
+    text: ParseName canonicalizes the input and returns the canonical form only when
+      it is a single non-empty, non-reserved path segment; it errors on an empty name,
+      on a name containing a slash, and on a reserved name.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/namespace/namespace.go
+    - function:5d2ed01f69324281a03074046a28b94e
+  - id: r.root-namespace
+    level: MUST
+    text: The package fixes the root namespace as ID "root", UUID 00000000-0000-0000-0000-000000000000
+      and empty path, exported as the RootNamespace value alongside the RootNamespaceID
+      and RootNamespaceUUID constants.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/namespace/namespace.go
+  - id: r.split-id-from-string
+    level: MUST
+    text: 'SplitIDFromString separates an identifier into its prefix-carrying base
+      and its trailing namespace suffix: it strips and preserves the legacy batch-token,
+      legacy service-token, batch-token or service-token prefix, otherwise treats
+      text up to the last slash as a prefix, returns no suffix when there is no dot,
+      when the dot is the last character or when a lease path ends in a slash, and
+      otherwise splits at the last dot.'
+    codeRefs:
+    - file:third_party/openbao/internal/helper/namespace/namespace.go
+    - function:bf96e286d504864fa16eb6eb04202d5a
+  - id: r.tested-behaviour
+    level: MUST
+    text: namespace_test.go exercises the exported behaviour, covering SplitIDFromString,
+      HasParent, ParentPath and Validate, so changes to canonicalization, parent relations,
+      ID splitting or validation rules must keep those tests passing.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/namespace/namespace_test.go
+  - id: r.trimmed-path
+    level: MUST
+    text: TrimmedPath removes the namespace's own path prefix from the supplied path,
+      leaving the remainder untouched when the prefix is absent.
+    codeRefs:
+    - method:7743f46beeb671e2c090422bf5323b7a
+  - id: r.validate-namespace
+    level: MUST
+    text: Validate canonicalizes the namespace path in place, then rejects a path
+      that canonicalizes to empty (the root namespace), rejects reuse of the root
+      namespace identifier, and rejects any segment that is empty, is in the reserved
+      name list (empty, ".", "..", root, sys, audit, auth, cubbyhole, identity), is
+      not valid UTF-8, is not a graphic unicode character, contains whitespace, or
+      contains the wildcard characters + or *.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/namespace/namespace.go
+    - method:8ca58b10cc371c770997b919b7a0cbc2
+  interfaces:
+  - name: Canonicalize
+    kind: function
+    signature: func Canonicalize(nsPath string) string
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+  - name: ContextWithNamespace
+    kind: function
+    signature: func ContextWithNamespace(ctx context.Context, ns *Namespace) context.Context
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+  - name: ContextWithNamespaceHeader
+    kind: function
+    signature: func ContextWithNamespaceHeader(ctx context.Context, nsHeader string)
+      context.Context
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+  - name: FromContext
+    kind: function
+    signature: func FromContext(ctx context.Context) (*Namespace, error)
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+  - name: HeaderFromContext
+    kind: function
+    signature: func HeaderFromContext(ctx context.Context) string
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+  - name: MountPathDetails
+    kind: struct
+    signature: type MountPathDetails struct
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+  - name: MountPathDetails.GetFullPath
+    kind: method
+    signature: func (mpd *MountPathDetails) GetFullPath() string
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+  - name: MountPathDetails.GetRelativePath
+    kind: method
+    signature: func (mpd *MountPathDetails) GetRelativePath(currNs *Namespace) string
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+  - name: Namespace
+    kind: struct
+    signature: type Namespace struct
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+  - name: Namespace.Clone
+    kind: method
+    signature: func (n *Namespace) Clone(withUnlock bool) *Namespace
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+  - name: Namespace.GenerateUUID
+    kind: method
+    signature: func (n *Namespace) GenerateUUID() (string, error)
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+  - name: Namespace.HasParent
+    kind: method
+    signature: func (n *Namespace) HasParent(possibleParent *Namespace) bool
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+  - name: Namespace.MatchesID
+    kind: method
+    signature: func (n *Namespace) MatchesID(id string) bool
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+  - name: Namespace.ParentPath
+    kind: method
+    signature: func (n *Namespace) ParentPath() (string, bool)
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+  - name: Namespace.String
+    kind: method
+    signature: func (n *Namespace) String() string
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+  - name: Namespace.TrimmedPath
+    kind: method
+    signature: func (n *Namespace) TrimmedPath(path string) string
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+  - name: Namespace.Validate
+    kind: method
+    signature: func (n *Namespace) Validate() error
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+  - name: Namespace.ValidateUUID
+    kind: method
+    signature: func (n *Namespace) ValidateUUID(candidate string) error
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+  - name: ParentOf
+    kind: function
+    signature: func ParentOf(path string) (string, bool)
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+  - name: ParseName
+    kind: function
+    signature: func ParseName(input string) (string, error)
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+  - name: RootContext
+    kind: function
+    signature: func RootContext(ctx context.Context) context.Context
+    file: third_party/openbao/internal/helper/namespace/namespace.go
+  - name: SplitIDFromString
+    kind: function
+    signature: func SplitIDFromString(input string) (string, string)
+    file: third_party/openbao/internal/helper/namespace/namespace.go
 codeRefIndex:
 - file:third_party/openbao/internal/helper/namespace/namespace.go namespace.go@third_party/openbao/internal/helper/namespace/namespace.go
 - file:third_party/openbao/internal/helper/namespace/namespace_test.go namespace_test.go@third_party/openbao/internal/helper/namespace/namespace_test.go
@@ -24,252 +273,3 @@ codeRefIndex:
 - method:ff66d44ddb6b00f086d5fba13c922284 Namespace.MatchesID@third_party/openbao/internal/helper/namespace/namespace.go:209
 - struct:5443bf7b3c772804f5855248919895d9 MountPathDetails@third_party/openbao/internal/helper/namespace/namespace.go:350
 - struct:d3c23ea7a231b1acbc9f0f948631ab62 Namespace@third_party/openbao/internal/helper/namespace/namespace.go:40
-kind: SystemContext
-metadata:
-  name: third-party-openbao-internal-helper-namespace
-  namespace: default
-spec:
-  intent: The package exists so the rest of OpenBao has one place that decides what
-    a namespace path looks like and one place that carries the current namespace through
-    a call chain. Validation and canonicalization are centralized because a stray
-    slash, a reserved segment such as sys or root, a wildcard or a space would otherwise
-    silently address the wrong namespace, and because the root namespace must be the
-    empty path. Context helpers exist because namespace is per-request data threaded
-    through HTTP handlers, core and mount layers without widening every function signature;
-    the header value is kept separately so the raw client-supplied namespace header
-    survives canonicalization. UUID and ID helpers exist so leases and tokens can
-    be stamped with the namespace that owns them and checked later without a lookup.
-  interfaces:
-  - file: third_party/openbao/internal/helper/namespace/namespace.go
-    kind: function
-    name: Canonicalize
-    signature: func Canonicalize(nsPath string) string
-  - file: third_party/openbao/internal/helper/namespace/namespace.go
-    kind: function
-    name: ContextWithNamespace
-    signature: func ContextWithNamespace(ctx context.Context, ns *Namespace) context.Context
-  - file: third_party/openbao/internal/helper/namespace/namespace.go
-    kind: function
-    name: ContextWithNamespaceHeader
-    signature: func ContextWithNamespaceHeader(ctx context.Context, nsHeader string)
-      context.Context
-  - file: third_party/openbao/internal/helper/namespace/namespace.go
-    kind: function
-    name: FromContext
-    signature: func FromContext(ctx context.Context) (*Namespace, error)
-  - file: third_party/openbao/internal/helper/namespace/namespace.go
-    kind: function
-    name: HeaderFromContext
-    signature: func HeaderFromContext(ctx context.Context) string
-  - file: third_party/openbao/internal/helper/namespace/namespace.go
-    kind: struct
-    name: MountPathDetails
-    signature: type MountPathDetails struct
-  - file: third_party/openbao/internal/helper/namespace/namespace.go
-    kind: method
-    name: MountPathDetails.GetFullPath
-    signature: func (mpd *MountPathDetails) GetFullPath() string
-  - file: third_party/openbao/internal/helper/namespace/namespace.go
-    kind: method
-    name: MountPathDetails.GetRelativePath
-    signature: func (mpd *MountPathDetails) GetRelativePath(currNs *Namespace) string
-  - file: third_party/openbao/internal/helper/namespace/namespace.go
-    kind: struct
-    name: Namespace
-    signature: type Namespace struct
-  - file: third_party/openbao/internal/helper/namespace/namespace.go
-    kind: method
-    name: Namespace.Clone
-    signature: func (n *Namespace) Clone(withUnlock bool) *Namespace
-  - file: third_party/openbao/internal/helper/namespace/namespace.go
-    kind: method
-    name: Namespace.GenerateUUID
-    signature: func (n *Namespace) GenerateUUID() (string, error)
-  - file: third_party/openbao/internal/helper/namespace/namespace.go
-    kind: method
-    name: Namespace.HasParent
-    signature: func (n *Namespace) HasParent(possibleParent *Namespace) bool
-  - file: third_party/openbao/internal/helper/namespace/namespace.go
-    kind: method
-    name: Namespace.MatchesID
-    signature: func (n *Namespace) MatchesID(id string) bool
-  - file: third_party/openbao/internal/helper/namespace/namespace.go
-    kind: method
-    name: Namespace.ParentPath
-    signature: func (n *Namespace) ParentPath() (string, bool)
-  - file: third_party/openbao/internal/helper/namespace/namespace.go
-    kind: method
-    name: Namespace.String
-    signature: func (n *Namespace) String() string
-  - file: third_party/openbao/internal/helper/namespace/namespace.go
-    kind: method
-    name: Namespace.TrimmedPath
-    signature: func (n *Namespace) TrimmedPath(path string) string
-  - file: third_party/openbao/internal/helper/namespace/namespace.go
-    kind: method
-    name: Namespace.Validate
-    signature: func (n *Namespace) Validate() error
-  - file: third_party/openbao/internal/helper/namespace/namespace.go
-    kind: method
-    name: Namespace.ValidateUUID
-    signature: func (n *Namespace) ValidateUUID(candidate string) error
-  - file: third_party/openbao/internal/helper/namespace/namespace.go
-    kind: function
-    name: ParentOf
-    signature: func ParentOf(path string) (string, bool)
-  - file: third_party/openbao/internal/helper/namespace/namespace.go
-    kind: function
-    name: ParseName
-    signature: func ParseName(input string) (string, error)
-  - file: third_party/openbao/internal/helper/namespace/namespace.go
-    kind: function
-    name: RootContext
-    signature: func RootContext(ctx context.Context) context.Context
-  - file: third_party/openbao/internal/helper/namespace/namespace.go
-    kind: function
-    name: SplitIDFromString
-    signature: func SplitIDFromString(input string) (string, string)
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/namespace/namespace.go
-    - function:8708e9b0e42010489ce6fcf8e67536ed
-    id: r.canonical-path-form
-    level: MUST
-    text: Canonicalize trims a leading slash, cleans the path so duplicate slashes
-      and ../ are removed, returns the empty string when the cleaned path is ".",
-      and otherwise appends a trailing slash if absent, so every canonical namespace
-      path ends in exactly one slash and the root namespace is the empty string.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/namespace/namespace.go
-    - method:072b9dcb5fd5c8b4c062f5eaa8290865
-    id: r.clone-namespace
-    level: MUST
-    text: Clone returns a new Namespace copying ID, UUID, Path, Tainted, ManuallySealed
-      and Locked, with CustomMetadata deep-copied into a fresh map so later writes
-      to the copy do not touch the original, and copies UnlockKey only when withUnlock
-      is true.
-  - codeRefs:
-    - function:119638c93fe5943f4b7964b6c0507e08
-    - function:96be3d9a2d4656461d79fd78efbc6a6b
-    id: r.context-header
-    level: MUST
-    text: ContextWithNamespaceHeader stores the canonicalized namespace header string
-      under its own context key, separate from the namespace value; HeaderFromContext
-      returns the stored string, or the empty string for a nil context or a missing
-      value.
-  - codeRefs:
-    - function:67742cbfe52aa8334c8c5414fe9d85c6
-    - function:cc7c3290d413fe4428108bdd2e9e1eca
-    - function:edd57972743df40c6b5c50c87217fb89
-    id: r.context-namespace
-    level: MUST
-    text: ContextWithNamespace stores a namespace under a private context key; FromContext
-      returns an error for a nil context, for a missing value and for a nil stored
-      namespace, returning ErrNoNamespace ("no namespace") in the latter two cases;
-      RootContext attaches the root namespace to the given context, or to a fresh
-      background context when the given context is nil.
-  - codeRefs:
-    - method:ff66d44ddb6b00f086d5fba13c922284
-    id: r.matches-id
-    level: MUST
-    text: MatchesID splits the trailing namespace suffix off the given accessor or
-      lease identifier and reports true when that suffix equals this namespace's ID,
-      or when the suffix is absent and this namespace is the root namespace.
-  - codeRefs:
-    - method:8e8f8737dfdc7280435a700d2bb2f70b
-    - method:e6655428f8e9ced8d271c326cedb3fce
-    - struct:5443bf7b3c772804f5855248919895d9
-    id: r.mount-path-details
-    level: MUST
-    text: MountPathDetails pairs a namespace with a mount path; GetRelativePath strips
-      the calling namespace's path prefix from the mount's namespace path and appends
-      the mount path, and GetFullPath concatenates the mount's namespace path with
-      the mount path.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/namespace/namespace.go
-    - struct:d3c23ea7a231b1acbc9f0f948631ab62
-    id: r.namespace-model
-    level: MUST
-    text: A Namespace carries ID, UUID, Path, Tainted, ManuallySealed, Locked, UnlockKey
-      and CustomMetadata; Locked is excluded from JSON and the remaining fields round-trip
-      through json and mapstructure tags.
-  - codeRefs:
-    - method:c31343f9e2d8cc12cc00b27de67c3208
-    id: r.namespace-string
-    level: SHOULD
-    text: 'String renders a namespace as "ID: <id>. Path: <path>" for logs and error
-      messages.'
-  - codeRefs:
-    - method:69ba4d2b355c5146e73ff755121320b1
-    - method:acf5ea946939aef3a6fc81a4a347ec29
-    id: r.namespaced-uuid
-    level: MUST
-    text: GenerateUUID returns a fresh UUID, suffixed as <uuid>.<namespace ID> for
-      any non-root namespace and left bare for the root namespace; ValidateUUID parses
-      the UUID part of a candidate and fails when that part is not a valid UUID or
-      when the suffix names a namespace other than this one, treating an absent suffix
-      as valid only for the root namespace.
-  - codeRefs:
-    - function:5b24d4437d76109559ece4ad62ded2a0
-    - method:018bda0ff5679dab6d4588f8c112dfd3
-    - method:34da7c84f15950207de1df72a3977848
-    id: r.parent-relations
-    level: MUST
-    text: HasParent reports true when the possible parent path is empty (the root
-      namespace is a parent of everything), false when the child path is empty and
-      the possible parent is not, and otherwise a plain path-prefix test; ParentPath
-      and ParentOf derive the parent path from a canonicalized path, returning an
-      empty string plus true when the path has at most one segment below root and
-      an empty string plus false for the empty path.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/namespace/namespace.go
-    - function:5d2ed01f69324281a03074046a28b94e
-    id: r.parse-name
-    level: MUST
-    text: ParseName canonicalizes the input and returns the canonical form only when
-      it is a single non-empty, non-reserved path segment; it errors on an empty name,
-      on a name containing a slash, and on a reserved name.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/namespace/namespace.go
-    id: r.root-namespace
-    level: MUST
-    text: The package fixes the root namespace as ID "root", UUID 00000000-0000-0000-0000-000000000000
-      and empty path, exported as the RootNamespace value alongside the RootNamespaceID
-      and RootNamespaceUUID constants.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/namespace/namespace.go
-    - function:bf96e286d504864fa16eb6eb04202d5a
-    id: r.split-id-from-string
-    level: MUST
-    text: 'SplitIDFromString separates an identifier into its prefix-carrying base
-      and its trailing namespace suffix: it strips and preserves the legacy batch-token,
-      legacy service-token, batch-token or service-token prefix, otherwise treats
-      text up to the last slash as a prefix, returns no suffix when there is no dot,
-      when the dot is the last character or when a lease path ends in a slash, and
-      otherwise splits at the last dot.'
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/namespace/namespace_test.go
-    id: r.tested-behaviour
-    level: MUST
-    text: namespace_test.go exercises the exported behaviour, covering SplitIDFromString,
-      HasParent, ParentPath and Validate, so changes to canonicalization, parent relations,
-      ID splitting or validation rules must keep those tests passing.
-  - codeRefs:
-    - method:7743f46beeb671e2c090422bf5323b7a
-    id: r.trimmed-path
-    level: MUST
-    text: TrimmedPath removes the namespace's own path prefix from the supplied path,
-      leaving the remainder untouched when the prefix is absent.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/namespace/namespace.go
-    - method:8ca58b10cc371c770997b919b7a0cbc2
-    id: r.validate-namespace
-    level: MUST
-    text: Validate canonicalizes the namespace path in place, then rejects a path
-      that canonicalizes to empty (the root namespace), rejects reuse of the root
-      namespace identifier, and rejects any segment that is empty, is in the reserved
-      name list (empty, ".", "..", root, sys, audit, auth, cubbyhole, identity), is
-      not valid UTF-8, is not a graphic unicode character, contains whitespace, or
-      contains the wildcard characters + or *.
-  upstream: self

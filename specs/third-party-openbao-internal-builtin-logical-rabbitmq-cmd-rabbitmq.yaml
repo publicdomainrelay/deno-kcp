@@ -1,30 +1,26 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/internal/builtin/logical/rabbitmq/cmd/rabbitmq/main.go
-  main.go@third_party/openbao/internal/builtin/logical/rabbitmq/cmd/rabbitmq/main.go
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-builtin-logical-rabbitmq-cmd-rabbitmq
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'This context exists because the RabbitMQ logical backend must be runnable
     as an out-of-process plugin: the engine logic lives in the rabbitmq package, but
     something has to expose it over the plugin protocol with the correct TLS handshake
     and backend factory. main.go is that something — it is the packaging seam, not
     the engine, and it is the only place where the backend factory, the AutoMTLS-compatible
     TLS provider, and the operator-facing TLS flags meet.'
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/rabbitmq/cmd/rabbitmq/main.go
-    id: r.log-and-exit-on-serve-failure
+  - id: r.log-and-exit-on-serve-failure
     level: MUST
     text: When plugin.ServeMultiplex returns a non-nil error, main must build an hclog
       logger, log "plugin shutting down" with the error attached under the "error"
       key, and call os.Exit(1); a nil error must not reach that path.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/builtin/logical/rabbitmq/cmd/rabbitmq/main.go
-    id: r.parse-tls-flags-from-argv
+  - id: r.parse-tls-flags-from-argv
     level: MUST
     text: main must obtain the plugin TLS flag set from api.PluginAPIClientMeta.FlagSet()
       and parse os.Args[1:] with it before building the TLS provider; the flag set
@@ -33,18 +29,22 @@ spec:
       false, when the flag is absent. No flag in this set is backed by an environment
       variable; the parsed values reach api.PluginAPIClientMeta.GetTLSConfig, which
       returns a TLSConfig only when at least one of them is non-empty, and nil otherwise.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/builtin/logical/rabbitmq/cmd/rabbitmq/main.go
-    id: r.serve-rabbitmq-backend
+  - id: r.serve-rabbitmq-backend
     level: MUST
     text: main must serve the RabbitMQ logical backend over the plugin multiplex protocol
       by calling plugin.ServeMultiplex with a ServeOpts whose BackendFactoryFunc is
       rabbitmq.Factory, so the binary can be registered as a secrets engine plugin.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/builtin/logical/rabbitmq/cmd/rabbitmq/main.go
-    id: r.tls-provider-for-automtls-compat
+  - id: r.tls-provider-for-automtls-compat
     level: MUST
     text: ServeOpts must set TLSProviderFunc to api.VaultPluginTLSProvider of the
       TLS config taken from apiClientMeta.GetTLSConfig(), so the plugin keeps backwards
       compatibility with OpenBao/Vault versions that do not support plugin AutoMTLS.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/rabbitmq/cmd/rabbitmq/main.go
+codeRefIndex:
+- file:third_party/openbao/internal/builtin/logical/rabbitmq/cmd/rabbitmq/main.go
+  main.go@third_party/openbao/internal/builtin/logical/rabbitmq/cmd/rabbitmq/main.go

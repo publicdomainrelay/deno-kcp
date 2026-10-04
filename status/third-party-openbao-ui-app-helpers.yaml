@@ -1,17 +1,20 @@
+syncedCommit: 89cee50ec5aea977a42f904a758e506729e1158e
+syncedFingerprint: 69c04b78f3b1a3ecfa2682e96f2d976b51efa7672bd54972cde295633d8ab483
+realizedSpecHash: 13959e30dfed323f041e1dd3f803803385292e8b85b497d6e9ca85e4494d1c28
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
+- type: CodeSynced
+  status: "True"
   reason: InterfacesObserved
-  status: "True"
-  type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+  message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+- type: Drifted
   status: "False"
-  type: Drifted
-- message: the spec passes the validator
-  reason: ValidatorPassed
+  reason: FingerprintEqual
+  message: observed facts match the synced fingerprint
+- type: SpecValid
   status: "True"
-  type: SpecValid
+  reason: ValidatorPassed
+  message: the spec passes the validator
 observed:
   files:
   - third_party/openbao/ui/app/helpers/-date-base.js
@@ -50,174 +53,171 @@ observed:
   - third_party/openbao/ui/app/helpers/to-label.js
   - third_party/openbao/ui/app/helpers/tools-actions.js
   - third_party/openbao/ui/app/helpers/wizard-constants.js
-  fingerprint: 69c04b78f3b1a3ecfa2682e96f2d976b51efa7672bd54972cde295633d8ab483
   interfaces:
-  - codegraphId: function:680fbae19f51d45475c2a5da31c3a1a7
+  - name: addToArray
+    kind: function
+    signature: ([array, string])
     file: third_party/openbao/ui/app/helpers/add-to-array.js
-    kind: function
     line: 13
-    name: addToArray
-    signature: ([array, string])
-  - codegraphId: function:66a6525e6882aeaf6e43aa0133dd5c96
+    codegraphId: function:680fbae19f51d45475c2a5da31c3a1a7
+  - name: add
+    kind: function
+    signature: (params)
     file: third_party/openbao/ui/app/helpers/add.js
-    kind: function
     line: 8
-    name: add
-    signature: (params)
-  - codegraphId: class:f82fd5e6fe2b966ab5cf9e48a144b12a
+    codegraphId: function:66a6525e6882aeaf6e43aa0133dd5c96
+  - name: AwaitHelper
+    kind: class
     file: third_party/openbao/ui/app/helpers/await.js
-    kind: class
     line: 9
-    name: AwaitHelper
-  - codegraphId: function:156b3a5217ffd49e614dba532758f81a
+    codegraphId: class:f82fd5e6fe2b966ab5cf9e48a144b12a
+  - name: regions
+    kind: function
+    signature: ()
     file: third_party/openbao/ui/app/helpers/aws-regions.js
-    kind: function
     line: 26
-    name: regions
-    signature: ()
-  - codegraphId: function:5101beb0a248ee5a9d65d8db31b46b0b
-    file: third_party/openbao/ui/app/helpers/coerce-eq.js
+    codegraphId: function:156b3a5217ffd49e614dba532758f81a
+  - name: coerceEq
     kind: function
-    line: 9
-    name: coerceEq
     signature: (params)
-  - codegraphId: class:58a093d44bc16347c712bd2dd0dc19d8
-    file: third_party/openbao/ui/app/helpers/current-mount-path.js
-    kind: class
-    line: 10
-    name: CurrentMountPathHelper
-  - codegraphId: function:51011254c696689ce5506de3701eb056
-    file: third_party/openbao/ui/app/helpers/date-from-now.js
-    kind: function
+    file: third_party/openbao/ui/app/helpers/coerce-eq.js
     line: 9
-    name: dateFromNow
+    codegraphId: function:5101beb0a248ee5a9d65d8db31b46b0b
+  - name: CurrentMountPathHelper
+    kind: class
+    file: third_party/openbao/ui/app/helpers/current-mount-path.js
+    line: 10
+    codegraphId: class:58a093d44bc16347c712bd2dd0dc19d8
+  - name: dateFromNow
+    kind: function
     signature: ([date], options = {})
-  - codegraphId: function:17b81b39cedf651279382cdac2bb2bd9
-    file: third_party/openbao/ui/app/helpers/filter-wildcard.js
+    file: third_party/openbao/ui/app/helpers/date-from-now.js
+    line: 9
+    codegraphId: function:51011254c696689ce5506de3701eb056
+  - name: filterWildcard
     kind: function
-    line: 8
-    name: filterWildcard
     signature: ([string, array])
-  - codegraphId: function:3a7dd62a4457f657a023dc2ec5ace076
-    file: third_party/openbao/ui/app/helpers/is-empty-value.js
-    kind: function
+    file: third_party/openbao/ui/app/helpers/filter-wildcard.js
     line: 8
-    name: isEmptyValue
+    codegraphId: function:17b81b39cedf651279382cdac2bb2bd9
+  - name: isEmptyValue
+    kind: function
     signature: ([value], { hasDefault = false })
-  - codegraphId: function:03fcf8224943c5c32b30851614ad3e47
-    file: third_party/openbao/ui/app/helpers/is-wildcard-string.js
-    kind: function
+    file: third_party/openbao/ui/app/helpers/is-empty-value.js
     line: 8
-    name: isWildcardString
+    codegraphId: function:3a7dd62a4457f657a023dc2ec5ace076
+  - name: isWildcardString
+    kind: function
     signature: ([string])
-  - codegraphId: function:ec5df4da4e815b41e2680553886eabf5
-    file: third_party/openbao/ui/app/helpers/jsonify.js
-    kind: function
+    file: third_party/openbao/ui/app/helpers/is-wildcard-string.js
     line: 8
-    name: jsonify
+    codegraphId: function:03fcf8224943c5c32b30851614ad3e47
+  - name: jsonify
+    kind: function
     signature: ([target])
-  - codegraphId: function:46f6f8ef583dd6de96284ed75c010573
+    file: third_party/openbao/ui/app/helpers/jsonify.js
+    line: 8
+    codegraphId: function:ec5df4da4e815b41e2680553886eabf5
+  - name: methods
+    kind: function
+    signature: ()
     file: third_party/openbao/ui/app/helpers/mountable-auth-methods.js
-    kind: function
     line: 64
-    name: methods
-    signature: ()
-  - codegraphId: function:07ee7fc7458b51d626a6135fecf0d398
-    file: third_party/openbao/ui/app/helpers/mountable-secret-engines.js
+    codegraphId: function:46f6f8ef583dd6de96284ed75c010573
+  - name: mountableEngines
     kind: function
+    signature: ()
+    file: third_party/openbao/ui/app/helpers/mountable-secret-engines.js
     line: 55
-    name: mountableEngines
+    codegraphId: function:07ee7fc7458b51d626a6135fecf0d398
+  - name: allEngines
+    kind: function
     signature: ()
-  - codegraphId: function:8fa1358cbc3e541f4f15db975ac06307
     file: third_party/openbao/ui/app/helpers/mountable-secret-engines.js
-    kind: function
     line: 59
-    name: allEngines
-    signature: ()
-  - codegraphId: function:2bf9ca3e66b37903cef3223e27b5b4fb
-    file: third_party/openbao/ui/app/helpers/multi-line-join.js
+    codegraphId: function:8fa1358cbc3e541f4f15db975ac06307
+  - name: multiLineJoin
     kind: function
-    line: 8
-    name: multiLineJoin
     signature: ([arr])
-  - codegraphId: function:65564ada6f3daba8cf635f1a6e2d48a3
-    file: third_party/openbao/ui/app/helpers/number-to-word.js
-    kind: function
+    file: third_party/openbao/ui/app/helpers/multi-line-join.js
     line: 8
-    name: numberToWord
+    codegraphId: function:2bf9ca3e66b37903cef3223e27b5b4fb
+  - name: numberToWord
+    kind: function
     signature: (number, capitalize)
-  - codegraphId: function:247ea2eb83897074bad4070233afdf41
-    file: third_party/openbao/ui/app/helpers/remove-from-array.js
+    file: third_party/openbao/ui/app/helpers/number-to-word.js
+    line: 8
+    codegraphId: function:65564ada6f3daba8cf635f1a6e2d48a3
+  - name: removeFromArray
     kind: function
-    line: 13
-    name: removeFromArray
     signature: ([array, string])
-  - codegraphId: function:04aed687162fbfdbdbbb145cb264cc2c
-    file: third_party/openbao/ui/app/helpers/secret-query-params.js
+    file: third_party/openbao/ui/app/helpers/remove-from-array.js
+    line: 13
+    codegraphId: function:247ea2eb83897074bad4070233afdf41
+  - name: secretQueryParams
     kind: function
-    line: 8
-    name: secretQueryParams
     signature: ([backendType, type = ''], { asQueryParams })
-  - codegraphId: function:e883d9b81a2135837f5636e53a9762f2
-    file: third_party/openbao/ui/app/helpers/sha2-digest-sizes.js
-    kind: function
-    line: 10
-    name: sha2DigestSizes
-    signature: ()
-  - codegraphId: function:6c11464e11cdcff59803753547f12b83
-    file: third_party/openbao/ui/app/helpers/split-object.js
-    kind: function
-    line: 22
-    name: splitObject
-    signature: (originalObject, array)
-  - codegraphId: function:a9677201a6f8c5cd48f62d6fd5e772a7
-    file: third_party/openbao/ui/app/helpers/stringify.js
-    kind: function
+    file: third_party/openbao/ui/app/helpers/secret-query-params.js
     line: 8
-    name: stringify
+    codegraphId: function:04aed687162fbfdbdbbb145cb264cc2c
+  - name: sha2DigestSizes
+    kind: function
+    signature: ()
+    file: third_party/openbao/ui/app/helpers/sha2-digest-sizes.js
+    line: 10
+    codegraphId: function:e883d9b81a2135837f5636e53a9762f2
+  - name: splitObject
+    kind: function
+    signature: (originalObject, array)
+    file: third_party/openbao/ui/app/helpers/split-object.js
+    line: 22
+    codegraphId: function:6c11464e11cdcff59803753547f12b83
+  - name: stringify
+    kind: function
     signature: ([target], { skipFormat })
-  - codegraphId: function:89ce1e4183a565f442d36ff3684c1e28
+    file: third_party/openbao/ui/app/helpers/stringify.js
+    line: 8
+    codegraphId: function:a9677201a6f8c5cd48f62d6fd5e772a7
+  - name: supportedAuthBackends
+    kind: function
+    signature: ()
     file: third_party/openbao/ui/app/helpers/supported-auth-backends.js
-    kind: function
     line: 59
-    name: supportedAuthBackends
+    codegraphId: function:89ce1e4183a565f442d36ff3684c1e28
+  - name: supportedManagedAuthBackends
+    kind: function
     signature: ()
-  - codegraphId: function:d0dbce506f16d978b4396463f4792f98
     file: third_party/openbao/ui/app/helpers/supported-managed-auth-backends.js
-    kind: function
     line: 10
-    name: supportedManagedAuthBackends
+    codegraphId: function:d0dbce506f16d978b4396463f4792f98
+  - name: supportedSecretBackends
+    kind: function
     signature: ()
-  - codegraphId: function:2c8d49e51c46b4e608f3047f729782a8
     file: third_party/openbao/ui/app/helpers/supported-secret-backends.js
-    kind: function
     line: 19
-    name: supportedSecretBackends
-    signature: ()
-  - codegraphId: function:32b08f55e5a5fb8bb84b7635c6f33c3b
-    file: third_party/openbao/ui/app/helpers/tabs-for-auth-section.js
+    codegraphId: function:2c8d49e51c46b4e608f3047f729782a8
+  - name: tabsForAuthSection
     kind: function
-    line: 83
-    name: tabsForAuthSection
     signature: ([model, sectionType = 'authSettings', paths])
-  - codegraphId: function:cf2eed3ac4f89d560e029e465496e4bc
-    file: third_party/openbao/ui/app/helpers/tabs-for-identity-show.js
+    file: third_party/openbao/ui/app/helpers/tabs-for-auth-section.js
+    line: 83
+    codegraphId: function:32b08f55e5a5fb8bb84b7635c6f33c3b
+  - name: tabsForIdentityShow
     kind: function
-    line: 18
-    name: tabsForIdentityShow
     signature: ([modelType, groupType])
-  - codegraphId: function:45bd1ea1be9b52a899f315eee5d33836
-    file: third_party/openbao/ui/app/helpers/to-label.js
+    file: third_party/openbao/ui/app/helpers/tabs-for-identity-show.js
+    line: 18
+    codegraphId: function:cf2eed3ac4f89d560e029e465496e4bc
+  - name: toLabel
     kind: function
-    line: 11
-    name: toLabel
     signature: (val)
-  - codegraphId: function:9760e0f1237e90a089d248bc66f6450c
-    file: third_party/openbao/ui/app/helpers/tools-actions.js
+    file: third_party/openbao/ui/app/helpers/to-label.js
+    line: 11
+    codegraphId: function:45bd1ea1be9b52a899f315eee5d33836
+  - name: toolsActions
     kind: function
-    line: 10
-    name: toolsActions
     signature: ()
-realizedSpecHash: 13959e30dfed323f041e1dd3f803803385292e8b85b497d6e9ca85e4494d1c28
-syncedCommit: 89cee50ec5aea977a42f904a758e506729e1158e
-syncedFingerprint: 69c04b78f3b1a3ecfa2682e96f2d976b51efa7672bd54972cde295633d8ab483
+    file: third_party/openbao/ui/app/helpers/tools-actions.js
+    line: 10
+    codegraphId: function:9760e0f1237e90a089d248bc66f6450c
+  fingerprint: 69c04b78f3b1a3ecfa2682e96f2d976b51efa7672bd54972cde295633d8ab483

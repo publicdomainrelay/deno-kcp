@@ -1,4 +1,306 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-sdk-helper-testhelpers-postgresql
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'This context exists so database plugin tests in OpenBao can obtain a real
+    PostgreSQL instance, or a replication cluster, without hand-rolling Docker plumbing.
+    It wraps sdk/helper/docker into reusable fixtures: container startup with readiness
+    probing, a variant that skips readiness probing so retry logic in the container
+    handler can be exercised, credential variants, a repmgr variant for multi-node
+    replication tests, and a Cluster type that models primary/replica topology with
+    slot-based base backup, promotion, and primary removal for failover tests.'
+  requirements:
+  - id: r.add-node-creates-replica
+    level: MUST
+    text: Cluster.AddNode delegates to the replica path, which opens a client on the
+      primary and creates the physical replication slot named replication_slot_<len(Nodes)>,
+      reads the primary's network IP, and starts a replica container whose entrypoint
+      stops PostgreSQL, wipes the data directory, loops pg_basebackup from that IP
+      with -R -X stream against the slot until it succeeds, appends primary_conninfo
+      for host, port 5432, user replicator and the configured password, touches standby.signal,
+      starts PostgreSQL and runs docker-entrypoint.sh postgres; the resulting Node
+      with runner, service, connection URL and container ID is appended to Cluster.Nodes.
+    codeRefs:
+    - method:4de8f897d99362b1bf3f726dcf264513
+    - struct:279ddc37516b70d8ed3ec7ecb9cfc6b6
+  - id: r.cluster-cleanup-nil-safe
+    level: MUST
+    text: Cluster.Cleanup delegates to CleanupWithContext with context.Background(),
+      and CleanupWithContext returns early on a nil cluster and otherwise cleans up
+      the primary and every node in Cluster.Nodes.
+    codeRefs:
+    - method:266795a31156798078ecf13c730c089b
+    - method:79bd8af96c7e3fcd66d2622a3956cbc9
+  - id: r.cluster-env-and-primary-command
+    level: MUST
+    text: The Cluster builds each node's environment with POSTGRES_PASSWORD from the
+      configured password in position zero, followed by the configured extra environment
+      variables. It names containers <config name>-<node>, where the primary node
+      is named primary and replicas replica_<slot>, and starts the primary with the
+      postgres command carrying -cwal_level set to the configured WAL level and -chot_standby=on,
+      -cmax_wal_senders=10, -cmax_replication_slots=10, -chot_standby_feedback=on.
+    codeRefs:
+    - method:c8ec22e50b5a59f7258b74b5b33eb529
+    - struct:f60335da0cc488dada2978d6d82ccf50
+  - id: r.default-cluster-config-values
+    level: MUST
+    text: DefaultClusterConfig(name) returns a ClusterConfig with Name set to the
+      argument, AddSuffix true, Repo DefaultPSQLRepo, Version 17, Password secret,
+      DoNotAutoRemove true, WALLevel replica, EnvVars containing only POSTGRES_DB=database,
+      and Logger set to a null logger.
+    codeRefs:
+    - function:3d2c9f3f0163d1e8e94a3f8576ccc97c
+    - struct:b631760469bf210d0400f9996c42e3c2
+  - id: r.empty-version-defaults-to-17
+    level: MUST
+    text: PrepareTestContainerRaw substitutes image tag 17 when the version argument
+      is empty. Every container it starts gets a RunOptions with container name, image
+      repo, image tag, environment, DoNotAutoRemove and network name taken from its
+      arguments, and Ports set to the single entry 5432/tcp.
+    codeRefs:
+    - function:cdae3af70fb00ded7fc722df0f220b96
+  - id: r.helpers-return-cleanup-and-url
+    level: MUST
+    text: PrepareTestContainer, TestContainerNoWait and PrepareTestContainerWithPassword
+      each call PrepareTestContainerRaw against name postgres, repo DefaultPSQLRepo,
+      the caller's version, password secret (or the supplied password), addSuffix
+      true, forceLocalAddr false, doNotAutoRemove false, an environment of POSTGRES_PASSWORD
+      plus POSTGRES_DB=database, wait true and no network, then discard the runner,
+      service and container ID and return the cleanup function together with the connection
+      URL string.
+    codeRefs:
+    - function:5e0727b2713bf72814c005c103873492
+    - function:6027711959b4c7fc94543900419ef075
+    - function:76bb2663f5605df1430bceeb1f166190
+  - id: r.new-cluster-adds-primary-and-network
+    level: MUST
+    text: ClusterConfig.NewCluster builds a Cluster holding the config, adds a primary
+      node, records that node as Cluster.Primary and appends it to Cluster.Nodes,
+      then reads the Docker network name from the primary. It returns a wrapped error
+      when adding the primary fails or when reading the network fails.
+    codeRefs:
+    - method:c8ec22e50b5a59f7258b74b5b33eb529
+    - struct:f60335da0cc488dada2978d6d82ccf50
+  - id: r.no-wait-skips-readiness
+    level: MUST
+    text: TestContainerNoWait calls PrepareTestContainerRaw with wait false, so the
+      readiness adapter only builds the URL and never opens or pings the database;
+      this lets a container handler's retry logic be observed while PostgreSQL is
+      still starting. When wait is true PrepareTestContainerRaw uses the adapter that
+      opens the URL with the pgx driver and pings it, connecting as user postgres
+      with the container password, database postgres, query sslmode=disable.
+    codeRefs:
+    - function:6027711959b4c7fc94543900419ef075
+    - function:cdae3af70fb00ded7fc722df0f220b96
+  - id: r.node-cleanup-nil-safe
+    level: MUST
+    text: Node.Cleanup does nothing for a nil node or a node whose Service is nil,
+      and otherwise runs the service's cleanup function.
+    codeRefs:
+    - method:969093956a3bbfb17d0ad85be8eaf684
+    - struct:279ddc37516b70d8ed3ec7ecb9cfc6b6
+  - id: r.node-client-opens-pgx-and-pings
+    level: MUST
+    text: Node.Client opens a *sql.DB on the node's connection URL with the pgx driver
+      and pings it within the given context, returning a wrapped error when opening
+      the database or verifying it fails.
+    codeRefs:
+    - method:df77aff5d248437ca0d0824be0d2a345
+    - struct:279ddc37516b70d8ed3ec7ecb9cfc6b6
+  - id: r.node-network-ip-and-internal-url
+    level: MUST
+    text: Node.NetworkIP inspects the container, resolves the node's own network name,
+      and returns the IP address recorded for that network, erroring when that network
+      is absent from the container's network settings. Node.InternalURL parses the
+      node's connection URL, replaces the host with <network IP>:5432, and returns
+      the rewritten URL, wrapping parse or IP lookup failures.
+    codeRefs:
+    - method:042e9b92418ed493d01f7d550345806f
+    - method:d19fb8eeb0337494a3598e64d6790cf4
+  - id: r.node-network-single-only
+    level: MUST
+    text: Node.Network asks the runner for the container's network names and addresses,
+      fails with a wrapped error when that lookup fails, and succeeds only when exactly
+      one network is attached, returning that network's name; zero or multiple networks
+      is an error.
+    codeRefs:
+    - method:62c8d1e4f860fb14913fdf08a94d7822
+  - id: r.pg-url-bypasses-containers
+    level: MUST
+    text: 'When the PG_URL environment variable is non-empty, PrepareTestContainerRaw
+      starts no container: it returns a nil runner, a nil service, a no-op cleanup
+      function, an empty URL, and PG_URL itself as the connection string.'
+    codeRefs:
+    - function:cdae3af70fb00ded7fc722df0f220b96
+  - id: r.primary-init-script
+    level: MUST
+    text: The primary node is started with a generated init-primary.sh mounted into
+      /docker-entrypoint-initdb.d that creates a replicator role WITH REPLICATION
+      and the configured password, appends the line host replication replicator 0.0.0.0/0
+      md5 to $PGDATA/pg_hba.conf, and runs SELECT pg_reload_conf(); the primary is
+      then waited for with the pinging readiness adapter.
+    codeRefs:
+    - struct:f60335da0cc488dada2978d6d82ccf50
+  - id: r.promote-node-requires-single-replica
+    level: MUST
+    text: Cluster.PromoteNode rejects an index outside [0, len(Nodes)) and rejects
+      any call when Cluster.Nodes does not hold exactly one node. For the accepted
+      node it opens a client, reads pg_is_in_recovery() and refuses to promote when
+      the node is not still in recovery, runs SELECT pg_promote(), and then records
+      that node as Cluster.Primary.
+    codeRefs:
+    - method:0f77c5f4ab16934dbcb77d3916910a86
+  - id: r.remove-primary-forces-container-removal
+    level: MUST
+    text: Cluster.RemovePrimary force-removes the primary's Docker container through
+      the Docker API, reports an error when the removal fails with a not-found status,
+      cleans the node up, sets Cluster.Primary to nil, and drops that node from Cluster.Nodes.
+    codeRefs:
+    - method:ee075a426170ac8ac17f4f07c4f45d1b
+  - id: r.repmgr-network-from-env
+    level: MUST
+    text: When the image repo argument equals bitnami/postgresql-repmgr, PrepareTestContainerRaw
+      sets the run option's NetworkID from the POSTGRES_MULTIHOST_NET environment
+      variable, so repmgr nodes join the pre-created multihost network instead of
+      the named network.
+    codeRefs:
+    - function:cdae3af70fb00ded7fc722df0f220b96
+  - id: r.repmgr-variant-configures-replication-env
+    level: MUST
+    text: PrepareTestContainerRepmgr appends REPMGR_PARTNER_NODES=psql-repl-node-0,psql-repl-node-1,
+      REPMGR_PRIMARY_HOST=psql-repl-node-0, REPMGR_PASSWORD=repmgrpass and POSTGRESQL_PASSWORD=secret
+      to the caller's environment variables and starts DefaultRepmgrRepo with addSuffix
+      false, forceLocalAddr true, doNotAutoRemove true, password secret and wait true,
+      returning the runner, cleanup function, URL and container ID.
+    codeRefs:
+    - function:c4eca0d8a516127f03a45135a1b0d8a8
+  - id: r.stop-and-restart-container
+    level: MUST
+    text: StopContainer and RestartContainer take a docker runner and container ID
+      and call the runner's Stop or Restart with the given context, calling t.Fatalf
+      with the underlying error when the call fails. They give failover tests a way
+      to take a node down and bring it back.
+    codeRefs:
+    - function:93c7140781ab96b439a9b73341149ad1
+    - function:f396199f3a62550ad597962a97ac47f3
+  - id: r.vault-user-helper-seeds-admin
+    level: MUST
+    text: PrepareTestContainerWithVaultUser starts a normal container and then runs
+      psql -U postgres -c "CREATE USER vaultadmin WITH LOGIN PASSWORD 'vaultpass'
+      SUPERUSER" inside it, so rotate-root can be tested without rotating the root
+      database credentials. It returns the container cleanup and URL, and calls t.Fatalf
+      when the command fails.
+    codeRefs:
+    - function:d5042eec516b76adade2c3580af94589
+  interfaces:
+  - name: Cluster
+    kind: struct
+    signature: type Cluster struct { Config *ClusterConfig; Primary *Node; Nodes []*Node;
+      Network string }
+    file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
+  - name: Cluster.AddNode
+    kind: method
+    signature: func (c *Cluster) AddNode(ctx context.Context) (*Node, error)
+    file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
+  - name: Cluster.Cleanup
+    kind: method
+    signature: func (c *Cluster) Cleanup()
+    file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
+  - name: Cluster.CleanupWithContext
+    kind: method
+    signature: func (c *Cluster) CleanupWithContext(ctx context.Context)
+    file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
+  - name: Cluster.PromoteNode
+    kind: method
+    signature: func (c *Cluster) PromoteNode(ctx context.Context, index int) error
+    file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
+  - name: Cluster.RemovePrimary
+    kind: method
+    signature: func (c *Cluster) RemovePrimary(ctx context.Context) error
+    file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
+  - name: ClusterConfig
+    kind: struct
+    signature: type ClusterConfig struct { Name string; AddSuffix bool; Repo string;
+      Version string; Password string; DoNotAutoRemove bool; WALLevel string; EnvVars
+      []string; Logger log.Logger }
+    file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
+  - name: ClusterConfig.NewCluster
+    kind: method
+    signature: func (c *ClusterConfig) NewCluster(ctx context.Context) (*Cluster,
+      error)
+    file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
+  - name: DefaultClusterConfig
+    kind: function
+    signature: func DefaultClusterConfig(name string) *ClusterConfig
+    file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
+  - name: Node
+    kind: struct
+    signature: type Node struct { Runner *docker.Runner; Service *docker.Service;
+      ConnectionURL string; ContainerID string }
+    file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
+  - name: Node.Cleanup
+    kind: method
+    signature: func (n *Node) Cleanup()
+    file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
+  - name: Node.Client
+    kind: method
+    signature: func (n *Node) Client(ctx context.Context) (*sql.DB, error)
+    file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
+  - name: Node.InternalURL
+    kind: method
+    signature: func (n *Node) InternalURL(ctx context.Context) (string, error)
+    file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
+  - name: Node.Network
+    kind: method
+    signature: func (n *Node) Network() (string, error)
+    file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
+  - name: Node.NetworkIP
+    kind: method
+    signature: func (n *Node) NetworkIP(ctx context.Context) (string, error)
+    file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
+  - name: PrepareTestContainer
+    kind: function
+    signature: func PrepareTestContainer(t *testing.T, version string) (func(), string)
+    file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
+  - name: PrepareTestContainerRaw
+    kind: function
+    signature: func PrepareTestContainerRaw(t *testing.T, name, repo, version, password
+      string, addSuffix, forceLocalAddr, doNotAutoRemove bool, envVars []string, wait
+      bool, network string) (*docker.Runner, *docker.Service, func(), string, string)
+    file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
+  - name: PrepareTestContainerRepmgr
+    kind: function
+    signature: func PrepareTestContainerRepmgr(t *testing.T, name, version string,
+      envVars []string) (*docker.Runner, func(), string, string)
+    file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
+  - name: PrepareTestContainerWithPassword
+    kind: function
+    signature: func PrepareTestContainerWithPassword(t *testing.T, version, password
+      string) (func(), string)
+    file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
+  - name: PrepareTestContainerWithVaultUser
+    kind: function
+    signature: func PrepareTestContainerWithVaultUser(t *testing.T, ctx context.Context,
+      version string) (func(), string)
+    file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
+  - name: RestartContainer
+    kind: function
+    signature: func RestartContainer(t *testing.T, ctx context.Context, runner *docker.Runner,
+      containerID string)
+    file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
+  - name: StopContainer
+    kind: function
+    signature: func StopContainer(t *testing.T, ctx context.Context, runner *docker.Runner,
+      containerID string)
+    file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
+  - name: TestContainerNoWait
+    kind: function
+    signature: func TestContainerNoWait(t *testing.T) (func(), string)
+    file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
 codeRefIndex:
 - file:third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go postgresqlhelper.go@third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
 - function:3d2c9f3f0163d1e8e94a3f8576ccc97c DefaultClusterConfig@third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go:207
@@ -24,305 +326,3 @@ codeRefIndex:
 - struct:279ddc37516b70d8ed3ec7ecb9cfc6b6 Node@third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go:232
 - struct:b631760469bf210d0400f9996c42e3c2 ClusterConfig@third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go:191
 - struct:f60335da0cc488dada2978d6d82ccf50 Cluster@third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go:223
-kind: SystemContext
-metadata:
-  name: third-party-openbao-sdk-helper-testhelpers-postgresql
-  namespace: default
-spec:
-  intent: 'This context exists so database plugin tests in OpenBao can obtain a real
-    PostgreSQL instance, or a replication cluster, without hand-rolling Docker plumbing.
-    It wraps sdk/helper/docker into reusable fixtures: container startup with readiness
-    probing, a variant that skips readiness probing so retry logic in the container
-    handler can be exercised, credential variants, a repmgr variant for multi-node
-    replication tests, and a Cluster type that models primary/replica topology with
-    slot-based base backup, promotion, and primary removal for failover tests.'
-  interfaces:
-  - file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
-    kind: struct
-    name: Cluster
-    signature: type Cluster struct { Config *ClusterConfig; Primary *Node; Nodes []*Node;
-      Network string }
-  - file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
-    kind: method
-    name: Cluster.AddNode
-    signature: func (c *Cluster) AddNode(ctx context.Context) (*Node, error)
-  - file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
-    kind: method
-    name: Cluster.Cleanup
-    signature: func (c *Cluster) Cleanup()
-  - file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
-    kind: method
-    name: Cluster.CleanupWithContext
-    signature: func (c *Cluster) CleanupWithContext(ctx context.Context)
-  - file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
-    kind: method
-    name: Cluster.PromoteNode
-    signature: func (c *Cluster) PromoteNode(ctx context.Context, index int) error
-  - file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
-    kind: method
-    name: Cluster.RemovePrimary
-    signature: func (c *Cluster) RemovePrimary(ctx context.Context) error
-  - file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
-    kind: struct
-    name: ClusterConfig
-    signature: type ClusterConfig struct { Name string; AddSuffix bool; Repo string;
-      Version string; Password string; DoNotAutoRemove bool; WALLevel string; EnvVars
-      []string; Logger log.Logger }
-  - file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
-    kind: method
-    name: ClusterConfig.NewCluster
-    signature: func (c *ClusterConfig) NewCluster(ctx context.Context) (*Cluster,
-      error)
-  - file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
-    kind: function
-    name: DefaultClusterConfig
-    signature: func DefaultClusterConfig(name string) *ClusterConfig
-  - file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
-    kind: struct
-    name: Node
-    signature: type Node struct { Runner *docker.Runner; Service *docker.Service;
-      ConnectionURL string; ContainerID string }
-  - file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
-    kind: method
-    name: Node.Cleanup
-    signature: func (n *Node) Cleanup()
-  - file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
-    kind: method
-    name: Node.Client
-    signature: func (n *Node) Client(ctx context.Context) (*sql.DB, error)
-  - file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
-    kind: method
-    name: Node.InternalURL
-    signature: func (n *Node) InternalURL(ctx context.Context) (string, error)
-  - file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
-    kind: method
-    name: Node.Network
-    signature: func (n *Node) Network() (string, error)
-  - file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
-    kind: method
-    name: Node.NetworkIP
-    signature: func (n *Node) NetworkIP(ctx context.Context) (string, error)
-  - file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
-    kind: function
-    name: PrepareTestContainer
-    signature: func PrepareTestContainer(t *testing.T, version string) (func(), string)
-  - file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
-    kind: function
-    name: PrepareTestContainerRaw
-    signature: func PrepareTestContainerRaw(t *testing.T, name, repo, version, password
-      string, addSuffix, forceLocalAddr, doNotAutoRemove bool, envVars []string, wait
-      bool, network string) (*docker.Runner, *docker.Service, func(), string, string)
-  - file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
-    kind: function
-    name: PrepareTestContainerRepmgr
-    signature: func PrepareTestContainerRepmgr(t *testing.T, name, version string,
-      envVars []string) (*docker.Runner, func(), string, string)
-  - file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
-    kind: function
-    name: PrepareTestContainerWithPassword
-    signature: func PrepareTestContainerWithPassword(t *testing.T, version, password
-      string) (func(), string)
-  - file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
-    kind: function
-    name: PrepareTestContainerWithVaultUser
-    signature: func PrepareTestContainerWithVaultUser(t *testing.T, ctx context.Context,
-      version string) (func(), string)
-  - file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
-    kind: function
-    name: RestartContainer
-    signature: func RestartContainer(t *testing.T, ctx context.Context, runner *docker.Runner,
-      containerID string)
-  - file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
-    kind: function
-    name: StopContainer
-    signature: func StopContainer(t *testing.T, ctx context.Context, runner *docker.Runner,
-      containerID string)
-  - file: third_party/openbao/sdk/helper/testhelpers/postgresql/postgresqlhelper.go
-    kind: function
-    name: TestContainerNoWait
-    signature: func TestContainerNoWait(t *testing.T) (func(), string)
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - method:4de8f897d99362b1bf3f726dcf264513
-    - struct:279ddc37516b70d8ed3ec7ecb9cfc6b6
-    id: r.add-node-creates-replica
-    level: MUST
-    text: Cluster.AddNode delegates to the replica path, which opens a client on the
-      primary and creates the physical replication slot named replication_slot_<len(Nodes)>,
-      reads the primary's network IP, and starts a replica container whose entrypoint
-      stops PostgreSQL, wipes the data directory, loops pg_basebackup from that IP
-      with -R -X stream against the slot until it succeeds, appends primary_conninfo
-      for host, port 5432, user replicator and the configured password, touches standby.signal,
-      starts PostgreSQL and runs docker-entrypoint.sh postgres; the resulting Node
-      with runner, service, connection URL and container ID is appended to Cluster.Nodes.
-  - codeRefs:
-    - method:266795a31156798078ecf13c730c089b
-    - method:79bd8af96c7e3fcd66d2622a3956cbc9
-    id: r.cluster-cleanup-nil-safe
-    level: MUST
-    text: Cluster.Cleanup delegates to CleanupWithContext with context.Background(),
-      and CleanupWithContext returns early on a nil cluster and otherwise cleans up
-      the primary and every node in Cluster.Nodes.
-  - codeRefs:
-    - method:c8ec22e50b5a59f7258b74b5b33eb529
-    - struct:f60335da0cc488dada2978d6d82ccf50
-    id: r.cluster-env-and-primary-command
-    level: MUST
-    text: The Cluster builds each node's environment with POSTGRES_PASSWORD from the
-      configured password in position zero, followed by the configured extra environment
-      variables. It names containers <config name>-<node>, where the primary node
-      is named primary and replicas replica_<slot>, and starts the primary with the
-      postgres command carrying -cwal_level set to the configured WAL level and -chot_standby=on,
-      -cmax_wal_senders=10, -cmax_replication_slots=10, -chot_standby_feedback=on.
-  - codeRefs:
-    - function:3d2c9f3f0163d1e8e94a3f8576ccc97c
-    - struct:b631760469bf210d0400f9996c42e3c2
-    id: r.default-cluster-config-values
-    level: MUST
-    text: DefaultClusterConfig(name) returns a ClusterConfig with Name set to the
-      argument, AddSuffix true, Repo DefaultPSQLRepo, Version 17, Password secret,
-      DoNotAutoRemove true, WALLevel replica, EnvVars containing only POSTGRES_DB=database,
-      and Logger set to a null logger.
-  - codeRefs:
-    - function:cdae3af70fb00ded7fc722df0f220b96
-    id: r.empty-version-defaults-to-17
-    level: MUST
-    text: PrepareTestContainerRaw substitutes image tag 17 when the version argument
-      is empty. Every container it starts gets a RunOptions with container name, image
-      repo, image tag, environment, DoNotAutoRemove and network name taken from its
-      arguments, and Ports set to the single entry 5432/tcp.
-  - codeRefs:
-    - function:5e0727b2713bf72814c005c103873492
-    - function:6027711959b4c7fc94543900419ef075
-    - function:76bb2663f5605df1430bceeb1f166190
-    id: r.helpers-return-cleanup-and-url
-    level: MUST
-    text: PrepareTestContainer, TestContainerNoWait and PrepareTestContainerWithPassword
-      each call PrepareTestContainerRaw against name postgres, repo DefaultPSQLRepo,
-      the caller's version, password secret (or the supplied password), addSuffix
-      true, forceLocalAddr false, doNotAutoRemove false, an environment of POSTGRES_PASSWORD
-      plus POSTGRES_DB=database, wait true and no network, then discard the runner,
-      service and container ID and return the cleanup function together with the connection
-      URL string.
-  - codeRefs:
-    - method:c8ec22e50b5a59f7258b74b5b33eb529
-    - struct:f60335da0cc488dada2978d6d82ccf50
-    id: r.new-cluster-adds-primary-and-network
-    level: MUST
-    text: ClusterConfig.NewCluster builds a Cluster holding the config, adds a primary
-      node, records that node as Cluster.Primary and appends it to Cluster.Nodes,
-      then reads the Docker network name from the primary. It returns a wrapped error
-      when adding the primary fails or when reading the network fails.
-  - codeRefs:
-    - function:6027711959b4c7fc94543900419ef075
-    - function:cdae3af70fb00ded7fc722df0f220b96
-    id: r.no-wait-skips-readiness
-    level: MUST
-    text: TestContainerNoWait calls PrepareTestContainerRaw with wait false, so the
-      readiness adapter only builds the URL and never opens or pings the database;
-      this lets a container handler's retry logic be observed while PostgreSQL is
-      still starting. When wait is true PrepareTestContainerRaw uses the adapter that
-      opens the URL with the pgx driver and pings it, connecting as user postgres
-      with the container password, database postgres, query sslmode=disable.
-  - codeRefs:
-    - method:969093956a3bbfb17d0ad85be8eaf684
-    - struct:279ddc37516b70d8ed3ec7ecb9cfc6b6
-    id: r.node-cleanup-nil-safe
-    level: MUST
-    text: Node.Cleanup does nothing for a nil node or a node whose Service is nil,
-      and otherwise runs the service's cleanup function.
-  - codeRefs:
-    - method:df77aff5d248437ca0d0824be0d2a345
-    - struct:279ddc37516b70d8ed3ec7ecb9cfc6b6
-    id: r.node-client-opens-pgx-and-pings
-    level: MUST
-    text: Node.Client opens a *sql.DB on the node's connection URL with the pgx driver
-      and pings it within the given context, returning a wrapped error when opening
-      the database or verifying it fails.
-  - codeRefs:
-    - method:042e9b92418ed493d01f7d550345806f
-    - method:d19fb8eeb0337494a3598e64d6790cf4
-    id: r.node-network-ip-and-internal-url
-    level: MUST
-    text: Node.NetworkIP inspects the container, resolves the node's own network name,
-      and returns the IP address recorded for that network, erroring when that network
-      is absent from the container's network settings. Node.InternalURL parses the
-      node's connection URL, replaces the host with <network IP>:5432, and returns
-      the rewritten URL, wrapping parse or IP lookup failures.
-  - codeRefs:
-    - method:62c8d1e4f860fb14913fdf08a94d7822
-    id: r.node-network-single-only
-    level: MUST
-    text: Node.Network asks the runner for the container's network names and addresses,
-      fails with a wrapped error when that lookup fails, and succeeds only when exactly
-      one network is attached, returning that network's name; zero or multiple networks
-      is an error.
-  - codeRefs:
-    - function:cdae3af70fb00ded7fc722df0f220b96
-    id: r.pg-url-bypasses-containers
-    level: MUST
-    text: 'When the PG_URL environment variable is non-empty, PrepareTestContainerRaw
-      starts no container: it returns a nil runner, a nil service, a no-op cleanup
-      function, an empty URL, and PG_URL itself as the connection string.'
-  - codeRefs:
-    - struct:f60335da0cc488dada2978d6d82ccf50
-    id: r.primary-init-script
-    level: MUST
-    text: The primary node is started with a generated init-primary.sh mounted into
-      /docker-entrypoint-initdb.d that creates a replicator role WITH REPLICATION
-      and the configured password, appends the line host replication replicator 0.0.0.0/0
-      md5 to $PGDATA/pg_hba.conf, and runs SELECT pg_reload_conf(); the primary is
-      then waited for with the pinging readiness adapter.
-  - codeRefs:
-    - method:0f77c5f4ab16934dbcb77d3916910a86
-    id: r.promote-node-requires-single-replica
-    level: MUST
-    text: Cluster.PromoteNode rejects an index outside [0, len(Nodes)) and rejects
-      any call when Cluster.Nodes does not hold exactly one node. For the accepted
-      node it opens a client, reads pg_is_in_recovery() and refuses to promote when
-      the node is not still in recovery, runs SELECT pg_promote(), and then records
-      that node as Cluster.Primary.
-  - codeRefs:
-    - method:ee075a426170ac8ac17f4f07c4f45d1b
-    id: r.remove-primary-forces-container-removal
-    level: MUST
-    text: Cluster.RemovePrimary force-removes the primary's Docker container through
-      the Docker API, reports an error when the removal fails with a not-found status,
-      cleans the node up, sets Cluster.Primary to nil, and drops that node from Cluster.Nodes.
-  - codeRefs:
-    - function:cdae3af70fb00ded7fc722df0f220b96
-    id: r.repmgr-network-from-env
-    level: MUST
-    text: When the image repo argument equals bitnami/postgresql-repmgr, PrepareTestContainerRaw
-      sets the run option's NetworkID from the POSTGRES_MULTIHOST_NET environment
-      variable, so repmgr nodes join the pre-created multihost network instead of
-      the named network.
-  - codeRefs:
-    - function:c4eca0d8a516127f03a45135a1b0d8a8
-    id: r.repmgr-variant-configures-replication-env
-    level: MUST
-    text: PrepareTestContainerRepmgr appends REPMGR_PARTNER_NODES=psql-repl-node-0,psql-repl-node-1,
-      REPMGR_PRIMARY_HOST=psql-repl-node-0, REPMGR_PASSWORD=repmgrpass and POSTGRESQL_PASSWORD=secret
-      to the caller's environment variables and starts DefaultRepmgrRepo with addSuffix
-      false, forceLocalAddr true, doNotAutoRemove true, password secret and wait true,
-      returning the runner, cleanup function, URL and container ID.
-  - codeRefs:
-    - function:93c7140781ab96b439a9b73341149ad1
-    - function:f396199f3a62550ad597962a97ac47f3
-    id: r.stop-and-restart-container
-    level: MUST
-    text: StopContainer and RestartContainer take a docker runner and container ID
-      and call the runner's Stop or Restart with the given context, calling t.Fatalf
-      with the underlying error when the call fails. They give failover tests a way
-      to take a node down and bring it back.
-  - codeRefs:
-    - function:d5042eec516b76adade2c3580af94589
-    id: r.vault-user-helper-seeds-admin
-    level: MUST
-    text: PrepareTestContainerWithVaultUser starts a normal container and then runs
-      psql -U postgres -c "CREATE USER vaultadmin WITH LOGIN PASSWORD 'vaultpass'
-      SUPERUSER" inside it, so rotate-root can be tested without rotating the root
-      database credentials. It returns the container cleanup and URL, and calls t.Fatalf
-      when the command fails.
-  upstream: self

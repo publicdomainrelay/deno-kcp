@@ -4,12 +4,12 @@ metadata:
   name: third-party-openbao-internal-physical-crosstest-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2
   namespace: default
 spec:
-  delta: {}
+  systemContext: third-party-openbao-internal-physical-crosstest
   direction: CodeToSpec
   fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-  systemContext: third-party-openbao-internal-physical-crosstest
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
+  phase: Succeeded
   agentLog: 'This context is the `crosstest` package in `third_party/openbao/internal/physical/crosstest/cross_test.go`,
     a Go test-only package that cross-tests OpenBao physical storage backends against
     each other to find behavioral divergence. It builds, in `allPhysical`, a named
@@ -33,9 +33,10 @@ status:
     is not in the observed facts; dropped; interface Test_ExerciseTransactionalBackends
     is not in the observed facts; dropped; interface BenchmarkClearView is not in
     the observed facts; dropped
-  phase: Succeeded
 superseded:
-- message: |-
+- name: third-party-openbao-internal-physical-crosstest-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9
+  phase: Failed
+  message: |-
     ...testing.T, txns map[string]physical.Backend, shouldError bool)", "file": "third_party/openbao/internal/physical/crosstest/cross_test.go"},
         {"name": "allDoSameRollback", "kind": "function", "signature": "func allDoSameRollback(t *testing.T, txns map[string]physical.Backend, shouldError bool)", "file": "third_party/openbao/internal/physical/crosstest/cross_test.go"},
         {"name": "exerciseBackends", "kind": "function", "signature": "func exerciseBackends(t *testing.T, backends map[string]physical.Backend)", "file": "third_party/openbao/internal/physical/crosstest/cross_test.go"},
@@ -47,5 +48,3 @@ superseded:
         {"name": "randomData", "kind": "function", "signature": "func randomData(t testing.TB, s logical.Storage, prefix string, count int, size int)", "file": "third_party/openbao/internal/physical/crosstest/cross_test.go"}
       ]
     }
-  name: third-party-openbao-internal-physical-crosstest-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9
-  phase: Failed

@@ -1,4 +1,120 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-internal-helper-stubbolt
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'This context exists so the repository records what the OpenBao third-party
+    stub package guarantees: a compile-time-compatible, runtime-inert stand-in for
+    the bolt and raft-boltdb API surface. It documents the deliberate failures (unimplemented
+    errors) and the one non-failing accessor (Bucket), so callers and tests know the
+    package is for linking and type-checking, not for storage, and so any future replacement
+    or vendoring change is measured against this contract.'
+  requirements:
+  - id: r.begin-ignores-writable-flag-and-fails
+    level: MUST
+    text: DB.Begin accepts the writable flag, ignores it, and returns a nil *Tx together
+      with the unimplemented error, so no transaction can ever be started.
+    codeRefs:
+    - method:d73f51f6ce9fd2ad9e92ed519f9b8ff6
+  - id: r.bucket-returns-empty-bucket
+    level: MUST
+    text: 'Tx.Bucket is the only operation that does not fail: for any bucket name
+      it returns a non-nil pointer to a zero-value Bucket, so callers that nil-check
+      the result take the non-nil branch.'
+    codeRefs:
+    - method:40e99d79fb1a193ec0998ad116ed5969
+  - id: r.foreach-never-invokes-callback
+    level: MUST
+    text: Bucket.ForEach returns the unimplemented error without invoking the supplied
+      visitor function, so no key or value pair is ever yielded and iteration terminates
+      immediately with an error.
+    codeRefs:
+    - method:b0c8b034a5471f84e94df3f04f9e372e
+  - id: r.open-ignores-arguments-and-fails
+    level: MUST
+    text: Open discards its path, file mode and Options arguments, opens nothing,
+      and returns a nil *DB together with the unimplemented error.
+    codeRefs:
+    - function:08d5377907086dbcefba0d746c9186d4
+  - id: r.options-mirrors-bolt-options
+    level: SHOULD
+    text: Options carries a ReadOnly bool and a Timeout time.Duration field so that
+      call sites which set those bolt options continue to compile against the stub
+      even though Open ignores them.
+    codeRefs:
+    - struct:8c440cfb0b89571960dbbcdf457e7c8e
+  - id: r.package-declares-bolt-shaped-surface
+    level: MUST
+    text: The package is declared as package bolt and exports the four types Options,
+      DB, Tx and Bucket plus the operations Open, DB.Begin, Tx.Rollback, Tx.Bucket
+      and Bucket.ForEach, so that code written against github.com/boltdb/bolt compiles
+      without that dependency present.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/stubbolt/stubbolt.go
+    - struct:8c440cfb0b89571960dbbcdf457e7c8e
+    - struct:b03d9778234921efa7dd0017a2fac60a
+  - id: r.receivers-hold-no-state
+    level: MUST
+    text: DB, Tx and Bucket are empty structs with no fields, so each method's result
+      depends only on which method is called and not on the receiver, and repeated
+      calls on the same or a zero-value receiver behave identically.
+    codeRefs:
+    - struct:71fe871ff7ba40c9c02e4b454bfc4047
+    - struct:aa2cb4e4fa1d1517c6a2c54a82a69129
+    - struct:b03d9778234921efa7dd0017a2fac60a
+  - id: r.rollback-fails
+    level: MUST
+    text: Tx.Rollback returns the unimplemented error and performs no cleanup, because
+      a Tx is never obtained from Begin in the first place.
+    codeRefs:
+    - method:d00ab011a65bc2464caf4e8c93979bab
+  - id: r.single-shared-error-value
+    level: MUST
+    text: Every operation that is not implemented returns one shared package-level
+      error value created as errors.New("unimplemented"), so callers can compare against
+      a single error identity rather than per-call errors.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/stubbolt/stubbolt.go
+  interfaces:
+  - name: Bucket
+    kind: struct
+    signature: type Bucket struct{}
+    file: third_party/openbao/internal/helper/stubbolt/stubbolt.go
+  - name: Bucket.ForEach
+    kind: method
+    signature: func (*Bucket) ForEach(func([]byte, []byte) error) error
+    file: third_party/openbao/internal/helper/stubbolt/stubbolt.go
+  - name: DB
+    kind: struct
+    signature: type DB struct{}
+    file: third_party/openbao/internal/helper/stubbolt/stubbolt.go
+  - name: DB.Begin
+    kind: method
+    signature: func (*DB) Begin(bool) (*Tx, error)
+    file: third_party/openbao/internal/helper/stubbolt/stubbolt.go
+  - name: Open
+    kind: function
+    signature: func Open(string, os.FileMode, *Options) (*DB, error)
+    file: third_party/openbao/internal/helper/stubbolt/stubbolt.go
+  - name: Options
+    kind: struct
+    signature: type Options struct { ReadOnly bool; Timeout time.Duration }
+    file: third_party/openbao/internal/helper/stubbolt/stubbolt.go
+  - name: Tx
+    kind: struct
+    signature: type Tx struct{}
+    file: third_party/openbao/internal/helper/stubbolt/stubbolt.go
+  - name: Tx.Bucket
+    kind: method
+    signature: func (*Tx) Bucket([]byte) *Bucket
+    file: third_party/openbao/internal/helper/stubbolt/stubbolt.go
+  - name: Tx.Rollback
+    kind: method
+    signature: func (*Tx) Rollback() error
+    file: third_party/openbao/internal/helper/stubbolt/stubbolt.go
 codeRefIndex:
 - file:third_party/openbao/internal/helper/stubbolt/stubbolt.go stubbolt.go@third_party/openbao/internal/helper/stubbolt/stubbolt.go
 - function:08d5377907086dbcefba0d746c9186d4 Open@third_party/openbao/internal/helper/stubbolt/stubbolt.go:30
@@ -10,119 +126,3 @@ codeRefIndex:
 - struct:8c440cfb0b89571960dbbcdf457e7c8e Options@third_party/openbao/internal/helper/stubbolt/stubbolt.go:19
 - struct:aa2cb4e4fa1d1517c6a2c54a82a69129 Tx@third_party/openbao/internal/helper/stubbolt/stubbolt.go:26
 - struct:b03d9778234921efa7dd0017a2fac60a DB@third_party/openbao/internal/helper/stubbolt/stubbolt.go:25
-kind: SystemContext
-metadata:
-  name: third-party-openbao-internal-helper-stubbolt
-  namespace: default
-spec:
-  intent: 'This context exists so the repository records what the OpenBao third-party
-    stub package guarantees: a compile-time-compatible, runtime-inert stand-in for
-    the bolt and raft-boltdb API surface. It documents the deliberate failures (unimplemented
-    errors) and the one non-failing accessor (Bucket), so callers and tests know the
-    package is for linking and type-checking, not for storage, and so any future replacement
-    or vendoring change is measured against this contract.'
-  interfaces:
-  - file: third_party/openbao/internal/helper/stubbolt/stubbolt.go
-    kind: struct
-    name: Bucket
-    signature: type Bucket struct{}
-  - file: third_party/openbao/internal/helper/stubbolt/stubbolt.go
-    kind: method
-    name: Bucket.ForEach
-    signature: func (*Bucket) ForEach(func([]byte, []byte) error) error
-  - file: third_party/openbao/internal/helper/stubbolt/stubbolt.go
-    kind: struct
-    name: DB
-    signature: type DB struct{}
-  - file: third_party/openbao/internal/helper/stubbolt/stubbolt.go
-    kind: method
-    name: DB.Begin
-    signature: func (*DB) Begin(bool) (*Tx, error)
-  - file: third_party/openbao/internal/helper/stubbolt/stubbolt.go
-    kind: function
-    name: Open
-    signature: func Open(string, os.FileMode, *Options) (*DB, error)
-  - file: third_party/openbao/internal/helper/stubbolt/stubbolt.go
-    kind: struct
-    name: Options
-    signature: type Options struct { ReadOnly bool; Timeout time.Duration }
-  - file: third_party/openbao/internal/helper/stubbolt/stubbolt.go
-    kind: struct
-    name: Tx
-    signature: type Tx struct{}
-  - file: third_party/openbao/internal/helper/stubbolt/stubbolt.go
-    kind: method
-    name: Tx.Bucket
-    signature: func (*Tx) Bucket([]byte) *Bucket
-  - file: third_party/openbao/internal/helper/stubbolt/stubbolt.go
-    kind: method
-    name: Tx.Rollback
-    signature: func (*Tx) Rollback() error
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - method:d73f51f6ce9fd2ad9e92ed519f9b8ff6
-    id: r.begin-ignores-writable-flag-and-fails
-    level: MUST
-    text: DB.Begin accepts the writable flag, ignores it, and returns a nil *Tx together
-      with the unimplemented error, so no transaction can ever be started.
-  - codeRefs:
-    - method:40e99d79fb1a193ec0998ad116ed5969
-    id: r.bucket-returns-empty-bucket
-    level: MUST
-    text: 'Tx.Bucket is the only operation that does not fail: for any bucket name
-      it returns a non-nil pointer to a zero-value Bucket, so callers that nil-check
-      the result take the non-nil branch.'
-  - codeRefs:
-    - method:b0c8b034a5471f84e94df3f04f9e372e
-    id: r.foreach-never-invokes-callback
-    level: MUST
-    text: Bucket.ForEach returns the unimplemented error without invoking the supplied
-      visitor function, so no key or value pair is ever yielded and iteration terminates
-      immediately with an error.
-  - codeRefs:
-    - function:08d5377907086dbcefba0d746c9186d4
-    id: r.open-ignores-arguments-and-fails
-    level: MUST
-    text: Open discards its path, file mode and Options arguments, opens nothing,
-      and returns a nil *DB together with the unimplemented error.
-  - codeRefs:
-    - struct:8c440cfb0b89571960dbbcdf457e7c8e
-    id: r.options-mirrors-bolt-options
-    level: SHOULD
-    text: Options carries a ReadOnly bool and a Timeout time.Duration field so that
-      call sites which set those bolt options continue to compile against the stub
-      even though Open ignores them.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/stubbolt/stubbolt.go
-    - struct:8c440cfb0b89571960dbbcdf457e7c8e
-    - struct:b03d9778234921efa7dd0017a2fac60a
-    id: r.package-declares-bolt-shaped-surface
-    level: MUST
-    text: The package is declared as package bolt and exports the four types Options,
-      DB, Tx and Bucket plus the operations Open, DB.Begin, Tx.Rollback, Tx.Bucket
-      and Bucket.ForEach, so that code written against github.com/boltdb/bolt compiles
-      without that dependency present.
-  - codeRefs:
-    - struct:71fe871ff7ba40c9c02e4b454bfc4047
-    - struct:aa2cb4e4fa1d1517c6a2c54a82a69129
-    - struct:b03d9778234921efa7dd0017a2fac60a
-    id: r.receivers-hold-no-state
-    level: MUST
-    text: DB, Tx and Bucket are empty structs with no fields, so each method's result
-      depends only on which method is called and not on the receiver, and repeated
-      calls on the same or a zero-value receiver behave identically.
-  - codeRefs:
-    - method:d00ab011a65bc2464caf4e8c93979bab
-    id: r.rollback-fails
-    level: MUST
-    text: Tx.Rollback returns the unimplemented error and performs no cleanup, because
-      a Tx is never obtained from Begin in the first place.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/stubbolt/stubbolt.go
-    id: r.single-shared-error-value
-    level: MUST
-    text: Every operation that is not implemented returns one shared package-level
-      error value created as errors.New("unimplemented"), so callers can compare against
-      a single error identity rather than per-call errors.
-  upstream: self

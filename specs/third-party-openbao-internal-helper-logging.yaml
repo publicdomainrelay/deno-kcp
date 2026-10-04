@@ -1,4 +1,152 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-internal-helper-logging
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'This context exists so the deno-kcp repository keeps a describable, self-contained
+    picture of the OpenBao logging helper it vendors under third_party. It records
+    the observable behavior of the rotating file writer and of the log level/format
+    parsing and logger setup helpers, so changes to that vendored code can be reviewed
+    against a stated contract instead of re-reading the sources each time. It is a
+    reference context, not a feature: nothing here is authored by this repository,
+    and the requirements below describe what the vendored code already does.'
+  requirements:
+  - id: r.log-format-string
+    level: MUST
+    text: LogFormat.String must render the format as its textual name so a parsed
+      format can be printed back in the form ParseLogFormat accepts.
+    codeRefs:
+    - method:c3c5b256f72ec609e77f5b5f02f6fb3c
+    - type_alias:fa3e242007f3869112f3c010e80541c3
+  - id: r.logfile-name-pattern
+    level: MUST
+    text: LogFile.fileNamePattern must split the configured file name into stem and
+      extension, substitute .log when the file name has no extension, and return stem
+      + "-%s" + extension so the rotation timestamp is inserted before the extension.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/logging/logfile.go
+    - struct:59334325f198b803cde297154f486f17
+  - id: r.logfile-rotation-and-prune
+    level: MUST
+    text: LogFile must rotate its backing file when the configured duration since
+      last creation has elapsed or when bytesWritten reaches maxBytes, and must delete
+      the oldest archived files so that no more than maxArchivedFiles rotated files
+      remain; when both duration and maxBytes are zero, rotation must stay disabled.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/logging/logfile.go
+    - struct:59334325f198b803cde297154f486f17
+  - id: r.logfile-write-serialized
+    level: MUST
+    text: LogFile.Write must hold the acquire mutex for the whole write, open a new
+      backing file when none is open, rotate the file when rotation is due, and add
+      the number of bytes written by the underlying file to the running byte total
+      before returning that count and any error.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/logging/logfile.go
+    - method:5500d8e2374667288edd52fa9a2d49f8
+    - struct:59334325f198b803cde297154f486f17
+  - id: r.logging-tests
+    level: SHOULD
+    text: Tests must cover opening a new log file, rotation by max duration, rotation
+      by max bytes, pruning with pruning enabled and disabled, and rotation disabled,
+      plus the logger configuration and level/format parsing helpers.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/logging/logfile_test.go
+    - file:third_party/openbao/internal/helper/logging/logger_test.go
+  - id: r.new-log-config
+    level: MUST
+    text: NewLogConfig must build a LogConfig from its default file name argument
+      and the surrounding environment, returning the config together with an error
+      rather than a partial config when a value fails to parse.
+    codeRefs:
+    - function:43409d49484bc726883df74478f18c0d
+    - struct:cfe77498c19809198497223af61dc308
+  - id: r.no-error-writer
+    level: MUST
+    text: noErrorWriter.Write must write through to its wrapped io.Writer, report
+      the length of the input as written, and never surface the underlying writer's
+      error to the caller.
+    codeRefs:
+    - method:1ca522ab4abbc3354ece35997c81515d
+  - id: r.parse-log-format
+    level: MUST
+    text: ParseLogFormat must map a format string onto a LogFormat value and must
+      return an error naming the unsupported format when the string is not a known
+      format.
+    codeRefs:
+    - function:eb740607e0ef652311891af3faedbfe2
+    - type_alias:fa3e242007f3869112f3c010e80541c3
+  - id: r.parse-log-level
+    level: MUST
+    text: ParseLogLevel must map a level name onto an hclog.Level and must return
+      an error naming the unsupported level when the string is not a known level.
+    codeRefs:
+    - function:bca6079fb39df81291a1021227b83c88
+  - id: r.setup-logger
+    level: MUST
+    text: Setup must build an hclog.InterceptLogger from the given LogConfig and writer,
+      wrapping the writer in noErrorWriter so a failing writer does not disable logging,
+      and must return an error when the config cannot be applied.
+    codeRefs:
+    - function:267f8b54aea9c228c4a468e655e0675e
+    - method:1ca522ab4abbc3354ece35997c81515d
+    - struct:cfe77498c19809198497223af61dc308
+  - id: r.translate-logger-level
+    level: MUST
+    text: TranslateLoggerLevel must read the level of the given hclog.Logger and return
+      it as a string, returning an error instead when the logger reports a level that
+      has no string form.
+    codeRefs:
+    - function:44fe4949e60b578345cf37efc63a5873
+  interfaces:
+  - name: LogConfig
+    kind: struct
+    signature: struct LogConfig
+    file: third_party/openbao/internal/helper/logging/logger.go
+  - name: LogFile
+    kind: struct
+    signature: struct LogFile
+    file: third_party/openbao/internal/helper/logging/logfile.go
+  - name: LogFile.Write
+    kind: method
+    signature: func (l *LogFile) Write(b []byte) (n int, err error)
+    file: third_party/openbao/internal/helper/logging/logfile.go
+  - name: LogFormat
+    kind: type_alias
+    signature: type LogFormat int
+    file: third_party/openbao/internal/helper/logging/logger.go
+  - name: LogFormat.String
+    kind: method
+    signature: func (f LogFormat) String() string
+    file: third_party/openbao/internal/helper/logging/logger.go
+  - name: NewLogConfig
+    kind: function
+    signature: func NewLogConfig(defaultFileName string) (*LogConfig, error)
+    file: third_party/openbao/internal/helper/logging/logger.go
+  - name: ParseLogFormat
+    kind: function
+    signature: func ParseLogFormat(format string) (LogFormat, error)
+    file: third_party/openbao/internal/helper/logging/logger.go
+  - name: ParseLogLevel
+    kind: function
+    signature: func ParseLogLevel(logLevel string) (hclog.Level, error)
+    file: third_party/openbao/internal/helper/logging/logger.go
+  - name: Setup
+    kind: function
+    signature: func Setup(config *LogConfig, w io.Writer) (hclog.InterceptLogger,
+      error)
+    file: third_party/openbao/internal/helper/logging/logger.go
+  - name: TranslateLoggerLevel
+    kind: function
+    signature: func TranslateLoggerLevel(logger hclog.Logger) (string, error)
+    file: third_party/openbao/internal/helper/logging/logger.go
+  - name: noErrorWriter.Write
+    kind: method
+    signature: func (w noErrorWriter) Write(p []byte) (n int, err error)
+    file: third_party/openbao/internal/helper/logging/logger.go
 codeRefIndex:
 - file:third_party/openbao/internal/helper/logging/logfile.go logfile.go@third_party/openbao/internal/helper/logging/logfile.go
 - file:third_party/openbao/internal/helper/logging/logfile_test.go logfile_test.go@third_party/openbao/internal/helper/logging/logfile_test.go
@@ -15,151 +163,3 @@ codeRefIndex:
 - struct:59334325f198b803cde297154f486f17 LogFile@third_party/openbao/internal/helper/logging/logfile.go:21
 - struct:cfe77498c19809198497223af61dc308 LogConfig@third_party/openbao/internal/helper/logging/logger.go:30
 - type_alias:fa3e242007f3869112f3c010e80541c3 LogFormat@third_party/openbao/internal/helper/logging/logger.go:27
-kind: SystemContext
-metadata:
-  name: third-party-openbao-internal-helper-logging
-  namespace: default
-spec:
-  intent: 'This context exists so the deno-kcp repository keeps a describable, self-contained
-    picture of the OpenBao logging helper it vendors under third_party. It records
-    the observable behavior of the rotating file writer and of the log level/format
-    parsing and logger setup helpers, so changes to that vendored code can be reviewed
-    against a stated contract instead of re-reading the sources each time. It is a
-    reference context, not a feature: nothing here is authored by this repository,
-    and the requirements below describe what the vendored code already does.'
-  interfaces:
-  - file: third_party/openbao/internal/helper/logging/logger.go
-    kind: struct
-    name: LogConfig
-    signature: struct LogConfig
-  - file: third_party/openbao/internal/helper/logging/logfile.go
-    kind: struct
-    name: LogFile
-    signature: struct LogFile
-  - file: third_party/openbao/internal/helper/logging/logfile.go
-    kind: method
-    name: LogFile.Write
-    signature: func (l *LogFile) Write(b []byte) (n int, err error)
-  - file: third_party/openbao/internal/helper/logging/logger.go
-    kind: type_alias
-    name: LogFormat
-    signature: type LogFormat int
-  - file: third_party/openbao/internal/helper/logging/logger.go
-    kind: method
-    name: LogFormat.String
-    signature: func (f LogFormat) String() string
-  - file: third_party/openbao/internal/helper/logging/logger.go
-    kind: function
-    name: NewLogConfig
-    signature: func NewLogConfig(defaultFileName string) (*LogConfig, error)
-  - file: third_party/openbao/internal/helper/logging/logger.go
-    kind: function
-    name: ParseLogFormat
-    signature: func ParseLogFormat(format string) (LogFormat, error)
-  - file: third_party/openbao/internal/helper/logging/logger.go
-    kind: function
-    name: ParseLogLevel
-    signature: func ParseLogLevel(logLevel string) (hclog.Level, error)
-  - file: third_party/openbao/internal/helper/logging/logger.go
-    kind: function
-    name: Setup
-    signature: func Setup(config *LogConfig, w io.Writer) (hclog.InterceptLogger,
-      error)
-  - file: third_party/openbao/internal/helper/logging/logger.go
-    kind: function
-    name: TranslateLoggerLevel
-    signature: func TranslateLoggerLevel(logger hclog.Logger) (string, error)
-  - file: third_party/openbao/internal/helper/logging/logger.go
-    kind: method
-    name: noErrorWriter.Write
-    signature: func (w noErrorWriter) Write(p []byte) (n int, err error)
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - method:c3c5b256f72ec609e77f5b5f02f6fb3c
-    - type_alias:fa3e242007f3869112f3c010e80541c3
-    id: r.log-format-string
-    level: MUST
-    text: LogFormat.String must render the format as its textual name so a parsed
-      format can be printed back in the form ParseLogFormat accepts.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/logging/logfile.go
-    - struct:59334325f198b803cde297154f486f17
-    id: r.logfile-name-pattern
-    level: MUST
-    text: LogFile.fileNamePattern must split the configured file name into stem and
-      extension, substitute .log when the file name has no extension, and return stem
-      + "-%s" + extension so the rotation timestamp is inserted before the extension.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/logging/logfile.go
-    - struct:59334325f198b803cde297154f486f17
-    id: r.logfile-rotation-and-prune
-    level: MUST
-    text: LogFile must rotate its backing file when the configured duration since
-      last creation has elapsed or when bytesWritten reaches maxBytes, and must delete
-      the oldest archived files so that no more than maxArchivedFiles rotated files
-      remain; when both duration and maxBytes are zero, rotation must stay disabled.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/logging/logfile.go
-    - method:5500d8e2374667288edd52fa9a2d49f8
-    - struct:59334325f198b803cde297154f486f17
-    id: r.logfile-write-serialized
-    level: MUST
-    text: LogFile.Write must hold the acquire mutex for the whole write, open a new
-      backing file when none is open, rotate the file when rotation is due, and add
-      the number of bytes written by the underlying file to the running byte total
-      before returning that count and any error.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/logging/logfile_test.go
-    - file:third_party/openbao/internal/helper/logging/logger_test.go
-    id: r.logging-tests
-    level: SHOULD
-    text: Tests must cover opening a new log file, rotation by max duration, rotation
-      by max bytes, pruning with pruning enabled and disabled, and rotation disabled,
-      plus the logger configuration and level/format parsing helpers.
-  - codeRefs:
-    - function:43409d49484bc726883df74478f18c0d
-    - struct:cfe77498c19809198497223af61dc308
-    id: r.new-log-config
-    level: MUST
-    text: NewLogConfig must build a LogConfig from its default file name argument
-      and the surrounding environment, returning the config together with an error
-      rather than a partial config when a value fails to parse.
-  - codeRefs:
-    - method:1ca522ab4abbc3354ece35997c81515d
-    id: r.no-error-writer
-    level: MUST
-    text: noErrorWriter.Write must write through to its wrapped io.Writer, report
-      the length of the input as written, and never surface the underlying writer's
-      error to the caller.
-  - codeRefs:
-    - function:eb740607e0ef652311891af3faedbfe2
-    - type_alias:fa3e242007f3869112f3c010e80541c3
-    id: r.parse-log-format
-    level: MUST
-    text: ParseLogFormat must map a format string onto a LogFormat value and must
-      return an error naming the unsupported format when the string is not a known
-      format.
-  - codeRefs:
-    - function:bca6079fb39df81291a1021227b83c88
-    id: r.parse-log-level
-    level: MUST
-    text: ParseLogLevel must map a level name onto an hclog.Level and must return
-      an error naming the unsupported level when the string is not a known level.
-  - codeRefs:
-    - function:267f8b54aea9c228c4a468e655e0675e
-    - method:1ca522ab4abbc3354ece35997c81515d
-    - struct:cfe77498c19809198497223af61dc308
-    id: r.setup-logger
-    level: MUST
-    text: Setup must build an hclog.InterceptLogger from the given LogConfig and writer,
-      wrapping the writer in noErrorWriter so a failing writer does not disable logging,
-      and must return an error when the config cannot be applied.
-  - codeRefs:
-    - function:44fe4949e60b578345cf37efc63a5873
-    id: r.translate-logger-level
-    level: MUST
-    text: TranslateLoggerLevel must read the level of the given hclog.Logger and return
-      it as a string, returning an error instead when the logger reports a level that
-      has no string form.
-  upstream: self

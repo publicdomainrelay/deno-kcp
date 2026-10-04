@@ -1,17 +1,20 @@
+syncedCommit: 89cee50ec5aea977a42f904a758e506729e1158e
+syncedFingerprint: aa130df04e459e4995e43142d3743da14fd5a558466fb86b619708bae34bda12
+realizedSpecHash: 30d246c170baedf443edbe9dd453d7a2fe839d7e7e8f7155fb5e7b50a4e3495e
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
+- type: CodeSynced
+  status: "True"
   reason: InterfacesObserved
-  status: "True"
-  type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+  message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+- type: Drifted
   status: "False"
-  type: Drifted
-- message: the spec passes the validator
-  reason: ValidatorPassed
+  reason: FingerprintEqual
+  message: observed facts match the synced fingerprint
+- type: SpecValid
   status: "True"
-  type: SpecValid
+  reason: ValidatorPassed
+  message: the spec passes the validator
 observed:
   files:
   - third_party/openbao/ui/app/serializers/application.js
@@ -40,23 +43,20 @@ observed:
   - third_party/openbao/ui/app/serializers/server.js
   - third_party/openbao/ui/app/serializers/ssh.js
   - third_party/openbao/ui/app/serializers/transit-key.js
-  fingerprint: aa130df04e459e4995e43142d3743da14fd5a558466fb86b619708bae34bda12
   interfaces:
-  - codegraphId: class:d94a61dedff298090c7cbfe1b78fb069
+  - name: MfaLoginEnforcementSerializer
+    kind: class
     file: third_party/openbao/ui/app/serializers/mfa-login-enforcement.js
-    kind: class
     line: 8
-    name: MfaLoginEnforcementSerializer
-  - codegraphId: class:681132b4a34a8a0d53b5e8a78ec4359b
+    codegraphId: class:d94a61dedff298090c7cbfe1b78fb069
+  - name: KeymgmtKeySerializer
+    kind: class
     file: third_party/openbao/ui/app/serializers/mfa-method.js
-    kind: class
     line: 8
-    name: KeymgmtKeySerializer
-  - codegraphId: class:5f8ac7300368de40c7fbff9d16a45232
+    codegraphId: class:681132b4a34a8a0d53b5e8a78ec4359b
+  - name: NamespaceSerializer
+    kind: class
     file: third_party/openbao/ui/app/serializers/namespace.js
-    kind: class
     line: 8
-    name: NamespaceSerializer
-realizedSpecHash: 30d246c170baedf443edbe9dd453d7a2fe839d7e7e8f7155fb5e7b50a4e3495e
-syncedCommit: 89cee50ec5aea977a42f904a758e506729e1158e
-syncedFingerprint: aa130df04e459e4995e43142d3743da14fd5a558466fb86b619708bae34bda12
+    codegraphId: class:5f8ac7300368de40c7fbff9d16a45232
+  fingerprint: aa130df04e459e4995e43142d3743da14fd5a558466fb86b619708bae34bda12

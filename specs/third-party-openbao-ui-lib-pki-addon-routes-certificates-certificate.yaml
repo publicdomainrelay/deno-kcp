@@ -1,13 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- class:ef19167c27da43e8f24bcbfe5369ae50 PkiCertificateDetailsRoute@third_party/openbao/ui/lib/pki/addon/routes/certificates/certificate/details.js:9
-- file:third_party/openbao/ui/lib/pki/addon/routes/certificates/certificate/details.js
-  details.js@third_party/openbao/ui/lib/pki/addon/routes/certificates/certificate/details.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-lib-pki-addon-routes-certificates-certificate
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'This context exists to describe the detail route that renders a single
     PKI certificate under a given secrets mount. It is the read side of the certificate
     detail view: it turns URL params (mount path plus serial) into an Ember Data request,
@@ -15,32 +13,34 @@ spec:
     one certificate to the certificates index and out to the mount. The context is
     one leaf of the OpenBao PKI addon''s route tree, vendored into the deno-kcp repository
     under `third_party/openbao/ui`.'
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - class:ef19167c27da43e8f24bcbfe5369ae50
-    - file:third_party/openbao/ui/lib/pki/addon/routes/certificates/certificate/details.js
-    id: r.breadcrumbs-setup
+  - id: r.breadcrumbs-setup
     level: MUST
     text: '`PkiCertificateDetailsRoute.setupController(controller, model)` must call
       `super.setupController(controller, model)` first, then set `controller.breadcrumbs`
       to the ordered trail: `secrets` (external link), the current `secretMountPath.currentPath`
       on the `overview` route, `certificates.index` scoped to that mount, and the
       terminal crumb labelled `model.id`.'
-  - codeRefs:
+    codeRefs:
     - class:ef19167c27da43e8f24bcbfe5369ae50
-    id: r.injected-services
+    - file:third_party/openbao/ui/lib/pki/addon/routes/certificates/certificate/details.js
+  - id: r.injected-services
     level: MUST
     text: The route must declare the `store` and `secretMountPath` services as injected
       Ember services, since both `model()` and `setupController()` read `this.store`
       and `this.secretMountPath.currentPath` when building the request and the breadcrumbs.
-  - codeRefs:
+    codeRefs:
     - class:ef19167c27da43e8f24bcbfe5369ae50
-    - file:third_party/openbao/ui/lib/pki/addon/routes/certificates/certificate/details.js
-    id: r.route-fetch-single-certificate
+  - id: r.route-fetch-single-certificate
     level: MUST
     text: '`PkiCertificateDetailsRoute.model()` must resolve the parent route''s `serial`
       param via `this.paramsFor(''certificates/certificate'')` and issue `this.store.queryRecord(''pki/certificate/base'',
       ...)`, passing `{ backend: this.secretMountPath.currentPath, id }` so the fetched
       certificate is scoped to the currently selected secrets mount.'
-  upstream: self
+    codeRefs:
+    - class:ef19167c27da43e8f24bcbfe5369ae50
+    - file:third_party/openbao/ui/lib/pki/addon/routes/certificates/certificate/details.js
+codeRefIndex:
+- class:ef19167c27da43e8f24bcbfe5369ae50 PkiCertificateDetailsRoute@third_party/openbao/ui/lib/pki/addon/routes/certificates/certificate/details.js:9
+- file:third_party/openbao/ui/lib/pki/addon/routes/certificates/certificate/details.js
+  details.js@third_party/openbao/ui/lib/pki/addon/routes/certificates/certificate/details.js

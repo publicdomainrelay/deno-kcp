@@ -1,4 +1,185 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-internal-vault-tokens
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'The context exists so the token wire format is described where the rest
+    of the codebase can reason about it without reading the whole vendored file. Token
+    signing, token lookup and token indexing in OpenBao all pass these two structs
+    across package boundaries, so anything that mints, parses, hashes or stores a
+    vault token depends on the field numbering, the protobuf tags and the nil-safe
+    getters recorded here. Recording them as a specification fixes the shape that
+    other contexts must not break: field numbers are part of the on-disk and over-the-wire
+    contract, and the getters are part of the in-process contract.'
+  requirements:
+  - id: r.message-internal-state
+    level: MUST
+    text: Both message types keep a protoimpl.MessageState, an unknownFields block
+      and a sizeCache beside their declared fields, so unknown wire fields survive
+      a round trip and the encoded size is cached; these members stay unexported and
+      are not part of the token data.
+    codeRefs:
+    - file:third_party/openbao/internal/vault/tokens/token.pb.go
+    - struct:0c3d99ca789793f04b7eb697d811ab0e
+    - struct:9a36db7b764465e95703935e8227c371
+  - id: r.signed-token-descriptor
+    level: MUST
+    text: SignedToken.Descriptor returns the raw gzipped file descriptor bytes and
+      the index path that locates SignedToken inside that descriptor.
+    codeRefs:
+    - method:38d828d5396a171a76b486449f42ed97
+  - id: r.signed-token-getters-nil-safe
+    level: MUST
+    text: SignedToken.GetTokenVersion, SignedToken.GetHmac and SignedToken.GetToken
+      return the corresponding field of the receiver, and each returns the field's
+      zero value (0 or nil) when the receiver is nil, so callers read signed token
+      material without a nil check.
+    codeRefs:
+    - method:0d6c61f24c047fe3a4374f3e50977ee4
+    - method:2b17d9ea1e57cf789a34fd9638d07a05
+    - method:327d4b2043e58be1f1374d327422f74d
+  - id: r.signed-token-reflection
+    level: MUST
+    text: SignedToken.ProtoMessage marks the type as a proto message, and SignedToken.ProtoReflect
+      returns the protoreflect.Message view of the receiver for reflective read and
+      write of its fields.
+    codeRefs:
+    - method:244741a5feb70cc161462666e8023de4
+    - method:9047ca25a7601e3cc046867ffd2bfa3d
+  - id: r.signed-token-reset-zeroes
+    level: MUST
+    text: SignedToken.Reset replaces the receiver with a zero-value SignedToken and
+      stores the file-level message info for message index 0 in the proto message
+      state, so a reused value carries no data from its previous use.
+    codeRefs:
+    - method:239383bafadc8eb4b699e5ef8fcb3860
+    - struct:0c3d99ca789793f04b7eb697d811ab0e
+  - id: r.signed-token-string-renders
+    level: MUST
+    text: SignedToken.String returns the protobuf text representation produced by
+      protoimpl.X.MessageStringOf for the receiver.
+    codeRefs:
+    - method:bd45d58e6d5e6bf3484ac73a5431aec4
+  - id: r.token-descriptor
+    level: MUST
+    text: Token.Descriptor returns the raw gzipped file descriptor bytes and the index
+      path that locates Token inside that descriptor.
+    codeRefs:
+    - method:d47d6f2f9ca7f5266c6534ca039f564c
+  - id: r.token-getters-nil-safe
+    level: MUST
+    text: Token.GetRandom, Token.GetIndexEpoch and Token.GetLocalIndex return the
+      corresponding field of the receiver, and each returns the field's zero value
+      (empty string or 0) when the receiver is nil.
+    codeRefs:
+    - method:af75743eace4d8810877000c75f3d599
+    - method:cf45ac1f3a9fc1c3b83b0b74b46c4c0e
+    - method:e98ba617a1171dff4107d7d1fbf3c259
+  - id: r.token-reflection
+    level: MUST
+    text: Token.ProtoMessage marks the type as a proto message, and Token.ProtoReflect
+      returns the protoreflect.Message view of the receiver.
+    codeRefs:
+    - method:397e2591618828c08e9a886fe73f6fe8
+    - method:6f19fee25656789fb67756d55fcad4e4
+  - id: r.token-reset-zeroes
+    level: MUST
+    text: Token.Reset replaces the receiver with a zero-value Token and stores the
+      file-level message info for message index 1 in the proto message state.
+    codeRefs:
+    - method:f847d4576589c228298de28fe4908b7c
+    - struct:9a36db7b764465e95703935e8227c371
+  - id: r.token-string-renders
+    level: MUST
+    text: Token.String returns the protobuf text representation produced by protoimpl.X.MessageStringOf
+      for the receiver.
+    codeRefs:
+    - method:ba7124d5fb412f60d88b45e8b900417f
+  - id: r.token-wire-field-numbers
+    level: MUST
+    text: Token carries Random as protobuf field 1 (string, the unencoded equivalent
+      of the former randbase62 value), IndexEpoch as field 3 (uint32 varint, JSON
+      name indexEpoch) and LocalIndex as field 50 (string, JSON name localIndex, the
+      storage state required to have this token); these numbers and JSON names are
+      the wire and JSON contract.
+    codeRefs:
+    - struct:9a36db7b764465e95703935e8227c371
+  interfaces:
+  - name: SignedToken
+    kind: struct
+    signature: type SignedToken struct
+    file: third_party/openbao/internal/vault/tokens/token.pb.go
+  - name: SignedToken.Descriptor
+    kind: method
+    signature: func (*SignedToken) Descriptor() ([]byte, []int)
+    file: third_party/openbao/internal/vault/tokens/token.pb.go
+  - name: SignedToken.GetHmac
+    kind: method
+    signature: func (x *SignedToken) GetHmac() []byte
+    file: third_party/openbao/internal/vault/tokens/token.pb.go
+  - name: SignedToken.GetToken
+    kind: method
+    signature: func (x *SignedToken) GetToken() []byte
+    file: third_party/openbao/internal/vault/tokens/token.pb.go
+  - name: SignedToken.GetTokenVersion
+    kind: method
+    signature: func (x *SignedToken) GetTokenVersion() uint64
+    file: third_party/openbao/internal/vault/tokens/token.pb.go
+  - name: SignedToken.ProtoMessage
+    kind: method
+    signature: func (*SignedToken) ProtoMessage()
+    file: third_party/openbao/internal/vault/tokens/token.pb.go
+  - name: SignedToken.ProtoReflect
+    kind: method
+    signature: func (x *SignedToken) ProtoReflect() protoreflect.Message
+    file: third_party/openbao/internal/vault/tokens/token.pb.go
+  - name: SignedToken.Reset
+    kind: method
+    signature: func (x *SignedToken) Reset()
+    file: third_party/openbao/internal/vault/tokens/token.pb.go
+  - name: SignedToken.String
+    kind: method
+    signature: func (x *SignedToken) String() string
+    file: third_party/openbao/internal/vault/tokens/token.pb.go
+  - name: Token
+    kind: struct
+    signature: type Token struct
+    file: third_party/openbao/internal/vault/tokens/token.pb.go
+  - name: Token.Descriptor
+    kind: method
+    signature: func (*Token) Descriptor() ([]byte, []int)
+    file: third_party/openbao/internal/vault/tokens/token.pb.go
+  - name: Token.GetIndexEpoch
+    kind: method
+    signature: func (x *Token) GetIndexEpoch() uint32
+    file: third_party/openbao/internal/vault/tokens/token.pb.go
+  - name: Token.GetLocalIndex
+    kind: method
+    signature: func (x *Token) GetLocalIndex() string
+    file: third_party/openbao/internal/vault/tokens/token.pb.go
+  - name: Token.GetRandom
+    kind: method
+    signature: func (x *Token) GetRandom() string
+    file: third_party/openbao/internal/vault/tokens/token.pb.go
+  - name: Token.ProtoMessage
+    kind: method
+    signature: func (*Token) ProtoMessage()
+    file: third_party/openbao/internal/vault/tokens/token.pb.go
+  - name: Token.ProtoReflect
+    kind: method
+    signature: func (x *Token) ProtoReflect() protoreflect.Message
+    file: third_party/openbao/internal/vault/tokens/token.pb.go
+  - name: Token.Reset
+    kind: method
+    signature: func (x *Token) Reset()
+    file: third_party/openbao/internal/vault/tokens/token.pb.go
+  - name: Token.String
+    kind: method
+    signature: func (x *Token) String() string
+    file: third_party/openbao/internal/vault/tokens/token.pb.go
 codeRefIndex:
 - file:third_party/openbao/internal/vault/tokens/token.pb.go token.pb.go@third_party/openbao/internal/vault/tokens/token.pb.go
 - method:0d6c61f24c047fe3a4374f3e50977ee4 SignedToken.GetHmac@third_party/openbao/internal/vault/tokens/token.pb.go:74
@@ -19,184 +200,3 @@ codeRefIndex:
 - method:f847d4576589c228298de28fe4908b7c Token.Reset@third_party/openbao/internal/vault/tokens/token.pb.go:97
 - struct:0c3d99ca789793f04b7eb697d811ab0e SignedToken@third_party/openbao/internal/vault/tokens/token.pb.go:28
 - struct:9a36db7b764465e95703935e8227c371 Token@third_party/openbao/internal/vault/tokens/token.pb.go:88
-kind: SystemContext
-metadata:
-  name: third-party-openbao-internal-vault-tokens
-  namespace: default
-spec:
-  intent: 'The context exists so the token wire format is described where the rest
-    of the codebase can reason about it without reading the whole vendored file. Token
-    signing, token lookup and token indexing in OpenBao all pass these two structs
-    across package boundaries, so anything that mints, parses, hashes or stores a
-    vault token depends on the field numbering, the protobuf tags and the nil-safe
-    getters recorded here. Recording them as a specification fixes the shape that
-    other contexts must not break: field numbers are part of the on-disk and over-the-wire
-    contract, and the getters are part of the in-process contract.'
-  interfaces:
-  - file: third_party/openbao/internal/vault/tokens/token.pb.go
-    kind: struct
-    name: SignedToken
-    signature: type SignedToken struct
-  - file: third_party/openbao/internal/vault/tokens/token.pb.go
-    kind: method
-    name: SignedToken.Descriptor
-    signature: func (*SignedToken) Descriptor() ([]byte, []int)
-  - file: third_party/openbao/internal/vault/tokens/token.pb.go
-    kind: method
-    name: SignedToken.GetHmac
-    signature: func (x *SignedToken) GetHmac() []byte
-  - file: third_party/openbao/internal/vault/tokens/token.pb.go
-    kind: method
-    name: SignedToken.GetToken
-    signature: func (x *SignedToken) GetToken() []byte
-  - file: third_party/openbao/internal/vault/tokens/token.pb.go
-    kind: method
-    name: SignedToken.GetTokenVersion
-    signature: func (x *SignedToken) GetTokenVersion() uint64
-  - file: third_party/openbao/internal/vault/tokens/token.pb.go
-    kind: method
-    name: SignedToken.ProtoMessage
-    signature: func (*SignedToken) ProtoMessage()
-  - file: third_party/openbao/internal/vault/tokens/token.pb.go
-    kind: method
-    name: SignedToken.ProtoReflect
-    signature: func (x *SignedToken) ProtoReflect() protoreflect.Message
-  - file: third_party/openbao/internal/vault/tokens/token.pb.go
-    kind: method
-    name: SignedToken.Reset
-    signature: func (x *SignedToken) Reset()
-  - file: third_party/openbao/internal/vault/tokens/token.pb.go
-    kind: method
-    name: SignedToken.String
-    signature: func (x *SignedToken) String() string
-  - file: third_party/openbao/internal/vault/tokens/token.pb.go
-    kind: struct
-    name: Token
-    signature: type Token struct
-  - file: third_party/openbao/internal/vault/tokens/token.pb.go
-    kind: method
-    name: Token.Descriptor
-    signature: func (*Token) Descriptor() ([]byte, []int)
-  - file: third_party/openbao/internal/vault/tokens/token.pb.go
-    kind: method
-    name: Token.GetIndexEpoch
-    signature: func (x *Token) GetIndexEpoch() uint32
-  - file: third_party/openbao/internal/vault/tokens/token.pb.go
-    kind: method
-    name: Token.GetLocalIndex
-    signature: func (x *Token) GetLocalIndex() string
-  - file: third_party/openbao/internal/vault/tokens/token.pb.go
-    kind: method
-    name: Token.GetRandom
-    signature: func (x *Token) GetRandom() string
-  - file: third_party/openbao/internal/vault/tokens/token.pb.go
-    kind: method
-    name: Token.ProtoMessage
-    signature: func (*Token) ProtoMessage()
-  - file: third_party/openbao/internal/vault/tokens/token.pb.go
-    kind: method
-    name: Token.ProtoReflect
-    signature: func (x *Token) ProtoReflect() protoreflect.Message
-  - file: third_party/openbao/internal/vault/tokens/token.pb.go
-    kind: method
-    name: Token.Reset
-    signature: func (x *Token) Reset()
-  - file: third_party/openbao/internal/vault/tokens/token.pb.go
-    kind: method
-    name: Token.String
-    signature: func (x *Token) String() string
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - file:third_party/openbao/internal/vault/tokens/token.pb.go
-    - struct:0c3d99ca789793f04b7eb697d811ab0e
-    - struct:9a36db7b764465e95703935e8227c371
-    id: r.message-internal-state
-    level: MUST
-    text: Both message types keep a protoimpl.MessageState, an unknownFields block
-      and a sizeCache beside their declared fields, so unknown wire fields survive
-      a round trip and the encoded size is cached; these members stay unexported and
-      are not part of the token data.
-  - codeRefs:
-    - method:38d828d5396a171a76b486449f42ed97
-    id: r.signed-token-descriptor
-    level: MUST
-    text: SignedToken.Descriptor returns the raw gzipped file descriptor bytes and
-      the index path that locates SignedToken inside that descriptor.
-  - codeRefs:
-    - method:0d6c61f24c047fe3a4374f3e50977ee4
-    - method:2b17d9ea1e57cf789a34fd9638d07a05
-    - method:327d4b2043e58be1f1374d327422f74d
-    id: r.signed-token-getters-nil-safe
-    level: MUST
-    text: SignedToken.GetTokenVersion, SignedToken.GetHmac and SignedToken.GetToken
-      return the corresponding field of the receiver, and each returns the field's
-      zero value (0 or nil) when the receiver is nil, so callers read signed token
-      material without a nil check.
-  - codeRefs:
-    - method:244741a5feb70cc161462666e8023de4
-    - method:9047ca25a7601e3cc046867ffd2bfa3d
-    id: r.signed-token-reflection
-    level: MUST
-    text: SignedToken.ProtoMessage marks the type as a proto message, and SignedToken.ProtoReflect
-      returns the protoreflect.Message view of the receiver for reflective read and
-      write of its fields.
-  - codeRefs:
-    - method:239383bafadc8eb4b699e5ef8fcb3860
-    - struct:0c3d99ca789793f04b7eb697d811ab0e
-    id: r.signed-token-reset-zeroes
-    level: MUST
-    text: SignedToken.Reset replaces the receiver with a zero-value SignedToken and
-      stores the file-level message info for message index 0 in the proto message
-      state, so a reused value carries no data from its previous use.
-  - codeRefs:
-    - method:bd45d58e6d5e6bf3484ac73a5431aec4
-    id: r.signed-token-string-renders
-    level: MUST
-    text: SignedToken.String returns the protobuf text representation produced by
-      protoimpl.X.MessageStringOf for the receiver.
-  - codeRefs:
-    - method:d47d6f2f9ca7f5266c6534ca039f564c
-    id: r.token-descriptor
-    level: MUST
-    text: Token.Descriptor returns the raw gzipped file descriptor bytes and the index
-      path that locates Token inside that descriptor.
-  - codeRefs:
-    - method:af75743eace4d8810877000c75f3d599
-    - method:cf45ac1f3a9fc1c3b83b0b74b46c4c0e
-    - method:e98ba617a1171dff4107d7d1fbf3c259
-    id: r.token-getters-nil-safe
-    level: MUST
-    text: Token.GetRandom, Token.GetIndexEpoch and Token.GetLocalIndex return the
-      corresponding field of the receiver, and each returns the field's zero value
-      (empty string or 0) when the receiver is nil.
-  - codeRefs:
-    - method:397e2591618828c08e9a886fe73f6fe8
-    - method:6f19fee25656789fb67756d55fcad4e4
-    id: r.token-reflection
-    level: MUST
-    text: Token.ProtoMessage marks the type as a proto message, and Token.ProtoReflect
-      returns the protoreflect.Message view of the receiver.
-  - codeRefs:
-    - method:f847d4576589c228298de28fe4908b7c
-    - struct:9a36db7b764465e95703935e8227c371
-    id: r.token-reset-zeroes
-    level: MUST
-    text: Token.Reset replaces the receiver with a zero-value Token and stores the
-      file-level message info for message index 1 in the proto message state.
-  - codeRefs:
-    - method:ba7124d5fb412f60d88b45e8b900417f
-    id: r.token-string-renders
-    level: MUST
-    text: Token.String returns the protobuf text representation produced by protoimpl.X.MessageStringOf
-      for the receiver.
-  - codeRefs:
-    - struct:9a36db7b764465e95703935e8227c371
-    id: r.token-wire-field-numbers
-    level: MUST
-    text: Token carries Random as protobuf field 1 (string, the unencoded equivalent
-      of the former randbase62 value), IndexEpoch as field 3 (uint32 varint, JSON
-      name indexEpoch) and LocalIndex as field 50 (string, JSON name localIndex, the
-      storage state required to have this token); these numbers and JSON names are
-      the wire and JSON contract.
-  upstream: self

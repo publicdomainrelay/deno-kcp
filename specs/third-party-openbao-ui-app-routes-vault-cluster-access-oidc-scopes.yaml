@@ -1,4 +1,78 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-ui-app-routes-vault-cluster-access-oidc-scopes
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: This context pins down the routing and model-resolution contract for the
+    OIDC scope list, create, and detail screens in the OpenBao UI so that changes
+    to those screens, or a port of them, keep the same store-backed model contract.
+    It records that the create route hands out a client-side `oidc/scope` record rather
+    than a fetched one, that the index route resolves its model with no parameters,
+    and that the detail route is keyed on a `{ name }` parameter taken from the URL.
+    It exists to make the three route classes, their injected `store` service, and
+    their `model` hook shapes explicitly specified rather than implicit in the source.
+  requirements:
+  - id: r.create-route-unsaved-record
+    level: MUST
+    text: OidcScopesCreateRoute.model must take no parameters and return a new, unsaved
+      oidc/scope record obtained from the injected store service via store.createRecord('oidc/scope'),
+      so the create screen edits a client-side record instead of a server-fetched
+      one.
+    codeRefs:
+    - class:71b1fd9421b5a5c4c1980994eef2a999
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/create.js
+  - id: r.default-export-route-class
+    level: MUST
+    text: Each of the three files must default-export exactly one class extending
+      the Ember Route base class — OidcScopesCreateRoute from create.js, OidcScopesRoute
+      from index.js, and OidcScopeRoute from scope.js — and export nothing else, so
+      the router can resolve them as the create, index, and detail routes of the OIDC
+      scopes resource.
+    codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/create.js
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/index.js
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope.js
+  - id: r.index-route-model-hook
+    level: MUST
+    text: OidcScopesRoute must override the model hook with no parameters and supply
+      the model for the OIDC scopes index (list) screen from the injected store service.
+    codeRefs:
+    - class:de9f6d7acd51217b2ef9cb3fa176a5b0
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/index.js
+  - id: r.scope-route-name-param
+    level: MUST
+    text: OidcScopeRoute.model must accept a destructured { name } parameter, taking
+      the scope name from the route's dynamic segment, and use that name to resolve
+      the single scope model for the detail screen through the injected store service.
+    codeRefs:
+    - class:271c3c6841cd1868b8eab40c1a455c38
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope.js
+  - id: r.store-service-injection
+    level: MUST
+    text: Each of the three scope route classes must declare the store service as
+      an injected service property named store, so that every model hook resolves
+      records against the application's Ember Data store rather than any other data
+      source.
+    codeRefs:
+    - class:271c3c6841cd1868b8eab40c1a455c38
+    - class:71b1fd9421b5a5c4c1980994eef2a999
+    - class:de9f6d7acd51217b2ef9cb3fa176a5b0
+  interfaces:
+  - name: OidcScopeRoute
+    kind: class
+    signature: class OidcScopeRoute extends Route
+    file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope.js
+  - name: OidcScopesCreateRoute
+    kind: class
+    signature: class OidcScopesCreateRoute extends Route
+    file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/create.js
+  - name: OidcScopesRoute
+    kind: class
+    signature: class OidcScopesRoute extends Route
+    file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/index.js
 codeRefIndex:
 - class:271c3c6841cd1868b8eab40c1a455c38 OidcScopeRoute@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope.js:9
 - class:71b1fd9421b5a5c4c1980994eef2a999 OidcScopesCreateRoute@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/create.js:9
@@ -9,77 +83,3 @@ codeRefIndex:
   index.js@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/index.js
 - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope.js
   scope.js@third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope.js
-kind: SystemContext
-metadata:
-  name: third-party-openbao-ui-app-routes-vault-cluster-access-oidc-scopes
-  namespace: default
-spec:
-  intent: This context pins down the routing and model-resolution contract for the
-    OIDC scope list, create, and detail screens in the OpenBao UI so that changes
-    to those screens, or a port of them, keep the same store-backed model contract.
-    It records that the create route hands out a client-side `oidc/scope` record rather
-    than a fetched one, that the index route resolves its model with no parameters,
-    and that the detail route is keyed on a `{ name }` parameter taken from the URL.
-    It exists to make the three route classes, their injected `store` service, and
-    their `model` hook shapes explicitly specified rather than implicit in the source.
-  interfaces:
-  - file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope.js
-    kind: class
-    name: OidcScopeRoute
-    signature: class OidcScopeRoute extends Route
-  - file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/create.js
-    kind: class
-    name: OidcScopesCreateRoute
-    signature: class OidcScopesCreateRoute extends Route
-  - file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/index.js
-    kind: class
-    name: OidcScopesRoute
-    signature: class OidcScopesRoute extends Route
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - class:71b1fd9421b5a5c4c1980994eef2a999
-    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/create.js
-    id: r.create-route-unsaved-record
-    level: MUST
-    text: OidcScopesCreateRoute.model must take no parameters and return a new, unsaved
-      oidc/scope record obtained from the injected store service via store.createRecord('oidc/scope'),
-      so the create screen edits a client-side record instead of a server-fetched
-      one.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/create.js
-    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/index.js
-    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope.js
-    id: r.default-export-route-class
-    level: MUST
-    text: Each of the three files must default-export exactly one class extending
-      the Ember Route base class — OidcScopesCreateRoute from create.js, OidcScopesRoute
-      from index.js, and OidcScopeRoute from scope.js — and export nothing else, so
-      the router can resolve them as the create, index, and detail routes of the OIDC
-      scopes resource.
-  - codeRefs:
-    - class:de9f6d7acd51217b2ef9cb3fa176a5b0
-    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/index.js
-    id: r.index-route-model-hook
-    level: MUST
-    text: OidcScopesRoute must override the model hook with no parameters and supply
-      the model for the OIDC scopes index (list) screen from the injected store service.
-  - codeRefs:
-    - class:271c3c6841cd1868b8eab40c1a455c38
-    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/scope.js
-    id: r.scope-route-name-param
-    level: MUST
-    text: OidcScopeRoute.model must accept a destructured { name } parameter, taking
-      the scope name from the route's dynamic segment, and use that name to resolve
-      the single scope model for the detail screen through the injected store service.
-  - codeRefs:
-    - class:271c3c6841cd1868b8eab40c1a455c38
-    - class:71b1fd9421b5a5c4c1980994eef2a999
-    - class:de9f6d7acd51217b2ef9cb3fa176a5b0
-    id: r.store-service-injection
-    level: MUST
-    text: Each of the three scope route classes must declare the store service as
-      an injected service property named store, so that every model hook resolves
-      records against the application's Ember Data store rather than any other data
-      source.
-  upstream: self

@@ -1,4 +1,153 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-internal-helper-osutil
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: This context exists so that callers that must refuse to read secrets from
+    world- or group-writable files, or that must confirm a file is owned by a specific
+    uid, have one audited place to ask. It separates the checks that are meaningful
+    everywhere (mode-bit inspection, digesting, permission comparison) from the ones
+    that need POSIX uid/gid data (fileinfo_unix.go) and the stubs that keep Windows
+    builds compiling, so a security check written once behaves the same wherever it
+    is called.
+  requirements:
+  - id: r.file-permissions-match
+    level: MUST
+    text: 'FilePermissionsMatch must compare the permission bits of the supplied fs.FileInfo
+      against the requested permissions: when permissions is non-zero an exact match
+      is required and any difference returns an error naming the path and the expected
+      permissions in octal, and when permissions is zero the check instead rejects
+      any mode that is writable by group or by others, returning an insecure-permissions
+      error that names the path and the offending mode.'
+    codeRefs:
+    - function:5230917cbf1f74829a48e450c17f4c02
+    - function:58ca6e3f55b39d24aa29a0b8244f6ee5
+    - function:d8871c7888dc2d4bed6db09ddc5955ac
+  - id: r.file-sha256-sum
+    level: MUST
+    text: FileSha256Sum must read the file at the given path and return the SHA-256
+      digest of its contents as a hexadecimal string, propagating any open or read
+      error to the caller instead of returning a partial digest.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/osutil/fileinfo.go
+    - function:8f224eea6f12efae1e65a6e97cb53e96
+  - id: r.file-uid-match
+    level: MUST
+    text: FileUidMatch must combine an fs.FileInfo, its path and an expected uid,
+      returning nil when the file's uid matches and an error otherwise, and it must
+      include the path in the error so the caller can tell which file was rejected.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/osutil/fileinfo_unix.go
+    - function:b5834146fd9a9b6aa4b8fd13f3cc3c6e
+  - id: r.group-other-write-predicates
+    level: MUST
+    text: IsWriteGroup must report true exactly when the group write bit (0o20) is
+      set in the mode, and IsWriteOther must report true exactly when the other write
+      bit (0o02) is set, so callers can test the two write bits independently.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/osutil/fileinfo.go
+    - function:5230917cbf1f74829a48e450c17f4c02
+    - function:d8871c7888dc2d4bed6db09ddc5955ac
+  - id: r.owner-permissions-match
+    level: MUST
+    text: OwnerPermissionsMatch must take a path, an expected uid and an expected
+      permission set, stat the path itself, and return an error when the file is owned
+      by a different uid or when its permissions fail the same exact-match-or-no-group-other-write
+      rule that FilePermissionsMatch applies, so callers never have to stat the file
+      twice.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/osutil/fileinfo.go
+    - function:f6f7b35960500a40f8def96ad643c344
+  - id: r.owner-permissions-match-file
+    level: MUST
+    text: OwnerPermissionsMatchFile must perform the same uid and permission verification
+      as OwnerPermissionsMatch but derive the file info from an already-opened *os.File
+      instead of a path, so a caller that holds the descriptor does not reopen the
+      file by name.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/osutil/fileinfo.go
+    - function:326475f15a2124fab7a15d850ad9d1cb
+  - id: r.platform-separation
+    level: MUST
+    text: The uid, gid and umask helpers that need POSIX syscall data must live in
+      fileinfo_unix.go, and fileinfo_windows.go must supply the build-tagged counterpart
+      so the package compiles on Windows without exposing the unix-only entry points
+      there.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/osutil/fileinfo_unix.go
+    - file:third_party/openbao/internal/helper/osutil/fileinfo_windows.go
+  - id: r.test-coverage
+    level: SHOULD
+    text: The permission and ownership checks should stay covered by tests that assert
+      both the accepting and rejecting cases, with the unix-specific behaviour exercised
+      in fileinfo_unix_test.go and the portable behaviour in fileinfo_test.go.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/osutil/fileinfo_test.go
+    - file:third_party/openbao/internal/helper/osutil/fileinfo_unix_test.go
+  - id: r.uid-gid-equality
+    level: MUST
+    text: FileUIDEqual and FileGIDEqual must read the underlying syscall.Stat_t through
+      fs.FileInfo.Sys() and return true only when its Uid, respectively Gid, equals
+      the requested value, returning false when the type assertion fails or the ids
+      differ.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/osutil/fileinfo_unix.go
+    - function:52c64b528a752fb717f7078d441e4fcc
+    - function:8b40f313720b4a1000c81f4f8809823d
+  - id: r.umask
+    level: MUST
+    text: Umask must install newmask as the process umask and return the umask value
+      that was in effect before the call, so a caller can restore the previous mask
+      after temporarily tightening it.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/osutil/fileinfo_unix.go
+    - function:c36bb0a2244e95f9eb9f055f6003c362
+  interfaces:
+  - name: FileGIDEqual
+    kind: function
+    signature: func FileGIDEqual(info fs.FileInfo, gid int) bool
+    file: third_party/openbao/internal/helper/osutil/fileinfo_unix.go
+  - name: FilePermissionsMatch
+    kind: function
+    signature: func FilePermissionsMatch(info fs.FileInfo, path string, permissions
+      int) error
+    file: third_party/openbao/internal/helper/osutil/fileinfo.go
+  - name: FileSha256Sum
+    kind: function
+    signature: func FileSha256Sum(path string) (result string, err error)
+    file: third_party/openbao/internal/helper/osutil/fileinfo.go
+  - name: FileUIDEqual
+    kind: function
+    signature: func FileUIDEqual(info fs.FileInfo, uid int) bool
+    file: third_party/openbao/internal/helper/osutil/fileinfo_unix.go
+  - name: FileUidMatch
+    kind: function
+    signature: func FileUidMatch(info fs.FileInfo, path string, uid int) (err error)
+    file: third_party/openbao/internal/helper/osutil/fileinfo_unix.go
+  - name: IsWriteGroup
+    kind: function
+    signature: func IsWriteGroup(mode os.FileMode) bool
+    file: third_party/openbao/internal/helper/osutil/fileinfo.go
+  - name: IsWriteOther
+    kind: function
+    signature: func IsWriteOther(mode os.FileMode) bool
+    file: third_party/openbao/internal/helper/osutil/fileinfo.go
+  - name: OwnerPermissionsMatch
+    kind: function
+    signature: func OwnerPermissionsMatch(path string, uid int, permissions int) error
+    file: third_party/openbao/internal/helper/osutil/fileinfo.go
+  - name: OwnerPermissionsMatchFile
+    kind: function
+    signature: func OwnerPermissionsMatchFile(file *os.File, uid int, permissions
+      int) error
+    file: third_party/openbao/internal/helper/osutil/fileinfo.go
+  - name: Umask
+    kind: function
+    signature: func Umask(newmask int) int
+    file: third_party/openbao/internal/helper/osutil/fileinfo_unix.go
 codeRefIndex:
 - file:third_party/openbao/internal/helper/osutil/fileinfo.go fileinfo.go@third_party/openbao/internal/helper/osutil/fileinfo.go
 - file:third_party/openbao/internal/helper/osutil/fileinfo_test.go fileinfo_test.go@third_party/openbao/internal/helper/osutil/fileinfo_test.go
@@ -15,152 +164,3 @@ codeRefIndex:
 - function:c36bb0a2244e95f9eb9f055f6003c362 Umask@third_party/openbao/internal/helper/osutil/fileinfo_unix.go:59
 - function:d8871c7888dc2d4bed6db09ddc5955ac IsWriteOther@third_party/openbao/internal/helper/osutil/fileinfo.go:20
 - function:f6f7b35960500a40f8def96ad643c344 OwnerPermissionsMatch@third_party/openbao/internal/helper/osutil/fileinfo.go:48
-kind: SystemContext
-metadata:
-  name: third-party-openbao-internal-helper-osutil
-  namespace: default
-spec:
-  intent: This context exists so that callers that must refuse to read secrets from
-    world- or group-writable files, or that must confirm a file is owned by a specific
-    uid, have one audited place to ask. It separates the checks that are meaningful
-    everywhere (mode-bit inspection, digesting, permission comparison) from the ones
-    that need POSIX uid/gid data (fileinfo_unix.go) and the stubs that keep Windows
-    builds compiling, so a security check written once behaves the same wherever it
-    is called.
-  interfaces:
-  - file: third_party/openbao/internal/helper/osutil/fileinfo_unix.go
-    kind: function
-    name: FileGIDEqual
-    signature: func FileGIDEqual(info fs.FileInfo, gid int) bool
-  - file: third_party/openbao/internal/helper/osutil/fileinfo.go
-    kind: function
-    name: FilePermissionsMatch
-    signature: func FilePermissionsMatch(info fs.FileInfo, path string, permissions
-      int) error
-  - file: third_party/openbao/internal/helper/osutil/fileinfo.go
-    kind: function
-    name: FileSha256Sum
-    signature: func FileSha256Sum(path string) (result string, err error)
-  - file: third_party/openbao/internal/helper/osutil/fileinfo_unix.go
-    kind: function
-    name: FileUIDEqual
-    signature: func FileUIDEqual(info fs.FileInfo, uid int) bool
-  - file: third_party/openbao/internal/helper/osutil/fileinfo_unix.go
-    kind: function
-    name: FileUidMatch
-    signature: func FileUidMatch(info fs.FileInfo, path string, uid int) (err error)
-  - file: third_party/openbao/internal/helper/osutil/fileinfo.go
-    kind: function
-    name: IsWriteGroup
-    signature: func IsWriteGroup(mode os.FileMode) bool
-  - file: third_party/openbao/internal/helper/osutil/fileinfo.go
-    kind: function
-    name: IsWriteOther
-    signature: func IsWriteOther(mode os.FileMode) bool
-  - file: third_party/openbao/internal/helper/osutil/fileinfo.go
-    kind: function
-    name: OwnerPermissionsMatch
-    signature: func OwnerPermissionsMatch(path string, uid int, permissions int) error
-  - file: third_party/openbao/internal/helper/osutil/fileinfo.go
-    kind: function
-    name: OwnerPermissionsMatchFile
-    signature: func OwnerPermissionsMatchFile(file *os.File, uid int, permissions
-      int) error
-  - file: third_party/openbao/internal/helper/osutil/fileinfo_unix.go
-    kind: function
-    name: Umask
-    signature: func Umask(newmask int) int
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - function:5230917cbf1f74829a48e450c17f4c02
-    - function:58ca6e3f55b39d24aa29a0b8244f6ee5
-    - function:d8871c7888dc2d4bed6db09ddc5955ac
-    id: r.file-permissions-match
-    level: MUST
-    text: 'FilePermissionsMatch must compare the permission bits of the supplied fs.FileInfo
-      against the requested permissions: when permissions is non-zero an exact match
-      is required and any difference returns an error naming the path and the expected
-      permissions in octal, and when permissions is zero the check instead rejects
-      any mode that is writable by group or by others, returning an insecure-permissions
-      error that names the path and the offending mode.'
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/osutil/fileinfo.go
-    - function:8f224eea6f12efae1e65a6e97cb53e96
-    id: r.file-sha256-sum
-    level: MUST
-    text: FileSha256Sum must read the file at the given path and return the SHA-256
-      digest of its contents as a hexadecimal string, propagating any open or read
-      error to the caller instead of returning a partial digest.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/osutil/fileinfo_unix.go
-    - function:b5834146fd9a9b6aa4b8fd13f3cc3c6e
-    id: r.file-uid-match
-    level: MUST
-    text: FileUidMatch must combine an fs.FileInfo, its path and an expected uid,
-      returning nil when the file's uid matches and an error otherwise, and it must
-      include the path in the error so the caller can tell which file was rejected.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/osutil/fileinfo.go
-    - function:5230917cbf1f74829a48e450c17f4c02
-    - function:d8871c7888dc2d4bed6db09ddc5955ac
-    id: r.group-other-write-predicates
-    level: MUST
-    text: IsWriteGroup must report true exactly when the group write bit (0o20) is
-      set in the mode, and IsWriteOther must report true exactly when the other write
-      bit (0o02) is set, so callers can test the two write bits independently.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/osutil/fileinfo.go
-    - function:f6f7b35960500a40f8def96ad643c344
-    id: r.owner-permissions-match
-    level: MUST
-    text: OwnerPermissionsMatch must take a path, an expected uid and an expected
-      permission set, stat the path itself, and return an error when the file is owned
-      by a different uid or when its permissions fail the same exact-match-or-no-group-other-write
-      rule that FilePermissionsMatch applies, so callers never have to stat the file
-      twice.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/osutil/fileinfo.go
-    - function:326475f15a2124fab7a15d850ad9d1cb
-    id: r.owner-permissions-match-file
-    level: MUST
-    text: OwnerPermissionsMatchFile must perform the same uid and permission verification
-      as OwnerPermissionsMatch but derive the file info from an already-opened *os.File
-      instead of a path, so a caller that holds the descriptor does not reopen the
-      file by name.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/osutil/fileinfo_unix.go
-    - file:third_party/openbao/internal/helper/osutil/fileinfo_windows.go
-    id: r.platform-separation
-    level: MUST
-    text: The uid, gid and umask helpers that need POSIX syscall data must live in
-      fileinfo_unix.go, and fileinfo_windows.go must supply the build-tagged counterpart
-      so the package compiles on Windows without exposing the unix-only entry points
-      there.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/osutil/fileinfo_test.go
-    - file:third_party/openbao/internal/helper/osutil/fileinfo_unix_test.go
-    id: r.test-coverage
-    level: SHOULD
-    text: The permission and ownership checks should stay covered by tests that assert
-      both the accepting and rejecting cases, with the unix-specific behaviour exercised
-      in fileinfo_unix_test.go and the portable behaviour in fileinfo_test.go.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/osutil/fileinfo_unix.go
-    - function:52c64b528a752fb717f7078d441e4fcc
-    - function:8b40f313720b4a1000c81f4f8809823d
-    id: r.uid-gid-equality
-    level: MUST
-    text: FileUIDEqual and FileGIDEqual must read the underlying syscall.Stat_t through
-      fs.FileInfo.Sys() and return true only when its Uid, respectively Gid, equals
-      the requested value, returning false when the type assertion fails or the ids
-      differ.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/osutil/fileinfo_unix.go
-    - function:c36bb0a2244e95f9eb9f055f6003c362
-    id: r.umask
-    level: MUST
-    text: Umask must install newmask as the process umask and return the umask value
-      that was in effect before the call, so a caller can restore the previous mask
-      after temporarily tightening it.
-  upstream: self

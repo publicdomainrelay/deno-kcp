@@ -1,4 +1,132 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-ui-lib-pki-addon-routes-issuers-issuer
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'This context exists to document the routing layer for a single issuer inside
+    the PKI secrets engine UI: how each issuer sub-screen loads its model, which store
+    records or raw endpoints it touches, and what breadcrumb trail it renders. It
+    gives a reader the contract each route must satisfy — model shape, controller
+    setup, mount-path awareness and confirm-leave behavior — without restating the
+    templates or components that consume it.'
+  requirements:
+  - id: r.cross-sign-model
+    level: MUST
+    text: The cross-sign route's `model()` returns the parent issuer by calling `this.modelFor('issuers.issuer')`
+      unchanged, and its breadcrumb trail ends with the label `cross-sign`.
+    codeRefs:
+    - class:0e431584883ac1d65f2b411946d203a2
+    - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer/cross-sign.js
+  - id: r.details-fetch-cert-by-format
+    level: MUST
+    text: '`fetchCertByFormat(issuerId, format)` builds `/v1/${this.secretMountPath.currentPath}/issuer/${issuerId}/${format}`,
+      issues an unauthenticated GET through the application adapter''s `rawRequest`,
+      returns `response.blob()` for format `der` and `response.text()` otherwise,
+      and returns `null` when the request throws.'
+    codeRefs:
+    - class:39d78ac404991312dcac6b1516416251
+    - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer/details.js
+  - id: r.details-is-root
+    level: MUST
+    text: '`isRoot({ certificate, keyId })` returns true only when `verifyCertificates(certificate,
+      certificate)` reports the certificate self-signed and a `keyId` is present;
+      the details breadcrumb trail ends with the issuer id.'
+    codeRefs:
+    - class:39d78ac404991312dcac6b1516416251
+    - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer/details.js
+  - id: r.details-model-hash
+    level: MUST
+    text: The details route's `model()` resolves a hash of the parent issuer, the
+      PEM form, the DER form and an `isRotatable` flag, so every download format is
+      available before the template renders.
+    codeRefs:
+    - class:39d78ac404991312dcac6b1516416251
+    - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer/details.js
+  - id: r.edit-model
+    level: MUST
+    text: The edit route's `model()` reads `issuer_ref` from `this.paramsFor('issuers/issuer')`
+      and queries a `pki/issuer` record scoped to the current secrets mount path by
+      that id; its breadcrumb trail ends with the label `update`.
+    codeRefs:
+    - class:b3deadcbb72d007d3d0c835b0d109355
+    - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer/edit.js
+  - id: r.inject-store-and-mount-path
+    level: MUST
+    text: Every issuer sub-route injects the `store` and `secretMountPath` services
+      as class fields, so it can query PKI records and read the currently selected
+      secrets mount path with `this.secretMountPath.currentPath`.
+    codeRefs:
+    - class:0e431584883ac1d65f2b411946d203a2
+    - class:39d78ac404991312dcac6b1516416251
+    - class:6ea813b535460b9ce9338711a5e87b54
+    - class:b3deadcbb72d007d3d0c835b0d109355
+    - class:fccd8c46422fab159c157923ce406406
+  - id: r.rotate-root-confirm-leave
+    level: MUST
+    text: The rotate-root route is decorated with `@withConfirmLeave('model.newRootModel')`,
+      so leaving the screen with a dirty new root model asks for confirmation, and
+      its breadcrumb trail ends with the label `rotate root`.
+    codeRefs:
+    - class:6ea813b535460b9ce9338711a5e87b54
+    - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer/rotate-root.js
+  - id: r.rotate-root-model
+    level: MUST
+    text: 'The rotate-root route parses the parent issuer''s certificate, joins any
+      `parsing_errors` messages with `, ` into a single `parsingErrors` value, and
+      creates a new `pki/action` record with `actionType: ''rotate-root''`, `type:
+      ''internal''` and the camelized old-root certificate settings copied over, resolving
+      `{ oldRoot, newRootModel, parsingErrors }`.'
+    codeRefs:
+    - class:6ea813b535460b9ce9338711a5e87b54
+    - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer/rotate-root.js
+  - id: r.set-breadcrumbs
+    level: MUST
+    text: 'Each route''s `setupController` calls `super.setupController(controller,
+      resolvedModel)` and then assigns `controller.breadcrumbs`, an ordered array
+      that starts with a links-to-`secrets` entry (`linkExternal: true`), the current
+      secrets mount path pointing at `overview`, an `issuers` entry pointing at `issuers.index`
+      with the mount path as model, an issuer entry pointing at `issuers.issuer.details`
+      with the mount path and issuer id as models, and ends with the label of the
+      current step.'
+    codeRefs:
+    - class:0e431584883ac1d65f2b411946d203a2
+    - class:39d78ac404991312dcac6b1516416251
+    - class:6ea813b535460b9ce9338711a5e87b54
+    - class:b3deadcbb72d007d3d0c835b0d109355
+    - class:fccd8c46422fab159c157923ce406406
+  - id: r.sign-model
+    level: MUST
+    text: The sign route is decorated with `@withConfirmLeave()`; its `model()` reads
+      `issuer_ref` from `this.paramsFor('issuers/issuer')` and creates a `pki/sign-intermediate`
+      record carrying that `issuerRef`; its breadcrumb trail ends with the label `sign
+      intermediate` and points at the issuer id from `resolvedModel.issuerRef`.
+    codeRefs:
+    - class:fccd8c46422fab159c157923ce406406
+    - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer/sign.js
+  interfaces:
+  - name: PkiIssuerCrossSignRoute
+    kind: class
+    signature: class PkiIssuerCrossSignRoute extends Route
+    file: third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer/cross-sign.js
+  - name: PkiIssuerDetailsRoute
+    kind: class
+    signature: class PkiIssuerDetailsRoute extends Route
+    file: third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer/details.js
+  - name: PkiIssuerEditRoute
+    kind: class
+    signature: class PkiIssuerEditRoute extends Route
+    file: third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer/edit.js
+  - name: PkiIssuerRotateRootRoute
+    kind: class
+    signature: class PkiIssuerRotateRootRoute extends Route
+    file: third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer/rotate-root.js
+  - name: PkiIssuerSignRoute
+    kind: class
+    signature: class PkiIssuerSignRoute extends Route
+    file: third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer/sign.js
 codeRefIndex:
 - class:0e431584883ac1d65f2b411946d203a2 PkiIssuerCrossSignRoute@third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer/cross-sign.js:11
 - class:39d78ac404991312dcac6b1516416251 PkiIssuerDetailsRoute@third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer/details.js:11
@@ -10,131 +138,3 @@ codeRefIndex:
 - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer/edit.js edit.js@third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer/edit.js
 - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer/rotate-root.js rotate-root.js@third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer/rotate-root.js
 - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer/sign.js sign.js@third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer/sign.js
-kind: SystemContext
-metadata:
-  name: third-party-openbao-ui-lib-pki-addon-routes-issuers-issuer
-  namespace: default
-spec:
-  intent: 'This context exists to document the routing layer for a single issuer inside
-    the PKI secrets engine UI: how each issuer sub-screen loads its model, which store
-    records or raw endpoints it touches, and what breadcrumb trail it renders. It
-    gives a reader the contract each route must satisfy — model shape, controller
-    setup, mount-path awareness and confirm-leave behavior — without restating the
-    templates or components that consume it.'
-  interfaces:
-  - file: third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer/cross-sign.js
-    kind: class
-    name: PkiIssuerCrossSignRoute
-    signature: class PkiIssuerCrossSignRoute extends Route
-  - file: third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer/details.js
-    kind: class
-    name: PkiIssuerDetailsRoute
-    signature: class PkiIssuerDetailsRoute extends Route
-  - file: third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer/edit.js
-    kind: class
-    name: PkiIssuerEditRoute
-    signature: class PkiIssuerEditRoute extends Route
-  - file: third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer/rotate-root.js
-    kind: class
-    name: PkiIssuerRotateRootRoute
-    signature: class PkiIssuerRotateRootRoute extends Route
-  - file: third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer/sign.js
-    kind: class
-    name: PkiIssuerSignRoute
-    signature: class PkiIssuerSignRoute extends Route
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - class:0e431584883ac1d65f2b411946d203a2
-    - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer/cross-sign.js
-    id: r.cross-sign-model
-    level: MUST
-    text: The cross-sign route's `model()` returns the parent issuer by calling `this.modelFor('issuers.issuer')`
-      unchanged, and its breadcrumb trail ends with the label `cross-sign`.
-  - codeRefs:
-    - class:39d78ac404991312dcac6b1516416251
-    - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer/details.js
-    id: r.details-fetch-cert-by-format
-    level: MUST
-    text: '`fetchCertByFormat(issuerId, format)` builds `/v1/${this.secretMountPath.currentPath}/issuer/${issuerId}/${format}`,
-      issues an unauthenticated GET through the application adapter''s `rawRequest`,
-      returns `response.blob()` for format `der` and `response.text()` otherwise,
-      and returns `null` when the request throws.'
-  - codeRefs:
-    - class:39d78ac404991312dcac6b1516416251
-    - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer/details.js
-    id: r.details-is-root
-    level: MUST
-    text: '`isRoot({ certificate, keyId })` returns true only when `verifyCertificates(certificate,
-      certificate)` reports the certificate self-signed and a `keyId` is present;
-      the details breadcrumb trail ends with the issuer id.'
-  - codeRefs:
-    - class:39d78ac404991312dcac6b1516416251
-    - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer/details.js
-    id: r.details-model-hash
-    level: MUST
-    text: The details route's `model()` resolves a hash of the parent issuer, the
-      PEM form, the DER form and an `isRotatable` flag, so every download format is
-      available before the template renders.
-  - codeRefs:
-    - class:b3deadcbb72d007d3d0c835b0d109355
-    - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer/edit.js
-    id: r.edit-model
-    level: MUST
-    text: The edit route's `model()` reads `issuer_ref` from `this.paramsFor('issuers/issuer')`
-      and queries a `pki/issuer` record scoped to the current secrets mount path by
-      that id; its breadcrumb trail ends with the label `update`.
-  - codeRefs:
-    - class:0e431584883ac1d65f2b411946d203a2
-    - class:39d78ac404991312dcac6b1516416251
-    - class:6ea813b535460b9ce9338711a5e87b54
-    - class:b3deadcbb72d007d3d0c835b0d109355
-    - class:fccd8c46422fab159c157923ce406406
-    id: r.inject-store-and-mount-path
-    level: MUST
-    text: Every issuer sub-route injects the `store` and `secretMountPath` services
-      as class fields, so it can query PKI records and read the currently selected
-      secrets mount path with `this.secretMountPath.currentPath`.
-  - codeRefs:
-    - class:6ea813b535460b9ce9338711a5e87b54
-    - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer/rotate-root.js
-    id: r.rotate-root-confirm-leave
-    level: MUST
-    text: The rotate-root route is decorated with `@withConfirmLeave('model.newRootModel')`,
-      so leaving the screen with a dirty new root model asks for confirmation, and
-      its breadcrumb trail ends with the label `rotate root`.
-  - codeRefs:
-    - class:6ea813b535460b9ce9338711a5e87b54
-    - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer/rotate-root.js
-    id: r.rotate-root-model
-    level: MUST
-    text: 'The rotate-root route parses the parent issuer''s certificate, joins any
-      `parsing_errors` messages with `, ` into a single `parsingErrors` value, and
-      creates a new `pki/action` record with `actionType: ''rotate-root''`, `type:
-      ''internal''` and the camelized old-root certificate settings copied over, resolving
-      `{ oldRoot, newRootModel, parsingErrors }`.'
-  - codeRefs:
-    - class:0e431584883ac1d65f2b411946d203a2
-    - class:39d78ac404991312dcac6b1516416251
-    - class:6ea813b535460b9ce9338711a5e87b54
-    - class:b3deadcbb72d007d3d0c835b0d109355
-    - class:fccd8c46422fab159c157923ce406406
-    id: r.set-breadcrumbs
-    level: MUST
-    text: 'Each route''s `setupController` calls `super.setupController(controller,
-      resolvedModel)` and then assigns `controller.breadcrumbs`, an ordered array
-      that starts with a links-to-`secrets` entry (`linkExternal: true`), the current
-      secrets mount path pointing at `overview`, an `issuers` entry pointing at `issuers.index`
-      with the mount path as model, an issuer entry pointing at `issuers.issuer.details`
-      with the mount path and issuer id as models, and ends with the label of the
-      current step.'
-  - codeRefs:
-    - class:fccd8c46422fab159c157923ce406406
-    - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer/sign.js
-    id: r.sign-model
-    level: MUST
-    text: The sign route is decorated with `@withConfirmLeave()`; its `model()` reads
-      `issuer_ref` from `this.paramsFor('issuers/issuer')` and creates a `pki/sign-intermediate`
-      record carrying that `issuerRef`; its breadcrumb trail ends with the label `sign
-      intermediate` and points at the issuer id from `resolvedModel.issuerRef`.
-  upstream: self

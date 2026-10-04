@@ -1,15 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/internal/command/agentproxyshared/winsvc/service.go service.go@third_party/openbao/internal/command/agentproxyshared/winsvc/service.go
-- file:third_party/openbao/internal/command/agentproxyshared/winsvc/service_windows.go
-  service_windows.go@third_party/openbao/internal/command/agentproxyshared/winsvc/service_windows.go
-- function:10e62384985d4e46bd75edda25ec0c6f ShutdownChannel@third_party/openbao/internal/command/agentproxyshared/winsvc/service.go:10
-- method:37a50972e1aea1705742d82736abad05 serviceWindows.Execute@third_party/openbao/internal/command/agentproxyshared/winsvc/service_windows.go:29
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-command-agentproxyshared-winsvc
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'This context exists so the agent proxy can run as a native Windows service.
     The Windows service manager drives the process through a handler interface, but
     the rest of the agent only needs one portable signal: a channel that fires when
@@ -17,77 +13,81 @@ spec:
     surface, and serviceWindows.Execute is the adapter that translates Windows service
     control requests into it. The init hook keeps normal interactive invocations unaffected,
     registering the handler only in a real service session.'
-  interfaces:
-  - file: third_party/openbao/internal/command/agentproxyshared/winsvc/service.go
-    kind: function
-    name: ShutdownChannel
-    signature: func ShutdownChannel() <-chan int
-  - file: third_party/openbao/internal/command/agentproxyshared/winsvc/service_windows.go
-    kind: method
-    name: serviceWindows.Execute
-    signature: func (serviceWindows) Execute(args []string, r <-chan wsvc.ChangeRequest,
-      s chan<- wsvc.Status) (svcSpecificEC bool, exitCode uint32)
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - method:37a50972e1aea1705742d82736abad05
-    id: r.execute-answers-interrogate
+  - id: r.execute-answers-interrogate
     level: MUST
     text: On an Interrogate command, Execute writes the request's current status back
       on the status channel and continues the loop, keeping the service manager's
       view of the service state up to date.
-  - codeRefs:
+    codeRefs:
     - method:37a50972e1aea1705742d82736abad05
-    id: r.execute-loops-on-change-requests
+  - id: r.execute-loops-on-change-requests
     level: MUST
     text: Execute loops reading change requests from the request channel and dispatches
       on the command field, so the service stays alive and responsive until a stop
       or shutdown command ends it.
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agentproxyshared/winsvc/service_windows.go
+    codeRefs:
     - method:37a50972e1aea1705742d82736abad05
-    id: r.execute-reports-start-and-running
+  - id: r.execute-reports-start-and-running
     level: MUST
     text: serviceWindows.Execute sends StartPending on the status channel, then sends
       Running with accepts set to AcceptStop combined with AcceptShutdown, declaring
       the two control codes the service will honor.
-  - codeRefs:
-    - function:10e62384985d4e46bd75edda25ec0c6f
+    codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/winsvc/service_windows.go
     - method:37a50972e1aea1705742d82736abad05
-    id: r.execute-stops-on-stop-or-shutdown
+  - id: r.execute-stops-on-stop-or-shutdown
     level: MUST
     text: On Stop or Shutdown, Execute sends StopPending, sends the value 1 on chanGraceExit
       so anything waiting on ShutdownChannel learns that shutdown was requested, then
       returns svcSpecificEC false with exit code 0, which ends the service.
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agentproxyshared/winsvc/service_windows.go
-    id: r.init-detects-interactive-session
+    codeRefs:
+    - function:10e62384985d4e46bd75edda25ec0c6f
+    - method:37a50972e1aea1705742d82736abad05
+  - id: r.init-detects-interactive-session
     level: MUST
     text: The package init calls wsvc.IsAnInteractiveSession, panics if that check
       returns an error, and returns early when the session is interactive, so the
       program never registers itself as a service while running from a console.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/command/agentproxyshared/winsvc/service_windows.go
-    id: r.init-runs-service-handler
+  - id: r.init-runs-service-handler
     level: MUST
     text: When the session is not interactive, init launches wsvc.Run with an empty
       service name and a serviceWindows value in a goroutine, so the Windows service
       dispatcher reaches serviceWindows.Execute.
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agentproxyshared/winsvc/service.go
-    - function:10e62384985d4e46bd75edda25ec0c6f
-    id: r.shutdown-channel-exposes-grace-exit
+    codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/winsvc/service_windows.go
+  - id: r.shutdown-channel-exposes-grace-exit
     level: MUST
     text: ShutdownChannel returns the receive-only end of the package-level chanGraceExit
       channel, so callers outside the package can wait for the signal that a shutdown
       request arrived for the service without being able to send on it.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/command/agentproxyshared/winsvc/service.go
-    - file:third_party/openbao/internal/command/agentproxyshared/winsvc/service_windows.go
-    id: r.windows-only-build
+    - function:10e62384985d4e46bd75edda25ec0c6f
+  - id: r.windows-only-build
     level: MUST
     text: The service handler and its init registration live in a Windows-specific
       file, so the interactive-session check, the wsvc handler, and the service registration
       are compiled only on Windows while ShutdownChannel stays available on every
       platform.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/winsvc/service.go
+    - file:third_party/openbao/internal/command/agentproxyshared/winsvc/service_windows.go
+  interfaces:
+  - name: ShutdownChannel
+    kind: function
+    signature: func ShutdownChannel() <-chan int
+    file: third_party/openbao/internal/command/agentproxyshared/winsvc/service.go
+  - name: serviceWindows.Execute
+    kind: method
+    signature: func (serviceWindows) Execute(args []string, r <-chan wsvc.ChangeRequest,
+      s chan<- wsvc.Status) (svcSpecificEC bool, exitCode uint32)
+    file: third_party/openbao/internal/command/agentproxyshared/winsvc/service_windows.go
+codeRefIndex:
+- file:third_party/openbao/internal/command/agentproxyshared/winsvc/service.go service.go@third_party/openbao/internal/command/agentproxyshared/winsvc/service.go
+- file:third_party/openbao/internal/command/agentproxyshared/winsvc/service_windows.go
+  service_windows.go@third_party/openbao/internal/command/agentproxyshared/winsvc/service_windows.go
+- function:10e62384985d4e46bd75edda25ec0c6f ShutdownChannel@third_party/openbao/internal/command/agentproxyshared/winsvc/service.go:10
+- method:37a50972e1aea1705742d82736abad05 serviceWindows.Execute@third_party/openbao/internal/command/agentproxyshared/winsvc/service_windows.go:29

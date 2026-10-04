@@ -1,4 +1,162 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-internal-serviceregistration-kubernetes-client
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'The package is vendored third-party code inside deno-kcp so the OpenBao
+    service-registration path can talk to Kubernetes without pulling in the full client-go
+    dependency tree. The spec records the behavior the vendored copy must keep: authenticated,
+    retrying, TLS-verified pod reads and non-destructive pod patches, plus the sanitization
+    and secret-hygiene rules that make its error output safe to log.'
+  requirements:
+  - id: r.client-construction
+    level: MUST
+    text: New loads the in-cluster configuration (host, CA pool, bearer token) and
+      returns its error unchanged when the process is not running in Kubernetes; on
+      success it stores the given logger, the loaded Config, and a fresh stop channel
+      on the returned Client.
+    codeRefs:
+    - file:third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
+    - function:38bb0084dd32c963a07b38054a0bdac6
+    - struct:4e2e0ec469393f723833e5823590ffbf
+  - id: r.get-pod
+    level: MUST
+    text: GetPod rejects an empty namespace with ErrNamespaceUnset and an empty pod
+      name with ErrPodNameUnset, otherwise issues a GET to /api/v1/namespaces/{namespace}/pods/{podName}
+      against the configured host and decodes the JSON response body into a Pod.
+    codeRefs:
+    - method:d896f3ab4c4c6ecaf45ab152335a5a4d
+    - struct:cdfabb91b2b8b15f5a4d7abee71b4c05
+  - id: r.https-and-auth
+    level: MUST
+    text: 'Every request sets an Authorization header of the form Bearer plus the
+      configured bearer token, an Accept: application/json header, and a transport
+      whose TLS client config uses the Config''s CA cert pool as RootCAs.'
+    codeRefs:
+    - file:third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
+    - struct:74b983625d770afde3cc2330d306d1e0
+  - id: r.in-cluster-config
+    level: MUST
+    text: inClusterConfig reads host and port from KUBERNETES_SERVICE_HOST and KUBERNETES_SERVICE_PORT,
+      returning ErrNotInCluster when either is empty, then reads the service-account
+      token file and root CA file, builds the x509 pool, and returns a Config whose
+      Host is scheme plus host:port and whose BearerToken comes from the token file.
+    codeRefs:
+    - file:third_party/openbao/internal/serviceregistration/kubernetes/client/config.go
+    - struct:74b983625d770afde3cc2330d306d1e0
+  - id: r.namespace-and-pod-env-names
+    level: MAY
+    text: The package exposes EnvVarKubernetesNamespace (BAO_K8S_NAMESPACE) and EnvVarKubernetesPodName
+      (BAO_K8S_POD_NAME) as consistently named constants for callers that read the
+      Downward API, and does not read them itself.
+    codeRefs:
+    - file:third_party/openbao/internal/serviceregistration/kubernetes/client/config.go
+  - id: r.no-secret-leak
+    level: SHOULD
+    text: Error strings returned from request handling include only the request method,
+      request URL and response status code, never the request or response body, so
+      tokens and payloads do not reach logs.
+    codeRefs:
+    - file:third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
+  - id: r.not-found-error
+    level: MUST
+    text: A 404 response is reported as a *ErrNotFound whose Error method returns
+      the sanitized debugging string rather than any response body.
+    codeRefs:
+    - method:007cf6996b84c2226351d047c38ee34d
+    - struct:01b68315a7b0530558da0002b3fc5df5
+  - id: r.patch-pod
+    level: MUST
+    text: PatchPod rejects an empty namespace or pod name with the same sentinel errors,
+      is a no-op when called with no patches, errors when any patch carries the unset
+      operation, and otherwise sends a PATCH to the pod endpoint with Content-Type
+      application/json-patch+json and a JSON array whose entries carry op, path and
+      value.
+    codeRefs:
+    - method:8c5bdc4d7ed53254e6df99cb6e4ee0e9
+    - struct:a088b03521cca1c4d3d2e952e024130a
+    - type_alias:a4a4add93fec47e4f99b7c606e6b0768
+  - id: r.retry-policy
+    level: MUST
+    text: Requests run through a retryable HTTP client configured with RetryWaitMin
+      500ms, RetryWaitMax 30s and RetryMax 10; the check-retry predicate retries a
+      nil response and the 500/502/503/504 statuses, treats 200/201/202/204 as success,
+      and on 401/403 re-reads the in-cluster config so a refreshed bearer token is
+      picked up before retrying.
+    codeRefs:
+    - file:third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
+  - id: r.sanitize
+    level: MUST
+    text: Sanitize maps each rune of its input to itself when it is a letter, a number,
+      or one of '-', '_' or '.', and to '-' otherwise, so the result contains only
+      Kubernetes-legal characters.
+    codeRefs:
+    - function:7cded39025065bccb4b10b4487bbfa8d
+  - id: r.shutdown-cancels-retries
+    level: MUST
+    text: Shutdown closes the client's stop channel, and the in-flight request context
+      watches that channel so an in-progress retry loop is cancelled instead of hanging
+      at process exit.
+    codeRefs:
+    - method:bab3187923123b97927ccf502569a7af
+    - struct:4e2e0ec469393f723833e5823590ffbf
+  interfaces:
+  - name: Client
+    kind: struct
+    signature: type Client struct
+    file: third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
+  - name: Client.GetPod
+    kind: method
+    signature: func (c *Client) GetPod(namespace, podName string) (*Pod, error)
+    file: third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
+  - name: Client.PatchPod
+    kind: method
+    signature: func (c *Client) PatchPod(namespace, podName string, patches ...*Patch)
+      error
+    file: third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
+  - name: Client.Shutdown
+    kind: method
+    signature: func (c *Client) Shutdown()
+    file: third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
+  - name: Config
+    kind: struct
+    signature: type Config struct
+    file: third_party/openbao/internal/serviceregistration/kubernetes/client/config.go
+  - name: ErrNotFound
+    kind: struct
+    signature: type ErrNotFound struct
+    file: third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
+  - name: ErrNotFound.Error
+    kind: method
+    signature: func (e *ErrNotFound) Error() string
+    file: third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
+  - name: Metadata
+    kind: struct
+    signature: type Metadata struct
+    file: third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
+  - name: New
+    kind: function
+    signature: func New(logger hclog.Logger) (*Client, error)
+    file: third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
+  - name: Patch
+    kind: struct
+    signature: type Patch struct
+    file: third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
+  - name: PatchOperation
+    kind: type_alias
+    signature: type PatchOperation string
+    file: third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
+  - name: Pod
+    kind: struct
+    signature: type Pod struct
+    file: third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
+  - name: Sanitize
+    kind: function
+    signature: func Sanitize(val string) string
+    file: third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
 codeRefIndex:
 - file:third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
   client.go@third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
@@ -18,161 +176,3 @@ codeRefIndex:
 - struct:a088b03521cca1c4d3d2e952e024130a Patch@third_party/openbao/internal/serviceregistration/kubernetes/client/client.go:246
 - struct:cdfabb91b2b8b15f5a4d7abee71b4c05 Pod@third_party/openbao/internal/serviceregistration/kubernetes/client/client.go:225
 - type_alias:a4a4add93fec47e4f99b7c606e6b0768 PatchOperation@third_party/openbao/internal/serviceregistration/kubernetes/client/client.go:238
-kind: SystemContext
-metadata:
-  name: third-party-openbao-internal-serviceregistration-kubernetes-client
-  namespace: default
-spec:
-  intent: 'The package is vendored third-party code inside deno-kcp so the OpenBao
-    service-registration path can talk to Kubernetes without pulling in the full client-go
-    dependency tree. The spec records the behavior the vendored copy must keep: authenticated,
-    retrying, TLS-verified pod reads and non-destructive pod patches, plus the sanitization
-    and secret-hygiene rules that make its error output safe to log.'
-  interfaces:
-  - file: third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
-    kind: struct
-    name: Client
-    signature: type Client struct
-  - file: third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
-    kind: method
-    name: Client.GetPod
-    signature: func (c *Client) GetPod(namespace, podName string) (*Pod, error)
-  - file: third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
-    kind: method
-    name: Client.PatchPod
-    signature: func (c *Client) PatchPod(namespace, podName string, patches ...*Patch)
-      error
-  - file: third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
-    kind: method
-    name: Client.Shutdown
-    signature: func (c *Client) Shutdown()
-  - file: third_party/openbao/internal/serviceregistration/kubernetes/client/config.go
-    kind: struct
-    name: Config
-    signature: type Config struct
-  - file: third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
-    kind: struct
-    name: ErrNotFound
-    signature: type ErrNotFound struct
-  - file: third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
-    kind: method
-    name: ErrNotFound.Error
-    signature: func (e *ErrNotFound) Error() string
-  - file: third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
-    kind: struct
-    name: Metadata
-    signature: type Metadata struct
-  - file: third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
-    kind: function
-    name: New
-    signature: func New(logger hclog.Logger) (*Client, error)
-  - file: third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
-    kind: struct
-    name: Patch
-    signature: type Patch struct
-  - file: third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
-    kind: type_alias
-    name: PatchOperation
-    signature: type PatchOperation string
-  - file: third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
-    kind: struct
-    name: Pod
-    signature: type Pod struct
-  - file: third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
-    kind: function
-    name: Sanitize
-    signature: func Sanitize(val string) string
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - file:third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
-    - function:38bb0084dd32c963a07b38054a0bdac6
-    - struct:4e2e0ec469393f723833e5823590ffbf
-    id: r.client-construction
-    level: MUST
-    text: New loads the in-cluster configuration (host, CA pool, bearer token) and
-      returns its error unchanged when the process is not running in Kubernetes; on
-      success it stores the given logger, the loaded Config, and a fresh stop channel
-      on the returned Client.
-  - codeRefs:
-    - method:d896f3ab4c4c6ecaf45ab152335a5a4d
-    - struct:cdfabb91b2b8b15f5a4d7abee71b4c05
-    id: r.get-pod
-    level: MUST
-    text: GetPod rejects an empty namespace with ErrNamespaceUnset and an empty pod
-      name with ErrPodNameUnset, otherwise issues a GET to /api/v1/namespaces/{namespace}/pods/{podName}
-      against the configured host and decodes the JSON response body into a Pod.
-  - codeRefs:
-    - file:third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
-    - struct:74b983625d770afde3cc2330d306d1e0
-    id: r.https-and-auth
-    level: MUST
-    text: 'Every request sets an Authorization header of the form Bearer plus the
-      configured bearer token, an Accept: application/json header, and a transport
-      whose TLS client config uses the Config''s CA cert pool as RootCAs.'
-  - codeRefs:
-    - file:third_party/openbao/internal/serviceregistration/kubernetes/client/config.go
-    - struct:74b983625d770afde3cc2330d306d1e0
-    id: r.in-cluster-config
-    level: MUST
-    text: inClusterConfig reads host and port from KUBERNETES_SERVICE_HOST and KUBERNETES_SERVICE_PORT,
-      returning ErrNotInCluster when either is empty, then reads the service-account
-      token file and root CA file, builds the x509 pool, and returns a Config whose
-      Host is scheme plus host:port and whose BearerToken comes from the token file.
-  - codeRefs:
-    - file:third_party/openbao/internal/serviceregistration/kubernetes/client/config.go
-    id: r.namespace-and-pod-env-names
-    level: MAY
-    text: The package exposes EnvVarKubernetesNamespace (BAO_K8S_NAMESPACE) and EnvVarKubernetesPodName
-      (BAO_K8S_POD_NAME) as consistently named constants for callers that read the
-      Downward API, and does not read them itself.
-  - codeRefs:
-    - file:third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
-    id: r.no-secret-leak
-    level: SHOULD
-    text: Error strings returned from request handling include only the request method,
-      request URL and response status code, never the request or response body, so
-      tokens and payloads do not reach logs.
-  - codeRefs:
-    - method:007cf6996b84c2226351d047c38ee34d
-    - struct:01b68315a7b0530558da0002b3fc5df5
-    id: r.not-found-error
-    level: MUST
-    text: A 404 response is reported as a *ErrNotFound whose Error method returns
-      the sanitized debugging string rather than any response body.
-  - codeRefs:
-    - method:8c5bdc4d7ed53254e6df99cb6e4ee0e9
-    - struct:a088b03521cca1c4d3d2e952e024130a
-    - type_alias:a4a4add93fec47e4f99b7c606e6b0768
-    id: r.patch-pod
-    level: MUST
-    text: PatchPod rejects an empty namespace or pod name with the same sentinel errors,
-      is a no-op when called with no patches, errors when any patch carries the unset
-      operation, and otherwise sends a PATCH to the pod endpoint with Content-Type
-      application/json-patch+json and a JSON array whose entries carry op, path and
-      value.
-  - codeRefs:
-    - file:third_party/openbao/internal/serviceregistration/kubernetes/client/client.go
-    id: r.retry-policy
-    level: MUST
-    text: Requests run through a retryable HTTP client configured with RetryWaitMin
-      500ms, RetryWaitMax 30s and RetryMax 10; the check-retry predicate retries a
-      nil response and the 500/502/503/504 statuses, treats 200/201/202/204 as success,
-      and on 401/403 re-reads the in-cluster config so a refreshed bearer token is
-      picked up before retrying.
-  - codeRefs:
-    - function:7cded39025065bccb4b10b4487bbfa8d
-    id: r.sanitize
-    level: MUST
-    text: Sanitize maps each rune of its input to itself when it is a letter, a number,
-      or one of '-', '_' or '.', and to '-' otherwise, so the result contains only
-      Kubernetes-legal characters.
-  - codeRefs:
-    - method:bab3187923123b97927ccf502569a7af
-    - struct:4e2e0ec469393f723833e5823590ffbf
-    id: r.shutdown-cancels-retries
-    level: MUST
-    text: Shutdown closes the client's stop channel, and the in-flight request context
-      watches that channel so an in-progress retry loop is cancelled instead of hanging
-      at process exit.
-  upstream: self

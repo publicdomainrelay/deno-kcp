@@ -1,13 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/ui/app/serializers/database/connection.js connection.js@third_party/openbao/ui/app/serializers/database/connection.js
-- file:third_party/openbao/ui/app/serializers/database/credential.js credential.js@third_party/openbao/ui/app/serializers/database/credential.js
-- file:third_party/openbao/ui/app/serializers/database/role.js role.js@third_party/openbao/ui/app/serializers/database/role.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-app-serializers-database
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'These serializers exist so the OpenBao UI can present database connections,
     roles and generated credentials as Ember Data models while the underlying API
     keeps its own wire shape. They absorb the API''s asymmetries: list endpoints return
@@ -15,78 +13,75 @@ spec:
     nothing useful, and some fields are named differently on the way out than on the
     way in. The context is the database-specific part of the UI serializer layer and
     is meant to be read together with the database models, adapters and utils/database-helpers.'
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/ui/app/serializers/database/connection.js
-    id: r.connection-attribute-omission
+  - id: r.connection-attribute-omission
     level: MUST
     text: The connection serializer MUST omit an attribute from the serialized payload
       when its value is undefined, and MUST include it otherwise only when the record
       is new or the attribute is present in snapshot.changedAttributes().
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/serializers/database/connection.js
-    id: r.connection-normalize-list-and-detail
+  - id: r.connection-normalize-list-and-detail
     level: MUST
     text: 'Connection normalization MUST branch on the payload shape: when payload.data.keys
       is an array it maps each key to {name: key, backend}; otherwise it builds a
       single record from payload.id, payload.name, payload.backend, payload.data and
       payload.data.connection_details, and renames payload.data.root_credentials_rotate_statements
       to root_rotation_statements when present.'
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/serializers/database/connection.js
-    id: r.connection-null-responses
+  - id: r.connection-null-responses
     level: MUST
     text: 'For the request types updateRecord, createRecord and deleteRecord the connection
       serializer MUST normalize to the minimal record {name: id, backend: payload.backend}
       instead of walking the payload, and for queryRecord it MUST emit the single-record
       form {id, ...connections}.'
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/serializers/database/connection.js
-    id: r.connection-primary-key
+  - id: r.connection-primary-key
     level: MUST
     text: The connection serializer MUST use 'name' as the primary key, so a connection
       record is identified by the connection name returned by the API.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/serializers/database/connection.js
-    id: r.connection-serialize-plugin-filter
+  - id: r.connection-serialize-plugin-filter
     level: MUST
     text: Serializing a connection MUST pass through unchanged when plugin_name is
       absent or is not found in AVAILABLE_PLUGIN_TYPES; when the plugin type is known,
       the outgoing payload MUST be filtered to only the attributes declared in that
       plugin type's fields plus 'backend', deleting every other key.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/serializers/database/credential.js
-    id: r.credential-field-rename
+    codeRefs:
+    - file:third_party/openbao/ui/app/serializers/database/connection.js
+  - id: r.credential-field-rename
     level: MUST
     text: Credential normalization MUST map payload.data.username and payload.data.password
       through unchanged and rename payload.lease_id to leaseId, payload.lease_duration
       to leaseDuration, payload.data.last_vault_rotation to lastVaultRotation and
       payload.data.rotation_period to rotationPeriod, carrying payload.data.ttl through
       as ttl and taking roleType from payload.roleType, which the adapter supplies.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/serializers/database/credential.js
-    id: r.credential-missing-data
+  - id: r.credential-missing-data
     level: SHOULD
     text: When a credential payload carries no data member, normalizePayload yields
       no record rather than throwing, so an empty response degrades to a missing model
       instead of an error.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/serializers/database/credential.js
-    id: r.credential-primary-key
+  - id: r.credential-primary-key
     level: MUST
     text: The credential serializer MUST use 'username' as the primary key, so a generated
       credential is identified by the username returned by the API.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/serializers/database/role.js
-    id: r.role-attribute-omission
+    codeRefs:
+    - file:third_party/openbao/ui/app/serializers/database/credential.js
+  - id: r.role-attribute-omission
     level: MUST
     text: The role serializer MUST omit an attribute from the serialized payload when
       its value is undefined, and MUST include it otherwise only when the record is
       new or the attribute is present in snapshot.changedAttributes().
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/serializers/database/role.js
-    id: r.role-normalize-list-and-detail
+  - id: r.role-normalize-list-and-detail
     level: MUST
     text: 'Role normalization MUST branch on the payload shape: when payload.data.keys
       is an array each key becomes {name, backend, type, path} where type is ''static''
@@ -97,26 +92,31 @@ spec:
       when present, and creation_statement and revocation_statement taken from the
       first element of payload.data.creation_statements and payload.data.revocation_statements
       respectively, all merged under payload.data.'
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/serializers/database/role.js
-    id: r.role-null-responses
+  - id: r.role-null-responses
     level: MUST
     text: 'For the request types updateRecord, createRecord and deleteRecord the role
       serializer MUST normalize to the minimal record {name: id, backend: payload.backend}
       instead of walking the payload.'
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/serializers/database/role.js
-    id: r.role-primary-key
+  - id: r.role-primary-key
     level: MUST
     text: The role serializer MUST use 'name' as the primary key, so a role record
       is identified by the role name returned by the API.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/serializers/database/role.js
-    id: r.role-serialize-transpose
+  - id: r.role-serialize-transpose
     level: MUST
     text: 'Serializing a role MUST convert the UI-side shape back to the API shape:
       a database array becomes db_name holding its first element, creation_statement
       becomes the one-element creation_statements array, and revocation_statement
       becomes the one-element revocation_statements array, with each singular key
       deleted after transposition.'
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/ui/app/serializers/database/role.js
+codeRefIndex:
+- file:third_party/openbao/ui/app/serializers/database/connection.js connection.js@third_party/openbao/ui/app/serializers/database/connection.js
+- file:third_party/openbao/ui/app/serializers/database/credential.js credential.js@third_party/openbao/ui/app/serializers/database/credential.js
+- file:third_party/openbao/ui/app/serializers/database/role.js role.js@third_party/openbao/ui/app/serializers/database/role.js

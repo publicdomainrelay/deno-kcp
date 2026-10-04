@@ -1,29 +1,25 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/internal/serviceregistration/kubernetes/client/cmd/kubeclient/main.go
-  main.go@third_party/openbao/internal/serviceregistration/kubernetes/client/cmd/kubeclient/main.go
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-serviceregistration-kubernetes-client-cmd-kubeclient
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: It exists to give operators and developers a throwaway, dependency-light
     binary for manual testing of the Kubernetes service-registration client against
     a live cluster. It is meant to be built and copied into a running container so
     that real `GetPod` and `PatchPod` requests can be issued from inside the cluster,
     which is why it ships as a `main` package under a `cmd/` directory rather than
     as a library.
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/internal/serviceregistration/kubernetes/client/cmd/kubeclient/main.go
-    id: r.client-construction
+  - id: r.client-construction
     level: MUST
     text: After parsing flags the command builds the client with `client.New(hclog.Default())`
       and panics if that constructor returns an error.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/serviceregistration/kubernetes/client/cmd/kubeclient/main.go
-    id: r.config-flags
+  - id: r.config-flags
     level: MUST
     text: 'The command reads its configuration only from four string flags registered
       in `init`, each defaulting to the empty string and backed by no environment
@@ -31,16 +27,16 @@ spec:
       patch list, `-namespace` supplies the Kubernetes namespace, and `-pod-name`
       supplies the pod name. A flag that is absent leaves its variable empty, and
       `flag.Parse()` is called before any client work.'
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/serviceregistration/kubernetes/client/cmd/kubeclient/main.go
-    id: r.get-pod-call
+  - id: r.get-pod-call
     level: MUST
     text: 'When `-call` is `get-pod`, the command calls `GetPod` with the `-namespace`
       and `-pod-name` values, JSON-marshals the returned pod, and prints it with the
       `pod: ` prefix; a call error panics.'
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/serviceregistration/kubernetes/client/cmd/kubeclient/main.go
-    id: r.patch-pod-call
+  - id: r.patch-pod-call
     level: MUST
     text: When `-call` is `patch-pod`, the command splits the `-patches` value on
       `,` and then each entry on `:`, requiring exactly two fields per entry and panicking
@@ -48,9 +44,9 @@ spec:
       a `client.Patch` per pair with `client.Replace` as the operation, the first
       field as the path and the second as the value, and calls `PatchPod` with the
       namespace, pod name and those patches; a call error panics.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/serviceregistration/kubernetes/client/cmd/kubeclient/main.go
-    id: r.shutdown-handling
+  - id: r.shutdown-handling
     level: MUST
     text: The work runs in a goroutine that closes its completion channel with `defer`
       when done, and `main` blocks in a select over that channel and a shutdown channel;
@@ -58,10 +54,14 @@ spec:
       and `syscall.SIGTERM` on a buffered signal channel and closes the result channel
       on the first signal, at which point `main` prints `Interrupt received, exiting...`
       and returns.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/serviceregistration/kubernetes/client/cmd/kubeclient/main.go
-    id: r.unsupported-call
+  - id: r.unsupported-call
     level: MUST
     text: 'Any `-call` value other than `get-pod` or `patch-pod`, including the empty
       default, panics with `unsupported call provided: %q`.'
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/internal/serviceregistration/kubernetes/client/cmd/kubeclient/main.go
+codeRefIndex:
+- file:third_party/openbao/internal/serviceregistration/kubernetes/client/cmd/kubeclient/main.go
+  main.go@third_party/openbao/internal/serviceregistration/kubernetes/client/cmd/kubeclient/main.go

@@ -1,4 +1,360 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-ui-app-helpers
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: This context exists to document the helper surface that OpenBao UI templates
+    call. Because the directory is vendored third-party code inside the deno-kcp repository,
+    the context records what each helper guarantees so that callers, adapters, and
+    any local patches can rely on stable behavior and on the exact exported names.
+    It also marks which helpers are pure functions of their arguments and which depend
+    on injected Ember services, so a reader knows where a helper can be evaluated
+    in isolation and where it needs a router, permissions service, or namespace context
+    to produce a value.
+  requirements:
+  - id: r.add-numeric-sum
+    level: MUST
+    text: add reduces its params array to a numeric sum, parsing each element with
+      parseInt and starting the accumulator at zero.
+    codeRefs:
+    - file:third_party/openbao/ui/app/helpers/add.js
+    - function:66a6525e6882aeaf6e43aa0133dd5c96
+  - id: r.add-to-array-dedupe
+    level: MUST
+    text: addToArray copies the input array, appends the given value, and returns
+      the result deduplicated; when the first argument is not an array it must fail
+      an assertion instead of returning a value.
+    codeRefs:
+    - file:third_party/openbao/ui/app/helpers/add-to-array.js
+    - function:680fbae19f51d45475c2a5da31c3a1a7
+  - id: r.auth-section-tabs
+    level: MUST
+    text: tabsForAuthSection builds the tab list for an auth method from the model,
+      the current section type defaulting to authSettings, and the available paths,
+      so the rendered tabs follow the routes the caller passes in.
+    codeRefs:
+    - file:third_party/openbao/ui/app/helpers/tabs-for-auth-section.js
+    - function:32b08f55e5a5fb8bb84b7635c6f33c3b
+  - id: r.await-helper-settled-value
+    level: MUST
+    text: AwaitHelper.compute returns a non-thenable argument unchanged, but for a
+      thenable it returns the last settled value and only starts a new resolve when
+      the promise differs from the stored lastPromise, clearing the cached value first;
+      AwaitHelper.resolve awaits the promise, stores a caught rejection as the value,
+      and calls recompute only when the resolved promise is still the newest one.
+    codeRefs:
+    - class:f82fd5e6fe2b966ab5cf9e48a144b12a
+    - file:third_party/openbao/ui/app/helpers/await.js
+  - id: r.aws-regions-copy
+    level: MUST
+    text: regions returns a copy of the internal AWS region list so that callers cannot
+      mutate the module-level REGIONS constant.
+    codeRefs:
+    - file:third_party/openbao/ui/app/helpers/aws-regions.js
+    - function:156b3a5217ffd49e614dba532758f81a
+  - id: r.coerce-eq-comparison
+    level: MUST
+    text: coerceEq compares its two params under coercion and reports whether they
+      are equal, so template conditionals work across string and number forms of the
+      same value.
+    codeRefs:
+    - file:third_party/openbao/ui/app/helpers/coerce-eq.js
+    - function:5101beb0a248ee5a9d65d8db31b46b0b
+  - id: r.current-mount-path-service
+    level: MUST
+    text: CurrentMountPathHelper derives the active mount path from the injected router
+      service rather than from a static value, so the helper updates as the application
+      navigates between mounts.
+    codeRefs:
+    - class:58a093d44bc16347c712bd2dd0dc19d8
+    - file:third_party/openbao/ui/app/helpers/current-mount-path.js
+  - id: r.date-from-now-options
+    level: SHOULD
+    text: dateFromNow renders a date relative to the current time and accepts an options
+      object that adjusts the rendering, with the shared date behavior coming from
+      the -date-base module used by the other date helpers.
+    codeRefs:
+    - file:third_party/openbao/ui/app/helpers/-date-base.js
+    - file:third_party/openbao/ui/app/helpers/date-from-now.js
+    - function:51011254c696689ce5506de3701eb056
+  - id: r.date-ordering-predicates
+    level: MUST
+    text: The is-after and is-before helpers compare two dates and return the corresponding
+      ordering result for use in template conditionals.
+    codeRefs:
+    - file:third_party/openbao/ui/app/helpers/is-after.js
+    - file:third_party/openbao/ui/app/helpers/is-before.js
+    - file:third_party/openbao/ui/app/helpers/now.js
+  - id: r.empty-value-default
+    level: MUST
+    text: isEmptyValue reports whether a value counts as empty, and the hasDefault
+      option in its options object changes that judgement for values that carry a
+      default.
+    codeRefs:
+    - file:third_party/openbao/ui/app/helpers/is-empty-value.js
+    - function:3a7dd62a4457f657a023dc2ec5ace076
+  - id: r.filter-wildcard-count
+    level: MUST
+    text: filterWildcard treats a non-object first argument as an id, converts the
+      wildcard characters in it to a regular expression anchored at both ends, and
+      returns the count of array items matching that pattern; it returns undefined
+      when either argument is missing.
+    codeRefs:
+    - file:third_party/openbao/ui/app/helpers/filter-wildcard.js
+    - function:17b81b39cedf651279382cdac2bb2bd9
+  - id: r.identity-show-tabs
+    level: MUST
+    text: tabsForIdentityShow builds the tab list for an identity show view from the
+      model type and group type, selecting the tabs that apply to that combination.
+    codeRefs:
+    - file:third_party/openbao/ui/app/helpers/tabs-for-identity-show.js
+    - function:cf2eed3ac4f89d560e029e465496e4bc
+  - id: r.jsonify-and-stringify
+    level: MUST
+    text: jsonify serializes its target to a JSON string, and stringify serializes
+      its target while honoring a skipFormat option that suppresses the formatted
+      output.
+    codeRefs:
+    - file:third_party/openbao/ui/app/helpers/jsonify.js
+    - file:third_party/openbao/ui/app/helpers/stringify.js
+    - function:a9677201a6f8c5cd48f62d6fd5e772a7
+    - function:ec5df4da4e815b41e2680553886eabf5
+  - id: r.mountable-auth-methods-list
+    level: MUST
+    text: methods returns the list of auth method types that the UI offers for mounting,
+      drawn from the supported auth backend metadata.
+    codeRefs:
+    - file:third_party/openbao/ui/app/helpers/mountable-auth-methods.js
+    - function:46f6f8ef583dd6de96284ed75c010573
+  - id: r.mountable-secret-engines-lists
+    level: MUST
+    text: mountableEngines returns the secret engines that may be mounted, and allEngines
+      returns the full engine list, so templates can distinguish mountable choices
+      from the complete set.
+    codeRefs:
+    - file:third_party/openbao/ui/app/helpers/mountable-secret-engines.js
+    - function:07ee7fc7458b51d626a6135fecf0d398
+    - function:8fa1358cbc3e541f4f15db975ac06307
+  - id: r.multi-line-join
+    level: MUST
+    text: multiLineJoin joins an array of strings into a single newline-separated
+      string for display in a single template slot.
+    codeRefs:
+    - file:third_party/openbao/ui/app/helpers/multi-line-join.js
+    - function:2bf9ca3e66b37903cef3223e27b5b4fb
+  - id: r.number-to-word-capitalize
+    level: MUST
+    text: numberToWord converts a number to its word form and capitalizes the result
+      when the capitalize argument is set.
+    codeRefs:
+    - file:third_party/openbao/ui/app/helpers/number-to-word.js
+    - function:65564ada6f3daba8cf635f1a6e2d48a3
+  - id: r.permission-check-helper
+    level: MUST
+    text: has-permission consults the permissions service for the requested capability
+      and reports whether the current user holds it, so templates gate controls on
+      real authorization rather than on role names.
+    codeRefs:
+    - file:third_party/openbao/ui/app/helpers/has-permission.js
+  - id: r.remove-from-array
+    level: MUST
+    text: removeFromArray returns a new array with the given value removed, asserting
+      that the first argument is an array and leaving the input array unmodified.
+    codeRefs:
+    - file:third_party/openbao/ui/app/helpers/remove-from-array.js
+    - function:247ea2eb83897074bad4070233afdf41
+  - id: r.router-facing-helpers
+    level: SHOULD
+    text: nav-to-route performs a transition through the injected router service and
+      route-params-for assembles the parameter object a route needs, so templates
+      can link and navigate without building router state by hand.
+    codeRefs:
+    - file:third_party/openbao/ui/app/helpers/nav-to-route.js
+    - file:third_party/openbao/ui/app/helpers/route-params-for.js
+  - id: r.secret-query-params
+    level: MUST
+    text: secretQueryParams builds the query parameters for a secret backend type,
+      defaulting the type when it is absent and emitting them in query-parameter form
+      when the asQueryParams option is set.
+    codeRefs:
+    - file:third_party/openbao/ui/app/helpers/secret-query-params.js
+    - function:04aed687162fbfdbdbbb145cb264cc2c
+  - id: r.sha2-digest-sizes
+    level: MUST
+    text: sha2DigestSizes returns the list of digest sizes the UI offers for SHA-2
+      hashing operations.
+    codeRefs:
+    - file:third_party/openbao/ui/app/helpers/sha2-digest-sizes.js
+    - function:e883d9b81a2135837f5636e53a9762f2
+  - id: r.split-object-by-keys
+    level: MUST
+    text: splitObject divides the original object into two groups according to the
+      supplied key array, so a caller can render one subset separately from the rest.
+    codeRefs:
+    - file:third_party/openbao/ui/app/helpers/split-object.js
+    - function:6c11464e11cdcff59803753547f12b83
+  - id: r.sub-arithmetic
+    level: MUST
+    text: sub subtracts its operands and returns the numeric difference, complementing
+      add for template arithmetic.
+    codeRefs:
+    - file:third_party/openbao/ui/app/helpers/sub.js
+  - id: r.supported-backend-lists
+    level: MUST
+    text: supportedAuthBackends, supportedManagedAuthBackends, and supportedSecretBackends
+      each return the backend type list the UI recognizes for their category, and
+      these lists are the source the mountable and tab helpers draw from.
+    codeRefs:
+    - file:third_party/openbao/ui/app/helpers/supported-auth-backends.js
+    - file:third_party/openbao/ui/app/helpers/supported-managed-auth-backends.js
+    - file:third_party/openbao/ui/app/helpers/supported-secret-backends.js
+    - function:2c8d49e51c46b4e608f3047f729782a8
+    - function:89ce1e4183a565f442d36ff3684c1e28
+    - function:d0dbce506f16d978b4396463f4792f98
+  - id: r.to-label-formatting
+    level: MUST
+    text: toLabel converts an incoming value into its human-readable label form for
+      display.
+    codeRefs:
+    - file:third_party/openbao/ui/app/helpers/to-label.js
+    - function:45bd1ea1be9b52a899f315eee5d33836
+  - id: r.tools-actions-list
+    level: MUST
+    text: toolsActions returns the list of actions offered on the tools page, which
+      the tools templates iterate to render their entries.
+    codeRefs:
+    - file:third_party/openbao/ui/app/helpers/tools-actions.js
+    - function:9760e0f1237e90a089d248bc66f6450c
+  - id: r.wildcard-string-predicate
+    level: MUST
+    text: isWildcardString reports whether the supplied string contains wildcard syntax,
+      letting callers branch before applying wildcard matching.
+    codeRefs:
+    - file:third_party/openbao/ui/app/helpers/is-wildcard-string.js
+    - function:03fcf8224943c5c32b30851614ad3e47
+  - id: r.wizard-constants
+    level: SHOULD
+    text: wizard-constants exposes the fixed values the wizard flow reads, keeping
+      those values in one module instead of repeating them across wizard templates
+      and components.
+    codeRefs:
+    - file:third_party/openbao/ui/app/helpers/wizard-constants.js
+  interfaces:
+  - name: AwaitHelper
+    kind: class
+    signature: class AwaitHelper extends Helper
+    file: third_party/openbao/ui/app/helpers/await.js
+  - name: CurrentMountPathHelper
+    kind: class
+    signature: class CurrentMountPathHelper extends Helper
+    file: third_party/openbao/ui/app/helpers/current-mount-path.js
+  - name: add
+    kind: function
+    signature: add(params)
+    file: third_party/openbao/ui/app/helpers/add.js
+  - name: addToArray
+    kind: function
+    signature: addToArray([array, string])
+    file: third_party/openbao/ui/app/helpers/add-to-array.js
+  - name: allEngines
+    kind: function
+    signature: allEngines()
+    file: third_party/openbao/ui/app/helpers/mountable-secret-engines.js
+  - name: coerceEq
+    kind: function
+    signature: coerceEq(params)
+    file: third_party/openbao/ui/app/helpers/coerce-eq.js
+  - name: dateFromNow
+    kind: function
+    signature: dateFromNow([date], options = {})
+    file: third_party/openbao/ui/app/helpers/date-from-now.js
+  - name: filterWildcard
+    kind: function
+    signature: filterWildcard([string, array])
+    file: third_party/openbao/ui/app/helpers/filter-wildcard.js
+  - name: isEmptyValue
+    kind: function
+    signature: isEmptyValue([value], { hasDefault = false })
+    file: third_party/openbao/ui/app/helpers/is-empty-value.js
+  - name: isWildcardString
+    kind: function
+    signature: isWildcardString([string])
+    file: third_party/openbao/ui/app/helpers/is-wildcard-string.js
+  - name: jsonify
+    kind: function
+    signature: jsonify([target])
+    file: third_party/openbao/ui/app/helpers/jsonify.js
+  - name: methods
+    kind: function
+    signature: methods()
+    file: third_party/openbao/ui/app/helpers/mountable-auth-methods.js
+  - name: mountableEngines
+    kind: function
+    signature: mountableEngines()
+    file: third_party/openbao/ui/app/helpers/mountable-secret-engines.js
+  - name: multiLineJoin
+    kind: function
+    signature: multiLineJoin([arr])
+    file: third_party/openbao/ui/app/helpers/multi-line-join.js
+  - name: numberToWord
+    kind: function
+    signature: numberToWord(number, capitalize)
+    file: third_party/openbao/ui/app/helpers/number-to-word.js
+  - name: regions
+    kind: function
+    signature: regions()
+    file: third_party/openbao/ui/app/helpers/aws-regions.js
+  - name: removeFromArray
+    kind: function
+    signature: removeFromArray([array, string])
+    file: third_party/openbao/ui/app/helpers/remove-from-array.js
+  - name: secretQueryParams
+    kind: function
+    signature: secretQueryParams([backendType, type = ''], { asQueryParams })
+    file: third_party/openbao/ui/app/helpers/secret-query-params.js
+  - name: sha2DigestSizes
+    kind: function
+    signature: sha2DigestSizes()
+    file: third_party/openbao/ui/app/helpers/sha2-digest-sizes.js
+  - name: splitObject
+    kind: function
+    signature: splitObject(originalObject, array)
+    file: third_party/openbao/ui/app/helpers/split-object.js
+  - name: stringify
+    kind: function
+    signature: stringify([target], { skipFormat })
+    file: third_party/openbao/ui/app/helpers/stringify.js
+  - name: supportedAuthBackends
+    kind: function
+    signature: supportedAuthBackends()
+    file: third_party/openbao/ui/app/helpers/supported-auth-backends.js
+  - name: supportedManagedAuthBackends
+    kind: function
+    signature: supportedManagedAuthBackends()
+    file: third_party/openbao/ui/app/helpers/supported-managed-auth-backends.js
+  - name: supportedSecretBackends
+    kind: function
+    signature: supportedSecretBackends()
+    file: third_party/openbao/ui/app/helpers/supported-secret-backends.js
+  - name: tabsForAuthSection
+    kind: function
+    signature: tabsForAuthSection([model, sectionType = 'authSettings', paths])
+    file: third_party/openbao/ui/app/helpers/tabs-for-auth-section.js
+  - name: tabsForIdentityShow
+    kind: function
+    signature: tabsForIdentityShow([modelType, groupType])
+    file: third_party/openbao/ui/app/helpers/tabs-for-identity-show.js
+  - name: toLabel
+    kind: function
+    signature: toLabel(val)
+    file: third_party/openbao/ui/app/helpers/to-label.js
+  - name: toolsActions
+    kind: function
+    signature: toolsActions()
+    file: third_party/openbao/ui/app/helpers/tools-actions.js
 codeRefIndex:
 - class:58a093d44bc16347c712bd2dd0dc19d8 CurrentMountPathHelper@third_party/openbao/ui/app/helpers/current-mount-path.js:10
 - class:f82fd5e6fe2b966ab5cf9e48a144b12a AwaitHelper@third_party/openbao/ui/app/helpers/await.js:9
@@ -64,359 +420,3 @@ codeRefIndex:
 - function:d0dbce506f16d978b4396463f4792f98 supportedManagedAuthBackends@third_party/openbao/ui/app/helpers/supported-managed-auth-backends.js:10
 - function:e883d9b81a2135837f5636e53a9762f2 sha2DigestSizes@third_party/openbao/ui/app/helpers/sha2-digest-sizes.js:10
 - function:ec5df4da4e815b41e2680553886eabf5 jsonify@third_party/openbao/ui/app/helpers/jsonify.js:8
-kind: SystemContext
-metadata:
-  name: third-party-openbao-ui-app-helpers
-  namespace: default
-spec:
-  intent: This context exists to document the helper surface that OpenBao UI templates
-    call. Because the directory is vendored third-party code inside the deno-kcp repository,
-    the context records what each helper guarantees so that callers, adapters, and
-    any local patches can rely on stable behavior and on the exact exported names.
-    It also marks which helpers are pure functions of their arguments and which depend
-    on injected Ember services, so a reader knows where a helper can be evaluated
-    in isolation and where it needs a router, permissions service, or namespace context
-    to produce a value.
-  interfaces:
-  - file: third_party/openbao/ui/app/helpers/await.js
-    kind: class
-    name: AwaitHelper
-    signature: class AwaitHelper extends Helper
-  - file: third_party/openbao/ui/app/helpers/current-mount-path.js
-    kind: class
-    name: CurrentMountPathHelper
-    signature: class CurrentMountPathHelper extends Helper
-  - file: third_party/openbao/ui/app/helpers/add.js
-    kind: function
-    name: add
-    signature: add(params)
-  - file: third_party/openbao/ui/app/helpers/add-to-array.js
-    kind: function
-    name: addToArray
-    signature: addToArray([array, string])
-  - file: third_party/openbao/ui/app/helpers/mountable-secret-engines.js
-    kind: function
-    name: allEngines
-    signature: allEngines()
-  - file: third_party/openbao/ui/app/helpers/coerce-eq.js
-    kind: function
-    name: coerceEq
-    signature: coerceEq(params)
-  - file: third_party/openbao/ui/app/helpers/date-from-now.js
-    kind: function
-    name: dateFromNow
-    signature: dateFromNow([date], options = {})
-  - file: third_party/openbao/ui/app/helpers/filter-wildcard.js
-    kind: function
-    name: filterWildcard
-    signature: filterWildcard([string, array])
-  - file: third_party/openbao/ui/app/helpers/is-empty-value.js
-    kind: function
-    name: isEmptyValue
-    signature: isEmptyValue([value], { hasDefault = false })
-  - file: third_party/openbao/ui/app/helpers/is-wildcard-string.js
-    kind: function
-    name: isWildcardString
-    signature: isWildcardString([string])
-  - file: third_party/openbao/ui/app/helpers/jsonify.js
-    kind: function
-    name: jsonify
-    signature: jsonify([target])
-  - file: third_party/openbao/ui/app/helpers/mountable-auth-methods.js
-    kind: function
-    name: methods
-    signature: methods()
-  - file: third_party/openbao/ui/app/helpers/mountable-secret-engines.js
-    kind: function
-    name: mountableEngines
-    signature: mountableEngines()
-  - file: third_party/openbao/ui/app/helpers/multi-line-join.js
-    kind: function
-    name: multiLineJoin
-    signature: multiLineJoin([arr])
-  - file: third_party/openbao/ui/app/helpers/number-to-word.js
-    kind: function
-    name: numberToWord
-    signature: numberToWord(number, capitalize)
-  - file: third_party/openbao/ui/app/helpers/aws-regions.js
-    kind: function
-    name: regions
-    signature: regions()
-  - file: third_party/openbao/ui/app/helpers/remove-from-array.js
-    kind: function
-    name: removeFromArray
-    signature: removeFromArray([array, string])
-  - file: third_party/openbao/ui/app/helpers/secret-query-params.js
-    kind: function
-    name: secretQueryParams
-    signature: secretQueryParams([backendType, type = ''], { asQueryParams })
-  - file: third_party/openbao/ui/app/helpers/sha2-digest-sizes.js
-    kind: function
-    name: sha2DigestSizes
-    signature: sha2DigestSizes()
-  - file: third_party/openbao/ui/app/helpers/split-object.js
-    kind: function
-    name: splitObject
-    signature: splitObject(originalObject, array)
-  - file: third_party/openbao/ui/app/helpers/stringify.js
-    kind: function
-    name: stringify
-    signature: stringify([target], { skipFormat })
-  - file: third_party/openbao/ui/app/helpers/supported-auth-backends.js
-    kind: function
-    name: supportedAuthBackends
-    signature: supportedAuthBackends()
-  - file: third_party/openbao/ui/app/helpers/supported-managed-auth-backends.js
-    kind: function
-    name: supportedManagedAuthBackends
-    signature: supportedManagedAuthBackends()
-  - file: third_party/openbao/ui/app/helpers/supported-secret-backends.js
-    kind: function
-    name: supportedSecretBackends
-    signature: supportedSecretBackends()
-  - file: third_party/openbao/ui/app/helpers/tabs-for-auth-section.js
-    kind: function
-    name: tabsForAuthSection
-    signature: tabsForAuthSection([model, sectionType = 'authSettings', paths])
-  - file: third_party/openbao/ui/app/helpers/tabs-for-identity-show.js
-    kind: function
-    name: tabsForIdentityShow
-    signature: tabsForIdentityShow([modelType, groupType])
-  - file: third_party/openbao/ui/app/helpers/to-label.js
-    kind: function
-    name: toLabel
-    signature: toLabel(val)
-  - file: third_party/openbao/ui/app/helpers/tools-actions.js
-    kind: function
-    name: toolsActions
-    signature: toolsActions()
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - file:third_party/openbao/ui/app/helpers/add.js
-    - function:66a6525e6882aeaf6e43aa0133dd5c96
-    id: r.add-numeric-sum
-    level: MUST
-    text: add reduces its params array to a numeric sum, parsing each element with
-      parseInt and starting the accumulator at zero.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/helpers/add-to-array.js
-    - function:680fbae19f51d45475c2a5da31c3a1a7
-    id: r.add-to-array-dedupe
-    level: MUST
-    text: addToArray copies the input array, appends the given value, and returns
-      the result deduplicated; when the first argument is not an array it must fail
-      an assertion instead of returning a value.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/helpers/tabs-for-auth-section.js
-    - function:32b08f55e5a5fb8bb84b7635c6f33c3b
-    id: r.auth-section-tabs
-    level: MUST
-    text: tabsForAuthSection builds the tab list for an auth method from the model,
-      the current section type defaulting to authSettings, and the available paths,
-      so the rendered tabs follow the routes the caller passes in.
-  - codeRefs:
-    - class:f82fd5e6fe2b966ab5cf9e48a144b12a
-    - file:third_party/openbao/ui/app/helpers/await.js
-    id: r.await-helper-settled-value
-    level: MUST
-    text: AwaitHelper.compute returns a non-thenable argument unchanged, but for a
-      thenable it returns the last settled value and only starts a new resolve when
-      the promise differs from the stored lastPromise, clearing the cached value first;
-      AwaitHelper.resolve awaits the promise, stores a caught rejection as the value,
-      and calls recompute only when the resolved promise is still the newest one.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/helpers/aws-regions.js
-    - function:156b3a5217ffd49e614dba532758f81a
-    id: r.aws-regions-copy
-    level: MUST
-    text: regions returns a copy of the internal AWS region list so that callers cannot
-      mutate the module-level REGIONS constant.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/helpers/coerce-eq.js
-    - function:5101beb0a248ee5a9d65d8db31b46b0b
-    id: r.coerce-eq-comparison
-    level: MUST
-    text: coerceEq compares its two params under coercion and reports whether they
-      are equal, so template conditionals work across string and number forms of the
-      same value.
-  - codeRefs:
-    - class:58a093d44bc16347c712bd2dd0dc19d8
-    - file:third_party/openbao/ui/app/helpers/current-mount-path.js
-    id: r.current-mount-path-service
-    level: MUST
-    text: CurrentMountPathHelper derives the active mount path from the injected router
-      service rather than from a static value, so the helper updates as the application
-      navigates between mounts.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/helpers/-date-base.js
-    - file:third_party/openbao/ui/app/helpers/date-from-now.js
-    - function:51011254c696689ce5506de3701eb056
-    id: r.date-from-now-options
-    level: SHOULD
-    text: dateFromNow renders a date relative to the current time and accepts an options
-      object that adjusts the rendering, with the shared date behavior coming from
-      the -date-base module used by the other date helpers.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/helpers/is-after.js
-    - file:third_party/openbao/ui/app/helpers/is-before.js
-    - file:third_party/openbao/ui/app/helpers/now.js
-    id: r.date-ordering-predicates
-    level: MUST
-    text: The is-after and is-before helpers compare two dates and return the corresponding
-      ordering result for use in template conditionals.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/helpers/is-empty-value.js
-    - function:3a7dd62a4457f657a023dc2ec5ace076
-    id: r.empty-value-default
-    level: MUST
-    text: isEmptyValue reports whether a value counts as empty, and the hasDefault
-      option in its options object changes that judgement for values that carry a
-      default.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/helpers/filter-wildcard.js
-    - function:17b81b39cedf651279382cdac2bb2bd9
-    id: r.filter-wildcard-count
-    level: MUST
-    text: filterWildcard treats a non-object first argument as an id, converts the
-      wildcard characters in it to a regular expression anchored at both ends, and
-      returns the count of array items matching that pattern; it returns undefined
-      when either argument is missing.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/helpers/tabs-for-identity-show.js
-    - function:cf2eed3ac4f89d560e029e465496e4bc
-    id: r.identity-show-tabs
-    level: MUST
-    text: tabsForIdentityShow builds the tab list for an identity show view from the
-      model type and group type, selecting the tabs that apply to that combination.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/helpers/jsonify.js
-    - file:third_party/openbao/ui/app/helpers/stringify.js
-    - function:a9677201a6f8c5cd48f62d6fd5e772a7
-    - function:ec5df4da4e815b41e2680553886eabf5
-    id: r.jsonify-and-stringify
-    level: MUST
-    text: jsonify serializes its target to a JSON string, and stringify serializes
-      its target while honoring a skipFormat option that suppresses the formatted
-      output.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/helpers/mountable-auth-methods.js
-    - function:46f6f8ef583dd6de96284ed75c010573
-    id: r.mountable-auth-methods-list
-    level: MUST
-    text: methods returns the list of auth method types that the UI offers for mounting,
-      drawn from the supported auth backend metadata.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/helpers/mountable-secret-engines.js
-    - function:07ee7fc7458b51d626a6135fecf0d398
-    - function:8fa1358cbc3e541f4f15db975ac06307
-    id: r.mountable-secret-engines-lists
-    level: MUST
-    text: mountableEngines returns the secret engines that may be mounted, and allEngines
-      returns the full engine list, so templates can distinguish mountable choices
-      from the complete set.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/helpers/multi-line-join.js
-    - function:2bf9ca3e66b37903cef3223e27b5b4fb
-    id: r.multi-line-join
-    level: MUST
-    text: multiLineJoin joins an array of strings into a single newline-separated
-      string for display in a single template slot.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/helpers/number-to-word.js
-    - function:65564ada6f3daba8cf635f1a6e2d48a3
-    id: r.number-to-word-capitalize
-    level: MUST
-    text: numberToWord converts a number to its word form and capitalizes the result
-      when the capitalize argument is set.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/helpers/has-permission.js
-    id: r.permission-check-helper
-    level: MUST
-    text: has-permission consults the permissions service for the requested capability
-      and reports whether the current user holds it, so templates gate controls on
-      real authorization rather than on role names.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/helpers/remove-from-array.js
-    - function:247ea2eb83897074bad4070233afdf41
-    id: r.remove-from-array
-    level: MUST
-    text: removeFromArray returns a new array with the given value removed, asserting
-      that the first argument is an array and leaving the input array unmodified.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/helpers/nav-to-route.js
-    - file:third_party/openbao/ui/app/helpers/route-params-for.js
-    id: r.router-facing-helpers
-    level: SHOULD
-    text: nav-to-route performs a transition through the injected router service and
-      route-params-for assembles the parameter object a route needs, so templates
-      can link and navigate without building router state by hand.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/helpers/secret-query-params.js
-    - function:04aed687162fbfdbdbbb145cb264cc2c
-    id: r.secret-query-params
-    level: MUST
-    text: secretQueryParams builds the query parameters for a secret backend type,
-      defaulting the type when it is absent and emitting them in query-parameter form
-      when the asQueryParams option is set.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/helpers/sha2-digest-sizes.js
-    - function:e883d9b81a2135837f5636e53a9762f2
-    id: r.sha2-digest-sizes
-    level: MUST
-    text: sha2DigestSizes returns the list of digest sizes the UI offers for SHA-2
-      hashing operations.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/helpers/split-object.js
-    - function:6c11464e11cdcff59803753547f12b83
-    id: r.split-object-by-keys
-    level: MUST
-    text: splitObject divides the original object into two groups according to the
-      supplied key array, so a caller can render one subset separately from the rest.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/helpers/sub.js
-    id: r.sub-arithmetic
-    level: MUST
-    text: sub subtracts its operands and returns the numeric difference, complementing
-      add for template arithmetic.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/helpers/supported-auth-backends.js
-    - file:third_party/openbao/ui/app/helpers/supported-managed-auth-backends.js
-    - file:third_party/openbao/ui/app/helpers/supported-secret-backends.js
-    - function:2c8d49e51c46b4e608f3047f729782a8
-    - function:89ce1e4183a565f442d36ff3684c1e28
-    - function:d0dbce506f16d978b4396463f4792f98
-    id: r.supported-backend-lists
-    level: MUST
-    text: supportedAuthBackends, supportedManagedAuthBackends, and supportedSecretBackends
-      each return the backend type list the UI recognizes for their category, and
-      these lists are the source the mountable and tab helpers draw from.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/helpers/to-label.js
-    - function:45bd1ea1be9b52a899f315eee5d33836
-    id: r.to-label-formatting
-    level: MUST
-    text: toLabel converts an incoming value into its human-readable label form for
-      display.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/helpers/tools-actions.js
-    - function:9760e0f1237e90a089d248bc66f6450c
-    id: r.tools-actions-list
-    level: MUST
-    text: toolsActions returns the list of actions offered on the tools page, which
-      the tools templates iterate to render their entries.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/helpers/is-wildcard-string.js
-    - function:03fcf8224943c5c32b30851614ad3e47
-    id: r.wildcard-string-predicate
-    level: MUST
-    text: isWildcardString reports whether the supplied string contains wildcard syntax,
-      letting callers branch before applying wildcard matching.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/helpers/wizard-constants.js
-    id: r.wizard-constants
-    level: SHOULD
-    text: wizard-constants exposes the fixed values the wizard flow reads, keeping
-      those values in one module instead of repeating them across wizard templates
-      and components.
-  upstream: self

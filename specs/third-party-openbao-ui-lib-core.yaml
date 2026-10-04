@@ -1,47 +1,47 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/ui/lib/core/icon-mappings.js icon-mappings.js@third_party/openbao/ui/lib/core/icon-mappings.js
-- file:third_party/openbao/ui/lib/core/index.js index.js@third_party/openbao/ui/lib/core/index.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-lib-core
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: This context exists so the OpenBao UI can resolve icon names in one place.
     The addon descriptor lets the Ember build discover the package and treat it as
     an in-development addon that reloads during development. The two mapping tables
     let components translate legacy OpenBao public-folder icon names and Structure
     icon names into the Flight icon names they render, and let a lookup miss be expressed
     explicitly as null instead of a missing key.
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/ui/lib/core/index.js
-    id: r.addon-descriptor
+  - id: r.addon-descriptor
     level: MUST
     text: index.js must export a module object that carries the addon name taken from
       require('./package').name and an isDevelopingAddon() method that returns true,
       so Ember loads the package as an in-development addon.
-  - codeRefs:
-    - file:third_party/openbao/ui/lib/core/icon-mappings.js
-    id: r.local-icon-map
+    codeRefs:
+    - file:third_party/openbao/ui/lib/core/index.js
+  - id: r.local-icon-map
     level: MUST
     text: icon-mappings.js must export localIconMap as a string-keyed table of icons
       that exist in the public folder but are not part of the Structure set; each
       value is the matching Flight icon name, and null marks an icon with no Flight
       match.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/core/icon-mappings.js
-    id: r.null-means-no-match
+  - id: r.null-means-no-match
     level: SHOULD
     text: A null value in either mapping table must be read as an explicit absence
       of a Flight counterpart, not as a missing entry, so callers that look up an
       icon can tell a known unmatched icon apart from an unknown name.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/core/icon-mappings.js
-    id: r.structure-icon-map
+  - id: r.structure-icon-map
     level: MUST
     text: icon-mappings.js must export structureIconMap covering the complete Structure
       icon set, keyed by Structure icon name with the Flight counterpart as value,
       and null where no direct correlation to a Flight icon exists.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/ui/lib/core/icon-mappings.js
+codeRefIndex:
+- file:third_party/openbao/ui/lib/core/icon-mappings.js icon-mappings.js@third_party/openbao/ui/lib/core/icon-mappings.js
+- file:third_party/openbao/ui/lib/core/index.js index.js@third_party/openbao/ui/lib/core/index.js

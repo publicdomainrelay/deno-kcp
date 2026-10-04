@@ -1,14 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/ui/app/controllers/vault/cluster/settings/auth/configure-section.js
-  configure-section.js@third_party/openbao/ui/app/controllers/vault/cluster/settings/auth/configure-section.js
-- file:third_party/openbao/ui/app/controllers/vault/cluster/settings/auth/enable.js
-  enable.js@third_party/openbao/ui/app/controllers/vault/cluster/settings/auth/enable.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-app-controllers-vault-cluster-settings-auth
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: This context exists to pin down the lifecycle behavior of the OpenBao UI
     auth-settings controllers around mounting an auth method and configuring it. The
     configure-section controller must release its Ember Data record from the store
@@ -18,46 +15,49 @@ spec:
     a successful auth-method mount to the configuration route using the safe transition
     helper with the injected router, so an unauthorized or inaccessible route is not
     entered.
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/ui/app/controllers/vault/cluster/settings/auth/configure-section.js
-    id: r.cleanup-model-guards
+  - id: r.cleanup-model-guards
     level: MUST
     text: cleanupModel() must return without touching the model when no model is set,
       or when the model is saving, destroyed, or destroying, so records still in flight
       are never unloaded.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/controllers/vault/cluster/settings/auth/configure-section.js
-    id: r.cleanup-removes-record
+  - id: r.cleanup-removes-record
     level: MUST
     text: cleanupModel() must call removeRecord with the injected store and the model
       when the model exposes a unloadRecord function, and must not call it otherwise.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/controllers/vault/cluster/settings/auth/configure-section.js
-    id: r.cleanup-unsets-singleton-model
+  - id: r.cleanup-unsets-singleton-model
     level: MUST
     text: cleanupModel() must always set the controller's model to null after the
       guards pass, because controllers are singletons and a retained model would leak
       between route visits.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/controllers/vault/cluster/settings/auth/configure-section.js
-    id: r.configure-section-store-service
+  - id: r.configure-section-store-service
     level: MUST
     text: The configure-section controller must inject the store service, which cleanupModel
       uses as the owner of the record being removed.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/controllers/vault/cluster/settings/auth/enable.js
-    id: r.enable-on-mount-success-transition
+    codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/settings/auth/configure-section.js
+  - id: r.enable-on-mount-success-transition
     level: MUST
     text: The enable controller's onMountSuccess(type, path) action must transition
       to the vault.cluster.settings.auth.configure route with the mounted method's
       path, using transitionToSafe with the injected router so an unauthorized route
       is not entered.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/controllers/vault/cluster/settings/auth/enable.js
-    id: r.enable-router-service
+  - id: r.enable-router-service
     level: MUST
     text: The enable controller must inject the router service and pass it to transitionToSafe
       rather than calling transitionTo on the controller directly.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/settings/auth/enable.js
+codeRefIndex:
+- file:third_party/openbao/ui/app/controllers/vault/cluster/settings/auth/configure-section.js
+  configure-section.js@third_party/openbao/ui/app/controllers/vault/cluster/settings/auth/configure-section.js
+- file:third_party/openbao/ui/app/controllers/vault/cluster/settings/auth/enable.js
+  enable.js@third_party/openbao/ui/app/controllers/vault/cluster/settings/auth/enable.js

@@ -1,111 +1,111 @@
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 49bd3e227842c7227415df6a6bb13c6c16cdbce0a2c3444a03c8eca9c3a2bfc8
+realizedSpecHash: 679d870de01362da95a5e7edb16971cc61bc9c778d226ed30bb02232395feb8c
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
+- type: CodeSynced
+  status: "True"
   reason: InterfacesObserved
-  status: "True"
-  type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+  message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+- type: Drifted
   status: "False"
-  type: Drifted
-- message: the spec passes the validator
-  reason: ValidatorPassed
+  reason: FingerprintEqual
+  message: observed facts match the synced fingerprint
+- type: SpecValid
   status: "True"
-  type: SpecValid
+  reason: ValidatorPassed
+  message: the spec passes the validator
 observed:
   files:
   - third_party/openbao/internal/builtin/plugin/backend.go
   - third_party/openbao/internal/builtin/plugin/backend_lazyLoad_test.go
   - third_party/openbao/internal/builtin/plugin/backend_test.go
-  fingerprint: 49bd3e227842c7227415df6a6bb13c6c16cdbce0a2c3444a03c8eca9c3a2bfc8
   interfaces:
-  - codegraphId: function:54cad82c274bb42c350b1fc292eccfd2
-    file: third_party/openbao/internal/builtin/plugin/backend.go
+  - name: Factory
     kind: function
-    line: 30
-    name: Factory
     signature: (ctx context.Context, conf *logical.BackendConfig) (logical.Backend,
       error)
-  - codegraphId: function:279285827f28c5fefc4e75c39b7fc39b
     file: third_party/openbao/internal/builtin/plugin/backend.go
+    line: 30
+    codegraphId: function:54cad82c274bb42c350b1fc292eccfd2
+  - name: Backend
     kind: function
-    line: 60
-    name: Backend
     signature: (ctx context.Context, conf *logical.BackendConfig) (*PluginBackend,
       error)
-  - codegraphId: struct:aac12544428d4d44fc72971986a2d518
     file: third_party/openbao/internal/builtin/plugin/backend.go
+    line: 60
+    codegraphId: function:279285827f28c5fefc4e75c39b7fc39b
+  - name: PluginBackend
     kind: struct
-    line: 107
-    name: PluginBackend
-  - codegraphId: method:e9311d1022b961fc21571d99db324f56
     file: third_party/openbao/internal/builtin/plugin/backend.go
+    line: 107
+    codegraphId: struct:aac12544428d4d44fc72971986a2d518
+  - name: PluginBackend.HandleRequest
     kind: method
-    line: 221
-    name: PluginBackend.HandleRequest
     signature: (ctx context.Context, req *logical.Request) (resp *logical.Response,
       err error)
-  - codegraphId: method:25485adf3c6948547038555a16260759
     file: third_party/openbao/internal/builtin/plugin/backend.go
+    line: 221
+    codegraphId: method:e9311d1022b961fc21571d99db324f56
+  - name: PluginBackend.HandleExistenceCheck
     kind: method
-    line: 233
-    name: PluginBackend.HandleExistenceCheck
     signature: (ctx context.Context, req *logical.Request) (checkFound bool, exists
       bool, err error)
-  - codegraphId: method:9eff9c5894c27395cd43737fb5d364a4
     file: third_party/openbao/internal/builtin/plugin/backend.go
+    line: 233
+    codegraphId: method:25485adf3c6948547038555a16260759
+  - name: PluginBackend.Initialize
     kind: method
-    line: 245
-    name: PluginBackend.Initialize
     signature: (ctx context.Context, req *logical.InitializationRequest) error
-  - codegraphId: method:2ca5bfb1f82e31c97888163ed21ba51a
     file: third_party/openbao/internal/builtin/plugin/backend.go
+    line: 245
+    codegraphId: method:9eff9c5894c27395cd43737fb5d364a4
+  - name: PluginBackend.SpecialPaths
     kind: method
-    line: 250
-    name: PluginBackend.SpecialPaths
     signature: () *logical.Paths
-  - codegraphId: method:740d924e05ea66e53ffa1d14d8a26c4e
     file: third_party/openbao/internal/builtin/plugin/backend.go
+    line: 250
+    codegraphId: method:2ca5bfb1f82e31c97888163ed21ba51a
+  - name: PluginBackend.System
     kind: method
-    line: 257
-    name: PluginBackend.System
     signature: () logical.SystemView
-  - codegraphId: method:1827cfcd152d3afd0a38f2a6e8f0fc68
     file: third_party/openbao/internal/builtin/plugin/backend.go
+    line: 257
+    codegraphId: method:740d924e05ea66e53ffa1d14d8a26c4e
+  - name: PluginBackend.Logger
     kind: method
-    line: 264
-    name: PluginBackend.Logger
     signature: () log.Logger
-  - codegraphId: method:5dbccf29070dfb9dc7c08eea2b372bb7
     file: third_party/openbao/internal/builtin/plugin/backend.go
+    line: 264
+    codegraphId: method:1827cfcd152d3afd0a38f2a6e8f0fc68
+  - name: PluginBackend.Cleanup
     kind: method
-    line: 271
-    name: PluginBackend.Cleanup
     signature: (ctx context.Context)
-  - codegraphId: method:dccf4dff09449e12f867f360073b5537
     file: third_party/openbao/internal/builtin/plugin/backend.go
+    line: 271
+    codegraphId: method:5dbccf29070dfb9dc7c08eea2b372bb7
+  - name: PluginBackend.InvalidateKey
     kind: method
-    line: 278
-    name: PluginBackend.InvalidateKey
     signature: (ctx context.Context, key string)
-  - codegraphId: method:1d5b59bbcacffc0d501f10e5157bc440
     file: third_party/openbao/internal/builtin/plugin/backend.go
+    line: 278
+    codegraphId: method:dccf4dff09449e12f867f360073b5537
+  - name: PluginBackend.Setup
     kind: method
-    line: 285
-    name: PluginBackend.Setup
     signature: (ctx context.Context, config *logical.BackendConfig) error
-  - codegraphId: method:5720d926d077fea76c8590513e3d5138
     file: third_party/openbao/internal/builtin/plugin/backend.go
+    line: 285
+    codegraphId: method:1d5b59bbcacffc0d501f10e5157bc440
+  - name: PluginBackend.Type
     kind: method
-    line: 292
-    name: PluginBackend.Type
     signature: () logical.BackendType
-  - codegraphId: method:eb22d417068f282674a039b8d17d06a4
     file: third_party/openbao/internal/builtin/plugin/backend.go
+    line: 292
+    codegraphId: method:5720d926d077fea76c8590513e3d5138
+  - name: PluginBackend.PluginVersion
     kind: method
-    line: 298
-    name: PluginBackend.PluginVersion
     signature: () logical.PluginVersion
-realizedSpecHash: 679d870de01362da95a5e7edb16971cc61bc9c778d226ed30bb02232395feb8c
-syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-syncedFingerprint: 49bd3e227842c7227415df6a6bb13c6c16cdbce0a2c3444a03c8eca9c3a2bfc8
+    file: third_party/openbao/internal/builtin/plugin/backend.go
+    line: 298
+    codegraphId: method:eb22d417068f282674a039b8d17d06a4
+  fingerprint: 49bd3e227842c7227415df6a6bb13c6c16cdbce0a2c3444a03c8eca9c3a2bfc8

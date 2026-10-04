@@ -1,17 +1,20 @@
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: d921a468ae262d96126c31670ae7f1f025f7f0521ae58805426b7c614004ac21
+realizedSpecHash: 3b84a50ccf2dcad6cc00237ad3be9e8b70f1b389d54e00d6cf88f91d6bf29636
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
+- type: CodeSynced
+  status: "True"
   reason: InterfacesObserved
-  status: "True"
-  type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+  message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+- type: Drifted
   status: "False"
-  type: Drifted
-- message: the spec passes the validator
-  reason: ValidatorPassed
+  reason: FingerprintEqual
+  message: observed facts match the synced fingerprint
+- type: SpecValid
   status: "True"
-  type: SpecValid
+  reason: ValidatorPassed
+  message: the spec passes the validator
 observed:
   files:
   - third_party/openbao/internal/helper/random/parser.go
@@ -25,147 +28,144 @@ observed:
   - third_party/openbao/internal/helper/random/serializing_test.go
   - third_party/openbao/internal/helper/random/string_generator.go
   - third_party/openbao/internal/helper/random/string_generator_test.go
-  fingerprint: d921a468ae262d96126c31670ae7f1f025f7f0521ae58805426b7c614004ac21
   interfaces:
-  - codegraphId: function:7689ecd13f7905f0a597e578d1cf4d02
-    file: third_party/openbao/internal/helper/random/parser.go
+  - name: ParsePolicy
     kind: function
-    line: 18
-    name: ParsePolicy
     signature: (raw string) (gen *StringGenerator, err error)
-  - codegraphId: function:82a1a2a5bdf10e6a0f641b84bc861e7e
     file: third_party/openbao/internal/helper/random/parser.go
-    kind: function
-    line: 29
-    name: ParsePolicyBytes
-    signature: (raw []byte) (gen *StringGenerator, err error)
-  - codegraphId: struct:51cf85ee3939be72e2149d2915d4077b
-    file: third_party/openbao/internal/helper/random/parser.go
-    kind: struct
-    line: 34
-    name: PolicyParser
-  - codegraphId: method:3bbceea9fc1070a46f3c6c872071f738
-    file: third_party/openbao/internal/helper/random/parser.go
-    kind: method
-    line: 40
-    name: PolicyParser.ParsePolicy
-    signature: (raw string) (sg *StringGenerator, err error)
-  - codegraphId: function:3f3e8dbed91b70337191211abb27d48c
-    file: third_party/openbao/internal/helper/random/random_api.go
-    kind: function
     line: 18
-    name: HandleRandomAPI
-    signature: (d *framework.FieldData) (*logical.Response, error)
-  - codegraphId: struct:843ef098b5721935b75f4ad9c3d485c5
-    file: third_party/openbao/internal/helper/random/registry.go
-    kind: struct
-    line: 25
-    name: Registry
-  - codegraphId: interface:91060efc84605a1dcc13fac3225ac3cb
-    file: third_party/openbao/internal/helper/random/rules.go
-    kind: interface
-    line: 14
-    name: Rule
-  - codegraphId: method:7791c4f5e9663e368d09393c766799b7
-    file: third_party/openbao/internal/helper/random/rules.go
-    kind: method
-    line: 16
-    name: Rule.Pass
-    signature: (value []rune) bool
-  - codegraphId: method:d63e6912f0d0b2ec36617d0deca1cb30
-    file: third_party/openbao/internal/helper/random/rules.go
-    kind: method
-    line: 19
-    name: Rule.Type
-    signature: () string
-  - codegraphId: struct:88ddd19e7a92d20b4baeb08319dd30cf
-    file: third_party/openbao/internal/helper/random/rules.go
-    kind: struct
-    line: 23
-    name: CharsetRule
-  - codegraphId: function:c4b5f5a3889e1ec2e05ff25c971b1b37
-    file: third_party/openbao/internal/helper/random/rules.go
+    codegraphId: function:7689ecd13f7905f0a597e578d1cf4d02
+  - name: ParsePolicyBytes
     kind: function
-    line: 32
-    name: ParseCharset
-    signature: (data map[string]any) (rule Rule, err error)
-  - codegraphId: method:ad9ab2c14df85914d8d9b69a60885bee
-    file: third_party/openbao/internal/helper/random/rules.go
-    kind: method
-    line: 52
-    name: CharsetRule.Type
-    signature: () string
-  - codegraphId: method:a4c331df70b129bcf50ccf335af59e5f
-    file: third_party/openbao/internal/helper/random/rules.go
-    kind: method
-    line: 57
-    name: CharsetRule.Chars
-    signature: () []rune
-  - codegraphId: method:2341e00b57531841a647bd5422db45e5
-    file: third_party/openbao/internal/helper/random/rules.go
-    kind: method
-    line: 61
-    name: CharsetRule.MinLength
-    signature: () int
-  - codegraphId: method:48a355dd1f9413870240d730867f64a5
-    file: third_party/openbao/internal/helper/random/rules.go
-    kind: method
-    line: 67
-    name: CharsetRule.Pass
-    signature: (value []rune) bool
-  - codegraphId: method:52d709fdbcb3d5abff37bae4d4c491f7
-    file: third_party/openbao/internal/helper/random/serializing.go
-    kind: method
-    line: 17
-    name: serializableRules.MarshalJSON
-    signature: () (b []byte, err error)
-  - codegraphId: method:9922db73c27392b37ee0544ee75ff10d
-    file: third_party/openbao/internal/helper/random/serializing.go
-    kind: method
-    line: 57
-    name: serializableRules.UnmarshalJSON
-    signature: (data []byte) (err error)
-  - codegraphId: method:72b586bc845844cdbd3aa5078d60105c
-    file: third_party/openbao/internal/helper/random/serializing.go
-    kind: method
-    line: 73
-    name: runes.Len
-    signature: () int
-  - codegraphId: method:c465fc94b0e91b28f163f676a57e35a3
-    file: third_party/openbao/internal/helper/random/serializing.go
-    kind: method
-    line: 74
-    name: runes.Less
-    signature: (i, j int) bool
-  - codegraphId: method:568211382744bcfb5f1135a67e9dfc3e
-    file: third_party/openbao/internal/helper/random/serializing.go
-    kind: method
-    line: 75
-    name: runes.Swap
-    signature: (i, j int)
-  - codegraphId: method:e91ab7a8656012a88fd93a6f6c734e5f
-    file: third_party/openbao/internal/helper/random/serializing.go
-    kind: method
-    line: 78
-    name: runes.MarshalJSON
-    signature: () (b []byte, err error)
-  - codegraphId: method:d5223fc9f9ab59cab1707241025106b8
-    file: third_party/openbao/internal/helper/random/serializing.go
-    kind: method
-    line: 83
-    name: runes.UnmarshalJSON
-    signature: (data []byte) (err error)
-  - codegraphId: struct:4f34fce2ae663b6eeabe145d17902950
-    file: third_party/openbao/internal/helper/random/string_generator.go
+    signature: (raw []byte) (gen *StringGenerator, err error)
+    file: third_party/openbao/internal/helper/random/parser.go
+    line: 29
+    codegraphId: function:82a1a2a5bdf10e6a0f641b84bc861e7e
+  - name: PolicyParser
     kind: struct
-    line: 76
-    name: StringGenerator
-  - codegraphId: method:6f856173083ecef6ca7a7f88d331e0a8
-    file: third_party/openbao/internal/helper/random/string_generator.go
+    file: third_party/openbao/internal/helper/random/parser.go
+    line: 34
+    codegraphId: struct:51cf85ee3939be72e2149d2915d4077b
+  - name: PolicyParser.ParsePolicy
     kind: method
-    line: 90
-    name: StringGenerator.Generate
+    signature: (raw string) (sg *StringGenerator, err error)
+    file: third_party/openbao/internal/helper/random/parser.go
+    line: 40
+    codegraphId: method:3bbceea9fc1070a46f3c6c872071f738
+  - name: HandleRandomAPI
+    kind: function
+    signature: (d *framework.FieldData) (*logical.Response, error)
+    file: third_party/openbao/internal/helper/random/random_api.go
+    line: 18
+    codegraphId: function:3f3e8dbed91b70337191211abb27d48c
+  - name: Registry
+    kind: struct
+    file: third_party/openbao/internal/helper/random/registry.go
+    line: 25
+    codegraphId: struct:843ef098b5721935b75f4ad9c3d485c5
+  - name: Rule
+    kind: interface
+    file: third_party/openbao/internal/helper/random/rules.go
+    line: 14
+    codegraphId: interface:91060efc84605a1dcc13fac3225ac3cb
+  - name: Rule.Pass
+    kind: method
+    signature: (value []rune) bool
+    file: third_party/openbao/internal/helper/random/rules.go
+    line: 16
+    codegraphId: method:7791c4f5e9663e368d09393c766799b7
+  - name: Rule.Type
+    kind: method
+    signature: () string
+    file: third_party/openbao/internal/helper/random/rules.go
+    line: 19
+    codegraphId: method:d63e6912f0d0b2ec36617d0deca1cb30
+  - name: CharsetRule
+    kind: struct
+    file: third_party/openbao/internal/helper/random/rules.go
+    line: 23
+    codegraphId: struct:88ddd19e7a92d20b4baeb08319dd30cf
+  - name: ParseCharset
+    kind: function
+    signature: (data map[string]any) (rule Rule, err error)
+    file: third_party/openbao/internal/helper/random/rules.go
+    line: 32
+    codegraphId: function:c4b5f5a3889e1ec2e05ff25c971b1b37
+  - name: CharsetRule.Type
+    kind: method
+    signature: () string
+    file: third_party/openbao/internal/helper/random/rules.go
+    line: 52
+    codegraphId: method:ad9ab2c14df85914d8d9b69a60885bee
+  - name: CharsetRule.Chars
+    kind: method
+    signature: () []rune
+    file: third_party/openbao/internal/helper/random/rules.go
+    line: 57
+    codegraphId: method:a4c331df70b129bcf50ccf335af59e5f
+  - name: CharsetRule.MinLength
+    kind: method
+    signature: () int
+    file: third_party/openbao/internal/helper/random/rules.go
+    line: 61
+    codegraphId: method:2341e00b57531841a647bd5422db45e5
+  - name: CharsetRule.Pass
+    kind: method
+    signature: (value []rune) bool
+    file: third_party/openbao/internal/helper/random/rules.go
+    line: 67
+    codegraphId: method:48a355dd1f9413870240d730867f64a5
+  - name: serializableRules.MarshalJSON
+    kind: method
+    signature: () (b []byte, err error)
+    file: third_party/openbao/internal/helper/random/serializing.go
+    line: 17
+    codegraphId: method:52d709fdbcb3d5abff37bae4d4c491f7
+  - name: serializableRules.UnmarshalJSON
+    kind: method
+    signature: (data []byte) (err error)
+    file: third_party/openbao/internal/helper/random/serializing.go
+    line: 57
+    codegraphId: method:9922db73c27392b37ee0544ee75ff10d
+  - name: runes.Len
+    kind: method
+    signature: () int
+    file: third_party/openbao/internal/helper/random/serializing.go
+    line: 73
+    codegraphId: method:72b586bc845844cdbd3aa5078d60105c
+  - name: runes.Less
+    kind: method
+    signature: (i, j int) bool
+    file: third_party/openbao/internal/helper/random/serializing.go
+    line: 74
+    codegraphId: method:c465fc94b0e91b28f163f676a57e35a3
+  - name: runes.Swap
+    kind: method
+    signature: (i, j int)
+    file: third_party/openbao/internal/helper/random/serializing.go
+    line: 75
+    codegraphId: method:568211382744bcfb5f1135a67e9dfc3e
+  - name: runes.MarshalJSON
+    kind: method
+    signature: () (b []byte, err error)
+    file: third_party/openbao/internal/helper/random/serializing.go
+    line: 78
+    codegraphId: method:e91ab7a8656012a88fd93a6f6c734e5f
+  - name: runes.UnmarshalJSON
+    kind: method
+    signature: (data []byte) (err error)
+    file: third_party/openbao/internal/helper/random/serializing.go
+    line: 83
+    codegraphId: method:d5223fc9f9ab59cab1707241025106b8
+  - name: StringGenerator
+    kind: struct
+    file: third_party/openbao/internal/helper/random/string_generator.go
+    line: 76
+    codegraphId: struct:4f34fce2ae663b6eeabe145d17902950
+  - name: StringGenerator.Generate
+    kind: method
     signature: (ctx context.Context, rng io.Reader) (str string, err error)
-realizedSpecHash: 3b84a50ccf2dcad6cc00237ad3be9e8b70f1b389d54e00d6cf88f91d6bf29636
-syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-syncedFingerprint: d921a468ae262d96126c31670ae7f1f025f7f0521ae58805426b7c614004ac21
+    file: third_party/openbao/internal/helper/random/string_generator.go
+    line: 90
+    codegraphId: method:6f856173083ecef6ca7a7f88d331e0a8
+  fingerprint: d921a468ae262d96126c31670ae7f1f025f7f0521ae58805426b7c614004ac21

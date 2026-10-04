@@ -1,4 +1,91 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-internal-command-agentproxyshared-auth-token-file
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'This context exists so the agent has a documented contract for the token-file
+    auth method: which configuration key it consumes, how it behaves when the file
+    is missing, empty, or unreadable, and which parts of the auth.AuthMethod interface
+    it intentionally leaves inert. It is the code under third_party/openbao/internal/command/agentproxyshared/auth/token-file
+    and the tests that pin its constructor and authenticate behavior.'
+  requirements:
+  - id: r.cached-token-fallback
+    level: MUST
+    text: When the file read fails or the file is empty and no token has been cached
+      yet, Authenticate returns an error that names the condition and no credentials;
+      when a cached token already exists in either case, it logs a warning and proceeds
+      with the cached token instead of failing.
+    codeRefs:
+    - method:52f55ad01b0a1ebc69331855c31658cc
+  - id: r.config-validation
+    level: MUST
+    text: The constructor rejects a nil AuthConfig with "empty config", a nil Config
+      map with "empty config data", an absent token_file_path key with "missing 'token_file_path'
+      value", a non-string value with "could not convert 'token_file_path' config
+      value to string", and an empty string with "'token_file_path' value is empty";
+      on success it returns a tokenFileMethod carrying the configured logger and the
+      file path.
+    codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/auth/token-file/token_file.go
+    - function:d24c73ee7eaff01d93be82b24abde9fe
+  - id: r.mount-path
+    level: MUST
+    text: The method hard-codes its mount path to "auth/token" and Authenticate returns
+      that path joined with "/lookup-self" as the request path, so every authentication
+      is a self-lookup of the token in the file.
+    codeRefs:
+    - function:d24c73ee7eaff01d93be82b24abde9fe
+    - method:52f55ad01b0a1ebc69331855c31658cc
+  - id: r.no-renewal
+    level: MUST
+    text: 'The method declares itself non-renewing: NewCreds returns a nil channel,
+      and CredSuccess and Shutdown do nothing, so the agent''s credential watcher
+      has no channel to select on and no lifecycle work to perform.'
+    codeRefs:
+    - method:7a5b310b87c2220fa7bd24f3f18adbd7
+    - method:a2082400b947908a7d6ed3021eb187b7
+    - method:fbfd5d5c4f474ff71ee6fd810ca16d3c
+  - id: r.test-coverage
+    level: SHOULD
+    text: The test file exercises the constructor with an empty config map, with an
+      empty file path value, and the authenticate path, so the rejection and token-reading
+      branches stay pinned.
+    codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/auth/token-file/token_file_test.go
+  - id: r.token-read-and-cache
+    level: MUST
+    text: Authenticate reads the configured token file, trims surrounding whitespace,
+      and when the read yields bytes stores the trimmed value in the method's cached
+      token and returns it in the request body under the key "token" with a nil request
+      path header and a nil error.
+    codeRefs:
+    - method:52f55ad01b0a1ebc69331855c31658cc
+  interfaces:
+  - name: NewTokenFileAuthMethod
+    kind: function
+    signature: func NewTokenFileAuthMethod(conf *auth.AuthConfig) (auth.AuthMethod,
+      error)
+    file: third_party/openbao/internal/command/agentproxyshared/auth/token-file/token_file.go
+  - name: tokenFileMethod.Authenticate
+    kind: method
+    signature: func (a *tokenFileMethod) Authenticate(_ context.Context, client *api.Client)
+      (string, http.Header, map[string]any, error)
+    file: third_party/openbao/internal/command/agentproxyshared/auth/token-file/token_file.go
+  - name: tokenFileMethod.CredSuccess
+    kind: method
+    signature: func (a *tokenFileMethod) CredSuccess()
+    file: third_party/openbao/internal/command/agentproxyshared/auth/token-file/token_file.go
+  - name: tokenFileMethod.NewCreds
+    kind: method
+    signature: func (a *tokenFileMethod) NewCreds() chan struct{}
+    file: third_party/openbao/internal/command/agentproxyshared/auth/token-file/token_file.go
+  - name: tokenFileMethod.Shutdown
+    kind: method
+    signature: func (a *tokenFileMethod) Shutdown()
+    file: third_party/openbao/internal/command/agentproxyshared/auth/token-file/token_file.go
 codeRefIndex:
 - file:third_party/openbao/internal/command/agentproxyshared/auth/token-file/token_file.go
   token_file.go@third_party/openbao/internal/command/agentproxyshared/auth/token-file/token_file.go
@@ -9,90 +96,3 @@ codeRefIndex:
 - method:7a5b310b87c2220fa7bd24f3f18adbd7 tokenFileMethod.Shutdown@third_party/openbao/internal/command/agentproxyshared/auth/token-file/token_file.go:85
 - method:a2082400b947908a7d6ed3021eb187b7 tokenFileMethod.NewCreds@third_party/openbao/internal/command/agentproxyshared/auth/token-file/token_file.go:78
 - method:fbfd5d5c4f474ff71ee6fd810ca16d3c tokenFileMethod.CredSuccess@third_party/openbao/internal/command/agentproxyshared/auth/token-file/token_file.go:82
-kind: SystemContext
-metadata:
-  name: third-party-openbao-internal-command-agentproxyshared-auth-token-file
-  namespace: default
-spec:
-  intent: 'This context exists so the agent has a documented contract for the token-file
-    auth method: which configuration key it consumes, how it behaves when the file
-    is missing, empty, or unreadable, and which parts of the auth.AuthMethod interface
-    it intentionally leaves inert. It is the code under third_party/openbao/internal/command/agentproxyshared/auth/token-file
-    and the tests that pin its constructor and authenticate behavior.'
-  interfaces:
-  - file: third_party/openbao/internal/command/agentproxyshared/auth/token-file/token_file.go
-    kind: function
-    name: NewTokenFileAuthMethod
-    signature: func NewTokenFileAuthMethod(conf *auth.AuthConfig) (auth.AuthMethod,
-      error)
-  - file: third_party/openbao/internal/command/agentproxyshared/auth/token-file/token_file.go
-    kind: method
-    name: tokenFileMethod.Authenticate
-    signature: func (a *tokenFileMethod) Authenticate(_ context.Context, client *api.Client)
-      (string, http.Header, map[string]any, error)
-  - file: third_party/openbao/internal/command/agentproxyshared/auth/token-file/token_file.go
-    kind: method
-    name: tokenFileMethod.CredSuccess
-    signature: func (a *tokenFileMethod) CredSuccess()
-  - file: third_party/openbao/internal/command/agentproxyshared/auth/token-file/token_file.go
-    kind: method
-    name: tokenFileMethod.NewCreds
-    signature: func (a *tokenFileMethod) NewCreds() chan struct{}
-  - file: third_party/openbao/internal/command/agentproxyshared/auth/token-file/token_file.go
-    kind: method
-    name: tokenFileMethod.Shutdown
-    signature: func (a *tokenFileMethod) Shutdown()
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - method:52f55ad01b0a1ebc69331855c31658cc
-    id: r.cached-token-fallback
-    level: MUST
-    text: When the file read fails or the file is empty and no token has been cached
-      yet, Authenticate returns an error that names the condition and no credentials;
-      when a cached token already exists in either case, it logs a warning and proceeds
-      with the cached token instead of failing.
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agentproxyshared/auth/token-file/token_file.go
-    - function:d24c73ee7eaff01d93be82b24abde9fe
-    id: r.config-validation
-    level: MUST
-    text: The constructor rejects a nil AuthConfig with "empty config", a nil Config
-      map with "empty config data", an absent token_file_path key with "missing 'token_file_path'
-      value", a non-string value with "could not convert 'token_file_path' config
-      value to string", and an empty string with "'token_file_path' value is empty";
-      on success it returns a tokenFileMethod carrying the configured logger and the
-      file path.
-  - codeRefs:
-    - function:d24c73ee7eaff01d93be82b24abde9fe
-    - method:52f55ad01b0a1ebc69331855c31658cc
-    id: r.mount-path
-    level: MUST
-    text: The method hard-codes its mount path to "auth/token" and Authenticate returns
-      that path joined with "/lookup-self" as the request path, so every authentication
-      is a self-lookup of the token in the file.
-  - codeRefs:
-    - method:7a5b310b87c2220fa7bd24f3f18adbd7
-    - method:a2082400b947908a7d6ed3021eb187b7
-    - method:fbfd5d5c4f474ff71ee6fd810ca16d3c
-    id: r.no-renewal
-    level: MUST
-    text: 'The method declares itself non-renewing: NewCreds returns a nil channel,
-      and CredSuccess and Shutdown do nothing, so the agent''s credential watcher
-      has no channel to select on and no lifecycle work to perform.'
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agentproxyshared/auth/token-file/token_file_test.go
-    id: r.test-coverage
-    level: SHOULD
-    text: The test file exercises the constructor with an empty config map, with an
-      empty file path value, and the authenticate path, so the rejection and token-reading
-      branches stay pinned.
-  - codeRefs:
-    - method:52f55ad01b0a1ebc69331855c31658cc
-    id: r.token-read-and-cache
-    level: MUST
-    text: Authenticate reads the configured token file, trims surrounding whitespace,
-      and when the read yields bytes stores the trimmed value in the method's cached
-      token and returns it in the request body under the key "token" with a nil request
-      path header and a nil error.
-  upstream: self

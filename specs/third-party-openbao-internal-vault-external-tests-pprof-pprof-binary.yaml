@@ -1,12 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/internal/vault/external_tests/pprof/pprof_binary/pprof_test.go
-  pprof_test.go@third_party/openbao/internal/vault/external_tests/pprof/pprof_binary/pprof_test.go
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-vault-external-tests-pprof-pprof-binary
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'This context exists to verify that the sys/pprof endpoints behave the same
     way on a real OpenBao server process as they do on the fake test cluster used
     by the sibling pprof package. The two tests are deliberately thin: they only build
@@ -14,45 +13,46 @@ spec:
     to the shared pprof test bodies, because the mechanism under test is the exec-based
     cluster, not the pprof assertions themselves. The BAO_BINARY gate keeps the suite
     from failing on machines without a built server binary.'
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/internal/vault/external_tests/pprof/pprof_binary/pprof_test.go
-    id: r.assertions-delegated
+  - id: r.assertions-delegated
     level: SHOULD
     text: The package holds no pprof assertions of its own; the pprof response checks
       stay in the imported pprof package and are reached only through pprof.SysPprof_Test
       and pprof.SysPprof_Standby_Test, so the exec wrapper stays a thin transport-swap
       layer over the in-process tests.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/pprof/pprof_binary/pprof_test.go
-    id: r.binary-env-gate
+  - id: r.binary-env-gate
     level: MUST
     text: Both tests read BAO_BINARY through api.ReadBaoVariable and call t.Skip with
       "only running exec test when $BAO_BINARY present" when the value is empty, so
       no cluster is started and no pprof assertion runs without a server binary; there
       are no command-line flags in this package.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/pprof/pprof_binary/pprof_test.go
-    id: r.cluster-cleanup-deferred
+  - id: r.cluster-cleanup-deferred
     level: MUST
     text: Each test defers cluster.Cleanup() immediately after the cluster is created,
       so the spawned server process tree is torn down on pass, fail, or skip of the
       delegated pprof test.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/pprof/pprof_binary/pprof_test.go
-    id: r.exec-dev-cluster-for-pprof
+  - id: r.exec-dev-cluster-for-pprof
     level: MUST
     text: TestSysPprof_Exec runs in parallel and, when the BAO_BINARY variable is
       non-empty, builds a dev cluster through testcluster.NewTestExecDevCluster with
       ClusterOptions.NumCores set to 1, BinaryPath taken from BAO_BINARY, and BaseListenAddress
       127.0.0.1:8208, then calls pprof.SysPprof_Test with that cluster.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/pprof/pprof_binary/pprof_test.go
-    id: r.standby-exec-dev-cluster
+  - id: r.standby-exec-dev-cluster
     level: MUST
     text: TestSysPprof_Standby_Exec runs in parallel and, when BAO_BINARY is non-empty,
       builds an exec dev cluster with VaultNodeConfig.DisablePerformanceStandby set
       to true, BinaryPath from BAO_BINARY, and BaseListenAddress 127.0.0.1:8210, then
       calls pprof.SysPprof_Standby_Test with that cluster.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/pprof/pprof_binary/pprof_test.go
+codeRefIndex:
+- file:third_party/openbao/internal/vault/external_tests/pprof/pprof_binary/pprof_test.go
+  pprof_test.go@third_party/openbao/internal/vault/external_tests/pprof/pprof_binary/pprof_test.go

@@ -1,12 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/internal/vault/external_tests/raft/raft_binary/raft_test.go
-  raft_test.go@third_party/openbao/internal/vault/external_tests/raft/raft_binary/raft_test.go
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-vault-external-tests-raft-raft-binary
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'This context exists so the raft configuration behaviour exercised by the
     shared external raft test suite is also covered against real docker-hosted vault
     nodes driven by a locally built binary, rather than only in-process nodes. It
@@ -14,37 +13,38 @@ spec:
     before and after a node is added, and the test only runs where a binary path is
     supplied, so developers without docker or a built binary get a skip instead of
     a failure.'
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/internal/vault/external_tests/raft/raft_binary/raft_test.go
-    id: r.config-test-before-and-after-add-node
+  - id: r.config-test-before-and-after-add-node
     level: MUST
     text: rafttest.Raft_Configuration_Test runs against the cluster once before cluster.AddNode,
       and again after AddNode succeeds; AddNode is called with the context from t.Context()
       and the same options value, and a non-nil error return fails the test with t.Fatal
       and prevents the second run.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/raft/raft_binary/raft_test.go
-    id: r.docker-cluster-options
+  - id: r.docker-cluster-options
     level: MUST
     text: The cluster is built from a docker.DockerClusterOptions value with ImageRepo
       "quay.io/openbao/openbao", ImageTag "latest", VaultBinary set to the BAO_BINARY
       value, and ClusterOptions.VaultNodeConfig.LogLevel "TRACE", then that options
       value is passed to docker.NewTestDockerCluster along with the testing.T.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/raft/raft_binary/raft_test.go
-    id: r.parallel-and-cleanup
+  - id: r.parallel-and-cleanup
     level: MUST
     text: The test calls t.Parallel() before any other setup, and defers cluster.Cleanup()
       immediately after docker.NewTestDockerCluster returns, so docker clusters do
       not leak when the test fails or is skipped over later.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/raft/raft_binary/raft_test.go
-    id: r.skip-without-binary
+  - id: r.skip-without-binary
     level: MUST
     text: TestRaft_Configuration_Docker reads api.ReadBaoVariable("BAO_BINARY") into
       a binary variable and calls t.Skip with the message "only running docker test
       when $BAO_BINARY present" when that variable is empty, so the docker test runs
       only where a binary path is provided.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/raft/raft_binary/raft_test.go
+codeRefIndex:
+- file:third_party/openbao/internal/vault/external_tests/raft/raft_binary/raft_test.go
+  raft_test.go@third_party/openbao/internal/vault/external_tests/raft/raft_binary/raft_test.go

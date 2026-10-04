@@ -1,17 +1,20 @@
+syncedCommit: 89cee50ec5aea977a42f904a758e506729e1158e
+syncedFingerprint: 85b3e4358e71bec57fa07f98279376d4967bcc4d9273f6f20428409b7fb9a1fe
+realizedSpecHash: 4237897c040b1bdb74ef2b6f1fff84ea151d7f221cb3fc0ccaa429e1a6e15da3
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
+- type: CodeSynced
+  status: "True"
   reason: InterfacesObserved
-  status: "True"
-  type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+  message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+- type: Drifted
   status: "False"
-  type: Drifted
-- message: the spec passes the validator
-  reason: ValidatorPassed
+  reason: FingerprintEqual
+  message: observed facts match the synced fingerprint
+- type: SpecValid
   status: "True"
-  type: SpecValid
+  reason: ValidatorPassed
+  message: the spec passes the validator
 observed:
   files:
   - third_party/openbao/ui/app/lib/arg-tokenizer.js
@@ -25,73 +28,70 @@ observed:
   - third_party/openbao/ui/app/lib/path-to-tree.js
   - third_party/openbao/ui/app/lib/route-paths.js
   - third_party/openbao/ui/app/lib/token-storage.js
-  fingerprint: 85b3e4358e71bec57fa07f98279376d4967bcc4d9273f6f20428409b7fb9a1fe
   interfaces:
-  - codegraphId: function:aa199a2dd08646d7f4d49ea43394054f
-    file: third_party/openbao/ui/app/lib/capabilities.js
+  - name: capability
     kind: function
-    line: 32
-    name: capability
     signature: (templateFn)
-  - codegraphId: function:f49f0a10d08ff839bef469674043b877
     file: third_party/openbao/ui/app/lib/capabilities.js
+    line: 32
+    codegraphId: function:aa199a2dd08646d7f4d49ea43394054f
+  - name: addCapabilityRelationships
     kind: function
-    line: 60
-    name: addCapabilityRelationships
     signature: (capabilities, jsonAPIDoc)
-  - codegraphId: function:8b4b12610ee75167ed0231e6992b193e
-    file: third_party/openbao/ui/app/lib/console-helpers.ts
+    file: third_party/openbao/ui/app/lib/capabilities.js
+    line: 60
+    codegraphId: function:f49f0a10d08ff839bef469674043b877
+  - name: extractDataFromStrings
     kind: function
-    line: 21
-    name: extractDataFromStrings
     signature: '(dataArray: string[]): DataObj'
-  - codegraphId: function:bff7baa2d52b0353ad5e2f16c5abab2e
     file: third_party/openbao/ui/app/lib/console-helpers.ts
+    line: 21
+    codegraphId: function:8b4b12610ee75167ed0231e6992b193e
+  - name: extractFlagsFromStrings
     kind: function
-    line: 49
-    name: extractFlagsFromStrings
     signature: '(flagArray: string[], method: string): Flags'
-  - codegraphId: function:83d46fae698e4b8ffd40b88724fb26f3
     file: third_party/openbao/ui/app/lib/console-helpers.ts
+    line: 49
+    codegraphId: function:bff7baa2d52b0353ad5e2f16c5abab2e
+  - name: executeUICommand
     kind: function
-    line: 75
-    name: executeUICommand
     signature: |-
       (
         command: string,
         logAndOutput: CallableFunction,
         commandFns: CommandFns
       ): boolean
-  - codegraphId: function:bb893ad89e9b560c41c0475b947a3790
     file: third_party/openbao/ui/app/lib/console-helpers.ts
+    line: 75
+    codegraphId: function:83d46fae698e4b8ffd40b88724fb26f3
+  - name: parseCommand
     kind: function
-    line: 98
-    name: parseCommand
     signature: '(command: string): ParsedCommand'
-  - codegraphId: function:1f596e6119a3a455d61f7ae0fc8207aa
     file: third_party/openbao/ui/app/lib/console-helpers.ts
+    line: 98
+    codegraphId: function:bb893ad89e9b560c41c0475b947a3790
+  - name: logFromResponse
     kind: function
-    line: 142
-    name: logFromResponse
     signature: '(response: LogResponse, path: string, method: string, flags: Flags)'
-  - codegraphId: function:2168844ebbaa634936076f9249fdabb5
     file: third_party/openbao/ui/app/lib/console-helpers.ts
+    line: 142
+    codegraphId: function:1f596e6119a3a455d61f7ae0fc8207aa
+  - name: logFromError
     kind: function
-    line: 196
-    name: logFromError
     signature: '(error: CustomError, vaultPath: string, method: string)'
-  - codegraphId: function:542d981636dbdfda76097facbd3abb14
     file: third_party/openbao/ui/app/lib/console-helpers.ts
+    line: 196
+    codegraphId: function:2168844ebbaa634936076f9249fdabb5
+  - name: shiftCommandIndex
     kind: function
-    line: 220
-    name: shiftCommandIndex
     signature: '(keyCode: number, history: CommandLog[], index: number)'
-  - codegraphId: function:435813ba50f28460ab1065f023b0bcb8
     file: third_party/openbao/ui/app/lib/console-helpers.ts
+    line: 220
+    codegraphId: function:542d981636dbdfda76097facbd3abb14
+  - name: formattedErrorFromInput
     kind: function
-    line: 250
-    name: formattedErrorFromInput
     signature: '(path: string, method: string, flags: Flags, dataArray: string[])'
-realizedSpecHash: 4237897c040b1bdb74ef2b6f1fff84ea151d7f221cb3fc0ccaa429e1a6e15da3
-syncedCommit: 89cee50ec5aea977a42f904a758e506729e1158e
-syncedFingerprint: 85b3e4358e71bec57fa07f98279376d4967bcc4d9273f6f20428409b7fb9a1fe
+    file: third_party/openbao/ui/app/lib/console-helpers.ts
+    line: 250
+    codegraphId: function:435813ba50f28460ab1065f023b0bcb8
+  fingerprint: 85b3e4358e71bec57fa07f98279376d4967bcc4d9273f6f20428409b7fb9a1fe

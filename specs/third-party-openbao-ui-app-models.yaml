@@ -1,4 +1,176 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-ui-app-models
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: The context exists so the UI can describe each OpenBao API resource once,
+    as a typed client-side record, and let routes, serializers, and form components
+    share that description. The models carry the field list, defaults, labels and
+    help text the form layer renders, the derived flags (for example whether a secret
+    engine is KV v2, whether a secret version is deleted, whether an auth method can
+    be edited or disabled), and the API path each record reads and writes, so that
+    the rest of the UI never hard-codes those details per screen.
+  requirements:
+  - id: r.mfa-login-enforcement-model
+    level: MUST
+    text: MfaLoginEnforcementModel must hold name, mfa_methods, namespace_id, auth_method_accessors,
+      auth_method_types, identity_entities and identity_groups, build its targets
+      list in prepareTargets from the referenced MFA methods, auth method accessors
+      and types, and identity entities and groups, and pick a display icon per mount
+      type through iconForMount(type).
+    codeRefs:
+    - class:25c2f24e84876c1c4bf1e4c29ea651df
+    - file:third_party/openbao/ui/app/models/mfa-login-enforcement.js
+  - id: r.mfa-method-model
+    level: MUST
+    text: MfaMethod must carry the per-method configuration attributes (type, username_format,
+      namespace_id, mount_accessor, settings_file_base64, use_signature and the Duo,
+      Okta, PingID, TOTP and Okta push specific URLs, keys, periods, key_size, qr_size,
+      algorithm, digits, skew and max_validation_attempts), expose name derived from
+      the method type, and expose formFields and attrs as the attribute list the MFA
+      method form renders.
+    codeRefs:
+    - class:4e9bb96f12a72a84d3fd92d8f643fcc5
+    - file:third_party/openbao/ui/app/models/mfa-method.js
+  - id: r.model-export-capabilities
+    level: MUST
+    text: ModelExport must expose canDisable, canEdit and canRead-style capability
+      gates so the auth method list and detail screens only offer disable, edit and
+      tune actions that the policy allows.
+    codeRefs:
+    - class:4ca0f0334095a295066c7608a584b7f4
+    - file:third_party/openbao/ui/app/models/auth-method.js
+  - id: r.model-export-tuning
+    level: MUST
+    text: 'ModelExport must describe an auth method mount: it keeps store, config,
+      path, accessor, name, type, description, local, sealWrap, deletePath and configPath
+      state, derives methodType from the type, computes apiPath and configPath from
+      the mount path, exposes localDisplay for the local flag, and exposes tuneAttrs,
+      formFields, formFieldGroups, attrs and fieldGroups as the attribute set the
+      tune form renders; tune(data) writes the supplied tuning data back to the mount.'
+    codeRefs:
+    - class:4ca0f0334095a295066c7608a584b7f4
+    - file:third_party/openbao/ui/app/models/auth-method.js
+  - id: r.model-per-concept
+    level: MUST
+    text: Each file in third_party/openbao/ui/app/models must default-export exactly
+      one Ember Data model class that the store can resolve by its model name; the
+      directory covers auth methods and config, AWS and SSH and JWT roles and credentials,
+      capabilities, cluster and node and raft join, lease, license, MFA methods and
+      MFA login enforcement, mount configuration, namespace, path filter configuration,
+      policy, secret, secret-v2 and secret-v2-version, secret engine, server, SSH
+      OTP credential, SSH sign, test form model, and transit key.
+    codeRefs:
+    - file:third_party/openbao/ui/app/models/auth-config.js
+    - file:third_party/openbao/ui/app/models/aws-credential.js
+    - file:third_party/openbao/ui/app/models/capabilities.js
+    - file:third_party/openbao/ui/app/models/cluster.js
+    - file:third_party/openbao/ui/app/models/lease.js
+    - file:third_party/openbao/ui/app/models/license.js
+    - file:third_party/openbao/ui/app/models/node.js
+    - file:third_party/openbao/ui/app/models/path-filter-config.js
+    - file:third_party/openbao/ui/app/models/policy.js
+    - file:third_party/openbao/ui/app/models/raft-join.js
+    - file:third_party/openbao/ui/app/models/role-aws.js
+    - file:third_party/openbao/ui/app/models/role-ssh.js
+    - file:third_party/openbao/ui/app/models/secret-v2.js
+    - file:third_party/openbao/ui/app/models/secret.js
+    - file:third_party/openbao/ui/app/models/server.js
+    - file:third_party/openbao/ui/app/models/ssh-otp-credential.js
+    - file:third_party/openbao/ui/app/models/ssh-sign.js
+    - file:third_party/openbao/ui/app/models/test-form-model.js
+    - file:third_party/openbao/ui/app/models/transit-key.js
+  - id: r.mount-config-model
+    level: MUST
+    text: MountConfigModel must be the store-resolvable model for a mount tuning configuration,
+      so that secret engines and auth methods can reference their tuning synchronously
+      instead of fetching it on access.
+    codeRefs:
+    - class:ad5c72b7f37378f2c16e6db9248f415c
+    - file:third_party/openbao/ui/app/models/mount-config.js
+  - id: r.namespace-model
+    level: MUST
+    text: NamespaceModel must be the store-resolvable model for a namespace record,
+      giving the namespace routes a single client-side shape for namespace listing
+      and detail data.
+    codeRefs:
+    - class:c3be2b86c02c76447ef0cf30f85cff7d
+    - file:third_party/openbao/ui/app/models/namespace.js
+  - id: r.role-jwt-model
+    level: MUST
+    text: RoleJwtModel must be the store-resolvable model for a JWT auth role, so
+      that JWT role create, edit and read screens load and save through the same record
+      type.
+    codeRefs:
+    - class:aee0d851e8d0b10aee21043bfdeceea5
+    - file:third_party/openbao/ui/app/models/role-jwt.js
+  - id: r.secret-engine-kv-type
+    level: MUST
+    text: SecretEngineModel must model a mounted secrets engine with path, type, description,
+      a synchronous belongsTo mount-config named config, version with default form
+      value 2, SSH privateKey, publicKey and generateSigningKey defaulting to true,
+      AWS lease and leaseMax, the API-returned accessor, and the KV v2 tuning options;
+      modelTypeForKV must return 'secret-v2' when engineType is 'kv' or 'generic'
+      and version is 2, and 'secret' otherwise, and isV2KV must report that same v2
+      condition.
+    codeRefs:
+    - class:98e1972dd659a70f6f6e99cdbb97d1f5
+    - file:third_party/openbao/ui/app/models/secret-engine.js
+  - id: r.secret-v2-version-model
+    level: MUST
+    text: SecretV2VersionModel must extend the base secret model, carry failedServerRead,
+      version, path, deletionTime, createdTime, destroyed and currentVersion, belong
+      synchronously to secret-v2 through the secret inverse selectedVersion, declare
+      pathAttr as 'path', and expose a deleted getter that is true when deletionTime
+      is at or before the current timestamp.
+    codeRefs:
+    - class:a24afb65e7f21f4e12c1dde187d38419
+    - file:third_party/openbao/ui/app/models/secret-v2-version.js
+  - id: r.shared-attr-metadata
+    level: SHOULD
+    text: Model fields should carry their UI metadata with the @attr declaration,
+      including defaultValue, label, helpText, subText, possibleValues, readOnly and
+      editType, so the form layer can render inputs without per-screen configuration.
+    codeRefs:
+    - file:third_party/openbao/ui/app/models/auth-method.js
+    - file:third_party/openbao/ui/app/models/mfa-method.js
+    - file:third_party/openbao/ui/app/models/secret-engine.js
+  interfaces:
+  - name: MfaLoginEnforcementModel
+    kind: class
+    signature: class MfaLoginEnforcementModel ()
+    file: third_party/openbao/ui/app/models/mfa-login-enforcement.js
+  - name: MfaMethod
+    kind: class
+    signature: class MfaMethod ()
+    file: third_party/openbao/ui/app/models/mfa-method.js
+  - name: ModelExport
+    kind: class
+    signature: class ModelExport ()
+    file: third_party/openbao/ui/app/models/auth-method.js
+  - name: MountConfigModel
+    kind: class
+    signature: class MountConfigModel ()
+    file: third_party/openbao/ui/app/models/mount-config.js
+  - name: NamespaceModel
+    kind: class
+    signature: class NamespaceModel ()
+    file: third_party/openbao/ui/app/models/namespace.js
+  - name: RoleJwtModel
+    kind: class
+    signature: class RoleJwtModel ()
+    file: third_party/openbao/ui/app/models/role-jwt.js
+  - name: SecretEngineModel
+    kind: class
+    signature: class SecretEngineModel ()
+    file: third_party/openbao/ui/app/models/secret-engine.js
+  - name: SecretV2VersionModel
+    kind: class
+    signature: class SecretV2VersionModel ()
+    file: third_party/openbao/ui/app/models/secret-v2-version.js
 codeRefIndex:
 - class:25c2f24e84876c1c4bf1e4c29ea651df MfaLoginEnforcementModel@third_party/openbao/ui/app/models/mfa-login-enforcement.js:37
 - class:4ca0f0334095a295066c7608a584b7f4 ModelExport@third_party/openbao/ui/app/models/auth-method.js:30
@@ -35,175 +207,3 @@ codeRefIndex:
 - file:third_party/openbao/ui/app/models/ssh-sign.js ssh-sign.js@third_party/openbao/ui/app/models/ssh-sign.js
 - file:third_party/openbao/ui/app/models/test-form-model.js test-form-model.js@third_party/openbao/ui/app/models/test-form-model.js
 - file:third_party/openbao/ui/app/models/transit-key.js transit-key.js@third_party/openbao/ui/app/models/transit-key.js
-kind: SystemContext
-metadata:
-  name: third-party-openbao-ui-app-models
-  namespace: default
-spec:
-  intent: The context exists so the UI can describe each OpenBao API resource once,
-    as a typed client-side record, and let routes, serializers, and form components
-    share that description. The models carry the field list, defaults, labels and
-    help text the form layer renders, the derived flags (for example whether a secret
-    engine is KV v2, whether a secret version is deleted, whether an auth method can
-    be edited or disabled), and the API path each record reads and writes, so that
-    the rest of the UI never hard-codes those details per screen.
-  interfaces:
-  - file: third_party/openbao/ui/app/models/mfa-login-enforcement.js
-    kind: class
-    name: MfaLoginEnforcementModel
-    signature: class MfaLoginEnforcementModel ()
-  - file: third_party/openbao/ui/app/models/mfa-method.js
-    kind: class
-    name: MfaMethod
-    signature: class MfaMethod ()
-  - file: third_party/openbao/ui/app/models/auth-method.js
-    kind: class
-    name: ModelExport
-    signature: class ModelExport ()
-  - file: third_party/openbao/ui/app/models/mount-config.js
-    kind: class
-    name: MountConfigModel
-    signature: class MountConfigModel ()
-  - file: third_party/openbao/ui/app/models/namespace.js
-    kind: class
-    name: NamespaceModel
-    signature: class NamespaceModel ()
-  - file: third_party/openbao/ui/app/models/role-jwt.js
-    kind: class
-    name: RoleJwtModel
-    signature: class RoleJwtModel ()
-  - file: third_party/openbao/ui/app/models/secret-engine.js
-    kind: class
-    name: SecretEngineModel
-    signature: class SecretEngineModel ()
-  - file: third_party/openbao/ui/app/models/secret-v2-version.js
-    kind: class
-    name: SecretV2VersionModel
-    signature: class SecretV2VersionModel ()
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - class:25c2f24e84876c1c4bf1e4c29ea651df
-    - file:third_party/openbao/ui/app/models/mfa-login-enforcement.js
-    id: r.mfa-login-enforcement-model
-    level: MUST
-    text: MfaLoginEnforcementModel must hold name, mfa_methods, namespace_id, auth_method_accessors,
-      auth_method_types, identity_entities and identity_groups, build its targets
-      list in prepareTargets from the referenced MFA methods, auth method accessors
-      and types, and identity entities and groups, and pick a display icon per mount
-      type through iconForMount(type).
-  - codeRefs:
-    - class:4e9bb96f12a72a84d3fd92d8f643fcc5
-    - file:third_party/openbao/ui/app/models/mfa-method.js
-    id: r.mfa-method-model
-    level: MUST
-    text: MfaMethod must carry the per-method configuration attributes (type, username_format,
-      namespace_id, mount_accessor, settings_file_base64, use_signature and the Duo,
-      Okta, PingID, TOTP and Okta push specific URLs, keys, periods, key_size, qr_size,
-      algorithm, digits, skew and max_validation_attempts), expose name derived from
-      the method type, and expose formFields and attrs as the attribute list the MFA
-      method form renders.
-  - codeRefs:
-    - class:4ca0f0334095a295066c7608a584b7f4
-    - file:third_party/openbao/ui/app/models/auth-method.js
-    id: r.model-export-capabilities
-    level: MUST
-    text: ModelExport must expose canDisable, canEdit and canRead-style capability
-      gates so the auth method list and detail screens only offer disable, edit and
-      tune actions that the policy allows.
-  - codeRefs:
-    - class:4ca0f0334095a295066c7608a584b7f4
-    - file:third_party/openbao/ui/app/models/auth-method.js
-    id: r.model-export-tuning
-    level: MUST
-    text: 'ModelExport must describe an auth method mount: it keeps store, config,
-      path, accessor, name, type, description, local, sealWrap, deletePath and configPath
-      state, derives methodType from the type, computes apiPath and configPath from
-      the mount path, exposes localDisplay for the local flag, and exposes tuneAttrs,
-      formFields, formFieldGroups, attrs and fieldGroups as the attribute set the
-      tune form renders; tune(data) writes the supplied tuning data back to the mount.'
-  - codeRefs:
-    - file:third_party/openbao/ui/app/models/auth-config.js
-    - file:third_party/openbao/ui/app/models/aws-credential.js
-    - file:third_party/openbao/ui/app/models/capabilities.js
-    - file:third_party/openbao/ui/app/models/cluster.js
-    - file:third_party/openbao/ui/app/models/lease.js
-    - file:third_party/openbao/ui/app/models/license.js
-    - file:third_party/openbao/ui/app/models/node.js
-    - file:third_party/openbao/ui/app/models/path-filter-config.js
-    - file:third_party/openbao/ui/app/models/policy.js
-    - file:third_party/openbao/ui/app/models/raft-join.js
-    - file:third_party/openbao/ui/app/models/role-aws.js
-    - file:third_party/openbao/ui/app/models/role-ssh.js
-    - file:third_party/openbao/ui/app/models/secret-v2.js
-    - file:third_party/openbao/ui/app/models/secret.js
-    - file:third_party/openbao/ui/app/models/server.js
-    - file:third_party/openbao/ui/app/models/ssh-otp-credential.js
-    - file:third_party/openbao/ui/app/models/ssh-sign.js
-    - file:third_party/openbao/ui/app/models/test-form-model.js
-    - file:third_party/openbao/ui/app/models/transit-key.js
-    id: r.model-per-concept
-    level: MUST
-    text: Each file in third_party/openbao/ui/app/models must default-export exactly
-      one Ember Data model class that the store can resolve by its model name; the
-      directory covers auth methods and config, AWS and SSH and JWT roles and credentials,
-      capabilities, cluster and node and raft join, lease, license, MFA methods and
-      MFA login enforcement, mount configuration, namespace, path filter configuration,
-      policy, secret, secret-v2 and secret-v2-version, secret engine, server, SSH
-      OTP credential, SSH sign, test form model, and transit key.
-  - codeRefs:
-    - class:ad5c72b7f37378f2c16e6db9248f415c
-    - file:third_party/openbao/ui/app/models/mount-config.js
-    id: r.mount-config-model
-    level: MUST
-    text: MountConfigModel must be the store-resolvable model for a mount tuning configuration,
-      so that secret engines and auth methods can reference their tuning synchronously
-      instead of fetching it on access.
-  - codeRefs:
-    - class:c3be2b86c02c76447ef0cf30f85cff7d
-    - file:third_party/openbao/ui/app/models/namespace.js
-    id: r.namespace-model
-    level: MUST
-    text: NamespaceModel must be the store-resolvable model for a namespace record,
-      giving the namespace routes a single client-side shape for namespace listing
-      and detail data.
-  - codeRefs:
-    - class:aee0d851e8d0b10aee21043bfdeceea5
-    - file:third_party/openbao/ui/app/models/role-jwt.js
-    id: r.role-jwt-model
-    level: MUST
-    text: RoleJwtModel must be the store-resolvable model for a JWT auth role, so
-      that JWT role create, edit and read screens load and save through the same record
-      type.
-  - codeRefs:
-    - class:98e1972dd659a70f6f6e99cdbb97d1f5
-    - file:third_party/openbao/ui/app/models/secret-engine.js
-    id: r.secret-engine-kv-type
-    level: MUST
-    text: SecretEngineModel must model a mounted secrets engine with path, type, description,
-      a synchronous belongsTo mount-config named config, version with default form
-      value 2, SSH privateKey, publicKey and generateSigningKey defaulting to true,
-      AWS lease and leaseMax, the API-returned accessor, and the KV v2 tuning options;
-      modelTypeForKV must return 'secret-v2' when engineType is 'kv' or 'generic'
-      and version is 2, and 'secret' otherwise, and isV2KV must report that same v2
-      condition.
-  - codeRefs:
-    - class:a24afb65e7f21f4e12c1dde187d38419
-    - file:third_party/openbao/ui/app/models/secret-v2-version.js
-    id: r.secret-v2-version-model
-    level: MUST
-    text: SecretV2VersionModel must extend the base secret model, carry failedServerRead,
-      version, path, deletionTime, createdTime, destroyed and currentVersion, belong
-      synchronously to secret-v2 through the secret inverse selectedVersion, declare
-      pathAttr as 'path', and expose a deleted getter that is true when deletionTime
-      is at or before the current timestamp.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/models/auth-method.js
-    - file:third_party/openbao/ui/app/models/mfa-method.js
-    - file:third_party/openbao/ui/app/models/secret-engine.js
-    id: r.shared-attr-metadata
-    level: SHOULD
-    text: Model fields should carry their UI metadata with the @attr declaration,
-      including defaultValue, label, helpText, subText, possibleValues, readOnly and
-      editType, so the form layer can render inputs without per-screen configuration.
-  upstream: self

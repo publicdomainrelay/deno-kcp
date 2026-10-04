@@ -1,13 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/.github/ISSUE_TEMPLATE/config.yml config.yml@third_party/openbao/.github/ISSUE_TEMPLATE/config.yml
-- file:third_party/openbao/.github/ISSUE_TEMPLATE/docs_ecosystem.yaml docs_ecosystem.yaml@third_party/openbao/.github/ISSUE_TEMPLATE/docs_ecosystem.yaml
-- file:third_party/openbao/.github/ISSUE_TEMPLATE/rfc.yml rfc.yml@third_party/openbao/.github/ISSUE_TEMPLATE/rfc.yml
 kind: SystemContext
 metadata:
   name: third-party-openbao-github-issue-template
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'This context exists to record the vendored GitHub issue-template metadata
     that deno-kcp carries for the OpenBao third-party tree. It is declarative configuration,
     not code: the three YAML files shape how contributors file documentation/ecosystem
@@ -16,49 +14,51 @@ spec:
     its contents are known to be upstream-owned metadata with no Go build surface,
     letting future changes be treated as upstream syncs rather than local behaviour
     changes.'
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/.github/ISSUE_TEMPLATE/docs_ecosystem.yaml
-    id: r.docs-ecosystem-form
+  - id: r.docs-ecosystem-form
     level: MUST
     text: docs_ecosystem.yaml must declare a GitHub issue form with its name, description,
       and body fields for documentation and ecosystem reports.
-  - codeRefs:
-    - file:third_party/openbao/.github/ISSUE_TEMPLATE/config.yml
-    id: r.issue-chooser-config
+    codeRefs:
+    - file:third_party/openbao/.github/ISSUE_TEMPLATE/docs_ecosystem.yaml
+  - id: r.issue-chooser-config
     level: MUST
     text: config.yml must define the issue chooser configuration and the contact links
       that route contributors to the upstream support and discussion channels.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/.github/ISSUE_TEMPLATE/config.yml
-    - file:third_party/openbao/.github/ISSUE_TEMPLATE/docs_ecosystem.yaml
-    - file:third_party/openbao/.github/ISSUE_TEMPLATE/rfc.yml
-    id: r.no-code-surface
+  - id: r.no-code-surface
     level: MUST
     text: This context must export no functions, types, or interfaces; the three YAML
       files are declarative GitHub metadata and contribute nothing to the Go build.
-  - codeRefs:
+    codeRefs:
+    - file:third_party/openbao/.github/ISSUE_TEMPLATE/config.yml
+    - file:third_party/openbao/.github/ISSUE_TEMPLATE/docs_ecosystem.yaml
     - file:third_party/openbao/.github/ISSUE_TEMPLATE/rfc.yml
-    id: r.rfc-form
+  - id: r.rfc-form
     level: MUST
     text: rfc.yml must declare a GitHub issue form with its name, description, and
       body fields for Request for Comments proposals.
-  - codeRefs:
-    - file:third_party/openbao/.github/ISSUE_TEMPLATE/config.yml
-    - file:third_party/openbao/.github/ISSUE_TEMPLATE/docs_ecosystem.yaml
+    codeRefs:
     - file:third_party/openbao/.github/ISSUE_TEMPLATE/rfc.yml
-    id: r.upstream-verbatim
+  - id: r.upstream-verbatim
     level: SHOULD
     text: The template files should stay byte-identical to the upstream OpenBao versions
       so local divergence does not accumulate in vendored metadata.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/.github/ISSUE_TEMPLATE/config.yml
     - file:third_party/openbao/.github/ISSUE_TEMPLATE/docs_ecosystem.yaml
     - file:third_party/openbao/.github/ISSUE_TEMPLATE/rfc.yml
-    id: r.vendored-issue-templates-present
+  - id: r.vendored-issue-templates-present
     level: MUST
     text: The vendored OpenBao tree must carry the GitHub issue template directory
       at third_party/openbao/.github/ISSUE_TEMPLATE, holding config.yml, docs_ecosystem.yaml
       and rfc.yml.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/.github/ISSUE_TEMPLATE/config.yml
+    - file:third_party/openbao/.github/ISSUE_TEMPLATE/docs_ecosystem.yaml
+    - file:third_party/openbao/.github/ISSUE_TEMPLATE/rfc.yml
+codeRefIndex:
+- file:third_party/openbao/.github/ISSUE_TEMPLATE/config.yml config.yml@third_party/openbao/.github/ISSUE_TEMPLATE/config.yml
+- file:third_party/openbao/.github/ISSUE_TEMPLATE/docs_ecosystem.yaml docs_ecosystem.yaml@third_party/openbao/.github/ISSUE_TEMPLATE/docs_ecosystem.yaml
+- file:third_party/openbao/.github/ISSUE_TEMPLATE/rfc.yml rfc.yml@third_party/openbao/.github/ISSUE_TEMPLATE/rfc.yml

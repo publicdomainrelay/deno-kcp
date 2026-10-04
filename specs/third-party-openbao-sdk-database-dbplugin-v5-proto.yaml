@@ -1,4 +1,803 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-sdk-database-dbplugin-v5-proto
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'This context exists because the deno-kcp repository vendors the OpenBao
+    database plugin SDK, and the v5 proto package is the wire contract between a secrets
+    engine and an out-of-process database plugin. It is generated code: protoc-gen-go
+    and protoc-gen-go-grpc produced it from the database.proto schema, so nobody edits
+    it by hand and it must stay byte-for-byte faithful to the upstream OpenBao release
+    it was cut from. Its purpose is to let the rest of the repository speak the v5
+    plugin RPC without importing the SDK implementation, to keep the credential request
+    and response shapes stable for any plugin binary built against v5, and to give
+    both sides of the gRPC transport the client stubs, server interface, registration
+    helper and unimplemented-server stub they need to interoperate.'
+  requirements:
+  - id: r.credential-change-statements
+    level: MUST
+    text: 'Each credential change sub-message must pair its new value with the Statements
+      to run: ChangePassword holds NewPassword and Statements, ChangePublicKey holds
+      NewPublicKey bytes and Statements, and ChangeExpiration holds NewExpiration
+      and Statements.'
+    codeRefs:
+    - method:13b2a3daad47d5350a9f8a504a4bc947
+    - method:4b8a816964687a1df0528569ca512376
+    - method:4e2740cc7110f2aaff493587c52b7cf1
+    - method:a8f14151f858bfded51da4c1510869e1
+    - method:b5b44f1ac58bc9bac15ade18bd8f4f00
+    - method:f90eb90d3c8b3c39607e98d9ad2ec160
+  - id: r.database-client-interface
+    level: MUST
+    text: DatabaseClient must be the caller-side contract and expose exactly the six
+      RPC methods Initialize, NewUser, UpdateUser, DeleteUser, Type and Close, each
+      taking a context, its request message and variadic grpc.CallOption and returning
+      the matching response message with an error.
+    codeRefs:
+    - interface:89d674ee881d50c5da4afeed4c88ead6
+    - method:04f80813ae1c7580ca105ee05fb4d363
+    - method:20931d082b67e1b86df51bcf7736d416
+    - method:285f5d69ffbb9aec1e52c87c27ac6b7b
+    - method:417ec012cd229093d58d34848df98877
+    - method:745ea3782b04d4425f1823d99c988366
+    - method:7e88eefbe4f4b10b7af75541300afd47
+  - id: r.database-server-interface
+    level: MUST
+    text: DatabaseServer must be the implementation-side contract and expose the same
+      six operations Initialize, NewUser, UpdateUser, DeleteUser, Type and Close,
+      each taking a context and the request message and returning the response message
+      with an error.
+    codeRefs:
+    - interface:d524b3dcf0036b9ae1f2569ba91c4646
+    - method:342463bd214a1410f071c389b0439211
+    - method:45033aa97e5a9ccf845b9c68e01b241a
+    - method:5ba87d3d06c681a03ef534292fb1d382
+    - method:bbb9e3be216e2dae773e486a0263cb90
+    - method:e9fc3ef8ddbce5cc4566bbc761b6cfd0
+    - method:f0f3409340e1777677bced7473d119a7
+  - id: r.delete-user-request-shape
+    level: MUST
+    text: DeleteUserRequest must carry the username to remove and the Statements that
+      perform the removal, and DeleteUserResponse must be an empty message.
+    codeRefs:
+    - method:06c1212b9b1a42e452ff03acd05d013d
+    - method:32096519fffbf04eb80cdc7bb574e4d8
+    - struct:b36aaaf0b59aaf90a664d4c9dfec3226
+  - id: r.descriptor-index
+    level: MUST
+    text: Each message type must expose Descriptor returning the raw gzipped file
+      descriptor bytes together with the index path that locates the message inside
+      that descriptor, so reflection can resolve the message without a registry lookup.
+    codeRefs:
+    - file:third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+    - method:0895fde4fa9d0d48d7b4953450fdea52
+    - method:24875eed28f4afda9c0a3afced81c774
+  - id: r.generated-code-boundary
+    level: MUST
+    text: 'Both files must stay machine-generated and unedited: the message file must
+      declare the protobuf package and Go import path the generator emitted, and the
+      gRPC file must declare the supported protoc-gen-go-grpc version, so regenerating
+      from the upstream proto reproduces the same content.'
+    codeRefs:
+    - file:third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+    - file:third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
+  - id: r.initialize-exchange
+    level: MUST
+    text: InitializeRequest must carry the plugin configuration as a structpb.Struct
+      in ConfigData plus a VerifyConnection boolean, and InitializeResponse must return
+      the resulting configuration as ConfigData, so a plugin knows whether to open
+      a real connection during initialization.
+    codeRefs:
+    - method:c19b8102d1b56d5878cb7ebea38bc345
+    - method:e8adc822d6293ea0ef1f624eb4b410b0
+    - method:fcf9789bf5bd101c2bc4b1eae337b663
+    - struct:e13ef78701a543286b66f732c0829701
+  - id: r.new-database-client
+    level: MUST
+    text: NewDatabaseClient must wrap any grpc.ClientConnInterface in an unexported
+      databaseClient whose methods invoke the corresponding service procedure and
+      unmarshal the reply into the response message.
+    codeRefs:
+    - function:1ea2712439edabfa3c6642f03cb1235f
+    - method:2d54a2d02dcffd2bd0f75963d8437241
+    - method:3044fe6694775472b3aad338aa22bbcf
+    - method:354a230a59ba8c583667db7534dcfb35
+    - method:b462058bfd11eeb1d57f7bf19435d3b2
+  - id: r.new-user-request-shape
+    level: MUST
+    text: 'NewUserRequest must describe the credential to mint: a UsernameConfig,
+      a password string, an expiration timestamp, the creation and rollback Statements,
+      a credential type as int32, the public key bytes and the subject string; NewUserResponse
+      must return the generated username.'
+    codeRefs:
+    - method:3822bb3384c347907397fb8f871d0a07
+    - method:4c084a432b6b00c93a12146294ba94a4
+    - method:61b0b542753c8c9e06ef6219156bb05a
+    - method:bc9648079eb920928c6d8b0230817c92
+    - method:cf2b11ee2c7d2f6ea443d8a16b6956a4
+    - method:efd0c14496b4adac8430d38667c32daa
+    - struct:741d9bd5cadfd64346f442026c840623
+  - id: r.nil-safe-getters
+    level: MUST
+    text: Every field getter must tolerate a nil receiver and return the field's zero
+      value in that case, so callers can read optional nested messages such as a request's
+      Statements, UsernameConfig or ChangePassword without a prior nil check.
+    codeRefs:
+    - method:0439f402a802b46153495ac355669270
+    - method:06c1212b9b1a42e452ff03acd05d013d
+    - method:7fe1671879729f014bc258ee706a2072
+    - method:d0deab9f54be5818f6d5197b47688e07
+    - method:e458b00fc6ccdf7afde9751003be23d0
+  - id: r.protobuf-message-contract
+    level: MUST
+    text: 'Every message type in the package must satisfy proto.Message: it must implement
+      Reset to clear the receiver to its zero value, String to render the prototext
+      form via protoimpl.MessageStringOf, ProtoMessage as the legacy marker, and ProtoReflect
+      to return the protoreflect.Message view backed by the package message state.'
+    codeRefs:
+    - file:third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+    - method:06d2ed0ba9ecb3272052216f11024e46
+    - method:4cd086dc5bc07fada55ba8ee6e167119
+    - method:9061d652791268dcd39217358ea3d05f
+    - method:c463a2e7551678671badd3c5a33c14e1
+  - id: r.server-registration
+    level: MUST
+    text: RegisterDatabaseServer must register the database service implementation
+      and its service descriptor with the supplied grpc.ServiceRegistrar, which makes
+      the six methods reachable over the wire.
+    codeRefs:
+    - file:third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
+    - function:dd411c97b371ec377cf3537fc976b967
+  - id: r.statements-command-list
+    level: MUST
+    text: Statements must carry an ordered list of SQL command strings, so a plugin
+      executes them in the order the engine supplied.
+    codeRefs:
+    - method:a60963779c5bc8ba1669a448268da850
+    - struct:a9fa423f61c2550ee4b38f109d08e8c3
+  - id: r.type-and-empty
+    level: MUST
+    text: TypeResponse must report the plugin's type as a string, and the Empty message
+      must serve as the request and the response of the argument-less Type and Close
+      calls.
+    codeRefs:
+    - file:third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+    - method:7d32519dbe0565b09d1494bd0559075b
+    - struct:1d519c31fe7b7d1bf164fad84714f068
+  - id: r.unimplemented-server-stub
+    level: MUST
+    text: UnimplementedDatabaseServer must provide a stub implementation of all six
+      service methods so a server can embed it and stay compiling when the service
+      gains methods, and each stub must return an error rather than silently succeed.
+    codeRefs:
+    - method:20be023b1a9ab718fcd8e16a4b03f856
+    - method:8b4a5446a052846e3de8439d40ddcb08
+    - method:a78787f9e9983ddad3fcc1ec7277fef2
+    - method:a7e7eb460b120a40c9844e299c0c57cc
+    - method:b52dbfcaaf70ace52c48648aafb397c0
+    - method:d6133d612821f4af6a07bf84212fd294
+    - struct:7686a96058e8c28fda23e539d6fcd69c
+  - id: r.unsafe-server-marker
+    level: MAY
+    text: UnsafeDatabaseServer may be implemented by a server that knowingly accepts
+      the forward-compatibility risk, so future service methods cannot break its build;
+      such a server must then be passed to RegisterDatabaseServer as a DatabaseServer.
+    codeRefs:
+    - interface:cd60c510b269b69e4e2270b8050edada
+  - id: r.update-user-deltas
+    level: MUST
+    text: UpdateUserRequest must identify the account by username and carry each change
+      as its own optional sub-message — ChangePassword, ChangeExpiration or ChangePublicKey
+      — alongside the credential type, so a caller can change one aspect without restating
+      the others; UpdateUserResponse is empty.
+    codeRefs:
+    - method:2c9ade4c8e917fdf475300fd1d7f97a8
+    - method:acf382b05b48efec5384efa755dd30fb
+    - method:bd0b7ff6a21e74880400be7ec1302aed
+    - method:f2419bb393eba5a8df31451ea9d91aa8
+    - struct:93b3bb72e9474903e1c9e2d67cc87568
+  - id: r.username-config-parts
+    level: MUST
+    text: UsernameConfig must carry a DisplayName and a RoleName so a secrets engine
+      can render a human-readable name while the plugin derives the actual account
+      name from the role.
+    codeRefs:
+    - method:835b13186c9cb47b6393dccf9b26fe61
+    - method:b338c3af11e7d9062e6b34de2c35cce7
+    - struct:1cc6b65fef148563b42b943eb3d069b6
+  interfaces:
+  - name: ChangeExpiration
+    kind: struct
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: ChangeExpiration.Descriptor
+    kind: method
+    signature: () ([]byte, []int)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: ChangeExpiration.GetNewExpiration
+    kind: method
+    signature: () *timestamppb.Timestamp
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: ChangeExpiration.GetStatements
+    kind: method
+    signature: () *Statements
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: ChangeExpiration.ProtoMessage
+    kind: method
+    signature: ()
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: ChangeExpiration.ProtoReflect
+    kind: method
+    signature: () protoreflect.Message
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: ChangeExpiration.Reset
+    kind: method
+    signature: ()
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: ChangeExpiration.String
+    kind: method
+    signature: () string
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: ChangePassword
+    kind: struct
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: ChangePassword.Descriptor
+    kind: method
+    signature: () ([]byte, []int)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: ChangePassword.GetNewPassword
+    kind: method
+    signature: () string
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: ChangePassword.GetStatements
+    kind: method
+    signature: () *Statements
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: ChangePassword.ProtoMessage
+    kind: method
+    signature: ()
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: ChangePassword.ProtoReflect
+    kind: method
+    signature: () protoreflect.Message
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: ChangePassword.Reset
+    kind: method
+    signature: ()
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: ChangePassword.String
+    kind: method
+    signature: () string
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: ChangePublicKey
+    kind: struct
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: ChangePublicKey.Descriptor
+    kind: method
+    signature: () ([]byte, []int)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: ChangePublicKey.GetNewPublicKey
+    kind: method
+    signature: () []byte
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: ChangePublicKey.GetStatements
+    kind: method
+    signature: () *Statements
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: ChangePublicKey.ProtoMessage
+    kind: method
+    signature: ()
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: ChangePublicKey.ProtoReflect
+    kind: method
+    signature: () protoreflect.Message
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: ChangePublicKey.Reset
+    kind: method
+    signature: ()
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: ChangePublicKey.String
+    kind: method
+    signature: () string
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: DatabaseClient
+    kind: interface
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
+  - name: DatabaseClient.Close
+    kind: method
+    signature: (ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty,
+      error)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
+  - name: DatabaseClient.DeleteUser
+    kind: method
+    signature: (ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption)
+      (*DeleteUserResponse, error)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
+  - name: DatabaseClient.Initialize
+    kind: method
+    signature: (ctx context.Context, in *InitializeRequest, opts ...grpc.CallOption)
+      (*InitializeResponse, error)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
+  - name: DatabaseClient.NewUser
+    kind: method
+    signature: (ctx context.Context, in *NewUserRequest, opts ...grpc.CallOption)
+      (*NewUserResponse, error)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
+  - name: DatabaseClient.Type
+    kind: method
+    signature: (ctx context.Context, in *Empty, opts ...grpc.CallOption) (*TypeResponse,
+      error)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
+  - name: DatabaseClient.UpdateUser
+    kind: method
+    signature: (ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption)
+      (*UpdateUserResponse, error)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
+  - name: DatabaseServer
+    kind: interface
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
+  - name: DatabaseServer.Close
+    kind: method
+    signature: (context.Context, *Empty) (*Empty, error)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
+  - name: DatabaseServer.DeleteUser
+    kind: method
+    signature: (context.Context, *DeleteUserRequest) (*DeleteUserResponse, error)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
+  - name: DatabaseServer.Initialize
+    kind: method
+    signature: (context.Context, *InitializeRequest) (*InitializeResponse, error)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
+  - name: DatabaseServer.NewUser
+    kind: method
+    signature: (context.Context, *NewUserRequest) (*NewUserResponse, error)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
+  - name: DatabaseServer.Type
+    kind: method
+    signature: (context.Context, *Empty) (*TypeResponse, error)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
+  - name: DatabaseServer.UpdateUser
+    kind: method
+    signature: (context.Context, *UpdateUserRequest) (*UpdateUserResponse, error)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
+  - name: DeleteUserRequest
+    kind: struct
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: DeleteUserRequest.Descriptor
+    kind: method
+    signature: () ([]byte, []int)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: DeleteUserRequest.GetStatements
+    kind: method
+    signature: () *Statements
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: DeleteUserRequest.GetUsername
+    kind: method
+    signature: () string
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: DeleteUserRequest.ProtoMessage
+    kind: method
+    signature: ()
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: DeleteUserRequest.ProtoReflect
+    kind: method
+    signature: () protoreflect.Message
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: DeleteUserRequest.Reset
+    kind: method
+    signature: ()
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: DeleteUserRequest.String
+    kind: method
+    signature: () string
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: DeleteUserResponse
+    kind: struct
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: DeleteUserResponse.Descriptor
+    kind: method
+    signature: () ([]byte, []int)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: DeleteUserResponse.ProtoMessage
+    kind: method
+    signature: ()
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: DeleteUserResponse.ProtoReflect
+    kind: method
+    signature: () protoreflect.Message
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: DeleteUserResponse.Reset
+    kind: method
+    signature: ()
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: DeleteUserResponse.String
+    kind: method
+    signature: () string
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: Empty
+    kind: struct
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: Empty.Descriptor
+    kind: method
+    signature: () ([]byte, []int)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: Empty.ProtoMessage
+    kind: method
+    signature: ()
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: Empty.ProtoReflect
+    kind: method
+    signature: () protoreflect.Message
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: Empty.Reset
+    kind: method
+    signature: ()
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: Empty.String
+    kind: method
+    signature: () string
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: InitializeRequest
+    kind: struct
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: InitializeRequest.Descriptor
+    kind: method
+    signature: () ([]byte, []int)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: InitializeRequest.GetConfigData
+    kind: method
+    signature: () *structpb.Struct
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: InitializeRequest.GetVerifyConnection
+    kind: method
+    signature: () bool
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: InitializeRequest.ProtoMessage
+    kind: method
+    signature: ()
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: InitializeRequest.ProtoReflect
+    kind: method
+    signature: () protoreflect.Message
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: InitializeRequest.Reset
+    kind: method
+    signature: ()
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: InitializeRequest.String
+    kind: method
+    signature: () string
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: InitializeResponse
+    kind: struct
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: InitializeResponse.Descriptor
+    kind: method
+    signature: () ([]byte, []int)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: InitializeResponse.GetConfigData
+    kind: method
+    signature: () *structpb.Struct
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: InitializeResponse.ProtoMessage
+    kind: method
+    signature: ()
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: InitializeResponse.ProtoReflect
+    kind: method
+    signature: () protoreflect.Message
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: InitializeResponse.Reset
+    kind: method
+    signature: ()
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: InitializeResponse.String
+    kind: method
+    signature: () string
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: NewDatabaseClient
+    kind: function
+    signature: func NewDatabaseClient(cc grpc.ClientConnInterface) DatabaseClient
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
+  - name: NewUserRequest
+    kind: struct
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: NewUserRequest.Descriptor
+    kind: method
+    signature: () ([]byte, []int)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: NewUserRequest.GetCredentialType
+    kind: method
+    signature: () int32
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: NewUserRequest.GetExpiration
+    kind: method
+    signature: () *timestamppb.Timestamp
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: NewUserRequest.GetPassword
+    kind: method
+    signature: () string
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: NewUserRequest.GetPublicKey
+    kind: method
+    signature: () []byte
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: NewUserRequest.GetRollbackStatements
+    kind: method
+    signature: () *Statements
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: NewUserRequest.GetStatements
+    kind: method
+    signature: () *Statements
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: NewUserRequest.GetSubject
+    kind: method
+    signature: () string
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: NewUserRequest.GetUsernameConfig
+    kind: method
+    signature: () *UsernameConfig
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: NewUserRequest.ProtoMessage
+    kind: method
+    signature: ()
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: NewUserRequest.ProtoReflect
+    kind: method
+    signature: () protoreflect.Message
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: NewUserRequest.Reset
+    kind: method
+    signature: ()
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: NewUserRequest.String
+    kind: method
+    signature: () string
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: NewUserResponse
+    kind: struct
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: NewUserResponse.Descriptor
+    kind: method
+    signature: () ([]byte, []int)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: NewUserResponse.GetUsername
+    kind: method
+    signature: () string
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: NewUserResponse.ProtoMessage
+    kind: method
+    signature: ()
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: NewUserResponse.ProtoReflect
+    kind: method
+    signature: () protoreflect.Message
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: NewUserResponse.Reset
+    kind: method
+    signature: ()
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: NewUserResponse.String
+    kind: method
+    signature: () string
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: RegisterDatabaseServer
+    kind: function
+    signature: func RegisterDatabaseServer(s grpc.ServiceRegistrar, srv DatabaseServer)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
+  - name: Statements
+    kind: struct
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: Statements.Descriptor
+    kind: method
+    signature: () ([]byte, []int)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: Statements.GetCommands
+    kind: method
+    signature: () []string
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: Statements.ProtoMessage
+    kind: method
+    signature: ()
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: Statements.ProtoReflect
+    kind: method
+    signature: () protoreflect.Message
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: Statements.Reset
+    kind: method
+    signature: ()
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: Statements.String
+    kind: method
+    signature: () string
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: TypeResponse
+    kind: struct
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: TypeResponse.Descriptor
+    kind: method
+    signature: () ([]byte, []int)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: TypeResponse.GetType
+    kind: method
+    signature: () string
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: TypeResponse.ProtoMessage
+    kind: method
+    signature: ()
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: TypeResponse.ProtoReflect
+    kind: method
+    signature: () protoreflect.Message
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: TypeResponse.Reset
+    kind: method
+    signature: ()
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: TypeResponse.String
+    kind: method
+    signature: () string
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: UnimplementedDatabaseServer
+    kind: struct
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
+  - name: UnimplementedDatabaseServer.Close
+    kind: method
+    signature: (context.Context, *Empty) (*Empty, error)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
+  - name: UnimplementedDatabaseServer.DeleteUser
+    kind: method
+    signature: (context.Context, *DeleteUserRequest) (*DeleteUserResponse, error)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
+  - name: UnimplementedDatabaseServer.Initialize
+    kind: method
+    signature: (context.Context, *InitializeRequest) (*InitializeResponse, error)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
+  - name: UnimplementedDatabaseServer.NewUser
+    kind: method
+    signature: (context.Context, *NewUserRequest) (*NewUserResponse, error)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
+  - name: UnimplementedDatabaseServer.Type
+    kind: method
+    signature: (context.Context, *Empty) (*TypeResponse, error)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
+  - name: UnimplementedDatabaseServer.UpdateUser
+    kind: method
+    signature: (context.Context, *UpdateUserRequest) (*UpdateUserResponse, error)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
+  - name: UnsafeDatabaseServer
+    kind: interface
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
+  - name: UpdateUserRequest
+    kind: struct
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: UpdateUserRequest.Descriptor
+    kind: method
+    signature: () ([]byte, []int)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: UpdateUserRequest.GetCredentialType
+    kind: method
+    signature: () int32
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: UpdateUserRequest.GetExpiration
+    kind: method
+    signature: () *ChangeExpiration
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: UpdateUserRequest.GetPassword
+    kind: method
+    signature: () *ChangePassword
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: UpdateUserRequest.GetPublicKey
+    kind: method
+    signature: () *ChangePublicKey
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: UpdateUserRequest.GetUsername
+    kind: method
+    signature: () string
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: UpdateUserRequest.ProtoMessage
+    kind: method
+    signature: ()
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: UpdateUserRequest.ProtoReflect
+    kind: method
+    signature: () protoreflect.Message
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: UpdateUserRequest.Reset
+    kind: method
+    signature: ()
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: UpdateUserRequest.String
+    kind: method
+    signature: () string
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: UpdateUserResponse
+    kind: struct
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: UpdateUserResponse.Descriptor
+    kind: method
+    signature: () ([]byte, []int)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: UpdateUserResponse.ProtoMessage
+    kind: method
+    signature: ()
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: UpdateUserResponse.ProtoReflect
+    kind: method
+    signature: () protoreflect.Message
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: UpdateUserResponse.Reset
+    kind: method
+    signature: ()
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: UpdateUserResponse.String
+    kind: method
+    signature: () string
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: UsernameConfig
+    kind: struct
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: UsernameConfig.Descriptor
+    kind: method
+    signature: () ([]byte, []int)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: UsernameConfig.GetDisplayName
+    kind: method
+    signature: () string
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: UsernameConfig.GetRoleName
+    kind: method
+    signature: () string
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: UsernameConfig.ProtoMessage
+    kind: method
+    signature: ()
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: UsernameConfig.ProtoReflect
+    kind: method
+    signature: () protoreflect.Message
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: UsernameConfig.Reset
+    kind: method
+    signature: ()
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: UsernameConfig.String
+    kind: method
+    signature: () string
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
+  - name: databaseClient.Close
+    kind: method
+    signature: (ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty,
+      error)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
+  - name: databaseClient.DeleteUser
+    kind: method
+    signature: (ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption)
+      (*DeleteUserResponse, error)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
+  - name: databaseClient.Initialize
+    kind: method
+    signature: (ctx context.Context, in *InitializeRequest, opts ...grpc.CallOption)
+      (*InitializeResponse, error)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
+  - name: databaseClient.NewUser
+    kind: method
+    signature: (ctx context.Context, in *NewUserRequest, opts ...grpc.CallOption)
+      (*NewUserResponse, error)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
+  - name: databaseClient.Type
+    kind: method
+    signature: (ctx context.Context, in *Empty, opts ...grpc.CallOption) (*TypeResponse,
+      error)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
+  - name: databaseClient.UpdateUser
+    kind: method
+    signature: (ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption)
+      (*UpdateUserResponse, error)
+    file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
 codeRefIndex:
 - file:third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go database.pb.go@third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
 - file:third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go database_grpc.pb.go@third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
@@ -72,802 +871,3 @@ codeRefIndex:
 - struct:a9fa423f61c2550ee4b38f109d08e8c3 Statements@third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go:736
 - struct:b36aaaf0b59aaf90a664d4c9dfec3226 DeleteUserRequest@third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go:598
 - struct:e13ef78701a543286b66f732c0829701 InitializeRequest@third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go:32
-kind: SystemContext
-metadata:
-  name: third-party-openbao-sdk-database-dbplugin-v5-proto
-  namespace: default
-spec:
-  intent: 'This context exists because the deno-kcp repository vendors the OpenBao
-    database plugin SDK, and the v5 proto package is the wire contract between a secrets
-    engine and an out-of-process database plugin. It is generated code: protoc-gen-go
-    and protoc-gen-go-grpc produced it from the database.proto schema, so nobody edits
-    it by hand and it must stay byte-for-byte faithful to the upstream OpenBao release
-    it was cut from. Its purpose is to let the rest of the repository speak the v5
-    plugin RPC without importing the SDK implementation, to keep the credential request
-    and response shapes stable for any plugin binary built against v5, and to give
-    both sides of the gRPC transport the client stubs, server interface, registration
-    helper and unimplemented-server stub they need to interoperate.'
-  interfaces:
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: struct
-    name: ChangeExpiration
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: ChangeExpiration.Descriptor
-    signature: () ([]byte, []int)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: ChangeExpiration.GetNewExpiration
-    signature: () *timestamppb.Timestamp
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: ChangeExpiration.GetStatements
-    signature: () *Statements
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: ChangeExpiration.ProtoMessage
-    signature: ()
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: ChangeExpiration.ProtoReflect
-    signature: () protoreflect.Message
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: ChangeExpiration.Reset
-    signature: ()
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: ChangeExpiration.String
-    signature: () string
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: struct
-    name: ChangePassword
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: ChangePassword.Descriptor
-    signature: () ([]byte, []int)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: ChangePassword.GetNewPassword
-    signature: () string
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: ChangePassword.GetStatements
-    signature: () *Statements
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: ChangePassword.ProtoMessage
-    signature: ()
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: ChangePassword.ProtoReflect
-    signature: () protoreflect.Message
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: ChangePassword.Reset
-    signature: ()
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: ChangePassword.String
-    signature: () string
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: struct
-    name: ChangePublicKey
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: ChangePublicKey.Descriptor
-    signature: () ([]byte, []int)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: ChangePublicKey.GetNewPublicKey
-    signature: () []byte
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: ChangePublicKey.GetStatements
-    signature: () *Statements
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: ChangePublicKey.ProtoMessage
-    signature: ()
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: ChangePublicKey.ProtoReflect
-    signature: () protoreflect.Message
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: ChangePublicKey.Reset
-    signature: ()
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: ChangePublicKey.String
-    signature: () string
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
-    kind: interface
-    name: DatabaseClient
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
-    kind: method
-    name: DatabaseClient.Close
-    signature: (ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty,
-      error)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
-    kind: method
-    name: DatabaseClient.DeleteUser
-    signature: (ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption)
-      (*DeleteUserResponse, error)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
-    kind: method
-    name: DatabaseClient.Initialize
-    signature: (ctx context.Context, in *InitializeRequest, opts ...grpc.CallOption)
-      (*InitializeResponse, error)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
-    kind: method
-    name: DatabaseClient.NewUser
-    signature: (ctx context.Context, in *NewUserRequest, opts ...grpc.CallOption)
-      (*NewUserResponse, error)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
-    kind: method
-    name: DatabaseClient.Type
-    signature: (ctx context.Context, in *Empty, opts ...grpc.CallOption) (*TypeResponse,
-      error)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
-    kind: method
-    name: DatabaseClient.UpdateUser
-    signature: (ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption)
-      (*UpdateUserResponse, error)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
-    kind: interface
-    name: DatabaseServer
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
-    kind: method
-    name: DatabaseServer.Close
-    signature: (context.Context, *Empty) (*Empty, error)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
-    kind: method
-    name: DatabaseServer.DeleteUser
-    signature: (context.Context, *DeleteUserRequest) (*DeleteUserResponse, error)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
-    kind: method
-    name: DatabaseServer.Initialize
-    signature: (context.Context, *InitializeRequest) (*InitializeResponse, error)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
-    kind: method
-    name: DatabaseServer.NewUser
-    signature: (context.Context, *NewUserRequest) (*NewUserResponse, error)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
-    kind: method
-    name: DatabaseServer.Type
-    signature: (context.Context, *Empty) (*TypeResponse, error)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
-    kind: method
-    name: DatabaseServer.UpdateUser
-    signature: (context.Context, *UpdateUserRequest) (*UpdateUserResponse, error)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: struct
-    name: DeleteUserRequest
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: DeleteUserRequest.Descriptor
-    signature: () ([]byte, []int)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: DeleteUserRequest.GetStatements
-    signature: () *Statements
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: DeleteUserRequest.GetUsername
-    signature: () string
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: DeleteUserRequest.ProtoMessage
-    signature: ()
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: DeleteUserRequest.ProtoReflect
-    signature: () protoreflect.Message
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: DeleteUserRequest.Reset
-    signature: ()
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: DeleteUserRequest.String
-    signature: () string
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: struct
-    name: DeleteUserResponse
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: DeleteUserResponse.Descriptor
-    signature: () ([]byte, []int)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: DeleteUserResponse.ProtoMessage
-    signature: ()
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: DeleteUserResponse.ProtoReflect
-    signature: () protoreflect.Message
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: DeleteUserResponse.Reset
-    signature: ()
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: DeleteUserResponse.String
-    signature: () string
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: struct
-    name: Empty
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: Empty.Descriptor
-    signature: () ([]byte, []int)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: Empty.ProtoMessage
-    signature: ()
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: Empty.ProtoReflect
-    signature: () protoreflect.Message
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: Empty.Reset
-    signature: ()
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: Empty.String
-    signature: () string
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: struct
-    name: InitializeRequest
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: InitializeRequest.Descriptor
-    signature: () ([]byte, []int)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: InitializeRequest.GetConfigData
-    signature: () *structpb.Struct
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: InitializeRequest.GetVerifyConnection
-    signature: () bool
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: InitializeRequest.ProtoMessage
-    signature: ()
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: InitializeRequest.ProtoReflect
-    signature: () protoreflect.Message
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: InitializeRequest.Reset
-    signature: ()
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: InitializeRequest.String
-    signature: () string
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: struct
-    name: InitializeResponse
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: InitializeResponse.Descriptor
-    signature: () ([]byte, []int)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: InitializeResponse.GetConfigData
-    signature: () *structpb.Struct
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: InitializeResponse.ProtoMessage
-    signature: ()
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: InitializeResponse.ProtoReflect
-    signature: () protoreflect.Message
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: InitializeResponse.Reset
-    signature: ()
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: InitializeResponse.String
-    signature: () string
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
-    kind: function
-    name: NewDatabaseClient
-    signature: func NewDatabaseClient(cc grpc.ClientConnInterface) DatabaseClient
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: struct
-    name: NewUserRequest
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: NewUserRequest.Descriptor
-    signature: () ([]byte, []int)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: NewUserRequest.GetCredentialType
-    signature: () int32
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: NewUserRequest.GetExpiration
-    signature: () *timestamppb.Timestamp
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: NewUserRequest.GetPassword
-    signature: () string
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: NewUserRequest.GetPublicKey
-    signature: () []byte
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: NewUserRequest.GetRollbackStatements
-    signature: () *Statements
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: NewUserRequest.GetStatements
-    signature: () *Statements
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: NewUserRequest.GetSubject
-    signature: () string
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: NewUserRequest.GetUsernameConfig
-    signature: () *UsernameConfig
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: NewUserRequest.ProtoMessage
-    signature: ()
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: NewUserRequest.ProtoReflect
-    signature: () protoreflect.Message
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: NewUserRequest.Reset
-    signature: ()
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: NewUserRequest.String
-    signature: () string
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: struct
-    name: NewUserResponse
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: NewUserResponse.Descriptor
-    signature: () ([]byte, []int)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: NewUserResponse.GetUsername
-    signature: () string
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: NewUserResponse.ProtoMessage
-    signature: ()
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: NewUserResponse.ProtoReflect
-    signature: () protoreflect.Message
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: NewUserResponse.Reset
-    signature: ()
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: NewUserResponse.String
-    signature: () string
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
-    kind: function
-    name: RegisterDatabaseServer
-    signature: func RegisterDatabaseServer(s grpc.ServiceRegistrar, srv DatabaseServer)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: struct
-    name: Statements
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: Statements.Descriptor
-    signature: () ([]byte, []int)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: Statements.GetCommands
-    signature: () []string
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: Statements.ProtoMessage
-    signature: ()
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: Statements.ProtoReflect
-    signature: () protoreflect.Message
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: Statements.Reset
-    signature: ()
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: Statements.String
-    signature: () string
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: struct
-    name: TypeResponse
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: TypeResponse.Descriptor
-    signature: () ([]byte, []int)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: TypeResponse.GetType
-    signature: () string
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: TypeResponse.ProtoMessage
-    signature: ()
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: TypeResponse.ProtoReflect
-    signature: () protoreflect.Message
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: TypeResponse.Reset
-    signature: ()
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: TypeResponse.String
-    signature: () string
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
-    kind: struct
-    name: UnimplementedDatabaseServer
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
-    kind: method
-    name: UnimplementedDatabaseServer.Close
-    signature: (context.Context, *Empty) (*Empty, error)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
-    kind: method
-    name: UnimplementedDatabaseServer.DeleteUser
-    signature: (context.Context, *DeleteUserRequest) (*DeleteUserResponse, error)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
-    kind: method
-    name: UnimplementedDatabaseServer.Initialize
-    signature: (context.Context, *InitializeRequest) (*InitializeResponse, error)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
-    kind: method
-    name: UnimplementedDatabaseServer.NewUser
-    signature: (context.Context, *NewUserRequest) (*NewUserResponse, error)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
-    kind: method
-    name: UnimplementedDatabaseServer.Type
-    signature: (context.Context, *Empty) (*TypeResponse, error)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
-    kind: method
-    name: UnimplementedDatabaseServer.UpdateUser
-    signature: (context.Context, *UpdateUserRequest) (*UpdateUserResponse, error)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
-    kind: interface
-    name: UnsafeDatabaseServer
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: struct
-    name: UpdateUserRequest
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: UpdateUserRequest.Descriptor
-    signature: () ([]byte, []int)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: UpdateUserRequest.GetCredentialType
-    signature: () int32
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: UpdateUserRequest.GetExpiration
-    signature: () *ChangeExpiration
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: UpdateUserRequest.GetPassword
-    signature: () *ChangePassword
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: UpdateUserRequest.GetPublicKey
-    signature: () *ChangePublicKey
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: UpdateUserRequest.GetUsername
-    signature: () string
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: UpdateUserRequest.ProtoMessage
-    signature: ()
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: UpdateUserRequest.ProtoReflect
-    signature: () protoreflect.Message
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: UpdateUserRequest.Reset
-    signature: ()
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: UpdateUserRequest.String
-    signature: () string
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: struct
-    name: UpdateUserResponse
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: UpdateUserResponse.Descriptor
-    signature: () ([]byte, []int)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: UpdateUserResponse.ProtoMessage
-    signature: ()
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: UpdateUserResponse.ProtoReflect
-    signature: () protoreflect.Message
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: UpdateUserResponse.Reset
-    signature: ()
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: UpdateUserResponse.String
-    signature: () string
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: struct
-    name: UsernameConfig
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: UsernameConfig.Descriptor
-    signature: () ([]byte, []int)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: UsernameConfig.GetDisplayName
-    signature: () string
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: UsernameConfig.GetRoleName
-    signature: () string
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: UsernameConfig.ProtoMessage
-    signature: ()
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: UsernameConfig.ProtoReflect
-    signature: () protoreflect.Message
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: UsernameConfig.Reset
-    signature: ()
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    kind: method
-    name: UsernameConfig.String
-    signature: () string
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
-    kind: method
-    name: databaseClient.Close
-    signature: (ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty,
-      error)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
-    kind: method
-    name: databaseClient.DeleteUser
-    signature: (ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption)
-      (*DeleteUserResponse, error)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
-    kind: method
-    name: databaseClient.Initialize
-    signature: (ctx context.Context, in *InitializeRequest, opts ...grpc.CallOption)
-      (*InitializeResponse, error)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
-    kind: method
-    name: databaseClient.NewUser
-    signature: (ctx context.Context, in *NewUserRequest, opts ...grpc.CallOption)
-      (*NewUserResponse, error)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
-    kind: method
-    name: databaseClient.Type
-    signature: (ctx context.Context, in *Empty, opts ...grpc.CallOption) (*TypeResponse,
-      error)
-  - file: third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
-    kind: method
-    name: databaseClient.UpdateUser
-    signature: (ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption)
-      (*UpdateUserResponse, error)
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - method:13b2a3daad47d5350a9f8a504a4bc947
-    - method:4b8a816964687a1df0528569ca512376
-    - method:4e2740cc7110f2aaff493587c52b7cf1
-    - method:a8f14151f858bfded51da4c1510869e1
-    - method:b5b44f1ac58bc9bac15ade18bd8f4f00
-    - method:f90eb90d3c8b3c39607e98d9ad2ec160
-    id: r.credential-change-statements
-    level: MUST
-    text: 'Each credential change sub-message must pair its new value with the Statements
-      to run: ChangePassword holds NewPassword and Statements, ChangePublicKey holds
-      NewPublicKey bytes and Statements, and ChangeExpiration holds NewExpiration
-      and Statements.'
-  - codeRefs:
-    - interface:89d674ee881d50c5da4afeed4c88ead6
-    - method:04f80813ae1c7580ca105ee05fb4d363
-    - method:20931d082b67e1b86df51bcf7736d416
-    - method:285f5d69ffbb9aec1e52c87c27ac6b7b
-    - method:417ec012cd229093d58d34848df98877
-    - method:745ea3782b04d4425f1823d99c988366
-    - method:7e88eefbe4f4b10b7af75541300afd47
-    id: r.database-client-interface
-    level: MUST
-    text: DatabaseClient must be the caller-side contract and expose exactly the six
-      RPC methods Initialize, NewUser, UpdateUser, DeleteUser, Type and Close, each
-      taking a context, its request message and variadic grpc.CallOption and returning
-      the matching response message with an error.
-  - codeRefs:
-    - interface:d524b3dcf0036b9ae1f2569ba91c4646
-    - method:342463bd214a1410f071c389b0439211
-    - method:45033aa97e5a9ccf845b9c68e01b241a
-    - method:5ba87d3d06c681a03ef534292fb1d382
-    - method:bbb9e3be216e2dae773e486a0263cb90
-    - method:e9fc3ef8ddbce5cc4566bbc761b6cfd0
-    - method:f0f3409340e1777677bced7473d119a7
-    id: r.database-server-interface
-    level: MUST
-    text: DatabaseServer must be the implementation-side contract and expose the same
-      six operations Initialize, NewUser, UpdateUser, DeleteUser, Type and Close,
-      each taking a context and the request message and returning the response message
-      with an error.
-  - codeRefs:
-    - method:06c1212b9b1a42e452ff03acd05d013d
-    - method:32096519fffbf04eb80cdc7bb574e4d8
-    - struct:b36aaaf0b59aaf90a664d4c9dfec3226
-    id: r.delete-user-request-shape
-    level: MUST
-    text: DeleteUserRequest must carry the username to remove and the Statements that
-      perform the removal, and DeleteUserResponse must be an empty message.
-  - codeRefs:
-    - file:third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    - method:0895fde4fa9d0d48d7b4953450fdea52
-    - method:24875eed28f4afda9c0a3afced81c774
-    id: r.descriptor-index
-    level: MUST
-    text: Each message type must expose Descriptor returning the raw gzipped file
-      descriptor bytes together with the index path that locates the message inside
-      that descriptor, so reflection can resolve the message without a registry lookup.
-  - codeRefs:
-    - file:third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    - file:third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
-    id: r.generated-code-boundary
-    level: MUST
-    text: 'Both files must stay machine-generated and unedited: the message file must
-      declare the protobuf package and Go import path the generator emitted, and the
-      gRPC file must declare the supported protoc-gen-go-grpc version, so regenerating
-      from the upstream proto reproduces the same content.'
-  - codeRefs:
-    - method:c19b8102d1b56d5878cb7ebea38bc345
-    - method:e8adc822d6293ea0ef1f624eb4b410b0
-    - method:fcf9789bf5bd101c2bc4b1eae337b663
-    - struct:e13ef78701a543286b66f732c0829701
-    id: r.initialize-exchange
-    level: MUST
-    text: InitializeRequest must carry the plugin configuration as a structpb.Struct
-      in ConfigData plus a VerifyConnection boolean, and InitializeResponse must return
-      the resulting configuration as ConfigData, so a plugin knows whether to open
-      a real connection during initialization.
-  - codeRefs:
-    - function:1ea2712439edabfa3c6642f03cb1235f
-    - method:2d54a2d02dcffd2bd0f75963d8437241
-    - method:3044fe6694775472b3aad338aa22bbcf
-    - method:354a230a59ba8c583667db7534dcfb35
-    - method:b462058bfd11eeb1d57f7bf19435d3b2
-    id: r.new-database-client
-    level: MUST
-    text: NewDatabaseClient must wrap any grpc.ClientConnInterface in an unexported
-      databaseClient whose methods invoke the corresponding service procedure and
-      unmarshal the reply into the response message.
-  - codeRefs:
-    - method:3822bb3384c347907397fb8f871d0a07
-    - method:4c084a432b6b00c93a12146294ba94a4
-    - method:61b0b542753c8c9e06ef6219156bb05a
-    - method:bc9648079eb920928c6d8b0230817c92
-    - method:cf2b11ee2c7d2f6ea443d8a16b6956a4
-    - method:efd0c14496b4adac8430d38667c32daa
-    - struct:741d9bd5cadfd64346f442026c840623
-    id: r.new-user-request-shape
-    level: MUST
-    text: 'NewUserRequest must describe the credential to mint: a UsernameConfig,
-      a password string, an expiration timestamp, the creation and rollback Statements,
-      a credential type as int32, the public key bytes and the subject string; NewUserResponse
-      must return the generated username.'
-  - codeRefs:
-    - method:0439f402a802b46153495ac355669270
-    - method:06c1212b9b1a42e452ff03acd05d013d
-    - method:7fe1671879729f014bc258ee706a2072
-    - method:d0deab9f54be5818f6d5197b47688e07
-    - method:e458b00fc6ccdf7afde9751003be23d0
-    id: r.nil-safe-getters
-    level: MUST
-    text: Every field getter must tolerate a nil receiver and return the field's zero
-      value in that case, so callers can read optional nested messages such as a request's
-      Statements, UsernameConfig or ChangePassword without a prior nil check.
-  - codeRefs:
-    - file:third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    - method:06d2ed0ba9ecb3272052216f11024e46
-    - method:4cd086dc5bc07fada55ba8ee6e167119
-    - method:9061d652791268dcd39217358ea3d05f
-    - method:c463a2e7551678671badd3c5a33c14e1
-    id: r.protobuf-message-contract
-    level: MUST
-    text: 'Every message type in the package must satisfy proto.Message: it must implement
-      Reset to clear the receiver to its zero value, String to render the prototext
-      form via protoimpl.MessageStringOf, ProtoMessage as the legacy marker, and ProtoReflect
-      to return the protoreflect.Message view backed by the package message state.'
-  - codeRefs:
-    - file:third_party/openbao/sdk/database/dbplugin/v5/proto/database_grpc.pb.go
-    - function:dd411c97b371ec377cf3537fc976b967
-    id: r.server-registration
-    level: MUST
-    text: RegisterDatabaseServer must register the database service implementation
-      and its service descriptor with the supplied grpc.ServiceRegistrar, which makes
-      the six methods reachable over the wire.
-  - codeRefs:
-    - method:a60963779c5bc8ba1669a448268da850
-    - struct:a9fa423f61c2550ee4b38f109d08e8c3
-    id: r.statements-command-list
-    level: MUST
-    text: Statements must carry an ordered list of SQL command strings, so a plugin
-      executes them in the order the engine supplied.
-  - codeRefs:
-    - file:third_party/openbao/sdk/database/dbplugin/v5/proto/database.pb.go
-    - method:7d32519dbe0565b09d1494bd0559075b
-    - struct:1d519c31fe7b7d1bf164fad84714f068
-    id: r.type-and-empty
-    level: MUST
-    text: TypeResponse must report the plugin's type as a string, and the Empty message
-      must serve as the request and the response of the argument-less Type and Close
-      calls.
-  - codeRefs:
-    - method:20be023b1a9ab718fcd8e16a4b03f856
-    - method:8b4a5446a052846e3de8439d40ddcb08
-    - method:a78787f9e9983ddad3fcc1ec7277fef2
-    - method:a7e7eb460b120a40c9844e299c0c57cc
-    - method:b52dbfcaaf70ace52c48648aafb397c0
-    - method:d6133d612821f4af6a07bf84212fd294
-    - struct:7686a96058e8c28fda23e539d6fcd69c
-    id: r.unimplemented-server-stub
-    level: MUST
-    text: UnimplementedDatabaseServer must provide a stub implementation of all six
-      service methods so a server can embed it and stay compiling when the service
-      gains methods, and each stub must return an error rather than silently succeed.
-  - codeRefs:
-    - interface:cd60c510b269b69e4e2270b8050edada
-    id: r.unsafe-server-marker
-    level: MAY
-    text: UnsafeDatabaseServer may be implemented by a server that knowingly accepts
-      the forward-compatibility risk, so future service methods cannot break its build;
-      such a server must then be passed to RegisterDatabaseServer as a DatabaseServer.
-  - codeRefs:
-    - method:2c9ade4c8e917fdf475300fd1d7f97a8
-    - method:acf382b05b48efec5384efa755dd30fb
-    - method:bd0b7ff6a21e74880400be7ec1302aed
-    - method:f2419bb393eba5a8df31451ea9d91aa8
-    - struct:93b3bb72e9474903e1c9e2d67cc87568
-    id: r.update-user-deltas
-    level: MUST
-    text: UpdateUserRequest must identify the account by username and carry each change
-      as its own optional sub-message — ChangePassword, ChangeExpiration or ChangePublicKey
-      — alongside the credential type, so a caller can change one aspect without restating
-      the others; UpdateUserResponse is empty.
-  - codeRefs:
-    - method:835b13186c9cb47b6393dccf9b26fe61
-    - method:b338c3af11e7d9062e6b34de2c35cce7
-    - struct:1cc6b65fef148563b42b943eb3d069b6
-    id: r.username-config-parts
-    level: MUST
-    text: UsernameConfig must carry a DisplayName and a RoleName so a secrets engine
-      can render a human-readable name while the plugin derives the actual account
-      name from the role.
-  upstream: self

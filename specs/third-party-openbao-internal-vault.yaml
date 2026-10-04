@@ -1,4 +1,113 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-internal-vault
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: The context exists so the vault core can emit an audit record for every
+    request and response through one narrow interface, without the callers knowing
+    which backend writes the record. The AuditLogger contract lets the HTTP handler
+    and the rate-limit wrapper obtain an auditor from Core and log request and response
+    inputs through it, while the concrete basicAuditor owns the sealed check and the
+    broker delegation. Splitting basicAuditor from genericAuditor lets the same interface
+    serve both whole-core auditing and auditing bound to a mount type and namespace.
+    The code is vendored third-party OpenBao source inside deno-kcp, so it is described
+    as it is observed rather than as something this repository authors.
+  requirements:
+  - id: r.audit-logger-interface
+    level: MUST
+    text: The vault package must define the AuditLogger interface with exactly the
+      two methods AuditRequest and AuditResponse, each accepting a context.Context
+      and a *logical.LogInput and returning an error, so a caller can audit both directions
+      of an exchange through a single contract.
+    codeRefs:
+    - file:third_party/openbao/internal/vault/audit.go
+  - id: r.audit-logger-obtained-from-core
+    level: SHOULD
+    text: Callers that audit non-logical requests, such as the HTTP handler's handleAuditNonLogical
+      and the rate-limit wrapper rateLimitQuotaWrapping, should obtain their AuditLogger
+      from Core.AuditLogger rather than constructing a basicAuditor or reaching into
+      the broker directly, keeping the sealed check in one place.
+    codeRefs:
+    - file:third_party/openbao/internal/vault/core.go
+  - id: r.basic-auditor-broker-delegation
+    level: MUST
+    text: When the Core's auditBroker is non-nil, basicAuditor.AuditRequest must delegate
+      to auditBroker.LogRequest, passing the incoming context, the logical.LogInput,
+      and the Core's auditedHeaders so the header allow-list governs what reaches
+      the audit record; the broker's error is returned to the caller unchanged.
+    codeRefs:
+    - file:third_party/openbao/internal/vault/audit.go
+    - file:third_party/openbao/internal/vault/audited_headers.go
+  - id: r.basic-auditor-full-interface
+    level: MUST
+    text: basicAuditor must satisfy the whole AuditLogger interface, providing AuditResponse
+      in addition to AuditRequest, so the same value returned by Core.AuditLogger
+      covers responses as well as requests.
+    codeRefs:
+    - file:third_party/openbao/internal/vault/audit.go
+    - file:third_party/openbao/internal/vault/core.go
+  - id: r.basic-auditor-sealed-guard
+    level: MUST
+    text: basicAuditor.AuditRequest must return consts.ErrSealed when the bound Core's
+      auditBroker is nil, so no audit write is attempted before the barrier has an
+      audit broker available.
+    codeRefs:
+    - file:third_party/openbao/internal/vault/audit.go
+  - id: r.core-audit-logger-accessor
+    level: MUST
+    text: 'Core.AuditLogger must return an AuditLogger value implemented by &basicAuditor{c:
+      c}, binding every auditor it hands out to the receiving Core instance.'
+    codeRefs:
+    - file:third_party/openbao/internal/vault/audit.go
+    - file:third_party/openbao/internal/vault/core.go
+  - id: r.generic-auditor-scope
+    level: MUST
+    text: genericAuditor must carry a *Core, a mountType string and a *namespace.Namespace,
+      so an auditor can be bound to one mount type and one namespace instead of auditing
+      the whole Core.
+    codeRefs:
+    - file:third_party/openbao/internal/vault/audit.go
+  interfaces:
+  - name: AuditLogger
+    kind: interface
+    signature: AuditRequest(ctx context.Context, input *logical.LogInput) error; AuditResponse(ctx
+      context.Context, input *logical.LogInput) error
+    file: third_party/openbao/internal/vault/audit.go
+  - name: AuditLogger.AuditRequest
+    kind: method
+    signature: (ctx context.Context, input *logical.LogInput) error
+    file: third_party/openbao/internal/vault/audit.go
+  - name: AuditLogger.AuditResponse
+    kind: method
+    signature: (ctx context.Context, input *logical.LogInput) error
+    file: third_party/openbao/internal/vault/audit.go
+  - name: Core.AuditLogger
+    kind: method
+    signature: func (c *Core) AuditLogger() AuditLogger
+    file: third_party/openbao/internal/vault/core.go
+  - name: basicAuditor.AuditRequest
+    kind: method
+    signature: func (b *basicAuditor) AuditRequest(ctx context.Context, input *logical.LogInput)
+      error
+    file: third_party/openbao/internal/vault/audit.go
+  - name: basicAuditor.AuditResponse
+    kind: method
+    signature: func (b *basicAuditor) AuditResponse(ctx context.Context, input *logical.LogInput)
+      error
+    file: third_party/openbao/internal/vault/audit.go
+  - name: genericAuditor.AuditRequest
+    kind: method
+    signature: func (g *genericAuditor) AuditRequest(ctx context.Context, input *logical.LogInput)
+      error
+    file: third_party/openbao/internal/vault/audit.go
+  - name: genericAuditor.AuditResponse
+    kind: method
+    signature: func (g *genericAuditor) AuditResponse(ctx context.Context, input *logical.LogInput)
+      error
+    file: third_party/openbao/internal/vault/audit.go
 codeRefIndex:
 - file:third_party/openbao/internal/vault/audit.go audit.go@third_party/openbao/internal/vault/audit.go
 - file:third_party/openbao/internal/vault/audit_broker.go audit_broker.go@third_party/openbao/internal/vault/audit_broker.go
@@ -125,112 +234,3 @@ codeRefIndex:
 - file:third_party/openbao/internal/vault/version_store_test.go version_store_test.go@third_party/openbao/internal/vault/version_store_test.go
 - file:third_party/openbao/internal/vault/workflow_store.go workflow_store.go@third_party/openbao/internal/vault/workflow_store.go
 - file:third_party/openbao/internal/vault/wrapping.go wrapping.go@third_party/openbao/internal/vault/wrapping.go
-kind: SystemContext
-metadata:
-  name: third-party-openbao-internal-vault
-  namespace: default
-spec:
-  intent: The context exists so the vault core can emit an audit record for every
-    request and response through one narrow interface, without the callers knowing
-    which backend writes the record. The AuditLogger contract lets the HTTP handler
-    and the rate-limit wrapper obtain an auditor from Core and log request and response
-    inputs through it, while the concrete basicAuditor owns the sealed check and the
-    broker delegation. Splitting basicAuditor from genericAuditor lets the same interface
-    serve both whole-core auditing and auditing bound to a mount type and namespace.
-    The code is vendored third-party OpenBao source inside deno-kcp, so it is described
-    as it is observed rather than as something this repository authors.
-  interfaces:
-  - file: third_party/openbao/internal/vault/audit.go
-    kind: interface
-    name: AuditLogger
-    signature: AuditRequest(ctx context.Context, input *logical.LogInput) error; AuditResponse(ctx
-      context.Context, input *logical.LogInput) error
-  - file: third_party/openbao/internal/vault/audit.go
-    kind: method
-    name: AuditLogger.AuditRequest
-    signature: (ctx context.Context, input *logical.LogInput) error
-  - file: third_party/openbao/internal/vault/audit.go
-    kind: method
-    name: AuditLogger.AuditResponse
-    signature: (ctx context.Context, input *logical.LogInput) error
-  - file: third_party/openbao/internal/vault/core.go
-    kind: method
-    name: Core.AuditLogger
-    signature: func (c *Core) AuditLogger() AuditLogger
-  - file: third_party/openbao/internal/vault/audit.go
-    kind: method
-    name: basicAuditor.AuditRequest
-    signature: func (b *basicAuditor) AuditRequest(ctx context.Context, input *logical.LogInput)
-      error
-  - file: third_party/openbao/internal/vault/audit.go
-    kind: method
-    name: basicAuditor.AuditResponse
-    signature: func (b *basicAuditor) AuditResponse(ctx context.Context, input *logical.LogInput)
-      error
-  - file: third_party/openbao/internal/vault/audit.go
-    kind: method
-    name: genericAuditor.AuditRequest
-    signature: func (g *genericAuditor) AuditRequest(ctx context.Context, input *logical.LogInput)
-      error
-  - file: third_party/openbao/internal/vault/audit.go
-    kind: method
-    name: genericAuditor.AuditResponse
-    signature: func (g *genericAuditor) AuditResponse(ctx context.Context, input *logical.LogInput)
-      error
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - file:third_party/openbao/internal/vault/audit.go
-    id: r.audit-logger-interface
-    level: MUST
-    text: The vault package must define the AuditLogger interface with exactly the
-      two methods AuditRequest and AuditResponse, each accepting a context.Context
-      and a *logical.LogInput and returning an error, so a caller can audit both directions
-      of an exchange through a single contract.
-  - codeRefs:
-    - file:third_party/openbao/internal/vault/core.go
-    id: r.audit-logger-obtained-from-core
-    level: SHOULD
-    text: Callers that audit non-logical requests, such as the HTTP handler's handleAuditNonLogical
-      and the rate-limit wrapper rateLimitQuotaWrapping, should obtain their AuditLogger
-      from Core.AuditLogger rather than constructing a basicAuditor or reaching into
-      the broker directly, keeping the sealed check in one place.
-  - codeRefs:
-    - file:third_party/openbao/internal/vault/audit.go
-    - file:third_party/openbao/internal/vault/audited_headers.go
-    id: r.basic-auditor-broker-delegation
-    level: MUST
-    text: When the Core's auditBroker is non-nil, basicAuditor.AuditRequest must delegate
-      to auditBroker.LogRequest, passing the incoming context, the logical.LogInput,
-      and the Core's auditedHeaders so the header allow-list governs what reaches
-      the audit record; the broker's error is returned to the caller unchanged.
-  - codeRefs:
-    - file:third_party/openbao/internal/vault/audit.go
-    - file:third_party/openbao/internal/vault/core.go
-    id: r.basic-auditor-full-interface
-    level: MUST
-    text: basicAuditor must satisfy the whole AuditLogger interface, providing AuditResponse
-      in addition to AuditRequest, so the same value returned by Core.AuditLogger
-      covers responses as well as requests.
-  - codeRefs:
-    - file:third_party/openbao/internal/vault/audit.go
-    id: r.basic-auditor-sealed-guard
-    level: MUST
-    text: basicAuditor.AuditRequest must return consts.ErrSealed when the bound Core's
-      auditBroker is nil, so no audit write is attempted before the barrier has an
-      audit broker available.
-  - codeRefs:
-    - file:third_party/openbao/internal/vault/audit.go
-    - file:third_party/openbao/internal/vault/core.go
-    id: r.core-audit-logger-accessor
-    level: MUST
-    text: 'Core.AuditLogger must return an AuditLogger value implemented by &basicAuditor{c:
-      c}, binding every auditor it hands out to the receiving Core instance.'
-  - codeRefs:
-    - file:third_party/openbao/internal/vault/audit.go
-    id: r.generic-auditor-scope
-    level: MUST
-    text: genericAuditor must carry a *Core, a mountType string and a *namespace.Namespace,
-      so an auditor can be bound to one mount type and one namespace instead of auditing
-      the whole Core.
-  upstream: self

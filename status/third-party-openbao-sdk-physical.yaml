@@ -1,17 +1,20 @@
+syncedCommit: 89cee50ec5aea977a42f904a758e506729e1158e
+syncedFingerprint: a900a9aed15ed2bcf71880200c8bc07d8e45086b894e8cdcc74e533513b36d0b
+realizedSpecHash: a9af20b0c8408936dadb40c65e3ee746c1b43810436f6c18cf1a070f69b651df
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
+- type: CodeSynced
+  status: "True"
   reason: InterfacesObserved
-  status: "True"
-  type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+  message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+- type: Drifted
   status: "False"
-  type: Drifted
-- message: the spec passes the validator
-  reason: ValidatorPassed
+  reason: FingerprintEqual
+  message: observed facts match the synced fingerprint
+- type: SpecValid
   status: "True"
-  type: SpecValid
+  reason: ValidatorPassed
+  message: the spec passes the validator
 observed:
   files:
   - third_party/openbao/sdk/physical/cache.go
@@ -26,829 +29,826 @@ observed:
   - third_party/openbao/sdk/physical/testing.go
   - third_party/openbao/sdk/physical/transactions.go
   - third_party/openbao/sdk/physical/write_notifier.go
-  fingerprint: a900a9aed15ed2bcf71880200c8bc07d8e45086b894e8cdcc74e533513b36d0b
   interfaces:
-  - codegraphId: function:ff4d7eee1ee723e8b6728c7b4904d7b3
-    file: third_party/openbao/sdk/physical/cache.go
+  - name: CacheRefreshContext
     kind: function
-    line: 46
-    name: CacheRefreshContext
     signature: (ctx context.Context, r bool) context.Context
-  - codegraphId: interface:3e369c75b5f78584ecb1fb21b4e3f76d
     file: third_party/openbao/sdk/physical/cache.go
+    line: 46
+    codegraphId: function:ff4d7eee1ee723e8b6728c7b4904d7b3
+  - name: Cache
     kind: interface
+    file: third_party/openbao/sdk/physical/cache.go
     line: 64
-    name: Cache
-  - codegraphId: interface:c551f864d0a2d50fbce634ac814b194c
-    file: third_party/openbao/sdk/physical/cache.go
+    codegraphId: interface:3e369c75b5f78584ecb1fb21b4e3f76d
+  - name: TransactionalCache
     kind: interface
-    line: 69
-    name: TransactionalCache
-  - codegraphId: function:34327220403569fa0aff0977c0c1f591
     file: third_party/openbao/sdk/physical/cache.go
+    line: 69
+    codegraphId: interface:c551f864d0a2d50fbce634ac814b194c
+  - name: NewCache
     kind: function
-    line: 113
-    name: NewCache
     signature: (b Backend, size int, logger log.Logger, metricSink metrics.MetricSink)
       Cache
-  - codegraphId: method:38a1adf14495b6d3bf7c358c6cc3ac83
     file: third_party/openbao/sdk/physical/cache.go
-    kind: method
-    line: 146
-    name: cache.ShouldCache
-    signature: (key string) bool
-  - codegraphId: method:fff52566fbdeb37fbdd74a0344472162
-    file: third_party/openbao/sdk/physical/cache.go
-    kind: method
-    line: 156
-    name: cache.SetEnabled
-    signature: (enabled bool)
-  - codegraphId: method:b7a2798b7fe8309ddb44db1c630f1e2e
-    file: third_party/openbao/sdk/physical/cache.go
-    kind: method
-    line: 161
-    name: cache.Purge
-    signature: (ctx context.Context)
-  - codegraphId: method:d2a50636c0acef479ab5a8d4dcd20399
-    file: third_party/openbao/sdk/physical/cache.go
-    kind: method
-    line: 172
-    name: cache.Put
-    signature: (ctx context.Context, entry *Entry) error
-  - codegraphId: method:606a138a7fec3d3e2de986b2e445a895
-    file: third_party/openbao/sdk/physical/cache.go
-    kind: method
-    line: 203
-    name: cache.Get
-    signature: (ctx context.Context, key string) (*Entry, error)
-  - codegraphId: method:c8124d3b0b7726fcaf931bc37e6b4647
-    file: third_party/openbao/sdk/physical/cache.go
-    kind: method
-    line: 237
-    name: cache.Delete
-    signature: (ctx context.Context, key string) error
-  - codegraphId: method:d95bddd6d95609619cff9183333261cd
-    file: third_party/openbao/sdk/physical/cache.go
-    kind: method
-    line: 253
-    name: cache.List
-    signature: (ctx context.Context, prefix string) ([]string, error)
-  - codegraphId: method:495e85ffc527d8d6af7b65b083490b9d
-    file: third_party/openbao/sdk/physical/cache.go
-    kind: method
-    line: 260
-    name: cache.ListPage
-    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
-      error)
-  - codegraphId: method:a592f4578bdda809e981d2d3ea9ea645
-    file: third_party/openbao/sdk/physical/cache.go
-    kind: method
-    line: 275
-    name: transactionalCache.BeginReadOnlyTx
-    signature: (ctx context.Context) (Transaction, error)
-  - codegraphId: method:49c2c5b43f002a86e6cdd21df5e236fc
-    file: third_party/openbao/sdk/physical/cache.go
-    kind: method
-    line: 292
-    name: transactionalCache.BeginTx
-    signature: (ctx context.Context) (Transaction, error)
-  - codegraphId: method:99e8f691d12128fb12bb21075a56eea2
-    file: third_party/openbao/sdk/physical/cache.go
-    kind: method
-    line: 308
-    name: cacheTransaction.Put
-    signature: (ctx context.Context, entry *Entry) error
-  - codegraphId: method:253b06e6f168853607e66c979c936d8d
-    file: third_party/openbao/sdk/physical/cache.go
-    kind: method
-    line: 342
-    name: cacheTransaction.Delete
-    signature: (ctx context.Context, key string) error
-  - codegraphId: method:669f632567fcb141c59621312cd2ada1
-    file: third_party/openbao/sdk/physical/cache.go
-    kind: method
-    line: 362
-    name: cacheTransaction.Commit
-    signature: (ctx context.Context) error
-  - codegraphId: method:59757faeb1505f1513aaed08368aecd6
-    file: third_party/openbao/sdk/physical/cache.go
-    kind: method
-    line: 389
-    name: cacheTransaction.Rollback
-    signature: (ctx context.Context) error
-  - codegraphId: method:dce8a4574d05b37899f35f8737f03cd9
-    file: third_party/openbao/sdk/physical/cache.go
-    kind: method
-    line: 402
-    name: cache.Invalidate
-    signature: (ctx context.Context, key string)
-  - codegraphId: interface:3abc2ea0c97155337bff68b1c25b282d
-    file: third_party/openbao/sdk/physical/encoding.go
-    kind: interface
-    line: 20
-    name: StorageEncoding
-  - codegraphId: interface:0047ee89f59f43dfe4e94ec0eee269e1
-    file: third_party/openbao/sdk/physical/encoding.go
-    kind: interface
-    line: 30
-    name: TransactionalStorageEncoding
-  - codegraphId: interface:c55488afd8098351787fbc2017fc50be
-    file: third_party/openbao/sdk/physical/encoding.go
-    kind: interface
-    line: 38
-    name: StorageEncodingTransaction
-  - codegraphId: function:72f695e0a898c83f112db456c8a1d4b1
-    file: third_party/openbao/sdk/physical/encoding.go
-    kind: function
-    line: 55
-    name: NewStorageEncoding
-    signature: (b Backend) Backend
-  - codegraphId: method:0775930799b3c6c71386dbd6956849ae
-    file: third_party/openbao/sdk/physical/encoding.go
-    kind: method
-    line: 77
-    name: storageEncoding.Put
-    signature: (ctx context.Context, entry *Entry) error
-  - codegraphId: method:20aee99f61f001e83e52d64784bc7486
-    file: third_party/openbao/sdk/physical/encoding.go
-    kind: method
-    line: 89
-    name: storageEncoding.Delete
-    signature: (ctx context.Context, key string) error
-  - codegraphId: method:de510a38c92034b6cb4664c9d568f0bb
-    file: third_party/openbao/sdk/physical/encoding.go
-    kind: method
-    line: 101
-    name: storageEncoding.Purge
-    signature: (ctx context.Context)
-  - codegraphId: method:4c9596aaa8e21def7f8c9ae5f3949f32
-    file: third_party/openbao/sdk/physical/encoding.go
-    kind: method
-    line: 107
-    name: storageEncoding.SetEnabled
-    signature: (enabled bool)
-  - codegraphId: method:c55bbf09c1df846fd673e22d725e88f7
-    file: third_party/openbao/sdk/physical/encoding.go
-    kind: method
     line: 113
-    name: transactionalStorageEncoding.BeginReadOnlyTx
-    signature: (ctx context.Context) (Transaction, error)
-  - codegraphId: method:d9bb37650861079d7bb8aafd0f10debb
-    file: third_party/openbao/sdk/physical/encoding.go
+    codegraphId: function:34327220403569fa0aff0977c0c1f591
+  - name: cache.ShouldCache
     kind: method
-    line: 126
-    name: transactionalStorageEncoding.BeginTx
-    signature: (ctx context.Context) (Transaction, error)
-  - codegraphId: method:0bd332eb0420eae831a35b27de7a080e
-    file: third_party/openbao/sdk/physical/encoding.go
+    signature: (key string) bool
+    file: third_party/openbao/sdk/physical/cache.go
+    line: 146
+    codegraphId: method:38a1adf14495b6d3bf7c358c6cc3ac83
+  - name: cache.SetEnabled
     kind: method
-    line: 139
-    name: storageEncodingTransaction.Commit
-    signature: (ctx context.Context) error
-  - codegraphId: method:a5ccf39e4acbab3fa36e5a1b3eb7791c
-    file: third_party/openbao/sdk/physical/encoding.go
+    signature: (enabled bool)
+    file: third_party/openbao/sdk/physical/cache.go
+    line: 156
+    codegraphId: method:fff52566fbdeb37fbdd74a0344472162
+  - name: cache.Purge
     kind: method
-    line: 143
-    name: storageEncodingTransaction.Rollback
-    signature: (ctx context.Context) error
-  - codegraphId: struct:6d1685314383067122ddde5e7575b72e
-    file: third_party/openbao/sdk/physical/entry.go
-    kind: struct
-    line: 12
-    name: Entry
-  - codegraphId: method:e4831f61ffb6b9b38ea13833b9d1c4e6
-    file: third_party/openbao/sdk/physical/entry.go
+    signature: (ctx context.Context)
+    file: third_party/openbao/sdk/physical/cache.go
+    line: 161
+    codegraphId: method:b7a2798b7fe8309ddb44db1c630f1e2e
+  - name: cache.Put
     kind: method
-    line: 21
-    name: Entry.String
-    signature: () string
-  - codegraphId: method:1e9458db4df54ab1e095336d02ec8291
-    file: third_party/openbao/sdk/physical/entry.go
-    kind: method
-    line: 26
-    name: Entry.Clone
-    signature: () *Entry
-  - codegraphId: interface:5b84e8caa4286b4b2b689fd80ebd982c
-    file: third_party/openbao/sdk/physical/error.go
-    kind: interface
-    line: 22
-    name: ErrorInjector
-  - codegraphId: method:54e8311f600071e530e66c8829de81a5
-    file: third_party/openbao/sdk/physical/error.go
-    kind: method
-    line: 24
-    name: ErrorInjector.SetErrorPercentage
-    signature: (int)
-  - codegraphId: function:714984d2ed75dac6bfd87f642ad23447
-    file: third_party/openbao/sdk/physical/error.go
-    kind: function
-    line: 55
-    name: NewErrorInjector
-    signature: (b Backend, errorPercent int, logger log.Logger) ErrorInjector
-  - codegraphId: method:990d4d7671debf22117664d55dac03de
-    file: third_party/openbao/sdk/physical/error.go
-    kind: method
-    line: 80
-    name: errorInjector.SetErrorPercentage
-    signature: (p int)
-  - codegraphId: method:8ce0c799baa8cb5521a15ff709d4f9ad
-    file: third_party/openbao/sdk/physical/error.go
-    kind: method
-    line: 95
-    name: errorInjector.Put
     signature: (ctx context.Context, entry *Entry) error
-  - codegraphId: method:21ad4cfa5e9d435d4e7b98662c286b7c
-    file: third_party/openbao/sdk/physical/error.go
-    kind: method
-    line: 102
-    name: errorInjector.Get
-    signature: (ctx context.Context, key string) (*Entry, error)
-  - codegraphId: method:947eea7bd84f009489e524782b2a7e83
-    file: third_party/openbao/sdk/physical/error.go
-    kind: method
-    line: 109
-    name: errorInjector.Delete
-    signature: (ctx context.Context, key string) error
-  - codegraphId: method:778bf97e3926c10a81f6967817cc9be0
-    file: third_party/openbao/sdk/physical/error.go
-    kind: method
-    line: 116
-    name: errorInjector.List
-    signature: (ctx context.Context, prefix string) ([]string, error)
-  - codegraphId: method:51fa4106e78f5d845b87f5d1d3f2ac4c
-    file: third_party/openbao/sdk/physical/error.go
-    kind: method
-    line: 123
-    name: errorInjector.ListPage
-    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
-      error)
-  - codegraphId: method:9d1547eb90786395096cc41a3e038113
-    file: third_party/openbao/sdk/physical/error.go
-    kind: method
-    line: 130
-    name: transactionalErrorInjector.BeginReadOnlyTx
-    signature: (ctx context.Context) (Transaction, error)
-  - codegraphId: method:9d4210c668df313546cd914b87438b82
-    file: third_party/openbao/sdk/physical/error.go
-    kind: method
-    line: 140
-    name: transactionalErrorInjector.BeginTx
-    signature: (ctx context.Context) (Transaction, error)
-  - codegraphId: method:bac3109e40abee45634266078fe8c279
-    file: third_party/openbao/sdk/physical/error.go
-    kind: method
-    line: 150
-    name: errorInjectorTransaction.Commit
-    signature: (ctx context.Context) error
-  - codegraphId: method:604c395f1f2554d53f6efdfff278e308
-    file: third_party/openbao/sdk/physical/error.go
-    kind: method
-    line: 154
-    name: errorInjectorTransaction.Rollback
-    signature: (ctx context.Context) error
-  - codegraphId: struct:6814c01d24d533bd86c51d633e3ed326
-    file: third_party/openbao/sdk/physical/latency.go
-    kind: struct
-    line: 22
-    name: LatencyInjector
-  - codegraphId: function:2773de0d74caf975495b1df34f2aa3f2
-    file: third_party/openbao/sdk/physical/latency.go
-    kind: function
-    line: 37
-    name: NewLatencyInjector
-    signature: (b Backend, latency time.Duration, jitter int, logger log.Logger) *LatencyInjector
-  - codegraphId: method:fc4b85d6d89264444aa804cbab2f4b5e
-    file: third_party/openbao/sdk/physical/latency.go
-    kind: method
-    line: 55
-    name: LatencyInjector.SetLatency
-    signature: (latency time.Duration)
-  - codegraphId: method:df9fbb73cfa0e176f7558a5f99cf146f
-    file: third_party/openbao/sdk/physical/latency.go
-    kind: method
-    line: 75
-    name: LatencyInjector.Put
-    signature: (ctx context.Context, entry *Entry) error
-  - codegraphId: method:bfb76404b2485cdaed97b99a6ed2bb69
-    file: third_party/openbao/sdk/physical/latency.go
-    kind: method
-    line: 81
-    name: LatencyInjector.Get
-    signature: (ctx context.Context, key string) (*Entry, error)
-  - codegraphId: method:ed864a6ed30dabb86cef07f1e03d79ff
-    file: third_party/openbao/sdk/physical/latency.go
-    kind: method
-    line: 87
-    name: LatencyInjector.Delete
-    signature: (ctx context.Context, key string) error
-  - codegraphId: method:36604ad42baff9182194fdbe967fbcdc
-    file: third_party/openbao/sdk/physical/latency.go
-    kind: method
-    line: 93
-    name: LatencyInjector.List
-    signature: (ctx context.Context, prefix string) ([]string, error)
-  - codegraphId: method:882f890866fb4e56a9ebe0791ce83da0
-    file: third_party/openbao/sdk/physical/latency.go
-    kind: method
-    line: 99
-    name: LatencyInjector.ListPage
-    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
-      error)
-  - codegraphId: struct:bdca7bea47a8a839f16a5d2320c1c5bf
-    file: third_party/openbao/sdk/physical/listing.go
-    kind: struct
-    line: 15
-    name: Lister
-  - codegraphId: method:903301af689bb47f9423be6a2c91683a
-    file: third_party/openbao/sdk/physical/listing.go
-    kind: method
-    line: 53
-    name: Lister.SeekPrefix
-    signature: () []byte
-  - codegraphId: method:082b9444e66f470df2382ba626b3d47c
-    file: third_party/openbao/sdk/physical/listing.go
-    kind: method
+    file: third_party/openbao/sdk/physical/cache.go
     line: 172
-    name: Lister.ListPage
-    signature: (ctx context.Context) ([]string, []string, error)
-  - codegraphId: type_alias:cfca255d3a7b14ad2dcb681120ee5002
-    file: third_party/openbao/sdk/physical/physical.go
-    kind: type_alias
-    line: 19
-    name: Operation
-  - codegraphId: interface:c42dc92aaf803810f2890fe01b5c2e74
-    file: third_party/openbao/sdk/physical/physical.go
-    kind: interface
-    line: 40
-    name: Backend
-  - codegraphId: method:c70a44f71273e5619bc9d984abbe0eb7
-    file: third_party/openbao/sdk/physical/physical.go
+    codegraphId: method:d2a50636c0acef479ab5a8d4dcd20399
+  - name: cache.Get
     kind: method
-    line: 42
-    name: Backend.Put
-    signature: (ctx context.Context, entry *Entry) error
-  - codegraphId: method:90d0f26d835b68dfd2e2fb5cf369ecc9
-    file: third_party/openbao/sdk/physical/physical.go
-    kind: method
-    line: 45
-    name: Backend.Get
     signature: (ctx context.Context, key string) (*Entry, error)
-  - codegraphId: method:e0dd79955ca589a7e7a28ff75e3f99bd
-    file: third_party/openbao/sdk/physical/physical.go
+    file: third_party/openbao/sdk/physical/cache.go
+    line: 203
+    codegraphId: method:606a138a7fec3d3e2de986b2e445a895
+  - name: cache.Delete
     kind: method
-    line: 48
-    name: Backend.Delete
     signature: (ctx context.Context, key string) error
-  - codegraphId: method:b0109019be0473eecfda55b4725fe9e7
-    file: third_party/openbao/sdk/physical/physical.go
+    file: third_party/openbao/sdk/physical/cache.go
+    line: 237
+    codegraphId: method:c8124d3b0b7726fcaf931bc37e6b4647
+  - name: cache.List
     kind: method
-    line: 52
-    name: Backend.List
     signature: (ctx context.Context, prefix string) ([]string, error)
-  - codegraphId: method:df5b7487ed3c9362165f313858b129bc
-    file: third_party/openbao/sdk/physical/physical.go
+    file: third_party/openbao/sdk/physical/cache.go
+    line: 253
+    codegraphId: method:d95bddd6d95609619cff9183333261cd
+  - name: cache.ListPage
     kind: method
-    line: 61
-    name: Backend.ListPage
     signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
       error)
-  - codegraphId: interface:3d13c6617dfad919aaca553fabf6b528
-    file: third_party/openbao/sdk/physical/physical.go
-    kind: interface
-    line: 68
-    name: CacheInvalidationBackend
-  - codegraphId: method:87f1c1ae650ab54554e746f7c2823ed4
-    file: third_party/openbao/sdk/physical/physical.go
+    file: third_party/openbao/sdk/physical/cache.go
+    line: 260
+    codegraphId: method:495e85ffc527d8d6af7b65b083490b9d
+  - name: transactionalCache.BeginReadOnlyTx
     kind: method
-    line: 69
-    name: CacheInvalidationBackend.HookInvalidate
-    signature: (hook InvalidateFunc)
-  - codegraphId: type_alias:33b86ed3a30df440a3be670b55c5e8ba
-    file: third_party/openbao/sdk/physical/physical.go
-    kind: type_alias
-    line: 72
-    name: InvalidateFunc
-  - codegraphId: interface:13bd2e0d23b764cee32c11c2f8dc9018
-    file: third_party/openbao/sdk/physical/physical.go
-    kind: interface
-    line: 79
-    name: ReplicationIndexBackend
-  - codegraphId: method:80d9c59fdb37241fac49f6caeac1b43e
-    file: third_party/openbao/sdk/physical/physical.go
+    signature: (ctx context.Context) (Transaction, error)
+    file: third_party/openbao/sdk/physical/cache.go
+    line: 275
+    codegraphId: method:a592f4578bdda809e981d2d3ea9ea645
+  - name: transactionalCache.BeginTx
     kind: method
-    line: 82
-    name: ReplicationIndexBackend.AppliedReplicationIndex
-    signature: (ctx context.Context) (string, error)
-  - codegraphId: method:3e0174bce2e864f3d2829e37dc7583c4
-    file: third_party/openbao/sdk/physical/physical.go
+    signature: (ctx context.Context) (Transaction, error)
+    file: third_party/openbao/sdk/physical/cache.go
+    line: 292
+    codegraphId: method:49c2c5b43f002a86e6cdd21df5e236fc
+  - name: cacheTransaction.Put
     kind: method
-    line: 87
-    name: ReplicationIndexBackend.GreaterEqualReplicationIndex
-    signature: (ctx context.Context, left string, right string) (bool, error)
-  - codegraphId: interface:8c498e2cc09fa8cf2e6cebb864101897
-    file: third_party/openbao/sdk/physical/physical.go
-    kind: interface
-    line: 94
-    name: HABackend
-  - codegraphId: method:39e64095b3c2731bec496e6f9d83a437
-    file: third_party/openbao/sdk/physical/physical.go
+    signature: (ctx context.Context, entry *Entry) error
+    file: third_party/openbao/sdk/physical/cache.go
+    line: 308
+    codegraphId: method:99e8f691d12128fb12bb21075a56eea2
+  - name: cacheTransaction.Delete
     kind: method
-    line: 96
-    name: HABackend.LockWith
-    signature: (key, value string) (Lock, error)
-  - codegraphId: method:b4b2d66682d3ff1690be03763052bc7e
-    file: third_party/openbao/sdk/physical/physical.go
+    signature: (ctx context.Context, key string) error
+    file: third_party/openbao/sdk/physical/cache.go
+    line: 342
+    codegraphId: method:253b06e6f168853607e66c979c936d8d
+  - name: cacheTransaction.Commit
     kind: method
-    line: 99
-    name: HABackend.HAEnabled
-    signature: () bool
-  - codegraphId: interface:05f1884eee66d15665c49c8df37093e2
-    file: third_party/openbao/sdk/physical/physical.go
-    kind: interface
-    line: 130
-    name: FencingHABackend
-  - codegraphId: method:eced766ac933e67ac9dc3b887af8dee0
-    file: third_party/openbao/sdk/physical/physical.go
+    signature: (ctx context.Context) error
+    file: third_party/openbao/sdk/physical/cache.go
+    line: 362
+    codegraphId: method:669f632567fcb141c59621312cd2ada1
+  - name: cacheTransaction.Rollback
     kind: method
-    line: 133
-    name: FencingHABackend.RegisterActiveNodeLock
-    signature: (l Lock) error
-  - codegraphId: function:535042a02a24c9c58620a8f8f73e5bf3
-    file: third_party/openbao/sdk/physical/physical.go
-    kind: function
-    line: 154
-    name: UnfencedWriteCtx
-    signature: (ctx context.Context) context.Context
-  - codegraphId: function:7a68fe5f09705029eb92a822dd50d285
-    file: third_party/openbao/sdk/physical/physical.go
-    kind: function
-    line: 160
-    name: IsUnfencedWrite
-    signature: (ctx context.Context) bool
-  - codegraphId: interface:d74a7bde4c43f84103136095df7eeee9
-    file: third_party/openbao/sdk/physical/physical.go
-    kind: interface
-    line: 168
-    name: ToggleablePurgemonster
-  - codegraphId: method:e3daf1369b111970e3a943d58f80b0fe
-    file: third_party/openbao/sdk/physical/physical.go
+    signature: (ctx context.Context) error
+    file: third_party/openbao/sdk/physical/cache.go
+    line: 389
+    codegraphId: method:59757faeb1505f1513aaed08368aecd6
+  - name: cache.Invalidate
     kind: method
-    line: 169
-    name: ToggleablePurgemonster.Purge
-    signature: (ctx context.Context)
-  - codegraphId: method:25e9861803e2fee8c836b250204c97b5
-    file: third_party/openbao/sdk/physical/physical.go
-    kind: method
-    line: 170
-    name: ToggleablePurgemonster.Invalidate
     signature: (ctx context.Context, key string)
-  - codegraphId: method:7983412a90c178b7a6eb52af3cb5e210
-    file: third_party/openbao/sdk/physical/physical.go
-    kind: method
-    line: 171
-    name: ToggleablePurgemonster.SetEnabled
-    signature: (bool)
-  - codegraphId: interface:105a98988cc407ace2a693c323fe82f0
-    file: third_party/openbao/sdk/physical/physical.go
+    file: third_party/openbao/sdk/physical/cache.go
+    line: 402
+    codegraphId: method:dce8a4574d05b37899f35f8737f03cd9
+  - name: StorageEncoding
     kind: interface
-    line: 177
-    name: RedirectDetect
-  - codegraphId: method:9c6852a96169247050fd8ccce0f56037
-    file: third_party/openbao/sdk/physical/physical.go
-    kind: method
-    line: 179
-    name: RedirectDetect.DetectHostAddr
-    signature: () (string, error)
-  - codegraphId: interface:c4f6350d056e8dd0c44a4be82e5f4d52
-    file: third_party/openbao/sdk/physical/physical.go
+    file: third_party/openbao/sdk/physical/encoding.go
+    line: 20
+    codegraphId: interface:3abc2ea0c97155337bff68b1c25b282d
+  - name: TransactionalStorageEncoding
     kind: interface
-    line: 182
-    name: Lock
-  - codegraphId: method:666ba145fa5ca3d9ec3083d999ff6ff4
-    file: third_party/openbao/sdk/physical/physical.go
-    kind: method
-    line: 187
-    name: Lock.Lock
-    signature: (stopCh <-chan struct{}) (<-chan struct{}, error)
-  - codegraphId: method:9f228b1a16a6df94cfd48a9f73f5e10b
-    file: third_party/openbao/sdk/physical/physical.go
-    kind: method
-    line: 190
-    name: Lock.Unlock
-    signature: () error
-  - codegraphId: method:d8d5d18ead4a538f09ab80fc79a12fa8
-    file: third_party/openbao/sdk/physical/physical.go
-    kind: method
-    line: 193
-    name: Lock.Value
-    signature: () (bool, string, error)
-  - codegraphId: interface:78bc32a027b56ca8606681d66c086d75
-    file: third_party/openbao/sdk/physical/physical.go
+    file: third_party/openbao/sdk/physical/encoding.go
+    line: 30
+    codegraphId: interface:0047ee89f59f43dfe4e94ec0eee269e1
+  - name: StorageEncodingTransaction
     kind: interface
-    line: 198
-    name: RemoteLock
-  - codegraphId: method:8090682025d209668f7a567732a30ebf
-    file: third_party/openbao/sdk/physical/physical.go
-    kind: method
-    line: 201
-    name: RemoteLock.IsActivelyHeld
-    signature: (ctx context.Context) (bool, error)
-  - codegraphId: type_alias:088e88cc51204d45396356d351d30b3c
-    file: third_party/openbao/sdk/physical/physical.go
-    kind: type_alias
-    line: 205
-    name: Factory
-  - codegraphId: struct:03a3c1fe3ff0e393c6f0e45c695c5798
-    file: third_party/openbao/sdk/physical/physical.go
-    kind: struct
-    line: 208
-    name: PermitPool
-  - codegraphId: function:561c6b9266d3a78ad6b74428ac50ec7d
-    file: third_party/openbao/sdk/physical/physical.go
+    file: third_party/openbao/sdk/physical/encoding.go
+    line: 38
+    codegraphId: interface:c55488afd8098351787fbc2017fc50be
+  - name: NewStorageEncoding
     kind: function
-    line: 214
-    name: NewPermitPool
-    signature: (permits int) *PermitPool
-  - codegraphId: method:c25fb5faa3f522a39ad67f58a5437f14
-    file: third_party/openbao/sdk/physical/physical.go
+    signature: (b Backend) Backend
+    file: third_party/openbao/sdk/physical/encoding.go
+    line: 55
+    codegraphId: function:72f695e0a898c83f112db456c8a1d4b1
+  - name: storageEncoding.Put
     kind: method
-    line: 224
-    name: PermitPool.Acquire
-    signature: ()
-  - codegraphId: method:c60fd2c06818cef2fb49cc9198048173
-    file: third_party/openbao/sdk/physical/physical.go
-    kind: method
-    line: 229
-    name: PermitPool.Release
-    signature: ()
-  - codegraphId: method:73f4f5e3dbdbc2785e422a2c07f8bf80
-    file: third_party/openbao/sdk/physical/physical.go
-    kind: method
-    line: 234
-    name: PermitPool.CurrentPermits
-    signature: () int
-  - codegraphId: function:53225bb6c155915c3d2308b06988e63d
-    file: third_party/openbao/sdk/physical/physical.go
-    kind: function
-    line: 241
-    name: Prefixes
-    signature: (s string) []string
-  - codegraphId: struct:df3721d3c77a1d9a71bc36b0792ebaa9
-    file: third_party/openbao/sdk/physical/physical_access.go
-    kind: struct
-    line: 13
-    name: PhysicalAccess
-  - codegraphId: function:2c3211f729a5fb94085fd69b2f0be6c1
-    file: third_party/openbao/sdk/physical/physical_access.go
-    kind: function
-    line: 19
-    name: NewPhysicalAccess
-    signature: (physical Backend) *PhysicalAccess
-  - codegraphId: method:c1f87dc960222913595edeb3a2dd9c29
-    file: third_party/openbao/sdk/physical/physical_access.go
-    kind: method
-    line: 23
-    name: PhysicalAccess.Put
     signature: (ctx context.Context, entry *Entry) error
-  - codegraphId: method:d36f0bd6ec06bb835321fba1c21d5e4c
-    file: third_party/openbao/sdk/physical/physical_access.go
+    file: third_party/openbao/sdk/physical/encoding.go
+    line: 77
+    codegraphId: method:0775930799b3c6c71386dbd6956849ae
+  - name: storageEncoding.Delete
     kind: method
-    line: 27
-    name: PhysicalAccess.Get
-    signature: (ctx context.Context, key string) (*Entry, error)
-  - codegraphId: method:06bfe54d55d7d12ca01fad789ea1d1c5
-    file: third_party/openbao/sdk/physical/physical_access.go
-    kind: method
-    line: 31
-    name: PhysicalAccess.Delete
     signature: (ctx context.Context, key string) error
-  - codegraphId: method:c9ac59888244962fd7eb8f3b844e4545
-    file: third_party/openbao/sdk/physical/physical_access.go
-    kind: method
-    line: 35
-    name: PhysicalAccess.List
-    signature: (ctx context.Context, prefix string) ([]string, error)
-  - codegraphId: method:dca844d983a8bdf6294f6b13a3830f21
-    file: third_party/openbao/sdk/physical/physical_access.go
-    kind: method
-    line: 39
-    name: PhysicalAccess.ListPage
-    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
-      error)
-  - codegraphId: method:7388501859c23bf4f54700997e6b21cb
-    file: third_party/openbao/sdk/physical/physical_access.go
-    kind: method
-    line: 43
-    name: PhysicalAccess.Purge
-    signature: (ctx context.Context)
-  - codegraphId: struct:5bc75dfe5fc1d9713f0aa85b4d53da4e
-    file: third_party/openbao/sdk/physical/physical_view.go
-    kind: struct
-    line: 15
-    name: View
-  - codegraphId: function:74f5abaeca87696c252646165f7d64bb
-    file: third_party/openbao/sdk/physical/physical_view.go
-    kind: function
-    line: 25
-    name: NewView
-    signature: (backend Backend, prefix string) *View
-  - codegraphId: method:d2e603651f28a5362f2db38d7adda611
-    file: third_party/openbao/sdk/physical/physical_view.go
-    kind: method
-    line: 33
-    name: View.List
-    signature: (ctx context.Context, prefix string) ([]string, error)
-  - codegraphId: method:bfdd975da6282f8d7d8b51d053b0d10d
-    file: third_party/openbao/sdk/physical/physical_view.go
-    kind: method
-    line: 41
-    name: View.ListPage
-    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
-      error)
-  - codegraphId: method:4a2d96ce2188c5b8bc883354eb54e8dc
-    file: third_party/openbao/sdk/physical/physical_view.go
-    kind: method
-    line: 49
-    name: View.Get
-    signature: (ctx context.Context, key string) (*Entry, error)
-  - codegraphId: method:66c85653a25af6fe5b7fc5933ea73fb2
-    file: third_party/openbao/sdk/physical/physical_view.go
-    kind: method
-    line: 69
-    name: View.Put
-    signature: (ctx context.Context, entry *Entry) error
-  - codegraphId: method:acf6ac641ccd2a39961630501c372d56
-    file: third_party/openbao/sdk/physical/physical_view.go
-    kind: method
-    line: 82
-    name: View.Delete
-    signature: (ctx context.Context, key string) error
-  - codegraphId: function:cdf9401bd1ce3d8e201d0bb21c095eb2
-    file: third_party/openbao/sdk/physical/testing.go
-    kind: function
-    line: 131
-    name: ExerciseBackend
-    signature: (t testing.TB, b Backend)
-  - codegraphId: function:ab3724de969fbcf4b7c60877fe893a52
-    file: third_party/openbao/sdk/physical/testing.go
-    kind: function
-    line: 337
-    name: ExerciseBackend_ListPrefix
-    signature: (t testing.TB, b Backend)
-  - codegraphId: function:f38102f89c2dd4dd5ab77bd257bb3242
-    file: third_party/openbao/sdk/physical/testing.go
-    kind: function
-    line: 394
-    name: ExerciseHABackend
-    signature: (t testing.TB, b HABackend, b2 HABackend)
-  - codegraphId: function:34f9a200d286ca26f172fafe9c35b6d9
-    file: third_party/openbao/sdk/physical/testing.go
-    kind: function
-    line: 491
-    name: ExerciseTransactionalBackend
-    signature: (t testing.TB, b TransactionalBackend)
-  - codegraphId: interface:9852d12ad0d3e5dbdf54721c45db0b05
-    file: third_party/openbao/sdk/physical/transactions.go
-    kind: interface
-    line: 24
-    name: Transactional
-  - codegraphId: method:e584b81c98057c68f9a170f9266091d2
-    file: third_party/openbao/sdk/physical/transactions.go
-    kind: method
-    line: 28
-    name: Transactional.BeginReadOnlyTx
-    signature: (context.Context) (Transaction, error)
-  - codegraphId: method:6bc6aa931a840535c0cce016b506112b
-    file: third_party/openbao/sdk/physical/transactions.go
-    kind: method
-    line: 34
-    name: Transactional.BeginTx
-    signature: (context.Context) (Transaction, error)
-  - codegraphId: interface:08ffcc14df3c8b65543b0d305373c3e9
-    file: third_party/openbao/sdk/physical/transactions.go
-    kind: interface
-    line: 41
-    name: Transaction
-  - codegraphId: method:5c8e9fb8611f650250e76ffef962a5a2
-    file: third_party/openbao/sdk/physical/transactions.go
-    kind: method
-    line: 47
-    name: Transaction.Commit
-    signature: (context.Context) error
-  - codegraphId: method:a8de377adade7c00825c85121c76f056
-    file: third_party/openbao/sdk/physical/transactions.go
-    kind: method
-    line: 51
-    name: Transaction.Rollback
-    signature: (context.Context) error
-  - codegraphId: interface:a169b37932f13dfaab67c2887a0b2628
-    file: third_party/openbao/sdk/physical/transactions.go
-    kind: interface
-    line: 56
-    name: TransactionalBackend
-  - codegraphId: type_alias:92241f5fc12edd1a43cc696311e80203
-    file: third_party/openbao/sdk/physical/write_notifier.go
-    kind: type_alias
-    line: 12
-    name: WriteNotificationFunc
-  - codegraphId: function:3aee5dde26ea2637ff9ca7a8b4120606
-    file: third_party/openbao/sdk/physical/write_notifier.go
-    kind: function
-    line: 31
-    name: NewWriteNotifier
-    signature: (b Backend, logger log.Logger, notifyWrite WriteNotificationFunc) Backend
-  - codegraphId: method:e8833094d318122c1592c109f76a4f0c
-    file: third_party/openbao/sdk/physical/write_notifier.go
-    kind: method
-    line: 52
-    name: writeNotifier.HookInvalidate
-    signature: (hook InvalidateFunc)
-  - codegraphId: method:a45e787aaed05d32de40a9159ea18d20
-    file: third_party/openbao/sdk/physical/write_notifier.go
-    kind: method
-    line: 54
-    name: writeNotifier.Put
-    signature: (ctx context.Context, entry *Entry) error
-  - codegraphId: method:3b390ef6ba7e03cb9ffaf244126c0140
-    file: third_party/openbao/sdk/physical/write_notifier.go
-    kind: method
-    line: 63
-    name: writeNotifier.Get
-    signature: (ctx context.Context, key string) (*Entry, error)
-  - codegraphId: method:52205dc35908cd26400eda5c7272f767
-    file: third_party/openbao/sdk/physical/write_notifier.go
-    kind: method
-    line: 67
-    name: writeNotifier.Delete
-    signature: (ctx context.Context, key string) error
-  - codegraphId: method:80fbaa7950835ebe6621c19232ba554d
-    file: third_party/openbao/sdk/physical/write_notifier.go
-    kind: method
-    line: 76
-    name: writeNotifier.List
-    signature: (ctx context.Context, prefix string) ([]string, error)
-  - codegraphId: method:e73e39cbc51fc4eb95522dc28590de04
-    file: third_party/openbao/sdk/physical/write_notifier.go
-    kind: method
-    line: 80
-    name: writeNotifier.ListPage
-    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
-      error)
-  - codegraphId: method:473c7ae3d4c37e9663791a6b59b8d3fd
-    file: third_party/openbao/sdk/physical/write_notifier.go
-    kind: method
-    line: 84
-    name: transactionalWriteNotifier.BeginReadOnlyTx
-    signature: (ctx context.Context) (Transaction, error)
-  - codegraphId: method:ed8fb768a078729d67a88759ebee7b7d
-    file: third_party/openbao/sdk/physical/write_notifier.go
-    kind: method
+    file: third_party/openbao/sdk/physical/encoding.go
     line: 89
-    name: transactionalWriteNotifier.BeginTx
+    codegraphId: method:20aee99f61f001e83e52d64784bc7486
+  - name: storageEncoding.Purge
+    kind: method
+    signature: (ctx context.Context)
+    file: third_party/openbao/sdk/physical/encoding.go
+    line: 101
+    codegraphId: method:de510a38c92034b6cb4664c9d568f0bb
+  - name: storageEncoding.SetEnabled
+    kind: method
+    signature: (enabled bool)
+    file: third_party/openbao/sdk/physical/encoding.go
+    line: 107
+    codegraphId: method:4c9596aaa8e21def7f8c9ae5f3949f32
+  - name: transactionalStorageEncoding.BeginReadOnlyTx
+    kind: method
     signature: (ctx context.Context) (Transaction, error)
-  - codegraphId: method:affd4e6f5c50f69f73ccb3a918bd4b36
-    file: third_party/openbao/sdk/physical/write_notifier.go
+    file: third_party/openbao/sdk/physical/encoding.go
+    line: 113
+    codegraphId: method:c55bbf09c1df846fd673e22d725e88f7
+  - name: transactionalStorageEncoding.BeginTx
     kind: method
-    line: 102
-    name: writeNotifierTransaction.Put
+    signature: (ctx context.Context) (Transaction, error)
+    file: third_party/openbao/sdk/physical/encoding.go
+    line: 126
+    codegraphId: method:d9bb37650861079d7bb8aafd0f10debb
+  - name: storageEncodingTransaction.Commit
+    kind: method
+    signature: (ctx context.Context) error
+    file: third_party/openbao/sdk/physical/encoding.go
+    line: 139
+    codegraphId: method:0bd332eb0420eae831a35b27de7a080e
+  - name: storageEncodingTransaction.Rollback
+    kind: method
+    signature: (ctx context.Context) error
+    file: third_party/openbao/sdk/physical/encoding.go
+    line: 143
+    codegraphId: method:a5ccf39e4acbab3fa36e5a1b3eb7791c
+  - name: Entry
+    kind: struct
+    file: third_party/openbao/sdk/physical/entry.go
+    line: 12
+    codegraphId: struct:6d1685314383067122ddde5e7575b72e
+  - name: Entry.String
+    kind: method
+    signature: () string
+    file: third_party/openbao/sdk/physical/entry.go
+    line: 21
+    codegraphId: method:e4831f61ffb6b9b38ea13833b9d1c4e6
+  - name: Entry.Clone
+    kind: method
+    signature: () *Entry
+    file: third_party/openbao/sdk/physical/entry.go
+    line: 26
+    codegraphId: method:1e9458db4df54ab1e095336d02ec8291
+  - name: ErrorInjector
+    kind: interface
+    file: third_party/openbao/sdk/physical/error.go
+    line: 22
+    codegraphId: interface:5b84e8caa4286b4b2b689fd80ebd982c
+  - name: ErrorInjector.SetErrorPercentage
+    kind: method
+    signature: (int)
+    file: third_party/openbao/sdk/physical/error.go
+    line: 24
+    codegraphId: method:54e8311f600071e530e66c8829de81a5
+  - name: NewErrorInjector
+    kind: function
+    signature: (b Backend, errorPercent int, logger log.Logger) ErrorInjector
+    file: third_party/openbao/sdk/physical/error.go
+    line: 55
+    codegraphId: function:714984d2ed75dac6bfd87f642ad23447
+  - name: errorInjector.SetErrorPercentage
+    kind: method
+    signature: (p int)
+    file: third_party/openbao/sdk/physical/error.go
+    line: 80
+    codegraphId: method:990d4d7671debf22117664d55dac03de
+  - name: errorInjector.Put
+    kind: method
     signature: (ctx context.Context, entry *Entry) error
-  - codegraphId: method:36f20743f5f759b76b944bc9df99b70c
-    file: third_party/openbao/sdk/physical/write_notifier.go
+    file: third_party/openbao/sdk/physical/error.go
+    line: 95
+    codegraphId: method:8ce0c799baa8cb5521a15ff709d4f9ad
+  - name: errorInjector.Get
     kind: method
-    line: 114
-    name: writeNotifierTransaction.Get
     signature: (ctx context.Context, key string) (*Entry, error)
-  - codegraphId: method:8c19bf03e50b815fd7a8b8ce4fca1f9b
-    file: third_party/openbao/sdk/physical/write_notifier.go
+    file: third_party/openbao/sdk/physical/error.go
+    line: 102
+    codegraphId: method:21ad4cfa5e9d435d4e7b98662c286b7c
+  - name: errorInjector.Delete
     kind: method
-    line: 118
-    name: writeNotifierTransaction.Delete
     signature: (ctx context.Context, key string) error
-  - codegraphId: method:b7dee0af44cb8c0193b53820d75abf11
-    file: third_party/openbao/sdk/physical/write_notifier.go
+    file: third_party/openbao/sdk/physical/error.go
+    line: 109
+    codegraphId: method:947eea7bd84f009489e524782b2a7e83
+  - name: errorInjector.List
     kind: method
-    line: 130
-    name: writeNotifierTransaction.List
     signature: (ctx context.Context, prefix string) ([]string, error)
-  - codegraphId: method:22f6bd20b04a0aadca136429c0d24e39
-    file: third_party/openbao/sdk/physical/write_notifier.go
+    file: third_party/openbao/sdk/physical/error.go
+    line: 116
+    codegraphId: method:778bf97e3926c10a81f6967817cc9be0
+  - name: errorInjector.ListPage
     kind: method
-    line: 134
-    name: writeNotifierTransaction.ListPage
     signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
       error)
-  - codegraphId: method:9486c15807ce309a30801a9300fb6beb
-    file: third_party/openbao/sdk/physical/write_notifier.go
+    file: third_party/openbao/sdk/physical/error.go
+    line: 123
+    codegraphId: method:51fa4106e78f5d845b87f5d1d3f2ac4c
+  - name: transactionalErrorInjector.BeginReadOnlyTx
     kind: method
+    signature: (ctx context.Context) (Transaction, error)
+    file: third_party/openbao/sdk/physical/error.go
+    line: 130
+    codegraphId: method:9d1547eb90786395096cc41a3e038113
+  - name: transactionalErrorInjector.BeginTx
+    kind: method
+    signature: (ctx context.Context) (Transaction, error)
+    file: third_party/openbao/sdk/physical/error.go
+    line: 140
+    codegraphId: method:9d4210c668df313546cd914b87438b82
+  - name: errorInjectorTransaction.Commit
+    kind: method
+    signature: (ctx context.Context) error
+    file: third_party/openbao/sdk/physical/error.go
+    line: 150
+    codegraphId: method:bac3109e40abee45634266078fe8c279
+  - name: errorInjectorTransaction.Rollback
+    kind: method
+    signature: (ctx context.Context) error
+    file: third_party/openbao/sdk/physical/error.go
+    line: 154
+    codegraphId: method:604c395f1f2554d53f6efdfff278e308
+  - name: LatencyInjector
+    kind: struct
+    file: third_party/openbao/sdk/physical/latency.go
+    line: 22
+    codegraphId: struct:6814c01d24d533bd86c51d633e3ed326
+  - name: NewLatencyInjector
+    kind: function
+    signature: (b Backend, latency time.Duration, jitter int, logger log.Logger) *LatencyInjector
+    file: third_party/openbao/sdk/physical/latency.go
+    line: 37
+    codegraphId: function:2773de0d74caf975495b1df34f2aa3f2
+  - name: LatencyInjector.SetLatency
+    kind: method
+    signature: (latency time.Duration)
+    file: third_party/openbao/sdk/physical/latency.go
+    line: 55
+    codegraphId: method:fc4b85d6d89264444aa804cbab2f4b5e
+  - name: LatencyInjector.Put
+    kind: method
+    signature: (ctx context.Context, entry *Entry) error
+    file: third_party/openbao/sdk/physical/latency.go
+    line: 75
+    codegraphId: method:df9fbb73cfa0e176f7558a5f99cf146f
+  - name: LatencyInjector.Get
+    kind: method
+    signature: (ctx context.Context, key string) (*Entry, error)
+    file: third_party/openbao/sdk/physical/latency.go
+    line: 81
+    codegraphId: method:bfb76404b2485cdaed97b99a6ed2bb69
+  - name: LatencyInjector.Delete
+    kind: method
+    signature: (ctx context.Context, key string) error
+    file: third_party/openbao/sdk/physical/latency.go
+    line: 87
+    codegraphId: method:ed864a6ed30dabb86cef07f1e03d79ff
+  - name: LatencyInjector.List
+    kind: method
+    signature: (ctx context.Context, prefix string) ([]string, error)
+    file: third_party/openbao/sdk/physical/latency.go
+    line: 93
+    codegraphId: method:36604ad42baff9182194fdbe967fbcdc
+  - name: LatencyInjector.ListPage
+    kind: method
+    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
+      error)
+    file: third_party/openbao/sdk/physical/latency.go
+    line: 99
+    codegraphId: method:882f890866fb4e56a9ebe0791ce83da0
+  - name: Lister
+    kind: struct
+    file: third_party/openbao/sdk/physical/listing.go
+    line: 15
+    codegraphId: struct:bdca7bea47a8a839f16a5d2320c1c5bf
+  - name: Lister.SeekPrefix
+    kind: method
+    signature: () []byte
+    file: third_party/openbao/sdk/physical/listing.go
+    line: 53
+    codegraphId: method:903301af689bb47f9423be6a2c91683a
+  - name: Lister.ListPage
+    kind: method
+    signature: (ctx context.Context) ([]string, []string, error)
+    file: third_party/openbao/sdk/physical/listing.go
+    line: 172
+    codegraphId: method:082b9444e66f470df2382ba626b3d47c
+  - name: Operation
+    kind: type_alias
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 19
+    codegraphId: type_alias:cfca255d3a7b14ad2dcb681120ee5002
+  - name: Backend
+    kind: interface
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 40
+    codegraphId: interface:c42dc92aaf803810f2890fe01b5c2e74
+  - name: Backend.Put
+    kind: method
+    signature: (ctx context.Context, entry *Entry) error
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 42
+    codegraphId: method:c70a44f71273e5619bc9d984abbe0eb7
+  - name: Backend.Get
+    kind: method
+    signature: (ctx context.Context, key string) (*Entry, error)
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 45
+    codegraphId: method:90d0f26d835b68dfd2e2fb5cf369ecc9
+  - name: Backend.Delete
+    kind: method
+    signature: (ctx context.Context, key string) error
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 48
+    codegraphId: method:e0dd79955ca589a7e7a28ff75e3f99bd
+  - name: Backend.List
+    kind: method
+    signature: (ctx context.Context, prefix string) ([]string, error)
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 52
+    codegraphId: method:b0109019be0473eecfda55b4725fe9e7
+  - name: Backend.ListPage
+    kind: method
+    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
+      error)
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 61
+    codegraphId: method:df5b7487ed3c9362165f313858b129bc
+  - name: CacheInvalidationBackend
+    kind: interface
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 68
+    codegraphId: interface:3d13c6617dfad919aaca553fabf6b528
+  - name: CacheInvalidationBackend.HookInvalidate
+    kind: method
+    signature: (hook InvalidateFunc)
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 69
+    codegraphId: method:87f1c1ae650ab54554e746f7c2823ed4
+  - name: InvalidateFunc
+    kind: type_alias
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 72
+    codegraphId: type_alias:33b86ed3a30df440a3be670b55c5e8ba
+  - name: ReplicationIndexBackend
+    kind: interface
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 79
+    codegraphId: interface:13bd2e0d23b764cee32c11c2f8dc9018
+  - name: ReplicationIndexBackend.AppliedReplicationIndex
+    kind: method
+    signature: (ctx context.Context) (string, error)
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 82
+    codegraphId: method:80d9c59fdb37241fac49f6caeac1b43e
+  - name: ReplicationIndexBackend.GreaterEqualReplicationIndex
+    kind: method
+    signature: (ctx context.Context, left string, right string) (bool, error)
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 87
+    codegraphId: method:3e0174bce2e864f3d2829e37dc7583c4
+  - name: HABackend
+    kind: interface
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 94
+    codegraphId: interface:8c498e2cc09fa8cf2e6cebb864101897
+  - name: HABackend.LockWith
+    kind: method
+    signature: (key, value string) (Lock, error)
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 96
+    codegraphId: method:39e64095b3c2731bec496e6f9d83a437
+  - name: HABackend.HAEnabled
+    kind: method
+    signature: () bool
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 99
+    codegraphId: method:b4b2d66682d3ff1690be03763052bc7e
+  - name: FencingHABackend
+    kind: interface
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 130
+    codegraphId: interface:05f1884eee66d15665c49c8df37093e2
+  - name: FencingHABackend.RegisterActiveNodeLock
+    kind: method
+    signature: (l Lock) error
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 133
+    codegraphId: method:eced766ac933e67ac9dc3b887af8dee0
+  - name: UnfencedWriteCtx
+    kind: function
+    signature: (ctx context.Context) context.Context
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 154
+    codegraphId: function:535042a02a24c9c58620a8f8f73e5bf3
+  - name: IsUnfencedWrite
+    kind: function
+    signature: (ctx context.Context) bool
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 160
+    codegraphId: function:7a68fe5f09705029eb92a822dd50d285
+  - name: ToggleablePurgemonster
+    kind: interface
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 168
+    codegraphId: interface:d74a7bde4c43f84103136095df7eeee9
+  - name: ToggleablePurgemonster.Purge
+    kind: method
+    signature: (ctx context.Context)
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 169
+    codegraphId: method:e3daf1369b111970e3a943d58f80b0fe
+  - name: ToggleablePurgemonster.Invalidate
+    kind: method
+    signature: (ctx context.Context, key string)
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 170
+    codegraphId: method:25e9861803e2fee8c836b250204c97b5
+  - name: ToggleablePurgemonster.SetEnabled
+    kind: method
+    signature: (bool)
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 171
+    codegraphId: method:7983412a90c178b7a6eb52af3cb5e210
+  - name: RedirectDetect
+    kind: interface
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 177
+    codegraphId: interface:105a98988cc407ace2a693c323fe82f0
+  - name: RedirectDetect.DetectHostAddr
+    kind: method
+    signature: () (string, error)
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 179
+    codegraphId: method:9c6852a96169247050fd8ccce0f56037
+  - name: Lock
+    kind: interface
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 182
+    codegraphId: interface:c4f6350d056e8dd0c44a4be82e5f4d52
+  - name: Lock.Lock
+    kind: method
+    signature: (stopCh <-chan struct{}) (<-chan struct{}, error)
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 187
+    codegraphId: method:666ba145fa5ca3d9ec3083d999ff6ff4
+  - name: Lock.Unlock
+    kind: method
+    signature: () error
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 190
+    codegraphId: method:9f228b1a16a6df94cfd48a9f73f5e10b
+  - name: Lock.Value
+    kind: method
+    signature: () (bool, string, error)
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 193
+    codegraphId: method:d8d5d18ead4a538f09ab80fc79a12fa8
+  - name: RemoteLock
+    kind: interface
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 198
+    codegraphId: interface:78bc32a027b56ca8606681d66c086d75
+  - name: RemoteLock.IsActivelyHeld
+    kind: method
+    signature: (ctx context.Context) (bool, error)
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 201
+    codegraphId: method:8090682025d209668f7a567732a30ebf
+  - name: Factory
+    kind: type_alias
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 205
+    codegraphId: type_alias:088e88cc51204d45396356d351d30b3c
+  - name: PermitPool
+    kind: struct
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 208
+    codegraphId: struct:03a3c1fe3ff0e393c6f0e45c695c5798
+  - name: NewPermitPool
+    kind: function
+    signature: (permits int) *PermitPool
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 214
+    codegraphId: function:561c6b9266d3a78ad6b74428ac50ec7d
+  - name: PermitPool.Acquire
+    kind: method
+    signature: ()
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 224
+    codegraphId: method:c25fb5faa3f522a39ad67f58a5437f14
+  - name: PermitPool.Release
+    kind: method
+    signature: ()
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 229
+    codegraphId: method:c60fd2c06818cef2fb49cc9198048173
+  - name: PermitPool.CurrentPermits
+    kind: method
+    signature: () int
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 234
+    codegraphId: method:73f4f5e3dbdbc2785e422a2c07f8bf80
+  - name: Prefixes
+    kind: function
+    signature: (s string) []string
+    file: third_party/openbao/sdk/physical/physical.go
+    line: 241
+    codegraphId: function:53225bb6c155915c3d2308b06988e63d
+  - name: PhysicalAccess
+    kind: struct
+    file: third_party/openbao/sdk/physical/physical_access.go
+    line: 13
+    codegraphId: struct:df3721d3c77a1d9a71bc36b0792ebaa9
+  - name: NewPhysicalAccess
+    kind: function
+    signature: (physical Backend) *PhysicalAccess
+    file: third_party/openbao/sdk/physical/physical_access.go
+    line: 19
+    codegraphId: function:2c3211f729a5fb94085fd69b2f0be6c1
+  - name: PhysicalAccess.Put
+    kind: method
+    signature: (ctx context.Context, entry *Entry) error
+    file: third_party/openbao/sdk/physical/physical_access.go
+    line: 23
+    codegraphId: method:c1f87dc960222913595edeb3a2dd9c29
+  - name: PhysicalAccess.Get
+    kind: method
+    signature: (ctx context.Context, key string) (*Entry, error)
+    file: third_party/openbao/sdk/physical/physical_access.go
+    line: 27
+    codegraphId: method:d36f0bd6ec06bb835321fba1c21d5e4c
+  - name: PhysicalAccess.Delete
+    kind: method
+    signature: (ctx context.Context, key string) error
+    file: third_party/openbao/sdk/physical/physical_access.go
+    line: 31
+    codegraphId: method:06bfe54d55d7d12ca01fad789ea1d1c5
+  - name: PhysicalAccess.List
+    kind: method
+    signature: (ctx context.Context, prefix string) ([]string, error)
+    file: third_party/openbao/sdk/physical/physical_access.go
+    line: 35
+    codegraphId: method:c9ac59888244962fd7eb8f3b844e4545
+  - name: PhysicalAccess.ListPage
+    kind: method
+    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
+      error)
+    file: third_party/openbao/sdk/physical/physical_access.go
+    line: 39
+    codegraphId: method:dca844d983a8bdf6294f6b13a3830f21
+  - name: PhysicalAccess.Purge
+    kind: method
+    signature: (ctx context.Context)
+    file: third_party/openbao/sdk/physical/physical_access.go
+    line: 43
+    codegraphId: method:7388501859c23bf4f54700997e6b21cb
+  - name: View
+    kind: struct
+    file: third_party/openbao/sdk/physical/physical_view.go
+    line: 15
+    codegraphId: struct:5bc75dfe5fc1d9713f0aa85b4d53da4e
+  - name: NewView
+    kind: function
+    signature: (backend Backend, prefix string) *View
+    file: third_party/openbao/sdk/physical/physical_view.go
+    line: 25
+    codegraphId: function:74f5abaeca87696c252646165f7d64bb
+  - name: View.List
+    kind: method
+    signature: (ctx context.Context, prefix string) ([]string, error)
+    file: third_party/openbao/sdk/physical/physical_view.go
+    line: 33
+    codegraphId: method:d2e603651f28a5362f2db38d7adda611
+  - name: View.ListPage
+    kind: method
+    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
+      error)
+    file: third_party/openbao/sdk/physical/physical_view.go
+    line: 41
+    codegraphId: method:bfdd975da6282f8d7d8b51d053b0d10d
+  - name: View.Get
+    kind: method
+    signature: (ctx context.Context, key string) (*Entry, error)
+    file: third_party/openbao/sdk/physical/physical_view.go
+    line: 49
+    codegraphId: method:4a2d96ce2188c5b8bc883354eb54e8dc
+  - name: View.Put
+    kind: method
+    signature: (ctx context.Context, entry *Entry) error
+    file: third_party/openbao/sdk/physical/physical_view.go
+    line: 69
+    codegraphId: method:66c85653a25af6fe5b7fc5933ea73fb2
+  - name: View.Delete
+    kind: method
+    signature: (ctx context.Context, key string) error
+    file: third_party/openbao/sdk/physical/physical_view.go
+    line: 82
+    codegraphId: method:acf6ac641ccd2a39961630501c372d56
+  - name: ExerciseBackend
+    kind: function
+    signature: (t testing.TB, b Backend)
+    file: third_party/openbao/sdk/physical/testing.go
+    line: 131
+    codegraphId: function:cdf9401bd1ce3d8e201d0bb21c095eb2
+  - name: ExerciseBackend_ListPrefix
+    kind: function
+    signature: (t testing.TB, b Backend)
+    file: third_party/openbao/sdk/physical/testing.go
+    line: 337
+    codegraphId: function:ab3724de969fbcf4b7c60877fe893a52
+  - name: ExerciseHABackend
+    kind: function
+    signature: (t testing.TB, b HABackend, b2 HABackend)
+    file: third_party/openbao/sdk/physical/testing.go
+    line: 394
+    codegraphId: function:f38102f89c2dd4dd5ab77bd257bb3242
+  - name: ExerciseTransactionalBackend
+    kind: function
+    signature: (t testing.TB, b TransactionalBackend)
+    file: third_party/openbao/sdk/physical/testing.go
+    line: 491
+    codegraphId: function:34f9a200d286ca26f172fafe9c35b6d9
+  - name: Transactional
+    kind: interface
+    file: third_party/openbao/sdk/physical/transactions.go
+    line: 24
+    codegraphId: interface:9852d12ad0d3e5dbdf54721c45db0b05
+  - name: Transactional.BeginReadOnlyTx
+    kind: method
+    signature: (context.Context) (Transaction, error)
+    file: third_party/openbao/sdk/physical/transactions.go
+    line: 28
+    codegraphId: method:e584b81c98057c68f9a170f9266091d2
+  - name: Transactional.BeginTx
+    kind: method
+    signature: (context.Context) (Transaction, error)
+    file: third_party/openbao/sdk/physical/transactions.go
+    line: 34
+    codegraphId: method:6bc6aa931a840535c0cce016b506112b
+  - name: Transaction
+    kind: interface
+    file: third_party/openbao/sdk/physical/transactions.go
+    line: 41
+    codegraphId: interface:08ffcc14df3c8b65543b0d305373c3e9
+  - name: Transaction.Commit
+    kind: method
+    signature: (context.Context) error
+    file: third_party/openbao/sdk/physical/transactions.go
+    line: 47
+    codegraphId: method:5c8e9fb8611f650250e76ffef962a5a2
+  - name: Transaction.Rollback
+    kind: method
+    signature: (context.Context) error
+    file: third_party/openbao/sdk/physical/transactions.go
+    line: 51
+    codegraphId: method:a8de377adade7c00825c85121c76f056
+  - name: TransactionalBackend
+    kind: interface
+    file: third_party/openbao/sdk/physical/transactions.go
+    line: 56
+    codegraphId: interface:a169b37932f13dfaab67c2887a0b2628
+  - name: WriteNotificationFunc
+    kind: type_alias
+    file: third_party/openbao/sdk/physical/write_notifier.go
+    line: 12
+    codegraphId: type_alias:92241f5fc12edd1a43cc696311e80203
+  - name: NewWriteNotifier
+    kind: function
+    signature: (b Backend, logger log.Logger, notifyWrite WriteNotificationFunc) Backend
+    file: third_party/openbao/sdk/physical/write_notifier.go
+    line: 31
+    codegraphId: function:3aee5dde26ea2637ff9ca7a8b4120606
+  - name: writeNotifier.HookInvalidate
+    kind: method
+    signature: (hook InvalidateFunc)
+    file: third_party/openbao/sdk/physical/write_notifier.go
+    line: 52
+    codegraphId: method:e8833094d318122c1592c109f76a4f0c
+  - name: writeNotifier.Put
+    kind: method
+    signature: (ctx context.Context, entry *Entry) error
+    file: third_party/openbao/sdk/physical/write_notifier.go
+    line: 54
+    codegraphId: method:a45e787aaed05d32de40a9159ea18d20
+  - name: writeNotifier.Get
+    kind: method
+    signature: (ctx context.Context, key string) (*Entry, error)
+    file: third_party/openbao/sdk/physical/write_notifier.go
+    line: 63
+    codegraphId: method:3b390ef6ba7e03cb9ffaf244126c0140
+  - name: writeNotifier.Delete
+    kind: method
+    signature: (ctx context.Context, key string) error
+    file: third_party/openbao/sdk/physical/write_notifier.go
+    line: 67
+    codegraphId: method:52205dc35908cd26400eda5c7272f767
+  - name: writeNotifier.List
+    kind: method
+    signature: (ctx context.Context, prefix string) ([]string, error)
+    file: third_party/openbao/sdk/physical/write_notifier.go
+    line: 76
+    codegraphId: method:80fbaa7950835ebe6621c19232ba554d
+  - name: writeNotifier.ListPage
+    kind: method
+    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
+      error)
+    file: third_party/openbao/sdk/physical/write_notifier.go
+    line: 80
+    codegraphId: method:e73e39cbc51fc4eb95522dc28590de04
+  - name: transactionalWriteNotifier.BeginReadOnlyTx
+    kind: method
+    signature: (ctx context.Context) (Transaction, error)
+    file: third_party/openbao/sdk/physical/write_notifier.go
+    line: 84
+    codegraphId: method:473c7ae3d4c37e9663791a6b59b8d3fd
+  - name: transactionalWriteNotifier.BeginTx
+    kind: method
+    signature: (ctx context.Context) (Transaction, error)
+    file: third_party/openbao/sdk/physical/write_notifier.go
+    line: 89
+    codegraphId: method:ed8fb768a078729d67a88759ebee7b7d
+  - name: writeNotifierTransaction.Put
+    kind: method
+    signature: (ctx context.Context, entry *Entry) error
+    file: third_party/openbao/sdk/physical/write_notifier.go
+    line: 102
+    codegraphId: method:affd4e6f5c50f69f73ccb3a918bd4b36
+  - name: writeNotifierTransaction.Get
+    kind: method
+    signature: (ctx context.Context, key string) (*Entry, error)
+    file: third_party/openbao/sdk/physical/write_notifier.go
+    line: 114
+    codegraphId: method:36f20743f5f759b76b944bc9df99b70c
+  - name: writeNotifierTransaction.Delete
+    kind: method
+    signature: (ctx context.Context, key string) error
+    file: third_party/openbao/sdk/physical/write_notifier.go
+    line: 118
+    codegraphId: method:8c19bf03e50b815fd7a8b8ce4fca1f9b
+  - name: writeNotifierTransaction.List
+    kind: method
+    signature: (ctx context.Context, prefix string) ([]string, error)
+    file: third_party/openbao/sdk/physical/write_notifier.go
+    line: 130
+    codegraphId: method:b7dee0af44cb8c0193b53820d75abf11
+  - name: writeNotifierTransaction.ListPage
+    kind: method
+    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
+      error)
+    file: third_party/openbao/sdk/physical/write_notifier.go
+    line: 134
+    codegraphId: method:22f6bd20b04a0aadca136429c0d24e39
+  - name: writeNotifierTransaction.Commit
+    kind: method
+    signature: (ctx context.Context) error
+    file: third_party/openbao/sdk/physical/write_notifier.go
     line: 138
-    name: writeNotifierTransaction.Commit
-    signature: (ctx context.Context) error
-  - codegraphId: method:f7826680a9c4578e25da8ec1765fb5dc
-    file: third_party/openbao/sdk/physical/write_notifier.go
+    codegraphId: method:9486c15807ce309a30801a9300fb6beb
+  - name: writeNotifierTransaction.Rollback
     kind: method
-    line: 149
-    name: writeNotifierTransaction.Rollback
     signature: (ctx context.Context) error
-realizedSpecHash: a9af20b0c8408936dadb40c65e3ee746c1b43810436f6c18cf1a070f69b651df
-syncedCommit: 89cee50ec5aea977a42f904a758e506729e1158e
-syncedFingerprint: a900a9aed15ed2bcf71880200c8bc07d8e45086b894e8cdcc74e533513b36d0b
+    file: third_party/openbao/sdk/physical/write_notifier.go
+    line: 149
+    codegraphId: method:f7826680a9c4578e25da8ec1765fb5dc
+  fingerprint: a900a9aed15ed2bcf71880200c8bc07d8e45086b894e8cdcc74e533513b36d0b

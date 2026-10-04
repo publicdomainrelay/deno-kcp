@@ -1,15 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/ui/app/routes/vault/cluster/access/identity/create.js create.js@third_party/openbao/ui/app/routes/vault/cluster/access/identity/create.js
-- file:third_party/openbao/ui/app/routes/vault/cluster/access/identity/edit.js edit.js@third_party/openbao/ui/app/routes/vault/cluster/access/identity/edit.js
-- file:third_party/openbao/ui/app/routes/vault/cluster/access/identity/index.js index.js@third_party/openbao/ui/app/routes/vault/cluster/access/identity/index.js
-- file:third_party/openbao/ui/app/routes/vault/cluster/access/identity/merge.js merge.js@third_party/openbao/ui/app/routes/vault/cluster/access/identity/merge.js
-- file:third_party/openbao/ui/app/routes/vault/cluster/access/identity/show.js show.js@third_party/openbao/ui/app/routes/vault/cluster/access/identity/show.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-app-routes-vault-cluster-access-identity
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'The context exists to specify the routing behaviour of the OpenBao UI identity
     screens: how each identity sub-route resolves or creates its ember-data model,
     which query parameters and store lookups it depends on, how it validates the requested
@@ -18,11 +14,8 @@ spec:
     OpenBao (HashiCorp-derived, MPL-2.0) front-end — so the specification records
     the behaviour that must hold for the vendored UI to keep working rather than describing
     new code to write.'
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/ui/app/routes/vault/cluster/access/identity/create.js
-    id: r.identity-create-new-record
+  - id: r.identity-create-new-record
     level: MUST
     text: The identity create route builds an unsaved record of type `identity/${itemType}`
       taken from the parent route via store.createRecord, calls controller.cleanupModel
@@ -30,17 +23,17 @@ spec:
       and returns false unless the user confirms discarding the record's dirty attributes
       through window.confirm, allowing the transition when the record has no dirty
       attributes or does not exist.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/routes/vault/cluster/access/identity/edit.js
-    id: r.identity-edit-fetch-and-discard-guard
+    codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/identity/create.js
+  - id: r.identity-edit-fetch-and-discard-guard
     level: MUST
     text: The identity edit route fetches the record of type `identity/${itemType}`
       from the parent route by params.item_id with store.findRecord, calls controller.cleanupModel
       when the controller resets on exit, and applies the same dirty-attribute discard
       confirmation in willTransition that aborts the transition unless the user confirms.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/routes/vault/cluster/access/identity/index.js
-    id: r.identity-index-paginated-list
+    codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/identity/edit.js
+  - id: r.identity-index-paginated-list
     level: MUST
     text: The identity index route resolves its model from the parent route's item
       type, forming the model type name as `identity/${itemType}` from the value returned
@@ -48,54 +41,61 @@ spec:
       using responsePath 'data.keys', the page and pageFilter params and sortBy 'name';
       a query that fails with httpStatus 404 resolves to an empty array instead of
       rejecting, and any other error is rethrown.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/identity/index.js
-    id: r.identity-index-query-params-and-reset
+  - id: r.identity-index-query-params-and-reset
     level: MUST
     text: The identity index route declares the page and pageFilter query parameters
       with refreshModel true, sets the controller's identityType from the parent model
       plus a filter string (pageFilter or empty) and the current page (resolvedModel.meta.currentPage,
       defaulting to 1), and on controller reset while exiting clears both pageFilter
       and filter to null.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/identity/index.js
-    id: r.identity-index-transition-dataset-clearing
+  - id: r.identity-index-transition-dataset-clearing
     level: MUST
     text: The identity index route scrolls the window to the top on any transition,
       clears all store datasets when the transition target is a different route, and
       its reload action clears all datasets before refreshing the route.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/routes/vault/cluster/access/identity/merge.js
-    id: r.identity-merge-entity-only
+    codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/identity/index.js
+  - id: r.identity-merge-entity-only
     level: MUST
     text: 'The identity merge route allows only the entity item type: beforeModel
       transitions to ''vault.cluster.access.identity'' when the parent route''s item
       type is not ''entity'', and the model hook creates a new record of type ''identity/entity-merge''
       through store.createRecord; the controller''s cleanupModel runs on reset while
       exiting.'
-  - codeRefs:
-    - file:third_party/openbao/ui/app/routes/vault/cluster/access/identity/show.js
-    id: r.identity-show-activate-and-redirect
+    codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/identity/merge.js
+  - id: r.identity-show-activate-and-redirect
     level: MUST
     text: The identity show route reloads the current model in a next() runloop callback
       from its activate hook when a current model is already present, redirects from
       the aliases section of an internal group to 'vault.cluster.access.identity.show'
       with the model id and the 'details' section in afterModel, and sets the controller's
       model and section properties in setupController.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/identity/show.js
-    id: r.identity-show-model-resolution
+  - id: r.identity-show-model-resolution
     level: MUST
     text: The identity show route resolves its model by peeking at the store for `identity/${itemType}`
       with params.item_id, reloading that record when it exists but has no creationTime
       (indicating a partial record), falling back to store.findRecord when no record
       is present, and returning a hash of the model and the requested section.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/routes/vault/cluster/access/identity/show.js
-    id: r.identity-show-section-validation
+  - id: r.identity-show-section-validation
     level: MUST
     text: The identity show route validates the requested section against TABS[itemType]
       for the parent route's item type and, when the section is not in that list,
       throws an AdapterError whose httpStatus is set to 404 so the route is treated
       as not found.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/identity/show.js
+codeRefIndex:
+- file:third_party/openbao/ui/app/routes/vault/cluster/access/identity/create.js create.js@third_party/openbao/ui/app/routes/vault/cluster/access/identity/create.js
+- file:third_party/openbao/ui/app/routes/vault/cluster/access/identity/edit.js edit.js@third_party/openbao/ui/app/routes/vault/cluster/access/identity/edit.js
+- file:third_party/openbao/ui/app/routes/vault/cluster/access/identity/index.js index.js@third_party/openbao/ui/app/routes/vault/cluster/access/identity/index.js
+- file:third_party/openbao/ui/app/routes/vault/cluster/access/identity/merge.js merge.js@third_party/openbao/ui/app/routes/vault/cluster/access/identity/merge.js
+- file:third_party/openbao/ui/app/routes/vault/cluster/access/identity/show.js show.js@third_party/openbao/ui/app/routes/vault/cluster/access/identity/show.js

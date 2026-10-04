@@ -1,72 +1,72 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- class:344497ad2abb8c229aa7cbc42719c21f MfaMethodController@third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/method/index.js:11
-- file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/method/index.js
-  index.js@third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/method/index.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-methods-method
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'This context exists to specify the page-level behavior of the MFA method
     detail controller: which services it depends on, how it exposes the active tab
     as a URL query parameter, and what the delete-method action must do on success
     and on failure. It captures the controller as an independently describable unit
     of the OpenBao UI so its query-parameter contract, service dependencies, and delete/redirect/notification
     flow can be verified against the code as written.'
-  interfaces:
-  - file: third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/method/index.js
-    kind: class
-    name: MfaMethodController
-    signature: export default class MfaMethodController extends Controller
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - class:344497ad2abb8c229aa7cbc42719c21f
-    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/method/index.js
-    id: r.default-export-controller
+  - id: r.default-export-controller
     level: MUST
     text: The module default-exports one class, MfaMethodController, that extends
       Ember's Controller, so the route resolves it as the controller for the MFA method
       page.
-  - codeRefs:
+    codeRefs:
     - class:344497ad2abb8c229aa7cbc42719c21f
     - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/method/index.js
-    id: r.delete-method-action
+  - id: r.delete-method-action
     level: MUST
     text: deleteMethod is exposed as an Ember @action and declared async, so templates
       can invoke it as the destructive delete control for the displayed MFA method.
-  - codeRefs:
+    codeRefs:
     - class:344497ad2abb8c229aa7cbc42719c21f
     - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/method/index.js
-    id: r.delete-method-failure
+  - id: r.delete-method-failure
     level: MUST
     text: When the record destruction rejects, deleteMethod's catch block reports
       a danger flash message with the text 'There was an error deleting this MFA method.'
       and performs no route transition, leaving the page in place.
-  - codeRefs:
+    codeRefs:
     - class:344497ad2abb8c229aa7cbc42719c21f
     - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/method/index.js
-    id: r.delete-method-success
+  - id: r.delete-method-success
     level: MUST
     text: deleteMethod awaits destroyRecord on the route model's method record, then
       reports a success flash message with the text 'MFA method deleted successfully.'
       and transitions to the vault.cluster.access.mfa.methods route through transitionToSafe
       using the injected router service.
-  - codeRefs:
+    codeRefs:
     - class:344497ad2abb8c229aa7cbc42719c21f
     - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/method/index.js
-    id: r.injected-services
+  - id: r.injected-services
     level: MUST
     text: The controller declares router and flashMessages as @service-injected properties
       before use, providing the routing and user-notification dependencies that deleteMethod
       consumes.
-  - codeRefs:
+    codeRefs:
     - class:344497ad2abb8c229aa7cbc42719c21f
     - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/method/index.js
-    id: r.tab-query-param
+  - id: r.tab-query-param
     level: MUST
     text: The controller declares queryParams as the single-element list ['tab'] and
       initializes tab to 'config', so the selected tab is reflected in the URL and
       the page opens on the config tab when no tab parameter is given.
-  upstream: self
+    codeRefs:
+    - class:344497ad2abb8c229aa7cbc42719c21f
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/method/index.js
+  interfaces:
+  - name: MfaMethodController
+    kind: class
+    signature: export default class MfaMethodController extends Controller
+    file: third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/method/index.js
+codeRefIndex:
+- class:344497ad2abb8c229aa7cbc42719c21f MfaMethodController@third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/method/index.js:11
+- file:third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/method/index.js
+  index.js@third_party/openbao/ui/app/controllers/vault/cluster/access/mfa/methods/method/index.js

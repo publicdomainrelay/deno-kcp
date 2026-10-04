@@ -1,11 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/internal/vault/external_tests/quotas/quotas_test.go quotas_test.go@third_party/openbao/internal/vault/external_tests/quotas/quotas_test.go
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-vault-external-tests-quotas
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'The context exists to pin down the externally observable contract of the
     OpenBao rate-limit quota subsystem as demanded by its external_tests/quotas package:
     how quota rules are named and deduplicated, how they bind to paths, mounts and
@@ -16,73 +16,70 @@ spec:
     is test-only and exports nothing but test entrypoints, the specification is expressed
     as invariants the tests require of the vault core and quota engine rather than
     as callable production API.'
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/internal/vault/external_tests/quotas/quotas_test.go
-    id: r.audit-logging
+  - id: r.audit-logging
     level: MUST
     text: With enable_rate_limit_audit_logging true in sys/quotas/config and the file
       audit backend enabled, a first request must pass and a second request under
       a 1 RPS quota must fail with an error containing 429, and the audit log must
       contain exactly one request-type record whose error field ends with quotas.ErrRateLimitQuotaExceeded.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/quotas/quotas_test.go
-    id: r.cluster-fixture
+  - id: r.cluster-fixture
     level: MUST
     text: Each test must build its own in-memory Vault cluster from teststorage.ClusterSetup
       with coreConfig, start it, wait for active with vault.TestWaitActive, and defer
       cluster.Cleanup; coreConfig must register the pki logical backend, the userpass
       credential backend and the file audit backend.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/quotas/quotas_test.go
-    id: r.default-exempt-health
+  - id: r.default-exempt-health
     level: MUST
     text: With a rate-limit quota of 1 RPS in force, two consecutive reads of sys/health
       must both succeed and return non-nil responses with non-nil data, because sys/health
       belongs to the default exempt paths.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/quotas/quotas_test.go
-    id: r.duplicate-name
+  - id: r.duplicate-name
     level: MUST
     text: Writing a rate-limit quota at sys/quotas/rate-limit/secret-rlq twice under
       the same name with different paths must succeed and leave exactly one entry
       returned by listing sys/quotas/rate-limit.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/quotas/quotas_test.go
-    id: r.duplicate-path
+  - id: r.duplicate-path
     level: MUST
     text: Creating a second rate-limit quota whose path collides with an existing
       quota's path (for example a global quota with empty path, then another empty-path
       quota) must be rejected with an error, and reading a quota by name must return
       non-empty data.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/quotas/quotas_test.go
-    id: r.exempt-paths
+  - id: r.exempt-paths
     level: MUST
     text: Default configuration read from sys/quotas/config must report a non-empty
       rate_limit_exempt_paths list; with a 7.7 RPS quota some requests must fail and
       successes must not exceed ceil(8 + 7.7*elapsedSeconds) + 1; after writing rate_limit_exempt_paths
       containing sys/quotas/rate-limit and allowing one second for refill, every request
       must succeed and none must fail.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/quotas/quotas_test.go
-    id: r.global-quota
+  - id: r.global-quota
     level: MUST
     text: A global rate-limit quota of 7.7 RPS must cause some requests to fail with
       successes bounded by ceil(8 + 7.7*elapsedSeconds) + 1; after one second of refill
       and an update to 10000 RPS, no further request may fail.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/quotas/quotas_test.go
-    id: r.inheritable-toggle
+  - id: r.inheritable-toggle
     level: MUST
     text: A quota on path ns1 with inheritable true at 7.7 RPS must apply to the child
       namespace ns1/ns1.1 so some requests there fail; after the same quota is rewritten
       with inheritable false, requests inside ns1/ns1.1 must all succeed while requests
       in ns1 must again fail under the same success bound.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/quotas/quotas_test.go
-    id: r.mount-fixture
+  - id: r.mount-fixture
     level: MUST
     text: setupMounts must enable a userpass auth mount with user foo password bar,
       mount pki, generate an internal root certificate with common_name testvault.com,
@@ -90,44 +87,47 @@ spec:
       allowed_domains testvault.com, allow_subdomains true, max_ttl 2h and generate_lease
       true; teardownMounts must unmount pki and disable the userpass and approle auth
       mounts, failing the test on any error.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/quotas/quotas_test.go
-    id: r.mount-precedence
+  - id: r.mount-precedence
     level: MUST
     text: 'When a root rate-limit quota of 14.7 RPS and a pki/-scoped quota of 7.7
       RPS both exist, the pki/-scoped quota must take precedence: some pki requests
       must fail and successes must stay at or below the bound computed from 7.7 RPS,
       not from 14.7.'
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/quotas/quotas_test.go
-    id: r.mount-quota
+  - id: r.mount-quota
     level: MUST
     text: A rate-limit quota with path pki/ at 7.7 RPS must reject some requests while
       keeping successes at or below ceil(8 + 7.7*elapsedSeconds) + 1; after updating
       the same quota to 10000 RPS no request may fail; teardownMounts must then remove
       the mounts.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/quotas/quotas_test.go
-    id: r.namespace-quota
+  - id: r.namespace-quota
     level: MUST
     text: A global inheritable quota of 7.7 RPS must bound requests issued from the
       root and from namespace ns1, while a quota declared at path ns1/ns1.1 with 9.9
       RPS must allow more requests, bounded by ceil(10 + 9.9*elapsedSeconds) + 1,
       when listing sys/namespaces inside ns1/ns1.1.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/quotas/quotas_test.go
-    id: r.response-schema-validation
+  - id: r.response-schema-validation
     level: SHOULD
     text: Tests that opt in by setting RequestResponseCallback to schema.ResponseValidatingCallback
       must have every API response validated against the registered response schema;
       tests that disable default quotas set NoDefaultQuotas to keep the fixture free
       of built-in quota rules.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/quotas/quotas_test.go
-    id: r.rps-harness
+  - id: r.rps-harness
     level: MUST
     text: testRPS and testRPSWithNS must call the supplied request function in a tight
       loop until the given duration elapses, counting successes and failures in atomic
       counters, optionally setting and clearing a namespace per call, and must return
       the success count, the failure count and the elapsed wall-clock duration.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/quotas/quotas_test.go
+codeRefIndex:
+- file:third_party/openbao/internal/vault/external_tests/quotas/quotas_test.go quotas_test.go@third_party/openbao/internal/vault/external_tests/quotas/quotas_test.go

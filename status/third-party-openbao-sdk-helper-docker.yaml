@@ -1,425 +1,425 @@
+syncedCommit: 89cee50ec5aea977a42f904a758e506729e1158e
+syncedFingerprint: 26eb3870b3b200ea2c128f1e0c81ba6ef8a7b99e8ca5104b17d0109adb7e13a0
+realizedSpecHash: bc0148c1d613e21fadb7a08e2018e0b608296741e89e17b2b0ad26aee602a561
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
+- type: CodeSynced
+  status: "True"
   reason: InterfacesObserved
-  status: "True"
-  type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+  message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+- type: Drifted
   status: "False"
-  type: Drifted
-- message: the spec passes the validator
-  reason: ValidatorPassed
+  reason: FingerprintEqual
+  message: observed facts match the synced fingerprint
+- type: SpecValid
   status: "True"
-  type: SpecValid
+  reason: ValidatorPassed
+  message: the spec passes the validator
 observed:
   files:
   - third_party/openbao/sdk/helper/docker/testhelpers.go
-  fingerprint: 26eb3870b3b200ea2c128f1e0c81ba6ef8a7b99e8ca5104b17d0109adb7e13a0
   interfaces:
-  - codegraphId: struct:a381d9825af7a1299f6f4bb8bd9b0282
-    file: third_party/openbao/sdk/helper/docker/testhelpers.go
+  - name: Runner
     kind: struct
+    file: third_party/openbao/sdk/helper/docker/testhelpers.go
     line: 36
-    name: Runner
-  - codegraphId: struct:a7bcbc35e907c919502f88df93032e8f
-    file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    codegraphId: struct:a381d9825af7a1299f6f4bb8bd9b0282
+  - name: RunOptions
     kind: struct
+    file: third_party/openbao/sdk/helper/docker/testhelpers.go
     line: 41
-    name: RunOptions
-  - codegraphId: function:8bd6cb0ad6ef23b212cfda763eb0d5f3
-    file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    codegraphId: struct:a7bcbc35e907c919502f88df93032e8f
+  - name: NewDockerAPI
     kind: function
-    line: 72
-    name: NewDockerAPI
     signature: () (*client.Client, error)
-  - codegraphId: function:372e27fd642fdd81548db64a253746eb
     file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    line: 72
+    codegraphId: function:8bd6cb0ad6ef23b212cfda763eb0d5f3
+  - name: NewServiceRunner
     kind: function
-    line: 76
-    name: NewServiceRunner
     signature: (opts RunOptions) (*Runner, error)
-  - codegraphId: interface:76a04c44131ea7f956ad9823764f251a
     file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    line: 76
+    codegraphId: function:372e27fd642fdd81548db64a253746eb
+  - name: ServiceConfig
     kind: interface
+    file: third_party/openbao/sdk/helper/docker/testhelpers.go
     line: 115
-    name: ServiceConfig
-  - codegraphId: method:86bc430fcfeb27e3f98083bcfe0f86ec
-    file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    codegraphId: interface:76a04c44131ea7f956ad9823764f251a
+  - name: ServiceConfig.Address
     kind: method
+    signature: () string
+    file: third_party/openbao/sdk/helper/docker/testhelpers.go
     line: 116
-    name: ServiceConfig.Address
-    signature: () string
-  - codegraphId: method:8c33414fdfbce554d2b592fa9a151fa7
-    file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    codegraphId: method:86bc430fcfeb27e3f98083bcfe0f86ec
+  - name: ServiceConfig.URL
     kind: method
+    signature: () *url.URL
+    file: third_party/openbao/sdk/helper/docker/testhelpers.go
     line: 117
-    name: ServiceConfig.URL
-    signature: () *url.URL
-  - codegraphId: function:e47570b4b99eaba234dbfd1512a74b5c
-    file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    codegraphId: method:8c33414fdfbce554d2b592fa9a151fa7
+  - name: NewServiceHostPort
     kind: function
-    line: 120
-    name: NewServiceHostPort
     signature: (host string, port int) *ServiceHostPort
-  - codegraphId: function:f61be835e23d55870bda470c202ea330
     file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    line: 120
+    codegraphId: function:e47570b4b99eaba234dbfd1512a74b5c
+  - name: NewServiceHostPortParse
     kind: function
-    line: 124
-    name: NewServiceHostPortParse
     signature: (s string) (*ServiceHostPort, error)
-  - codegraphId: struct:251cb12f9a112d5484d3087245ba6c9d
     file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    line: 124
+    codegraphId: function:f61be835e23d55870bda470c202ea330
+  - name: ServiceHostPort
     kind: struct
+    file: third_party/openbao/sdk/helper/docker/testhelpers.go
     line: 138
-    name: ServiceHostPort
-  - codegraphId: method:1e494bd7e1bc8824f6f4a40c6890fda4
-    file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    codegraphId: struct:251cb12f9a112d5484d3087245ba6c9d
+  - name: ServiceHostPort.Address
     kind: method
+    signature: () string
+    file: third_party/openbao/sdk/helper/docker/testhelpers.go
     line: 142
-    name: ServiceHostPort.Address
-    signature: () string
-  - codegraphId: method:80bd2a5c7ac933e1de9ce832f7bf2190
-    file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    codegraphId: method:1e494bd7e1bc8824f6f4a40c6890fda4
+  - name: ServiceHostPort.URL
     kind: method
+    signature: () *url.URL
+    file: third_party/openbao/sdk/helper/docker/testhelpers.go
     line: 146
-    name: ServiceHostPort.URL
-    signature: () *url.URL
-  - codegraphId: function:f62059fd3220bc5d6c452507ace175b0
-    file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    codegraphId: method:80bd2a5c7ac933e1de9ce832f7bf2190
+  - name: NewServiceURLParse
     kind: function
-    line: 150
-    name: NewServiceURLParse
     signature: (s string) (*ServiceURL, error)
-  - codegraphId: function:adf178adbf827a175b03d2bbe4aa5a62
     file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    line: 150
+    codegraphId: function:f62059fd3220bc5d6c452507ace175b0
+  - name: NewServiceURL
     kind: function
-    line: 158
-    name: NewServiceURL
     signature: (u url.URL) *ServiceURL
-  - codegraphId: struct:0d79b5d90c7ce58803f0dd330bf6e94c
     file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    line: 158
+    codegraphId: function:adf178adbf827a175b03d2bbe4aa5a62
+  - name: ServiceURL
     kind: struct
+    file: third_party/openbao/sdk/helper/docker/testhelpers.go
     line: 162
-    name: ServiceURL
-  - codegraphId: method:6f9eaf5942277d526e0f84590b62f8eb
-    file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    codegraphId: struct:0d79b5d90c7ce58803f0dd330bf6e94c
+  - name: ServiceURL.Address
     kind: method
-    line: 166
-    name: ServiceURL.Address
     signature: () string
-  - codegraphId: method:986cb96cf22e906aee57fcedcb5a1187
     file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    line: 166
+    codegraphId: method:6f9eaf5942277d526e0f84590b62f8eb
+  - name: ServiceURL.URL
     kind: method
-    line: 170
-    name: ServiceURL.URL
     signature: () *url.URL
-  - codegraphId: type_alias:69ecae07474f1a7eefa0303ad3af5d14
     file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    line: 170
+    codegraphId: method:986cb96cf22e906aee57fcedcb5a1187
+  - name: ServiceAdapter
     kind: type_alias
+    file: third_party/openbao/sdk/helper/docker/testhelpers.go
     line: 176
-    name: ServiceAdapter
-  - codegraphId: method:8d7bef7509bedcd9c91d89cb299fde51
-    file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    codegraphId: type_alias:69ecae07474f1a7eefa0303ad3af5d14
+  - name: Runner.StartService
     kind: method
-    line: 183
-    name: Runner.StartService
     signature: (ctx context.Context, connect ServiceAdapter) (*Service, error)
-  - codegraphId: struct:2255596c02d0a79bb5cc88c2059d1457
     file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    line: 183
+    codegraphId: method:8d7bef7509bedcd9c91d89cb299fde51
+  - name: LogConsumerWriter
     kind: struct
+    file: third_party/openbao/sdk/helper/docker/testhelpers.go
     line: 189
-    name: LogConsumerWriter
-  - codegraphId: method:9813d04e9afad26e6f01e75a9ea46e34
-    file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    codegraphId: struct:2255596c02d0a79bb5cc88c2059d1457
+  - name: LogConsumerWriter.Write
     kind: method
-    line: 193
-    name: LogConsumerWriter.Write
     signature: (p []byte) (n int, err error)
-  - codegraphId: method:40680e298fa36128a35487b8fde8c44e
     file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    line: 193
+    codegraphId: method:9813d04e9afad26e6f01e75a9ea46e34
+  - name: Runner.StartNewService
     kind: method
-    line: 212
-    name: Runner.StartNewService
     signature: (ctx context.Context, addSuffix, forceLocalAddr bool, connect ServiceAdapter)
       (*Service, string, error)
-  - codegraphId: struct:c0a0f64d3b748c570b3398146d0beef6
     file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    line: 212
+    codegraphId: method:40680e298fa36128a35487b8fde8c44e
+  - name: Service
     kind: struct
+    file: third_party/openbao/sdk/helper/docker/testhelpers.go
     line: 356
-    name: Service
-  - codegraphId: struct:e28ff49a59207e853f03dd68a5cd6681
-    file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    codegraphId: struct:c0a0f64d3b748c570b3398146d0beef6
+  - name: StartResult
     kind: struct
-    line: 363
-    name: StartResult
-  - codegraphId: method:1698022a332a83b2b0f1d1acd98af8df
     file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    line: 363
+    codegraphId: struct:e28ff49a59207e853f03dd68a5cd6681
+  - name: Runner.Start
     kind: method
-    line: 444
-    name: Runner.Start
     signature: (ctx context.Context, addSuffix, forceLocalAddr bool) (*StartResult,
       error)
-  - codegraphId: method:be0c96f099aed4c929cf068a863eb04e
     file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    line: 444
+    codegraphId: method:1698022a332a83b2b0f1d1acd98af8df
+  - name: Runner.RefreshFiles
     kind: method
+    signature: (ctx context.Context, containerID string) error
+    file: third_party/openbao/sdk/helper/docker/testhelpers.go
     line: 607
-    name: Runner.RefreshFiles
-    signature: (ctx context.Context, containerID string) error
-  - codegraphId: method:00191fa588d0556e1c5a368a61b0c22d
-    file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    codegraphId: method:be0c96f099aed4c929cf068a863eb04e
+  - name: Runner.Stop
     kind: method
+    signature: (ctx context.Context, containerID string) error
+    file: third_party/openbao/sdk/helper/docker/testhelpers.go
     line: 621
-    name: Runner.Stop
-    signature: (ctx context.Context, containerID string) error
-  - codegraphId: method:627302db609e5beda39059796a182547
-    file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    codegraphId: method:00191fa588d0556e1c5a368a61b0c22d
+  - name: Runner.Restart
     kind: method
+    signature: (ctx context.Context, containerID string) error
+    file: third_party/openbao/sdk/helper/docker/testhelpers.go
     line: 643
-    name: Runner.Restart
-    signature: (ctx context.Context, containerID string) error
-  - codegraphId: interface:acae64485063e7695f03fd283daf5bf4
-    file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    codegraphId: method:627302db609e5beda39059796a182547
+  - name: RunCmdOpt
     kind: interface
+    file: third_party/openbao/sdk/helper/docker/testhelpers.go
     line: 689
-    name: RunCmdOpt
-  - codegraphId: method:eec43ee288a8f5f5879496cc58d89ea5
-    file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    codegraphId: interface:acae64485063e7695f03fd283daf5bf4
+  - name: RunCmdOpt.Apply
     kind: method
+    signature: (cfg *client.ExecCreateOptions) error
+    file: third_party/openbao/sdk/helper/docker/testhelpers.go
     line: 690
-    name: RunCmdOpt.Apply
-    signature: (cfg *client.ExecCreateOptions) error
-  - codegraphId: type_alias:ccb13f26d6b290434c6aab1692a4fa8a
-    file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    codegraphId: method:eec43ee288a8f5f5879496cc58d89ea5
+  - name: RunCmdUser
     kind: type_alias
+    file: third_party/openbao/sdk/helper/docker/testhelpers.go
     line: 693
-    name: RunCmdUser
-  - codegraphId: method:acf33f96904e552d5d61a413f94b9d7c
-    file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    codegraphId: type_alias:ccb13f26d6b290434c6aab1692a4fa8a
+  - name: RunCmdUser.Apply
     kind: method
-    line: 697
-    name: RunCmdUser.Apply
     signature: (cfg *client.ExecCreateOptions) error
-  - codegraphId: method:19038821dfcd10e814c23e8cdbe172d9
     file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    line: 697
+    codegraphId: method:acf33f96904e552d5d61a413f94b9d7c
+  - name: Runner.RunCmdWithOutput
     kind: method
-    line: 702
-    name: Runner.RunCmdWithOutput
     signature: (ctx context.Context, container string, cmd []string, opts ...RunCmdOpt)
       ([]byte, []byte, int, error)
-  - codegraphId: function:dfefbe8ad9f3777864b0abfc546ef5fb
     file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    line: 702
+    codegraphId: method:19038821dfcd10e814c23e8cdbe172d9
+  - name: RunCmdWithOutput
     kind: function
-    line: 706
-    name: RunCmdWithOutput
     signature: (api *client.Client, ctx context.Context, c string, cmd []string, opts
       ...RunCmdOpt) ([]byte, []byte, int, error)
-  - codegraphId: method:9138348dffd470d5c20805adb0b1ace9
     file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    line: 706
+    codegraphId: function:dfefbe8ad9f3777864b0abfc546ef5fb
+  - name: Runner.RunCmdInBackground
     kind: method
-    line: 748
-    name: Runner.RunCmdInBackground
     signature: (ctx context.Context, container string, cmd []string, opts ...RunCmdOpt)
       (string, error)
-  - codegraphId: function:027659abee07bbb1f22f66b64670f7ca
     file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    line: 748
+    codegraphId: method:9138348dffd470d5c20805adb0b1ace9
+  - name: RunCmdInBackground
     kind: function
-    line: 752
-    name: RunCmdInBackground
     signature: (api *client.Client, ctx context.Context, c string, cmd []string, opts
       ...RunCmdOpt) (string, error)
-  - codegraphId: interface:d7a471eff09b7445abab742056d2a251
     file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    line: 752
+    codegraphId: function:027659abee07bbb1f22f66b64670f7ca
+  - name: PathContents
     kind: interface
+    file: third_party/openbao/sdk/helper/docker/testhelpers.go
     line: 779
-    name: PathContents
-  - codegraphId: method:8d36c884b1f7f8ff92e006abd1888fe7
-    file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    codegraphId: interface:d7a471eff09b7445abab742056d2a251
+  - name: PathContents.UpdateHeader
     kind: method
+    signature: (header *tar.Header) error
+    file: third_party/openbao/sdk/helper/docker/testhelpers.go
     line: 780
-    name: PathContents.UpdateHeader
-    signature: (header *tar.Header) error
-  - codegraphId: method:13fa58ffca7238e617ac806d443eca48
-    file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    codegraphId: method:8d36c884b1f7f8ff92e006abd1888fe7
+  - name: PathContents.Get
     kind: method
+    signature: () ([]byte, error)
+    file: third_party/openbao/sdk/helper/docker/testhelpers.go
     line: 781
-    name: PathContents.Get
-    signature: () ([]byte, error)
-  - codegraphId: method:bea4714a61cc44b7fa65e25b67d8e31e
-    file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    codegraphId: method:13fa58ffca7238e617ac806d443eca48
+  - name: PathContents.SetMode
     kind: method
+    signature: (mode int64)
+    file: third_party/openbao/sdk/helper/docker/testhelpers.go
     line: 782
-    name: PathContents.SetMode
-    signature: (mode int64)
-  - codegraphId: method:96bf8f9881a1f3c193d995b2965f20ed
-    file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    codegraphId: method:bea4714a61cc44b7fa65e25b67d8e31e
+  - name: PathContents.SetOwners
     kind: method
+    signature: (uid int, gid int)
+    file: third_party/openbao/sdk/helper/docker/testhelpers.go
     line: 783
-    name: PathContents.SetOwners
-    signature: (uid int, gid int)
-  - codegraphId: struct:b3783a089c1916606bb1814b7418ef1e
-    file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    codegraphId: method:96bf8f9881a1f3c193d995b2965f20ed
+  - name: FileContents
     kind: struct
+    file: third_party/openbao/sdk/helper/docker/testhelpers.go
     line: 786
-    name: FileContents
-  - codegraphId: method:aa549a6fc1fda6205d479718ac95fe86
-    file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    codegraphId: struct:b3783a089c1916606bb1814b7418ef1e
+  - name: FileContents.UpdateHeader
     kind: method
-    line: 793
-    name: FileContents.UpdateHeader
     signature: (header *tar.Header) error
-  - codegraphId: method:4f7d86ba9bd998e55e0d7ccc32e5e1a2
     file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    line: 793
+    codegraphId: method:aa549a6fc1fda6205d479718ac95fe86
+  - name: FileContents.Get
     kind: method
-    line: 800
-    name: FileContents.Get
     signature: () ([]byte, error)
-  - codegraphId: method:8cd7bbfd0300a876b54f083af7efaa3d
     file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    line: 800
+    codegraphId: method:4f7d86ba9bd998e55e0d7ccc32e5e1a2
+  - name: FileContents.SetMode
     kind: method
-    line: 804
-    name: FileContents.SetMode
     signature: (mode int64)
-  - codegraphId: method:62e205e6f7a211ffffd6c01df87e3845
     file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    line: 804
+    codegraphId: method:8cd7bbfd0300a876b54f083af7efaa3d
+  - name: FileContents.SetOwners
     kind: method
-    line: 808
-    name: FileContents.SetOwners
     signature: (uid int, gid int)
-  - codegraphId: function:a5a4c18c5bdd490405845f402a8c566f
     file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    line: 808
+    codegraphId: method:62e205e6f7a211ffffd6c01df87e3845
+  - name: PathContentsFromBytes
     kind: function
-    line: 813
-    name: PathContentsFromBytes
     signature: (data []byte) PathContents
-  - codegraphId: function:04f29607fa5c365f79559e4847b59eda
     file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    line: 813
+    codegraphId: function:a5a4c18c5bdd490405845f402a8c566f
+  - name: PathContentsFromString
     kind: function
-    line: 820
-    name: PathContentsFromString
     signature: (data string) PathContents
-  - codegraphId: type_alias:ef72c1da62d802c675b7c44616cf96ae
     file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    line: 820
+    codegraphId: function:04f29607fa5c365f79559e4847b59eda
+  - name: BuildContext
     kind: type_alias
+    file: third_party/openbao/sdk/helper/docker/testhelpers.go
     line: 824
-    name: BuildContext
-  - codegraphId: function:0fa8f3fc3096e8d0dadf33fc0c3a51d5
-    file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    codegraphId: type_alias:ef72c1da62d802c675b7c44616cf96ae
+  - name: NewBuildContext
     kind: function
-    line: 826
-    name: NewBuildContext
     signature: () BuildContext
-  - codegraphId: function:ed2f06fcd9f5afcc1c659f2ea69d24d8
     file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    line: 826
+    codegraphId: function:0fa8f3fc3096e8d0dadf33fc0c3a51d5
+  - name: BuildContextFromTarball
     kind: function
-    line: 830
-    name: BuildContextFromTarball
     signature: (reader io.Reader) (BuildContext, error)
-  - codegraphId: method:1ed689e9377f8e7e440940b8ca101b97
     file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    line: 830
+    codegraphId: function:ed2f06fcd9f5afcc1c659f2ea69d24d8
+  - name: BuildContext.ToTarball
     kind: method
-    line: 865
-    name: BuildContext.ToTarball
     signature: () (io.Reader, error)
-  - codegraphId: interface:ccd9724f792dae681d04f0ba3b7268dc
     file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    line: 865
+    codegraphId: method:1ed689e9377f8e7e440940b8ca101b97
+  - name: BuildOpt
     kind: interface
+    file: third_party/openbao/sdk/helper/docker/testhelpers.go
     line: 911
-    name: BuildOpt
-  - codegraphId: method:32ee669ee075304ded15ed87b3af82f9
-    file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    codegraphId: interface:ccd9724f792dae681d04f0ba3b7268dc
+  - name: BuildOpt.Apply
     kind: method
+    signature: (cfg *client.ImageBuildOptions) error
+    file: third_party/openbao/sdk/helper/docker/testhelpers.go
     line: 912
-    name: BuildOpt.Apply
-    signature: (cfg *client.ImageBuildOptions) error
-  - codegraphId: type_alias:594732b7782af4e0c31cd0c754db91df
-    file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    codegraphId: method:32ee669ee075304ded15ed87b3af82f9
+  - name: BuildRemove
     kind: type_alias
+    file: third_party/openbao/sdk/helper/docker/testhelpers.go
     line: 915
-    name: BuildRemove
-  - codegraphId: method:5c394080140517df88feef5ad7be8bbb
-    file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    codegraphId: type_alias:594732b7782af4e0c31cd0c754db91df
+  - name: BuildRemove.Apply
     kind: method
+    signature: (cfg *client.ImageBuildOptions) error
+    file: third_party/openbao/sdk/helper/docker/testhelpers.go
     line: 919
-    name: BuildRemove.Apply
-    signature: (cfg *client.ImageBuildOptions) error
-  - codegraphId: type_alias:07343ef010bf511d0ac6c292ef8fe20e
-    file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    codegraphId: method:5c394080140517df88feef5ad7be8bbb
+  - name: BuildForceRemove
     kind: type_alias
+    file: third_party/openbao/sdk/helper/docker/testhelpers.go
     line: 924
-    name: BuildForceRemove
-  - codegraphId: method:ff41f0796a62b67640f3523c0b820a2c
-    file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    codegraphId: type_alias:07343ef010bf511d0ac6c292ef8fe20e
+  - name: BuildForceRemove.Apply
     kind: method
+    signature: (cfg *client.ImageBuildOptions) error
+    file: third_party/openbao/sdk/helper/docker/testhelpers.go
     line: 928
-    name: BuildForceRemove.Apply
-    signature: (cfg *client.ImageBuildOptions) error
-  - codegraphId: type_alias:0fc6b6c6507222a5094e9473b597a06b
-    file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    codegraphId: method:ff41f0796a62b67640f3523c0b820a2c
+  - name: BuildPullParent
     kind: type_alias
+    file: third_party/openbao/sdk/helper/docker/testhelpers.go
     line: 933
-    name: BuildPullParent
-  - codegraphId: method:b88e4616b91ab1113fc8781995f36e81
-    file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    codegraphId: type_alias:0fc6b6c6507222a5094e9473b597a06b
+  - name: BuildPullParent.Apply
     kind: method
+    signature: (cfg *client.ImageBuildOptions) error
+    file: third_party/openbao/sdk/helper/docker/testhelpers.go
     line: 937
-    name: BuildPullParent.Apply
-    signature: (cfg *client.ImageBuildOptions) error
-  - codegraphId: type_alias:2c45a10aa1dbab231b2af26f6624d9f7
-    file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    codegraphId: method:b88e4616b91ab1113fc8781995f36e81
+  - name: BuildArgs
     kind: type_alias
+    file: third_party/openbao/sdk/helper/docker/testhelpers.go
     line: 942
-    name: BuildArgs
-  - codegraphId: method:687b9b183edff47563863feb2b280901
-    file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    codegraphId: type_alias:2c45a10aa1dbab231b2af26f6624d9f7
+  - name: BuildArgs.Apply
     kind: method
+    signature: (cfg *client.ImageBuildOptions) error
+    file: third_party/openbao/sdk/helper/docker/testhelpers.go
     line: 946
-    name: BuildArgs.Apply
-    signature: (cfg *client.ImageBuildOptions) error
-  - codegraphId: type_alias:238cc116aafb6d432d511cd6b48e8a71
-    file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    codegraphId: method:687b9b183edff47563863feb2b280901
+  - name: BuildTags
     kind: type_alias
+    file: third_party/openbao/sdk/helper/docker/testhelpers.go
     line: 951
-    name: BuildTags
-  - codegraphId: method:9f6b0b4f40a4d2bad6f9af6229c466a6
-    file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    codegraphId: type_alias:238cc116aafb6d432d511cd6b48e8a71
+  - name: BuildTags.Apply
     kind: method
-    line: 955
-    name: BuildTags.Apply
     signature: (cfg *client.ImageBuildOptions) error
-  - codegraphId: method:dd456d0b9822d3c7464c69c79bc76e68
     file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    line: 955
+    codegraphId: method:9f6b0b4f40a4d2bad6f9af6229c466a6
+  - name: Runner.BuildImage
     kind: method
-    line: 962
-    name: Runner.BuildImage
     signature: (ctx context.Context, containerfile string, containerContext BuildContext,
       opts ...BuildOpt) ([]byte, error)
-  - codegraphId: function:ed64d8f3ff7b12c0710a6552de82c78d
     file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    line: 962
+    codegraphId: method:dd456d0b9822d3c7464c69c79bc76e68
+  - name: BuildImage
     kind: function
-    line: 966
-    name: BuildImage
     signature: (ctx context.Context, api *client.Client, containerfile string, containerContext
       BuildContext, opts ...BuildOpt) ([]byte, error)
-  - codegraphId: method:9d073ce521d509a0990c6363223ba5ac
     file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    line: 966
+    codegraphId: function:ed64d8f3ff7b12c0710a6552de82c78d
+  - name: Runner.CopyTo
     kind: method
-    line: 1029
-    name: Runner.CopyTo
     signature: (c string, destination string, contents BuildContext) error
-  - codegraphId: method:c91a9a9ef5aecdd92b3b8c78ec82479b
     file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    line: 1029
+    codegraphId: method:9d073ce521d509a0990c6363223ba5ac
+  - name: Runner.CopyFrom
     kind: method
-    line: 1044
-    name: Runner.CopyFrom
     signature: (container string, source string) (BuildContext, *container.PathStat,
       error)
-  - codegraphId: method:db190a05f468cec2d3266a767c9d59cf
     file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    line: 1044
+    codegraphId: method:c91a9a9ef5aecdd92b3b8c78ec82479b
+  - name: Runner.GetNetworkAndAddresses
     kind: method
-    line: 1060
-    name: Runner.GetNetworkAndAddresses
     signature: (container string) (map[string]string, error)
-realizedSpecHash: bc0148c1d613e21fadb7a08e2018e0b608296741e89e17b2b0ad26aee602a561
-syncedCommit: 89cee50ec5aea977a42f904a758e506729e1158e
-syncedFingerprint: 26eb3870b3b200ea2c128f1e0c81ba6ef8a7b99e8ca5104b17d0109adb7e13a0
+    file: third_party/openbao/sdk/helper/docker/testhelpers.go
+    line: 1060
+    codegraphId: method:db190a05f468cec2d3266a767c9d59cf
+  fingerprint: 26eb3870b3b200ea2c128f1e0c81ba6ef8a7b99e8ca5104b17d0109adb7e13a0

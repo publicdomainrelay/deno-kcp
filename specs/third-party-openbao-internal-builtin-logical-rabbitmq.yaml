@@ -1,4 +1,128 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-internal-builtin-logical-rabbitmq
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'It exists so an OpenBao mount can broker short lived RabbitMQ credentials
+    instead of long lived static users: an operator stores a broker URI and credentials
+    and a role''s vhost/permissions, and each read of the creds path mints a new RabbitMQ
+    user, hands the username and password to the caller, and removes that user when
+    the lease ends. The context documents that contract: the factory wiring, the client
+    cache, the lease and role lookups, and the metadata that makes revocation possible.'
+  requirements:
+  - id: r.client-cache
+    level: MUST
+    text: backend.Client returns the cached *rabbithole.Client when one exists; otherwise
+      it reads the stored connection config, creates a client with the configured
+      URI, username and password, sets cleanhttp.DefaultPooledTransport so file descriptors
+      are not leaked, and caches the result under the write lock with a second nil
+      check so concurrent callers share one client.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/rabbitmq/path_config_connection.go
+    - method:19c459f7c4669101020cc5f7761933c1
+  - id: r.credential-revocation
+    level: MUST
+    text: The credential secret implements lease revocation by reading the stored
+      UsernameMetadata and deleting the corresponding RabbitMQ user through the cached
+      client, so an expired or revoked lease removes the broker account it created.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/rabbitmq/path_role_create.go
+    - file:third_party/openbao/internal/builtin/logical/rabbitmq/secret_creds.go
+  - id: r.factory-setup
+    level: MUST
+    text: Factory builds a RabbitMQ logical backend and runs Setup with the supplied
+      *logical.BackendConfig before returning it, so the returned logical.Backend
+      has its paths and storage view wired and the mount fails to initialize rather
+      than returning a half configured backend.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/rabbitmq/backend.go
+    - function:7249d246c1bcaad7ca4c445ca6199410
+  - id: r.lease-lookup
+    level: MUST
+    text: backend.Lease reads config/lease from storage, returns a nil configLease
+      and no error when nothing is stored so the mount's system default TTLs apply,
+      and otherwise decodes the stored JSON into the lease and max lease TTL fields.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/rabbitmq/path_config_lease.go
+    - method:03d02022be39269f293bd7155ec1aa16
+  - id: r.password-generation
+    level: MUST
+    text: Credential creation draws the RabbitMQ user's password from the package
+      password generator in passwords.go rather than from a caller supplied value,
+      so every issued credential has an independently random secret.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/rabbitmq/passwords.go
+    - file:third_party/openbao/internal/builtin/logical/rabbitmq/path_role_create.go
+  - id: r.path-tests
+    level: SHOULD
+    text: The connection config, lease config and role creation paths each have tests
+      in the package that cover their request and response handling, so changes to
+      those paths fail the package test run when behavior regresses.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/rabbitmq/backend_test.go
+    - file:third_party/openbao/internal/builtin/logical/rabbitmq/path_config_connection_test.go
+    - file:third_party/openbao/internal/builtin/logical/rabbitmq/path_config_lease_test.go
+    - file:third_party/openbao/internal/builtin/logical/rabbitmq/path_role_create_test.go
+  - id: r.paths-registered
+    level: MUST
+    text: Backend returns a *backend whose embedded framework.Backend registers the
+      connection config path, the lease config path, the role paths and the credential
+      issuing path, so the mount answers config/connection, config/lease, roles and
+      creds requests.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/rabbitmq/path_config_connection.go
+    - file:third_party/openbao/internal/builtin/logical/rabbitmq/path_config_lease.go
+    - file:third_party/openbao/internal/builtin/logical/rabbitmq/path_roles.go
+    - file:third_party/openbao/internal/builtin/logical/rabbitmq/secret_creds.go
+    - function:af02f0c800c326f9a0242c86e058e628
+  - id: r.role-lookup
+    level: MUST
+    text: backend.Role fetches the named role from storage and returns a nil entry
+      with no error when the role does not exist, so callers can distinguish a missing
+      role from a storage failure and report it as an unknown role.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/rabbitmq/path_roles.go
+    - method:27372aea34df6f50e52b393c04bbff6e
+  - id: r.username-metadata
+    level: MUST
+    text: UsernameMetadata records the RabbitMQ username created for a credential
+      and is written into the credential's internal data, so lease revocation can
+      look the exact username up in RabbitMQ and delete it.
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/rabbitmq/path_role_create.go
+    - struct:f988e041fca99538d35ef5814b06d3f2
+  interfaces:
+  - name: Backend
+    kind: function
+    signature: func Backend() *backend
+    file: third_party/openbao/internal/builtin/logical/rabbitmq/backend.go
+  - name: Factory
+    kind: function
+    signature: func Factory(ctx context.Context, conf *logical.BackendConfig) (logical.Backend,
+      error)
+    file: third_party/openbao/internal/builtin/logical/rabbitmq/backend.go
+  - name: UsernameMetadata
+    kind: struct
+    signature: type UsernameMetadata struct
+    file: third_party/openbao/internal/builtin/logical/rabbitmq/path_role_create.go
+  - name: backend.Client
+    kind: method
+    signature: func (b *backend) Client(ctx context.Context, s logical.Storage) (*rabbithole.Client,
+      error)
+    file: third_party/openbao/internal/builtin/logical/rabbitmq/backend.go
+  - name: backend.Lease
+    kind: method
+    signature: func (b *backend) Lease(ctx context.Context, s logical.Storage) (*configLease,
+      error)
+    file: third_party/openbao/internal/builtin/logical/rabbitmq/backend.go
+  - name: backend.Role
+    kind: method
+    signature: func (b *backend) Role(ctx context.Context, s logical.Storage, n string)
+      (*roleEntry, error)
+    file: third_party/openbao/internal/builtin/logical/rabbitmq/path_roles.go
 codeRefIndex:
 - file:third_party/openbao/internal/builtin/logical/rabbitmq/backend.go backend.go@third_party/openbao/internal/builtin/logical/rabbitmq/backend.go
 - file:third_party/openbao/internal/builtin/logical/rabbitmq/backend_test.go backend_test.go@third_party/openbao/internal/builtin/logical/rabbitmq/backend_test.go
@@ -22,127 +146,3 @@ codeRefIndex:
 - method:19c459f7c4669101020cc5f7761933c1 backend.Client@third_party/openbao/internal/builtin/logical/rabbitmq/backend.go:68
 - method:27372aea34df6f50e52b393c04bbff6e backend.Role@third_party/openbao/internal/builtin/logical/rabbitmq/path_roles.go:87
 - struct:f988e041fca99538d35ef5814b06d3f2 UsernameMetadata@third_party/openbao/internal/builtin/logical/rabbitmq/path_role_create.go:242
-kind: SystemContext
-metadata:
-  name: third-party-openbao-internal-builtin-logical-rabbitmq
-  namespace: default
-spec:
-  intent: 'It exists so an OpenBao mount can broker short lived RabbitMQ credentials
-    instead of long lived static users: an operator stores a broker URI and credentials
-    and a role''s vhost/permissions, and each read of the creds path mints a new RabbitMQ
-    user, hands the username and password to the caller, and removes that user when
-    the lease ends. The context documents that contract: the factory wiring, the client
-    cache, the lease and role lookups, and the metadata that makes revocation possible.'
-  interfaces:
-  - file: third_party/openbao/internal/builtin/logical/rabbitmq/backend.go
-    kind: function
-    name: Backend
-    signature: func Backend() *backend
-  - file: third_party/openbao/internal/builtin/logical/rabbitmq/backend.go
-    kind: function
-    name: Factory
-    signature: func Factory(ctx context.Context, conf *logical.BackendConfig) (logical.Backend,
-      error)
-  - file: third_party/openbao/internal/builtin/logical/rabbitmq/path_role_create.go
-    kind: struct
-    name: UsernameMetadata
-    signature: type UsernameMetadata struct
-  - file: third_party/openbao/internal/builtin/logical/rabbitmq/backend.go
-    kind: method
-    name: backend.Client
-    signature: func (b *backend) Client(ctx context.Context, s logical.Storage) (*rabbithole.Client,
-      error)
-  - file: third_party/openbao/internal/builtin/logical/rabbitmq/backend.go
-    kind: method
-    name: backend.Lease
-    signature: func (b *backend) Lease(ctx context.Context, s logical.Storage) (*configLease,
-      error)
-  - file: third_party/openbao/internal/builtin/logical/rabbitmq/path_roles.go
-    kind: method
-    name: backend.Role
-    signature: func (b *backend) Role(ctx context.Context, s logical.Storage, n string)
-      (*roleEntry, error)
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/rabbitmq/path_config_connection.go
-    - method:19c459f7c4669101020cc5f7761933c1
-    id: r.client-cache
-    level: MUST
-    text: backend.Client returns the cached *rabbithole.Client when one exists; otherwise
-      it reads the stored connection config, creates a client with the configured
-      URI, username and password, sets cleanhttp.DefaultPooledTransport so file descriptors
-      are not leaked, and caches the result under the write lock with a second nil
-      check so concurrent callers share one client.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/rabbitmq/path_role_create.go
-    - file:third_party/openbao/internal/builtin/logical/rabbitmq/secret_creds.go
-    id: r.credential-revocation
-    level: MUST
-    text: The credential secret implements lease revocation by reading the stored
-      UsernameMetadata and deleting the corresponding RabbitMQ user through the cached
-      client, so an expired or revoked lease removes the broker account it created.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/rabbitmq/backend.go
-    - function:7249d246c1bcaad7ca4c445ca6199410
-    id: r.factory-setup
-    level: MUST
-    text: Factory builds a RabbitMQ logical backend and runs Setup with the supplied
-      *logical.BackendConfig before returning it, so the returned logical.Backend
-      has its paths and storage view wired and the mount fails to initialize rather
-      than returning a half configured backend.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/rabbitmq/path_config_lease.go
-    - method:03d02022be39269f293bd7155ec1aa16
-    id: r.lease-lookup
-    level: MUST
-    text: backend.Lease reads config/lease from storage, returns a nil configLease
-      and no error when nothing is stored so the mount's system default TTLs apply,
-      and otherwise decodes the stored JSON into the lease and max lease TTL fields.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/rabbitmq/passwords.go
-    - file:third_party/openbao/internal/builtin/logical/rabbitmq/path_role_create.go
-    id: r.password-generation
-    level: MUST
-    text: Credential creation draws the RabbitMQ user's password from the package
-      password generator in passwords.go rather than from a caller supplied value,
-      so every issued credential has an independently random secret.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/rabbitmq/backend_test.go
-    - file:third_party/openbao/internal/builtin/logical/rabbitmq/path_config_connection_test.go
-    - file:third_party/openbao/internal/builtin/logical/rabbitmq/path_config_lease_test.go
-    - file:third_party/openbao/internal/builtin/logical/rabbitmq/path_role_create_test.go
-    id: r.path-tests
-    level: SHOULD
-    text: The connection config, lease config and role creation paths each have tests
-      in the package that cover their request and response handling, so changes to
-      those paths fail the package test run when behavior regresses.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/rabbitmq/path_config_connection.go
-    - file:third_party/openbao/internal/builtin/logical/rabbitmq/path_config_lease.go
-    - file:third_party/openbao/internal/builtin/logical/rabbitmq/path_roles.go
-    - file:third_party/openbao/internal/builtin/logical/rabbitmq/secret_creds.go
-    - function:af02f0c800c326f9a0242c86e058e628
-    id: r.paths-registered
-    level: MUST
-    text: Backend returns a *backend whose embedded framework.Backend registers the
-      connection config path, the lease config path, the role paths and the credential
-      issuing path, so the mount answers config/connection, config/lease, roles and
-      creds requests.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/rabbitmq/path_roles.go
-    - method:27372aea34df6f50e52b393c04bbff6e
-    id: r.role-lookup
-    level: MUST
-    text: backend.Role fetches the named role from storage and returns a nil entry
-      with no error when the role does not exist, so callers can distinguish a missing
-      role from a storage failure and report it as an unknown role.
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/rabbitmq/path_role_create.go
-    - struct:f988e041fca99538d35ef5814b06d3f2
-    id: r.username-metadata
-    level: MUST
-    text: UsernameMetadata records the RabbitMQ username created for a credential
-      and is written into the credential's internal data, so lease revocation can
-      look the exact username up in RabbitMQ and delete it.
-  upstream: self

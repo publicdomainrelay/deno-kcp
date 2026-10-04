@@ -1,16 +1,19 @@
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: a506cd905ba7db53ed6b814198123ebc170ba055a48950ea33d599155cf96061
+realizedSpecHash: b2bd37eec0e32cbca5b20de851f7117a2edcfe7977b473f528acee6e26e48fee
 conditions:
-- message: 'undeclared: Cassandra'
+- type: CodeSynced
+  status: "False"
   reason: InterfacesMissing
+  message: 'undeclared: Cassandra'
+- type: Drifted
   status: "False"
-  type: CodeSynced
-- message: observed facts match the synced fingerprint
   reason: FingerprintEqual
-  status: "False"
-  type: Drifted
-- message: the spec passes the validator
-  reason: ValidatorPassed
+  message: observed facts match the synced fingerprint
+- type: SpecValid
   status: "True"
-  type: SpecValid
+  reason: ValidatorPassed
+  message: the spec passes the validator
 observed:
   files:
   - third_party/openbao/internal/builtin/database/cassandra/cassandra.go
@@ -18,71 +21,68 @@ observed:
   - third_party/openbao/internal/builtin/database/cassandra/connection_producer.go
   - third_party/openbao/internal/builtin/database/cassandra/connection_producer_test.go
   - third_party/openbao/internal/builtin/database/cassandra/tls.go
-  fingerprint: a506cd905ba7db53ed6b814198123ebc170ba055a48950ea33d599155cf96061
   interfaces:
-  - codegraphId: struct:cf5ab4cfb46e08ff7c0a3f11416c81d0
-    file: third_party/openbao/internal/builtin/database/cassandra/cassandra.go
+  - name: Cassandra
     kind: struct
+    file: third_party/openbao/internal/builtin/database/cassandra/cassandra.go
     line: 33
-    name: Cassandra
-  - codegraphId: function:896447b936c176ef082306cc1a83e1b3
-    file: third_party/openbao/internal/builtin/database/cassandra/cassandra.go
+    codegraphId: struct:cf5ab4cfb46e08ff7c0a3f11416c81d0
+  - name: New
     kind: function
-    line: 40
-    name: New
     signature: () (any, error)
-  - codegraphId: method:e84994d2e2914fd4b017db889f7b23a5
     file: third_party/openbao/internal/builtin/database/cassandra/cassandra.go
+    line: 40
+    codegraphId: function:896447b936c176ef082306cc1a83e1b3
+  - name: Cassandra.Type
     kind: method
-    line: 57
-    name: Cassandra.Type
     signature: () (string, error)
-  - codegraphId: method:c0cf582b2daa9be4bc18adfe212e0b9b
     file: third_party/openbao/internal/builtin/database/cassandra/cassandra.go
+    line: 57
+    codegraphId: method:e84994d2e2914fd4b017db889f7b23a5
+  - name: Cassandra.Initialize
     kind: method
-    line: 70
-    name: Cassandra.Initialize
     signature: (ctx context.Context, req dbplugin.InitializeRequest) (dbplugin.InitializeResponse,
       error)
-  - codegraphId: method:e7749700dfbe1b3401f7c87b94a47a51
     file: third_party/openbao/internal/builtin/database/cassandra/cassandra.go
+    line: 70
+    codegraphId: method:c0cf582b2daa9be4bc18adfe212e0b9b
+  - name: Cassandra.NewUser
     kind: method
-    line: 103
-    name: Cassandra.NewUser
     signature: (ctx context.Context, req dbplugin.NewUserRequest) (dbplugin.NewUserResponse,
       error)
-  - codegraphId: method:22f672314f03258d5dcdfbdbeef88afb
     file: third_party/openbao/internal/builtin/database/cassandra/cassandra.go
+    line: 103
+    codegraphId: method:e7749700dfbe1b3401f7c87b94a47a51
+  - name: Cassandra.UpdateUser
     kind: method
-    line: 181
-    name: Cassandra.UpdateUser
     signature: (ctx context.Context, req dbplugin.UpdateUserRequest) (dbplugin.UpdateUserResponse,
       error)
-  - codegraphId: method:4fde785073b5fce6dddcfdec87633060
     file: third_party/openbao/internal/builtin/database/cassandra/cassandra.go
+    line: 181
+    codegraphId: method:22f672314f03258d5dcdfbdbeef88afb
+  - name: Cassandra.DeleteUser
     kind: method
-    line: 229
-    name: Cassandra.DeleteUser
     signature: (ctx context.Context, req dbplugin.DeleteUserRequest) (dbplugin.DeleteUserResponse,
       error)
-  - codegraphId: method:ff25d04d410a9dbfa4ae6623e6f267b7
-    file: third_party/openbao/internal/builtin/database/cassandra/connection_producer.go
+    file: third_party/openbao/internal/builtin/database/cassandra/cassandra.go
+    line: 229
+    codegraphId: method:4fde785073b5fce6dddcfdec87633060
+  - name: cassandraConnectionProducer.Initialize
     kind: method
-    line: 55
-    name: cassandraConnectionProducer.Initialize
     signature: (ctx context.Context, req dbplugin.InitializeRequest) error
-  - codegraphId: method:43b0ffaae7ea1b876b5faefb7ddf1d76
     file: third_party/openbao/internal/builtin/database/cassandra/connection_producer.go
+    line: 55
+    codegraphId: method:ff25d04d410a9dbfa4ae6623e6f267b7
+  - name: cassandraConnectionProducer.Connection
     kind: method
-    line: 144
-    name: cassandraConnectionProducer.Connection
     signature: (ctx context.Context) (any, error)
-  - codegraphId: method:5fdcc8148196b14dda92e86d37277920
     file: third_party/openbao/internal/builtin/database/cassandra/connection_producer.go
+    line: 144
+    codegraphId: method:43b0ffaae7ea1b876b5faefb7ddf1d76
+  - name: cassandraConnectionProducer.Close
     kind: method
-    line: 165
-    name: cassandraConnectionProducer.Close
     signature: () error
-realizedSpecHash: b2bd37eec0e32cbca5b20de851f7117a2edcfe7977b473f528acee6e26e48fee
-syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-syncedFingerprint: a506cd905ba7db53ed6b814198123ebc170ba055a48950ea33d599155cf96061
+    file: third_party/openbao/internal/builtin/database/cassandra/connection_producer.go
+    line: 165
+    codegraphId: method:5fdcc8148196b14dda92e86d37277920
+  fingerprint: a506cd905ba7db53ed6b814198123ebc170ba055a48950ea33d599155cf96061

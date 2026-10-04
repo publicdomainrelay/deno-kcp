@@ -1,17 +1,20 @@
+syncedCommit: 89cee50ec5aea977a42f904a758e506729e1158e
+syncedFingerprint: 0ea6a6ed9e692abaffdc444b8850f81d6bb6268f1abe64ced5c29b7ca0a90e33
+realizedSpecHash: e2b7d54ebd6ef5b85caa9de8c46410c83e3eafe9832824125ca276da9afb8023
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
+- type: CodeSynced
+  status: "True"
   reason: InterfacesObserved
-  status: "True"
-  type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+  message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+- type: Drifted
   status: "False"
-  type: Drifted
-- message: the spec passes the validator
-  reason: ValidatorPassed
+  reason: FingerprintEqual
+  message: observed facts match the synced fingerprint
+- type: SpecValid
   status: "True"
-  type: SpecValid
+  reason: ValidatorPassed
+  message: the spec passes the validator
 observed:
   files:
   - third_party/openbao/sdk/physical/inmem/cache_test.go
@@ -20,257 +23,254 @@ observed:
   - third_party/openbao/sdk/physical/inmem/inmem_ha_test.go
   - third_party/openbao/sdk/physical/inmem/inmem_test.go
   - third_party/openbao/sdk/physical/inmem/physical_view_test.go
-  fingerprint: 0ea6a6ed9e692abaffdc444b8850f81d6bb6268f1abe64ced5c29b7ca0a90e33
   interfaces:
-  - codegraphId: struct:433127d50c193842a0b1f3ca0ba2d6bd
-    file: third_party/openbao/sdk/physical/inmem/inmem.go
+  - name: InmemBackend
     kind: struct
+    file: third_party/openbao/sdk/physical/inmem/inmem.go
     line: 39
-    name: InmemBackend
-  - codegraphId: struct:efc12d86c49e3285916bf6e41a1d988b
-    file: third_party/openbao/sdk/physical/inmem/inmem.go
+    codegraphId: struct:433127d50c193842a0b1f3ca0ba2d6bd
+  - name: TransactionalInmemBackend
     kind: struct
+    file: third_party/openbao/sdk/physical/inmem/inmem.go
     line: 54
-    name: TransactionalInmemBackend
-  - codegraphId: function:67470801f4aada872caf1408df246d21
-    file: third_party/openbao/sdk/physical/inmem/inmem.go
+    codegraphId: struct:efc12d86c49e3285916bf6e41a1d988b
+  - name: OpName
     kind: function
-    line: 75
-    name: OpName
     signature: (op int) string
-  - codegraphId: struct:f0f24e705179292bd318eb8daf67f1e0
     file: third_party/openbao/sdk/physical/inmem/inmem.go
+    line: 75
+    codegraphId: function:67470801f4aada872caf1408df246d21
+  - name: InmemOp
     kind: struct
+    file: third_party/openbao/sdk/physical/inmem/inmem.go
     line: 100
-    name: InmemOp
-  - codegraphId: struct:ebb7d2f72be01a983dbdded0ecbb4f62
-    file: third_party/openbao/sdk/physical/inmem/inmem.go
+    codegraphId: struct:f0f24e705179292bd318eb8daf67f1e0
+  - name: InmemBackendTransaction
     kind: struct
+    file: third_party/openbao/sdk/physical/inmem/inmem.go
     line: 115
-    name: InmemBackendTransaction
-  - codegraphId: function:92955b55e1abdc8afbaa395116e4e364
-    file: third_party/openbao/sdk/physical/inmem/inmem.go
+    codegraphId: struct:ebb7d2f72be01a983dbdded0ecbb4f62
+  - name: NewDirectInmem
     kind: function
+    signature: (conf map[string]string, logger log.Logger) (physical.Backend, error)
+    file: third_party/openbao/sdk/physical/inmem/inmem.go
     line: 128
-    name: NewDirectInmem
-    signature: (conf map[string]string, logger log.Logger) (physical.Backend, error)
-  - codegraphId: function:c019f4a22f383dc72eccdef8d9c0f0f2
-    file: third_party/openbao/sdk/physical/inmem/inmem.go
+    codegraphId: function:92955b55e1abdc8afbaa395116e4e364
+  - name: NewInmem
     kind: function
+    signature: (conf map[string]string, logger log.Logger) (physical.Backend, error)
+    file: third_party/openbao/sdk/physical/inmem/inmem.go
     line: 149
-    name: NewInmem
-    signature: (conf map[string]string, logger log.Logger) (physical.Backend, error)
-  - codegraphId: method:8429c18c50dd55f046d1bda3badc60ed
-    file: third_party/openbao/sdk/physical/inmem/inmem.go
+    codegraphId: function:c019f4a22f383dc72eccdef8d9c0f0f2
+  - name: InmemBackend.Put
     kind: method
+    signature: (ctx context.Context, entry *physical.Entry) error
+    file: third_party/openbao/sdk/physical/inmem/inmem.go
     line: 166
-    name: InmemBackend.Put
-    signature: (ctx context.Context, entry *physical.Entry) error
-  - codegraphId: method:531fc17acb8394310e09753f2e8a6c9d
-    file: third_party/openbao/sdk/physical/inmem/inmem.go
+    codegraphId: method:8429c18c50dd55f046d1bda3badc60ed
+  - name: InmemBackend.PutInternal
     kind: method
+    signature: (ctx context.Context, entry *physical.Entry) error
+    file: third_party/openbao/sdk/physical/inmem/inmem.go
     line: 176
-    name: InmemBackend.PutInternal
-    signature: (ctx context.Context, entry *physical.Entry) error
-  - codegraphId: method:800402a0b3c8d2c671bce53ead64e1cd
-    file: third_party/openbao/sdk/physical/inmem/inmem.go
+    codegraphId: method:531fc17acb8394310e09753f2e8a6c9d
+  - name: InmemBackend.FailPut
     kind: method
+    signature: (fail bool)
+    file: third_party/openbao/sdk/physical/inmem/inmem.go
     line: 198
-    name: InmemBackend.FailPut
-    signature: (fail bool)
-  - codegraphId: method:9ec8aef4898dfb331ce15077f40a1c71
-    file: third_party/openbao/sdk/physical/inmem/inmem.go
+    codegraphId: method:800402a0b3c8d2c671bce53ead64e1cd
+  - name: InmemBackend.Get
     kind: method
+    signature: (ctx context.Context, key string) (*physical.Entry, error)
+    file: third_party/openbao/sdk/physical/inmem/inmem.go
     line: 203
-    name: InmemBackend.Get
-    signature: (ctx context.Context, key string) (*physical.Entry, error)
-  - codegraphId: method:6e622dd27a1a2f30cd44d967957d94f9
-    file: third_party/openbao/sdk/physical/inmem/inmem.go
+    codegraphId: method:9ec8aef4898dfb331ce15077f40a1c71
+  - name: InmemBackend.GetInternal
     kind: method
+    signature: (ctx context.Context, key string) (*physical.Entry, error)
+    file: third_party/openbao/sdk/physical/inmem/inmem.go
     line: 213
-    name: InmemBackend.GetInternal
-    signature: (ctx context.Context, key string) (*physical.Entry, error)
-  - codegraphId: method:393c7df9a35883ea59c0adec45409a7c
-    file: third_party/openbao/sdk/physical/inmem/inmem.go
+    codegraphId: method:6e622dd27a1a2f30cd44d967957d94f9
+  - name: InmemBackend.FailGet
     kind: method
+    signature: (fail bool)
+    file: third_party/openbao/sdk/physical/inmem/inmem.go
     line: 240
-    name: InmemBackend.FailGet
-    signature: (fail bool)
-  - codegraphId: method:f728bdd01cbe77de2f9240c26d3edf38
-    file: third_party/openbao/sdk/physical/inmem/inmem.go
+    codegraphId: method:393c7df9a35883ea59c0adec45409a7c
+  - name: InmemBackend.Delete
     kind: method
+    signature: (ctx context.Context, key string) error
+    file: third_party/openbao/sdk/physical/inmem/inmem.go
     line: 245
-    name: InmemBackend.Delete
-    signature: (ctx context.Context, key string) error
-  - codegraphId: method:fa6471032402e180cc0e53d51382c058
-    file: third_party/openbao/sdk/physical/inmem/inmem.go
+    codegraphId: method:f728bdd01cbe77de2f9240c26d3edf38
+  - name: InmemBackend.DeleteInternal
     kind: method
+    signature: (ctx context.Context, key string) error
+    file: third_party/openbao/sdk/physical/inmem/inmem.go
     line: 255
-    name: InmemBackend.DeleteInternal
-    signature: (ctx context.Context, key string) error
-  - codegraphId: method:74e406f96705c0d0e72d5501915b441c
-    file: third_party/openbao/sdk/physical/inmem/inmem.go
+    codegraphId: method:fa6471032402e180cc0e53d51382c058
+  - name: InmemBackend.FailDelete
     kind: method
+    signature: (fail bool)
+    file: third_party/openbao/sdk/physical/inmem/inmem.go
     line: 272
-    name: InmemBackend.FailDelete
-    signature: (fail bool)
-  - codegraphId: method:25879ce9bfd59a5bcd1affedc70dc4af
-    file: third_party/openbao/sdk/physical/inmem/inmem.go
+    codegraphId: method:74e406f96705c0d0e72d5501915b441c
+  - name: InmemBackend.List
     kind: method
+    signature: (ctx context.Context, prefix string) ([]string, error)
+    file: third_party/openbao/sdk/physical/inmem/inmem.go
     line: 278
-    name: InmemBackend.List
-    signature: (ctx context.Context, prefix string) ([]string, error)
-  - codegraphId: method:5e7184e26097a7ac26054b5656d8ab53
-    file: third_party/openbao/sdk/physical/inmem/inmem.go
+    codegraphId: method:25879ce9bfd59a5bcd1affedc70dc4af
+  - name: InmemBackend.ListPage
     kind: method
+    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
+      error)
+    file: third_party/openbao/sdk/physical/inmem/inmem.go
     line: 291
-    name: InmemBackend.ListPage
-    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
-      error)
-  - codegraphId: method:20e1a4431c687b6f461a6a95a9941088
-    file: third_party/openbao/sdk/physical/inmem/inmem.go
+    codegraphId: method:5e7184e26097a7ac26054b5656d8ab53
+  - name: InmemBackend.ListInternal
     kind: method
+    signature: (ctx context.Context, prefix string) ([]string, error)
+    file: third_party/openbao/sdk/physical/inmem/inmem.go
     line: 301
-    name: InmemBackend.ListInternal
-    signature: (ctx context.Context, prefix string) ([]string, error)
-  - codegraphId: method:3f8fb42701c6fbbab889e38d19785fd5
-    file: third_party/openbao/sdk/physical/inmem/inmem.go
+    codegraphId: method:20e1a4431c687b6f461a6a95a9941088
+  - name: InmemBackend.ListPaginatedInternal
     kind: method
+    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
+      error)
+    file: third_party/openbao/sdk/physical/inmem/inmem.go
     line: 305
-    name: InmemBackend.ListPaginatedInternal
-    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
-      error)
-  - codegraphId: method:d195bf63851ddf91db7d6336fb640822
-    file: third_party/openbao/sdk/physical/inmem/inmem.go
+    codegraphId: method:3f8fb42701c6fbbab889e38d19785fd5
+  - name: InmemBackend.FailList
     kind: method
-    line: 364
-    name: InmemBackend.FailList
     signature: (fail bool)
-  - codegraphId: method:d21e06b62fb07aa815fd38f8e8d9291a
     file: third_party/openbao/sdk/physical/inmem/inmem.go
+    line: 364
+    codegraphId: method:d195bf63851ddf91db7d6336fb640822
+  - name: TransactionalInmemBackend.BeginReadOnlyTx
     kind: method
+    signature: (ctx context.Context) (physical.Transaction, error)
+    file: third_party/openbao/sdk/physical/inmem/inmem.go
     line: 368
-    name: TransactionalInmemBackend.BeginReadOnlyTx
-    signature: (ctx context.Context) (physical.Transaction, error)
-  - codegraphId: method:705d52ff7b4f4df84dc5294474090947
-    file: third_party/openbao/sdk/physical/inmem/inmem.go
+    codegraphId: method:d21e06b62fb07aa815fd38f8e8d9291a
+  - name: TransactionalInmemBackend.BeginTx
     kind: method
+    signature: (ctx context.Context) (physical.Transaction, error)
+    file: third_party/openbao/sdk/physical/inmem/inmem.go
     line: 380
-    name: TransactionalInmemBackend.BeginTx
-    signature: (ctx context.Context) (physical.Transaction, error)
-  - codegraphId: method:3e0f1595c88e7a20ae01bea792ec8df5
-    file: third_party/openbao/sdk/physical/inmem/inmem.go
+    codegraphId: method:705d52ff7b4f4df84dc5294474090947
+  - name: InmemBackendTransaction.Put
     kind: method
-    line: 408
-    name: InmemBackendTransaction.Put
     signature: (ctx context.Context, entry *physical.Entry) error
-  - codegraphId: method:8153482cc71bfa19cbfe74e22a7f9b6d
     file: third_party/openbao/sdk/physical/inmem/inmem.go
+    line: 408
+    codegraphId: method:3e0f1595c88e7a20ae01bea792ec8df5
+  - name: InmemBackendTransaction.Delete
     kind: method
-    line: 448
-    name: InmemBackendTransaction.Delete
     signature: (ctx context.Context, key string) error
-  - codegraphId: method:f53097ef61ea8e68a22cc816f1aa5044
     file: third_party/openbao/sdk/physical/inmem/inmem.go
+    line: 448
+    codegraphId: method:8153482cc71bfa19cbfe74e22a7f9b6d
+  - name: InmemBackendTransaction.Get
     kind: method
-    line: 483
-    name: InmemBackendTransaction.Get
     signature: (ctx context.Context, key string) (*physical.Entry, error)
-  - codegraphId: method:da23dda1d9aaee72a6f3dfa2566046a7
     file: third_party/openbao/sdk/physical/inmem/inmem.go
+    line: 483
+    codegraphId: method:f53097ef61ea8e68a22cc816f1aa5044
+  - name: InmemBackendTransaction.List
     kind: method
-    line: 510
-    name: InmemBackendTransaction.List
     signature: (ctx context.Context, prefix string) ([]string, error)
-  - codegraphId: method:96fcde07ad2ea1cf9ae5ee6ec522f37a
     file: third_party/openbao/sdk/physical/inmem/inmem.go
+    line: 510
+    codegraphId: method:da23dda1d9aaee72a6f3dfa2566046a7
+  - name: InmemBackendTransaction.ListPage
     kind: method
-    line: 533
-    name: InmemBackendTransaction.ListPage
     signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
       error)
-  - codegraphId: method:304c80ffef2cd2f743ea3bdc7f6a8784
     file: third_party/openbao/sdk/physical/inmem/inmem.go
+    line: 533
+    codegraphId: method:96fcde07ad2ea1cf9ae5ee6ec522f37a
+  - name: InmemBackendTransaction.Commit
     kind: method
+    signature: (ctx context.Context) error
+    file: third_party/openbao/sdk/physical/inmem/inmem.go
     line: 558
-    name: InmemBackendTransaction.Commit
+    codegraphId: method:304c80ffef2cd2f743ea3bdc7f6a8784
+  - name: InmemBackendTransaction.Rollback
+    kind: method
     signature: (ctx context.Context) error
-  - codegraphId: method:eaa3ba9fbe82faa210aeb03c2f6307c5
     file: third_party/openbao/sdk/physical/inmem/inmem.go
-    kind: method
     line: 644
-    name: InmemBackendTransaction.Rollback
-    signature: (ctx context.Context) error
-  - codegraphId: struct:70bd01e4484635d5c2e3ccf8049945b9
-    file: third_party/openbao/sdk/physical/inmem/inmem_ha.go
+    codegraphId: method:eaa3ba9fbe82faa210aeb03c2f6307c5
+  - name: InmemHABackend
     kind: struct
+    file: third_party/openbao/sdk/physical/inmem/inmem_ha.go
     line: 15
-    name: InmemHABackend
-  - codegraphId: function:b323d9f5d39c7f416fbfac9dad196fc3
-    file: third_party/openbao/sdk/physical/inmem/inmem_ha.go
+    codegraphId: struct:70bd01e4484635d5c2e3ccf8049945b9
+  - name: NewInmemHA
     kind: function
-    line: 26
-    name: NewInmemHA
     signature: (_ map[string]string, logger log.Logger) (physical.Backend, error)
-  - codegraphId: method:39d6aaeb07abb8bb3686f001a8d57d5c
     file: third_party/openbao/sdk/physical/inmem/inmem_ha.go
+    line: 26
+    codegraphId: function:b323d9f5d39c7f416fbfac9dad196fc3
+  - name: InmemHABackend.LockWith
     kind: method
-    line: 43
-    name: InmemHABackend.LockWith
     signature: (key, value string) (physical.Lock, error)
-  - codegraphId: method:94bb327c33212189635d340fa6746144
     file: third_party/openbao/sdk/physical/inmem/inmem_ha.go
+    line: 43
+    codegraphId: method:39d6aaeb07abb8bb3686f001a8d57d5c
+  - name: InmemHABackend.HookInvalidate
     kind: method
-    line: 52
-    name: InmemHABackend.HookInvalidate
     signature: (hook physical.InvalidateFunc)
-  - codegraphId: method:83e66da284c9013a6b103a26f187c911
     file: third_party/openbao/sdk/physical/inmem/inmem_ha.go
+    line: 52
+    codegraphId: method:94bb327c33212189635d340fa6746144
+  - name: InmemHABackend.LockMapSize
     kind: method
-    line: 61
-    name: InmemHABackend.LockMapSize
     signature: () int
-  - codegraphId: method:7253cc2049f88538d67b5ad10141893d
     file: third_party/openbao/sdk/physical/inmem/inmem_ha.go
+    line: 61
+    codegraphId: method:83e66da284c9013a6b103a26f187c911
+  - name: InmemHABackend.HAEnabled
     kind: method
-    line: 67
-    name: InmemHABackend.HAEnabled
     signature: () bool
-  - codegraphId: struct:605223dc185e0eeb8f8537f0bf596ad0
     file: third_party/openbao/sdk/physical/inmem/inmem_ha.go
+    line: 67
+    codegraphId: method:7253cc2049f88538d67b5ad10141893d
+  - name: InmemLock
     kind: struct
+    file: third_party/openbao/sdk/physical/inmem/inmem_ha.go
     line: 72
-    name: InmemLock
-  - codegraphId: method:fb8dd39628f33fdfc2bbbeff7dcdfac6
-    file: third_party/openbao/sdk/physical/inmem/inmem_ha.go
+    codegraphId: struct:605223dc185e0eeb8f8537f0bf596ad0
+  - name: InmemLock.Lock
     kind: method
-    line: 82
-    name: InmemLock.Lock
     signature: (stopCh <-chan struct{}) (<-chan struct{}, error)
-  - codegraphId: method:4bee182a484f430f1c6c3a51381d5441
     file: third_party/openbao/sdk/physical/inmem/inmem_ha.go
+    line: 82
+    codegraphId: method:fb8dd39628f33fdfc2bbbeff7dcdfac6
+  - name: InmemLock.Unlock
     kind: method
-    line: 131
-    name: InmemLock.Unlock
     signature: () error
-  - codegraphId: method:bc30b838af03d4362af5ce8b9b79a4c5
     file: third_party/openbao/sdk/physical/inmem/inmem_ha.go
+    line: 131
+    codegraphId: method:4bee182a484f430f1c6c3a51381d5441
+  - name: InmemLock.Value
     kind: method
-    line: 150
-    name: InmemLock.Value
     signature: () (bool, string, error)
-  - codegraphId: method:d5e0cabb4753f261dcbcad8dd0676c07
     file: third_party/openbao/sdk/physical/inmem/inmem_ha.go
+    line: 150
+    codegraphId: method:bc30b838af03d4362af5ce8b9b79a4c5
+  - name: InmemHABackend.Put
     kind: method
-    line: 167
-    name: InmemHABackend.Put
     signature: (ctx context.Context, entry *physical.Entry) error
-  - codegraphId: method:616da0007e46a4628fdb7f765fb27c67
     file: third_party/openbao/sdk/physical/inmem/inmem_ha.go
+    line: 167
+    codegraphId: method:d5e0cabb4753f261dcbcad8dd0676c07
+  - name: InmemHABackend.Delete
     kind: method
-    line: 176
-    name: InmemHABackend.Delete
     signature: (ctx context.Context, key string) error
-realizedSpecHash: e2b7d54ebd6ef5b85caa9de8c46410c83e3eafe9832824125ca276da9afb8023
-syncedCommit: 89cee50ec5aea977a42f904a758e506729e1158e
-syncedFingerprint: 0ea6a6ed9e692abaffdc444b8850f81d6bb6268f1abe64ced5c29b7ca0a90e33
+    file: third_party/openbao/sdk/physical/inmem/inmem_ha.go
+    line: 176
+    codegraphId: method:616da0007e46a4628fdb7f765fb27c67
+  fingerprint: 0ea6a6ed9e692abaffdc444b8850f81d6bb6268f1abe64ced5c29b7ca0a90e33

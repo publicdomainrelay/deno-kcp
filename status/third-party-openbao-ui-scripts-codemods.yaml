@@ -1,16 +1,19 @@
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 087c2921e169b84a2b587af1bb82faa01164306dd62d23c52c4be21a8f89bffd
+realizedSpecHash: 2377850d8b012b89dd6f2de40b44b0f40925ee9cb3689436cb32ef54b52424b9
 conditions:
-- message: 'undeclared: transformer'
+- type: CodeSynced
+  status: "False"
   reason: InterfacesMissing
+  message: 'undeclared: transformer'
+- type: Drifted
   status: "False"
-  type: CodeSynced
-- message: observed facts match the synced fingerprint
   reason: FingerprintEqual
-  status: "False"
-  type: Drifted
-- message: the spec passes the validator
-  reason: ValidatorPassed
+  message: observed facts match the synced fingerprint
+- type: SpecValid
   status: "True"
-  type: SpecValid
+  reason: ValidatorPassed
+  message: the spec passes the validator
 observed:
   files:
   - third_party/openbao/ui/scripts/codemods/dropdown-transform.js
@@ -20,14 +23,11 @@ observed:
   - third_party/openbao/ui/scripts/codemods/linkto-with-on-modifier.js
   - third_party/openbao/ui/scripts/codemods/no-quoteless-attributes.js
   - third_party/openbao/ui/scripts/codemods/transform-deprecated-args.js
-  fingerprint: 087c2921e169b84a2b587af1bb82faa01164306dd62d23c52c4be21a8f89bffd
   interfaces:
-  - codegraphId: function:c1efbbed502d8256e4a47416d7e523ed
-    file: third_party/openbao/ui/scripts/codemods/inject-service.js
+  - name: transformer
     kind: function
-    line: 17
-    name: transformer
     signature: ({ source }, api, { service })
-realizedSpecHash: 2377850d8b012b89dd6f2de40b44b0f40925ee9cb3689436cb32ef54b52424b9
-syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-syncedFingerprint: 087c2921e169b84a2b587af1bb82faa01164306dd62d23c52c4be21a8f89bffd
+    file: third_party/openbao/ui/scripts/codemods/inject-service.js
+    line: 17
+    codegraphId: function:c1efbbed502d8256e4a47416d7e523ed
+  fingerprint: 087c2921e169b84a2b587af1bb82faa01164306dd62d23c52c4be21a8f89bffd

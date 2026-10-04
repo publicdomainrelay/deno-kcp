@@ -1,4 +1,201 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-internal-command-agentproxyshared-cache-cachememdb
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: The package exists so the agent proxy cache can store and look up cached
+    responses in memory by several independent keys instead of a single map key. memdb
+    supplies the multi-index lookup, prefix iteration and schema-level uniqueness,
+    while the atomic pointer lets a `Flush` replace the whole database without racing
+    in-flight readers. Serialization exists so an index can be persisted or transferred
+    between the memory cache and the persistent bolt cache; the renewal context is
+    deliberately excluded because a cancel func cannot be serialized. This context
+    is a third-party vendored dependency inside deno-kcp, not code the repository
+    authors.
+  requirements:
+  - id: r.atomic-database-pointer
+    level: MUST
+    text: CacheMemDB must hold its memdb instance behind an atomic pointer so readers
+      that load the database before a Flush continue on the old instance while later
+      operations use the new one.
+    codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
+    - struct:04503da514b04d1fa5c8af50f9ef21c3
+  - id: r.cache-memdb-construction
+    level: MUST
+    text: New must build a memdb database from the package schema, store it in the
+      CacheMemDB atomic pointer, and return the CacheMemDB; a schema construction
+      failure must surface as an error with no CacheMemDB returned.
+    codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
+    - function:1e6beeceeb5446601c2b1c949124f9f5
+    - struct:04503da514b04d1fa5c8af50f9ef21c3
+  - id: r.context-info-construction
+    level: MUST
+    text: NewContextInfo must return nil when given a nil parent context, and otherwise
+      derive a cancellable child context, store the cancel func, and allocate the
+      DoneCh channel that signals the renewal goroutine to stop.
+    codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index.go
+    - function:1245e3729c3b85f45bc7bcf8ee367e0f
+    - struct:c6a4bec231f98a1052acdb4de21aad04
+  - id: r.deserialize-index
+    level: MUST
+    text: Deserialize must unmarshal JSON bytes into a new Index and return it, returning
+      the unmarshal error on malformed input; the returned Index has a nil RenewCtxInfo
+      that the caller must reconstruct separately.
+    codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index.go
+    - function:e0584361bcee3f77f6466eddde165222
+  - id: r.evict-index
+    level: MUST
+    text: Evict must first resolve the index through Get, return nil without touching
+      the database when no index matches, and otherwise delete that index from the
+      `indexer` table inside a write transaction that aborts on failure.
+    codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
+    - method:4e832c6e65f6084ed6dd9c2fe12febf7
+  - id: r.flush-cache
+    level: MUST
+    text: Flush must build a fresh empty database and swap it into the CacheMemDB
+      atomic pointer, leaving previously stored entries unreachable; a failure to
+      build the replacement database must return the error and leave the existing
+      database in place.
+    codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
+    - method:5a9cd13b2fb712d346e9e7eae4bb3a84
+  - id: r.get-by-prefix
+    level: MUST
+    text: GetByPrefix must validate the index name, append the `_prefix` suffix to
+      derive the memdb prefix index, iterate all matching objects in a read-only transaction
+      and collect them into a slice; a cast failure on any element must return an
+      error and no partial result.
+    codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
+    - method:a0fc3c92721e7b8f8fb4a741adcba5de
+  - id: r.get-single-index
+    level: MUST
+    text: Get must validate the index name, run a read-only transaction and return
+      the first matching Index; an invalid name returns an error naming the name,
+      a miss returns a nil Index with a nil error, and a stored value that is not
+      an *Index returns an error rather than a panic.
+    codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
+    - method:2e90880633b025054f046238565aea5c
+  - id: r.index-cached-record
+    level: MUST
+    text: Index must carry the lookup keys the schema indexes, the serialized Response
+      bytes, the HTTP request shape (RequestMethod, RequestToken, RequestHeader) and
+      LastRenewed, plus a Type string classifying the entry as token, auth-lease or
+      secret-lease.
+    codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index.go
+    - struct:c93eea47213b832b39d7deb030c51ba4
+  - id: r.index-name-validation
+    level: MUST
+    text: Index names must be restricted to exactly the seven constants `id`, `lease`,
+      `request_path`, `token`, `token_accessor`, `token_parent` and `lease_token`;
+      any other name is invalid and every name-taking operation must reject it instead
+      of querying memdb.
+    codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index.go
+    - type_alias:9cc4f0cb4f80eaff6afa843a7e490231
+  - id: r.memdb-schema-indexes
+    level: MUST
+    text: The schema must define one table named `indexer` whose indexes are `id`
+      (unique, StringFieldIndex on ID), `request_path` (non-unique, CompoundIndex
+      over Namespace then RequestPath), `token` (unique, AllowMissing, on Token),
+      `token_accessor` (unique, AllowMissing, on TokenAccessor), `lease` (unique,
+      AllowMissing, on Lease), `lease_token` (non-unique, AllowMissing, on LeaseToken)
+      and `token_parent` (non-unique, AllowMissing, on TokenParent).
+    codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
+  - id: r.package-tests
+    level: SHOULD
+    text: The package should keep its cache_memdb_test.go and index_test.go suites
+      covering the store operations and the index serialization round trip, since
+      these are the only checks on the memdb schema behavior.
+    codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb_test.go
+    - file:third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index_test.go
+  - id: r.serialize-excludes-renew-context
+    level: MUST
+    text: Serialize must clear RenewCtxInfo on its receiver copy before JSON marshalling,
+      so the renewal context, cancel func and done channel never appear in the serialized
+      bytes, and must return the marshal error unwrapped if marshalling fails.
+    codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index.go
+    - method:9f12c46bc5e7d967f7d50c07c11c3766
+  - id: r.set-index
+    level: MUST
+    text: Set must reject a nil index with an error, insert the index into the `indexer`
+      table in a write transaction, abort the transaction when the insert fails, and
+      commit only on success.
+    codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
+    - method:3d90db1ee13b0be4f60726597bedfac5
+  interfaces:
+  - name: CacheMemDB
+    kind: struct
+    signature: type CacheMemDB struct { db atomic.Pointer[memdb.MemDB] }
+    file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
+  - name: CacheMemDB.Evict
+    kind: method
+    signature: func (c *CacheMemDB) Evict(indexName string, indexValues ...any) error
+    file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
+  - name: CacheMemDB.Flush
+    kind: method
+    signature: func (c *CacheMemDB) Flush() error
+    file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
+  - name: CacheMemDB.Get
+    kind: method
+    signature: func (c *CacheMemDB) Get(indexName string, indexValues ...any) (*Index,
+      error)
+    file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
+  - name: CacheMemDB.GetByPrefix
+    kind: method
+    signature: func (c *CacheMemDB) GetByPrefix(indexName string, indexValues ...any)
+      ([]*Index, error)
+    file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
+  - name: CacheMemDB.Set
+    kind: method
+    signature: func (c *CacheMemDB) Set(index *Index) error
+    file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
+  - name: ContextInfo
+    kind: struct
+    signature: type ContextInfo struct { Ctx context.Context; CancelFunc context.CancelFunc;
+      DoneCh chan struct{} }
+    file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index.go
+  - name: Deserialize
+    kind: function
+    signature: func Deserialize(indexBytes []byte) (*Index, error)
+    file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index.go
+  - name: Index
+    kind: struct
+    signature: type Index struct { ID string; Token string; TokenParent string; TokenAccessor
+      string; Namespace string; RequestPath string; Lease string; LeaseToken string;
+      Response []byte; RenewCtxInfo *ContextInfo; RequestMethod string; RequestToken
+      string; RequestHeader http.Header; LastRenewed time.Time; Type string }
+    file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index.go
+  - name: Index.Serialize
+    kind: method
+    signature: func (i Index) Serialize() ([]byte, error)
+    file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index.go
+  - name: IndexName
+    kind: type_alias
+    signature: type IndexName uint32
+    file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index.go
+  - name: New
+    kind: function
+    signature: func New() (*CacheMemDB, error)
+    file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
+  - name: NewContextInfo
+    kind: function
+    signature: func NewContextInfo(ctx context.Context) *ContextInfo
+    file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index.go
 codeRefIndex:
 - file:third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
   cache_memdb.go@third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
@@ -21,200 +218,3 @@ codeRefIndex:
 - struct:c6a4bec231f98a1052acdb4de21aad04 ContextInfo@third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index.go:116
 - struct:c93eea47213b832b39d7deb030c51ba4 Index@third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index.go:15
 - type_alias:9cc4f0cb4f80eaff6afa843a7e490231 IndexName@third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index.go:76
-kind: SystemContext
-metadata:
-  name: third-party-openbao-internal-command-agentproxyshared-cache-cachememdb
-  namespace: default
-spec:
-  intent: The package exists so the agent proxy cache can store and look up cached
-    responses in memory by several independent keys instead of a single map key. memdb
-    supplies the multi-index lookup, prefix iteration and schema-level uniqueness,
-    while the atomic pointer lets a `Flush` replace the whole database without racing
-    in-flight readers. Serialization exists so an index can be persisted or transferred
-    between the memory cache and the persistent bolt cache; the renewal context is
-    deliberately excluded because a cancel func cannot be serialized. This context
-    is a third-party vendored dependency inside deno-kcp, not code the repository
-    authors.
-  interfaces:
-  - file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
-    kind: struct
-    name: CacheMemDB
-    signature: type CacheMemDB struct { db atomic.Pointer[memdb.MemDB] }
-  - file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
-    kind: method
-    name: CacheMemDB.Evict
-    signature: func (c *CacheMemDB) Evict(indexName string, indexValues ...any) error
-  - file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
-    kind: method
-    name: CacheMemDB.Flush
-    signature: func (c *CacheMemDB) Flush() error
-  - file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
-    kind: method
-    name: CacheMemDB.Get
-    signature: func (c *CacheMemDB) Get(indexName string, indexValues ...any) (*Index,
-      error)
-  - file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
-    kind: method
-    name: CacheMemDB.GetByPrefix
-    signature: func (c *CacheMemDB) GetByPrefix(indexName string, indexValues ...any)
-      ([]*Index, error)
-  - file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
-    kind: method
-    name: CacheMemDB.Set
-    signature: func (c *CacheMemDB) Set(index *Index) error
-  - file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index.go
-    kind: struct
-    name: ContextInfo
-    signature: type ContextInfo struct { Ctx context.Context; CancelFunc context.CancelFunc;
-      DoneCh chan struct{} }
-  - file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index.go
-    kind: function
-    name: Deserialize
-    signature: func Deserialize(indexBytes []byte) (*Index, error)
-  - file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index.go
-    kind: struct
-    name: Index
-    signature: type Index struct { ID string; Token string; TokenParent string; TokenAccessor
-      string; Namespace string; RequestPath string; Lease string; LeaseToken string;
-      Response []byte; RenewCtxInfo *ContextInfo; RequestMethod string; RequestToken
-      string; RequestHeader http.Header; LastRenewed time.Time; Type string }
-  - file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index.go
-    kind: method
-    name: Index.Serialize
-    signature: func (i Index) Serialize() ([]byte, error)
-  - file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index.go
-    kind: type_alias
-    name: IndexName
-    signature: type IndexName uint32
-  - file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
-    kind: function
-    name: New
-    signature: func New() (*CacheMemDB, error)
-  - file: third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index.go
-    kind: function
-    name: NewContextInfo
-    signature: func NewContextInfo(ctx context.Context) *ContextInfo
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
-    - struct:04503da514b04d1fa5c8af50f9ef21c3
-    id: r.atomic-database-pointer
-    level: MUST
-    text: CacheMemDB must hold its memdb instance behind an atomic pointer so readers
-      that load the database before a Flush continue on the old instance while later
-      operations use the new one.
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
-    - function:1e6beeceeb5446601c2b1c949124f9f5
-    - struct:04503da514b04d1fa5c8af50f9ef21c3
-    id: r.cache-memdb-construction
-    level: MUST
-    text: New must build a memdb database from the package schema, store it in the
-      CacheMemDB atomic pointer, and return the CacheMemDB; a schema construction
-      failure must surface as an error with no CacheMemDB returned.
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index.go
-    - function:1245e3729c3b85f45bc7bcf8ee367e0f
-    - struct:c6a4bec231f98a1052acdb4de21aad04
-    id: r.context-info-construction
-    level: MUST
-    text: NewContextInfo must return nil when given a nil parent context, and otherwise
-      derive a cancellable child context, store the cancel func, and allocate the
-      DoneCh channel that signals the renewal goroutine to stop.
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index.go
-    - function:e0584361bcee3f77f6466eddde165222
-    id: r.deserialize-index
-    level: MUST
-    text: Deserialize must unmarshal JSON bytes into a new Index and return it, returning
-      the unmarshal error on malformed input; the returned Index has a nil RenewCtxInfo
-      that the caller must reconstruct separately.
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
-    - method:4e832c6e65f6084ed6dd9c2fe12febf7
-    id: r.evict-index
-    level: MUST
-    text: Evict must first resolve the index through Get, return nil without touching
-      the database when no index matches, and otherwise delete that index from the
-      `indexer` table inside a write transaction that aborts on failure.
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
-    - method:5a9cd13b2fb712d346e9e7eae4bb3a84
-    id: r.flush-cache
-    level: MUST
-    text: Flush must build a fresh empty database and swap it into the CacheMemDB
-      atomic pointer, leaving previously stored entries unreachable; a failure to
-      build the replacement database must return the error and leave the existing
-      database in place.
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
-    - method:a0fc3c92721e7b8f8fb4a741adcba5de
-    id: r.get-by-prefix
-    level: MUST
-    text: GetByPrefix must validate the index name, append the `_prefix` suffix to
-      derive the memdb prefix index, iterate all matching objects in a read-only transaction
-      and collect them into a slice; a cast failure on any element must return an
-      error and no partial result.
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
-    - method:2e90880633b025054f046238565aea5c
-    id: r.get-single-index
-    level: MUST
-    text: Get must validate the index name, run a read-only transaction and return
-      the first matching Index; an invalid name returns an error naming the name,
-      a miss returns a nil Index with a nil error, and a stored value that is not
-      an *Index returns an error rather than a panic.
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index.go
-    - struct:c93eea47213b832b39d7deb030c51ba4
-    id: r.index-cached-record
-    level: MUST
-    text: Index must carry the lookup keys the schema indexes, the serialized Response
-      bytes, the HTTP request shape (RequestMethod, RequestToken, RequestHeader) and
-      LastRenewed, plus a Type string classifying the entry as token, auth-lease or
-      secret-lease.
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index.go
-    - type_alias:9cc4f0cb4f80eaff6afa843a7e490231
-    id: r.index-name-validation
-    level: MUST
-    text: Index names must be restricted to exactly the seven constants `id`, `lease`,
-      `request_path`, `token`, `token_accessor`, `token_parent` and `lease_token`;
-      any other name is invalid and every name-taking operation must reject it instead
-      of querying memdb.
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
-    id: r.memdb-schema-indexes
-    level: MUST
-    text: The schema must define one table named `indexer` whose indexes are `id`
-      (unique, StringFieldIndex on ID), `request_path` (non-unique, CompoundIndex
-      over Namespace then RequestPath), `token` (unique, AllowMissing, on Token),
-      `token_accessor` (unique, AllowMissing, on TokenAccessor), `lease` (unique,
-      AllowMissing, on Lease), `lease_token` (non-unique, AllowMissing, on LeaseToken)
-      and `token_parent` (non-unique, AllowMissing, on TokenParent).
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb_test.go
-    - file:third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index_test.go
-    id: r.package-tests
-    level: SHOULD
-    text: The package should keep its cache_memdb_test.go and index_test.go suites
-      covering the store operations and the index serialization round trip, since
-      these are the only checks on the memdb schema behavior.
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/index.go
-    - method:9f12c46bc5e7d967f7d50c07c11c3766
-    id: r.serialize-excludes-renew-context
-    level: MUST
-    text: Serialize must clear RenewCtxInfo on its receiver copy before JSON marshalling,
-      so the renewal context, cancel func and done channel never appear in the serialized
-      bytes, and must return the marshal error unwrapped if marshalling fails.
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agentproxyshared/cache/cachememdb/cache_memdb.go
-    - method:3d90db1ee13b0be4f60726597bedfac5
-    id: r.set-index
-    level: MUST
-    text: Set must reject a nil index with an error, insert the index into the `indexer`
-      table in a write transaction, abort the transaction when the insert fails, and
-      commit only on success.
-  upstream: self

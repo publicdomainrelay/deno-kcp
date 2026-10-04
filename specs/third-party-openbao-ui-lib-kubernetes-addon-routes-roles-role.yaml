@@ -1,4 +1,98 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-ui-lib-kubernetes-addon-routes-roles-role
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'The context exists to describe the routing behavior for an individual Kubernetes
+    secrets-backend role: how the role URL resolves to a sub-page, how the backend
+    mount path and role name are turned into a model, and what breadcrumb trail each
+    sub-page presents. It is a specification of the existing Ember route classes so
+    the nested route contract (params, services, model payload, breadcrumbs) is recorded
+    rather than re-derived from the source.'
+  requirements:
+  - id: r.breadcrumb-model-wiring
+    level: SHOULD
+    text: 'Breadcrumb entries for the backend and roles list must carry models: [resolvedModel.backend]
+      so the links can rebuild the overview and roles routes, and the role-level entry
+      must carry models: [resolvedModel.backend, resolvedModel.name]; credentials
+      uses resolvedModel.roleName for the role label and model pair because its model
+      has no name field.'
+    codeRefs:
+    - class:290326aafdae1851a62f9d27fcd88b22
+    - class:32262fe0a4ca64514fa9f710e852d5e4
+    - class:c8398962d8543db56fc0b0da6c82724e
+  - id: r.breadcrumbs-chain
+    level: MUST
+    text: 'setupController must assign controller.breadcrumbs as an array of label/route/models
+      entries that leads from the backend overview, to the roles list, to the role
+      itself, and then to the sub-page label: details ends at the role name with no
+      trailing route, edit labels the role via route ''roles.role'' and appends ''edit'',
+      and credentials labels the role via route ''roles.role.details'' and appends
+      ''credentials''.'
+    codeRefs:
+    - class:290326aafdae1851a62f9d27fcd88b22
+    - class:32262fe0a4ca64514fa9f710e852d5e4
+    - class:c8398962d8543db56fc0b0da6c82724e
+    - file:third_party/openbao/ui/lib/kubernetes/addon/routes/roles/role/credentials.js
+    - file:third_party/openbao/ui/lib/kubernetes/addon/routes/roles/role/details.js
+    - file:third_party/openbao/ui/lib/kubernetes/addon/routes/roles/role/edit.js
+  - id: r.credentials-model-is-plain-object
+    level: MUST
+    text: The credentials route must not query the store; its model returns a plain
+      object with roleName taken from paramsFor('roles.role').name and backend taken
+      from the secretMountPath service, because the generated-credentials page needs
+      only the role identity and mount path.
+    codeRefs:
+    - class:32262fe0a4ca64514fa9f710e852d5e4
+    - file:third_party/openbao/ui/lib/kubernetes/addon/routes/roles/role/credentials.js
+  - id: r.details-and-edit-load-role-record
+    level: MUST
+    text: The details and edit routes must build their model by reading the backend
+      mount path from the secretMountPath service via get(), destructuring name out
+      of paramsFor('roles.role'), and returning store.queryRecord('kubernetes/role',
+      { backend, name }) so both sub-pages show the same persisted role record.
+    codeRefs:
+    - class:290326aafdae1851a62f9d27fcd88b22
+    - class:c8398962d8543db56fc0b0da6c82724e
+    - file:third_party/openbao/ui/lib/kubernetes/addon/routes/roles/role/details.js
+    - file:third_party/openbao/ui/lib/kubernetes/addon/routes/roles/role/edit.js
+  - id: r.index-redirects-to-details
+    level: MUST
+    text: 'The bare role route must not render anything itself: its redirect hook
+      calls transitionTo(''vault.cluster.secrets.backend.kubernetes.roles.role.details'')
+      on the injected ''host-router'' service, so visiting a role lands on the details
+      sub-route.'
+    codeRefs:
+    - class:d4e652ddc3de7319028bec8ac4e0f41b
+    - file:third_party/openbao/ui/lib/kubernetes/addon/routes/roles/role/index.js
+  - id: r.setupController-calls-super
+    level: MUST
+    text: Each of the details, edit and credentials routes must call super.setupController(controller,
+      resolvedModel) before touching the controller, so base Route behavior is preserved.
+    codeRefs:
+    - class:290326aafdae1851a62f9d27fcd88b22
+    - class:32262fe0a4ca64514fa9f710e852d5e4
+    - class:c8398962d8543db56fc0b0da6c82724e
+  interfaces:
+  - name: KubernetesRoleCredentialsRoute
+    kind: class
+    signature: class KubernetesRoleCredentialsRoute extends Route
+    file: third_party/openbao/ui/lib/kubernetes/addon/routes/roles/role/credentials.js
+  - name: KubernetesRoleDetailsRoute
+    kind: class
+    signature: class KubernetesRoleDetailsRoute extends Route
+    file: third_party/openbao/ui/lib/kubernetes/addon/routes/roles/role/details.js
+  - name: KubernetesRoleEditRoute
+    kind: class
+    signature: class KubernetesRoleEditRoute extends Route
+    file: third_party/openbao/ui/lib/kubernetes/addon/routes/roles/role/edit.js
+  - name: KubernetesRoleRoute
+    kind: class
+    signature: class KubernetesRoleRoute extends Route
+    file: third_party/openbao/ui/lib/kubernetes/addon/routes/roles/role/index.js
 codeRefIndex:
 - class:290326aafdae1851a62f9d27fcd88b22 KubernetesRoleEditRoute@third_party/openbao/ui/lib/kubernetes/addon/routes/roles/role/edit.js:9
 - class:32262fe0a4ca64514fa9f710e852d5e4 KubernetesRoleCredentialsRoute@third_party/openbao/ui/lib/kubernetes/addon/routes/roles/role/credentials.js:8
@@ -9,97 +103,3 @@ codeRefIndex:
 - file:third_party/openbao/ui/lib/kubernetes/addon/routes/roles/role/details.js details.js@third_party/openbao/ui/lib/kubernetes/addon/routes/roles/role/details.js
 - file:third_party/openbao/ui/lib/kubernetes/addon/routes/roles/role/edit.js edit.js@third_party/openbao/ui/lib/kubernetes/addon/routes/roles/role/edit.js
 - file:third_party/openbao/ui/lib/kubernetes/addon/routes/roles/role/index.js index.js@third_party/openbao/ui/lib/kubernetes/addon/routes/roles/role/index.js
-kind: SystemContext
-metadata:
-  name: third-party-openbao-ui-lib-kubernetes-addon-routes-roles-role
-  namespace: default
-spec:
-  intent: 'The context exists to describe the routing behavior for an individual Kubernetes
-    secrets-backend role: how the role URL resolves to a sub-page, how the backend
-    mount path and role name are turned into a model, and what breadcrumb trail each
-    sub-page presents. It is a specification of the existing Ember route classes so
-    the nested route contract (params, services, model payload, breadcrumbs) is recorded
-    rather than re-derived from the source.'
-  interfaces:
-  - file: third_party/openbao/ui/lib/kubernetes/addon/routes/roles/role/credentials.js
-    kind: class
-    name: KubernetesRoleCredentialsRoute
-    signature: class KubernetesRoleCredentialsRoute extends Route
-  - file: third_party/openbao/ui/lib/kubernetes/addon/routes/roles/role/details.js
-    kind: class
-    name: KubernetesRoleDetailsRoute
-    signature: class KubernetesRoleDetailsRoute extends Route
-  - file: third_party/openbao/ui/lib/kubernetes/addon/routes/roles/role/edit.js
-    kind: class
-    name: KubernetesRoleEditRoute
-    signature: class KubernetesRoleEditRoute extends Route
-  - file: third_party/openbao/ui/lib/kubernetes/addon/routes/roles/role/index.js
-    kind: class
-    name: KubernetesRoleRoute
-    signature: class KubernetesRoleRoute extends Route
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - class:290326aafdae1851a62f9d27fcd88b22
-    - class:32262fe0a4ca64514fa9f710e852d5e4
-    - class:c8398962d8543db56fc0b0da6c82724e
-    id: r.breadcrumb-model-wiring
-    level: SHOULD
-    text: 'Breadcrumb entries for the backend and roles list must carry models: [resolvedModel.backend]
-      so the links can rebuild the overview and roles routes, and the role-level entry
-      must carry models: [resolvedModel.backend, resolvedModel.name]; credentials
-      uses resolvedModel.roleName for the role label and model pair because its model
-      has no name field.'
-  - codeRefs:
-    - class:290326aafdae1851a62f9d27fcd88b22
-    - class:32262fe0a4ca64514fa9f710e852d5e4
-    - class:c8398962d8543db56fc0b0da6c82724e
-    - file:third_party/openbao/ui/lib/kubernetes/addon/routes/roles/role/credentials.js
-    - file:third_party/openbao/ui/lib/kubernetes/addon/routes/roles/role/details.js
-    - file:third_party/openbao/ui/lib/kubernetes/addon/routes/roles/role/edit.js
-    id: r.breadcrumbs-chain
-    level: MUST
-    text: 'setupController must assign controller.breadcrumbs as an array of label/route/models
-      entries that leads from the backend overview, to the roles list, to the role
-      itself, and then to the sub-page label: details ends at the role name with no
-      trailing route, edit labels the role via route ''roles.role'' and appends ''edit'',
-      and credentials labels the role via route ''roles.role.details'' and appends
-      ''credentials''.'
-  - codeRefs:
-    - class:32262fe0a4ca64514fa9f710e852d5e4
-    - file:third_party/openbao/ui/lib/kubernetes/addon/routes/roles/role/credentials.js
-    id: r.credentials-model-is-plain-object
-    level: MUST
-    text: The credentials route must not query the store; its model returns a plain
-      object with roleName taken from paramsFor('roles.role').name and backend taken
-      from the secretMountPath service, because the generated-credentials page needs
-      only the role identity and mount path.
-  - codeRefs:
-    - class:290326aafdae1851a62f9d27fcd88b22
-    - class:c8398962d8543db56fc0b0da6c82724e
-    - file:third_party/openbao/ui/lib/kubernetes/addon/routes/roles/role/details.js
-    - file:third_party/openbao/ui/lib/kubernetes/addon/routes/roles/role/edit.js
-    id: r.details-and-edit-load-role-record
-    level: MUST
-    text: The details and edit routes must build their model by reading the backend
-      mount path from the secretMountPath service via get(), destructuring name out
-      of paramsFor('roles.role'), and returning store.queryRecord('kubernetes/role',
-      { backend, name }) so both sub-pages show the same persisted role record.
-  - codeRefs:
-    - class:d4e652ddc3de7319028bec8ac4e0f41b
-    - file:third_party/openbao/ui/lib/kubernetes/addon/routes/roles/role/index.js
-    id: r.index-redirects-to-details
-    level: MUST
-    text: 'The bare role route must not render anything itself: its redirect hook
-      calls transitionTo(''vault.cluster.secrets.backend.kubernetes.roles.role.details'')
-      on the injected ''host-router'' service, so visiting a role lands on the details
-      sub-route.'
-  - codeRefs:
-    - class:290326aafdae1851a62f9d27fcd88b22
-    - class:32262fe0a4ca64514fa9f710e852d5e4
-    - class:c8398962d8543db56fc0b0da6c82724e
-    id: r.setupController-calls-super
-    level: MUST
-    text: Each of the details, edit and credentials routes must call super.setupController(controller,
-      resolvedModel) before touching the controller, so base Route behavior is preserved.
-  upstream: self

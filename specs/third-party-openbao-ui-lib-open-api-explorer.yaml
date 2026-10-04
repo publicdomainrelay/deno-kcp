@@ -1,11 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/ui/lib/open-api-explorer/index.js index.js@third_party/openbao/ui/lib/open-api-explorer/index.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-lib-open-api-explorer
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'The context exists so the vendored OpenBao API documentation UI can be
     built and mounted as a lazy-loaded Ember engine inside the host application. It
     pins the engine''s identity and the build configuration the engine depends on:
@@ -20,55 +20,55 @@ spec:
     third-party code rather than code authored in this repository, the context also
     preserves its HashiCorp MPL-2.0 provenance header and the eslint-disable that
     exempts Ember object state initialization from the host lint rules.'
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/ui/lib/open-api-explorer/index.js
-    id: r.babel-auto-import-plugin
+  - id: r.babel-auto-import-plugin
     level: MUST
     text: The engine's `babel` configuration must list `ember-auto-import/babel-plugin`,
       resolved through `require.resolve`, as its only Babel plugin, so ember-auto-import
       rewrites imports in the engine's build.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/open-api-explorer/index.js
-    id: r.engine-export
+  - id: r.engine-export
     level: MUST
     text: The module must export a single Ember engine class produced by `EngineAddon.extend`
       (from `ember-engines/lib/engine-addon`), with the engine `name` set to `open-api-explorer`,
       so the host application can mount it as a lazy-loaded engine.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/open-api-explorer/index.js
-    id: r.included-excludes-swagger-js
+  - id: r.included-excludes-swagger-js
     level: MUST
     text: The `included()` hook must not import Swagger UI JavaScript; the comment
       in the hook states that importing the JS dependencies here leads to their inclusion
       in `vendor.js`, so they are instead lazy-loaded through a dynamic `import()`
       in the swagger-ui.js component.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/open-api-explorer/index.js
-    id: r.included-imports-swagger-css
+  - id: r.included-imports-swagger-css
     level: MUST
     text: The `included()` hook must call `this._super.included` (applied to `this`
       with `arguments`) when that parent hook exists, then call `this.import('node_modules/swagger-ui-dist/swagger-ui.css')`,
       placing the Swagger UI stylesheet in the engine's lazy-loaded CSS bundle rather
       than the host application's vendor CSS.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/open-api-explorer/index.js
-    id: r.is-developing-addon
+  - id: r.is-developing-addon
     level: MUST
     text: '`isDevelopingAddon()` must return `true` for this vendored copy, so the
       addon is treated as under development within the third-party tree.'
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/open-api-explorer/index.js
-    id: r.lazy-loading-enabled
+  - id: r.lazy-loading-enabled
     level: MUST
     text: 'The `lazyLoading` configuration must have `enabled: true`, so the engine''s
       assets are loaded only when the host routes into the engine.'
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/open-api-explorer/index.js
-    id: r.third-party-provenance
+  - id: r.third-party-provenance
     level: SHOULD
     text: 'The file should keep the HashiCorp copyright and `SPDX-License-Identifier:
       MPL-2.0` header and the `ember/avoid-leaking-state-in-ember-objects` eslint-disable,
       since it is vendored third-party code and not authored in this repository.'
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/ui/lib/open-api-explorer/index.js
+codeRefIndex:
+- file:third_party/openbao/ui/lib/open-api-explorer/index.js index.js@third_party/openbao/ui/lib/open-api-explorer/index.js

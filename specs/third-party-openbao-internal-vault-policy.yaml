@@ -1,4 +1,440 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-internal-vault-policy
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: The context exists to describe the vendored ACL and policy store package
+    so that other parts of deno-kcp that depend on policy evaluation can be read and
+    changed without re-deriving this package's behaviour. It documents how rules are
+    parsed, how an ACL is assembled from named and templated policies, how requests
+    are checked, and how the store caches, lists and invalidates policies. It anchors
+    every statement to the actual functions and methods in the copied files.
+  requirements:
+  - id: r.acl-construction
+    level: MUST
+    text: 'NewACL builds an ACL from a policy list in the namespace carried by the
+      context: it errors when the context has no namespace, rejects any policy whose
+      Type is not the ACL type, and when a policy named root is present it must be
+      the only policy or construction fails; the root policy''s namespace becomes
+      the ACL root.'
+    codeRefs:
+    - file:third_party/openbao/internal/vault/policy/acl.go
+    - function:5772199666331f7c0f94f82198491e7c
+    - struct:62b5160d9e68721a22ab930b4b1938b3
+  - id: r.allow-operation
+    level: MUST
+    text: ACL.AllowOperation evaluates a logical.Request against the exact, prefix
+      and segment-wildcard rules and reports the outcome in ACLResults, filling in
+      whether the request is allowed, whether it comes from the root policy, whether
+      root privileges were required and any per-path permission detail; capCheckOnly
+      limits the work to a capability check.
+    codeRefs:
+    - file:third_party/openbao/internal/vault/policy/acl.go
+    - method:4ab79a60637351660208f7c4f2c7deda
+    - struct:371d5c892dfcdf97850cdaf02babeab2
+    - struct:57a79c9c6bfdb92f3ab2ba33495f8638
+  - id: r.auth-and-sentinel-results
+    level: MUST
+    text: 'AuthResults carries the combined verdict of a policy check: the ACL result,
+      the sentinel result, the final Allowed and RootPrivs flags, whether the denial
+      should be reported as an error, and a multierror aggregating failures, so callers
+      have one value describing the whole decision.'
+    codeRefs:
+    - file:third_party/openbao/internal/vault/policy/acl.go
+    - struct:de4b98edcce02741d471969e78ba3642
+    - struct:fe8c6ce3c52f7c364909dc2284c1cb76
+  - id: r.capabilities-and-nonexact
+    level: MUST
+    text: ACL.Capabilities returns the capability names granted to a path, and ACL.CheckAllowedFromNonExactPaths
+      resolves permissions from the non-exact rules for a path, optionally treating
+      it as a bare mount, returning nil when no rule applies.
+    codeRefs:
+    - file:third_party/openbao/internal/vault/policy/acl.go
+    - method:385c4428fe000811076219ea30564019
+    - method:c79bd3b75e88d2fd9c26607baad52176
+  - id: r.check-opts
+    level: MUST
+    text: CheckOpts tells the check whether root privileges are required for the request
+      and whether the request is unauthenticated, so a caller can run only external
+      policy checks against a login path.
+    codeRefs:
+    - file:third_party/openbao/internal/vault/policy/acl.go
+    - struct:57a79c9c6bfdb92f3ab2ba33495f8638
+  - id: r.clone-deep-copy
+    level: MUST
+    text: ACLPermissions.Clone and ControlGroup.Clone return deep copies of their
+      receiver and report an error rather than returning a partially copied value,
+      so merging rules never aliases the source policy's maps.
+    codeRefs:
+    - file:third_party/openbao/internal/vault/policy/policy.go
+    - method:2184800defb24e18f0dba03a3ecc5c39
+    - method:8f33ee80e8bbe8f111a332cb8b2d33fd
+  - id: r.control-group-model
+    level: MUST
+    text: 'A policy can carry control-group requirements: ControlGroup holds the factors
+      and the identity list, ControlGroupFactor names a factor, IdentityFactor describes
+      an identity-based factor with its entity and group names, and ControlGroupIdentity
+      names an entity and its groups, so the store can express and copy multi-factor
+      access conditions.'
+    codeRefs:
+    - file:third_party/openbao/internal/vault/policy/policy.go
+    - struct:05f347d1fbdc6c51bbdab5a7415843b7
+    - struct:436d5b1c473a3ddb04137ad40ba1f640
+    - struct:559109d5bbd2034ca10c2370c75c77cc
+    - struct:88615c2a235941916f17e6ba0a35d97c
+  - id: r.parse-acl-policy
+    level: MUST
+    text: ParseACLPolicy turns a raw rules string into a Policy bound to the given
+      namespace, and ParseACLPolicyWithTemplating does the same while optionally performing
+      identity templating with a list of blocked substitutions, an entity and its
+      groups; both return an error instead of a partial policy when the rules do not
+      parse.
+    codeRefs:
+    - file:third_party/openbao/internal/vault/policy/policy.go
+    - function:1d9c2c3940c5da04dbce8d9e331379c4
+    - function:ce5e405b18d53239274e1cde29e712e0
+  - id: r.policy-decode-clone
+    level: MUST
+    text: Policy.Decode materialises the policy named by the caller against a namespace,
+      and Policy.ShallowClone returns a copy that shares the path and rule data so
+      callers can rename or retype a policy without mutating the cached original.
+    codeRefs:
+    - file:third_party/openbao/internal/vault/policy/policy.go
+    - method:01c2ad9feafa4ceb043e92af913fc35f
+    - method:d83a713f7ea4d281722e0ef8e988b427
+  - id: r.policy-type
+    level: MUST
+    text: Type names the kind of policy and Type.String renders it as the text used
+      in storage paths and error messages, so a policy's type round-trips from its
+      stored name.
+    codeRefs:
+    - file:third_party/openbao/internal/vault/policy/policy.go
+    - method:deb628b9c3bba5d41c6afa6a68b3846f
+    - type_alias:8e3ac3f57ee83613aa804e40e82f2199
+  - id: r.rule-accessors
+    level: SHOULD
+    text: ACL.ExactRules and ACL.PrefixRules expose the internal radix trees and ACL.Root
+      exposes the namespace of a root ACL so that callers such as list filtering can
+      inspect the rule set directly.
+    codeRefs:
+    - file:third_party/openbao/internal/vault/policy/acl.go
+    - method:552774ae484b2143f6b5bd4511e31143
+    - method:9c5bb123f79dec394830b362c902d972
+    - method:a9f33f7f348d42e360c597d841e489fa
+  - id: r.rule-indexing
+    level: MUST
+    text: NewACL indexes each non-expired policy path into exact rules or prefix rules
+      by its IsPrefix flag, keeps segment-wildcard paths in a separate map, and clones
+      and merges permissions when several policies name the same path, so the ACL
+      holds one merged permission set per path.
+    codeRefs:
+    - file:third_party/openbao/internal/vault/policy/acl.go
+    - function:5772199666331f7c0f94f82198491e7c
+    - struct:8b3dac7fc8f3ab481be70c7b3793fae8
+  - id: r.store-acl-assembly
+    level: MUST
+    text: Store.ACL assembles an ACL from the named token policies of each namespace
+      in the policy-name map, appends any pre-fetched policies passed by the caller,
+      and for templated ACL policies re-parses the raw text with the entity and its
+      direct and inherited groups before handing everything to NewACL; it errors when
+      a namespace is missing, when a policy cannot be fetched or parsed, or when the
+      ACL cannot be constructed.
+    codeRefs:
+    - file:third_party/openbao/internal/vault/policy/policy_store.go
+    - function:5772199666331f7c0f94f82198491e7c
+    - method:dd0ae629ad8c7b89df9a52d973cd6ab6
+  - id: r.store-acl-view
+    level: MUST
+    text: Store.GetACLView returns the barrier view that holds the ACL policies for
+      a namespace, so callers read and write that namespace's policy storage instead
+      of the base view.
+    codeRefs:
+    - file:third_party/openbao/internal/vault/policy/policy_store.go
+    - method:d9104fe028812ab6b4227fae29cf9c5e
+  - id: r.store-construction
+    level: MUST
+    text: NewStore builds a policy Store over the supplied core, base barrier view,
+      system view and logger, and returns an error when the store cannot be initialised;
+      the same core supplies namespace lookup by ID, the identity store and the namespace
+      barrier view through core.NamespaceByID, core.IdentityStore and core.NamespaceView.
+    codeRefs:
+    - file:third_party/openbao/internal/vault/policy/policy_store.go
+    - function:ec220b62b95c7485cc8fd78e4854e006
+    - method:0d126139abdd9136786de2f6ffb1d1d8
+    - method:501ef09c8dae79bd9770e5826c4db6cf
+    - method:5a2df33b3cc0b32c53bb39f6f0546e3e
+    - struct:55589b5678c147cb581a7c6ccfc78f8a
+  - id: r.store-default-and-load
+    level: SHOULD
+    text: Store.LoadDefaultPolicies installs the built-in default policies when they
+      are absent, and Store.LoadACLPolicy stores the given policy text under the given
+      name, both returning an error if the write fails.
+    codeRefs:
+    - file:third_party/openbao/internal/vault/policy/policy_store.go
+    - method:56de26f3a784e2f2c3445714a7f84130
+    - method:862e5a93cdad4e55579a070d96e86a2c
+  - id: r.store-delete-and-invalidate
+    level: MUST
+    text: Store.DeletePolicy removes a named policy and Store.DeletePolicyForce removes
+      it even when it is protected from ordinary deletion; Store.Invalidate drops
+      one named policy of a type from the cache, Store.InvalidateNamespace drops every
+      cached policy of a namespace, and Store.PurgeCache clears the whole cache.
+    codeRefs:
+    - file:third_party/openbao/internal/vault/policy/policy_store.go
+    - method:1728f8a4efd8925dc0f89123c8b08bfb
+    - method:67024fed08405b79aea3c4df54ea9b4e
+    - method:6c6dfc6162a91e1f7c299f2536cfc1e5
+    - method:82e9d15f9e34778eeca7bd3a7209880c
+    - method:b10e674c11742296bbd9abf79070307c
+  - id: r.store-list
+    level: MUST
+    text: Store.ListPolicies lists stored policies of one type and Store.ListPoliciesWithPrefix
+      narrows that list to names starting with a prefix; both accept omitNonAssignable
+      and drop non-assignable policies when it is set, returning an error if the barrier
+      listing fails.
+    codeRefs:
+    - file:third_party/openbao/internal/vault/policy/policy_store.go
+    - method:3a2f0325460fe600950e469ee8b73c1e
+    - method:798df78fa8b25a2d25259650b35b811d
+  - id: r.store-name-sanitisation
+    level: MUST
+    text: Store.SanitizeName maps a caller-supplied policy name to the canonical form
+      used as the storage key, so the same policy is addressed by one name regardless
+      of the spelling given.
+    codeRefs:
+    - file:third_party/openbao/internal/vault/policy/policy_store.go
+    - method:8be19924c6ef7697f8e558f70cee8749
+  - id: r.store-set-and-get
+    level: MUST
+    text: Store.SetPolicy writes a policy to the barrier for its namespace and can
+      enforce a compare-and-swap version, while Store.GetPolicy reads a policy by
+      name and type and Store.GetNonEGPPolicyType reports the stored type of a non-endpoint-governing
+      policy, all returning errors on storage failure and nil when nothing is stored.
+    codeRefs:
+    - file:third_party/openbao/internal/vault/policy/policy_store.go
+    - method:207ba1a4feab95a4024bf1f0f7429b3d
+    - method:c90ecedb2a9deed751092ccf278372f3
+    - method:cbcfaa9c7bcac2d27131232d89f8f77a
+  - id: r.templating-substitution-limits
+    level: MUST
+    text: 'When re-parsing a templated policy the store blocks the substitutions the
+      policy did not opt into: it blocks "/" unless AllowSlashesInIdentityTemplates
+      is set, and blocks "*" and "+" unless AllowWildcardsInIdentityTemplates is set,
+      so a template can never widen a policy path beyond its declared permissions.'
+    codeRefs:
+    - file:third_party/openbao/internal/vault/policy/policy_store.go
+    - function:ce5e405b18d53239274e1cde29e712e0
+    - method:dd0ae629ad8c7b89df9a52d973cd6ab6
+  interfaces:
+  - name: ACL
+    kind: struct
+    signature: type ACL struct
+    file: third_party/openbao/internal/vault/policy/acl.go
+  - name: ACL.AllowOperation
+    kind: method
+    signature: func (a *ACL) AllowOperation(ctx context.Context, req *logical.Request,
+      capCheckOnly bool) (ret *ACLResults)
+    file: third_party/openbao/internal/vault/policy/acl.go
+  - name: ACL.Capabilities
+    kind: method
+    signature: func (a *ACL) Capabilities(ctx context.Context, path string) (pathCapabilities
+      []string)
+    file: third_party/openbao/internal/vault/policy/acl.go
+  - name: ACL.CheckAllowedFromNonExactPaths
+    kind: method
+    signature: func (a *ACL) CheckAllowedFromNonExactPaths(path string, bareMount
+      bool) *ACLPermissions
+    file: third_party/openbao/internal/vault/policy/acl.go
+  - name: ACL.ExactRules
+    kind: method
+    signature: func (a *ACL) ExactRules() *radix.Tree
+    file: third_party/openbao/internal/vault/policy/acl.go
+  - name: ACL.PrefixRules
+    kind: method
+    signature: func (a *ACL) PrefixRules() *radix.Tree
+    file: third_party/openbao/internal/vault/policy/acl.go
+  - name: ACL.Root
+    kind: method
+    signature: func (a *ACL) Root() *namespace.Namespace
+    file: third_party/openbao/internal/vault/policy/acl.go
+  - name: ACLPermissions
+    kind: struct
+    signature: type ACLPermissions struct
+    file: third_party/openbao/internal/vault/policy/policy.go
+  - name: ACLPermissions.Clone
+    kind: method
+    signature: func (p *ACLPermissions) Clone() (*ACLPermissions, error)
+    file: third_party/openbao/internal/vault/policy/policy.go
+  - name: ACLResults
+    kind: struct
+    signature: type ACLResults struct
+    file: third_party/openbao/internal/vault/policy/acl.go
+  - name: AuthResults
+    kind: struct
+    signature: type AuthResults struct
+    file: third_party/openbao/internal/vault/policy/acl.go
+  - name: CheckOpts
+    kind: struct
+    signature: type CheckOpts struct
+    file: third_party/openbao/internal/vault/policy/acl.go
+  - name: ControlGroup
+    kind: struct
+    signature: type ControlGroup struct
+    file: third_party/openbao/internal/vault/policy/policy.go
+  - name: ControlGroup.Clone
+    kind: method
+    signature: func (c *ControlGroup) Clone() (*ControlGroup, error)
+    file: third_party/openbao/internal/vault/policy/policy.go
+  - name: ControlGroupFactor
+    kind: struct
+    signature: type ControlGroupFactor struct
+    file: third_party/openbao/internal/vault/policy/policy.go
+  - name: ControlGroupIdentity
+    kind: struct
+    signature: type ControlGroupIdentity struct
+    file: third_party/openbao/internal/vault/policy/policy.go
+  - name: IdentityFactor
+    kind: struct
+    signature: type IdentityFactor struct
+    file: third_party/openbao/internal/vault/policy/policy.go
+  - name: NewACL
+    kind: function
+    signature: func NewACL(ctx context.Context, policies []*Policy) (*ACL, error)
+    file: third_party/openbao/internal/vault/policy/acl.go
+  - name: NewStore
+    kind: function
+    signature: func NewStore(ctx context.Context, core core, baseView barrier.View,
+      system logical.SystemView, logger log.Logger) (*Store, error)
+    file: third_party/openbao/internal/vault/policy/policy_store.go
+  - name: ParseACLPolicy
+    kind: function
+    signature: func ParseACLPolicy(ns *namespace.Namespace, rules string) (*Policy,
+      error)
+    file: third_party/openbao/internal/vault/policy/policy.go
+  - name: ParseACLPolicyWithTemplating
+    kind: function
+    signature: func ParseACLPolicyWithTemplating(ns *namespace.Namespace, rules string,
+      performTemplating bool, blockedSubstitutions []string, entity *identity.Entity,
+      groups []*identity.Group) (*Policy, error)
+    file: third_party/openbao/internal/vault/policy/policy.go
+  - name: PathRules
+    kind: struct
+    signature: type PathRules struct
+    file: third_party/openbao/internal/vault/policy/policy.go
+  - name: Policy
+    kind: struct
+    signature: type Policy struct
+    file: third_party/openbao/internal/vault/policy/policy.go
+  - name: Policy.Decode
+    kind: method
+    signature: func (p *Policy) Decode(name string, ns *namespace.Namespace) error
+    file: third_party/openbao/internal/vault/policy/policy.go
+  - name: Policy.ShallowClone
+    kind: method
+    signature: func (p *Policy) ShallowClone() *Policy
+    file: third_party/openbao/internal/vault/policy/policy.go
+  - name: SentinelResults
+    kind: struct
+    signature: type SentinelResults struct
+    file: third_party/openbao/internal/vault/policy/acl.go
+  - name: Store
+    kind: struct
+    signature: type Store struct
+    file: third_party/openbao/internal/vault/policy/policy_store.go
+  - name: Store.ACL
+    kind: method
+    signature: func (ps *Store) ACL(ctx context.Context, entity *identity.Entity,
+      policyNames map[string][]string, additionalPolicies ...*Policy) (*ACL, error)
+    file: third_party/openbao/internal/vault/policy/policy_store.go
+  - name: Store.DeletePolicy
+    kind: method
+    signature: func (ps *Store) DeletePolicy(ctx context.Context, name string, policyType
+      Type) error
+    file: third_party/openbao/internal/vault/policy/policy_store.go
+  - name: Store.DeletePolicyForce
+    kind: method
+    signature: func (ps *Store) DeletePolicyForce(ctx context.Context, name string,
+      policyType Type) error
+    file: third_party/openbao/internal/vault/policy/policy_store.go
+  - name: Store.GetACLView
+    kind: method
+    signature: func (ps *Store) GetACLView(ns *namespace.Namespace) barrier.View
+    file: third_party/openbao/internal/vault/policy/policy_store.go
+  - name: Store.GetNonEGPPolicyType
+    kind: method
+    signature: func (ps *Store) GetNonEGPPolicyType(ctx context.Context, name string)
+      (*Type, error)
+    file: third_party/openbao/internal/vault/policy/policy_store.go
+  - name: Store.GetPolicy
+    kind: method
+    signature: func (ps *Store) GetPolicy(ctx context.Context, name string, policyType
+      Type) (*Policy, error)
+    file: third_party/openbao/internal/vault/policy/policy_store.go
+  - name: Store.Invalidate
+    kind: method
+    signature: func (ps *Store) Invalidate(ctx context.Context, name string, policyType
+      Type) error
+    file: third_party/openbao/internal/vault/policy/policy_store.go
+  - name: Store.InvalidateNamespace
+    kind: method
+    signature: func (ps *Store) InvalidateNamespace(ctx context.Context, uuid string)
+    file: third_party/openbao/internal/vault/policy/policy_store.go
+  - name: Store.ListPolicies
+    kind: method
+    signature: func (ps *Store) ListPolicies(ctx context.Context, policyType Type,
+      omitNonAssignable bool) ([]string, error)
+    file: third_party/openbao/internal/vault/policy/policy_store.go
+  - name: Store.ListPoliciesWithPrefix
+    kind: method
+    signature: func (ps *Store) ListPoliciesWithPrefix(ctx context.Context, policyType
+      Type, prefix string, omitNonAssignable bool) ([]string, error)
+    file: third_party/openbao/internal/vault/policy/policy_store.go
+  - name: Store.LoadACLPolicy
+    kind: method
+    signature: func (ps *Store) LoadACLPolicy(ctx context.Context, policyName, policyText
+      string) error
+    file: third_party/openbao/internal/vault/policy/policy_store.go
+  - name: Store.LoadDefaultPolicies
+    kind: method
+    signature: func (ps *Store) LoadDefaultPolicies(ctx context.Context) error
+    file: third_party/openbao/internal/vault/policy/policy_store.go
+  - name: Store.PurgeCache
+    kind: method
+    signature: func (ps *Store) PurgeCache()
+    file: third_party/openbao/internal/vault/policy/policy_store.go
+  - name: Store.SanitizeName
+    kind: method
+    signature: func (ps *Store) SanitizeName(name string) string
+    file: third_party/openbao/internal/vault/policy/policy_store.go
+  - name: Store.SetPolicy
+    kind: method
+    signature: func (ps *Store) SetPolicy(ctx context.Context, p *Policy, casVersion
+      *int) error
+    file: third_party/openbao/internal/vault/policy/policy_store.go
+  - name: Type
+    kind: type
+    signature: type Type string
+    file: third_party/openbao/internal/vault/policy/policy.go
+  - name: Type.String
+    kind: method
+    signature: func (t Type) String() string
+    file: third_party/openbao/internal/vault/policy/policy.go
+  - name: core.IdentityStore
+    kind: method
+    signature: func (c *core) IdentityStore() *vaultidentity.IdentityStore
+    file: third_party/openbao/internal/vault/policy/policy_store.go
+  - name: core.NamespaceByID
+    kind: method
+    signature: func (c *core) NamespaceByID(context.Context, string) (*namespace.Namespace,
+      error)
+    file: third_party/openbao/internal/vault/policy/policy_store.go
+  - name: core.NamespaceView
+    kind: method
+    signature: func (c *core) NamespaceView(*namespace.Namespace) barrier.View
+    file: third_party/openbao/internal/vault/policy/policy_store.go
 codeRefIndex:
 - file:third_party/openbao/internal/vault/policy/acl.go acl.go@third_party/openbao/internal/vault/policy/acl.go
 - file:third_party/openbao/internal/vault/policy/acl_test.go acl_test.go@third_party/openbao/internal/vault/policy/acl_test.go
@@ -50,439 +486,3 @@ codeRefIndex:
 - struct:de4b98edcce02741d471969e78ba3642 SentinelResults@third_party/openbao/internal/vault/policy/acl.go:66
 - struct:fe8c6ce3c52f7c364909dc2284c1cb76 AuthResults@third_party/openbao/internal/vault/policy/acl.go:46
 - type_alias:8e3ac3f57ee83613aa804e40e82f2199 Type@third_party/openbao/internal/vault/policy/policy.go:66
-kind: SystemContext
-metadata:
-  name: third-party-openbao-internal-vault-policy
-  namespace: default
-spec:
-  intent: The context exists to describe the vendored ACL and policy store package
-    so that other parts of deno-kcp that depend on policy evaluation can be read and
-    changed without re-deriving this package's behaviour. It documents how rules are
-    parsed, how an ACL is assembled from named and templated policies, how requests
-    are checked, and how the store caches, lists and invalidates policies. It anchors
-    every statement to the actual functions and methods in the copied files.
-  interfaces:
-  - file: third_party/openbao/internal/vault/policy/acl.go
-    kind: struct
-    name: ACL
-    signature: type ACL struct
-  - file: third_party/openbao/internal/vault/policy/acl.go
-    kind: method
-    name: ACL.AllowOperation
-    signature: func (a *ACL) AllowOperation(ctx context.Context, req *logical.Request,
-      capCheckOnly bool) (ret *ACLResults)
-  - file: third_party/openbao/internal/vault/policy/acl.go
-    kind: method
-    name: ACL.Capabilities
-    signature: func (a *ACL) Capabilities(ctx context.Context, path string) (pathCapabilities
-      []string)
-  - file: third_party/openbao/internal/vault/policy/acl.go
-    kind: method
-    name: ACL.CheckAllowedFromNonExactPaths
-    signature: func (a *ACL) CheckAllowedFromNonExactPaths(path string, bareMount
-      bool) *ACLPermissions
-  - file: third_party/openbao/internal/vault/policy/acl.go
-    kind: method
-    name: ACL.ExactRules
-    signature: func (a *ACL) ExactRules() *radix.Tree
-  - file: third_party/openbao/internal/vault/policy/acl.go
-    kind: method
-    name: ACL.PrefixRules
-    signature: func (a *ACL) PrefixRules() *radix.Tree
-  - file: third_party/openbao/internal/vault/policy/acl.go
-    kind: method
-    name: ACL.Root
-    signature: func (a *ACL) Root() *namespace.Namespace
-  - file: third_party/openbao/internal/vault/policy/policy.go
-    kind: struct
-    name: ACLPermissions
-    signature: type ACLPermissions struct
-  - file: third_party/openbao/internal/vault/policy/policy.go
-    kind: method
-    name: ACLPermissions.Clone
-    signature: func (p *ACLPermissions) Clone() (*ACLPermissions, error)
-  - file: third_party/openbao/internal/vault/policy/acl.go
-    kind: struct
-    name: ACLResults
-    signature: type ACLResults struct
-  - file: third_party/openbao/internal/vault/policy/acl.go
-    kind: struct
-    name: AuthResults
-    signature: type AuthResults struct
-  - file: third_party/openbao/internal/vault/policy/acl.go
-    kind: struct
-    name: CheckOpts
-    signature: type CheckOpts struct
-  - file: third_party/openbao/internal/vault/policy/policy.go
-    kind: struct
-    name: ControlGroup
-    signature: type ControlGroup struct
-  - file: third_party/openbao/internal/vault/policy/policy.go
-    kind: method
-    name: ControlGroup.Clone
-    signature: func (c *ControlGroup) Clone() (*ControlGroup, error)
-  - file: third_party/openbao/internal/vault/policy/policy.go
-    kind: struct
-    name: ControlGroupFactor
-    signature: type ControlGroupFactor struct
-  - file: third_party/openbao/internal/vault/policy/policy.go
-    kind: struct
-    name: ControlGroupIdentity
-    signature: type ControlGroupIdentity struct
-  - file: third_party/openbao/internal/vault/policy/policy.go
-    kind: struct
-    name: IdentityFactor
-    signature: type IdentityFactor struct
-  - file: third_party/openbao/internal/vault/policy/acl.go
-    kind: function
-    name: NewACL
-    signature: func NewACL(ctx context.Context, policies []*Policy) (*ACL, error)
-  - file: third_party/openbao/internal/vault/policy/policy_store.go
-    kind: function
-    name: NewStore
-    signature: func NewStore(ctx context.Context, core core, baseView barrier.View,
-      system logical.SystemView, logger log.Logger) (*Store, error)
-  - file: third_party/openbao/internal/vault/policy/policy.go
-    kind: function
-    name: ParseACLPolicy
-    signature: func ParseACLPolicy(ns *namespace.Namespace, rules string) (*Policy,
-      error)
-  - file: third_party/openbao/internal/vault/policy/policy.go
-    kind: function
-    name: ParseACLPolicyWithTemplating
-    signature: func ParseACLPolicyWithTemplating(ns *namespace.Namespace, rules string,
-      performTemplating bool, blockedSubstitutions []string, entity *identity.Entity,
-      groups []*identity.Group) (*Policy, error)
-  - file: third_party/openbao/internal/vault/policy/policy.go
-    kind: struct
-    name: PathRules
-    signature: type PathRules struct
-  - file: third_party/openbao/internal/vault/policy/policy.go
-    kind: struct
-    name: Policy
-    signature: type Policy struct
-  - file: third_party/openbao/internal/vault/policy/policy.go
-    kind: method
-    name: Policy.Decode
-    signature: func (p *Policy) Decode(name string, ns *namespace.Namespace) error
-  - file: third_party/openbao/internal/vault/policy/policy.go
-    kind: method
-    name: Policy.ShallowClone
-    signature: func (p *Policy) ShallowClone() *Policy
-  - file: third_party/openbao/internal/vault/policy/acl.go
-    kind: struct
-    name: SentinelResults
-    signature: type SentinelResults struct
-  - file: third_party/openbao/internal/vault/policy/policy_store.go
-    kind: struct
-    name: Store
-    signature: type Store struct
-  - file: third_party/openbao/internal/vault/policy/policy_store.go
-    kind: method
-    name: Store.ACL
-    signature: func (ps *Store) ACL(ctx context.Context, entity *identity.Entity,
-      policyNames map[string][]string, additionalPolicies ...*Policy) (*ACL, error)
-  - file: third_party/openbao/internal/vault/policy/policy_store.go
-    kind: method
-    name: Store.DeletePolicy
-    signature: func (ps *Store) DeletePolicy(ctx context.Context, name string, policyType
-      Type) error
-  - file: third_party/openbao/internal/vault/policy/policy_store.go
-    kind: method
-    name: Store.DeletePolicyForce
-    signature: func (ps *Store) DeletePolicyForce(ctx context.Context, name string,
-      policyType Type) error
-  - file: third_party/openbao/internal/vault/policy/policy_store.go
-    kind: method
-    name: Store.GetACLView
-    signature: func (ps *Store) GetACLView(ns *namespace.Namespace) barrier.View
-  - file: third_party/openbao/internal/vault/policy/policy_store.go
-    kind: method
-    name: Store.GetNonEGPPolicyType
-    signature: func (ps *Store) GetNonEGPPolicyType(ctx context.Context, name string)
-      (*Type, error)
-  - file: third_party/openbao/internal/vault/policy/policy_store.go
-    kind: method
-    name: Store.GetPolicy
-    signature: func (ps *Store) GetPolicy(ctx context.Context, name string, policyType
-      Type) (*Policy, error)
-  - file: third_party/openbao/internal/vault/policy/policy_store.go
-    kind: method
-    name: Store.Invalidate
-    signature: func (ps *Store) Invalidate(ctx context.Context, name string, policyType
-      Type) error
-  - file: third_party/openbao/internal/vault/policy/policy_store.go
-    kind: method
-    name: Store.InvalidateNamespace
-    signature: func (ps *Store) InvalidateNamespace(ctx context.Context, uuid string)
-  - file: third_party/openbao/internal/vault/policy/policy_store.go
-    kind: method
-    name: Store.ListPolicies
-    signature: func (ps *Store) ListPolicies(ctx context.Context, policyType Type,
-      omitNonAssignable bool) ([]string, error)
-  - file: third_party/openbao/internal/vault/policy/policy_store.go
-    kind: method
-    name: Store.ListPoliciesWithPrefix
-    signature: func (ps *Store) ListPoliciesWithPrefix(ctx context.Context, policyType
-      Type, prefix string, omitNonAssignable bool) ([]string, error)
-  - file: third_party/openbao/internal/vault/policy/policy_store.go
-    kind: method
-    name: Store.LoadACLPolicy
-    signature: func (ps *Store) LoadACLPolicy(ctx context.Context, policyName, policyText
-      string) error
-  - file: third_party/openbao/internal/vault/policy/policy_store.go
-    kind: method
-    name: Store.LoadDefaultPolicies
-    signature: func (ps *Store) LoadDefaultPolicies(ctx context.Context) error
-  - file: third_party/openbao/internal/vault/policy/policy_store.go
-    kind: method
-    name: Store.PurgeCache
-    signature: func (ps *Store) PurgeCache()
-  - file: third_party/openbao/internal/vault/policy/policy_store.go
-    kind: method
-    name: Store.SanitizeName
-    signature: func (ps *Store) SanitizeName(name string) string
-  - file: third_party/openbao/internal/vault/policy/policy_store.go
-    kind: method
-    name: Store.SetPolicy
-    signature: func (ps *Store) SetPolicy(ctx context.Context, p *Policy, casVersion
-      *int) error
-  - file: third_party/openbao/internal/vault/policy/policy.go
-    kind: type
-    name: Type
-    signature: type Type string
-  - file: third_party/openbao/internal/vault/policy/policy.go
-    kind: method
-    name: Type.String
-    signature: func (t Type) String() string
-  - file: third_party/openbao/internal/vault/policy/policy_store.go
-    kind: method
-    name: core.IdentityStore
-    signature: func (c *core) IdentityStore() *vaultidentity.IdentityStore
-  - file: third_party/openbao/internal/vault/policy/policy_store.go
-    kind: method
-    name: core.NamespaceByID
-    signature: func (c *core) NamespaceByID(context.Context, string) (*namespace.Namespace,
-      error)
-  - file: third_party/openbao/internal/vault/policy/policy_store.go
-    kind: method
-    name: core.NamespaceView
-    signature: func (c *core) NamespaceView(*namespace.Namespace) barrier.View
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - file:third_party/openbao/internal/vault/policy/acl.go
-    - function:5772199666331f7c0f94f82198491e7c
-    - struct:62b5160d9e68721a22ab930b4b1938b3
-    id: r.acl-construction
-    level: MUST
-    text: 'NewACL builds an ACL from a policy list in the namespace carried by the
-      context: it errors when the context has no namespace, rejects any policy whose
-      Type is not the ACL type, and when a policy named root is present it must be
-      the only policy or construction fails; the root policy''s namespace becomes
-      the ACL root.'
-  - codeRefs:
-    - file:third_party/openbao/internal/vault/policy/acl.go
-    - method:4ab79a60637351660208f7c4f2c7deda
-    - struct:371d5c892dfcdf97850cdaf02babeab2
-    - struct:57a79c9c6bfdb92f3ab2ba33495f8638
-    id: r.allow-operation
-    level: MUST
-    text: ACL.AllowOperation evaluates a logical.Request against the exact, prefix
-      and segment-wildcard rules and reports the outcome in ACLResults, filling in
-      whether the request is allowed, whether it comes from the root policy, whether
-      root privileges were required and any per-path permission detail; capCheckOnly
-      limits the work to a capability check.
-  - codeRefs:
-    - file:third_party/openbao/internal/vault/policy/acl.go
-    - struct:de4b98edcce02741d471969e78ba3642
-    - struct:fe8c6ce3c52f7c364909dc2284c1cb76
-    id: r.auth-and-sentinel-results
-    level: MUST
-    text: 'AuthResults carries the combined verdict of a policy check: the ACL result,
-      the sentinel result, the final Allowed and RootPrivs flags, whether the denial
-      should be reported as an error, and a multierror aggregating failures, so callers
-      have one value describing the whole decision.'
-  - codeRefs:
-    - file:third_party/openbao/internal/vault/policy/acl.go
-    - method:385c4428fe000811076219ea30564019
-    - method:c79bd3b75e88d2fd9c26607baad52176
-    id: r.capabilities-and-nonexact
-    level: MUST
-    text: ACL.Capabilities returns the capability names granted to a path, and ACL.CheckAllowedFromNonExactPaths
-      resolves permissions from the non-exact rules for a path, optionally treating
-      it as a bare mount, returning nil when no rule applies.
-  - codeRefs:
-    - file:third_party/openbao/internal/vault/policy/acl.go
-    - struct:57a79c9c6bfdb92f3ab2ba33495f8638
-    id: r.check-opts
-    level: MUST
-    text: CheckOpts tells the check whether root privileges are required for the request
-      and whether the request is unauthenticated, so a caller can run only external
-      policy checks against a login path.
-  - codeRefs:
-    - file:third_party/openbao/internal/vault/policy/policy.go
-    - method:2184800defb24e18f0dba03a3ecc5c39
-    - method:8f33ee80e8bbe8f111a332cb8b2d33fd
-    id: r.clone-deep-copy
-    level: MUST
-    text: ACLPermissions.Clone and ControlGroup.Clone return deep copies of their
-      receiver and report an error rather than returning a partially copied value,
-      so merging rules never aliases the source policy's maps.
-  - codeRefs:
-    - file:third_party/openbao/internal/vault/policy/policy.go
-    - struct:05f347d1fbdc6c51bbdab5a7415843b7
-    - struct:436d5b1c473a3ddb04137ad40ba1f640
-    - struct:559109d5bbd2034ca10c2370c75c77cc
-    - struct:88615c2a235941916f17e6ba0a35d97c
-    id: r.control-group-model
-    level: MUST
-    text: 'A policy can carry control-group requirements: ControlGroup holds the factors
-      and the identity list, ControlGroupFactor names a factor, IdentityFactor describes
-      an identity-based factor with its entity and group names, and ControlGroupIdentity
-      names an entity and its groups, so the store can express and copy multi-factor
-      access conditions.'
-  - codeRefs:
-    - file:third_party/openbao/internal/vault/policy/policy.go
-    - function:1d9c2c3940c5da04dbce8d9e331379c4
-    - function:ce5e405b18d53239274e1cde29e712e0
-    id: r.parse-acl-policy
-    level: MUST
-    text: ParseACLPolicy turns a raw rules string into a Policy bound to the given
-      namespace, and ParseACLPolicyWithTemplating does the same while optionally performing
-      identity templating with a list of blocked substitutions, an entity and its
-      groups; both return an error instead of a partial policy when the rules do not
-      parse.
-  - codeRefs:
-    - file:third_party/openbao/internal/vault/policy/policy.go
-    - method:01c2ad9feafa4ceb043e92af913fc35f
-    - method:d83a713f7ea4d281722e0ef8e988b427
-    id: r.policy-decode-clone
-    level: MUST
-    text: Policy.Decode materialises the policy named by the caller against a namespace,
-      and Policy.ShallowClone returns a copy that shares the path and rule data so
-      callers can rename or retype a policy without mutating the cached original.
-  - codeRefs:
-    - file:third_party/openbao/internal/vault/policy/policy.go
-    - method:deb628b9c3bba5d41c6afa6a68b3846f
-    - type_alias:8e3ac3f57ee83613aa804e40e82f2199
-    id: r.policy-type
-    level: MUST
-    text: Type names the kind of policy and Type.String renders it as the text used
-      in storage paths and error messages, so a policy's type round-trips from its
-      stored name.
-  - codeRefs:
-    - file:third_party/openbao/internal/vault/policy/acl.go
-    - method:552774ae484b2143f6b5bd4511e31143
-    - method:9c5bb123f79dec394830b362c902d972
-    - method:a9f33f7f348d42e360c597d841e489fa
-    id: r.rule-accessors
-    level: SHOULD
-    text: ACL.ExactRules and ACL.PrefixRules expose the internal radix trees and ACL.Root
-      exposes the namespace of a root ACL so that callers such as list filtering can
-      inspect the rule set directly.
-  - codeRefs:
-    - file:third_party/openbao/internal/vault/policy/acl.go
-    - function:5772199666331f7c0f94f82198491e7c
-    - struct:8b3dac7fc8f3ab481be70c7b3793fae8
-    id: r.rule-indexing
-    level: MUST
-    text: NewACL indexes each non-expired policy path into exact rules or prefix rules
-      by its IsPrefix flag, keeps segment-wildcard paths in a separate map, and clones
-      and merges permissions when several policies name the same path, so the ACL
-      holds one merged permission set per path.
-  - codeRefs:
-    - file:third_party/openbao/internal/vault/policy/policy_store.go
-    - function:5772199666331f7c0f94f82198491e7c
-    - method:dd0ae629ad8c7b89df9a52d973cd6ab6
-    id: r.store-acl-assembly
-    level: MUST
-    text: Store.ACL assembles an ACL from the named token policies of each namespace
-      in the policy-name map, appends any pre-fetched policies passed by the caller,
-      and for templated ACL policies re-parses the raw text with the entity and its
-      direct and inherited groups before handing everything to NewACL; it errors when
-      a namespace is missing, when a policy cannot be fetched or parsed, or when the
-      ACL cannot be constructed.
-  - codeRefs:
-    - file:third_party/openbao/internal/vault/policy/policy_store.go
-    - method:d9104fe028812ab6b4227fae29cf9c5e
-    id: r.store-acl-view
-    level: MUST
-    text: Store.GetACLView returns the barrier view that holds the ACL policies for
-      a namespace, so callers read and write that namespace's policy storage instead
-      of the base view.
-  - codeRefs:
-    - file:third_party/openbao/internal/vault/policy/policy_store.go
-    - function:ec220b62b95c7485cc8fd78e4854e006
-    - method:0d126139abdd9136786de2f6ffb1d1d8
-    - method:501ef09c8dae79bd9770e5826c4db6cf
-    - method:5a2df33b3cc0b32c53bb39f6f0546e3e
-    - struct:55589b5678c147cb581a7c6ccfc78f8a
-    id: r.store-construction
-    level: MUST
-    text: NewStore builds a policy Store over the supplied core, base barrier view,
-      system view and logger, and returns an error when the store cannot be initialised;
-      the same core supplies namespace lookup by ID, the identity store and the namespace
-      barrier view through core.NamespaceByID, core.IdentityStore and core.NamespaceView.
-  - codeRefs:
-    - file:third_party/openbao/internal/vault/policy/policy_store.go
-    - method:56de26f3a784e2f2c3445714a7f84130
-    - method:862e5a93cdad4e55579a070d96e86a2c
-    id: r.store-default-and-load
-    level: SHOULD
-    text: Store.LoadDefaultPolicies installs the built-in default policies when they
-      are absent, and Store.LoadACLPolicy stores the given policy text under the given
-      name, both returning an error if the write fails.
-  - codeRefs:
-    - file:third_party/openbao/internal/vault/policy/policy_store.go
-    - method:1728f8a4efd8925dc0f89123c8b08bfb
-    - method:67024fed08405b79aea3c4df54ea9b4e
-    - method:6c6dfc6162a91e1f7c299f2536cfc1e5
-    - method:82e9d15f9e34778eeca7bd3a7209880c
-    - method:b10e674c11742296bbd9abf79070307c
-    id: r.store-delete-and-invalidate
-    level: MUST
-    text: Store.DeletePolicy removes a named policy and Store.DeletePolicyForce removes
-      it even when it is protected from ordinary deletion; Store.Invalidate drops
-      one named policy of a type from the cache, Store.InvalidateNamespace drops every
-      cached policy of a namespace, and Store.PurgeCache clears the whole cache.
-  - codeRefs:
-    - file:third_party/openbao/internal/vault/policy/policy_store.go
-    - method:3a2f0325460fe600950e469ee8b73c1e
-    - method:798df78fa8b25a2d25259650b35b811d
-    id: r.store-list
-    level: MUST
-    text: Store.ListPolicies lists stored policies of one type and Store.ListPoliciesWithPrefix
-      narrows that list to names starting with a prefix; both accept omitNonAssignable
-      and drop non-assignable policies when it is set, returning an error if the barrier
-      listing fails.
-  - codeRefs:
-    - file:third_party/openbao/internal/vault/policy/policy_store.go
-    - method:8be19924c6ef7697f8e558f70cee8749
-    id: r.store-name-sanitisation
-    level: MUST
-    text: Store.SanitizeName maps a caller-supplied policy name to the canonical form
-      used as the storage key, so the same policy is addressed by one name regardless
-      of the spelling given.
-  - codeRefs:
-    - file:third_party/openbao/internal/vault/policy/policy_store.go
-    - method:207ba1a4feab95a4024bf1f0f7429b3d
-    - method:c90ecedb2a9deed751092ccf278372f3
-    - method:cbcfaa9c7bcac2d27131232d89f8f77a
-    id: r.store-set-and-get
-    level: MUST
-    text: Store.SetPolicy writes a policy to the barrier for its namespace and can
-      enforce a compare-and-swap version, while Store.GetPolicy reads a policy by
-      name and type and Store.GetNonEGPPolicyType reports the stored type of a non-endpoint-governing
-      policy, all returning errors on storage failure and nil when nothing is stored.
-  - codeRefs:
-    - file:third_party/openbao/internal/vault/policy/policy_store.go
-    - function:ce5e405b18d53239274e1cde29e712e0
-    - method:dd0ae629ad8c7b89df9a52d973cd6ab6
-    id: r.templating-substitution-limits
-    level: MUST
-    text: 'When re-parsing a templated policy the store blocks the substitutions the
-      policy did not opt into: it blocks "/" unless AllowSlashesInIdentityTemplates
-      is set, and blocks "*" and "+" unless AllowWildcardsInIdentityTemplates is set,
-      so a template can never widen a policy path beyond its declared permissions.'
-  upstream: self

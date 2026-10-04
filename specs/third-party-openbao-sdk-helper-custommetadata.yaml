@@ -1,14 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/sdk/helper/custommetadata/custom_metadata.go custom_metadata.go@third_party/openbao/sdk/helper/custommetadata/custom_metadata.go
-- file:third_party/openbao/sdk/helper/custommetadata/custom_metadata_test.go custom_metadata_test.go@third_party/openbao/sdk/helper/custommetadata/custom_metadata_test.go
-- function:033e2afedd4e010b8e905d90383c072f Validate@third_party/openbao/sdk/helper/custommetadata/custom_metadata.go:59
-- function:36566084e5022d041b516ae815d08b53 Parse@third_party/openbao/sdk/helper/custommetadata/custom_metadata.go:31
 kind: SystemContext
 metadata:
   name: third-party-openbao-sdk-helper-custommetadata
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'This context exists so the repository records the contract of the custommetadata
     helper as referenceable specification rather than as vendored OpenBao source.
     Custom metadata is the arbitrary user-supplied key-value supplemental information
@@ -19,95 +16,98 @@ spec:
     the vendored package, and makes the nil-filtering rule of Parse explicit, since
     a null value is meaningful only during a patch and is otherwise flattened to an
     empty string.'
-  interfaces:
-  - file: third_party/openbao/sdk/helper/custommetadata/custom_metadata.go
-    kind: function
-    name: Parse
-    signature: func Parse(raw map[string]any, filterNils bool) (map[string]string,
-      error)
-  - file: third_party/openbao/sdk/helper/custommetadata/custom_metadata.go
-    kind: function
-    name: Validate
-    signature: func Validate(cm map[string]string) error
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - function:36566084e5022d041b516ae815d08b53
-    id: r.parse-decode-error-aborts
+  - id: r.parse-decode-error-aborts
     level: MUST
     text: When WeakDecode fails for any value, Parse returns a nil map together with
       the decode error and adds no further entries, so a partially converted payload
       never reaches the caller.
-  - codeRefs:
+    codeRefs:
     - function:36566084e5022d041b516ae815d08b53
-    id: r.parse-filter-nils
+  - id: r.parse-filter-nils
     level: MUST
     text: Parse skips a key entirely when filterNils is true and its value is nil;
       when filterNils is false the nil value is decoded normally and therefore becomes
       an empty string in the result, because the filter flag is only meant for patch
       operations where null signals removal of the field.
-  - codeRefs:
+    codeRefs:
     - function:36566084e5022d041b516ae815d08b53
-    id: r.parse-preserves-keys
+  - id: r.parse-preserves-keys
     level: MUST
     text: Parse carries every non-skipped input key over to the result unchanged;
       it does not rename, normalize or drop keys on any ground other than the nil
       filter.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/custommetadata/custom_metadata.go
+    codeRefs:
     - function:36566084e5022d041b516ae815d08b53
-    id: r.parse-weak-decodes-values
+  - id: r.parse-weak-decodes-values
     level: MUST
     text: Parse walks every key of the raw map[string]any payload and converts the
       value at that key into a string with mapstructure.WeakDecode, writing the result
       into a newly allocated map[string]string under the same key, so textual, numeric
       and other weakly decodable values all land as their string form.
-  - codeRefs:
-    - function:033e2afedd4e010b8e905d90383c072f
-    id: r.validate-collect-all-errors
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/custommetadata/custom_metadata.go
+    - function:36566084e5022d041b516ae815d08b53
+  - id: r.validate-collect-all-errors
     level: MUST
     text: Validate accumulates per-entry failures in a multierror rather than stopping
       at the first one, and returns errs.ErrorOrNil() so that a payload with several
       violations yields all of them and a clean payload yields nil.
-  - codeRefs:
+    codeRefs:
     - function:033e2afedd4e010b8e905d90383c072f
-    id: r.validate-error-prefix
+  - id: r.validate-error-prefix
     level: MUST
     text: Every error message Validate produces begins with the validationErrorPrefix
       constant, whose value is the string "custom_metadata validation failed", followed
       by a colon and the specific limit or condition that was violated.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/custommetadata/custom_metadata.go
+    codeRefs:
     - function:033e2afedd4e010b8e905d90383c072f
-    id: r.validate-key-count-short-circuit
+  - id: r.validate-key-count-short-circuit
     level: MUST
     text: Validate first measures the number of entries in the metadata map and, when
       that count exceeds maxKeys (64), returns immediately with a single error naming
       the limit and the provided count, without running any per-key or per-value check.
-  - codeRefs:
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/custommetadata/custom_metadata.go
     - function:033e2afedd4e010b8e905d90383c072f
-    id: r.validate-length-bounds
+  - id: r.validate-length-bounds
     level: MUST
     text: At or below the key-count limit, Validate checks each entry and reports
       an error when the key length is zero or greater than maxKeyLength (128), and
       separately when the value length is zero or greater than maxValueLength (512),
       so empty keys and empty values are both rejected.
-  - codeRefs:
+    codeRefs:
     - function:033e2afedd4e010b8e905d90383c072f
-    id: r.validate-printable
+  - id: r.validate-printable
     level: MUST
     text: Validate rejects any key or value that strutil.Printable does not accept,
       reporting unprintable characters separately for the key and for the value; the
       key error repeats the key unquoted in a second %s slot so that the offending
       key is identifiable even when the unprintable characters are not visible.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/custommetadata/custom_metadata_test.go
+    codeRefs:
     - function:033e2afedd4e010b8e905d90383c072f
-    id: r.validate-test-coverage
+  - id: r.validate-test-coverage
     level: SHOULD
     text: Validate stays covered by the table-driven TestValidate, whose cases pass
       a well-formed three-entry map, a map with more than maxKeys entries, an over-long
       key, an over-long value, and a key and a value each containing a zero-width
       space; each case runs as a parallel subtest and asserts an error exactly when
       shouldPass is false.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/custommetadata/custom_metadata_test.go
+    - function:033e2afedd4e010b8e905d90383c072f
+  interfaces:
+  - name: Parse
+    kind: function
+    signature: func Parse(raw map[string]any, filterNils bool) (map[string]string,
+      error)
+    file: third_party/openbao/sdk/helper/custommetadata/custom_metadata.go
+  - name: Validate
+    kind: function
+    signature: func Validate(cm map[string]string) error
+    file: third_party/openbao/sdk/helper/custommetadata/custom_metadata.go
+codeRefIndex:
+- file:third_party/openbao/sdk/helper/custommetadata/custom_metadata.go custom_metadata.go@third_party/openbao/sdk/helper/custommetadata/custom_metadata.go
+- file:third_party/openbao/sdk/helper/custommetadata/custom_metadata_test.go custom_metadata_test.go@third_party/openbao/sdk/helper/custommetadata/custom_metadata_test.go
+- function:033e2afedd4e010b8e905d90383c072f Validate@third_party/openbao/sdk/helper/custommetadata/custom_metadata.go:59
+- function:36566084e5022d041b516ae815d08b53 Parse@third_party/openbao/sdk/helper/custommetadata/custom_metadata.go:31

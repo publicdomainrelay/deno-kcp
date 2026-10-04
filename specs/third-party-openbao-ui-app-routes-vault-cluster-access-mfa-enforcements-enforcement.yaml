@@ -1,13 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- class:1ceca47d6f273ffa24bcc7ce879e48f2 MfaLoginEnforcementEditRoute@third_party/openbao/ui/app/routes/vault/cluster/access/mfa/enforcements/enforcement/edit.js:8
-- file:third_party/openbao/ui/app/routes/vault/cluster/access/mfa/enforcements/enforcement/edit.js
-  edit.js@third_party/openbao/ui/app/routes/vault/cluster/access/mfa/enforcements/enforcement/edit.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-app-routes-vault-cluster-access-mfa-enforcements-enforcement
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'This context exists to record the edit route of the cluster access MFA
     login enforcement resource in the OpenBao UI, so that the route hierarchy and
     the extensions of Ember''s Route class in that part of the app are documented
@@ -16,50 +14,52 @@ spec:
     on the framework''s default route behavior and on the route''s position in the
     router map, so any future change to the model loading or controller setup for
     that screen has to be introduced here rather than assumed to already exist.'
-  interfaces:
-  - file: third_party/openbao/ui/app/routes/vault/cluster/access/mfa/enforcements/enforcement/edit.js
-    kind: class
-    name: MfaLoginEnforcementEditRoute
-    signature: export default class MfaLoginEnforcementEditRoute extends Route {}
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - class:1ceca47d6f273ffa24bcc7ce879e48f2
-    - file:third_party/openbao/ui/app/routes/vault/cluster/access/mfa/enforcements/enforcement/edit.js
-    id: r.default-export-route-class
+  - id: r.default-export-route-class
     level: MUST
     text: The module third_party/openbao/ui/app/routes/vault/cluster/access/mfa/enforcements/enforcement/edit.js
       must default-export a class named MfaLoginEnforcementEditRoute, because the
       Ember router resolves the edit route for the cluster access MFA login enforcement
       resource by module path and expects the default export to be the route class.
-  - codeRefs:
+    codeRefs:
     - class:1ceca47d6f273ffa24bcc7ce879e48f2
-    id: r.extends-ember-route
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/mfa/enforcements/enforcement/edit.js
+  - id: r.extends-ember-route
     level: MUST
     text: MfaLoginEnforcementEditRoute must extend Ember's Route base class, so that
       the route participates in the standard Ember routing lifecycle for the edit
       URL of an MFA login enforcement.
-  - codeRefs:
+    codeRefs:
     - class:1ceca47d6f273ffa24bcc7ce879e48f2
-    id: r.no-controller-setup-override
+  - id: r.no-controller-setup-override
     level: MUST
     text: MfaLoginEnforcementEditRoute must not override setupController, resetController,
       beforeModel or afterModel, so the edit screen keeps the inherited controller
       wiring and no route-specific side effects run on enter or exit.
-  - codeRefs:
+    codeRefs:
     - class:1ceca47d6f273ffa24bcc7ce879e48f2
-    id: r.no-injected-dependencies
+  - id: r.no-injected-dependencies
     level: MAY
     text: MfaLoginEnforcementEditRoute may remain free of injected services and of
       any own properties or methods; if services are ever needed for the edit screen,
       they must be added to this class rather than assumed to be present.
-  - codeRefs:
+    codeRefs:
     - class:1ceca47d6f273ffa24bcc7ce879e48f2
-    - file:third_party/openbao/ui/app/routes/vault/cluster/access/mfa/enforcements/enforcement/edit.js
-    id: r.no-model-hook
+  - id: r.no-model-hook
     level: MUST
     text: 'MfaLoginEnforcementEditRoute must declare an empty class body: it must
       not define a model hook, so loading of the enforcement record for the edit screen
       is left to the framework''s default model resolution (the route''s dynamic segment
       plus the default store lookup) rather than to code in this route.'
-  upstream: self
+    codeRefs:
+    - class:1ceca47d6f273ffa24bcc7ce879e48f2
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/mfa/enforcements/enforcement/edit.js
+  interfaces:
+  - name: MfaLoginEnforcementEditRoute
+    kind: class
+    signature: export default class MfaLoginEnforcementEditRoute extends Route {}
+    file: third_party/openbao/ui/app/routes/vault/cluster/access/mfa/enforcements/enforcement/edit.js
+codeRefIndex:
+- class:1ceca47d6f273ffa24bcc7ce879e48f2 MfaLoginEnforcementEditRoute@third_party/openbao/ui/app/routes/vault/cluster/access/mfa/enforcements/enforcement/edit.js:8
+- file:third_party/openbao/ui/app/routes/vault/cluster/access/mfa/enforcements/enforcement/edit.js
+  edit.js@third_party/openbao/ui/app/routes/vault/cluster/access/mfa/enforcements/enforcement/edit.js

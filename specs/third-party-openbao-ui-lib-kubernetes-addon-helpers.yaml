@@ -1,12 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- class:d0f222f7db6aa4f4d2ad9e72f0099d51 CurrentMountPathHelper@third_party/openbao/ui/lib/kubernetes/addon/helpers/current-mount-path.js:10
-- file:third_party/openbao/ui/lib/kubernetes/addon/helpers/current-mount-path.js current-mount-path.js@third_party/openbao/ui/lib/kubernetes/addon/helpers/current-mount-path.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-lib-kubernetes-addon-helpers
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'This context exists so the Kubernetes addon portion of the OpenBao UI can
     expose the currently viewed secret mount path to its templates without each template
     reaching into the secretMountPath service directly. The helper is a thin template-facing
@@ -14,36 +13,37 @@ spec:
     state as a helper value. It exists because the addon lives in its own Ember engine
     with its own helper namespace, so it needs a local copy of the helper rather than
     a cross-engine import from the app or the pki addon.'
-  interfaces:
-  - file: third_party/openbao/ui/lib/kubernetes/addon/helpers/current-mount-path.js
-    kind: class
-    name: CurrentMountPathHelper
-    signature: export default class CurrentMountPathHelper extends Helper { @service
-      secretMountPath; compute() }
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - class:d0f222f7db6aa4f4d2ad9e72f0099d51
-    - file:third_party/openbao/ui/lib/kubernetes/addon/helpers/current-mount-path.js
-    id: r.compute-returns-current-path
+  - id: r.compute-returns-current-path
     level: MUST
     text: The compute method must take no arguments and return this.secretMountPath.currentPath,
       so the helper's template value is always the path of the secret mount currently
       being viewed and stays live as the service's currentPath changes.
-  - codeRefs:
+    codeRefs:
     - class:d0f222f7db6aa4f4d2ad9e72f0099d51
     - file:third_party/openbao/ui/lib/kubernetes/addon/helpers/current-mount-path.js
-    id: r.export-default-helper-class
+  - id: r.export-default-helper-class
     level: MUST
     text: The module must default-export a class named CurrentMountPathHelper that
       extends Ember's Helper base class, so the Kubernetes addon's template resolver
       can look it up as the current-mount-path helper.
-  - codeRefs:
+    codeRefs:
     - class:d0f222f7db6aa4f4d2ad9e72f0099d51
     - file:third_party/openbao/ui/lib/kubernetes/addon/helpers/current-mount-path.js
-    id: r.inject-secret-mount-path-service
+  - id: r.inject-secret-mount-path-service
     level: MUST
     text: The class must declare a secretMountPath property injected via the @service
       decorator, so the helper reads mount state from the shared service instead of
       holding its own copy.
-  upstream: self
+    codeRefs:
+    - class:d0f222f7db6aa4f4d2ad9e72f0099d51
+    - file:third_party/openbao/ui/lib/kubernetes/addon/helpers/current-mount-path.js
+  interfaces:
+  - name: CurrentMountPathHelper
+    kind: class
+    signature: export default class CurrentMountPathHelper extends Helper { @service
+      secretMountPath; compute() }
+    file: third_party/openbao/ui/lib/kubernetes/addon/helpers/current-mount-path.js
+codeRefIndex:
+- class:d0f222f7db6aa4f4d2ad9e72f0099d51 CurrentMountPathHelper@third_party/openbao/ui/lib/kubernetes/addon/helpers/current-mount-path.js:10
+- file:third_party/openbao/ui/lib/kubernetes/addon/helpers/current-mount-path.js current-mount-path.js@third_party/openbao/ui/lib/kubernetes/addon/helpers/current-mount-path.js

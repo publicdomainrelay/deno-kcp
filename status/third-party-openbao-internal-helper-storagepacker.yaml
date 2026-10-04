@@ -1,215 +1,215 @@
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: c3313364eb266bb302d1b8709edc1eae89233e5b72d7e8a880078fb18692249c
+realizedSpecHash: fb32864fd92ffe1bed15dd6b756cfce9d6dc684443c577eb5a10312879894fa1
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
+- type: CodeSynced
+  status: "True"
   reason: InterfacesObserved
-  status: "True"
-  type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+  message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+- type: Drifted
   status: "False"
-  type: Drifted
-- message: the spec passes the validator
-  reason: ValidatorPassed
+  reason: FingerprintEqual
+  message: observed facts match the synced fingerprint
+- type: SpecValid
   status: "True"
-  type: SpecValid
+  reason: ValidatorPassed
+  message: the spec passes the validator
 observed:
   files:
   - third_party/openbao/internal/helper/storagepacker/storagepacker.go
   - third_party/openbao/internal/helper/storagepacker/storagepacker_test.go
   - third_party/openbao/internal/helper/storagepacker/types.pb.go
-  fingerprint: c3313364eb266bb302d1b8709edc1eae89233e5b72d7e8a880078fb18692249c
   interfaces:
-  - codegraphId: struct:0f854771b8ae5763bc97cb1892ca0543
-    file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
+  - name: StoragePacker
     kind: struct
+    file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
     line: 32
-    name: StoragePacker
-  - codegraphId: method:592d9a518c0875805f12e02d90a339ac
-    file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
+    codegraphId: struct:0f854771b8ae5763bc97cb1892ca0543
+  - name: StoragePacker.View
     kind: method
-    line: 40
-    name: StoragePacker.View
     signature: () logical.Storage
-  - codegraphId: method:a8c57b82f9f33f23ee6e78eab5d295d0
     file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
+    line: 40
+    codegraphId: method:592d9a518c0875805f12e02d90a339ac
+  - name: StoragePacker.GetBucket
     kind: method
-    line: 45
-    name: StoragePacker.GetBucket
     signature: (ctx context.Context, key string) (*Bucket, error)
-  - codegraphId: method:4ea68f2b375a5eea6b98426d184a0d6f
     file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
+    line: 45
+    codegraphId: method:a8c57b82f9f33f23ee6e78eab5d295d0
+  - name: StoragePacker.GetBucketWithStorage
     kind: method
-    line: 49
-    name: StoragePacker.GetBucketWithStorage
     signature: (ctx context.Context, view logical.Storage, key string) (*Bucket, error)
-  - codegraphId: method:6ac054bf900c8bf5d29f5e78a2b77532
     file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
+    line: 49
+    codegraphId: method:4ea68f2b375a5eea6b98426d184a0d6f
+  - name: StoragePacker.BucketKey
     kind: method
-    line: 121
-    name: StoragePacker.BucketKey
     signature: (itemID string) string
-  - codegraphId: method:66509edfc33ffcf1d787d17b0fb16637
     file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
+    line: 121
+    codegraphId: method:6ac054bf900c8bf5d29f5e78a2b77532
+  - name: StoragePacker.DeleteItem
     kind: method
-    line: 134
-    name: StoragePacker.DeleteItem
     signature: (ctx context.Context, itemID string) error
-  - codegraphId: method:1546f4edd249d0d3695dd4c507553908
     file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
+    line: 134
+    codegraphId: method:66509edfc33ffcf1d787d17b0fb16637
+  - name: StoragePacker.DeleteItemWithStorage
     kind: method
-    line: 138
-    name: StoragePacker.DeleteItemWithStorage
     signature: (ctx context.Context, view logical.Storage, itemID string) error
-  - codegraphId: method:bab2d31f24172605e8831608bac645b9
     file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
+    line: 138
+    codegraphId: method:1546f4edd249d0d3695dd4c507553908
+  - name: StoragePacker.DeleteMultipleItems
     kind: method
-    line: 142
-    name: StoragePacker.DeleteMultipleItems
     signature: (ctx context.Context, logger hclog.Logger, itemIDs []string) error
-  - codegraphId: method:321be0b131494579b3aa1319e004d6a7
     file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
+    line: 142
+    codegraphId: method:bab2d31f24172605e8831608bac645b9
+  - name: StoragePacker.DeleteMultipleItemsWithStorage
     kind: method
-    line: 146
-    name: StoragePacker.DeleteMultipleItemsWithStorage
     signature: (ctx context.Context, logger hclog.Logger, view logical.Storage, itemIDs
       []string) error
-  - codegraphId: method:2cfbb5f821065e71d5924e7165ee98f9
     file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
+    line: 146
+    codegraphId: method:321be0b131494579b3aa1319e004d6a7
+  - name: StoragePacker.GetItem
     kind: method
-    line: 284
-    name: StoragePacker.GetItem
     signature: (itemID string) (*Item, error)
-  - codegraphId: method:1159578d7a4da3a9fd69f7f0e4306da1
     file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
+    line: 284
+    codegraphId: method:2cfbb5f821065e71d5924e7165ee98f9
+  - name: StoragePacker.GetItemWithStorage
     kind: method
-    line: 288
-    name: StoragePacker.GetItemWithStorage
     signature: (view logical.Storage, itemID string) (*Item, error)
-  - codegraphId: method:7e26b61e01086a228327a23a0b563a8b
     file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
+    line: 288
+    codegraphId: method:1159578d7a4da3a9fd69f7f0e4306da1
+  - name: StoragePacker.PutItem
     kind: method
-    line: 317
-    name: StoragePacker.PutItem
     signature: (ctx context.Context, item *Item) error
-  - codegraphId: method:9e2ec9cf1ba6e22915319d5d5005eefa
     file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
+    line: 317
+    codegraphId: method:7e26b61e01086a228327a23a0b563a8b
+  - name: StoragePacker.PutItemWithStorage
     kind: method
-    line: 321
-    name: StoragePacker.PutItemWithStorage
     signature: (ctx context.Context, view logical.Storage, item *Item) error
-  - codegraphId: method:611e4ddd411a973ce4af46b88d4fa0c4
     file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
+    line: 321
+    codegraphId: method:9e2ec9cf1ba6e22915319d5d5005eefa
+  - name: StoragePacker.SwapItem
     kind: method
-    line: 381
-    name: StoragePacker.SwapItem
     signature: (ctx context.Context, oldId string, item *Item) error
-  - codegraphId: function:4892f08282d073624e43f94ce475fee6
     file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
+    line: 381
+    codegraphId: method:611e4ddd411a973ce4af46b88d4fa0c4
+  - name: NewStoragePacker
     kind: function
-    line: 400
-    name: NewStoragePacker
     signature: (view logical.Storage, logger hclog.Logger, viewPrefix string) (*StoragePacker,
       error)
-  - codegraphId: struct:9454ff7b70791135edc179fc55d3dab1
-    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
+    file: third_party/openbao/internal/helper/storagepacker/storagepacker.go
+    line: 400
+    codegraphId: function:4892f08282d073624e43f94ce475fee6
+  - name: Item
     kind: struct
+    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
     line: 29
-    name: Item
-  - codegraphId: method:5e3fdf8c8f26162e96b2b161c8aa945d
-    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
+    codegraphId: struct:9454ff7b70791135edc179fc55d3dab1
+  - name: Item.Reset
     kind: method
+    signature: ()
+    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
     line: 43
-    name: Item.Reset
-    signature: ()
-  - codegraphId: method:f78bce098659e1f682294a1005489e26
-    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
+    codegraphId: method:5e3fdf8c8f26162e96b2b161c8aa945d
+  - name: Item.String
     kind: method
+    signature: () string
+    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
     line: 50
-    name: Item.String
-    signature: () string
-  - codegraphId: method:7e694fa25e23670857c162a3e4cd9a81
-    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
+    codegraphId: method:f78bce098659e1f682294a1005489e26
+  - name: Item.ProtoMessage
     kind: method
+    signature: ()
+    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
     line: 54
-    name: Item.ProtoMessage
-    signature: ()
-  - codegraphId: method:bc645d9e7dfa3df175ac7ac28c113743
-    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
+    codegraphId: method:7e694fa25e23670857c162a3e4cd9a81
+  - name: Item.ProtoReflect
     kind: method
+    signature: () protoreflect.Message
+    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
     line: 56
-    name: Item.ProtoReflect
-    signature: () protoreflect.Message
-  - codegraphId: method:049b1e8a2dd343e87780ea246edd3ef8
-    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
+    codegraphId: method:bc645d9e7dfa3df175ac7ac28c113743
+  - name: Item.Descriptor
     kind: method
+    signature: () ([]byte, []int)
+    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
     line: 69
-    name: Item.Descriptor
-    signature: () ([]byte, []int)
-  - codegraphId: method:adfd6fa74f9b4444771acf4ae78c244c
-    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
+    codegraphId: method:049b1e8a2dd343e87780ea246edd3ef8
+  - name: Item.GetID
     kind: method
+    signature: () string
+    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
     line: 73
-    name: Item.GetID
-    signature: () string
-  - codegraphId: method:76bff3d9582c9ee1235c855401a80d84
-    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
+    codegraphId: method:adfd6fa74f9b4444771acf4ae78c244c
+  - name: Item.GetMessage
     kind: method
-    line: 80
-    name: Item.GetMessage
     signature: () *anypb.Any
-  - codegraphId: struct:f591721ec484a2e5c1dd5e3324c995e9
     file: third_party/openbao/internal/helper/storagepacker/types.pb.go
+    line: 80
+    codegraphId: method:76bff3d9582c9ee1235c855401a80d84
+  - name: Bucket
     kind: struct
+    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
     line: 93
-    name: Bucket
-  - codegraphId: method:c81e2f6b6bcfff728d51c1107803927f
-    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
+    codegraphId: struct:f591721ec484a2e5c1dd5e3324c995e9
+  - name: Bucket.Reset
     kind: method
+    signature: ()
+    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
     line: 105
-    name: Bucket.Reset
-    signature: ()
-  - codegraphId: method:179f3e948667946b5b546752ec7bc650
-    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
+    codegraphId: method:c81e2f6b6bcfff728d51c1107803927f
+  - name: Bucket.String
     kind: method
+    signature: () string
+    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
     line: 112
-    name: Bucket.String
-    signature: () string
-  - codegraphId: method:d8de1235f153a06f89034f59b08c58c1
-    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
+    codegraphId: method:179f3e948667946b5b546752ec7bc650
+  - name: Bucket.ProtoMessage
     kind: method
-    line: 116
-    name: Bucket.ProtoMessage
     signature: ()
-  - codegraphId: method:5605698b6e4089f58fb86f8b2b65ad2b
     file: third_party/openbao/internal/helper/storagepacker/types.pb.go
+    line: 116
+    codegraphId: method:d8de1235f153a06f89034f59b08c58c1
+  - name: Bucket.ProtoReflect
     kind: method
-    line: 118
-    name: Bucket.ProtoReflect
     signature: () protoreflect.Message
-  - codegraphId: method:10e9b5e3715357f041973d7049de9074
     file: third_party/openbao/internal/helper/storagepacker/types.pb.go
+    line: 118
+    codegraphId: method:5605698b6e4089f58fb86f8b2b65ad2b
+  - name: Bucket.Descriptor
     kind: method
-    line: 131
-    name: Bucket.Descriptor
     signature: () ([]byte, []int)
-  - codegraphId: method:42f3f9816b6a170b513393fffff43893
     file: third_party/openbao/internal/helper/storagepacker/types.pb.go
+    line: 131
+    codegraphId: method:10e9b5e3715357f041973d7049de9074
+  - name: Bucket.GetKey
     kind: method
-    line: 135
-    name: Bucket.GetKey
     signature: () string
-  - codegraphId: method:83e51dd628dadb708809a6bf4cf9db29
     file: third_party/openbao/internal/helper/storagepacker/types.pb.go
+    line: 135
+    codegraphId: method:42f3f9816b6a170b513393fffff43893
+  - name: Bucket.GetItems
     kind: method
-    line: 142
-    name: Bucket.GetItems
     signature: () []*Item
-  - codegraphId: method:c071787e1e36cf1ccf963bf9475cbad7
     file: third_party/openbao/internal/helper/storagepacker/types.pb.go
+    line: 142
+    codegraphId: method:83e51dd628dadb708809a6bf4cf9db29
+  - name: Bucket.GetItemMap
     kind: method
-    line: 149
-    name: Bucket.GetItemMap
     signature: () map[string]*anypb.Any
-realizedSpecHash: fb32864fd92ffe1bed15dd6b756cfce9d6dc684443c577eb5a10312879894fa1
-syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-syncedFingerprint: c3313364eb266bb302d1b8709edc1eae89233e5b72d7e8a880078fb18692249c
+    file: third_party/openbao/internal/helper/storagepacker/types.pb.go
+    line: 149
+    codegraphId: method:c071787e1e36cf1ccf963bf9475cbad7
+  fingerprint: c3313364eb266bb302d1b8709edc1eae89233e5b72d7e8a880078fb18692249c

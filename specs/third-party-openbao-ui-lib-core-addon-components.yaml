@@ -1,4 +1,351 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-ui-lib-core-addon-components
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'This context exists to pin down the contract of the third-party OpenBao
+    UI core addon before any local modification, so that work in deno-kcp treats this
+    vendored component set as an interface rather than as free-form markup. It records
+    which modules exist at which path, which class each module exports, and the few
+    behaviours the observed code proves: how AlertBanner validates its type argument,
+    how CheckboxGrid derives and reports checked values, how AutocompleteInput binds
+    its dropdown API and input element, and how AlertInlineComponent and BoxRadio
+    compute their display strings. The specification gives later changes a named surface
+    to keep compatible, and marks the component families that must stay grouped so
+    templates referencing them keep resolving.'
+  requirements:
+  - id: r.alert-banner-requires-type-argument
+    level: MUST
+    text: AlertBanner.alertType asserts when the type argument is missing and otherwise
+      passes [type] through messageTypes, so an untyped banner fails loudly instead
+      of rendering unstyled.
+    codeRefs:
+    - class:0ea7465fdf8e8cc2a735db5c406d3ec1
+    - file:third_party/openbao/ui/lib/core/addon/components/alert-banner.js
+  - id: r.alert-inline-refresh-state
+    level: MUST
+    text: AlertInlineComponent keeps an isRefreshing property and exposes refresh()
+      plus mimicRefresh(), and derives paddingTop, isMarginless, sizeSmall, textClass
+      and alertType from its arguments, so callers can trigger a refresh and the banner
+      reports its own visual variant.
+    codeRefs:
+    - class:34017146cd29f13bafa7839289826ba3
+    - file:third_party/openbao/ui/lib/core/addon/components/alert-inline.js
+  - id: r.autocomplete-input-element-and-dropdown-binding
+    level: MUST
+    text: AutocompleteInput holds dropdownAPI and inputElement, wires them through
+      setDropdownAPI and setElement, and handles interaction in onInput and selectOption,
+      so the component operates the underlying dropdown element it was handed.
+    codeRefs:
+    - class:49404c7ed3d87be02764bde96c307a0b
+    - file:third_party/openbao/ui/lib/core/addon/components/autocomplete-input.js
+  - id: r.box-radio-tooltip-fallback
+    level: SHOULD
+    text: BoxRadio.tooltipMessage returns the tooltipMessage argument when supplied
+      and otherwise the literal 'This option is not available to you at this time.',
+      so a disabled option always explains itself.
+    codeRefs:
+    - class:0e9d565dc24a318aceb4a47e51084497
+    - file:third_party/openbao/ui/lib/core/addon/components/box-radio.js
+  - id: r.checkbox-grid-change-reads-input-element
+    level: MUST
+    text: CheckboxGrid.checkboxChange consumes an HTMLElementEvent<HTMLInputElement>
+      so a checkbox toggle is reported from the DOM element rather than from component
+      state.
+    codeRefs:
+    - class:22bb5d45f5ba37bc82eb3a8e7412822d
+    - method:dfa03fd9ac775b70ef877f47afb371a9
+  - id: r.checkbox-grid-derives-checked-flags
+    level: MUST
+    text: CheckboxGrid.checkboxes maps each entry of the fields argument to a copy
+      carrying value set from membership in the value argument list, so rendering
+      is a pure projection of the current selection.
+    codeRefs:
+    - class:22bb5d45f5ba37bc82eb3a8e7412822d
+    - method:c17e591b6211048d86c857676f908c40
+  - id: r.components-default-export-one-class
+    level: MUST
+    text: Each file under third_party/openbao/ui/lib/core/addon/components/ default-exports
+      exactly one Ember Component subclass whose name matches the module, so templates
+      can resolve it by file name.
+    codeRefs:
+    - file:third_party/openbao/ui/lib/core/addon/components/alert-banner.js
+    - file:third_party/openbao/ui/lib/core/addon/components/checkbox-grid.ts
+    - file:third_party/openbao/ui/lib/core/addon/components/modal.js
+  - id: r.dialog-family-composition
+    level: MUST
+    text: Dialog behaviour stays split across ModalComponent for the generic overlay,
+      ConfirmationModal for confirm-style prompts, and ConfirmActionComponent for
+      wrapping an action behind a confirmation, so each caller picks the narrowest
+      one.
+    codeRefs:
+    - class:96f0f2e4f4b1175df5b1d2af37fd1091
+    - class:a67d68843c80485a4fa42db944265f0b
+    - class:febdf7ec704cbc54587897bb7c3a3783
+  - id: r.form-field-family-composition
+    level: MUST
+    text: Form rendering stays split across FormFieldComponent for one field, FormFieldGroupsComponent
+      for a set of groups, and FormFieldGroupsLoop for repeated group instances, so
+      group iteration remains a separate component from group layout.
+    codeRefs:
+    - class:5db1941fa2fa00ceda966cb9fcde927a
+    - class:ed79ef0908b56bca49838fcf623e48e8
+    - class:ef0fc519a6e87b313c3c1250efec8c7e
+  - id: r.info-table-family-composition
+    level: MUST
+    text: Tabular display stays split across InfoTable for the table shell, InfoTableRowComponent
+      for a labelled row, and InfoTableItemArray for array-valued cells, so a row
+      can render a list value without the table knowing the value shape.
+    codeRefs:
+    - class:1d751206cef1c91461b8fed041182fc6
+    - class:29d09ab2455ec6a61fae55761b131e8d
+    - class:f6b64232f2a33e4c7625752d381129a4
+  - id: r.link-icon-and-tooltip-atoms
+    level: SHOULD
+    text: Link, icon, tooltip and download affordances stay small standalone components
+      — Icon, ExternalLinkComponent, DocLinkComponent, ToolbarLinkComponent, ToolTipComponent,
+      InfoTooltip and DownloadButton — so pages compose them freely without pulling
+      in page-level state.
+    codeRefs:
+    - class:3669f7648786e73436f2622f8ef41f84
+    - class:54fe7484c43cec80ba402244557f81b7
+    - class:708955279db6379bb02e680a4b646897
+    - class:978998ffdf5294a6c58dd66db553fec9
+    - class:ae9ad4cd66d1a4c48fc2634968f64e78
+    - class:c8bb7c44ea71369b1bd1832090cdce7e
+    - class:fc3a22a644f2938e2f9e96e590fdbc8d
+  - id: r.page-and-list-chrome
+    level: SHOULD
+    text: 'Page chrome stays separate from list content: PageHeader, KeyValueHeader
+      and NamespaceReminder frame a view, while ListView, LinkedBlockComponent and
+      ModalComponent neighbours such as AutocompleteInput supply the scrollable and
+      navigational pieces.'
+    codeRefs:
+    - class:2cd5cf07a55894d1632fa555e8ebe04c
+    - class:35e6b75238f39a1c3f60420bd6578f77
+    - class:7cc9e6070103a01574ed86300329c094
+    - class:b17577f7eefd45c37975d81690a1e696
+    - class:fc737250ca19adcb9283f66dceae91ef
+  - id: r.search-select-modal-variant
+    level: MUST
+    text: SearchSelectWithModal remains a distinct component from SearchSelect so
+      the modal-hosted search variant keeps its own template and argument surface
+      rather than being folded into the base select.
+    codeRefs:
+    - class:243d5bc9b5a3c15a7f898cd522cae90a
+    - class:d441a86c1d8039e801eb50bf6e092750
+  - id: r.secret-list-header-tab-pair
+    level: MUST
+    text: SecretListHeader and SecretListHeaderTab stay a matched pair, the header
+      owning the secret engine view and the tab owning one selectable tab inside it.
+    codeRefs:
+    - class:2efc9978becedac0a6e66d51b77f40f5
+    - class:3e53b924bddd495f4eb552077ec6725d
+  - id: r.toggle-family-composition
+    level: MUST
+    text: ToggleComponent holds the boolean switch, ToggleButtonComponent holds the
+      button-styled variant, and Chevron holds the expand indicator, kept separate
+      so each can be used without the others.
+    codeRefs:
+    - class:2bd1638cb34a54e4551651a6eb093242
+    - class:9bce35f21a5d0de9ad25fabbc3e08c5a
+    - class:acca0dcd3732219219d6743cbeeea698
+  - id: r.value-editor-inputs
+    level: MUST
+    text: 'Value editing stays distributed over typed components: JsonEditorComponent,
+      KvObjectEditor, MaskedInputComponent, ObjectListInput, StringList, TextFileComponent,
+      TtlPickerComponent, NavigateInput and inputSelect each handle one input shape
+      instead of one general editor.'
+    codeRefs:
+    - class:042e7b32237959788182f4b6459dadd9
+    - class:0a2713f8cb684aa5c54e8686fd0ed680
+    - class:44800735feddd0161d75fe1c18e6bd2c
+    - class:471f275c8b5cb879d670515b157fdb34
+    - class:732fdd85874a6832d1a2aa089517b8ae
+    - class:8d76aa6549290441c75e993f9a91b791
+    - class:971c7c9e9c8712d16184f65efc9a7f5c
+    - class:c9c6f0badf8cb49a7cbf110db7a5838c
+    - class:caa08403c86cf099eae9f12c47010e09
+  interfaces:
+  - name: AlertBanner
+    kind: class
+    signature: class AlertBanner()
+    file: third_party/openbao/ui/lib/core/addon/components/alert-banner.js
+  - name: AlertInlineComponent
+    kind: class
+    signature: class AlertInlineComponent()
+    file: third_party/openbao/ui/lib/core/addon/components/alert-inline.js
+  - name: AutocompleteInput
+    kind: class
+    signature: class AutocompleteInput()
+    file: third_party/openbao/ui/lib/core/addon/components/autocomplete-input.js
+  - name: BoxRadio
+    kind: class
+    signature: class BoxRadio()
+    file: third_party/openbao/ui/lib/core/addon/components/box-radio.js
+  - name: CheckboxGrid
+    kind: class
+    signature: class CheckboxGrid()
+    file: third_party/openbao/ui/lib/core/addon/components/checkbox-grid.ts
+  - name: CheckboxGrid.checkboxChange
+    kind: method
+    signature: 'CheckboxGrid.checkboxChange(event: HTMLElementEvent<HTMLInputElement>)'
+    file: third_party/openbao/ui/lib/core/addon/components/checkbox-grid.ts
+  - name: CheckboxGrid.checkboxes
+    kind: method
+    signature: CheckboxGrid.checkboxes()
+    file: third_party/openbao/ui/lib/core/addon/components/checkbox-grid.ts
+  - name: Chevron
+    kind: class
+    signature: class Chevron()
+    file: third_party/openbao/ui/lib/core/addon/components/chevron.js
+  - name: ConfirmActionComponent
+    kind: class
+    signature: class ConfirmActionComponent()
+    file: third_party/openbao/ui/lib/core/addon/components/confirm-action.js
+  - name: ConfirmationModal
+    kind: class
+    signature: class ConfirmationModal()
+    file: third_party/openbao/ui/lib/core/addon/components/confirmation-modal.js
+  - name: DocLinkComponent
+    kind: class
+    signature: class DocLinkComponent()
+    file: third_party/openbao/ui/lib/core/addon/components/doc-link.js
+  - name: DownloadButton
+    kind: class
+    signature: class DownloadButton()
+    file: third_party/openbao/ui/lib/core/addon/components/download-button.js
+  - name: ExternalLinkComponent
+    kind: class
+    signature: class ExternalLinkComponent()
+    file: third_party/openbao/ui/lib/core/addon/components/external-link.js
+  - name: FormFieldComponent
+    kind: class
+    signature: class FormFieldComponent()
+    file: third_party/openbao/ui/lib/core/addon/components/form-field.js
+  - name: FormFieldGroupsComponent
+    kind: class
+    signature: class FormFieldGroupsComponent()
+    file: third_party/openbao/ui/lib/core/addon/components/form-field-groups.js
+  - name: FormFieldGroupsLoop
+    kind: class
+    signature: class FormFieldGroupsLoop()
+    file: third_party/openbao/ui/lib/core/addon/components/form-field-groups-loop.js
+  - name: Icon
+    kind: class
+    signature: class Icon()
+    file: third_party/openbao/ui/lib/core/addon/components/icon.js
+  - name: InfoTable
+    kind: class
+    signature: class InfoTable()
+    file: third_party/openbao/ui/lib/core/addon/components/info-table.js
+  - name: InfoTableItemArray
+    kind: class
+    signature: class InfoTableItemArray()
+    file: third_party/openbao/ui/lib/core/addon/components/info-table-item-array.js
+  - name: InfoTableRowComponent
+    kind: class
+    signature: class InfoTableRowComponent()
+    file: third_party/openbao/ui/lib/core/addon/components/info-table-row.js
+  - name: InfoTooltip
+    kind: class
+    signature: class InfoTooltip()
+    file: third_party/openbao/ui/lib/core/addon/components/info-tooltip.js
+  - name: JsonEditorComponent
+    kind: class
+    signature: class JsonEditorComponent()
+    file: third_party/openbao/ui/lib/core/addon/components/json-editor.js
+  - name: KeyValueHeader
+    kind: class
+    signature: class KeyValueHeader()
+    file: third_party/openbao/ui/lib/core/addon/components/key-value-header.js
+  - name: KvObjectEditor
+    kind: class
+    signature: class KvObjectEditor()
+    file: third_party/openbao/ui/lib/core/addon/components/kv-object-editor.js
+  - name: LinkedBlockComponent
+    kind: class
+    signature: class LinkedBlockComponent()
+    file: third_party/openbao/ui/lib/core/addon/components/linked-block.js
+  - name: ListView
+    kind: class
+    signature: class ListView()
+    file: third_party/openbao/ui/lib/core/addon/components/list-view.js
+  - name: MaskedInputComponent
+    kind: class
+    signature: class MaskedInputComponent()
+    file: third_party/openbao/ui/lib/core/addon/components/masked-input.js
+  - name: ModalComponent
+    kind: class
+    signature: class ModalComponent()
+    file: third_party/openbao/ui/lib/core/addon/components/modal.js
+  - name: NamespaceReminder
+    kind: class
+    signature: class NamespaceReminder()
+    file: third_party/openbao/ui/lib/core/addon/components/namespace-reminder.js
+  - name: NavigateInput
+    kind: class
+    signature: class NavigateInput()
+    file: third_party/openbao/ui/lib/core/addon/components/navigate-input.js
+  - name: ObjectListInput
+    kind: class
+    signature: class ObjectListInput()
+    file: third_party/openbao/ui/lib/core/addon/components/object-list-input.js
+  - name: PageHeader
+    kind: class
+    signature: class PageHeader()
+    file: third_party/openbao/ui/lib/core/addon/components/page-header.js
+  - name: SearchSelect
+    kind: class
+    signature: class SearchSelect()
+    file: third_party/openbao/ui/lib/core/addon/components/search-select.js
+  - name: SearchSelectWithModal
+    kind: class
+    signature: class SearchSelectWithModal()
+    file: third_party/openbao/ui/lib/core/addon/components/search-select-with-modal.js
+  - name: SecretListHeader
+    kind: class
+    signature: class SecretListHeader()
+    file: third_party/openbao/ui/lib/core/addon/components/secret-list-header.js
+  - name: SecretListHeaderTab
+    kind: class
+    signature: class SecretListHeaderTab()
+    file: third_party/openbao/ui/lib/core/addon/components/secret-list-header-tab.js
+  - name: StringList
+    kind: class
+    signature: class StringList()
+    file: third_party/openbao/ui/lib/core/addon/components/string-list.js
+  - name: TextFileComponent
+    kind: class
+    signature: class TextFileComponent()
+    file: third_party/openbao/ui/lib/core/addon/components/text-file.js
+  - name: ToggleButtonComponent
+    kind: class
+    signature: class ToggleButtonComponent()
+    file: third_party/openbao/ui/lib/core/addon/components/toggle-button.js
+  - name: ToggleComponent
+    kind: class
+    signature: class ToggleComponent()
+    file: third_party/openbao/ui/lib/core/addon/components/toggle.js
+  - name: ToolTipComponent
+    kind: class
+    signature: class ToolTipComponent()
+    file: third_party/openbao/ui/lib/core/addon/components/tool-tip.js
+  - name: ToolbarLinkComponent
+    kind: class
+    signature: class ToolbarLinkComponent()
+    file: third_party/openbao/ui/lib/core/addon/components/toolbar-link.js
+  - name: TtlPickerComponent
+    kind: class
+    signature: class TtlPickerComponent()
+    file: third_party/openbao/ui/lib/core/addon/components/ttl-picker.js
+  - name: inputSelect
+    kind: class
+    signature: class inputSelect()
+    file: third_party/openbao/ui/lib/core/addon/components/input-search.js
 codeRefIndex:
 - class:042e7b32237959788182f4b6459dadd9 TtlPickerComponent@third_party/openbao/ui/lib/core/addon/components/ttl-picker.js:43
 - class:0a2713f8cb684aa5c54e8686fd0ed680 KvObjectEditor@third_party/openbao/ui/lib/core/addon/components/kv-object-editor.js:38
@@ -101,350 +448,3 @@ codeRefIndex:
 - file:third_party/openbao/ui/lib/core/addon/components/ttl-picker.js ttl-picker.js@third_party/openbao/ui/lib/core/addon/components/ttl-picker.js
 - method:c17e591b6211048d86c857676f908c40 CheckboxGrid.checkboxes@third_party/openbao/ui/lib/core/addon/components/checkbox-grid.ts:40
 - method:dfa03fd9ac775b70ef877f47afb371a9 CheckboxGrid.checkboxChange@third_party/openbao/ui/lib/core/addon/components/checkbox-grid.ts:48
-kind: SystemContext
-metadata:
-  name: third-party-openbao-ui-lib-core-addon-components
-  namespace: default
-spec:
-  intent: 'This context exists to pin down the contract of the third-party OpenBao
-    UI core addon before any local modification, so that work in deno-kcp treats this
-    vendored component set as an interface rather than as free-form markup. It records
-    which modules exist at which path, which class each module exports, and the few
-    behaviours the observed code proves: how AlertBanner validates its type argument,
-    how CheckboxGrid derives and reports checked values, how AutocompleteInput binds
-    its dropdown API and input element, and how AlertInlineComponent and BoxRadio
-    compute their display strings. The specification gives later changes a named surface
-    to keep compatible, and marks the component families that must stay grouped so
-    templates referencing them keep resolving.'
-  interfaces:
-  - file: third_party/openbao/ui/lib/core/addon/components/alert-banner.js
-    kind: class
-    name: AlertBanner
-    signature: class AlertBanner()
-  - file: third_party/openbao/ui/lib/core/addon/components/alert-inline.js
-    kind: class
-    name: AlertInlineComponent
-    signature: class AlertInlineComponent()
-  - file: third_party/openbao/ui/lib/core/addon/components/autocomplete-input.js
-    kind: class
-    name: AutocompleteInput
-    signature: class AutocompleteInput()
-  - file: third_party/openbao/ui/lib/core/addon/components/box-radio.js
-    kind: class
-    name: BoxRadio
-    signature: class BoxRadio()
-  - file: third_party/openbao/ui/lib/core/addon/components/checkbox-grid.ts
-    kind: class
-    name: CheckboxGrid
-    signature: class CheckboxGrid()
-  - file: third_party/openbao/ui/lib/core/addon/components/checkbox-grid.ts
-    kind: method
-    name: CheckboxGrid.checkboxChange
-    signature: 'CheckboxGrid.checkboxChange(event: HTMLElementEvent<HTMLInputElement>)'
-  - file: third_party/openbao/ui/lib/core/addon/components/checkbox-grid.ts
-    kind: method
-    name: CheckboxGrid.checkboxes
-    signature: CheckboxGrid.checkboxes()
-  - file: third_party/openbao/ui/lib/core/addon/components/chevron.js
-    kind: class
-    name: Chevron
-    signature: class Chevron()
-  - file: third_party/openbao/ui/lib/core/addon/components/confirm-action.js
-    kind: class
-    name: ConfirmActionComponent
-    signature: class ConfirmActionComponent()
-  - file: third_party/openbao/ui/lib/core/addon/components/confirmation-modal.js
-    kind: class
-    name: ConfirmationModal
-    signature: class ConfirmationModal()
-  - file: third_party/openbao/ui/lib/core/addon/components/doc-link.js
-    kind: class
-    name: DocLinkComponent
-    signature: class DocLinkComponent()
-  - file: third_party/openbao/ui/lib/core/addon/components/download-button.js
-    kind: class
-    name: DownloadButton
-    signature: class DownloadButton()
-  - file: third_party/openbao/ui/lib/core/addon/components/external-link.js
-    kind: class
-    name: ExternalLinkComponent
-    signature: class ExternalLinkComponent()
-  - file: third_party/openbao/ui/lib/core/addon/components/form-field.js
-    kind: class
-    name: FormFieldComponent
-    signature: class FormFieldComponent()
-  - file: third_party/openbao/ui/lib/core/addon/components/form-field-groups.js
-    kind: class
-    name: FormFieldGroupsComponent
-    signature: class FormFieldGroupsComponent()
-  - file: third_party/openbao/ui/lib/core/addon/components/form-field-groups-loop.js
-    kind: class
-    name: FormFieldGroupsLoop
-    signature: class FormFieldGroupsLoop()
-  - file: third_party/openbao/ui/lib/core/addon/components/icon.js
-    kind: class
-    name: Icon
-    signature: class Icon()
-  - file: third_party/openbao/ui/lib/core/addon/components/info-table.js
-    kind: class
-    name: InfoTable
-    signature: class InfoTable()
-  - file: third_party/openbao/ui/lib/core/addon/components/info-table-item-array.js
-    kind: class
-    name: InfoTableItemArray
-    signature: class InfoTableItemArray()
-  - file: third_party/openbao/ui/lib/core/addon/components/info-table-row.js
-    kind: class
-    name: InfoTableRowComponent
-    signature: class InfoTableRowComponent()
-  - file: third_party/openbao/ui/lib/core/addon/components/info-tooltip.js
-    kind: class
-    name: InfoTooltip
-    signature: class InfoTooltip()
-  - file: third_party/openbao/ui/lib/core/addon/components/json-editor.js
-    kind: class
-    name: JsonEditorComponent
-    signature: class JsonEditorComponent()
-  - file: third_party/openbao/ui/lib/core/addon/components/key-value-header.js
-    kind: class
-    name: KeyValueHeader
-    signature: class KeyValueHeader()
-  - file: third_party/openbao/ui/lib/core/addon/components/kv-object-editor.js
-    kind: class
-    name: KvObjectEditor
-    signature: class KvObjectEditor()
-  - file: third_party/openbao/ui/lib/core/addon/components/linked-block.js
-    kind: class
-    name: LinkedBlockComponent
-    signature: class LinkedBlockComponent()
-  - file: third_party/openbao/ui/lib/core/addon/components/list-view.js
-    kind: class
-    name: ListView
-    signature: class ListView()
-  - file: third_party/openbao/ui/lib/core/addon/components/masked-input.js
-    kind: class
-    name: MaskedInputComponent
-    signature: class MaskedInputComponent()
-  - file: third_party/openbao/ui/lib/core/addon/components/modal.js
-    kind: class
-    name: ModalComponent
-    signature: class ModalComponent()
-  - file: third_party/openbao/ui/lib/core/addon/components/namespace-reminder.js
-    kind: class
-    name: NamespaceReminder
-    signature: class NamespaceReminder()
-  - file: third_party/openbao/ui/lib/core/addon/components/navigate-input.js
-    kind: class
-    name: NavigateInput
-    signature: class NavigateInput()
-  - file: third_party/openbao/ui/lib/core/addon/components/object-list-input.js
-    kind: class
-    name: ObjectListInput
-    signature: class ObjectListInput()
-  - file: third_party/openbao/ui/lib/core/addon/components/page-header.js
-    kind: class
-    name: PageHeader
-    signature: class PageHeader()
-  - file: third_party/openbao/ui/lib/core/addon/components/search-select.js
-    kind: class
-    name: SearchSelect
-    signature: class SearchSelect()
-  - file: third_party/openbao/ui/lib/core/addon/components/search-select-with-modal.js
-    kind: class
-    name: SearchSelectWithModal
-    signature: class SearchSelectWithModal()
-  - file: third_party/openbao/ui/lib/core/addon/components/secret-list-header.js
-    kind: class
-    name: SecretListHeader
-    signature: class SecretListHeader()
-  - file: third_party/openbao/ui/lib/core/addon/components/secret-list-header-tab.js
-    kind: class
-    name: SecretListHeaderTab
-    signature: class SecretListHeaderTab()
-  - file: third_party/openbao/ui/lib/core/addon/components/string-list.js
-    kind: class
-    name: StringList
-    signature: class StringList()
-  - file: third_party/openbao/ui/lib/core/addon/components/text-file.js
-    kind: class
-    name: TextFileComponent
-    signature: class TextFileComponent()
-  - file: third_party/openbao/ui/lib/core/addon/components/toggle-button.js
-    kind: class
-    name: ToggleButtonComponent
-    signature: class ToggleButtonComponent()
-  - file: third_party/openbao/ui/lib/core/addon/components/toggle.js
-    kind: class
-    name: ToggleComponent
-    signature: class ToggleComponent()
-  - file: third_party/openbao/ui/lib/core/addon/components/tool-tip.js
-    kind: class
-    name: ToolTipComponent
-    signature: class ToolTipComponent()
-  - file: third_party/openbao/ui/lib/core/addon/components/toolbar-link.js
-    kind: class
-    name: ToolbarLinkComponent
-    signature: class ToolbarLinkComponent()
-  - file: third_party/openbao/ui/lib/core/addon/components/ttl-picker.js
-    kind: class
-    name: TtlPickerComponent
-    signature: class TtlPickerComponent()
-  - file: third_party/openbao/ui/lib/core/addon/components/input-search.js
-    kind: class
-    name: inputSelect
-    signature: class inputSelect()
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - class:0ea7465fdf8e8cc2a735db5c406d3ec1
-    - file:third_party/openbao/ui/lib/core/addon/components/alert-banner.js
-    id: r.alert-banner-requires-type-argument
-    level: MUST
-    text: AlertBanner.alertType asserts when the type argument is missing and otherwise
-      passes [type] through messageTypes, so an untyped banner fails loudly instead
-      of rendering unstyled.
-  - codeRefs:
-    - class:34017146cd29f13bafa7839289826ba3
-    - file:third_party/openbao/ui/lib/core/addon/components/alert-inline.js
-    id: r.alert-inline-refresh-state
-    level: MUST
-    text: AlertInlineComponent keeps an isRefreshing property and exposes refresh()
-      plus mimicRefresh(), and derives paddingTop, isMarginless, sizeSmall, textClass
-      and alertType from its arguments, so callers can trigger a refresh and the banner
-      reports its own visual variant.
-  - codeRefs:
-    - class:49404c7ed3d87be02764bde96c307a0b
-    - file:third_party/openbao/ui/lib/core/addon/components/autocomplete-input.js
-    id: r.autocomplete-input-element-and-dropdown-binding
-    level: MUST
-    text: AutocompleteInput holds dropdownAPI and inputElement, wires them through
-      setDropdownAPI and setElement, and handles interaction in onInput and selectOption,
-      so the component operates the underlying dropdown element it was handed.
-  - codeRefs:
-    - class:0e9d565dc24a318aceb4a47e51084497
-    - file:third_party/openbao/ui/lib/core/addon/components/box-radio.js
-    id: r.box-radio-tooltip-fallback
-    level: SHOULD
-    text: BoxRadio.tooltipMessage returns the tooltipMessage argument when supplied
-      and otherwise the literal 'This option is not available to you at this time.',
-      so a disabled option always explains itself.
-  - codeRefs:
-    - class:22bb5d45f5ba37bc82eb3a8e7412822d
-    - method:dfa03fd9ac775b70ef877f47afb371a9
-    id: r.checkbox-grid-change-reads-input-element
-    level: MUST
-    text: CheckboxGrid.checkboxChange consumes an HTMLElementEvent<HTMLInputElement>
-      so a checkbox toggle is reported from the DOM element rather than from component
-      state.
-  - codeRefs:
-    - class:22bb5d45f5ba37bc82eb3a8e7412822d
-    - method:c17e591b6211048d86c857676f908c40
-    id: r.checkbox-grid-derives-checked-flags
-    level: MUST
-    text: CheckboxGrid.checkboxes maps each entry of the fields argument to a copy
-      carrying value set from membership in the value argument list, so rendering
-      is a pure projection of the current selection.
-  - codeRefs:
-    - file:third_party/openbao/ui/lib/core/addon/components/alert-banner.js
-    - file:third_party/openbao/ui/lib/core/addon/components/checkbox-grid.ts
-    - file:third_party/openbao/ui/lib/core/addon/components/modal.js
-    id: r.components-default-export-one-class
-    level: MUST
-    text: Each file under third_party/openbao/ui/lib/core/addon/components/ default-exports
-      exactly one Ember Component subclass whose name matches the module, so templates
-      can resolve it by file name.
-  - codeRefs:
-    - class:96f0f2e4f4b1175df5b1d2af37fd1091
-    - class:a67d68843c80485a4fa42db944265f0b
-    - class:febdf7ec704cbc54587897bb7c3a3783
-    id: r.dialog-family-composition
-    level: MUST
-    text: Dialog behaviour stays split across ModalComponent for the generic overlay,
-      ConfirmationModal for confirm-style prompts, and ConfirmActionComponent for
-      wrapping an action behind a confirmation, so each caller picks the narrowest
-      one.
-  - codeRefs:
-    - class:5db1941fa2fa00ceda966cb9fcde927a
-    - class:ed79ef0908b56bca49838fcf623e48e8
-    - class:ef0fc519a6e87b313c3c1250efec8c7e
-    id: r.form-field-family-composition
-    level: MUST
-    text: Form rendering stays split across FormFieldComponent for one field, FormFieldGroupsComponent
-      for a set of groups, and FormFieldGroupsLoop for repeated group instances, so
-      group iteration remains a separate component from group layout.
-  - codeRefs:
-    - class:1d751206cef1c91461b8fed041182fc6
-    - class:29d09ab2455ec6a61fae55761b131e8d
-    - class:f6b64232f2a33e4c7625752d381129a4
-    id: r.info-table-family-composition
-    level: MUST
-    text: Tabular display stays split across InfoTable for the table shell, InfoTableRowComponent
-      for a labelled row, and InfoTableItemArray for array-valued cells, so a row
-      can render a list value without the table knowing the value shape.
-  - codeRefs:
-    - class:3669f7648786e73436f2622f8ef41f84
-    - class:54fe7484c43cec80ba402244557f81b7
-    - class:708955279db6379bb02e680a4b646897
-    - class:978998ffdf5294a6c58dd66db553fec9
-    - class:ae9ad4cd66d1a4c48fc2634968f64e78
-    - class:c8bb7c44ea71369b1bd1832090cdce7e
-    - class:fc3a22a644f2938e2f9e96e590fdbc8d
-    id: r.link-icon-and-tooltip-atoms
-    level: SHOULD
-    text: Link, icon, tooltip and download affordances stay small standalone components
-      — Icon, ExternalLinkComponent, DocLinkComponent, ToolbarLinkComponent, ToolTipComponent,
-      InfoTooltip and DownloadButton — so pages compose them freely without pulling
-      in page-level state.
-  - codeRefs:
-    - class:2cd5cf07a55894d1632fa555e8ebe04c
-    - class:35e6b75238f39a1c3f60420bd6578f77
-    - class:7cc9e6070103a01574ed86300329c094
-    - class:b17577f7eefd45c37975d81690a1e696
-    - class:fc737250ca19adcb9283f66dceae91ef
-    id: r.page-and-list-chrome
-    level: SHOULD
-    text: 'Page chrome stays separate from list content: PageHeader, KeyValueHeader
-      and NamespaceReminder frame a view, while ListView, LinkedBlockComponent and
-      ModalComponent neighbours such as AutocompleteInput supply the scrollable and
-      navigational pieces.'
-  - codeRefs:
-    - class:243d5bc9b5a3c15a7f898cd522cae90a
-    - class:d441a86c1d8039e801eb50bf6e092750
-    id: r.search-select-modal-variant
-    level: MUST
-    text: SearchSelectWithModal remains a distinct component from SearchSelect so
-      the modal-hosted search variant keeps its own template and argument surface
-      rather than being folded into the base select.
-  - codeRefs:
-    - class:2efc9978becedac0a6e66d51b77f40f5
-    - class:3e53b924bddd495f4eb552077ec6725d
-    id: r.secret-list-header-tab-pair
-    level: MUST
-    text: SecretListHeader and SecretListHeaderTab stay a matched pair, the header
-      owning the secret engine view and the tab owning one selectable tab inside it.
-  - codeRefs:
-    - class:2bd1638cb34a54e4551651a6eb093242
-    - class:9bce35f21a5d0de9ad25fabbc3e08c5a
-    - class:acca0dcd3732219219d6743cbeeea698
-    id: r.toggle-family-composition
-    level: MUST
-    text: ToggleComponent holds the boolean switch, ToggleButtonComponent holds the
-      button-styled variant, and Chevron holds the expand indicator, kept separate
-      so each can be used without the others.
-  - codeRefs:
-    - class:042e7b32237959788182f4b6459dadd9
-    - class:0a2713f8cb684aa5c54e8686fd0ed680
-    - class:44800735feddd0161d75fe1c18e6bd2c
-    - class:471f275c8b5cb879d670515b157fdb34
-    - class:732fdd85874a6832d1a2aa089517b8ae
-    - class:8d76aa6549290441c75e993f9a91b791
-    - class:971c7c9e9c8712d16184f65efc9a7f5c
-    - class:c9c6f0badf8cb49a7cbf110db7a5838c
-    - class:caa08403c86cf099eae9f12c47010e09
-    id: r.value-editor-inputs
-    level: MUST
-    text: 'Value editing stays distributed over typed components: JsonEditorComponent,
-      KvObjectEditor, MaskedInputComponent, ObjectListInput, StringList, TextFileComponent,
-      TtlPickerComponent, NavigateInput and inputSelect each handle one input shape
-      instead of one general editor.'
-  upstream: self

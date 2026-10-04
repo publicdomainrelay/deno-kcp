@@ -1,4 +1,125 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-ui-app-components-identity
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: This context exists so the vendored OpenBao identity UI components are described
+    as a coherent unit rather than nine unrelated files. It pins down the shared contract
+    that the popup subclasses inherit, the modes and routes the entity/group edit
+    form supports, and the parameters the lookup component sends to the identity adapter,
+    so that any future change to the vendored tree, or any replacement of it, can
+    be checked against the behavior the code actually has today.
+  requirements:
+  - id: r.edit-form-modes-and-routes
+    level: MUST
+    text: edit-form.js supports the modes create, edit and merge against a model with
+      identityType, and its cancelLink computed property maps the `${mode}-${model.identityType}`
+      key to a vault.cluster.access.identity route, falling back to the merge-entity-alias
+      route when no model is present; getMessage builds a humanized success string,
+      returning 'Successfully merged entities' for merge mode.
+    codeRefs:
+    - file:third_party/openbao/ui/app/components/identity/edit-form.js
+  - id: r.edit-form-save-and-delete
+    level: MUST
+    text: 'edit-form.js exposes a save ember-concurrency task wrapped in waitFor and
+      marked drop(), which yields model.save(), flashes the computed message on success
+      and invokes the onSave callback with { saveType: ''save'', model }; its deleteItem
+      action calls model.destroyRecord() and then invokes onSave with { saveType:
+      ''delete'', model }; willDestroy rolls back the model''s attributes when it
+      is dirty and not already destroyed or destroying, ignoring teardown failures.'
+    codeRefs:
+    - file:third_party/openbao/ui/app/components/identity/edit-form.js
+  - id: r.entity-nav-empty-component
+    level: MUST
+    text: entity-nav.js exports a Component with no properties, computed values, actions
+      or injected services, so it exists only as a template-backed navigation placeholder.
+    codeRefs:
+    - file:third_party/openbao/ui/app/components/identity/entity-nav.js
+  - id: r.item-details-enable
+    level: MUST
+    text: 'item-details.js injects flashMessages and its enable action sets the model''s
+      disabled flag to false, saves the model, and on resolution flashes `Successfully
+      enabled entity: ${model.id}`; on rejection it joins e.errors with a space (falling
+      back to e.message) into a problem message.'
+    codeRefs:
+    - file:third_party/openbao/ui/app/components/identity/item-details.js
+  - id: r.lookup-input-adapter-and-data
+    level: MUST
+    text: lookup-input.js takes a public type of either 'entity' or 'group' that selects
+      the store adapter identity/<type>, and its data() underscores the param name
+      into the query key and additionally sets alias_mount_accessor whenever param
+      is 'alias name'; init loads all auth-method records and defaults aliasMountAccessor
+      to the first method's accessor.
+    codeRefs:
+    - file:third_party/openbao/ui/app/components/identity/lookup-input.js
+  - id: r.lookup-input-lookup-task
+    level: MUST
+    text: lookup-input.js exposes a lookup ember-concurrency task that calls adapter.lookup(store,
+      data()); on error it flashes a danger message naming the type and error, on
+      a falsy response it flashes a danger message stating no identity of that type
+      was found for the param value, and on a response it transitions through transitionToSafe
+      to the vault.cluster.access.identity.show route with the response id and the
+      'details' segment.
+    codeRefs:
+    - file:third_party/openbao/ui/app/components/identity/lookup-input.js
+  - id: r.popup-alias-delete
+    level: MUST
+    text: 'popup-alias.js extends the popup base, derives messageArgs as [model.identityType,
+      model.id], and implements transaction as model.destroyRecord(), reporting ''Successfully
+      deleted {type}: {id}'' or a problem-deleting message built from e.errors joined
+      by a space or e.message.'
+    codeRefs:
+    - file:third_party/openbao/ui/app/components/identity/popup-alias.js
+  - id: r.popup-base-contract
+    level: MUST
+    text: '_popup-base.js defines the shared popup contract: tagName is empty, flashMessages
+      is injected, params defaults to null, onSuccess is a no-op and onError rolls
+      back the model when it has rollbackAttributes; transaction is declared but asserts
+      false so every subclass must override it; the performTransaction action spreads
+      its arguments into messageArgs, calls transaction, and on resolve calls onSuccess
+      then flashes successMessage, while on reject it calls onError then flashes errorMessage
+      through flashMessages.success.'
+    codeRefs:
+    - file:third_party/openbao/ui/app/components/identity/_popup-base.js
+  - id: r.popup-members-remove
+    level: MUST
+    text: popup-members.js extends the popup base and reads its three arguments from
+      params as model, groupArray and memberId; its transaction removes memberId from
+      the named group array on the model with without() and saves the model, reporting
+      'Successfully removed '{memberId}' from the group' or a problem-removing message.
+    codeRefs:
+    - file:third_party/openbao/ui/app/components/identity/popup-members.js
+  - id: r.popup-metadata-remove
+    level: MUST
+    text: popup-metadata.js extends the popup base and reads params[0] as model and
+      params[1] as key; its transaction deletes metadata[key], reassigns the metadata
+      object to a shallow copy to preserve reactivity, and saves the model, reporting
+      removal or failure of that key.
+    codeRefs:
+    - file:third_party/openbao/ui/app/components/identity/popup-metadata.js
+  - id: r.popup-policy-remove
+    level: MUST
+    text: popup-policy.js extends the popup base and reads params[0] as model and
+      params[1] as policyName; its transaction sets model.policies to that collection
+      with policyName removed via without(), saves the model, and reports 'Successfully
+      removed '{policyName}' policy from {model.id}' or a problem-removing message.
+    codeRefs:
+    - file:third_party/openbao/ui/app/components/identity/popup-policy.js
+  - id: r.popup-subclasses-override-transaction
+    level: MUST
+    text: Each popup subclass extends the popup base, supplies its own messageArgs
+      and transaction override, and reports its own successMessage and errorMessage,
+      so the base contract's asserting transaction is never reached and the confirm-then-mutate
+      flow is identical across alias deletion, member removal, metadata removal and
+      policy removal.
+    codeRefs:
+    - file:third_party/openbao/ui/app/components/identity/popup-alias.js
+    - file:third_party/openbao/ui/app/components/identity/popup-members.js
+    - file:third_party/openbao/ui/app/components/identity/popup-metadata.js
+    - file:third_party/openbao/ui/app/components/identity/popup-policy.js
 codeRefIndex:
 - file:third_party/openbao/ui/app/components/identity/_popup-base.js _popup-base.js@third_party/openbao/ui/app/components/identity/_popup-base.js
 - file:third_party/openbao/ui/app/components/identity/edit-form.js edit-form.js@third_party/openbao/ui/app/components/identity/edit-form.js
@@ -9,124 +130,3 @@ codeRefIndex:
 - file:third_party/openbao/ui/app/components/identity/popup-members.js popup-members.js@third_party/openbao/ui/app/components/identity/popup-members.js
 - file:third_party/openbao/ui/app/components/identity/popup-metadata.js popup-metadata.js@third_party/openbao/ui/app/components/identity/popup-metadata.js
 - file:third_party/openbao/ui/app/components/identity/popup-policy.js popup-policy.js@third_party/openbao/ui/app/components/identity/popup-policy.js
-kind: SystemContext
-metadata:
-  name: third-party-openbao-ui-app-components-identity
-  namespace: default
-spec:
-  intent: This context exists so the vendored OpenBao identity UI components are described
-    as a coherent unit rather than nine unrelated files. It pins down the shared contract
-    that the popup subclasses inherit, the modes and routes the entity/group edit
-    form supports, and the parameters the lookup component sends to the identity adapter,
-    so that any future change to the vendored tree, or any replacement of it, can
-    be checked against the behavior the code actually has today.
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - file:third_party/openbao/ui/app/components/identity/edit-form.js
-    id: r.edit-form-modes-and-routes
-    level: MUST
-    text: edit-form.js supports the modes create, edit and merge against a model with
-      identityType, and its cancelLink computed property maps the `${mode}-${model.identityType}`
-      key to a vault.cluster.access.identity route, falling back to the merge-entity-alias
-      route when no model is present; getMessage builds a humanized success string,
-      returning 'Successfully merged entities' for merge mode.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/components/identity/edit-form.js
-    id: r.edit-form-save-and-delete
-    level: MUST
-    text: 'edit-form.js exposes a save ember-concurrency task wrapped in waitFor and
-      marked drop(), which yields model.save(), flashes the computed message on success
-      and invokes the onSave callback with { saveType: ''save'', model }; its deleteItem
-      action calls model.destroyRecord() and then invokes onSave with { saveType:
-      ''delete'', model }; willDestroy rolls back the model''s attributes when it
-      is dirty and not already destroyed or destroying, ignoring teardown failures.'
-  - codeRefs:
-    - file:third_party/openbao/ui/app/components/identity/entity-nav.js
-    id: r.entity-nav-empty-component
-    level: MUST
-    text: entity-nav.js exports a Component with no properties, computed values, actions
-      or injected services, so it exists only as a template-backed navigation placeholder.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/components/identity/item-details.js
-    id: r.item-details-enable
-    level: MUST
-    text: 'item-details.js injects flashMessages and its enable action sets the model''s
-      disabled flag to false, saves the model, and on resolution flashes `Successfully
-      enabled entity: ${model.id}`; on rejection it joins e.errors with a space (falling
-      back to e.message) into a problem message.'
-  - codeRefs:
-    - file:third_party/openbao/ui/app/components/identity/lookup-input.js
-    id: r.lookup-input-adapter-and-data
-    level: MUST
-    text: lookup-input.js takes a public type of either 'entity' or 'group' that selects
-      the store adapter identity/<type>, and its data() underscores the param name
-      into the query key and additionally sets alias_mount_accessor whenever param
-      is 'alias name'; init loads all auth-method records and defaults aliasMountAccessor
-      to the first method's accessor.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/components/identity/lookup-input.js
-    id: r.lookup-input-lookup-task
-    level: MUST
-    text: lookup-input.js exposes a lookup ember-concurrency task that calls adapter.lookup(store,
-      data()); on error it flashes a danger message naming the type and error, on
-      a falsy response it flashes a danger message stating no identity of that type
-      was found for the param value, and on a response it transitions through transitionToSafe
-      to the vault.cluster.access.identity.show route with the response id and the
-      'details' segment.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/components/identity/popup-alias.js
-    id: r.popup-alias-delete
-    level: MUST
-    text: 'popup-alias.js extends the popup base, derives messageArgs as [model.identityType,
-      model.id], and implements transaction as model.destroyRecord(), reporting ''Successfully
-      deleted {type}: {id}'' or a problem-deleting message built from e.errors joined
-      by a space or e.message.'
-  - codeRefs:
-    - file:third_party/openbao/ui/app/components/identity/_popup-base.js
-    id: r.popup-base-contract
-    level: MUST
-    text: '_popup-base.js defines the shared popup contract: tagName is empty, flashMessages
-      is injected, params defaults to null, onSuccess is a no-op and onError rolls
-      back the model when it has rollbackAttributes; transaction is declared but asserts
-      false so every subclass must override it; the performTransaction action spreads
-      its arguments into messageArgs, calls transaction, and on resolve calls onSuccess
-      then flashes successMessage, while on reject it calls onError then flashes errorMessage
-      through flashMessages.success.'
-  - codeRefs:
-    - file:third_party/openbao/ui/app/components/identity/popup-members.js
-    id: r.popup-members-remove
-    level: MUST
-    text: popup-members.js extends the popup base and reads its three arguments from
-      params as model, groupArray and memberId; its transaction removes memberId from
-      the named group array on the model with without() and saves the model, reporting
-      'Successfully removed '{memberId}' from the group' or a problem-removing message.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/components/identity/popup-metadata.js
-    id: r.popup-metadata-remove
-    level: MUST
-    text: popup-metadata.js extends the popup base and reads params[0] as model and
-      params[1] as key; its transaction deletes metadata[key], reassigns the metadata
-      object to a shallow copy to preserve reactivity, and saves the model, reporting
-      removal or failure of that key.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/components/identity/popup-policy.js
-    id: r.popup-policy-remove
-    level: MUST
-    text: popup-policy.js extends the popup base and reads params[0] as model and
-      params[1] as policyName; its transaction sets model.policies to that collection
-      with policyName removed via without(), saves the model, and reports 'Successfully
-      removed '{policyName}' policy from {model.id}' or a problem-removing message.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/components/identity/popup-alias.js
-    - file:third_party/openbao/ui/app/components/identity/popup-members.js
-    - file:third_party/openbao/ui/app/components/identity/popup-metadata.js
-    - file:third_party/openbao/ui/app/components/identity/popup-policy.js
-    id: r.popup-subclasses-override-transaction
-    level: MUST
-    text: Each popup subclass extends the popup base, supplies its own messageArgs
-      and transaction override, and reports its own successMessage and errorMessage,
-      so the base contract's asserting transaction is never reached and the confirm-then-mutate
-      flow is identical across alias deletion, member removal, metadata removal and
-      policy removal.
-  upstream: self

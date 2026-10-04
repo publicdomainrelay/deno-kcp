@@ -1,17 +1,20 @@
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 057845d5467bd488047fea5b29b07fb27e60f185cb3a3aedd47c836a64013b5f
+realizedSpecHash: 2c9443b6f71bb762946695509e2348f46aac3b0a279ae000a0bf684902cdab84
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
+- type: CodeSynced
+  status: "True"
   reason: InterfacesObserved
-  status: "True"
-  type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+  message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+- type: Drifted
   status: "False"
-  type: Drifted
-- message: the spec passes the validator
-  reason: ValidatorPassed
+  reason: FingerprintEqual
+  message: observed facts match the synced fingerprint
+- type: SpecValid
   status: "True"
-  type: SpecValid
+  reason: ValidatorPassed
+  message: the spec passes the validator
 observed:
   files:
   - third_party/openbao/internal/http/assets.go
@@ -69,199 +72,196 @@ observed:
   - third_party/openbao/internal/http/testing.go
   - third_party/openbao/internal/http/unwrapping_raw_body_test.go
   - third_party/openbao/internal/http/util.go
-  fingerprint: 057845d5467bd488047fea5b29b07fb27e60f185cb3a3aedd47c836a64013b5f
   interfaces:
-  - codegraphId: struct:016c00b4b99172fccb45188271ef7f5d
-    file: third_party/openbao/internal/http/handler.go
+  - name: HandlerAnchor
     kind: struct
+    file: third_party/openbao/internal/http/handler.go
     line: 127
-    name: HandlerAnchor
-  - codegraphId: method:84eb5fb6f1aae6434f6d6f06dbfd80cf
-    file: third_party/openbao/internal/http/handler.go
+    codegraphId: struct:016c00b4b99172fccb45188271ef7f5d
+  - name: HandlerAnchor.Handler
     kind: method
-    line: 129
-    name: HandlerAnchor.Handler
     signature: (props *vault.HandlerProperties) http.Handler
-  - codegraphId: type_alias:28a21571ba0b776aa360350f41d08ee0
     file: third_party/openbao/internal/http/handler.go
+    line: 129
+    codegraphId: method:84eb5fb6f1aae6434f6d6f06dbfd80cf
+  - name: HandlerFunc
     kind: type_alias
+    file: third_party/openbao/internal/http/handler.go
     line: 135
-    name: HandlerFunc
-  - codegraphId: method:a5cca87321744db3c1ee18a1dc79bd40
-    file: third_party/openbao/internal/http/handler.go
+    codegraphId: type_alias:28a21571ba0b776aa360350f41d08ee0
+  - name: HandlerFunc.Handler
     kind: method
-    line: 137
-    name: HandlerFunc.Handler
     signature: (props *vault.HandlerProperties) http.Handler
-  - codegraphId: method:c831c4945e58cf05c1efba63b5fd62bf
     file: third_party/openbao/internal/http/handler.go
-    kind: method
-    line: 279
-    name: copyResponseWriter.Header
-    signature: () http.Header
-  - codegraphId: method:4d96008ed49146f640748d9606499ead
-    file: third_party/openbao/internal/http/handler.go
-    kind: method
-    line: 283
-    name: copyResponseWriter.Write
-    signature: (buf []byte) (int, error)
-  - codegraphId: method:5412779bc9a7ee61e2eff3d2b8384a63
-    file: third_party/openbao/internal/http/handler.go
-    kind: method
-    line: 288
-    name: copyResponseWriter.WriteHeader
-    signature: (code int)
-  - codegraphId: function:2e8c896a6a31adb733c76bde2edca6e5
-    file: third_party/openbao/internal/http/handler.go
-    kind: function
-    line: 478
-    name: WrapHttpServerHandler
-    signature: (h http.Handler, l *configutil.Listener) http.Handler
-  - codegraphId: struct:fefbc685630821c5a39e1c2f581b33d8
-    file: third_party/openbao/internal/http/handler.go
-    kind: struct
-    line: 821
-    name: UIAssetWrapper
-  - codegraphId: method:54a0c4654f2f6b8ed2ad71d828455b96
-    file: third_party/openbao/internal/http/handler.go
-    kind: method
-    line: 825
-    name: UIAssetWrapper.Open
-    signature: (name string) (http.File, error)
-  - codegraphId: function:b106bcd2d6184b15afb7677cff3a396c
-    file: third_party/openbao/internal/http/json.go
-    kind: function
-    line: 122
-    name: EnforceJSONComplexityLimits
-    signature: (ctx context.Context, reader io.Reader) (int64, int64, error)
-  - codegraphId: struct:bf0c13e2cc2e82e9088408c856ce3266
-    file: third_party/openbao/internal/http/sys_generate_root.go
-    kind: struct
-    line: 212
-    name: GenerateRootInitRequest
-  - codegraphId: struct:bc7f306e4d035f955d01e9846abc92cf
-    file: third_party/openbao/internal/http/sys_generate_root.go
-    kind: struct
-    line: 217
-    name: GenerateRootStatusResponse
-  - codegraphId: struct:9516c58a3e2ce7506455850e5efe3ff7
-    file: third_party/openbao/internal/http/sys_generate_root.go
-    kind: struct
-    line: 230
-    name: GenerateRootUpdateRequest
-  - codegraphId: struct:5145c7dfa28a9d4e42cf239a95151f57
-    file: third_party/openbao/internal/http/sys_health.go
-    kind: struct
-    line: 170
-    name: HealthResponse
-  - codegraphId: struct:0be9dca687b6bc4a7250ba145ece21c1
-    file: third_party/openbao/internal/http/sys_init.go
-    kind: struct
-    line: 119
-    name: InitRequest
-  - codegraphId: struct:f3f3f40f449d5956118c6e73d5851eb7
-    file: third_party/openbao/internal/http/sys_init.go
-    kind: struct
-    line: 129
-    name: InitResponse
-  - codegraphId: struct:b9f82c89b9e865f4ae188c1228608441
-    file: third_party/openbao/internal/http/sys_init.go
-    kind: struct
     line: 137
-    name: InitStatusResponse
-  - codegraphId: struct:a100ab592585fb4f37e0b3742df1df7c
-    file: third_party/openbao/internal/http/sys_raft.go
+    codegraphId: method:a5cca87321744db3c1ee18a1dc79bd40
+  - name: copyResponseWriter.Header
+    kind: method
+    signature: () http.Header
+    file: third_party/openbao/internal/http/handler.go
+    line: 279
+    codegraphId: method:c831c4945e58cf05c1efba63b5fd62bf
+  - name: copyResponseWriter.Write
+    kind: method
+    signature: (buf []byte) (int, error)
+    file: third_party/openbao/internal/http/handler.go
+    line: 283
+    codegraphId: method:4d96008ed49146f640748d9606499ead
+  - name: copyResponseWriter.WriteHeader
+    kind: method
+    signature: (code int)
+    file: third_party/openbao/internal/http/handler.go
+    line: 288
+    codegraphId: method:5412779bc9a7ee61e2eff3d2b8384a63
+  - name: WrapHttpServerHandler
+    kind: function
+    signature: (h http.Handler, l *configutil.Listener) http.Handler
+    file: third_party/openbao/internal/http/handler.go
+    line: 478
+    codegraphId: function:2e8c896a6a31adb733c76bde2edca6e5
+  - name: UIAssetWrapper
     kind: struct
+    file: third_party/openbao/internal/http/handler.go
+    line: 821
+    codegraphId: struct:fefbc685630821c5a39e1c2f581b33d8
+  - name: UIAssetWrapper.Open
+    kind: method
+    signature: (name string) (http.File, error)
+    file: third_party/openbao/internal/http/handler.go
+    line: 825
+    codegraphId: method:54a0c4654f2f6b8ed2ad71d828455b96
+  - name: EnforceJSONComplexityLimits
+    kind: function
+    signature: (ctx context.Context, reader io.Reader) (int64, int64, error)
+    file: third_party/openbao/internal/http/json.go
+    line: 122
+    codegraphId: function:b106bcd2d6184b15afb7677cff3a396c
+  - name: GenerateRootInitRequest
+    kind: struct
+    file: third_party/openbao/internal/http/sys_generate_root.go
+    line: 212
+    codegraphId: struct:bf0c13e2cc2e82e9088408c856ce3266
+  - name: GenerateRootStatusResponse
+    kind: struct
+    file: third_party/openbao/internal/http/sys_generate_root.go
+    line: 217
+    codegraphId: struct:bc7f306e4d035f955d01e9846abc92cf
+  - name: GenerateRootUpdateRequest
+    kind: struct
+    file: third_party/openbao/internal/http/sys_generate_root.go
+    line: 230
+    codegraphId: struct:9516c58a3e2ce7506455850e5efe3ff7
+  - name: HealthResponse
+    kind: struct
+    file: third_party/openbao/internal/http/sys_health.go
+    line: 170
+    codegraphId: struct:5145c7dfa28a9d4e42cf239a95151f57
+  - name: InitRequest
+    kind: struct
+    file: third_party/openbao/internal/http/sys_init.go
+    line: 119
+    codegraphId: struct:0be9dca687b6bc4a7250ba145ece21c1
+  - name: InitResponse
+    kind: struct
+    file: third_party/openbao/internal/http/sys_init.go
+    line: 129
+    codegraphId: struct:f3f3f40f449d5956118c6e73d5851eb7
+  - name: InitStatusResponse
+    kind: struct
+    file: third_party/openbao/internal/http/sys_init.go
+    line: 137
+    codegraphId: struct:b9f82c89b9e865f4ae188c1228608441
+  - name: JoinResponse
+    kind: struct
+    file: third_party/openbao/internal/http/sys_raft.go
     line: 101
-    name: JoinResponse
-  - codegraphId: struct:f930638200133c35808bc2881f2f701f
+    codegraphId: struct:a100ab592585fb4f37e0b3742df1df7c
+  - name: JoinRequest
+    kind: struct
     file: third_party/openbao/internal/http/sys_raft.go
-    kind: struct
     line: 105
-    name: JoinRequest
-  - codegraphId: struct:c1feb31f25bc79ac7c3f575c3cf72a87
-    file: third_party/openbao/internal/http/sys_rekey.go
+    codegraphId: struct:f930638200133c35808bc2881f2f701f
+  - name: RekeyRequest
     kind: struct
+    file: third_party/openbao/internal/http/sys_rekey.go
     line: 330
-    name: RekeyRequest
-  - codegraphId: struct:f4eaf8acd7e99e98cc5c232bba9d84a3
-    file: third_party/openbao/internal/http/sys_rekey.go
+    codegraphId: struct:c1feb31f25bc79ac7c3f575c3cf72a87
+  - name: RekeyStatusResponse
     kind: struct
+    file: third_party/openbao/internal/http/sys_rekey.go
     line: 338
-    name: RekeyStatusResponse
-  - codegraphId: struct:b78c5904da11db12bd1bb73047f41b5f
-    file: third_party/openbao/internal/http/sys_rekey.go
+    codegraphId: struct:f4eaf8acd7e99e98cc5c232bba9d84a3
+  - name: RekeyUpdateRequest
     kind: struct
+    file: third_party/openbao/internal/http/sys_rekey.go
     line: 351
-    name: RekeyUpdateRequest
-  - codegraphId: struct:878734e749075a5f33055d05e2141217
-    file: third_party/openbao/internal/http/sys_rekey.go
+    codegraphId: struct:b78c5904da11db12bd1bb73047f41b5f
+  - name: RekeyUpdateResponse
     kind: struct
+    file: third_party/openbao/internal/http/sys_rekey.go
     line: 356
-    name: RekeyUpdateResponse
-  - codegraphId: struct:db8c14b6eed4f3bbb3c4adea7202dd64
-    file: third_party/openbao/internal/http/sys_rekey.go
+    codegraphId: struct:878734e749075a5f33055d05e2141217
+  - name: RekeyVerificationUpdateRequest
     kind: struct
+    file: third_party/openbao/internal/http/sys_rekey.go
     line: 367
-    name: RekeyVerificationUpdateRequest
-  - codegraphId: struct:30a67a6afdd05f4539608e1c5b492034
-    file: third_party/openbao/internal/http/sys_rekey.go
+    codegraphId: struct:db8c14b6eed4f3bbb3c4adea7202dd64
+  - name: RekeyVerificationStatusResponse
     kind: struct
+    file: third_party/openbao/internal/http/sys_rekey.go
     line: 372
-    name: RekeyVerificationStatusResponse
-  - codegraphId: struct:73bb07faf010373b79a04aac61e398ef
+    codegraphId: struct:30a67a6afdd05f4539608e1c5b492034
+  - name: RekeyVerificationUpdateResponse
+    kind: struct
     file: third_party/openbao/internal/http/sys_rekey.go
-    kind: struct
     line: 380
-    name: RekeyVerificationUpdateResponse
-  - codegraphId: struct:00c3694b43bc074ff8e885b14fd2742a
-    file: third_party/openbao/internal/http/sys_seal.go
+    codegraphId: struct:73bb07faf010373b79a04aac61e398ef
+  - name: UnsealRequest
     kind: struct
+    file: third_party/openbao/internal/http/sys_seal.go
     line: 184
-    name: UnsealRequest
-  - codegraphId: function:9721f01f2945a7644f94f41f0c466613
-    file: third_party/openbao/internal/http/testing.go
+    codegraphId: struct:00c3694b43bc074ff8e885b14fd2742a
+  - name: TestListener
     kind: function
-    line: 16
-    name: TestListener
     signature: (tb testing.TB) (net.Listener, string)
-  - codegraphId: function:1a39cf4e86eccf88009e235523d16614
     file: third_party/openbao/internal/http/testing.go
+    line: 16
+    codegraphId: function:9721f01f2945a7644f94f41f0c466613
+  - name: TestServerWithListenerAndProperties
     kind: function
-    line: 32
-    name: TestServerWithListenerAndProperties
     signature: (tb testing.TB, ln net.Listener, addr string, core *vault.Core, props
       *vault.HandlerProperties)
-  - codegraphId: function:a1732bf9310d647b993a51edae99c0af
     file: third_party/openbao/internal/http/testing.go
+    line: 32
+    codegraphId: function:1a39cf4e86eccf88009e235523d16614
+  - name: TestServerWithListener
     kind: function
-    line: 47
-    name: TestServerWithListener
     signature: (tb testing.TB, ln net.Listener, addr string, core *vault.Core)
-  - codegraphId: function:b0d52dd8e11ccd15f45fb886f9fb5082
     file: third_party/openbao/internal/http/testing.go
+    line: 47
+    codegraphId: function:a1732bf9310d647b993a51edae99c0af
+  - name: TestServerWithCertForwarding
     kind: function
+    signature: (tb testing.TB, core *vault.Core) (net.Listener, string)
+    file: third_party/openbao/internal/http/testing.go
     line: 63
-    name: TestServerWithCertForwarding
-    signature: (tb testing.TB, core *vault.Core) (net.Listener, string)
-  - codegraphId: function:e06335d0c0882c762de0d50399455bd9
-    file: third_party/openbao/internal/http/testing.go
+    codegraphId: function:b0d52dd8e11ccd15f45fb886f9fb5082
+  - name: TestServer
     kind: function
+    signature: (tb testing.TB, core *vault.Core) (net.Listener, string)
+    file: third_party/openbao/internal/http/testing.go
     line: 87
-    name: TestServer
-    signature: (tb testing.TB, core *vault.Core) (net.Listener, string)
-  - codegraphId: function:ee89a43f24c3e910320d9f6364f5b1e4
-    file: third_party/openbao/internal/http/testing.go
+    codegraphId: function:e06335d0c0882c762de0d50399455bd9
+  - name: TestServerAuth
     kind: function
-    line: 93
-    name: TestServerAuth
     signature: (tb testing.TB, addr string, token string)
-  - codegraphId: method:00f873e3b91b9528ca4d0b27b8ec4360
-    file: third_party/openbao/internal/http/util.go
+    file: third_party/openbao/internal/http/testing.go
+    line: 93
+    codegraphId: function:ee89a43f24c3e910320d9f6364f5b1e4
+  - name: multiReaderCloser.Close
     kind: method
-    line: 253
-    name: multiReaderCloser.Close
     signature: () error
-realizedSpecHash: 2c9443b6f71bb762946695509e2348f46aac3b0a279ae000a0bf684902cdab84
-syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-syncedFingerprint: 057845d5467bd488047fea5b29b07fb27e60f185cb3a3aedd47c836a64013b5f
+    file: third_party/openbao/internal/http/util.go
+    line: 253
+    codegraphId: method:00f873e3b91b9528ca4d0b27b8ec4360
+  fingerprint: 057845d5467bd488047fea5b29b07fb27e60f185cb3a3aedd47c836a64013b5f

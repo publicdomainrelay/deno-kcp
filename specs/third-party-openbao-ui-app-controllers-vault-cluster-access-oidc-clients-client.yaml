@@ -1,13 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- class:dcd9216169acc4b1f83f8521996f79fa OidcClientDetailsController@third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client/details.js:11
-- file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client/details.js
-  details.js@third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client/details.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-clients-client
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'The context exists so the OIDC client details screen has a controller with
     a single destructive action: deleting the OIDC application being viewed. It is
     the UI-facing counterpart of the OIDC client read/delete path, kept separate from
@@ -15,47 +13,49 @@ spec:
     and post-delete navigation. Anyone changing how OIDC clients are deleted, how
     deletion errors are reported, or where the user lands after a delete must look
     here.'
-  interfaces:
-  - file: third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client/details.js
-    kind: class
-    name: OidcClientDetailsController
-    signature: export default class OidcClientDetailsController extends Controller
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - class:dcd9216169acc4b1f83f8521996f79fa
-    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client/details.js
-    id: r.delete-action-destroys-and-navigates
+  - id: r.delete-action-destroys-and-navigates
     level: MUST
     text: The delete action is asynchronous and marked as an Ember action. It first
       destroys the current model record via destroyRecord; on success it shows the
       success flash message 'Application deleted successfully' and then transitions
       to the safe route 'vault.cluster.access.oidc.clients' using transitionToSafe
       with the injected router, so the user leaves the now-deleted client's page.
-  - codeRefs:
+    codeRefs:
     - class:dcd9216169acc4b1f83f8521996f79fa
     - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client/details.js
-    id: r.delete-action-recovers-from-failure
+  - id: r.delete-action-recovers-from-failure
     level: MUST
     text: When destroying the record throws, the delete action rolls the model back
       with rollbackAttributes so the UI does not keep showing an optimistically deleted
       client, then reports the failure as a danger flash message. The message text
       is the model's error list joined with '. ' when the thrown error carries an
       errors collection, otherwise the thrown error's own message.
-  - codeRefs:
+    codeRefs:
     - class:dcd9216169acc4b1f83f8521996f79fa
     - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client/details.js
-    id: r.exports-details-controller
+  - id: r.exports-details-controller
     level: MUST
     text: The details route controller is exported as the default export, named OidcClientDetailsController,
       and extends Ember's Controller so the OIDC client details route resolves it
       by the standard naming convention.
-  - codeRefs:
+    codeRefs:
     - class:dcd9216169acc4b1f83f8521996f79fa
     - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client/details.js
-    id: r.injects-router-and-flash-messages
+  - id: r.injects-router-and-flash-messages
     level: MUST
     text: The controller declares the router and flashMessages services as injected
       properties, so the delete action can navigate through the router and show success
       or danger banners without reaching for globals.
-  upstream: self
+    codeRefs:
+    - class:dcd9216169acc4b1f83f8521996f79fa
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client/details.js
+  interfaces:
+  - name: OidcClientDetailsController
+    kind: class
+    signature: export default class OidcClientDetailsController extends Controller
+    file: third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client/details.js
+codeRefIndex:
+- class:dcd9216169acc4b1f83f8521996f79fa OidcClientDetailsController@third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client/details.js:11
+- file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client/details.js
+  details.js@third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client/details.js

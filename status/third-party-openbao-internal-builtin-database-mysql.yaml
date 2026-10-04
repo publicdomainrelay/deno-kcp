@@ -1,101 +1,101 @@
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: ee4576e73a03a031f3597d6363263b1d216b802a78b8d5de96d67201a618d9fc
+realizedSpecHash: 7be15b24d17ecb40046f1c4da2e6a00bbee40b828c3a2642c6154e40f5870aad
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
+- type: CodeSynced
+  status: "True"
   reason: InterfacesObserved
-  status: "True"
-  type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+  message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+- type: Drifted
   status: "False"
-  type: Drifted
-- message: the spec passes the validator
-  reason: ValidatorPassed
+  reason: FingerprintEqual
+  message: observed facts match the synced fingerprint
+- type: SpecValid
   status: "True"
-  type: SpecValid
+  reason: ValidatorPassed
+  message: the spec passes the validator
 observed:
   files:
   - third_party/openbao/internal/builtin/database/mysql/connection_producer.go
   - third_party/openbao/internal/builtin/database/mysql/connection_producer_test.go
   - third_party/openbao/internal/builtin/database/mysql/mysql.go
   - third_party/openbao/internal/builtin/database/mysql/mysql_test.go
-  fingerprint: ee4576e73a03a031f3597d6363263b1d216b802a78b8d5de96d67201a618d9fc
   interfaces:
-  - codegraphId: method:e50b9f1a12554552068bc1ef044fe986
-    file: third_party/openbao/internal/builtin/database/mysql/connection_producer.go
+  - name: mySQLConnectionProducer.Initialize
     kind: method
-    line: 56
-    name: mySQLConnectionProducer.Initialize
     signature: (ctx context.Context, conf map[string]any, verifyConnection bool) error
-  - codegraphId: method:442bc4e61ba09f7de989ce75450cf291
     file: third_party/openbao/internal/builtin/database/mysql/connection_producer.go
+    line: 56
+    codegraphId: method:e50b9f1a12554552068bc1ef044fe986
+  - name: mySQLConnectionProducer.Init
     kind: method
-    line: 61
-    name: mySQLConnectionProducer.Init
     signature: (ctx context.Context, conf map[string]any, verifyConnection bool) (map[string]any,
       error)
-  - codegraphId: method:1dcf4d26b3f813c8c805c7be795ed38d
     file: third_party/openbao/internal/builtin/database/mysql/connection_producer.go
+    line: 61
+    codegraphId: method:442bc4e61ba09f7de989ce75450cf291
+  - name: mySQLConnectionProducer.Connection
     kind: method
-    line: 143
-    name: mySQLConnectionProducer.Connection
     signature: (ctx context.Context) (any, error)
-  - codegraphId: method:3dec55da06dfc4b9ab79d175e9c5f669
     file: third_party/openbao/internal/builtin/database/mysql/connection_producer.go
+    line: 143
+    codegraphId: method:1dcf4d26b3f813c8c805c7be795ed38d
+  - name: mySQLConnectionProducer.SecretValues
     kind: method
-    line: 191
-    name: mySQLConnectionProducer.SecretValues
     signature: () map[string]string
-  - codegraphId: method:ccc37717bb59483c31e56f15b56eb65a
     file: third_party/openbao/internal/builtin/database/mysql/connection_producer.go
+    line: 191
+    codegraphId: method:3dec55da06dfc4b9ab79d175e9c5f669
+  - name: mySQLConnectionProducer.Close
     kind: method
-    line: 198
-    name: mySQLConnectionProducer.Close
     signature: () error
-  - codegraphId: struct:76f64e78002f3990882f31fc4fa973cd
-    file: third_party/openbao/internal/builtin/database/mysql/mysql.go
+    file: third_party/openbao/internal/builtin/database/mysql/connection_producer.go
+    line: 198
+    codegraphId: method:ccc37717bb59483c31e56f15b56eb65a
+  - name: MySQL
     kind: struct
+    file: third_party/openbao/internal/builtin/database/mysql/mysql.go
     line: 38
-    name: MySQL
-  - codegraphId: function:ab7a97517afe8744ec208e49efaa382c
-    file: third_party/openbao/internal/builtin/database/mysql/mysql.go
+    codegraphId: struct:76f64e78002f3990882f31fc4fa973cd
+  - name: New
     kind: function
-    line: 46
-    name: New
     signature: (defaultUsernameTemplate string) func() (any, error)
-  - codegraphId: method:428289802a4f07b84a7410d39be9bcd0
     file: third_party/openbao/internal/builtin/database/mysql/mysql.go
+    line: 46
+    codegraphId: function:ab7a97517afe8744ec208e49efaa382c
+  - name: MySQL.Type
     kind: method
-    line: 68
-    name: MySQL.Type
     signature: () (string, error)
-  - codegraphId: method:0d811a165342ca2e1598b6fcbf4cd993
     file: third_party/openbao/internal/builtin/database/mysql/mysql.go
+    line: 68
+    codegraphId: method:428289802a4f07b84a7410d39be9bcd0
+  - name: MySQL.Initialize
     kind: method
-    line: 81
-    name: MySQL.Initialize
     signature: (ctx context.Context, req dbplugin.InitializeRequest) (dbplugin.InitializeResponse,
       error)
-  - codegraphId: method:c3614388cef34b7f1d861709b81d21f1
     file: third_party/openbao/internal/builtin/database/mysql/mysql.go
+    line: 81
+    codegraphId: method:0d811a165342ca2e1598b6fcbf4cd993
+  - name: MySQL.NewUser
     kind: method
-    line: 115
-    name: MySQL.NewUser
     signature: (ctx context.Context, req dbplugin.NewUserRequest) (dbplugin.NewUserResponse,
       error)
-  - codegraphId: method:0b8132995d14bfa7b27f7f8395282f08
     file: third_party/openbao/internal/builtin/database/mysql/mysql.go
+    line: 115
+    codegraphId: method:c3614388cef34b7f1d861709b81d21f1
+  - name: MySQL.DeleteUser
     kind: method
-    line: 146
-    name: MySQL.DeleteUser
     signature: (ctx context.Context, req dbplugin.DeleteUserRequest) (dbplugin.DeleteUserResponse,
       error)
-  - codegraphId: method:a5bc8db241ea4458270d9852cb464d37
     file: third_party/openbao/internal/builtin/database/mysql/mysql.go
+    line: 146
+    codegraphId: method:0b8132995d14bfa7b27f7f8395282f08
+  - name: MySQL.UpdateUser
     kind: method
-    line: 210
-    name: MySQL.UpdateUser
     signature: (ctx context.Context, req dbplugin.UpdateUserRequest) (dbplugin.UpdateUserResponse,
       error)
-realizedSpecHash: 7be15b24d17ecb40046f1c4da2e6a00bbee40b828c3a2642c6154e40f5870aad
-syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-syncedFingerprint: ee4576e73a03a031f3597d6363263b1d216b802a78b8d5de96d67201a618d9fc
+    file: third_party/openbao/internal/builtin/database/mysql/mysql.go
+    line: 210
+    codegraphId: method:a5bc8db241ea4458270d9852cb464d37
+  fingerprint: ee4576e73a03a031f3597d6363263b1d216b802a78b8d5de96d67201a618d9fc

@@ -1,11 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/ui/lib/core/app/decorators/confirm-leave.js confirm-leave.js@third_party/openbao/ui/lib/core/app/decorators/confirm-leave.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-lib-core-app-decorators
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'This context exists so the app-side decorator entry point for confirm-leave
     navigation guarding is specifiable independently of the addon that implements
     it. The app file is a pure re-export shim: it owns no logic, but it fixes the
@@ -14,7 +14,6 @@ spec:
     imports withConfirmLeave from the app decorators directory rather than from the
     addon. It is described here so the route-decorator contract it exposes, and the
     unsaved-change behavior behind it, are recorded as the observable facts show them.'
-  repository: deno-kcp
   requirements:
   - id: r.confirm-unsaved-changes
     level: MUST
@@ -29,14 +28,14 @@ spec:
     text: withConfirmLeave takes modelPath as its first parameter defaulting to 'model',
       and every controller lookup in the decorator uses that path, so callers change
       which model is guarded by passing a different path.
-  - codeRefs:
-    - file:third_party/openbao/ui/lib/core/app/decorators/confirm-leave.js
-    id: r.reexport-with-confirm-leave
+  - id: r.reexport-with-confirm-leave
     level: MUST
     text: The app-side module third_party/openbao/ui/lib/core/app/decorators/confirm-leave.js
       re-exports withConfirmLeave from the specifier 'core/decorators/confirm-leave',
       which resolves to the addon decorator module; the module defines no logic of
       its own and exports no other binding.
+    codeRefs:
+    - file:third_party/openbao/ui/lib/core/app/decorators/confirm-leave.js
   - id: r.rollback-dirty-model
     level: MUST
     text: Rollback goes through _rollbackModel(modelPath), which fetches the model
@@ -64,4 +63,5 @@ spec:
       inside a try/catch so that a SuperClass without its own willTransition does
       not throw, and then reads the model at modelPath from this.controller before
       deciding whether to block the transition.
-  upstream: self
+codeRefIndex:
+- file:third_party/openbao/ui/lib/core/app/decorators/confirm-leave.js confirm-leave.js@third_party/openbao/ui/lib/core/app/decorators/confirm-leave.js

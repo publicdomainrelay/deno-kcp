@@ -1,4 +1,128 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-internal-command-agentproxyshared-cache-keymanager
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'This context exists to specify the key-material boundary of the agent proxy
+    shared cache. The cache needs a wrapper to encrypt and decrypt cached responses
+    and a way to hand back the material that reproduces the cache key, but it should
+    not care how that material is produced or whether it is abstracted behind an external
+    KMS. The KeyManager interface states that boundary in two methods, and PassthroughKeyManager
+    supplies the simplest conforming behavior: one locally held AES-GCM root key,
+    generated if absent, returned unchanged as the retrieval token. Reading this context
+    tells a maintainer what the contract requires, what the passthrough implementation
+    accepts and rejects, and which error strings and constants downstream code can
+    depend on.'
+  requirements:
+  - id: r.constructor-key-size
+    level: MUST
+    text: 'NewPassthroughKeyManager must branch on the length of the supplied key:
+      a zero-length key causes it to draw 32 fresh bytes from crypto/rand and use
+      them as the root key, a 32-byte key is used verbatim, and any other length must
+      return a nil manager with the error formatted as "invalid key size, should be
+      32, got %d" carrying the observed length.'
+    codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/cache/keymanager/passthrough.go
+    - function:d44e09ab3af0fd99b64a10c3f2faa4d2
+  - id: r.constructor-wrapper-setup
+    level: MUST
+    text: NewPassthroughKeyManager must build an aead wrapper, set its config with
+      key_id mapped to KeyID, install the resolved root key bytes through SetAesGcmKeyBytes,
+      and return a PassthroughKeyManager holding that wrapper; a failure from the
+      random read, SetConfig or SetAesGcmKeyBytes must abort with a nil manager and
+      the underlying error.
+    codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/cache/keymanager/passthrough.go
+    - function:d44e09ab3af0fd99b64a10c3f2faa4d2
+    - struct:194fd2b46e2244a6f7f3f7de2e915e3f
+  - id: r.interface-contract
+    level: MUST
+    text: 'The package must expose a KeyManager interface whose contract is exactly
+      two methods: Wrapper, which returns a wrapping.Wrapper usable for key-related
+      operations, and RetrievalToken, which takes a context and returns the byte material
+      that lets a caller source back the encryption key, where that material may be
+      the encryption key itself or a token or identifier exchanged for it.'
+    codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/cache/keymanager/manager.go
+    - interface:d00c51a0235874fb732e081ad66bc03a
+    - method:08219df992da36d79b44d2a92e7f0c51
+    - method:ff0d80c0ab9cc136eac0d0a232e1c88a
+  - id: r.keyid-constant
+    level: MUST
+    text: The package must define the constant KeyID with the value "root" and use
+      it as the key_id config entry when configuring a wrapper.
+    codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/cache/keymanager/manager.go
+  - id: r.passthrough-implements-keymanager
+    level: MUST
+    text: PassthroughKeyManager must satisfy KeyManager, enforced at compile time
+      by the assertion var _ KeyManager = (*PassthroughKeyManager)(nil); a change
+      that removes either method from the type must break the build.
+    codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/cache/keymanager/passthrough.go
+    - interface:d00c51a0235874fb732e081ad66bc03a
+    - struct:194fd2b46e2244a6f7f3f7de2e915e3f
+  - id: r.retrieval-token-passthrough
+    level: MUST
+    text: PassthroughKeyManager.RetrievalToken must return the key bytes held by the
+      wrapper, obtained through KeyBytes with the caller's context, and must return
+      a nil token with the error "unable to get wrapper for token retrieval" when
+      the wrapper is nil; because the manager is a passthrough it must not abstract,
+      re-wrap or transform the key material before returning it.
+    codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/cache/keymanager/passthrough.go
+    - method:1d7f8031128f2daa290c05a3247b7687
+    - struct:194fd2b46e2244a6f7f3f7de2e915e3f
+  - id: r.test-coverage
+    level: SHOULD
+    text: The package should keep passthrough_test.go exercising the passthrough constructor
+      together with both Wrapper and RetrievalToken, so the key-size branches and
+      the nil-wrapper error path stay covered.
+    codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/cache/keymanager/passthrough_test.go
+  - id: r.wrapper-accessor
+    level: MUST
+    text: PassthroughKeyManager.Wrapper must return the manager's stored *aead.Wrapper
+      unchanged, so callers perform key operations against the same wrapper the constructor
+      configured.
+    codeRefs:
+    - method:a129007c172ebe0a5d8127eb26368b58
+    - struct:194fd2b46e2244a6f7f3f7de2e915e3f
+  interfaces:
+  - name: KeyManager
+    kind: interface
+    signature: type KeyManager interface { Wrapper() wrapping.Wrapper; RetrievalToken(ctx
+      context.Context) ([]byte, error) }
+    file: third_party/openbao/internal/command/agentproxyshared/cache/keymanager/manager.go
+  - name: KeyManager.RetrievalToken
+    kind: method
+    signature: RetrievalToken(ctx context.Context) ([]byte, error)
+    file: third_party/openbao/internal/command/agentproxyshared/cache/keymanager/manager.go
+  - name: KeyManager.Wrapper
+    kind: method
+    signature: Wrapper() wrapping.Wrapper
+    file: third_party/openbao/internal/command/agentproxyshared/cache/keymanager/manager.go
+  - name: NewPassthroughKeyManager
+    kind: function
+    signature: func NewPassthroughKeyManager(ctx context.Context, key []byte) (*PassthroughKeyManager,
+      error)
+    file: third_party/openbao/internal/command/agentproxyshared/cache/keymanager/passthrough.go
+  - name: PassthroughKeyManager
+    kind: struct
+    signature: type PassthroughKeyManager struct { wrapper *aead.Wrapper }
+    file: third_party/openbao/internal/command/agentproxyshared/cache/keymanager/passthrough.go
+  - name: PassthroughKeyManager.RetrievalToken
+    kind: method
+    signature: func (w *PassthroughKeyManager) RetrievalToken(ctx context.Context)
+      ([]byte, error)
+    file: third_party/openbao/internal/command/agentproxyshared/cache/keymanager/passthrough.go
+  - name: PassthroughKeyManager.Wrapper
+    kind: method
+    signature: func (w *PassthroughKeyManager) Wrapper() wrapping.Wrapper
+    file: third_party/openbao/internal/command/agentproxyshared/cache/keymanager/passthrough.go
 codeRefIndex:
 - file:third_party/openbao/internal/command/agentproxyshared/cache/keymanager/manager.go
   manager.go@third_party/openbao/internal/command/agentproxyshared/cache/keymanager/manager.go
@@ -13,127 +137,3 @@ codeRefIndex:
 - method:a129007c172ebe0a5d8127eb26368b58 PassthroughKeyManager.Wrapper@third_party/openbao/internal/command/agentproxyshared/cache/keymanager/passthrough.go:59
 - method:ff0d80c0ab9cc136eac0d0a232e1c88a KeyManager.Wrapper@third_party/openbao/internal/command/agentproxyshared/cache/keymanager/manager.go:18
 - struct:194fd2b46e2244a6f7f3f7de2e915e3f PassthroughKeyManager@third_party/openbao/internal/command/agentproxyshared/cache/keymanager/passthrough.go:18
-kind: SystemContext
-metadata:
-  name: third-party-openbao-internal-command-agentproxyshared-cache-keymanager
-  namespace: default
-spec:
-  intent: 'This context exists to specify the key-material boundary of the agent proxy
-    shared cache. The cache needs a wrapper to encrypt and decrypt cached responses
-    and a way to hand back the material that reproduces the cache key, but it should
-    not care how that material is produced or whether it is abstracted behind an external
-    KMS. The KeyManager interface states that boundary in two methods, and PassthroughKeyManager
-    supplies the simplest conforming behavior: one locally held AES-GCM root key,
-    generated if absent, returned unchanged as the retrieval token. Reading this context
-    tells a maintainer what the contract requires, what the passthrough implementation
-    accepts and rejects, and which error strings and constants downstream code can
-    depend on.'
-  interfaces:
-  - file: third_party/openbao/internal/command/agentproxyshared/cache/keymanager/manager.go
-    kind: interface
-    name: KeyManager
-    signature: type KeyManager interface { Wrapper() wrapping.Wrapper; RetrievalToken(ctx
-      context.Context) ([]byte, error) }
-  - file: third_party/openbao/internal/command/agentproxyshared/cache/keymanager/manager.go
-    kind: method
-    name: KeyManager.RetrievalToken
-    signature: RetrievalToken(ctx context.Context) ([]byte, error)
-  - file: third_party/openbao/internal/command/agentproxyshared/cache/keymanager/manager.go
-    kind: method
-    name: KeyManager.Wrapper
-    signature: Wrapper() wrapping.Wrapper
-  - file: third_party/openbao/internal/command/agentproxyshared/cache/keymanager/passthrough.go
-    kind: function
-    name: NewPassthroughKeyManager
-    signature: func NewPassthroughKeyManager(ctx context.Context, key []byte) (*PassthroughKeyManager,
-      error)
-  - file: third_party/openbao/internal/command/agentproxyshared/cache/keymanager/passthrough.go
-    kind: struct
-    name: PassthroughKeyManager
-    signature: type PassthroughKeyManager struct { wrapper *aead.Wrapper }
-  - file: third_party/openbao/internal/command/agentproxyshared/cache/keymanager/passthrough.go
-    kind: method
-    name: PassthroughKeyManager.RetrievalToken
-    signature: func (w *PassthroughKeyManager) RetrievalToken(ctx context.Context)
-      ([]byte, error)
-  - file: third_party/openbao/internal/command/agentproxyshared/cache/keymanager/passthrough.go
-    kind: method
-    name: PassthroughKeyManager.Wrapper
-    signature: func (w *PassthroughKeyManager) Wrapper() wrapping.Wrapper
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agentproxyshared/cache/keymanager/passthrough.go
-    - function:d44e09ab3af0fd99b64a10c3f2faa4d2
-    id: r.constructor-key-size
-    level: MUST
-    text: 'NewPassthroughKeyManager must branch on the length of the supplied key:
-      a zero-length key causes it to draw 32 fresh bytes from crypto/rand and use
-      them as the root key, a 32-byte key is used verbatim, and any other length must
-      return a nil manager with the error formatted as "invalid key size, should be
-      32, got %d" carrying the observed length.'
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agentproxyshared/cache/keymanager/passthrough.go
-    - function:d44e09ab3af0fd99b64a10c3f2faa4d2
-    - struct:194fd2b46e2244a6f7f3f7de2e915e3f
-    id: r.constructor-wrapper-setup
-    level: MUST
-    text: NewPassthroughKeyManager must build an aead wrapper, set its config with
-      key_id mapped to KeyID, install the resolved root key bytes through SetAesGcmKeyBytes,
-      and return a PassthroughKeyManager holding that wrapper; a failure from the
-      random read, SetConfig or SetAesGcmKeyBytes must abort with a nil manager and
-      the underlying error.
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agentproxyshared/cache/keymanager/manager.go
-    - interface:d00c51a0235874fb732e081ad66bc03a
-    - method:08219df992da36d79b44d2a92e7f0c51
-    - method:ff0d80c0ab9cc136eac0d0a232e1c88a
-    id: r.interface-contract
-    level: MUST
-    text: 'The package must expose a KeyManager interface whose contract is exactly
-      two methods: Wrapper, which returns a wrapping.Wrapper usable for key-related
-      operations, and RetrievalToken, which takes a context and returns the byte material
-      that lets a caller source back the encryption key, where that material may be
-      the encryption key itself or a token or identifier exchanged for it.'
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agentproxyshared/cache/keymanager/manager.go
-    id: r.keyid-constant
-    level: MUST
-    text: The package must define the constant KeyID with the value "root" and use
-      it as the key_id config entry when configuring a wrapper.
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agentproxyshared/cache/keymanager/passthrough.go
-    - interface:d00c51a0235874fb732e081ad66bc03a
-    - struct:194fd2b46e2244a6f7f3f7de2e915e3f
-    id: r.passthrough-implements-keymanager
-    level: MUST
-    text: PassthroughKeyManager must satisfy KeyManager, enforced at compile time
-      by the assertion var _ KeyManager = (*PassthroughKeyManager)(nil); a change
-      that removes either method from the type must break the build.
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agentproxyshared/cache/keymanager/passthrough.go
-    - method:1d7f8031128f2daa290c05a3247b7687
-    - struct:194fd2b46e2244a6f7f3f7de2e915e3f
-    id: r.retrieval-token-passthrough
-    level: MUST
-    text: PassthroughKeyManager.RetrievalToken must return the key bytes held by the
-      wrapper, obtained through KeyBytes with the caller's context, and must return
-      a nil token with the error "unable to get wrapper for token retrieval" when
-      the wrapper is nil; because the manager is a passthrough it must not abstract,
-      re-wrap or transform the key material before returning it.
-  - codeRefs:
-    - file:third_party/openbao/internal/command/agentproxyshared/cache/keymanager/passthrough_test.go
-    id: r.test-coverage
-    level: SHOULD
-    text: The package should keep passthrough_test.go exercising the passthrough constructor
-      together with both Wrapper and RetrievalToken, so the key-size branches and
-      the nil-wrapper error path stay covered.
-  - codeRefs:
-    - method:a129007c172ebe0a5d8127eb26368b58
-    - struct:194fd2b46e2244a6f7f3f7de2e915e3f
-    id: r.wrapper-accessor
-    level: MUST
-    text: PassthroughKeyManager.Wrapper must return the manager's stored *aead.Wrapper
-      unchanged, so callers perform key operations against the same wrapper the constructor
-      configured.
-  upstream: self

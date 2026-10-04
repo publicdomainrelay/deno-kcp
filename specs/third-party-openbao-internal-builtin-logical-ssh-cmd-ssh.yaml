@@ -1,11 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/internal/builtin/logical/ssh/cmd/ssh/main.go main.go@third_party/openbao/internal/builtin/logical/ssh/cmd/ssh/main.go
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-builtin-logical-ssh-cmd-ssh
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'The file exists so the SSH logical backend can be built and run as a separate
     OpenBao/Vault plugin process, negotiated over the plugin protocol rather than
     compiled into the server. Its purpose is to wire the three pieces a plugin binary
@@ -13,11 +13,8 @@ spec:
     command-line flags, and the multiplexed plugin server, while keeping the legacy
     `TLSProviderFunc` path so the plugin still works with host versions that do not
     support plugin AutoMTLS.'
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/internal/builtin/logical/ssh/cmd/ssh/main.go
-    id: r.configuration-surface
+  - id: r.configuration-surface
     level: MUST
     text: The entrypoint's configuration surface is the flag set returned by `api.PluginAPIClientMeta.FlagSet()`,
       parsed from `os.Args[1:]` with `flag.ContinueOnError`; no environment variable
@@ -26,27 +23,30 @@ spec:
       (string, default empty), `-tls-server-name` (string, default empty), and `-tls-skip-verify`
       (bool, default false). When every flag keeps its default, `GetTLSConfig` returns
       nil and no custom TLS configuration is applied.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/builtin/logical/ssh/cmd/ssh/main.go
-    id: r.exit-on-serve-failure
+  - id: r.exit-on-serve-failure
     level: MUST
     text: If `plugin.ServeMultiplex` returns an error, `main` must log it at error
       level under the message `plugin shutting down` with the error attached, using
       a freshly constructed `hclog` logger, and must terminate the process with exit
       status 1.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/builtin/logical/ssh/cmd/ssh/main.go
-    id: r.legacy-tls-provider
+  - id: r.legacy-tls-provider
     level: MUST
     text: '`main` must build the plugin TLS provider from the parsed flag values via
       `apiClientMeta.GetTLSConfig()` passed to `api.VaultPluginTLSProvider`, and must
       set the result as `ServeOpts.TLSProviderFunc`, so the plugin maintains backwards
       compatibility with host versions that do not support plugin AutoMTLS.'
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/builtin/logical/ssh/cmd/ssh/main.go
-    id: r.serve-ssh-backend-as-plugin
+  - id: r.serve-ssh-backend-as-plugin
     level: MUST
     text: '`main` must serve the SSH logical backend by calling `plugin.ServeMultiplex`
       with `BackendFactoryFunc` set to `ssh.Factory`, so the backend is constructed
       by the SSH package''s factory when the host requests it.'
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/ssh/cmd/ssh/main.go
+codeRefIndex:
+- file:third_party/openbao/internal/builtin/logical/ssh/cmd/ssh/main.go main.go@third_party/openbao/internal/builtin/logical/ssh/cmd/ssh/main.go

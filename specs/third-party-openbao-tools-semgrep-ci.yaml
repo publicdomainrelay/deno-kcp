@@ -1,4 +1,206 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-tools-semgrep-ci
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: The directory exists so CI can statically reject Go patterns that the OpenBao
+    project treats as defects but that a compiler or vet does not catch, for example
+    an unchecked nil after a storage read, a MAC compared with bytes.Equal, or an
+    auth response returned together with an error. Each file is a standalone Semgrep
+    ruleset that the CI job loads and runs over the Go source; the rule ids double
+    as the failure identifiers a developer sees. The rules are vendored from OpenBao
+    into third_party, so this context documents the inherited policy as-is rather
+    than a policy this repository authored.
+  requirements:
+  - id: r.bad-multierror-append
+    level: MUST
+    text: Rule bad-multierror-append reports go code that assigns multierror.Append
+      back onto either operand, covering $ERR = multierror.Append($ERRORS, $ERR),
+      $ERR = multierror.Append($ERR, $ERR), $ERRORS = multierror.Append($ERR, $ERR)
+      and $ERRORS = multierror.Append($ERR, $ERRORS), at severity ERROR.
+    codeRefs:
+    - file:third_party/openbao/tools/semgrep/ci/bad-multierror-append.yml
+  - id: r.bad-nil-guard
+    level: MUST
+    text: Rule bad-nil-guard reports go boolean expressions that compare a variable
+      against nil and also dereference or call a field on that same variable, in all
+      six orderings of && and || with == nil and != nil, at severity ERROR.
+    codeRefs:
+    - file:third_party/openbao/tools/semgrep/ci/bad-nil-guard.yml
+  - id: r.ed25519-pointer
+    level: MUST
+    text: Rule use-non-pointer-ed25519-public-key is a generic-language rule scoped
+      with paths.include *.go that reports the type expression *ed25519.PublicKey,
+      at severity ERROR.
+    codeRefs:
+    - file:third_party/openbao/tools/semgrep/ci/ed25519-pointer.yml
+  - id: r.error-shadowing
+    level: MUST
+    text: Rules error-shadow-check-types and error-shadow-check-regex report reassignment
+      of an error variable before it is checked, exempting paths where the code tests
+      == nil, tests != nil, passes the error to a checking call, or enters a switch,
+      both at severity ERROR.
+    codeRefs:
+    - file:third_party/openbao/tools/semgrep/ci/error-shadowing.yml
+  - id: r.fmt-printf
+    level: MUST
+    text: Rule fmt.Printf reports fmt.Printf and fmt.Println anywhere except test
+      files, cmd trees, tools trees and the two sdk database plugin server files,
+      using paths.exclude globs **/*_test.go, **/cmd/**/*.go, **/tools/**/*.go, sdk/database/dbplugin/server.go
+      and sdk/database/dbplugin/v5/plugin_server.go, at severity ERROR.
+    codeRefs:
+    - file:third_party/openbao/tools/semgrep/ci/fmt-printf.yml
+  - id: r.hashsum
+    level: MUST
+    text: Rule hash-sum-without-write reports a hash Sum call on a freshly constructed
+      hasher or on a hasher whose value never reaches a Write call or another function,
+      at severity ERROR.
+    codeRefs:
+    - file:third_party/openbao/tools/semgrep/ci/hashsum.yml
+  - id: r.hmac-bytes
+    level: MUST
+    text: Rule use-hmac-equal reports a bytes.Equal comparison against the output
+      of $MAC.Sum where $MAC came from hmac.New, in either argument order, at severity
+      ERROR.
+    codeRefs:
+    - file:third_party/openbao/tools/semgrep/ci/hmac-bytes.yml
+  - id: r.hmac-hash
+    level: MUST
+    text: Rule hmac-needs-new reports hmac.New when handed a closure that returns
+      a hash instance already allocated before the call, in the named-function, inline-literal
+      and cast forms, at severity ERROR.
+    codeRefs:
+    - file:third_party/openbao/tools/semgrep/ci/hmac-hash.yml
+  - id: r.logger-format-string
+    level: MUST
+    text: Rule logger-used-with-format-string reports hclog Trace, Debug, Info, Warn
+      and Error calls whose literal message contains a printf-style verb, restricted
+      to files importing github.com/hashicorp/go-hclog, at severity ERROR.
+    codeRefs:
+    - file:third_party/openbao/tools/semgrep/ci/logger-format-string.yml
+  - id: r.logger-level-check
+    level: MUST
+    text: Rule logger-level-check reports an if statement that guards a log call with
+      the matching level predicate on the same logger, matching $LOGGER against a
+      name containing logger and $CHECK and $LOG against IsDebug/IsInfo/IsWarn/IsError/IsTrace/IsFatal
+      and Debug/Info/Warn/Error/Trace/Fatal, at severity ERROR.
+    codeRefs:
+    - file:third_party/openbao/tools/semgrep/ci/logger-level-check.yml
+  - id: r.loop-time-after
+    level: MUST
+    text: Rule loop-time-after reports a receive from time.After inside a for loop
+      as a hint to use a ticker or timer, at severity WARNING.
+    codeRefs:
+    - file:third_party/openbao/tools/semgrep/ci/loop-time-after.yml
+  - id: r.loopclosure
+    level: MUST
+    text: Rule loopclosure reports use of a range loop's value variable inside a goroutine,
+      exempting goroutines that pass the variable as a parameter and goroutines that
+      declare their own inner loop, at severity WARNING.
+    codeRefs:
+    - file:third_party/openbao/tools/semgrep/ci/loopclosure.yml
+  - id: r.mpl-license-header
+    level: MUST
+    text: 'Every rule file under third_party/openbao/tools/semgrep/ci carries an SPDX-License-Identifier:
+      MPL-2.0 comment and a HashiCorp or OpenBao copyright line before the rules block.'
+    codeRefs:
+    - file:third_party/openbao/tools/semgrep/ci/bad-multierror-append.yml
+    - file:third_party/openbao/tools/semgrep/ci/ed25519-pointer.yml
+    - file:third_party/openbao/tools/semgrep/ci/no-nil-check.yml
+  - id: r.no-nil-check
+    level: MUST
+    text: 'no-nil-check.yml defines four ERROR rules for a value taken from a storage
+      read and then dereferenced or passed on without a nil test: nil-check-logical-storage
+      for ($S : logical.Storage).Get, nil-check-physical-storage for ($S : physical.Storage).Get,
+      nil-check-physical-storage-by-nsid for NamespaceByID, and nil-check-logical-storage-regex
+      for receivers matching the storage, s, barrier, view, barrierView, physical
+      and underlying name regex, which excludes /internal/vault/ui.go from its scope.'
+    codeRefs:
+    - file:third_party/openbao/tools/semgrep/ci/no-nil-check.yml
+  - id: r.non-nil-err-auth-response
+    level: MUST
+    text: Rule non-nil-err-auth-response reports returning a logical.Response that
+      carries an Auth value together with err, logical.CodedError, fmt.Errorf or errors.New,
+      including the form where the response is first bound to a variable and returned
+      later, at severity ERROR.
+    codeRefs:
+    - file:third_party/openbao/tools/semgrep/ci/non-nil-err-auth-response.yml
+  - id: r.oddifsequence
+    level: MUST
+    text: Rule odd-sequence-ifs reports a second conditional whose test contradicts,
+      repeats or loops on the test of an early-returning if, covering nested and sequential
+      forms over both boolean and equality tests, at severity ERROR.
+    codeRefs:
+    - file:third_party/openbao/tools/semgrep/ci/oddifsequence.yml
+  - id: r.paths-with-callbacks
+    level: MUST
+    text: Rule uses-path-callbacks reports a framework.Path literal that sets Callbacks,
+      in slice-element and address-of forms, at severity WARNING.
+    codeRefs:
+    - file:third_party/openbao/tools/semgrep/ci/paths-with-callbacks.yml
+  - id: r.paths-with-callbacks-and-operations
+    level: MUST
+    text: Rule path-has-both-callbacks-and-operations reports a framework.Path literal
+      that sets both Callbacks and Operations, in slice-element and address-of forms
+      and in either field order, at severity ERROR.
+    codeRefs:
+    - file:third_party/openbao/tools/semgrep/ci/paths-with-callbacks-and-operations.yml
+  - id: r.return-nil
+    level: MUST
+    text: Rule hc-return-nil in return-nil.yml reports returning a variable from inside
+      its own nil test, and returning that variable after an if that returns early
+      when it is non-nil, at severity ERROR.
+    codeRefs:
+    - file:third_party/openbao/tools/semgrep/ci/return-nil.yml
+  - id: r.return-nil-error
+    level: MUST
+    text: Rule return-nil in return-nil-error.yml reports an if err == nil branch
+      that returns err itself as a value, with or without additional return operands,
+      at severity ERROR.
+    codeRefs:
+    - file:third_party/openbao/tools/semgrep/ci/return-nil-error.yml
+  - id: r.rule-anatomy
+    level: MUST
+    text: Each file has a top-level rules list whose entries each declare id, message,
+      languages and severity, so Semgrep can load the file and report a named finding.
+    codeRefs:
+    - file:third_party/openbao/tools/semgrep/ci/bad-multierror-append.yml
+    - file:third_party/openbao/tools/semgrep/ci/time-parse-duration.yml
+  - id: r.splitn-1
+    level: MUST
+    text: Rule splitn-1 reports strings.SplitN called with a limit of 1 as a no-op
+      split, at severity ERROR.
+    codeRefs:
+    - file:third_party/openbao/tools/semgrep/ci/splitn-1.yml
+  - id: r.tests-context
+    level: MUST
+    text: Rule use-test-context is scoped with paths.include *_test.go and reports
+      context.Background and context.TODO in test files, telling the author to use
+      (t/b).Context() instead, at severity ERROR.
+    codeRefs:
+    - file:third_party/openbao/tools/semgrep/ci/tests-context.yml
+  - id: r.time-parse-duration
+    level: MUST
+    text: Rule time-parse-duration reports any call to time.ParseDuration and directs
+      the author to parseutil.ParseDurationSeconds, at severity ERROR.
+    codeRefs:
+    - file:third_party/openbao/tools/semgrep/ci/time-parse-duration.yml
+  - id: r.wrongerrcall
+    level: MUST
+    text: Rule maybe-wrong-err reports returning err from inside a branch guarded
+      by a different error's Err() method, at severity WARNING.
+    codeRefs:
+    - file:third_party/openbao/tools/semgrep/ci/wrongerrcall.yml
+  - id: r.wronglock
+    level: MUST
+    text: Rule wrong-lock-unlock reports a mutex lock followed by a deferred mismatched
+      unlock, covering Lock with deferred RUnlock, RLock with deferred Unlock, Lock
+      with deferred Lock, and RLock with deferred RLock, at severity ERROR.
+    codeRefs:
+    - file:third_party/openbao/tools/semgrep/ci/wronglock.yml
 codeRefIndex:
 - file:third_party/openbao/tools/semgrep/ci/bad-multierror-append.yml bad-multierror-append.yml@third_party/openbao/tools/semgrep/ci/bad-multierror-append.yml
 - file:third_party/openbao/tools/semgrep/ci/bad-nil-guard.yml bad-nil-guard.yml@third_party/openbao/tools/semgrep/ci/bad-nil-guard.yml
@@ -25,205 +227,3 @@ codeRefIndex:
 - file:third_party/openbao/tools/semgrep/ci/time-parse-duration.yml time-parse-duration.yml@third_party/openbao/tools/semgrep/ci/time-parse-duration.yml
 - file:third_party/openbao/tools/semgrep/ci/wrongerrcall.yml wrongerrcall.yml@third_party/openbao/tools/semgrep/ci/wrongerrcall.yml
 - file:third_party/openbao/tools/semgrep/ci/wronglock.yml wronglock.yml@third_party/openbao/tools/semgrep/ci/wronglock.yml
-kind: SystemContext
-metadata:
-  name: third-party-openbao-tools-semgrep-ci
-  namespace: default
-spec:
-  intent: The directory exists so CI can statically reject Go patterns that the OpenBao
-    project treats as defects but that a compiler or vet does not catch, for example
-    an unchecked nil after a storage read, a MAC compared with bytes.Equal, or an
-    auth response returned together with an error. Each file is a standalone Semgrep
-    ruleset that the CI job loads and runs over the Go source; the rule ids double
-    as the failure identifiers a developer sees. The rules are vendored from OpenBao
-    into third_party, so this context documents the inherited policy as-is rather
-    than a policy this repository authored.
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - file:third_party/openbao/tools/semgrep/ci/bad-multierror-append.yml
-    id: r.bad-multierror-append
-    level: MUST
-    text: Rule bad-multierror-append reports go code that assigns multierror.Append
-      back onto either operand, covering $ERR = multierror.Append($ERRORS, $ERR),
-      $ERR = multierror.Append($ERR, $ERR), $ERRORS = multierror.Append($ERR, $ERR)
-      and $ERRORS = multierror.Append($ERR, $ERRORS), at severity ERROR.
-  - codeRefs:
-    - file:third_party/openbao/tools/semgrep/ci/bad-nil-guard.yml
-    id: r.bad-nil-guard
-    level: MUST
-    text: Rule bad-nil-guard reports go boolean expressions that compare a variable
-      against nil and also dereference or call a field on that same variable, in all
-      six orderings of && and || with == nil and != nil, at severity ERROR.
-  - codeRefs:
-    - file:third_party/openbao/tools/semgrep/ci/ed25519-pointer.yml
-    id: r.ed25519-pointer
-    level: MUST
-    text: Rule use-non-pointer-ed25519-public-key is a generic-language rule scoped
-      with paths.include *.go that reports the type expression *ed25519.PublicKey,
-      at severity ERROR.
-  - codeRefs:
-    - file:third_party/openbao/tools/semgrep/ci/error-shadowing.yml
-    id: r.error-shadowing
-    level: MUST
-    text: Rules error-shadow-check-types and error-shadow-check-regex report reassignment
-      of an error variable before it is checked, exempting paths where the code tests
-      == nil, tests != nil, passes the error to a checking call, or enters a switch,
-      both at severity ERROR.
-  - codeRefs:
-    - file:third_party/openbao/tools/semgrep/ci/fmt-printf.yml
-    id: r.fmt-printf
-    level: MUST
-    text: Rule fmt.Printf reports fmt.Printf and fmt.Println anywhere except test
-      files, cmd trees, tools trees and the two sdk database plugin server files,
-      using paths.exclude globs **/*_test.go, **/cmd/**/*.go, **/tools/**/*.go, sdk/database/dbplugin/server.go
-      and sdk/database/dbplugin/v5/plugin_server.go, at severity ERROR.
-  - codeRefs:
-    - file:third_party/openbao/tools/semgrep/ci/hashsum.yml
-    id: r.hashsum
-    level: MUST
-    text: Rule hash-sum-without-write reports a hash Sum call on a freshly constructed
-      hasher or on a hasher whose value never reaches a Write call or another function,
-      at severity ERROR.
-  - codeRefs:
-    - file:third_party/openbao/tools/semgrep/ci/hmac-bytes.yml
-    id: r.hmac-bytes
-    level: MUST
-    text: Rule use-hmac-equal reports a bytes.Equal comparison against the output
-      of $MAC.Sum where $MAC came from hmac.New, in either argument order, at severity
-      ERROR.
-  - codeRefs:
-    - file:third_party/openbao/tools/semgrep/ci/hmac-hash.yml
-    id: r.hmac-hash
-    level: MUST
-    text: Rule hmac-needs-new reports hmac.New when handed a closure that returns
-      a hash instance already allocated before the call, in the named-function, inline-literal
-      and cast forms, at severity ERROR.
-  - codeRefs:
-    - file:third_party/openbao/tools/semgrep/ci/logger-format-string.yml
-    id: r.logger-format-string
-    level: MUST
-    text: Rule logger-used-with-format-string reports hclog Trace, Debug, Info, Warn
-      and Error calls whose literal message contains a printf-style verb, restricted
-      to files importing github.com/hashicorp/go-hclog, at severity ERROR.
-  - codeRefs:
-    - file:third_party/openbao/tools/semgrep/ci/logger-level-check.yml
-    id: r.logger-level-check
-    level: MUST
-    text: Rule logger-level-check reports an if statement that guards a log call with
-      the matching level predicate on the same logger, matching $LOGGER against a
-      name containing logger and $CHECK and $LOG against IsDebug/IsInfo/IsWarn/IsError/IsTrace/IsFatal
-      and Debug/Info/Warn/Error/Trace/Fatal, at severity ERROR.
-  - codeRefs:
-    - file:third_party/openbao/tools/semgrep/ci/loop-time-after.yml
-    id: r.loop-time-after
-    level: MUST
-    text: Rule loop-time-after reports a receive from time.After inside a for loop
-      as a hint to use a ticker or timer, at severity WARNING.
-  - codeRefs:
-    - file:third_party/openbao/tools/semgrep/ci/loopclosure.yml
-    id: r.loopclosure
-    level: MUST
-    text: Rule loopclosure reports use of a range loop's value variable inside a goroutine,
-      exempting goroutines that pass the variable as a parameter and goroutines that
-      declare their own inner loop, at severity WARNING.
-  - codeRefs:
-    - file:third_party/openbao/tools/semgrep/ci/bad-multierror-append.yml
-    - file:third_party/openbao/tools/semgrep/ci/ed25519-pointer.yml
-    - file:third_party/openbao/tools/semgrep/ci/no-nil-check.yml
-    id: r.mpl-license-header
-    level: MUST
-    text: 'Every rule file under third_party/openbao/tools/semgrep/ci carries an SPDX-License-Identifier:
-      MPL-2.0 comment and a HashiCorp or OpenBao copyright line before the rules block.'
-  - codeRefs:
-    - file:third_party/openbao/tools/semgrep/ci/no-nil-check.yml
-    id: r.no-nil-check
-    level: MUST
-    text: 'no-nil-check.yml defines four ERROR rules for a value taken from a storage
-      read and then dereferenced or passed on without a nil test: nil-check-logical-storage
-      for ($S : logical.Storage).Get, nil-check-physical-storage for ($S : physical.Storage).Get,
-      nil-check-physical-storage-by-nsid for NamespaceByID, and nil-check-logical-storage-regex
-      for receivers matching the storage, s, barrier, view, barrierView, physical
-      and underlying name regex, which excludes /internal/vault/ui.go from its scope.'
-  - codeRefs:
-    - file:third_party/openbao/tools/semgrep/ci/non-nil-err-auth-response.yml
-    id: r.non-nil-err-auth-response
-    level: MUST
-    text: Rule non-nil-err-auth-response reports returning a logical.Response that
-      carries an Auth value together with err, logical.CodedError, fmt.Errorf or errors.New,
-      including the form where the response is first bound to a variable and returned
-      later, at severity ERROR.
-  - codeRefs:
-    - file:third_party/openbao/tools/semgrep/ci/oddifsequence.yml
-    id: r.oddifsequence
-    level: MUST
-    text: Rule odd-sequence-ifs reports a second conditional whose test contradicts,
-      repeats or loops on the test of an early-returning if, covering nested and sequential
-      forms over both boolean and equality tests, at severity ERROR.
-  - codeRefs:
-    - file:third_party/openbao/tools/semgrep/ci/paths-with-callbacks.yml
-    id: r.paths-with-callbacks
-    level: MUST
-    text: Rule uses-path-callbacks reports a framework.Path literal that sets Callbacks,
-      in slice-element and address-of forms, at severity WARNING.
-  - codeRefs:
-    - file:third_party/openbao/tools/semgrep/ci/paths-with-callbacks-and-operations.yml
-    id: r.paths-with-callbacks-and-operations
-    level: MUST
-    text: Rule path-has-both-callbacks-and-operations reports a framework.Path literal
-      that sets both Callbacks and Operations, in slice-element and address-of forms
-      and in either field order, at severity ERROR.
-  - codeRefs:
-    - file:third_party/openbao/tools/semgrep/ci/return-nil.yml
-    id: r.return-nil
-    level: MUST
-    text: Rule hc-return-nil in return-nil.yml reports returning a variable from inside
-      its own nil test, and returning that variable after an if that returns early
-      when it is non-nil, at severity ERROR.
-  - codeRefs:
-    - file:third_party/openbao/tools/semgrep/ci/return-nil-error.yml
-    id: r.return-nil-error
-    level: MUST
-    text: Rule return-nil in return-nil-error.yml reports an if err == nil branch
-      that returns err itself as a value, with or without additional return operands,
-      at severity ERROR.
-  - codeRefs:
-    - file:third_party/openbao/tools/semgrep/ci/bad-multierror-append.yml
-    - file:third_party/openbao/tools/semgrep/ci/time-parse-duration.yml
-    id: r.rule-anatomy
-    level: MUST
-    text: Each file has a top-level rules list whose entries each declare id, message,
-      languages and severity, so Semgrep can load the file and report a named finding.
-  - codeRefs:
-    - file:third_party/openbao/tools/semgrep/ci/splitn-1.yml
-    id: r.splitn-1
-    level: MUST
-    text: Rule splitn-1 reports strings.SplitN called with a limit of 1 as a no-op
-      split, at severity ERROR.
-  - codeRefs:
-    - file:third_party/openbao/tools/semgrep/ci/tests-context.yml
-    id: r.tests-context
-    level: MUST
-    text: Rule use-test-context is scoped with paths.include *_test.go and reports
-      context.Background and context.TODO in test files, telling the author to use
-      (t/b).Context() instead, at severity ERROR.
-  - codeRefs:
-    - file:third_party/openbao/tools/semgrep/ci/time-parse-duration.yml
-    id: r.time-parse-duration
-    level: MUST
-    text: Rule time-parse-duration reports any call to time.ParseDuration and directs
-      the author to parseutil.ParseDurationSeconds, at severity ERROR.
-  - codeRefs:
-    - file:third_party/openbao/tools/semgrep/ci/wrongerrcall.yml
-    id: r.wrongerrcall
-    level: MUST
-    text: Rule maybe-wrong-err reports returning err from inside a branch guarded
-      by a different error's Err() method, at severity WARNING.
-  - codeRefs:
-    - file:third_party/openbao/tools/semgrep/ci/wronglock.yml
-    id: r.wronglock
-    level: MUST
-    text: Rule wrong-lock-unlock reports a mutex lock followed by a deferred mismatched
-      unlock, covering Lock with deferred RUnlock, RLock with deferred Unlock, Lock
-      with deferred Lock, and RLock with deferred RLock, at severity ERROR.
-  upstream: self

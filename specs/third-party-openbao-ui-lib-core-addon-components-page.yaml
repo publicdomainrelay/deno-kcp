@@ -1,42 +1,42 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- class:15a8a06f683af68845d73ab5e5213987 Breadcrumbs@third_party/openbao/ui/lib/core/addon/components/page/breadcrumbs.js:20
-- file:third_party/openbao/ui/lib/core/addon/components/page/breadcrumbs.js breadcrumbs.js@third_party/openbao/ui/lib/core/addon/components/page/breadcrumbs.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-lib-core-addon-components-page
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'The context exists to pin down the contract of the shared Breadcrumbs page
     component that other OpenBao UI routes build on. It records that the component
     is a thin Ember class whose only behavior is the constructor-time validation of
     its `breadcrumbs` argument, so that any page reusing or replacing it knows the
     required shape: an array of entries, each with a `label` key, with routing metadata
     passed through untouched.'
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - class:15a8a06f683af68845d73ab5e5213987
-    - file:third_party/openbao/ui/lib/core/addon/components/page/breadcrumbs.js
-    id: r.arguments-forwarded-to-super
+  - id: r.arguments-forwarded-to-super
     level: MUST
     text: The constructor must forward its arguments to the parent Component constructor
       via super(...arguments) before running breadcrumb validation, and must not declare
       or reorder the component arguments itself.
-  - codeRefs:
+    codeRefs:
     - class:15a8a06f683af68845d73ab5e5213987
     - file:third_party/openbao/ui/lib/core/addon/components/page/breadcrumbs.js
-    id: r.breadcrumbs-arg-required
+  - id: r.breadcrumbs-arg-required
     level: MUST
     text: Breadcrumbs must read its entries from the `breadcrumbs` component argument
       and must iterate every entry during construction, treating the argument as non-null
       and enumerable.
-  - codeRefs:
+    codeRefs:
     - class:15a8a06f683af68845d73ab5e5213987
     - file:third_party/openbao/ui/lib/core/addon/components/page/breadcrumbs.js
-    id: r.label-key-asserted
+  - id: r.label-key-asserted
     level: MUST
     text: For each breadcrumb entry, the constructor must assert that its keys include
       `label`; an entry without a `label` key must fail the assertion with the message
       'breadcrumb has a label key'.
-  upstream: self
+    codeRefs:
+    - class:15a8a06f683af68845d73ab5e5213987
+    - file:third_party/openbao/ui/lib/core/addon/components/page/breadcrumbs.js
+codeRefIndex:
+- class:15a8a06f683af68845d73ab5e5213987 Breadcrumbs@third_party/openbao/ui/lib/core/addon/components/page/breadcrumbs.js:20
+- file:third_party/openbao/ui/lib/core/addon/components/page/breadcrumbs.js breadcrumbs.js@third_party/openbao/ui/lib/core/addon/components/page/breadcrumbs.js

@@ -1,5 +1,11 @@
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: b1b12e6f6f2e4f33963a84504d4a2d21f8bdca644107016b9092ac6a7e3d9447
+realizedSpecHash: 3b10b9a8b379492284bef663967b96717814fddee706eafaf810b1768334072c
 conditions:
-- message: 'missing: DenoJob.DeepCopy, DenoJob.DeepCopyInto, DenoJob.DeepCopyObject,
+- type: CodeSynced
+  status: "False"
+  reason: InterfacesMissing
+  message: 'missing: DenoJob.DeepCopy, DenoJob.DeepCopyInto, DenoJob.DeepCopyObject,
     DenoJobList.DeepCopy, DenoJobList.DeepCopyInto, DenoJobList.DeepCopyObject, DenoJobSpec.DeepCopyInto,
     DenoJobStatus.DeepCopyInto, DenoPermission.DeepCopyInto, DenoPermissions.DeepCopyInto,
     DenoPod.DeepCopy, DenoPod.DeepCopyInto, DenoPod.DeepCopyObject, DenoPodList.DeepCopy,
@@ -29,17 +35,14 @@ conditions:
     method:97a18054cf35b3ba841a31198ca24b02, r.deepcopy-object-for-roots-and-lists:
     method:a4967ab3a26c061c8378b3d92104b613, r.deepcopy-object-for-roots-and-lists:
     method:b8e83f017166d220cee8c04269e072c7, r.deno-permissions-conversion: method:0dd42034ce69416d2233ce9e55bb6d3d'
-  reason: InterfacesMissing
+- type: Drifted
   status: "False"
-  type: CodeSynced
-- message: observed facts match the synced fingerprint
   reason: FingerprintEqual
-  status: "False"
-  type: Drifted
-- message: the spec passes the validator
-  reason: ValidatorPassed
+  message: observed facts match the synced fingerprint
+- type: SpecValid
   status: "True"
-  type: SpecValid
+  reason: ValidatorPassed
+  message: the spec passes the validator
 observed:
   files:
   - api/v1alpha1/deno_types_test.go
@@ -56,250 +59,247 @@ observed:
   - api/v1alpha1/types_shared.go
   - api/v1alpha1/types_test.go
   - api/v1alpha1/zz_generated.deepcopy.go
-  fingerprint: b1b12e6f6f2e4f33963a84504d4a2d21f8bdca644107016b9092ac6a7e3d9447
   interfaces:
-  - codegraphId: method:4853a11212ee93729970106d66fe9a6c
-    file: api/v1alpha1/denospec.go
+  - name: DenoPermissions.DenoSpec
     kind: method
-    line: 12
-    name: DenoPermissions.DenoSpec
     signature: () *denospec.Permissions
-  - codegraphId: method:3846c936f898af39cc3e185598df8409
     file: api/v1alpha1/denospec.go
+    line: 12
+    codegraphId: method:4853a11212ee93729970106d66fe9a6c
+  - name: ServiceAccountRef.DenoSpec
     kind: method
-    line: 45
-    name: ServiceAccountRef.DenoSpec
     signature: () *denospec.ServiceAccountRef
-  - codegraphId: struct:9f31aa5c4a5874f591d074bb6f87c0d7
-    file: api/v1alpha1/types_denojob.go
+    file: api/v1alpha1/denospec.go
+    line: 45
+    codegraphId: method:3846c936f898af39cc3e185598df8409
+  - name: DenoJob
     kind: struct
+    file: api/v1alpha1/types_denojob.go
     line: 7
-    name: DenoJob
-  - codegraphId: struct:e23b6c675e266e96e349726b82e81264
-    file: api/v1alpha1/types_denojob.go
+    codegraphId: struct:9f31aa5c4a5874f591d074bb6f87c0d7
+  - name: DenoJobList
     kind: struct
+    file: api/v1alpha1/types_denojob.go
     line: 15
-    name: DenoJobList
-  - codegraphId: struct:11ada3025e8b3e4cb83fea05d838d25b
-    file: api/v1alpha1/types_denojob.go
+    codegraphId: struct:e23b6c675e266e96e349726b82e81264
+  - name: DenoJobSpec
     kind: struct
-    line: 22
-    name: DenoJobSpec
-  - codegraphId: type_alias:b301d0b47a8b87747f72eb4dd29c1213
     file: api/v1alpha1/types_denojob.go
+    line: 22
+    codegraphId: struct:11ada3025e8b3e4cb83fea05d838d25b
+  - name: DenoJobPhase
     kind: type_alias
+    file: api/v1alpha1/types_denojob.go
     line: 38
-    name: DenoJobPhase
-  - codegraphId: struct:c8831499bb53beff7d2fc49579535570
+    codegraphId: type_alias:b301d0b47a8b87747f72eb4dd29c1213
+  - name: DenoJobStatus
+    kind: struct
     file: api/v1alpha1/types_denojob.go
-    kind: struct
     line: 50
-    name: DenoJobStatus
-  - codegraphId: struct:ad8c97baa6157384096c06159cfb2dbe
-    file: api/v1alpha1/types_denopod.go
+    codegraphId: struct:c8831499bb53beff7d2fc49579535570
+  - name: DenoPod
     kind: struct
+    file: api/v1alpha1/types_denopod.go
     line: 7
-    name: DenoPod
-  - codegraphId: struct:4e814833e5abc93cd307dbef4a0d5abb
-    file: api/v1alpha1/types_denopod.go
+    codegraphId: struct:ad8c97baa6157384096c06159cfb2dbe
+  - name: DenoPodList
     kind: struct
+    file: api/v1alpha1/types_denopod.go
     line: 15
-    name: DenoPodList
-  - codegraphId: struct:54c96eeeceda1a4a8f5e63ef4beba6b5
-    file: api/v1alpha1/types_denopod.go
+    codegraphId: struct:4e814833e5abc93cd307dbef4a0d5abb
+  - name: DenoPodSpec
     kind: struct
-    line: 22
-    name: DenoPodSpec
-  - codegraphId: type_alias:0e2883e159e4826141f3b8dbf5a8951d
     file: api/v1alpha1/types_denopod.go
+    line: 22
+    codegraphId: struct:54c96eeeceda1a4a8f5e63ef4beba6b5
+  - name: DenoPodPhase
     kind: type_alias
+    file: api/v1alpha1/types_denopod.go
     line: 36
-    name: DenoPodPhase
-  - codegraphId: struct:78eecda4a2199493218816c567945e6d
+    codegraphId: type_alias:0e2883e159e4826141f3b8dbf5a8951d
+  - name: DenoPodStatus
+    kind: struct
     file: api/v1alpha1/types_denopod.go
-    kind: struct
     line: 48
-    name: DenoPodStatus
-  - codegraphId: struct:8592ae201b80a86fa2aea2b4ff73a6a7
-    file: api/v1alpha1/types_denorun.go
+    codegraphId: struct:78eecda4a2199493218816c567945e6d
+  - name: DenoRun
     kind: struct
+    file: api/v1alpha1/types_denorun.go
     line: 7
-    name: DenoRun
-  - codegraphId: struct:9b5ce2a07cecc427a4df5c9186d4ddc8
-    file: api/v1alpha1/types_denorun.go
+    codegraphId: struct:8592ae201b80a86fa2aea2b4ff73a6a7
+  - name: DenoRunList
     kind: struct
+    file: api/v1alpha1/types_denorun.go
     line: 15
-    name: DenoRunList
-  - codegraphId: struct:1cf3dab88f5e645f4aecb8ee5a1452b7
-    file: api/v1alpha1/types_denorun.go
+    codegraphId: struct:9b5ce2a07cecc427a4df5c9186d4ddc8
+  - name: DenoRunSpec
     kind: struct
-    line: 22
-    name: DenoRunSpec
-  - codegraphId: type_alias:f1812e2547cdacd2b9d3b0c4591ef2e2
     file: api/v1alpha1/types_denorun.go
+    line: 22
+    codegraphId: struct:1cf3dab88f5e645f4aecb8ee5a1452b7
+  - name: DenoRunPhase
     kind: type_alias
+    file: api/v1alpha1/types_denorun.go
     line: 32
-    name: DenoRunPhase
-  - codegraphId: struct:ba9f5eda95c2cc504892ba97f6840615
+    codegraphId: type_alias:f1812e2547cdacd2b9d3b0c4591ef2e2
+  - name: DenoRunStatus
+    kind: struct
     file: api/v1alpha1/types_denorun.go
-    kind: struct
     line: 44
-    name: DenoRunStatus
-  - codegraphId: struct:c61a776387495a41e314bf8a3bc46c7e
-    file: api/v1alpha1/types_openbao.go
+    codegraphId: struct:ba9f5eda95c2cc504892ba97f6840615
+  - name: OpenBao
     kind: struct
+    file: api/v1alpha1/types_openbao.go
     line: 15
-    name: OpenBao
-  - codegraphId: struct:b33f39d50e564c386868bc724e62059e
-    file: api/v1alpha1/types_openbao.go
+    codegraphId: struct:c61a776387495a41e314bf8a3bc46c7e
+  - name: OpenBaoList
     kind: struct
+    file: api/v1alpha1/types_openbao.go
     line: 23
-    name: OpenBaoList
-  - codegraphId: struct:682deb678875ecbd72066fc7eee1adaa
-    file: api/v1alpha1/types_openbao.go
+    codegraphId: struct:b33f39d50e564c386868bc724e62059e
+  - name: OpenBaoSpec
     kind: struct
+    file: api/v1alpha1/types_openbao.go
     line: 30
-    name: OpenBaoSpec
-  - codegraphId: struct:3d4f3a77df9eff3913283e3193ebdc0c
-    file: api/v1alpha1/types_openbao.go
+    codegraphId: struct:682deb678875ecbd72066fc7eee1adaa
+  - name: OpenBaoStatus
     kind: struct
+    file: api/v1alpha1/types_openbao.go
     line: 39
-    name: OpenBaoStatus
-  - codegraphId: struct:1ec205881eb7af10ea8b319f43c8b79f
-    file: api/v1alpha1/types_policyengine.go
+    codegraphId: struct:3d4f3a77df9eff3913283e3193ebdc0c
+  - name: PolicyEngine
     kind: struct
+    file: api/v1alpha1/types_policyengine.go
     line: 8
-    name: PolicyEngine
-  - codegraphId: struct:5adb7a53bc10bdd5ca15164597335d81
-    file: api/v1alpha1/types_policyengine.go
+    codegraphId: struct:1ec205881eb7af10ea8b319f43c8b79f
+  - name: PolicyEngineList
     kind: struct
+    file: api/v1alpha1/types_policyengine.go
     line: 16
-    name: PolicyEngineList
-  - codegraphId: struct:06c63fea51925dbd41f3c4df59e93f41
-    file: api/v1alpha1/types_policyengine.go
+    codegraphId: struct:5adb7a53bc10bdd5ca15164597335d81
+  - name: PolicyEngineSpec
     kind: struct
-    line: 23
-    name: PolicyEngineSpec
-  - codegraphId: type_alias:71e9ec98b426f5ba2a6f0fa861505f90
     file: api/v1alpha1/types_policyengine.go
+    line: 23
+    codegraphId: struct:06c63fea51925dbd41f3c4df59e93f41
+  - name: PolicyEnginePhase
     kind: type_alias
+    file: api/v1alpha1/types_policyengine.go
     line: 41
-    name: PolicyEnginePhase
-  - codegraphId: struct:c316e42aef9d55ae6fd71743c1fde990
+    codegraphId: type_alias:71e9ec98b426f5ba2a6f0fa861505f90
+  - name: PolicyEngineStatus
+    kind: struct
     file: api/v1alpha1/types_policyengine.go
-    kind: struct
     line: 51
-    name: PolicyEngineStatus
-  - codegraphId: struct:2acd645a0c495c069ad6a7de77c53b69
-    file: api/v1alpha1/types_policyworkflowpod.go
+    codegraphId: struct:c316e42aef9d55ae6fd71743c1fde990
+  - name: PolicyWorkflowPod
     kind: struct
+    file: api/v1alpha1/types_policyworkflowpod.go
     line: 8
-    name: PolicyWorkflowPod
-  - codegraphId: struct:0c79e3dee3b764f7f5257847216d72fc
-    file: api/v1alpha1/types_policyworkflowpod.go
+    codegraphId: struct:2acd645a0c495c069ad6a7de77c53b69
+  - name: PolicyWorkflowPodList
     kind: struct
+    file: api/v1alpha1/types_policyworkflowpod.go
     line: 16
-    name: PolicyWorkflowPodList
-  - codegraphId: struct:f5ddc2d2343853d756015a53254dbce3
-    file: api/v1alpha1/types_policyworkflowpod.go
+    codegraphId: struct:0c79e3dee3b764f7f5257847216d72fc
+  - name: PolicyWorkflowPodSpec
     kind: struct
-    line: 23
-    name: PolicyWorkflowPodSpec
-  - codegraphId: type_alias:3228acbcc876296a83b038db20f5ba53
     file: api/v1alpha1/types_policyworkflowpod.go
+    line: 23
+    codegraphId: struct:f5ddc2d2343853d756015a53254dbce3
+  - name: PolicyWorkflowPodPhase
     kind: type_alias
+    file: api/v1alpha1/types_policyworkflowpod.go
     line: 43
-    name: PolicyWorkflowPodPhase
-  - codegraphId: struct:bb8f8c07c85fb14822c6df3a9b260b18
+    codegraphId: type_alias:3228acbcc876296a83b038db20f5ba53
+  - name: PolicyWorkflowPodStatus
+    kind: struct
     file: api/v1alpha1/types_policyworkflowpod.go
-    kind: struct
     line: 53
-    name: PolicyWorkflowPodStatus
-  - codegraphId: struct:163c94c497ab49465c39a0cfdcff529b
-    file: api/v1alpha1/types_policyworkflowrun.go
+    codegraphId: struct:bb8f8c07c85fb14822c6df3a9b260b18
+  - name: PolicyWorkflowRun
     kind: struct
+    file: api/v1alpha1/types_policyworkflowrun.go
     line: 8
-    name: PolicyWorkflowRun
-  - codegraphId: struct:9cd31281556cc318318824f59ed761c4
-    file: api/v1alpha1/types_policyworkflowrun.go
+    codegraphId: struct:163c94c497ab49465c39a0cfdcff529b
+  - name: PolicyWorkflowRunList
     kind: struct
+    file: api/v1alpha1/types_policyworkflowrun.go
     line: 16
-    name: PolicyWorkflowRunList
-  - codegraphId: struct:76a56119c3f73bd4c3368f000990397f
-    file: api/v1alpha1/types_policyworkflowrun.go
+    codegraphId: struct:9cd31281556cc318318824f59ed761c4
+  - name: PolicyWorkflowRunSpec
     kind: struct
-    line: 23
-    name: PolicyWorkflowRunSpec
-  - codegraphId: type_alias:cb7db6e321bd704e6960895aa2922ada
     file: api/v1alpha1/types_policyworkflowrun.go
+    line: 23
+    codegraphId: struct:76a56119c3f73bd4c3368f000990397f
+  - name: PolicyWorkflowPhase
     kind: type_alias
+    file: api/v1alpha1/types_policyworkflowrun.go
     line: 49
-    name: PolicyWorkflowPhase
-  - codegraphId: struct:6d3c4a2c540c216efa9cefae9ca36db4
+    codegraphId: type_alias:cb7db6e321bd704e6960895aa2922ada
+  - name: PolicyWorkflowRunStatus
+    kind: struct
     file: api/v1alpha1/types_policyworkflowrun.go
-    kind: struct
     line: 63
-    name: PolicyWorkflowRunStatus
-  - codegraphId: struct:6347366d6293ec3914c67cd0fde6f6b6
-    file: api/v1alpha1/types_runtrigger.go
+    codegraphId: struct:6d3c4a2c540c216efa9cefae9ca36db4
+  - name: RunTrigger
     kind: struct
+    file: api/v1alpha1/types_runtrigger.go
     line: 7
-    name: RunTrigger
-  - codegraphId: struct:329701e6df45ea80e4b2746b82c4b04b
-    file: api/v1alpha1/types_runtrigger.go
+    codegraphId: struct:6347366d6293ec3914c67cd0fde6f6b6
+  - name: RunTriggerList
     kind: struct
+    file: api/v1alpha1/types_runtrigger.go
     line: 15
-    name: RunTriggerList
-  - codegraphId: struct:852948a2a15890447c7fa5d4b4132edf
-    file: api/v1alpha1/types_runtrigger.go
+    codegraphId: struct:329701e6df45ea80e4b2746b82c4b04b
+  - name: RunTriggerSpec
     kind: struct
+    file: api/v1alpha1/types_runtrigger.go
     line: 22
-    name: RunTriggerSpec
-  - codegraphId: type_alias:95711bd9c109c1c963d90415abeb221a
-    file: api/v1alpha1/types_runtrigger.go
+    codegraphId: struct:852948a2a15890447c7fa5d4b4132edf
+  - name: RunTriggerPhase
     kind: type_alias
+    file: api/v1alpha1/types_runtrigger.go
     line: 30
-    name: RunTriggerPhase
-  - codegraphId: struct:628eff8a6ce37cfb048106d4d94a8fd0
+    codegraphId: type_alias:95711bd9c109c1c963d90415abeb221a
+  - name: RunTriggerStatus
+    kind: struct
     file: api/v1alpha1/types_runtrigger.go
-    kind: struct
     line: 42
-    name: RunTriggerStatus
-  - codegraphId: struct:05cdd79e23617fbecdb398d34c9d5ad7
-    file: api/v1alpha1/types_shared.go
+    codegraphId: struct:628eff8a6ce37cfb048106d4d94a8fd0
+  - name: ServiceAccountRef
     kind: struct
+    file: api/v1alpha1/types_shared.go
     line: 7
-    name: ServiceAccountRef
-  - codegraphId: struct:e95b0c824023d610cd8dd79e9b10330c
-    file: api/v1alpha1/types_shared.go
+    codegraphId: struct:05cdd79e23617fbecdb398d34c9d5ad7
+  - name: DenoPermission
     kind: struct
+    file: api/v1alpha1/types_shared.go
     line: 13
-    name: DenoPermission
-  - codegraphId: struct:da40f37a9ba38a5f2a353dd41f480892
-    file: api/v1alpha1/types_shared.go
+    codegraphId: struct:e95b0c824023d610cd8dd79e9b10330c
+  - name: DenoPermissions
     kind: struct
+    file: api/v1alpha1/types_shared.go
     line: 23
-    name: DenoPermissions
-  - codegraphId: struct:b1b033afbaf6fab9e420675da77463a6
-    file: api/v1alpha1/types_shared.go
+    codegraphId: struct:da40f37a9ba38a5f2a353dd41f480892
+  - name: DenoPodTemplate
     kind: struct
+    file: api/v1alpha1/types_shared.go
     line: 51
-    name: DenoPodTemplate
-  - codegraphId: struct:a6b2c82ee80cb3d8639351da73b016d6
-    file: api/v1alpha1/types_shared.go
+    codegraphId: struct:b1b033afbaf6fab9e420675da77463a6
+  - name: ExecProbe
     kind: struct
+    file: api/v1alpha1/types_shared.go
     line: 67
-    name: ExecProbe
-  - codegraphId: type_alias:f1737f67a27a8469e8d83ac7bc87a249
-    file: api/v1alpha1/types_shared.go
+    codegraphId: struct:a6b2c82ee80cb3d8639351da73b016d6
+  - name: DenoRestartPolicy
     kind: type_alias
+    file: api/v1alpha1/types_shared.go
     line: 77
-    name: DenoRestartPolicy
-  - codegraphId: type_alias:f821022f3e38a5407c14bb767eba914b
-    file: api/v1alpha1/types_shared.go
+    codegraphId: type_alias:f1737f67a27a8469e8d83ac7bc87a249
+  - name: ConcurrencyPolicy
     kind: type_alias
+    file: api/v1alpha1/types_shared.go
     line: 87
-    name: ConcurrencyPolicy
-realizedSpecHash: 3b10b9a8b379492284bef663967b96717814fddee706eafaf810b1768334072c
-syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-syncedFingerprint: b1b12e6f6f2e4f33963a84504d4a2d21f8bdca644107016b9092ac6a7e3d9447
+    codegraphId: type_alias:f821022f3e38a5407c14bb767eba914b
+  fingerprint: b1b12e6f6f2e4f33963a84504d4a2d21f8bdca644107016b9092ac6a7e3d9447

@@ -1,4 +1,126 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-internal-helper-monitor
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'This context exists because streaming server logs over the API needs a
+    fan-out point that can be attached and detached from a live logger without changing
+    the logger''s own level, and that must not let a slow consumer stall the logging
+    path. It is the mechanism behind the sys/monitor endpoint and the monitor CLI
+    command: the caller constructs a Monitor with a buffer size and logger options,
+    calls Start to obtain the message channel, reads from it, and calls Stop to detach.
+    It also bounds how much is lost when the reader lags, by dropping overflow writes
+    and reporting the dropped count rather than blocking.'
+  requirements:
+  - id: r.construct-monitor
+    level: MUST
+    text: NewMonitor(buf int, logger log.InterceptLogger, opts *log.LoggerOptions)
+      MUST return a Monitor and an error, allocate the log channel with capacity buf,
+      set the drop-check interval to 3 seconds, and install the new monitor as opts.Output
+      before wrapping opts in a log.SinkAdapter it keeps as its sink. A buf of zero
+      or less MUST return a nil Monitor and the error "buf must be greater than zero",
+      so no sink is ever registered for an invalid buffer.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/monitor/monitor.go
+    - function:5ee85571ad480dd00c15635b1cd08915
+  - id: r.monitor-interface-contract
+    level: MUST
+    text: 'The package MUST expose a Monitor interface with exactly two methods: Start,
+      which returns a receive-only channel of log message byte slices, and Stop, which
+      takes no arguments and returns nothing. Callers depend only on this interface,
+      not on the concrete type behind it.'
+    codeRefs:
+    - file:third_party/openbao/internal/helper/monitor/monitor.go
+    - interface:d55022e116ddb7aa68c8ffb1b085a4d4
+    - method:3eccfbb5e5fcf9ae7b7387ef2bb0db05
+    - method:883488dc68166813bbf790c874947040
+  - id: r.monitor-not-threadsafe
+    level: SHOULD
+    text: The concrete monitor type SHOULD remain documented as not thread-safe, keeping
+      the started and droppedCount state in atomics while leaving Start and Stop sequencing
+      to the caller. Test coverage for the package lives in monitor_test.go alongside
+      the implementation.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/monitor/monitor.go
+    - file:third_party/openbao/internal/helper/monitor/monitor_test.go
+  - id: r.report-dropped-logs
+    level: MUST
+    text: On each drop-check tick the forwarding goroutine MUST load the dropped counter;
+      when it is greater than zero it MUST swap the counter back to zero and emit
+      the message "Monitor dropped %d logs during monitor request\n" with the observed
+      count into the returned stream, so a slow reader learns how many records it
+      lost. A zero count MUST emit nothing. The goroutine MUST abort the send to the
+      stream if the done channel closes first, and MUST remain responsive to shutdown
+      at every wait point.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/monitor/monitor.go
+    - method:2a34ad1a7da02c24490483b7f53d3d56
+    - method:8901da37a40b2f42781715a94bd96336
+  - id: r.start-once
+    level: MUST
+    text: 'monitor.Start MUST flip the started flag with a compare-and-swap so it
+      is idempotent: the first call registers the sink on the InterceptLogger, returns
+      a newly allocated channel buffered at bufSize, and launches the forwarding goroutine;
+      every later call while the monitor is still started MUST return a nil channel
+      and leave the existing stream untouched. The forwarding goroutine MUST close
+      the returned channel on return, MUST stop its ticker, and MUST select over the
+      drop-check ticker, the internal log channel, and the shutdown channel.'
+    codeRefs:
+    - file:third_party/openbao/internal/helper/monitor/monitor.go
+    - method:8901da37a40b2f42781715a94bd96336
+  - id: r.stop-detach
+    level: MUST
+    text: monitor.Stop MUST deregister the sink from the InterceptLogger, close the
+      done channel to end the forwarding goroutine, and store false into the started
+      flag so the same monitor can be started again. It MUST be safe to call on a
+      monitor whose Start returned nil.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/monitor/monitor.go
+    - method:e263af4f59be8e57cff8720ae4edbb67
+  - id: r.write-non-blocking
+    level: MUST
+    text: 'monitor.Write MUST satisfy io.Writer without blocking the logging path:
+      it returns early with no error once the done channel is closed, copies the input
+      bytes before queueing so the caller''s slice is not aliased, and on a non-blocking
+      send to the log channel either enqueues the copy or, when the buffer is full,
+      increments the dropped counter instead. It MUST report len(p) and a nil error
+      in every case.'
+    codeRefs:
+    - file:third_party/openbao/internal/helper/monitor/monitor.go
+    - method:2a34ad1a7da02c24490483b7f53d3d56
+  interfaces:
+  - name: Monitor
+    kind: interface
+    signature: type Monitor interface { Start() <-chan []byte; Stop() }
+    file: third_party/openbao/internal/helper/monitor/monitor.go
+  - name: Monitor.Start
+    kind: method
+    signature: Start() <-chan []byte
+    file: third_party/openbao/internal/helper/monitor/monitor.go
+  - name: Monitor.Stop
+    kind: method
+    signature: Stop()
+    file: third_party/openbao/internal/helper/monitor/monitor.go
+  - name: NewMonitor
+    kind: function
+    signature: func NewMonitor(buf int, logger log.InterceptLogger, opts *log.LoggerOptions)
+      (Monitor, error)
+    file: third_party/openbao/internal/helper/monitor/monitor.go
+  - name: monitor.Start
+    kind: method
+    signature: func (d *monitor) Start() <-chan []byte
+    file: third_party/openbao/internal/helper/monitor/monitor.go
+  - name: monitor.Stop
+    kind: method
+    signature: func (d *monitor) Stop()
+    file: third_party/openbao/internal/helper/monitor/monitor.go
+  - name: monitor.Write
+    kind: method
+    signature: func (d *monitor) Write(p []byte) (n int, err error)
+    file: third_party/openbao/internal/helper/monitor/monitor.go
 codeRefIndex:
 - file:third_party/openbao/internal/helper/monitor/monitor.go monitor.go@third_party/openbao/internal/helper/monitor/monitor.go
 - file:third_party/openbao/internal/helper/monitor/monitor_test.go monitor_test.go@third_party/openbao/internal/helper/monitor/monitor_test.go
@@ -9,125 +131,3 @@ codeRefIndex:
 - method:883488dc68166813bbf790c874947040 Monitor.Stop@third_party/openbao/internal/helper/monitor/monitor.go:25
 - method:8901da37a40b2f42781715a94bd96336 monitor.Start@third_party/openbao/internal/helper/monitor/monitor.go:95
 - method:e263af4f59be8e57cff8720ae4edbb67 monitor.Stop@third_party/openbao/internal/helper/monitor/monitor.go:87
-kind: SystemContext
-metadata:
-  name: third-party-openbao-internal-helper-monitor
-  namespace: default
-spec:
-  intent: 'This context exists because streaming server logs over the API needs a
-    fan-out point that can be attached and detached from a live logger without changing
-    the logger''s own level, and that must not let a slow consumer stall the logging
-    path. It is the mechanism behind the sys/monitor endpoint and the monitor CLI
-    command: the caller constructs a Monitor with a buffer size and logger options,
-    calls Start to obtain the message channel, reads from it, and calls Stop to detach.
-    It also bounds how much is lost when the reader lags, by dropping overflow writes
-    and reporting the dropped count rather than blocking.'
-  interfaces:
-  - file: third_party/openbao/internal/helper/monitor/monitor.go
-    kind: interface
-    name: Monitor
-    signature: type Monitor interface { Start() <-chan []byte; Stop() }
-  - file: third_party/openbao/internal/helper/monitor/monitor.go
-    kind: method
-    name: Monitor.Start
-    signature: Start() <-chan []byte
-  - file: third_party/openbao/internal/helper/monitor/monitor.go
-    kind: method
-    name: Monitor.Stop
-    signature: Stop()
-  - file: third_party/openbao/internal/helper/monitor/monitor.go
-    kind: function
-    name: NewMonitor
-    signature: func NewMonitor(buf int, logger log.InterceptLogger, opts *log.LoggerOptions)
-      (Monitor, error)
-  - file: third_party/openbao/internal/helper/monitor/monitor.go
-    kind: method
-    name: monitor.Start
-    signature: func (d *monitor) Start() <-chan []byte
-  - file: third_party/openbao/internal/helper/monitor/monitor.go
-    kind: method
-    name: monitor.Stop
-    signature: func (d *monitor) Stop()
-  - file: third_party/openbao/internal/helper/monitor/monitor.go
-    kind: method
-    name: monitor.Write
-    signature: func (d *monitor) Write(p []byte) (n int, err error)
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/monitor/monitor.go
-    - function:5ee85571ad480dd00c15635b1cd08915
-    id: r.construct-monitor
-    level: MUST
-    text: NewMonitor(buf int, logger log.InterceptLogger, opts *log.LoggerOptions)
-      MUST return a Monitor and an error, allocate the log channel with capacity buf,
-      set the drop-check interval to 3 seconds, and install the new monitor as opts.Output
-      before wrapping opts in a log.SinkAdapter it keeps as its sink. A buf of zero
-      or less MUST return a nil Monitor and the error "buf must be greater than zero",
-      so no sink is ever registered for an invalid buffer.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/monitor/monitor.go
-    - interface:d55022e116ddb7aa68c8ffb1b085a4d4
-    - method:3eccfbb5e5fcf9ae7b7387ef2bb0db05
-    - method:883488dc68166813bbf790c874947040
-    id: r.monitor-interface-contract
-    level: MUST
-    text: 'The package MUST expose a Monitor interface with exactly two methods: Start,
-      which returns a receive-only channel of log message byte slices, and Stop, which
-      takes no arguments and returns nothing. Callers depend only on this interface,
-      not on the concrete type behind it.'
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/monitor/monitor.go
-    - file:third_party/openbao/internal/helper/monitor/monitor_test.go
-    id: r.monitor-not-threadsafe
-    level: SHOULD
-    text: The concrete monitor type SHOULD remain documented as not thread-safe, keeping
-      the started and droppedCount state in atomics while leaving Start and Stop sequencing
-      to the caller. Test coverage for the package lives in monitor_test.go alongside
-      the implementation.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/monitor/monitor.go
-    - method:2a34ad1a7da02c24490483b7f53d3d56
-    - method:8901da37a40b2f42781715a94bd96336
-    id: r.report-dropped-logs
-    level: MUST
-    text: On each drop-check tick the forwarding goroutine MUST load the dropped counter;
-      when it is greater than zero it MUST swap the counter back to zero and emit
-      the message "Monitor dropped %d logs during monitor request\n" with the observed
-      count into the returned stream, so a slow reader learns how many records it
-      lost. A zero count MUST emit nothing. The goroutine MUST abort the send to the
-      stream if the done channel closes first, and MUST remain responsive to shutdown
-      at every wait point.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/monitor/monitor.go
-    - method:8901da37a40b2f42781715a94bd96336
-    id: r.start-once
-    level: MUST
-    text: 'monitor.Start MUST flip the started flag with a compare-and-swap so it
-      is idempotent: the first call registers the sink on the InterceptLogger, returns
-      a newly allocated channel buffered at bufSize, and launches the forwarding goroutine;
-      every later call while the monitor is still started MUST return a nil channel
-      and leave the existing stream untouched. The forwarding goroutine MUST close
-      the returned channel on return, MUST stop its ticker, and MUST select over the
-      drop-check ticker, the internal log channel, and the shutdown channel.'
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/monitor/monitor.go
-    - method:e263af4f59be8e57cff8720ae4edbb67
-    id: r.stop-detach
-    level: MUST
-    text: monitor.Stop MUST deregister the sink from the InterceptLogger, close the
-      done channel to end the forwarding goroutine, and store false into the started
-      flag so the same monitor can be started again. It MUST be safe to call on a
-      monitor whose Start returned nil.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/monitor/monitor.go
-    - method:2a34ad1a7da02c24490483b7f53d3d56
-    id: r.write-non-blocking
-    level: MUST
-    text: 'monitor.Write MUST satisfy io.Writer without blocking the logging path:
-      it returns early with no error once the done channel is closed, copies the input
-      bytes before queueing so the caller''s slice is not aliased, and on a non-blocking
-      send to the log channel either enqueues the copy or, when the buffer is full,
-      increments the dropped counter instead. It MUST report len(p) and a nil error
-      in every case.'
-  upstream: self

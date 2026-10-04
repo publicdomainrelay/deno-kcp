@@ -1,562 +1,562 @@
+syncedCommit: 89cee50ec5aea977a42f904a758e506729e1158e
+syncedFingerprint: 4f426f3edc8b546522ef98cd672786d81fcc30a0bbf888f1392f6dcab2b9a5b5
+realizedSpecHash: 1fbcce3122a28e78ef70689787eefc82b58d2890effa276442f7e52c09bdb9dc
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
+- type: CodeSynced
+  status: "True"
   reason: InterfacesObserved
-  status: "True"
-  type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+  message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+- type: Drifted
   status: "False"
-  type: Drifted
-- message: the spec passes the validator
-  reason: ValidatorPassed
+  reason: FingerprintEqual
+  message: observed facts match the synced fingerprint
+- type: SpecValid
   status: "True"
-  type: SpecValid
+  reason: ValidatorPassed
+  message: the spec passes the validator
 observed:
   files:
   - third_party/openbao/sdk/helper/certutil/certutil_test.go
   - third_party/openbao/sdk/helper/certutil/helpers.go
   - third_party/openbao/sdk/helper/certutil/helpers_test.go
   - third_party/openbao/sdk/helper/certutil/types.go
-  fingerprint: 4f426f3edc8b546522ef98cd672786d81fcc30a0bbf888f1392f6dcab2b9a5b5
   interfaces:
-  - codegraphId: function:6b0ae26f4b5d7b3d70eaedb43292885a
-    file: third_party/openbao/sdk/helper/certutil/helpers.go
+  - name: GetHexFormatted
     kind: function
-    line: 107
-    name: GetHexFormatted
     signature: (buf []byte, sep string) string
-  - codegraphId: function:6cc1b7ebce81e57ec2b40e80bfc64f6f
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 107
+    codegraphId: function:6b0ae26f4b5d7b3d70eaedb43292885a
+  - name: ParseHexFormatted
     kind: function
-    line: 119
-    name: ParseHexFormatted
     signature: (in, sep string) []byte
-  - codegraphId: function:5dd6b6c88f931c1bec2b6201983a7d65
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 119
+    codegraphId: function:6cc1b7ebce81e57ec2b40e80bfc64f6f
+  - name: GetSubjKeyID
     kind: function
-    line: 136
-    name: GetSubjKeyID
     signature: (privateKey crypto.Signer) ([]byte, error)
-  - codegraphId: function:55112192ada193ee197162fb1d8f4bd5
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 136
+    codegraphId: function:5dd6b6c88f931c1bec2b6201983a7d65
+  - name: GetSubjectKeyID
     kind: function
-    line: 153
-    name: GetSubjectKeyID
     signature: (pub any) ([]byte, error)
-  - codegraphId: function:fcabedf8f57cab17de957763d1c536f9
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 153
+    codegraphId: function:55112192ada193ee197162fb1d8f4bd5
+  - name: ParsePKIMap
     kind: function
-    line: 189
-    name: ParsePKIMap
     signature: (data map[string]any) (*ParsedCertBundle, error)
-  - codegraphId: function:0fdac3e716fa7d05f89deb80380ed47b
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 189
+    codegraphId: function:fcabedf8f57cab17de957763d1c536f9
+  - name: ParsePKIJSON
     kind: function
-    line: 204
-    name: ParsePKIJSON
     signature: (input []byte) (*ParsedCertBundle, error)
-  - codegraphId: function:0a7f2d501161b043fb2995f0a153c68b
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 204
+    codegraphId: function:0fdac3e716fa7d05f89deb80380ed47b
+  - name: ParseDERKey
     kind: function
-    line: 222
-    name: ParseDERKey
     signature: (privateKeyBytes []byte) (signer crypto.Signer, format BlockType, err
       error)
-  - codegraphId: function:8b3855b2639ae257b54d5f1d2b2ecc9a
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 222
+    codegraphId: function:0a7f2d501161b043fb2995f0a153c68b
+  - name: ParsePEMKey
     kind: function
-    line: 258
-    name: ParsePEMKey
     signature: (keyPem string) (crypto.Signer, BlockType, error)
-  - codegraphId: function:e5274aed47b4c73183f08c085a1241a1
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 258
+    codegraphId: function:8b3855b2639ae257b54d5f1d2b2ecc9a
+  - name: ParsePEMBundle
     kind: function
-    line: 271
-    name: ParsePEMBundle
     signature: (pemBundle string) (*ParsedCertBundle, error)
-  - codegraphId: function:833f97d0b04f06af7e1d14170e2c233b
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 271
+    codegraphId: function:e5274aed47b4c73183f08c085a1241a1
+  - name: GeneratePrivateKey
     kind: function
-    line: 327
-    name: GeneratePrivateKey
     signature: (keyType string, keyBits int, container ParsedPrivateKeyContainer)
       error
-  - codegraphId: function:63f39b7b3124660d0a41cb437600a6d4
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 327
+    codegraphId: function:833f97d0b04f06af7e1d14170e2c233b
+  - name: GeneratePrivateKeyWithRandomSource
     kind: function
-    line: 333
-    name: GeneratePrivateKeyWithRandomSource
     signature: (keyType string, keyBits int, container ParsedPrivateKeyContainer,
       entropyReader io.Reader) error
-  - codegraphId: function:3eb22aa2cbcba0ca20230bee4155af9b
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 333
+    codegraphId: function:63f39b7b3124660d0a41cb437600a6d4
+  - name: GenerateSerialNumber
     kind: function
-    line: 432
-    name: GenerateSerialNumber
     signature: () (*big.Int, error)
-  - codegraphId: function:232d7f231c6c10cf085afdcf705ccb6c
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 432
+    codegraphId: function:3eb22aa2cbcba0ca20230bee4155af9b
+  - name: GenerateSerialNumberWithRandomSource
     kind: function
-    line: 438
-    name: GenerateSerialNumberWithRandomSource
     signature: (randReader io.Reader) (*big.Int, error)
-  - codegraphId: function:c8c8cf1a306c02543dbf9b14837a2148
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 438
+    codegraphId: function:232d7f231c6c10cf085afdcf705ccb6c
+  - name: ComparePublicKeysAndType
     kind: function
+    signature: (key1Iface, key2Iface crypto.PublicKey) (bool, error)
+    file: third_party/openbao/sdk/helper/certutil/helpers.go
     line: 452
-    name: ComparePublicKeysAndType
-    signature: (key1Iface, key2Iface crypto.PublicKey) (bool, error)
-  - codegraphId: function:bbe8f31af6131f678c06f32bdaa7f41c
-    file: third_party/openbao/sdk/helper/certutil/helpers.go
+    codegraphId: function:c8c8cf1a306c02543dbf9b14837a2148
+  - name: ComparePublicKeys
     kind: function
+    signature: (key1Iface, key2Iface crypto.PublicKey) (bool, error)
+    file: third_party/openbao/sdk/helper/certutil/helpers.go
     line: 465
-    name: ComparePublicKeys
-    signature: (key1Iface, key2Iface crypto.PublicKey) (bool, error)
-  - codegraphId: function:d92a2684c31945feab4c1b6c471db627
-    file: third_party/openbao/sdk/helper/certutil/helpers.go
+    codegraphId: function:bbe8f31af6131f678c06f32bdaa7f41c
+  - name: ParsePublicKeyPEM
     kind: function
-    line: 523
-    name: ParsePublicKeyPEM
     signature: (data []byte) (crypto.PublicKey, error)
-  - codegraphId: function:ff46223bfeb7247ec80d247dd3fbaeab
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 523
+    codegraphId: function:d92a2684c31945feab4c1b6c471db627
+  - name: AddPolicyIdentifiers
     kind: function
+    signature: (data *CreationBundle, certTemplate *x509.Certificate)
+    file: third_party/openbao/sdk/helper/certutil/helpers.go
     line: 554
-    name: AddPolicyIdentifiers
-    signature: (data *CreationBundle, certTemplate *x509.Certificate)
-  - codegraphId: function:f7fd4c1e83d181bbb120e46cb0aef7ba
-    file: third_party/openbao/sdk/helper/certutil/helpers.go
+    codegraphId: function:ff46223bfeb7247ec80d247dd3fbaeab
+  - name: AddExtKeyUsageOids
     kind: function
+    signature: (data *CreationBundle, certTemplate *x509.Certificate)
+    file: third_party/openbao/sdk/helper/certutil/helpers.go
     line: 577
-    name: AddExtKeyUsageOids
-    signature: (data *CreationBundle, certTemplate *x509.Certificate)
-  - codegraphId: function:d3564934772805b161d2801faa20727b
-    file: third_party/openbao/sdk/helper/certutil/helpers.go
+    codegraphId: function:f7fd4c1e83d181bbb120e46cb0aef7ba
+  - name: HandleOtherCSRSANs
     kind: function
-    line: 586
-    name: HandleOtherCSRSANs
     signature: (in *x509.CertificateRequest, sans map[string][]string) error
-  - codegraphId: function:42ec8afa473528553abd99780d4c59f7
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 586
+    codegraphId: function:d3564934772805b161d2801faa20727b
+  - name: HandleOtherSANs
     kind: function
-    line: 600
-    name: HandleOtherSANs
     signature: (in *x509.Certificate, sans map[string][]string) error
-  - codegraphId: function:d0fe5cf685cb3355202ab5d337056457
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 600
+    codegraphId: function:42ec8afa473528553abd99780d4c59f7
+  - name: StringToOid
     kind: function
-    line: 695
-    name: StringToOid
     signature: (in string) (asn1.ObjectIdentifier, error)
-  - codegraphId: function:0376b30eb1aa077dfd9bad274eb2912c
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 695
+    codegraphId: function:d0fe5cf685cb3355202ab5d337056457
+  - name: DefaultOrValueKeyBits
     kind: function
+    signature: (keyType string, keyBits int) (int, error)
+    file: third_party/openbao/sdk/helper/certutil/helpers.go
     line: 710
-    name: DefaultOrValueKeyBits
-    signature: (keyType string, keyBits int) (int, error)
-  - codegraphId: function:9d8b42e48379b367188ac7efab419694
-    file: third_party/openbao/sdk/helper/certutil/helpers.go
+    codegraphId: function:0376b30eb1aa077dfd9bad274eb2912c
+  - name: ValidateDefaultOrValueKeyTypeSignatureLength
     kind: function
-    line: 729
-    name: ValidateDefaultOrValueKeyTypeSignatureLength
     signature: (keyType string, keyBits int, hashBits int) (int, error)
-  - codegraphId: function:339b6f9d0eb4d66e0b52d68697c667bd
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 729
+    codegraphId: function:9d8b42e48379b367188ac7efab419694
+  - name: ValidateDefaultOrValueKeyTypeLength
     kind: function
-    line: 747
-    name: ValidateDefaultOrValueKeyTypeLength
     signature: (keyType string, keyBits int) (int, error)
-  - codegraphId: function:ba20fc2be29d9adfafe4249f48e2444d
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 747
+    codegraphId: function:339b6f9d0eb4d66e0b52d68697c667bd
+  - name: ValidateSignatureLength
     kind: function
-    line: 763
-    name: ValidateSignatureLength
     signature: (keyType string, hashBits int) error
-  - codegraphId: function:d17e3e00e326b031a6d611db4bd624fb
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 763
+    codegraphId: function:ba20fc2be29d9adfafe4249f48e2444d
+  - name: ValidateKeyTypeLength
     kind: function
-    line: 798
-    name: ValidateKeyTypeLength
     signature: (keyType string, keyBits int) error
-  - codegraphId: function:4e9712f901fb801152426facd7ae1793
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 798
+    codegraphId: function:d17e3e00e326b031a6d611db4bd624fb
+  - name: CreateCertificate
     kind: function
-    line: 836
-    name: CreateCertificate
     signature: (data *CreationBundle) (*ParsedCertBundle, error)
-  - codegraphId: function:72967fa5e2e4a53ecf0ae143891e141b
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 836
+    codegraphId: function:4e9712f901fb801152426facd7ae1793
+  - name: CreateCertificateWithRandomSource
     kind: function
-    line: 842
-    name: CreateCertificateWithRandomSource
     signature: (data *CreationBundle, randReader io.Reader) (*ParsedCertBundle, error)
-  - codegraphId: type_alias:9d52cf001e7f570966ac187f3dd96642
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 842
+    codegraphId: function:72967fa5e2e4a53ecf0ae143891e141b
+  - name: KeyGenerator
     kind: type_alias
-    line: 847
-    name: KeyGenerator
-  - codegraphId: function:7415b6eb1dc399910aeb45cd10b7c57e
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 847
+    codegraphId: type_alias:9d52cf001e7f570966ac187f3dd96642
+  - name: CreateCertificateWithKeyGenerator
     kind: function
-    line: 849
-    name: CreateCertificateWithKeyGenerator
     signature: (data *CreationBundle, randReader io.Reader, keyGenerator KeyGenerator)
       (*ParsedCertBundle, error)
-  - codegraphId: function:5b2fba7d7121f6983eeb8fc8a04cf991
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 849
+    codegraphId: function:7415b6eb1dc399910aeb45cd10b7c57e
+  - name: CreateCertificateWithTemplate
     kind: function
-    line: 1044
-    name: CreateCertificateWithTemplate
     signature: (caSign *CAInfoBundle, evaluationData map[string]any, certTemplate
       x509.Certificate, randReader io.Reader) (*ParsedCertBundle, error)
-  - codegraphId: function:c9ba9ad0fe51ac3b81fba19f5ba9ec30
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 1044
+    codegraphId: function:5b2fba7d7121f6983eeb8fc8a04cf991
+  - name: CreateCSR
     kind: function
-    line: 1174
-    name: CreateCSR
     signature: (data *CreationBundle, addBasicConstraints bool) (*ParsedCSRBundle,
       error)
-  - codegraphId: function:c0dbf1d8c32f645cfc37528682075df4
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 1174
+    codegraphId: function:c9ba9ad0fe51ac3b81fba19f5ba9ec30
+  - name: CreateCSRWithRandomSource
     kind: function
-    line: 1180
-    name: CreateCSRWithRandomSource
     signature: (data *CreationBundle, addBasicConstraints bool, randReader io.Reader)
       (*ParsedCSRBundle, error)
-  - codegraphId: function:28827c8b61a4e84deeb30396a1adda23
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 1180
+    codegraphId: function:c0dbf1d8c32f645cfc37528682075df4
+  - name: CreateCSRWithKeyGenerator
     kind: function
-    line: 1186
-    name: CreateCSRWithKeyGenerator
     signature: (data *CreationBundle, addBasicConstraints bool, randReader io.Reader,
       keyGenerator KeyGenerator) (*ParsedCSRBundle, error)
-  - codegraphId: function:2a852689b1d2c1530dae5a7a7cecca45
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 1186
+    codegraphId: function:28827c8b61a4e84deeb30396a1adda23
+  - name: SignCertificate
     kind: function
-    line: 1260
-    name: SignCertificate
     signature: (data *CreationBundle) (*ParsedCertBundle, error)
-  - codegraphId: function:265419b99c324ffd6a97f938bf8e67fb
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 1260
+    codegraphId: function:2a852689b1d2c1530dae5a7a7cecca45
+  - name: SignCertificateWithRandomSource
     kind: function
-    line: 1267
-    name: SignCertificateWithRandomSource
     signature: (data *CreationBundle, randReader io.Reader) (*ParsedCertBundle, error)
-  - codegraphId: function:46c5887c68146a5848cf0b8ca1aae665
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 1267
+    codegraphId: function:265419b99c324ffd6a97f938bf8e67fb
+  - name: SignCertificateWithTemplate
     kind: function
-    line: 1414
-    name: SignCertificateWithTemplate
     signature: (caSign *CAInfoBundle, csr *x509.CertificateRequest, evaluationData
       map[string]any, certTemplate x509.Certificate) (*ParsedCertBundle, error)
-  - codegraphId: function:b3ae0be0192d5537a23508fbd70a1d54
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 1414
+    codegraphId: function:46c5887c68146a5848cf0b8ca1aae665
+  - name: NewCertPool
     kind: function
-    line: 1519
-    name: NewCertPool
     signature: (reader io.Reader) (*x509.CertPool, error)
-  - codegraphId: function:f3b2b8d406d4eddbd852d874c26306a7
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 1519
+    codegraphId: function:b3ae0be0192d5537a23508fbd70a1d54
+  - name: GetPublicKeySize
     kind: function
-    line: 1568
-    name: GetPublicKeySize
     signature: (key crypto.PublicKey) int
-  - codegraphId: function:cfe1676918218d8cb73df28bfa2a4f84
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 1568
+    codegraphId: function:f3b2b8d406d4eddbd852d874c26306a7
+  - name: GetPublicKeyType
     kind: function
-    line: 1591
-    name: GetPublicKeyType
     signature: (pub crypto.PublicKey) PrivateKeyType
-  - codegraphId: function:ad0eb7790ed8e25af975db3021db1f5c
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 1591
+    codegraphId: function:cfe1676918218d8cb73df28bfa2a4f84
+  - name: GetMLDSAParameterSetLabel
     kind: function
-    line: 1608
-    name: GetMLDSAParameterSetLabel
     signature: (k *mldsa.PublicKey) int
-  - codegraphId: function:3fcfe8a23047ebda8aed35e16ea0a9f2
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 1608
+    codegraphId: function:ad0eb7790ed8e25af975db3021db1f5c
+  - name: CreateKeyBundle
     kind: function
-    line: 1623
-    name: CreateKeyBundle
     signature: (keyType string, keyBits int, randReader io.Reader) (KeyBundle, error)
-  - codegraphId: function:5b4c9526744c7b7558a21b5d3ec7e2b7
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 1623
+    codegraphId: function:3fcfe8a23047ebda8aed35e16ea0a9f2
+  - name: CreateKeyBundleWithKeyGenerator
     kind: function
-    line: 1630
-    name: CreateKeyBundleWithKeyGenerator
     signature: (keyType string, keyBits int, randReader io.Reader, keyGenerator KeyGenerator)
       (KeyBundle, error)
-  - codegraphId: function:13b96c93120335518df3d3e0b3f6d972
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 1630
+    codegraphId: function:5b4c9526744c7b7558a21b5d3ec7e2b7
+  - name: CreateDeltaCRLIndicatorExt
     kind: function
-    line: 1644
-    name: CreateDeltaCRLIndicatorExt
     signature: (completeCRLNumber int64) (pkix.Extension, error)
-  - codegraphId: function:2b82ecb6ec45e273929263b33ebc2d1b
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 1644
+    codegraphId: function:13b96c93120335518df3d3e0b3f6d972
+  - name: CreateFreshestCRLExt
     kind: function
-    line: 1668
-    name: CreateFreshestCRLExt
     signature: (paths []string) (pkix.Extension, error)
-  - codegraphId: function:a4cd0c670f2ac9f7462ebd95202fc49f
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 1668
+    codegraphId: function:2b82ecb6ec45e273929263b33ebc2d1b
+  - name: ParseBasicConstraintExtension
     kind: function
-    line: 1716
-    name: ParseBasicConstraintExtension
     signature: (ext pkix.Extension) (bool, int, error)
-  - codegraphId: function:cc08d68277fdfc2d4a425076442e8889
     file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 1716
+    codegraphId: function:a4cd0c670f2ac9f7462ebd95202fc49f
+  - name: CreateBasicConstraintExtension
     kind: function
-    line: 1744
-    name: CreateBasicConstraintExtension
     signature: (isCa bool, maxPath int) (pkix.Extension, error)
-  - codegraphId: struct:56d4901fc20ac0fcbc5a4c39cadaa8d6
-    file: third_party/openbao/sdk/helper/certutil/types.go
+    file: third_party/openbao/sdk/helper/certutil/helpers.go
+    line: 1744
+    codegraphId: function:cc08d68277fdfc2d4a425076442e8889
+  - name: ClusterKeyParams
     kind: struct
+    file: third_party/openbao/sdk/helper/certutil/types.go
     line: 43
-    name: ClusterKeyParams
-  - codegraphId: struct:787462e0ca790a2fd18e638da2568b9e
-    file: third_party/openbao/sdk/helper/certutil/types.go
+    codegraphId: struct:56d4901fc20ac0fcbc5a4c39cadaa8d6
+  - name: Secret
     kind: struct
+    file: third_party/openbao/sdk/helper/certutil/types.go
     line: 52
-    name: Secret
-  - codegraphId: type_alias:147d71ecbb08ed568d334dded8045bd0
-    file: third_party/openbao/sdk/helper/certutil/types.go
+    codegraphId: struct:787462e0ca790a2fd18e638da2568b9e
+  - name: PrivateKeyType
     kind: type_alias
+    file: third_party/openbao/sdk/helper/certutil/types.go
     line: 59
-    name: PrivateKeyType
-  - codegraphId: type_alias:d3401168ee9846624f77bf26d02dd43d
-    file: third_party/openbao/sdk/helper/certutil/types.go
+    codegraphId: type_alias:147d71ecbb08ed568d334dded8045bd0
+  - name: TLSUsage
     kind: type_alias
+    file: third_party/openbao/sdk/helper/certutil/types.go
     line: 75
-    name: TLSUsage
-  - codegraphId: type_alias:8189f671740721d10e923284a9e02806
-    file: third_party/openbao/sdk/helper/certutil/types.go
+    codegraphId: type_alias:d3401168ee9846624f77bf26d02dd43d
+  - name: BlockType
     kind: type_alias
+    file: third_party/openbao/sdk/helper/certutil/types.go
     line: 85
-    name: BlockType
-  - codegraphId: interface:49a9b2a1ccd98566337696050d0057cd
-    file: third_party/openbao/sdk/helper/certutil/types.go
+    codegraphId: type_alias:8189f671740721d10e923284a9e02806
+  - name: ParsedPrivateKeyContainer
     kind: interface
+    file: third_party/openbao/sdk/helper/certutil/types.go
     line: 96
-    name: ParsedPrivateKeyContainer
-  - codegraphId: method:4b0874a6b7802a7668857a9d60fc7abe
-    file: third_party/openbao/sdk/helper/certutil/types.go
+    codegraphId: interface:49a9b2a1ccd98566337696050d0057cd
+  - name: ParsedPrivateKeyContainer.SetParsedPrivateKey
     kind: method
-    line: 97
-    name: ParsedPrivateKeyContainer.SetParsedPrivateKey
     signature: (crypto.Signer, PrivateKeyType, []byte)
-  - codegraphId: struct:256b29e582477107b4f3e74ad2507ea0
     file: third_party/openbao/sdk/helper/certutil/types.go
+    line: 97
+    codegraphId: method:4b0874a6b7802a7668857a9d60fc7abe
+  - name: CertBlock
     kind: struct
+    file: third_party/openbao/sdk/helper/certutil/types.go
     line: 102
-    name: CertBlock
-  - codegraphId: struct:18d84d575aacae12d61ffc18f63e4af6
-    file: third_party/openbao/sdk/helper/certutil/types.go
+    codegraphId: struct:256b29e582477107b4f3e74ad2507ea0
+  - name: CertBundle
     kind: struct
+    file: third_party/openbao/sdk/helper/certutil/types.go
     line: 110
-    name: CertBundle
-  - codegraphId: struct:c691a832894d4e77b7f183c53da73feb
-    file: third_party/openbao/sdk/helper/certutil/types.go
+    codegraphId: struct:18d84d575aacae12d61ffc18f63e4af6
+  - name: ParsedCertBundle
     kind: struct
+    file: third_party/openbao/sdk/helper/certutil/types.go
     line: 121
-    name: ParsedCertBundle
-  - codegraphId: struct:e8a2b3f42369f468c1b99047d3f827d8
-    file: third_party/openbao/sdk/helper/certutil/types.go
+    codegraphId: struct:c691a832894d4e77b7f183c53da73feb
+  - name: CSRBundle
     kind: struct
+    file: third_party/openbao/sdk/helper/certutil/types.go
     line: 133
-    name: CSRBundle
-  - codegraphId: struct:915228f73a9779af4bb4b55d6a2aae3c
-    file: third_party/openbao/sdk/helper/certutil/types.go
+    codegraphId: struct:e8a2b3f42369f468c1b99047d3f827d8
+  - name: ParsedCSRBundle
     kind: struct
+    file: third_party/openbao/sdk/helper/certutil/types.go
     line: 141
-    name: ParsedCSRBundle
-  - codegraphId: struct:2cc1bfb54b5215913392b14911751990
-    file: third_party/openbao/sdk/helper/certutil/types.go
+    codegraphId: struct:915228f73a9779af4bb4b55d6a2aae3c
+  - name: KeyBundle
     kind: struct
+    file: third_party/openbao/sdk/helper/certutil/types.go
     line: 149
-    name: KeyBundle
-  - codegraphId: function:1f552596ba67b65eae92216834a6852b
-    file: third_party/openbao/sdk/helper/certutil/types.go
+    codegraphId: struct:2cc1bfb54b5215913392b14911751990
+  - name: GetPrivateKeyTypeFromSigner
     kind: function
-    line: 155
-    name: GetPrivateKeyTypeFromSigner
     signature: (signer crypto.Signer) PrivateKeyType
-  - codegraphId: method:93ee1f9f2095415c34d79be0b50d5b67
     file: third_party/openbao/sdk/helper/certutil/types.go
+    line: 155
+    codegraphId: function:1f552596ba67b65eae92216834a6852b
+  - name: CertBundle.ToPEMBundle
     kind: method
+    signature: () string
+    file: third_party/openbao/sdk/helper/certutil/types.go
     line: 173
-    name: CertBundle.ToPEMBundle
-    signature: () string
-  - codegraphId: method:8cb0813a0ea307cbd273751f37becfac
-    file: third_party/openbao/sdk/helper/certutil/types.go
+    codegraphId: method:93ee1f9f2095415c34d79be0b50d5b67
+  - name: CertBundle.ToParsedCertBundle
     kind: method
-    line: 191
-    name: CertBundle.ToParsedCertBundle
     signature: () (*ParsedCertBundle, error)
-  - codegraphId: type_alias:3c0369aa6f88f9367f008a742cd1d826
     file: third_party/openbao/sdk/helper/certutil/types.go
+    line: 191
+    codegraphId: method:8cb0813a0ea307cbd273751f37becfac
+  - name: PrivateKeyExtractor
     kind: type_alias
+    file: third_party/openbao/sdk/helper/certutil/types.go
     line: 197
-    name: PrivateKeyExtractor
-  - codegraphId: method:f97dc871a5c93c0bfdc9c684d8e016b1
-    file: third_party/openbao/sdk/helper/certutil/types.go
+    codegraphId: type_alias:3c0369aa6f88f9367f008a742cd1d826
+  - name: CertBundle.ToParsedCertBundleWithExtractor
     kind: method
-    line: 199
-    name: CertBundle.ToParsedCertBundleWithExtractor
     signature: (privateKeyExtractor PrivateKeyExtractor) (*ParsedCertBundle, error)
-  - codegraphId: function:71e27e1e074c7daec5f5a117fd658ec9
     file: third_party/openbao/sdk/helper/certutil/types.go
+    line: 199
+    codegraphId: method:f97dc871a5c93c0bfdc9c684d8e016b1
+  - name: OptionalExternalKeyExtractor
     kind: function
-    line: 267
-    name: OptionalExternalKeyExtractor
     signature: (externalKeyExtractor PrivateKeyExtractor) PrivateKeyExtractor
-  - codegraphId: method:0098d3a3f254fdbf76fa8ad78880a2ee
     file: third_party/openbao/sdk/helper/certutil/types.go
+    line: 267
+    codegraphId: function:71e27e1e074c7daec5f5a117fd658ec9
+  - name: ParsedCertBundle.ToCertBundle
     kind: method
-    line: 325
-    name: ParsedCertBundle.ToCertBundle
     signature: () (*CertBundle, error)
-  - codegraphId: method:861600b87978e3e83fc3edfda7e08a50
     file: third_party/openbao/sdk/helper/certutil/types.go
+    line: 325
+    codegraphId: method:0098d3a3f254fdbf76fa8ad78880a2ee
+  - name: ParsedCertBundle.Verify
     kind: method
-    line: 379
-    name: ParsedCertBundle.Verify
     signature: () error
-  - codegraphId: method:813bafa492ed85a38d523c974c83dd3c
     file: third_party/openbao/sdk/helper/certutil/types.go
+    line: 379
+    codegraphId: method:861600b87978e3e83fc3edfda7e08a50
+  - name: ParsedCertBundle.GetCertificatePath
     kind: method
+    signature: () []*CertBlock
+    file: third_party/openbao/sdk/helper/certutil/types.go
     line: 411
-    name: ParsedCertBundle.GetCertificatePath
-    signature: () []*CertBlock
-  - codegraphId: method:6a39fb976caf739b1325585dc1ffd795
-    file: third_party/openbao/sdk/helper/certutil/types.go
+    codegraphId: method:813bafa492ed85a38d523c974c83dd3c
+  - name: ParsedCertBundle.SetParsedPrivateKey
     kind: method
+    signature: (privateKey crypto.Signer, privateKeyType PrivateKeyType, privateKeyBytes
+      []byte)
+    file: third_party/openbao/sdk/helper/certutil/types.go
     line: 471
-    name: ParsedCertBundle.SetParsedPrivateKey
-    signature: (privateKey crypto.Signer, privateKeyType PrivateKeyType, privateKeyBytes
-      []byte)
-  - codegraphId: method:fbd4b0758a78465a57d092ab8a4a6b9d
-    file: third_party/openbao/sdk/helper/certutil/types.go
+    codegraphId: method:6a39fb976caf739b1325585dc1ffd795
+  - name: ParsedCertBundle.GetKeyBits
     kind: method
-    line: 480
-    name: ParsedCertBundle.GetKeyBits
     signature: () (int, error)
-  - codegraphId: method:e4a6494e1007ca0c1176b190abdee57e
     file: third_party/openbao/sdk/helper/certutil/types.go
+    line: 480
+    codegraphId: method:fbd4b0758a78465a57d092ab8a4a6b9d
+  - name: CSRBundle.ToParsedCSRBundle
     kind: method
-    line: 545
-    name: CSRBundle.ToParsedCSRBundle
     signature: () (*ParsedCSRBundle, error)
-  - codegraphId: method:8f36dd95d1e4495453b8c186cbdd6cf1
     file: third_party/openbao/sdk/helper/certutil/types.go
+    line: 545
+    codegraphId: method:e4a6494e1007ca0c1176b190abdee57e
+  - name: ParsedCSRBundle.ToCSRBundle
     kind: method
-    line: 608
-    name: ParsedCSRBundle.ToCSRBundle
     signature: () (*CSRBundle, error)
-  - codegraphId: method:a01bb9db8e8bebb1e44513797615f993
     file: third_party/openbao/sdk/helper/certutil/types.go
+    line: 608
+    codegraphId: method:8f36dd95d1e4495453b8c186cbdd6cf1
+  - name: ParsedCSRBundle.SetParsedPrivateKey
     kind: method
+    signature: (privateKey crypto.Signer, privateKeyType PrivateKeyType, privateKeyBytes
+      []byte)
+    file: third_party/openbao/sdk/helper/certutil/types.go
     line: 689
-    name: ParsedCSRBundle.SetParsedPrivateKey
-    signature: (privateKey crypto.Signer, privateKeyType PrivateKeyType, privateKeyBytes
-      []byte)
-  - codegraphId: method:07710caea8555439c2b3f8282510b397
-    file: third_party/openbao/sdk/helper/certutil/types.go
+    codegraphId: method:a01bb9db8e8bebb1e44513797615f993
+  - name: ParsedCertBundle.GetTLSConfig
     kind: method
-    line: 700
-    name: ParsedCertBundle.GetTLSConfig
     signature: (usage TLSUsage) (*tls.Config, error)
-  - codegraphId: struct:0382b4f3d740a258c4a4cfb3624a0c09
     file: third_party/openbao/sdk/helper/certutil/types.go
+    line: 700
+    codegraphId: method:07710caea8555439c2b3f8282510b397
+  - name: IssueData
     kind: struct
+    file: third_party/openbao/sdk/helper/certutil/types.go
     line: 756
-    name: IssueData
-  - codegraphId: struct:f8a18f32b94bc3bf1025f3de24358411
-    file: third_party/openbao/sdk/helper/certutil/types.go
+    codegraphId: struct:0382b4f3d740a258c4a4cfb3624a0c09
+  - name: URLEntries
     kind: struct
+    file: third_party/openbao/sdk/helper/certutil/types.go
     line: 766
-    name: URLEntries
-  - codegraphId: type_alias:eed31f0843b1392b61284038f6d6345d
-    file: third_party/openbao/sdk/helper/certutil/types.go
+    codegraphId: struct:f8a18f32b94bc3bf1025f3de24358411
+  - name: NotAfterBehavior
     kind: type_alias
+    file: third_party/openbao/sdk/helper/certutil/types.go
     line: 773
-    name: NotAfterBehavior
-  - codegraphId: method:1ae6d7c651fd4cf2326c5ca12dd08eea
-    file: third_party/openbao/sdk/helper/certutil/types.go
+    codegraphId: type_alias:eed31f0843b1392b61284038f6d6345d
+  - name: NotAfterBehavior.String
     kind: method
-    line: 787
-    name: NotAfterBehavior.String
     signature: () string
-  - codegraphId: struct:c2cad3ed7232545ed4c178e69b9cb7aa
     file: third_party/openbao/sdk/helper/certutil/types.go
+    line: 787
+    codegraphId: method:1ae6d7c651fd4cf2326c5ca12dd08eea
+  - name: CAInfoBundle
     kind: struct
+    file: third_party/openbao/sdk/helper/certutil/types.go
     line: 795
-    name: CAInfoBundle
-  - codegraphId: method:7a9c3b9a9fca4df36ef3753f4644c3d5
-    file: third_party/openbao/sdk/helper/certutil/types.go
+    codegraphId: struct:c2cad3ed7232545ed4c178e69b9cb7aa
+  - name: CAInfoBundle.GetCAChain
     kind: method
+    signature: () []*CertBlock
+    file: third_party/openbao/sdk/helper/certutil/types.go
     line: 802
-    name: CAInfoBundle.GetCAChain
-    signature: () []*CertBlock
-  - codegraphId: method:f26da7cd68a8dee286e6c9700a1ade27
-    file: third_party/openbao/sdk/helper/certutil/types.go
+    codegraphId: method:7a9c3b9a9fca4df36ef3753f4644c3d5
+  - name: CAInfoBundle.GetFullChain
     kind: method
+    signature: () []*CertBlock
+    file: third_party/openbao/sdk/helper/certutil/types.go
     line: 817
-    name: CAInfoBundle.GetFullChain
-    signature: () []*CertBlock
-  - codegraphId: type_alias:db1f5c4a28b8691490fb5edc87b3292c
-    file: third_party/openbao/sdk/helper/certutil/types.go
+    codegraphId: method:f26da7cd68a8dee286e6c9700a1ade27
+  - name: CertExtKeyUsage
     kind: type_alias
+    file: third_party/openbao/sdk/helper/certutil/types.go
     line: 836
-    name: CertExtKeyUsage
-  - codegraphId: struct:13e094ec443fd8d4e91a1bea0f90f8be
-    file: third_party/openbao/sdk/helper/certutil/types.go
+    codegraphId: type_alias:db1f5c4a28b8691490fb5edc87b3292c
+  - name: CreationParameters
     kind: struct
+    file: third_party/openbao/sdk/helper/certutil/types.go
     line: 855
-    name: CreationParameters
-  - codegraphId: struct:5ff6b145d957540395039dc139e1095c
-    file: third_party/openbao/sdk/helper/certutil/types.go
+    codegraphId: struct:13e094ec443fd8d4e91a1bea0f90f8be
+  - name: CreationBundle
     kind: struct
+    file: third_party/openbao/sdk/helper/certutil/types.go
     line: 894
-    name: CreationBundle
-  - codegraphId: function:11bcdc15ddced7955980d5a8e7bdc6ee
-    file: third_party/openbao/sdk/helper/certutil/types.go
+    codegraphId: struct:5ff6b145d957540395039dc139e1095c
+  - name: AddKeyUsages
     kind: function
-    line: 902
-    name: AddKeyUsages
     signature: (data *CreationBundle, certTemplate *x509.Certificate)
-  - codegraphId: method:73078b1ca6ee719e0685db4884765cba
     file: third_party/openbao/sdk/helper/certutil/types.go
+    line: 902
+    codegraphId: function:11bcdc15ddced7955980d5a8e7bdc6ee
+  - name: KeyBundle.SetParsedPrivateKey
     kind: method
-    line: 975
-    name: KeyBundle.SetParsedPrivateKey
     signature: (privateKey crypto.Signer, privateKeyType PrivateKeyType, privateKeyBytes
       []byte)
-  - codegraphId: method:d2b3e0031a1feed3e525432bfdbe0705
     file: third_party/openbao/sdk/helper/certutil/types.go
+    line: 975
+    codegraphId: method:73078b1ca6ee719e0685db4884765cba
+  - name: KeyBundle.ToPrivateKeyPemString
     kind: method
-    line: 981
-    name: KeyBundle.ToPrivateKeyPemString
     signature: () (string, error)
-  - codegraphId: struct:bff9ed8e5cb9e6a48591c1aa727503e9
     file: third_party/openbao/sdk/helper/certutil/types.go
+    line: 981
+    codegraphId: method:d2b3e0031a1feed3e525432bfdbe0705
+  - name: PolicyIdentifierWithQualifierEntry
     kind: struct
+    file: third_party/openbao/sdk/helper/certutil/types.go
     line: 1002
-    name: PolicyIdentifierWithQualifierEntry
-  - codegraphId: function:591f11aaaa306b4b643dcde35ee41973
-    file: third_party/openbao/sdk/helper/certutil/types.go
+    codegraphId: struct:bff9ed8e5cb9e6a48591c1aa727503e9
+  - name: GetPolicyIdentifierFromString
     kind: function
-    line: 1009
-    name: GetPolicyIdentifierFromString
     signature: (policyIdentifier string) (*PolicyIdentifierWithQualifierEntry, error)
-  - codegraphId: function:d4174ca444722aea5bf02f6f873f3d9c
     file: third_party/openbao/sdk/helper/certutil/types.go
+    line: 1009
+    codegraphId: function:591f11aaaa306b4b643dcde35ee41973
+  - name: CreatePolicyInformationExtensionFromStorageStrings
     kind: function
-    line: 1086
-    name: CreatePolicyInformationExtensionFromStorageStrings
     signature: (policyIdentifiers []string) (*pkix.Extension, error)
-realizedSpecHash: 1fbcce3122a28e78ef70689787eefc82b58d2890effa276442f7e52c09bdb9dc
-syncedCommit: 89cee50ec5aea977a42f904a758e506729e1158e
-syncedFingerprint: 4f426f3edc8b546522ef98cd672786d81fcc30a0bbf888f1392f6dcab2b9a5b5
+    file: third_party/openbao/sdk/helper/certutil/types.go
+    line: 1086
+    codegraphId: function:d4174ca444722aea5bf02f6f873f3d9c
+  fingerprint: 4f426f3edc8b546522ef98cd672786d81fcc30a0bbf888f1392f6dcab2b9a5b5

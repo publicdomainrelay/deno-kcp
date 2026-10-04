@@ -1,14 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/.golangci.deprecations.yml .golangci.deprecations.yml@third_party/openbao/.golangci.deprecations.yml
-- file:third_party/openbao/.golangci.yml .golangci.yml@third_party/openbao/.golangci.yml
-- file:third_party/openbao/main.go main.go@third_party/openbao/main.go
-- file:third_party/openbao/publiccode.yml publiccode.yml@third_party/openbao/publiccode.yml
 kind: SystemContext
 metadata:
   name: third-party-openbao
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'This context exists to mark the boundary of the vendored upstream OpenBao
     tree inside deno-kcp, so that readers and tools do not confuse it with deno-kcp''s
     first-party OpenBao handling in internal/provider. It records that the copies
@@ -18,40 +15,43 @@ spec:
     to the deno-kcp module. It is a containment and provenance note rather than a
     behavioral contract: the renames and edits to make upstream OpenBao usable by
     deno-kcp happen in the first-party packages, not here.'
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/.golangci.deprecations.yml
-    - file:third_party/openbao/.golangci.yml
-    id: r.golangci-lint-configs
+  - id: r.golangci-lint-configs
     level: MUST
     text: The vendored tree ships both its base lint configuration and a separate
       deprecations lint configuration, as third_party/openbao/.golangci.yml and third_party/openbao/.golangci.deprecations.yml.
-  - codeRefs:
-    - file:third_party/openbao/main.go
-    id: r.main-entrypoint
+    codeRefs:
+    - file:third_party/openbao/.golangci.deprecations.yml
+    - file:third_party/openbao/.golangci.yml
+  - id: r.main-entrypoint
     level: MUST
     text: The vendored tree has a Go main package entry point at third_party/openbao/main.go.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/main.go
-    id: r.no-exported-interfaces
+  - id: r.no-exported-interfaces
     level: MAY
     text: The vendored tree exports no interfaces of its own into the deno-kcp module;
       OpenBao handling in deno-kcp lives in the first-party internal/provider package
       instead.
-  - codeRefs:
-    - file:third_party/openbao/publiccode.yml
-    id: r.publiccode-metadata
+    codeRefs:
+    - file:third_party/openbao/main.go
+  - id: r.publiccode-metadata
     level: SHOULD
     text: The vendored tree keeps its upstream publiccode.yml project metadata alongside
       the sources.
-  - codeRefs:
+    codeRefs:
+    - file:third_party/openbao/publiccode.yml
+  - id: r.vendored-openbao-tree
+    level: MUST
+    text: The repository carries a vendored copy of OpenBao under third_party/openbao,
+      kept apart from first-party deno-kcp packages.
+    codeRefs:
     - file:third_party/openbao/.golangci.deprecations.yml
     - file:third_party/openbao/.golangci.yml
     - file:third_party/openbao/main.go
     - file:third_party/openbao/publiccode.yml
-    id: r.vendored-openbao-tree
-    level: MUST
-    text: The repository carries a vendored copy of OpenBao under third_party/openbao,
-      kept apart from first-party deno-kcp packages.
-  upstream: self
+codeRefIndex:
+- file:third_party/openbao/.golangci.deprecations.yml .golangci.deprecations.yml@third_party/openbao/.golangci.deprecations.yml
+- file:third_party/openbao/.golangci.yml .golangci.yml@third_party/openbao/.golangci.yml
+- file:third_party/openbao/main.go main.go@third_party/openbao/main.go
+- file:third_party/openbao/publiccode.yml publiccode.yml@third_party/openbao/publiccode.yml

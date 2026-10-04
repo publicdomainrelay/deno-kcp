@@ -4,12 +4,12 @@ metadata:
   name: third-party-openbao-ui-app-serializers-kubernetes-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2
   namespace: default
 spec:
-  delta: {}
+  systemContext: third-party-openbao-ui-app-serializers-kubernetes
   direction: CodeToSpec
   fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-  systemContext: third-party-openbao-ui-app-serializers-kubernetes
   toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
 status:
+  phase: Succeeded
   agentLog: 'This context covers the two Ember Data serializers under third_party/openbao/ui/app/serializers/kubernetes
     in the deno-kcp repository: config.js and role.js. Each file default-exports a
     serializer class named KubernetesConfigSerializer that extends the shared ApplicationSerializer,
@@ -25,9 +25,10 @@ status:
     interface KubernetesConfigSerializer.serialize is not in the observed facts; dropped;
     interface KubernetesConfigSerializer.primaryKey is not in the observed facts;
     dropped
-  phase: Succeeded
 superseded:
-- message: |-
+- name: third-party-openbao-ui-app-serializers-kubernetes-c2s-6c1bbe4c3ba9-89cee50ec5ae
+  phase: Failed
+  message: |-
     ...e, the config serializer sets kubernetes_ca_cert, kubernetes_host and service_account_jwt to null, unsetting values left over from a previous manual configuration.",
           "codeRefs": [
             "file:third_party/openbao/ui/app/serializers/kubernetes/config.js",
@@ -82,5 +83,3 @@ superseded:
         }
       ]
     }
-  name: third-party-openbao-ui-app-serializers-kubernetes-c2s-6c1bbe4c3ba9-89cee50ec5ae
-  phase: Failed

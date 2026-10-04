@@ -1,4 +1,130 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-ui-app-models-oidc
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: This context exists to pin down the contract of the vendored OpenBao OIDC
+    UI models that the rest of the OpenBao front end builds on. Routes, components
+    and serializers in the same application read attributes, form field lists, capability
+    getters and API path properties off these five classes, so their names and semantics
+    must stay stable when the vendored tree is updated or when another part of the
+    repository consumes it. The spec states which attributes each model carries, which
+    getters derive presentation and permission data from them, and which path properties
+    the capability getters read, so a change to any of those is visible as a change
+    to this contract rather than as a silent break in the OIDC screens.
+  requirements:
+  - id: r.oidc-assignment-attributes
+    level: MUST
+    text: OidcAssignmentModel carries the assignment attributes name, entityIds and
+      groupIds, and exposes an assignmentPath property that capability getters read.
+    codeRefs:
+    - class:47bd6620e0b1468753ab65f2174824ff
+    - file:third_party/openbao/ui/app/models/oidc/assignment.js
+  - id: r.oidc-assignment-capabilities
+    level: MUST
+    text: OidcAssignmentModel resolves read, edit and delete permission for an assignment
+      through the canRead, canEdit and canDelete getters, which read the permission
+      state held at assignmentPath.
+    codeRefs:
+    - class:47bd6620e0b1468753ab65f2174824ff
+    - file:third_party/openbao/ui/app/models/oidc/assignment.js
+  - id: r.oidc-client-attributes
+    level: MUST
+    text: OidcClientModel declares the client attributes name, clientType, redirectUris,
+      key, accessTokenTtl, idTokenTtl, authorizationCode, clientCredentials, assignments,
+      clientId and clientSecret, and keeps a clientPath property that the capability
+      getters read.
+    codeRefs:
+    - class:261dca2bb7f66ffcfbb9bbf5f9b2ed47
+    - file:third_party/openbao/ui/app/models/oidc/client.js
+  - id: r.oidc-client-capabilities
+    level: MUST
+    text: OidcClientModel resolves read, edit and delete permission for a client through
+      the canRead, canEdit and canDelete getters, which read the permission state
+      held at clientPath.
+    codeRefs:
+    - class:261dca2bb7f66ffcfbb9bbf5f9b2ed47
+    - file:third_party/openbao/ui/app/models/oidc/client.js
+  - id: r.oidc-client-form-fields
+    level: MUST
+    text: OidcClientModel exposes a formFields getter that returns the ordered list
+      of attributes to render in the client form, and a fieldGroups getter that groups
+      those fields using the _fieldToAttrsGroups map over the per-attribute metadata
+      held in _attributeMeta.
+    codeRefs:
+    - class:261dca2bb7f66ffcfbb9bbf5f9b2ed47
+    - file:third_party/openbao/ui/app/models/oidc/client.js
+  - id: r.oidc-key-attributes
+    level: MUST
+    text: OidcKeyModel declares the key attributes name, algorithm, rotationPeriod,
+      verificationTtl and allowedClientIds, and keeps a keyPath property and a rotatePath
+      property for the key and its rotation endpoint.
+    codeRefs:
+    - class:ace1f2a8ef976995b7f07739033b4c7c
+    - file:third_party/openbao/ui/app/models/oidc/key.js
+  - id: r.oidc-key-capabilities
+    level: MUST
+    text: OidcKeyModel resolves read, edit, rotate and delete permission for a key
+      through the canRead, canEdit, canRotate and canDelete getters, reading the permission
+      state held at keyPath and the rotation permission held at rotatePath.
+    codeRefs:
+    - class:ace1f2a8ef976995b7f07739033b4c7c
+    - file:third_party/openbao/ui/app/models/oidc/key.js
+  - id: r.oidc-key-form-fields
+    level: MUST
+    text: OidcKeyModel exposes a formFields getter that returns the attributes to
+      render in the key form, driven by the per-attribute metadata held in _attributeMeta.
+    codeRefs:
+    - class:ace1f2a8ef976995b7f07739033b4c7c
+    - file:third_party/openbao/ui/app/models/oidc/key.js
+  - id: r.oidc-models-single-directory
+    level: SHOULD
+    text: All five OIDC model modules live in one directory, third_party/openbao/ui/app/models/oidc,
+      so a change to one OIDC object type stays next to the others.
+    codeRefs:
+    - file:third_party/openbao/ui/app/models/oidc/assignment.js
+    - file:third_party/openbao/ui/app/models/oidc/client.js
+    - file:third_party/openbao/ui/app/models/oidc/key.js
+    - file:third_party/openbao/ui/app/models/oidc/provider.js
+    - file:third_party/openbao/ui/app/models/oidc/scope.js
+  - id: r.oidc-provider-model
+    level: MUST
+    text: OidcProviderModel is the model class for OIDC provider records in the oidc
+      model namespace, so the application resolves provider records to this class.
+    codeRefs:
+    - class:13025483db13a0a8d234a0b5977da762
+    - file:third_party/openbao/ui/app/models/oidc/provider.js
+  - id: r.oidc-scope-model
+    level: MUST
+    text: OidcScopeModel is the model class for OIDC scope records in the oidc model
+      namespace, so the application resolves scope records to this class.
+    codeRefs:
+    - class:c75f9d2624e93ca2e45bf2838a3e1775
+    - file:third_party/openbao/ui/app/models/oidc/scope.js
+  interfaces:
+  - name: OidcAssignmentModel
+    kind: class
+    signature: OidcAssignmentModel()
+    file: third_party/openbao/ui/app/models/oidc/assignment.js
+  - name: OidcClientModel
+    kind: class
+    signature: OidcClientModel()
+    file: third_party/openbao/ui/app/models/oidc/client.js
+  - name: OidcKeyModel
+    kind: class
+    signature: OidcKeyModel()
+    file: third_party/openbao/ui/app/models/oidc/key.js
+  - name: OidcProviderModel
+    kind: class
+    signature: OidcProviderModel()
+    file: third_party/openbao/ui/app/models/oidc/provider.js
+  - name: OidcScopeModel
+    kind: class
+    signature: OidcScopeModel()
+    file: third_party/openbao/ui/app/models/oidc/scope.js
 codeRefIndex:
 - class:13025483db13a0a8d234a0b5977da762 OidcProviderModel@third_party/openbao/ui/app/models/oidc/provider.js:22
 - class:261dca2bb7f66ffcfbb9bbf5f9b2ed47 OidcClientModel@third_party/openbao/ui/app/models/oidc/client.js:24
@@ -10,129 +136,3 @@ codeRefIndex:
 - file:third_party/openbao/ui/app/models/oidc/key.js key.js@third_party/openbao/ui/app/models/oidc/key.js
 - file:third_party/openbao/ui/app/models/oidc/provider.js provider.js@third_party/openbao/ui/app/models/oidc/provider.js
 - file:third_party/openbao/ui/app/models/oidc/scope.js scope.js@third_party/openbao/ui/app/models/oidc/scope.js
-kind: SystemContext
-metadata:
-  name: third-party-openbao-ui-app-models-oidc
-  namespace: default
-spec:
-  intent: This context exists to pin down the contract of the vendored OpenBao OIDC
-    UI models that the rest of the OpenBao front end builds on. Routes, components
-    and serializers in the same application read attributes, form field lists, capability
-    getters and API path properties off these five classes, so their names and semantics
-    must stay stable when the vendored tree is updated or when another part of the
-    repository consumes it. The spec states which attributes each model carries, which
-    getters derive presentation and permission data from them, and which path properties
-    the capability getters read, so a change to any of those is visible as a change
-    to this contract rather than as a silent break in the OIDC screens.
-  interfaces:
-  - file: third_party/openbao/ui/app/models/oidc/assignment.js
-    kind: class
-    name: OidcAssignmentModel
-    signature: OidcAssignmentModel()
-  - file: third_party/openbao/ui/app/models/oidc/client.js
-    kind: class
-    name: OidcClientModel
-    signature: OidcClientModel()
-  - file: third_party/openbao/ui/app/models/oidc/key.js
-    kind: class
-    name: OidcKeyModel
-    signature: OidcKeyModel()
-  - file: third_party/openbao/ui/app/models/oidc/provider.js
-    kind: class
-    name: OidcProviderModel
-    signature: OidcProviderModel()
-  - file: third_party/openbao/ui/app/models/oidc/scope.js
-    kind: class
-    name: OidcScopeModel
-    signature: OidcScopeModel()
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - class:47bd6620e0b1468753ab65f2174824ff
-    - file:third_party/openbao/ui/app/models/oidc/assignment.js
-    id: r.oidc-assignment-attributes
-    level: MUST
-    text: OidcAssignmentModel carries the assignment attributes name, entityIds and
-      groupIds, and exposes an assignmentPath property that capability getters read.
-  - codeRefs:
-    - class:47bd6620e0b1468753ab65f2174824ff
-    - file:third_party/openbao/ui/app/models/oidc/assignment.js
-    id: r.oidc-assignment-capabilities
-    level: MUST
-    text: OidcAssignmentModel resolves read, edit and delete permission for an assignment
-      through the canRead, canEdit and canDelete getters, which read the permission
-      state held at assignmentPath.
-  - codeRefs:
-    - class:261dca2bb7f66ffcfbb9bbf5f9b2ed47
-    - file:third_party/openbao/ui/app/models/oidc/client.js
-    id: r.oidc-client-attributes
-    level: MUST
-    text: OidcClientModel declares the client attributes name, clientType, redirectUris,
-      key, accessTokenTtl, idTokenTtl, authorizationCode, clientCredentials, assignments,
-      clientId and clientSecret, and keeps a clientPath property that the capability
-      getters read.
-  - codeRefs:
-    - class:261dca2bb7f66ffcfbb9bbf5f9b2ed47
-    - file:third_party/openbao/ui/app/models/oidc/client.js
-    id: r.oidc-client-capabilities
-    level: MUST
-    text: OidcClientModel resolves read, edit and delete permission for a client through
-      the canRead, canEdit and canDelete getters, which read the permission state
-      held at clientPath.
-  - codeRefs:
-    - class:261dca2bb7f66ffcfbb9bbf5f9b2ed47
-    - file:third_party/openbao/ui/app/models/oidc/client.js
-    id: r.oidc-client-form-fields
-    level: MUST
-    text: OidcClientModel exposes a formFields getter that returns the ordered list
-      of attributes to render in the client form, and a fieldGroups getter that groups
-      those fields using the _fieldToAttrsGroups map over the per-attribute metadata
-      held in _attributeMeta.
-  - codeRefs:
-    - class:ace1f2a8ef976995b7f07739033b4c7c
-    - file:third_party/openbao/ui/app/models/oidc/key.js
-    id: r.oidc-key-attributes
-    level: MUST
-    text: OidcKeyModel declares the key attributes name, algorithm, rotationPeriod,
-      verificationTtl and allowedClientIds, and keeps a keyPath property and a rotatePath
-      property for the key and its rotation endpoint.
-  - codeRefs:
-    - class:ace1f2a8ef976995b7f07739033b4c7c
-    - file:third_party/openbao/ui/app/models/oidc/key.js
-    id: r.oidc-key-capabilities
-    level: MUST
-    text: OidcKeyModel resolves read, edit, rotate and delete permission for a key
-      through the canRead, canEdit, canRotate and canDelete getters, reading the permission
-      state held at keyPath and the rotation permission held at rotatePath.
-  - codeRefs:
-    - class:ace1f2a8ef976995b7f07739033b4c7c
-    - file:third_party/openbao/ui/app/models/oidc/key.js
-    id: r.oidc-key-form-fields
-    level: MUST
-    text: OidcKeyModel exposes a formFields getter that returns the attributes to
-      render in the key form, driven by the per-attribute metadata held in _attributeMeta.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/models/oidc/assignment.js
-    - file:third_party/openbao/ui/app/models/oidc/client.js
-    - file:third_party/openbao/ui/app/models/oidc/key.js
-    - file:third_party/openbao/ui/app/models/oidc/provider.js
-    - file:third_party/openbao/ui/app/models/oidc/scope.js
-    id: r.oidc-models-single-directory
-    level: SHOULD
-    text: All five OIDC model modules live in one directory, third_party/openbao/ui/app/models/oidc,
-      so a change to one OIDC object type stays next to the others.
-  - codeRefs:
-    - class:13025483db13a0a8d234a0b5977da762
-    - file:third_party/openbao/ui/app/models/oidc/provider.js
-    id: r.oidc-provider-model
-    level: MUST
-    text: OidcProviderModel is the model class for OIDC provider records in the oidc
-      model namespace, so the application resolves provider records to this class.
-  - codeRefs:
-    - class:c75f9d2624e93ca2e45bf2838a3e1775
-    - file:third_party/openbao/ui/app/models/oidc/scope.js
-    id: r.oidc-scope-model
-    level: MUST
-    text: OidcScopeModel is the model class for OIDC scope records in the oidc model
-      namespace, so the application resolves scope records to this class.
-  upstream: self

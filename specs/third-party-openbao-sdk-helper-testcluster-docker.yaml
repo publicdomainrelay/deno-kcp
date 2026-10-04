@@ -1,4 +1,405 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-sdk-helper-testcluster-docker
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: The context exists so that tests can stand up disposable, multi-node OpenBao
+    clusters in Docker and drive failure scenarios against them without hand-managing
+    containers. It defines the cluster and node lifecycle (create, start, stop, pause,
+    upgrade, cleanup), the fault-injection surface (partition, unpartition, network
+    delay), the secret accessors tests need to unseal or authenticate (barrier keys,
+    recovery keys, root token), the transport accessors (TLS config, API client, CA
+    PEM file), and the storage abstraction that lets a cluster run on in-memory or
+    PostgreSQL-backed storage, including a mapper that assigns one database per node
+    index.
+  requirements:
+  - id: r.certificate-getter
+    level: MUST
+    text: NewCertificateGetter records the certificate file, key file and optional
+      passphrase, Reload re-reads the pair from disk and returns an error when loading
+      fails, and GetCertificate satisfies tls.Config.GetCertificate by returning the
+      last loaded certificate.
+    codeRefs:
+    - function:f3307f66cd7aae87db19bbba3c2686f8
+    - method:3877831773497cccf32c4b21103359ac
+    - method:dae24a0a22bb7350f382d21bba1c0f7c
+    - type_alias:73092d361099d2aa5e324e7f8f9ebffb
+  - id: r.cluster-construction
+    level: MUST
+    text: NewDockerCluster builds a cluster of nodes from the supplied DockerClusterOptions
+      and returns an error when setup fails, while NewTestDockerCluster wraps it for
+      tests and ties cluster teardown to the testing.T lifetime.
+    codeRefs:
+    - function:28c1ae209259dc140e8b6f1ab62653bf
+    - function:94d4f70ff9e68bab894962876d43901c
+    - struct:3ce35b2132166901b93ee585531c9af3
+  - id: r.cluster-membership
+    level: MUST
+    text: AddNode appends a further node to an existing cluster using new options,
+      and Nodes returns the current node list as testcluster.VaultClusterNode values.
+    codeRefs:
+    - method:2b5ec2ba8e60f0f9d882bccbb730d31a
+    - method:339f59f0ac055a6c5d293e1c7e669b40
+  - id: r.default-options
+    level: MUST
+    text: DefaultOptions derives a usable set of cluster options from the testing.T,
+      so a caller that supplies no options still gets a runnable cluster configuration.
+    codeRefs:
+    - function:936d9e6c5a7eacb61e5335e8b8da2678
+  - id: r.fault-injection
+    level: MUST
+    text: PartitionFromCluster and UnpartitionFromCluster cut and restore a node's
+      network reachability to the rest of the cluster, and AddNetworkDelay injects
+      latency toward a target IP for a given duration.
+    codeRefs:
+    - method:54fe38cf73d487daa79352d8cd5d6789
+    - method:96eadda598d362f8fec3edf525f48666
+    - method:b0cd317f5590439e93c034608699390a
+  - id: r.key-access
+    level: MUST
+    text: The cluster exposes and accepts barrier and recovery keys, with GetBarrierOrRecoveryKeys
+      returning whichever set the cluster mode actually produced so unseal logic does
+      not need to know the seal type.
+    codeRefs:
+    - method:3bcae64b76e30bef4a9b3e2b040e6612
+    - method:449be918154ffed2cbceb9310a683bf2
+    - method:7d9ece15fddd462a1f8b56aa9222062a
+    - method:a0a6081590128bee572efd82778bebb0
+    - method:bd37b86a1aa40dd0d107b60b45a67019
+  - id: r.log-consumer
+    level: MUST
+    text: LogConsumerWriter.Write forwards container log bytes to the wrapped consumer
+      and reports the byte count written.
+    codeRefs:
+    - method:ca575a7aa36d4939219c37e39e2b688f
+    - struct:663352853a6ce8ed754e8b2484a478d6
+  - id: r.node-clients
+    level: MUST
+    text: A node hands out a TLS config and an authenticated API client so tests can
+      address the node directly, and NamedLogger returns a logger scoped to a sub-name
+      for both cluster and nodes.
+    codeRefs:
+    - method:87fedcf4f99fb571793a72aaa176ebf3
+    - method:a6248f205895acafb18c2558cdd62da7
+    - method:cef17f21ac315d39b6b0ef6943d33a52
+    - struct:6d9ca3b3379c02cac2cd3bad9578b11a
+    - struct:b0a726b36d000ad259091756811da615
+  - id: r.node-lifecycle
+    level: MUST
+    text: DockerClusterNode.Start launches the node container from the given options,
+      Stop halts it, Pause suspends it, Cleanup releases its container resources,
+      and Name reports the node name used for certificates and container naming.
+    codeRefs:
+    - method:46631632e37e56991909ed6b5810cf45
+    - method:5e5e96cbc57d1caae6550cda2022e7fa
+    - method:cef9e3e4b1e71d4e9f3499c8d52a42ff
+    - method:f37137e578c370d02454c8b9da08159d
+    - method:ff0a1ec89e44b2f2fc6e48f3e0611cc8
+  - id: r.node-upgrade
+    level: MUST
+    text: Upgrade replaces the running node with one created from the supplied options,
+      so a test can move a cluster member from one OpenBao image to another.
+    codeRefs:
+    - method:1a1831cd3a4b59fdd90d3c0f129e78d7
+  - id: r.package-scope
+    level: MUST
+    text: The package is vendored third-party OpenBao SDK test helper code, split
+      across cert.go for certificate loading, environment.go for the Docker cluster
+      and node lifecycle, and storage.go for pluggable storage backends.
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/testcluster/docker/cert.go
+    - file:third_party/openbao/sdk/helper/testcluster/docker/environment.go
+    - file:third_party/openbao/sdk/helper/testcluster/docker/storage.go
+  - id: r.postgres-cluster-storage
+    level: MUST
+    text: NewPostgreSQLClusterStorage creates one database per cluster through a PostgreSQLClusterMapper,
+      ForNode returns the testcluster.NodeStorage for a given node index, and Cleanup
+      and Type report teardown and the storage type name.
+    codeRefs:
+    - function:2e5fea03573e7b814aa230b7a707ee25
+    - method:1fe4fb82c37fc5ed16a36558781a4491
+    - method:cb9382be91b28bb321a2c5e010f85f61
+    - method:d1d438d1268b30e8262e9345ea401c8d
+    - struct:d0d99e0c8dcc1b86bc5fb5d708035c49
+    - type_alias:b6227006632befb5cdc0da8fe20f1d4e
+  - id: r.postgres-storage
+    level: MUST
+    text: NewPostgreSQLStorage starts a PostgreSQL container on the given docker network
+      for a test, NewStaticPostgreSQLStorage instead adopts existing external and
+      internal connection URLs, and Client opens a *sql.DB against the storage instance.
+    codeRefs:
+    - function:b11ad9ba34e8f7186f73f594b0d05ffe
+    - function:fc4dac195ec0fd4f6df4adea8a5454f2
+    - method:4cb674d5a0367efa3aefd711329c5bf5
+    - struct:c2721b369f8c3ec8219c7d4660e4961c
+  - id: r.storage-backends
+    level: MUST
+    text: 'InmemStorage and PostgreSQLStorage both implement the node storage contract:
+      Start prepares the backend for a cluster, Cleanup releases it, Opts returns
+      the OpenBao storage stanza options, and Type returns the storage type name.'
+    codeRefs:
+    - method:488ae022b3f7534270f33caa4b925ecd
+    - method:6d5c753355e962689831604bc6e2f5c1
+    - method:7d90c111a015e81f3dac7373d8a40d84
+    - method:8c0c30f4ee5fbe13543d54975a5489e2
+    - method:9098203feb9525cbc1d047183e46da47
+    - method:e0ed9a963004d8fc5cdfa80982ee6e27
+    - method:e26511df796858f368dd2d260e747082
+    - method:e949976efc24365436b9285a15bb10c6
+  - id: r.token-and-endpoints
+    level: MUST
+    text: The cluster holds a root token through GetRootToken and SetRootToken, reports
+      its identity through ClusterID, returns its CA certificate PEM file path through
+      GetCACertPEMFile, and Cleanup tears down all nodes.
+    codeRefs:
+    - method:19d6f580b2568f327888c4851c392479
+    - method:57ecdd62b8c053bf0c479a4d226f2a3e
+    - method:6a8f0aabda16a476d8da3fd2e3917ea2
+    - method:bfb62b87fd1f0f8ef909dd47c48e250b
+    - method:d6b0a269ec8514181ee46dabbcbd55aa
+  interfaces:
+  - name: CertificateGetter
+    kind: struct
+    signature: type CertificateGetter struct
+    file: third_party/openbao/sdk/helper/testcluster/docker/cert.go
+  - name: CertificateGetter.GetCertificate
+    kind: method
+    signature: func (*CertificateGetter) GetCertificate(clientHello *tls.ClientHelloInfo)
+      (*tls.Certificate, error)
+    file: third_party/openbao/sdk/helper/testcluster/docker/cert.go
+  - name: CertificateGetter.Reload
+    kind: method
+    signature: func (*CertificateGetter) Reload() error
+    file: third_party/openbao/sdk/helper/testcluster/docker/cert.go
+  - name: DefaultOptions
+    kind: function
+    signature: func DefaultOptions(t *testing.T) *DockerClusterOptions
+    file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
+  - name: DockerCluster
+    kind: struct
+    signature: type DockerCluster struct
+    file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
+  - name: DockerCluster.AddNode
+    kind: method
+    signature: func (*DockerCluster) AddNode(ctx context.Context, opts *DockerClusterOptions)
+      error
+    file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
+  - name: DockerCluster.Cleanup
+    kind: method
+    signature: func (*DockerCluster) Cleanup()
+    file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
+  - name: DockerCluster.ClusterID
+    kind: method
+    signature: func (*DockerCluster) ClusterID() string
+    file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
+  - name: DockerCluster.GetBarrierKeys
+    kind: method
+    signature: func (*DockerCluster) GetBarrierKeys() [][]byte
+    file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
+  - name: DockerCluster.GetBarrierOrRecoveryKeys
+    kind: method
+    signature: func (*DockerCluster) GetBarrierOrRecoveryKeys() [][]byte
+    file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
+  - name: DockerCluster.GetCACertPEMFile
+    kind: method
+    signature: func (*DockerCluster) GetCACertPEMFile() string
+    file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
+  - name: DockerCluster.GetRecoveryKeys
+    kind: method
+    signature: func (*DockerCluster) GetRecoveryKeys() [][]byte
+    file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
+  - name: DockerCluster.GetRootToken
+    kind: method
+    signature: func (*DockerCluster) GetRootToken() string
+    file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
+  - name: DockerCluster.NamedLogger
+    kind: method
+    signature: func (*DockerCluster) NamedLogger(s string) log.Logger
+    file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
+  - name: DockerCluster.Nodes
+    kind: method
+    signature: func (*DockerCluster) Nodes() []testcluster.VaultClusterNode
+    file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
+  - name: DockerCluster.SetBarrierKeys
+    kind: method
+    signature: func (*DockerCluster) SetBarrierKeys(keys [][]byte)
+    file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
+  - name: DockerCluster.SetRecoveryKeys
+    kind: method
+    signature: func (*DockerCluster) SetRecoveryKeys(keys [][]byte)
+    file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
+  - name: DockerCluster.SetRootToken
+    kind: method
+    signature: func (*DockerCluster) SetRootToken(s string)
+    file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
+  - name: DockerClusterNode
+    kind: struct
+    signature: type DockerClusterNode struct
+    file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
+  - name: DockerClusterNode.APIClient
+    kind: method
+    signature: func (*DockerClusterNode) APIClient() *api.Client
+    file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
+  - name: DockerClusterNode.AddNetworkDelay
+    kind: method
+    signature: func (*DockerClusterNode) AddNetworkDelay(ctx context.Context, delay
+      time.Duration, targetIP string) error
+    file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
+  - name: DockerClusterNode.Cleanup
+    kind: method
+    signature: func (*DockerClusterNode) Cleanup()
+    file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
+  - name: DockerClusterNode.Name
+    kind: method
+    signature: func (*DockerClusterNode) Name() string
+    file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
+  - name: DockerClusterNode.PartitionFromCluster
+    kind: method
+    signature: func (*DockerClusterNode) PartitionFromCluster(ctx context.Context)
+      error
+    file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
+  - name: DockerClusterNode.Pause
+    kind: method
+    signature: func (*DockerClusterNode) Pause(ctx context.Context) error
+    file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
+  - name: DockerClusterNode.Start
+    kind: method
+    signature: func (*DockerClusterNode) Start(ctx context.Context, opts *DockerClusterOptions)
+      error
+    file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
+  - name: DockerClusterNode.Stop
+    kind: method
+    signature: func (*DockerClusterNode) Stop()
+    file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
+  - name: DockerClusterNode.TLSConfig
+    kind: method
+    signature: func (*DockerClusterNode) TLSConfig() *tls.Config
+    file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
+  - name: DockerClusterNode.UnpartitionFromCluster
+    kind: method
+    signature: func (*DockerClusterNode) UnpartitionFromCluster(ctx context.Context)
+      error
+    file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
+  - name: DockerClusterNode.Upgrade
+    kind: method
+    signature: func (*DockerClusterNode) Upgrade(ctx context.Context, opts *DockerClusterOptions)
+      error
+    file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
+  - name: DockerClusterOptions
+    kind: struct
+    signature: type DockerClusterOptions struct
+    file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
+  - name: InmemStorage
+    kind: struct
+    signature: type InmemStorage struct
+    file: third_party/openbao/sdk/helper/testcluster/docker/storage.go
+  - name: InmemStorage.Cleanup
+    kind: method
+    signature: func (*InmemStorage) Cleanup() error
+    file: third_party/openbao/sdk/helper/testcluster/docker/storage.go
+  - name: InmemStorage.Opts
+    kind: method
+    signature: func (*InmemStorage) Opts() map[string]any
+    file: third_party/openbao/sdk/helper/testcluster/docker/storage.go
+  - name: InmemStorage.Start
+    kind: method
+    signature: func (*InmemStorage) Start(context.Context, *testcluster.ClusterOptions)
+      error
+    file: third_party/openbao/sdk/helper/testcluster/docker/storage.go
+  - name: InmemStorage.Type
+    kind: method
+    signature: func (*InmemStorage) Type() string
+    file: third_party/openbao/sdk/helper/testcluster/docker/storage.go
+  - name: LogConsumerWriter
+    kind: struct
+    signature: type LogConsumerWriter struct
+    file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
+  - name: LogConsumerWriter.Write
+    kind: method
+    signature: func (*LogConsumerWriter) Write(p []byte) (n int, err error)
+    file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
+  - name: NewCertificateGetter
+    kind: function
+    signature: func NewCertificateGetter(certFile, keyFile, passphrase string) *CertificateGetter
+    file: third_party/openbao/sdk/helper/testcluster/docker/cert.go
+  - name: NewDockerCluster
+    kind: function
+    signature: func NewDockerCluster(ctx context.Context, opts *DockerClusterOptions)
+      (*DockerCluster, error)
+    file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
+  - name: NewPostgreSQLClusterStorage
+    kind: function
+    signature: func NewPostgreSQLClusterStorage(ctx context.Context, logger log.Logger,
+      name string, network string, mapper PostgreSQLClusterMapper) (*PostgreSQLClusterStorage,
+      error)
+    file: third_party/openbao/sdk/helper/testcluster/docker/storage.go
+  - name: NewPostgreSQLStorage
+    kind: function
+    signature: func NewPostgreSQLStorage(t *testing.T, network string) *PostgreSQLStorage
+    file: third_party/openbao/sdk/helper/testcluster/docker/storage.go
+  - name: NewStaticPostgreSQLStorage
+    kind: function
+    signature: func NewStaticPostgreSQLStorage(extConnUrl string, intConnUrl string)
+      *PostgreSQLStorage
+    file: third_party/openbao/sdk/helper/testcluster/docker/storage.go
+  - name: NewTestDockerCluster
+    kind: function
+    signature: func NewTestDockerCluster(t *testing.T, opts *DockerClusterOptions)
+      *DockerCluster
+    file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
+  - name: PostgreSQLClusterMapper
+    kind: type
+    signature: type PostgreSQLClusterMapper func(...)
+    file: third_party/openbao/sdk/helper/testcluster/docker/storage.go
+  - name: PostgreSQLClusterStorage
+    kind: struct
+    signature: type PostgreSQLClusterStorage struct
+    file: third_party/openbao/sdk/helper/testcluster/docker/storage.go
+  - name: PostgreSQLClusterStorage.Cleanup
+    kind: method
+    signature: func (*PostgreSQLClusterStorage) Cleanup() error
+    file: third_party/openbao/sdk/helper/testcluster/docker/storage.go
+  - name: PostgreSQLClusterStorage.ForNode
+    kind: method
+    signature: func (*PostgreSQLClusterStorage) ForNode(ctx context.Context, index
+      int) (testcluster.NodeStorage, error)
+    file: third_party/openbao/sdk/helper/testcluster/docker/storage.go
+  - name: PostgreSQLClusterStorage.Type
+    kind: method
+    signature: func (*PostgreSQLClusterStorage) Type() string
+    file: third_party/openbao/sdk/helper/testcluster/docker/storage.go
+  - name: PostgreSQLStorage
+    kind: struct
+    signature: type PostgreSQLStorage struct
+    file: third_party/openbao/sdk/helper/testcluster/docker/storage.go
+  - name: PostgreSQLStorage.Cleanup
+    kind: method
+    signature: func (*PostgreSQLStorage) Cleanup() error
+    file: third_party/openbao/sdk/helper/testcluster/docker/storage.go
+  - name: PostgreSQLStorage.Client
+    kind: method
+    signature: func (*PostgreSQLStorage) Client(ctx context.Context) (*sql.DB, error)
+    file: third_party/openbao/sdk/helper/testcluster/docker/storage.go
+  - name: PostgreSQLStorage.Opts
+    kind: method
+    signature: func (*PostgreSQLStorage) Opts() map[string]any
+    file: third_party/openbao/sdk/helper/testcluster/docker/storage.go
+  - name: PostgreSQLStorage.Start
+    kind: method
+    signature: func (*PostgreSQLStorage) Start(context.Context, *testcluster.ClusterOptions)
+      error
+    file: third_party/openbao/sdk/helper/testcluster/docker/storage.go
+  - name: PostgreSQLStorage.Type
+    kind: method
+    signature: func (*PostgreSQLStorage) Type() string
+    file: third_party/openbao/sdk/helper/testcluster/docker/storage.go
+  - name: ReloadFunc
+    kind: type
+    signature: type ReloadFunc func() error
+    file: third_party/openbao/sdk/helper/testcluster/docker/cert.go
 codeRefIndex:
 - file:third_party/openbao/sdk/helper/testcluster/docker/cert.go cert.go@third_party/openbao/sdk/helper/testcluster/docker/cert.go
 - file:third_party/openbao/sdk/helper/testcluster/docker/environment.go environment.go@third_party/openbao/sdk/helper/testcluster/docker/environment.go
@@ -57,404 +458,3 @@ codeRefIndex:
 - struct:d0d99e0c8dcc1b86bc5fb5d708035c49 PostgreSQLClusterStorage@third_party/openbao/sdk/helper/testcluster/docker/storage.go:141
 - type_alias:73092d361099d2aa5e324e7f8f9ebffb ReloadFunc@third_party/openbao/sdk/helper/testcluster/docker/cert.go:17
 - type_alias:b6227006632befb5cdc0da8fe20f1d4e PostgreSQLClusterMapper@third_party/openbao/sdk/helper/testcluster/docker/storage.go:139
-kind: SystemContext
-metadata:
-  name: third-party-openbao-sdk-helper-testcluster-docker
-  namespace: default
-spec:
-  intent: The context exists so that tests can stand up disposable, multi-node OpenBao
-    clusters in Docker and drive failure scenarios against them without hand-managing
-    containers. It defines the cluster and node lifecycle (create, start, stop, pause,
-    upgrade, cleanup), the fault-injection surface (partition, unpartition, network
-    delay), the secret accessors tests need to unseal or authenticate (barrier keys,
-    recovery keys, root token), the transport accessors (TLS config, API client, CA
-    PEM file), and the storage abstraction that lets a cluster run on in-memory or
-    PostgreSQL-backed storage, including a mapper that assigns one database per node
-    index.
-  interfaces:
-  - file: third_party/openbao/sdk/helper/testcluster/docker/cert.go
-    kind: struct
-    name: CertificateGetter
-    signature: type CertificateGetter struct
-  - file: third_party/openbao/sdk/helper/testcluster/docker/cert.go
-    kind: method
-    name: CertificateGetter.GetCertificate
-    signature: func (*CertificateGetter) GetCertificate(clientHello *tls.ClientHelloInfo)
-      (*tls.Certificate, error)
-  - file: third_party/openbao/sdk/helper/testcluster/docker/cert.go
-    kind: method
-    name: CertificateGetter.Reload
-    signature: func (*CertificateGetter) Reload() error
-  - file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
-    kind: function
-    name: DefaultOptions
-    signature: func DefaultOptions(t *testing.T) *DockerClusterOptions
-  - file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
-    kind: struct
-    name: DockerCluster
-    signature: type DockerCluster struct
-  - file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
-    kind: method
-    name: DockerCluster.AddNode
-    signature: func (*DockerCluster) AddNode(ctx context.Context, opts *DockerClusterOptions)
-      error
-  - file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
-    kind: method
-    name: DockerCluster.Cleanup
-    signature: func (*DockerCluster) Cleanup()
-  - file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
-    kind: method
-    name: DockerCluster.ClusterID
-    signature: func (*DockerCluster) ClusterID() string
-  - file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
-    kind: method
-    name: DockerCluster.GetBarrierKeys
-    signature: func (*DockerCluster) GetBarrierKeys() [][]byte
-  - file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
-    kind: method
-    name: DockerCluster.GetBarrierOrRecoveryKeys
-    signature: func (*DockerCluster) GetBarrierOrRecoveryKeys() [][]byte
-  - file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
-    kind: method
-    name: DockerCluster.GetCACertPEMFile
-    signature: func (*DockerCluster) GetCACertPEMFile() string
-  - file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
-    kind: method
-    name: DockerCluster.GetRecoveryKeys
-    signature: func (*DockerCluster) GetRecoveryKeys() [][]byte
-  - file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
-    kind: method
-    name: DockerCluster.GetRootToken
-    signature: func (*DockerCluster) GetRootToken() string
-  - file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
-    kind: method
-    name: DockerCluster.NamedLogger
-    signature: func (*DockerCluster) NamedLogger(s string) log.Logger
-  - file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
-    kind: method
-    name: DockerCluster.Nodes
-    signature: func (*DockerCluster) Nodes() []testcluster.VaultClusterNode
-  - file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
-    kind: method
-    name: DockerCluster.SetBarrierKeys
-    signature: func (*DockerCluster) SetBarrierKeys(keys [][]byte)
-  - file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
-    kind: method
-    name: DockerCluster.SetRecoveryKeys
-    signature: func (*DockerCluster) SetRecoveryKeys(keys [][]byte)
-  - file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
-    kind: method
-    name: DockerCluster.SetRootToken
-    signature: func (*DockerCluster) SetRootToken(s string)
-  - file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
-    kind: struct
-    name: DockerClusterNode
-    signature: type DockerClusterNode struct
-  - file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
-    kind: method
-    name: DockerClusterNode.APIClient
-    signature: func (*DockerClusterNode) APIClient() *api.Client
-  - file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
-    kind: method
-    name: DockerClusterNode.AddNetworkDelay
-    signature: func (*DockerClusterNode) AddNetworkDelay(ctx context.Context, delay
-      time.Duration, targetIP string) error
-  - file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
-    kind: method
-    name: DockerClusterNode.Cleanup
-    signature: func (*DockerClusterNode) Cleanup()
-  - file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
-    kind: method
-    name: DockerClusterNode.Name
-    signature: func (*DockerClusterNode) Name() string
-  - file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
-    kind: method
-    name: DockerClusterNode.PartitionFromCluster
-    signature: func (*DockerClusterNode) PartitionFromCluster(ctx context.Context)
-      error
-  - file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
-    kind: method
-    name: DockerClusterNode.Pause
-    signature: func (*DockerClusterNode) Pause(ctx context.Context) error
-  - file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
-    kind: method
-    name: DockerClusterNode.Start
-    signature: func (*DockerClusterNode) Start(ctx context.Context, opts *DockerClusterOptions)
-      error
-  - file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
-    kind: method
-    name: DockerClusterNode.Stop
-    signature: func (*DockerClusterNode) Stop()
-  - file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
-    kind: method
-    name: DockerClusterNode.TLSConfig
-    signature: func (*DockerClusterNode) TLSConfig() *tls.Config
-  - file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
-    kind: method
-    name: DockerClusterNode.UnpartitionFromCluster
-    signature: func (*DockerClusterNode) UnpartitionFromCluster(ctx context.Context)
-      error
-  - file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
-    kind: method
-    name: DockerClusterNode.Upgrade
-    signature: func (*DockerClusterNode) Upgrade(ctx context.Context, opts *DockerClusterOptions)
-      error
-  - file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
-    kind: struct
-    name: DockerClusterOptions
-    signature: type DockerClusterOptions struct
-  - file: third_party/openbao/sdk/helper/testcluster/docker/storage.go
-    kind: struct
-    name: InmemStorage
-    signature: type InmemStorage struct
-  - file: third_party/openbao/sdk/helper/testcluster/docker/storage.go
-    kind: method
-    name: InmemStorage.Cleanup
-    signature: func (*InmemStorage) Cleanup() error
-  - file: third_party/openbao/sdk/helper/testcluster/docker/storage.go
-    kind: method
-    name: InmemStorage.Opts
-    signature: func (*InmemStorage) Opts() map[string]any
-  - file: third_party/openbao/sdk/helper/testcluster/docker/storage.go
-    kind: method
-    name: InmemStorage.Start
-    signature: func (*InmemStorage) Start(context.Context, *testcluster.ClusterOptions)
-      error
-  - file: third_party/openbao/sdk/helper/testcluster/docker/storage.go
-    kind: method
-    name: InmemStorage.Type
-    signature: func (*InmemStorage) Type() string
-  - file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
-    kind: struct
-    name: LogConsumerWriter
-    signature: type LogConsumerWriter struct
-  - file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
-    kind: method
-    name: LogConsumerWriter.Write
-    signature: func (*LogConsumerWriter) Write(p []byte) (n int, err error)
-  - file: third_party/openbao/sdk/helper/testcluster/docker/cert.go
-    kind: function
-    name: NewCertificateGetter
-    signature: func NewCertificateGetter(certFile, keyFile, passphrase string) *CertificateGetter
-  - file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
-    kind: function
-    name: NewDockerCluster
-    signature: func NewDockerCluster(ctx context.Context, opts *DockerClusterOptions)
-      (*DockerCluster, error)
-  - file: third_party/openbao/sdk/helper/testcluster/docker/storage.go
-    kind: function
-    name: NewPostgreSQLClusterStorage
-    signature: func NewPostgreSQLClusterStorage(ctx context.Context, logger log.Logger,
-      name string, network string, mapper PostgreSQLClusterMapper) (*PostgreSQLClusterStorage,
-      error)
-  - file: third_party/openbao/sdk/helper/testcluster/docker/storage.go
-    kind: function
-    name: NewPostgreSQLStorage
-    signature: func NewPostgreSQLStorage(t *testing.T, network string) *PostgreSQLStorage
-  - file: third_party/openbao/sdk/helper/testcluster/docker/storage.go
-    kind: function
-    name: NewStaticPostgreSQLStorage
-    signature: func NewStaticPostgreSQLStorage(extConnUrl string, intConnUrl string)
-      *PostgreSQLStorage
-  - file: third_party/openbao/sdk/helper/testcluster/docker/environment.go
-    kind: function
-    name: NewTestDockerCluster
-    signature: func NewTestDockerCluster(t *testing.T, opts *DockerClusterOptions)
-      *DockerCluster
-  - file: third_party/openbao/sdk/helper/testcluster/docker/storage.go
-    kind: type
-    name: PostgreSQLClusterMapper
-    signature: type PostgreSQLClusterMapper func(...)
-  - file: third_party/openbao/sdk/helper/testcluster/docker/storage.go
-    kind: struct
-    name: PostgreSQLClusterStorage
-    signature: type PostgreSQLClusterStorage struct
-  - file: third_party/openbao/sdk/helper/testcluster/docker/storage.go
-    kind: method
-    name: PostgreSQLClusterStorage.Cleanup
-    signature: func (*PostgreSQLClusterStorage) Cleanup() error
-  - file: third_party/openbao/sdk/helper/testcluster/docker/storage.go
-    kind: method
-    name: PostgreSQLClusterStorage.ForNode
-    signature: func (*PostgreSQLClusterStorage) ForNode(ctx context.Context, index
-      int) (testcluster.NodeStorage, error)
-  - file: third_party/openbao/sdk/helper/testcluster/docker/storage.go
-    kind: method
-    name: PostgreSQLClusterStorage.Type
-    signature: func (*PostgreSQLClusterStorage) Type() string
-  - file: third_party/openbao/sdk/helper/testcluster/docker/storage.go
-    kind: struct
-    name: PostgreSQLStorage
-    signature: type PostgreSQLStorage struct
-  - file: third_party/openbao/sdk/helper/testcluster/docker/storage.go
-    kind: method
-    name: PostgreSQLStorage.Cleanup
-    signature: func (*PostgreSQLStorage) Cleanup() error
-  - file: third_party/openbao/sdk/helper/testcluster/docker/storage.go
-    kind: method
-    name: PostgreSQLStorage.Client
-    signature: func (*PostgreSQLStorage) Client(ctx context.Context) (*sql.DB, error)
-  - file: third_party/openbao/sdk/helper/testcluster/docker/storage.go
-    kind: method
-    name: PostgreSQLStorage.Opts
-    signature: func (*PostgreSQLStorage) Opts() map[string]any
-  - file: third_party/openbao/sdk/helper/testcluster/docker/storage.go
-    kind: method
-    name: PostgreSQLStorage.Start
-    signature: func (*PostgreSQLStorage) Start(context.Context, *testcluster.ClusterOptions)
-      error
-  - file: third_party/openbao/sdk/helper/testcluster/docker/storage.go
-    kind: method
-    name: PostgreSQLStorage.Type
-    signature: func (*PostgreSQLStorage) Type() string
-  - file: third_party/openbao/sdk/helper/testcluster/docker/cert.go
-    kind: type
-    name: ReloadFunc
-    signature: type ReloadFunc func() error
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - function:f3307f66cd7aae87db19bbba3c2686f8
-    - method:3877831773497cccf32c4b21103359ac
-    - method:dae24a0a22bb7350f382d21bba1c0f7c
-    - type_alias:73092d361099d2aa5e324e7f8f9ebffb
-    id: r.certificate-getter
-    level: MUST
-    text: NewCertificateGetter records the certificate file, key file and optional
-      passphrase, Reload re-reads the pair from disk and returns an error when loading
-      fails, and GetCertificate satisfies tls.Config.GetCertificate by returning the
-      last loaded certificate.
-  - codeRefs:
-    - function:28c1ae209259dc140e8b6f1ab62653bf
-    - function:94d4f70ff9e68bab894962876d43901c
-    - struct:3ce35b2132166901b93ee585531c9af3
-    id: r.cluster-construction
-    level: MUST
-    text: NewDockerCluster builds a cluster of nodes from the supplied DockerClusterOptions
-      and returns an error when setup fails, while NewTestDockerCluster wraps it for
-      tests and ties cluster teardown to the testing.T lifetime.
-  - codeRefs:
-    - method:2b5ec2ba8e60f0f9d882bccbb730d31a
-    - method:339f59f0ac055a6c5d293e1c7e669b40
-    id: r.cluster-membership
-    level: MUST
-    text: AddNode appends a further node to an existing cluster using new options,
-      and Nodes returns the current node list as testcluster.VaultClusterNode values.
-  - codeRefs:
-    - function:936d9e6c5a7eacb61e5335e8b8da2678
-    id: r.default-options
-    level: MUST
-    text: DefaultOptions derives a usable set of cluster options from the testing.T,
-      so a caller that supplies no options still gets a runnable cluster configuration.
-  - codeRefs:
-    - method:54fe38cf73d487daa79352d8cd5d6789
-    - method:96eadda598d362f8fec3edf525f48666
-    - method:b0cd317f5590439e93c034608699390a
-    id: r.fault-injection
-    level: MUST
-    text: PartitionFromCluster and UnpartitionFromCluster cut and restore a node's
-      network reachability to the rest of the cluster, and AddNetworkDelay injects
-      latency toward a target IP for a given duration.
-  - codeRefs:
-    - method:3bcae64b76e30bef4a9b3e2b040e6612
-    - method:449be918154ffed2cbceb9310a683bf2
-    - method:7d9ece15fddd462a1f8b56aa9222062a
-    - method:a0a6081590128bee572efd82778bebb0
-    - method:bd37b86a1aa40dd0d107b60b45a67019
-    id: r.key-access
-    level: MUST
-    text: The cluster exposes and accepts barrier and recovery keys, with GetBarrierOrRecoveryKeys
-      returning whichever set the cluster mode actually produced so unseal logic does
-      not need to know the seal type.
-  - codeRefs:
-    - method:ca575a7aa36d4939219c37e39e2b688f
-    - struct:663352853a6ce8ed754e8b2484a478d6
-    id: r.log-consumer
-    level: MUST
-    text: LogConsumerWriter.Write forwards container log bytes to the wrapped consumer
-      and reports the byte count written.
-  - codeRefs:
-    - method:87fedcf4f99fb571793a72aaa176ebf3
-    - method:a6248f205895acafb18c2558cdd62da7
-    - method:cef17f21ac315d39b6b0ef6943d33a52
-    - struct:6d9ca3b3379c02cac2cd3bad9578b11a
-    - struct:b0a726b36d000ad259091756811da615
-    id: r.node-clients
-    level: MUST
-    text: A node hands out a TLS config and an authenticated API client so tests can
-      address the node directly, and NamedLogger returns a logger scoped to a sub-name
-      for both cluster and nodes.
-  - codeRefs:
-    - method:46631632e37e56991909ed6b5810cf45
-    - method:5e5e96cbc57d1caae6550cda2022e7fa
-    - method:cef9e3e4b1e71d4e9f3499c8d52a42ff
-    - method:f37137e578c370d02454c8b9da08159d
-    - method:ff0a1ec89e44b2f2fc6e48f3e0611cc8
-    id: r.node-lifecycle
-    level: MUST
-    text: DockerClusterNode.Start launches the node container from the given options,
-      Stop halts it, Pause suspends it, Cleanup releases its container resources,
-      and Name reports the node name used for certificates and container naming.
-  - codeRefs:
-    - method:1a1831cd3a4b59fdd90d3c0f129e78d7
-    id: r.node-upgrade
-    level: MUST
-    text: Upgrade replaces the running node with one created from the supplied options,
-      so a test can move a cluster member from one OpenBao image to another.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/testcluster/docker/cert.go
-    - file:third_party/openbao/sdk/helper/testcluster/docker/environment.go
-    - file:third_party/openbao/sdk/helper/testcluster/docker/storage.go
-    id: r.package-scope
-    level: MUST
-    text: The package is vendored third-party OpenBao SDK test helper code, split
-      across cert.go for certificate loading, environment.go for the Docker cluster
-      and node lifecycle, and storage.go for pluggable storage backends.
-  - codeRefs:
-    - function:2e5fea03573e7b814aa230b7a707ee25
-    - method:1fe4fb82c37fc5ed16a36558781a4491
-    - method:cb9382be91b28bb321a2c5e010f85f61
-    - method:d1d438d1268b30e8262e9345ea401c8d
-    - struct:d0d99e0c8dcc1b86bc5fb5d708035c49
-    - type_alias:b6227006632befb5cdc0da8fe20f1d4e
-    id: r.postgres-cluster-storage
-    level: MUST
-    text: NewPostgreSQLClusterStorage creates one database per cluster through a PostgreSQLClusterMapper,
-      ForNode returns the testcluster.NodeStorage for a given node index, and Cleanup
-      and Type report teardown and the storage type name.
-  - codeRefs:
-    - function:b11ad9ba34e8f7186f73f594b0d05ffe
-    - function:fc4dac195ec0fd4f6df4adea8a5454f2
-    - method:4cb674d5a0367efa3aefd711329c5bf5
-    - struct:c2721b369f8c3ec8219c7d4660e4961c
-    id: r.postgres-storage
-    level: MUST
-    text: NewPostgreSQLStorage starts a PostgreSQL container on the given docker network
-      for a test, NewStaticPostgreSQLStorage instead adopts existing external and
-      internal connection URLs, and Client opens a *sql.DB against the storage instance.
-  - codeRefs:
-    - method:488ae022b3f7534270f33caa4b925ecd
-    - method:6d5c753355e962689831604bc6e2f5c1
-    - method:7d90c111a015e81f3dac7373d8a40d84
-    - method:8c0c30f4ee5fbe13543d54975a5489e2
-    - method:9098203feb9525cbc1d047183e46da47
-    - method:e0ed9a963004d8fc5cdfa80982ee6e27
-    - method:e26511df796858f368dd2d260e747082
-    - method:e949976efc24365436b9285a15bb10c6
-    id: r.storage-backends
-    level: MUST
-    text: 'InmemStorage and PostgreSQLStorage both implement the node storage contract:
-      Start prepares the backend for a cluster, Cleanup releases it, Opts returns
-      the OpenBao storage stanza options, and Type returns the storage type name.'
-  - codeRefs:
-    - method:19d6f580b2568f327888c4851c392479
-    - method:57ecdd62b8c053bf0c479a4d226f2a3e
-    - method:6a8f0aabda16a476d8da3fd2e3917ea2
-    - method:bfb62b87fd1f0f8ef909dd47c48e250b
-    - method:d6b0a269ec8514181ee46dabbcbd55aa
-    id: r.token-and-endpoints
-    level: MUST
-    text: The cluster holds a root token through GetRootToken and SetRootToken, reports
-      its identity through ClusterID, returns its CA certificate PEM file path through
-      GetCACertPEMFile, and Cleanup tears down all nodes.
-  upstream: self

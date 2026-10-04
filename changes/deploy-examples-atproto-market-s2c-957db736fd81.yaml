@@ -4,118 +4,44 @@ metadata:
   name: deploy-examples-atproto-market-s2c-957db736fd81
   namespace: default
 spec:
-  delta:
-    requirements:
-    - fields:
-      - text
-      from:
-        codeRefs:
-        - file:deploy/examples/atproto/market/apply.sh
-        id: r.live-acceptance-script
-        level: MUST
-        text: 'deploy/examples/atproto/market/accept.sh is the live acceptance of
-          this example: it brings the whole market up in a throwaway state directory
-          and exits non-zero unless every workload is up and reachable. It is bash
-          with set -euo pipefail; ACCEPT_ROOT (default a fresh mktemp -d) is the one
-          directory it owns, and an EXIT trap stops everything it started and removes
-          that directory. It never stops or touches a kcp, kine or OpenBao it did
-          not start. It asks the kernel for three free 127.0.0.1 ports, for kcp, kine
-          and OpenBao, instead of pinning any, so it cannot collide with another instance
-          on the machine. It starts kcp with ROOT=$ACCEPT_ROOT/kcp and KCP_SECURE_PORT
-          and KINE_ENDPOINT set to two of those ports through deploy/start-kcp.sh;
-          installs the provider with KUBECONFIG_PATH=$ACCEPT_ROOT/kcp/admin.kubeconfig
-          through deploy/install-provider.sh; builds ./cmd/deno-kcp-provider into
-          $ACCEPT_ROOT; starts OpenBao with OPENBAO_DIR=$ACCEPT_ROOT/openbao and OPENBAO_LISTEN
-          on the third port through deploy/start-openbao.sh; and runs the provider
-          with --kubeconfig, --openbao-addr http://<openbao port>, --openbao-token
-          root and RUNS_DIR=$ACCEPT_ROOT/runs. It then runs deploy/examples/atproto/market/apply.sh
-          with ORG_ROOT the repository parent, KUBECONFIG the kcp admin kubeconfig,
-          OPENBAO_LISTEN the same address, START_OPENBAO=0, a bounded WAIT_SECONDS,
-          and KEY_FILE, BOB_KEY_FILE and BIDDER_KEY_FILE under $ACCEPT_ROOT. When
-          apply.sh returns, whether it succeeded or not, accept.sh reads every DenoPod
-          from kcp with kubectl and prints one line per check, each with its result
-          and the decisive evidence: apply.sh exited 0; DenoPod plc in root:global,
-          relay in root:relay, pds in root:alice, pds in root:bob and bidder in root:bob
-          each reached phase Running and report ready true; DenoPod verifier in root:alice
-          reached the terminal phase Succeeded; bob pds answers on its own name, which
-          the provider proves with its readiness probe through the shim (kcpdns pds.default.bob.svc.kcp.local
-          /xrpc/_health) and the host proves by fetching the same path from outside
-          with curl https://127.0.0.1:2585/xrpc/_health; the bidder answers on bidder.default.bob.svc.kcp.local
-          /oauth-client-metadata.json and on https://127.0.0.1:2586/oauth-client-metadata.json.
-          Both host checks use https, because every service pod sets SERVICE_TLS true
-          and the provider issues it a leaf, so the listener the host reaches is the
-          TLS one; an http:// fetch of a TLS listener is not a check of anything and
-          must not be written. http_code reports the status curl printed, and prints
-          000 exactly once when the fetch failed rather than appending a second fallback.
-          And the five long-running pods are still Running with ready true when they
-          are read a second time at least ten seconds later, so a pod that dies after
-          startup fails the run. It prints a final table naming every check and its
-          result, prints the tail of the provider log and the status of the failing
-          pod when a check fails, and exits 0 only when every check passed.'
-      id: r.live-acceptance-script
-      op: changed
-      to:
-        codeRefs:
-        - file:deploy/examples/atproto/market/apply.sh
-        id: r.live-acceptance-script
-        level: MUST
-        text: 'deploy/examples/atproto/market/accept.sh is the live acceptance of
-          this example: it brings the whole market up in a throwaway state directory
-          and exits non-zero unless every workload is up and reachable. It is bash
-          with set -euo pipefail; ACCEPT_ROOT (default a fresh mktemp -d) is the one
-          directory it owns, and an EXIT trap stops everything it started and removes
-          that directory. It never stops or touches a kcp, kine or OpenBao it did
-          not start. It asks the kernel for three free 127.0.0.1 ports, for kcp, kine
-          and OpenBao, instead of pinning any, so it cannot collide with another instance
-          on the machine. It starts kcp with ROOT=$ACCEPT_ROOT/kcp and KCP_SECURE_PORT
-          and KINE_ENDPOINT set to two of those ports through deploy/start-kcp.sh;
-          installs the provider with KUBECONFIG_PATH=$ACCEPT_ROOT/kcp/admin.kubeconfig
-          through deploy/install-provider.sh; builds ./cmd/deno-kcp-provider into
-          $ACCEPT_ROOT; starts OpenBao with OPENBAO_DIR=$ACCEPT_ROOT/openbao and OPENBAO_LISTEN
-          on the third port through deploy/start-openbao.sh; and runs the provider
-          with --kubeconfig, --openbao-addr http://<openbao port>, --openbao-token
-          root and RUNS_DIR=$ACCEPT_ROOT/runs. It then runs deploy/examples/atproto/market/apply.sh
-          with ORG_ROOT the repository parent, KUBECONFIG the kcp admin kubeconfig,
-          OPENBAO_LISTEN the same address, START_OPENBAO=0, a bounded WAIT_SECONDS,
-          and KEY_FILE, BOB_KEY_FILE and BIDDER_KEY_FILE under $ACCEPT_ROOT. When
-          apply.sh returns, whether it succeeded or not, accept.sh reads every DenoPod
-          from kcp with kubectl and prints one line per check, each with its result
-          and the decisive evidence: apply.sh exited 0; DenoPod plc in root:global,
-          relay in root:relay, pds in root:alice, pds in root:bob and bidder in root:bob
-          each reached phase Running and report ready true; DenoPod verifier in root:alice
-          reached the terminal phase Succeeded; bob pds answers on its own name, which
-          the provider proves with its readiness probe through the shim (kcpdns pds.default.bob.svc.kcp.local
-          /xrpc/_health) and the host proves by fetching the same path from outside
-          with curl https://127.0.0.1:2585/xrpc/_health; the bidder answers on bidder.default.bob.svc.kcp.local
-          /oauth-client-metadata.json and on http://127.0.0.1:2586/oauth-client-metadata.json.
-          The host check names the scheme the listener actually speaks, and the two
-          are not the same. The PDS in root:bob serves TLS -- its supervisor script
-          writes the injected leaf and appends --tls-cert-file and --tls-key-file
-          -- so its host check is https, because an http:// fetch of a TLS listener
-          is not a check of anything and must not be written. The bidder serves plain
-          HTTP on its port: SERVICE_TLS is true for it too, but its supervisor script
-          must not append the TLS flags, because hono-bidder declares no such options
-          and its parser rejects unknown ones, so the bidder consumes only the trust
-          bundle and its listener is not the TLS one; its host check is therefore
-          http://, and an https:// fetch of a plain listener fails the same way round.
-          The readiness probe of the provider is the one that does not care, because
-          it tries https and then http. http_code reports the status curl printed,
-          and prints 000 exactly once when the fetch failed rather than appending
-          a second fallback. And the five long-running pods are still Running with
-          ready true when they are read a second time at least ten seconds later,
-          so a pod that dies after startup fails the run. It prints a final table
-          naming every check and its result, prints the tail of the provider log and
-          the status of the failing pod when a check fails, and exits 0 only when
-          every check passed.'
+  systemContext: deploy-examples-atproto-market
   direction: SpecToCode
   fromSpecHash: 847249505041403014ba8894aaac79deaf0fef652f87dfb8dd8642389fcb6403
-  systemContext: deploy-examples-atproto-market
   toSpecHash: 957db736fd813b5203a0f7e106bec00d9911566c77c41fed0b8c84626368c7d8
+  delta:
+    counts:
+      changed: 1
+    requirements:
+    - ~r.live-acceptance-script
 status:
+  phase: Succeeded
+  branch: spec/deploy-examples-atproto-market/957db736
+  commit: e33a5585dc1ac9d3bf63bc1ebdcf5dbb45369989
+  filesTouched:
+  - deploy/examples/atproto/market/accept.sh
+  agentLog: "accept.sh bidder host check changed `https://` → `http://127.0.0.1:2586`,
+    comment now states why schemes differ (PDS appends TLS leaf flags, bidder declares
+    none, parser rejects unknown flags). `70-bidder.yaml` already matched spec — no
+    TLS leaf written, no TLS flags appended, `SERVICE_TLS: \"true\"` kept.\n\n`bash
+    -n` OK. `go test ./...` exit zero.\n\nFiles: `deploy/examples/atproto/market/accept.sh`.\n\n⚠
+    claude.ai connectors are disabled because ANTHROPIC_API_KEY or another auth source
+    is set and takes precedence over your claude.ai login · Unset it to load your
+    organization's connectors\n[claude-code:unrecognized_model] {\"model\":\"deepseek-v4-flash\",\"query_source\":\"sdk\"}\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/api/v1alpha1\t(cached)\n?   \tgithub.com/johnandersen777/deno-kcp/cmd/deno-kcp-provider\t[no
+    test files]\nok  \tgithub.com/johnandersen777/deno-kcp/internal/denojob\t(cached)\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/internal/denopod\t(cached)\nok  \tgithub.com/johnandersen777/deno-kcp/internal/denorun\t(cached)\n?
+    \  \tgithub.com/johnandersen777/deno-kcp/internal/livegate\t[no test files]\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/internal/policyengine\t(cached)\nok  \tgithub.com/johnandersen777/deno-kcp/internal/policyworkflowpod\t(cached)\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/internal/policyworkflowrun\t(cached)\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/internal/provider\t0.044s\nok  \tgithub.com/johnandersen777/deno-kcp/internal/trigger\t(cached)\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/test/integration\t(cached)"
+  message: 'realized deploy-examples-atproto-market on spec/deploy-examples-atproto-market/957db736:
+    1 file(s) touched, verify exit 0'
   acceptance:
-  - durationSeconds: 411.547115946
+  - name: market-live-acceptance
     exitCode: 1
-    name: market-live-acceptance
+    durationSeconds: 411.547115946
+    passed: false
     outputTail: |-
       ...rial=24:C9:13:DA:85:27:EE:F4:EB:17:07:AE:FF:BD:1A:34:FC:B6:48:D6
 
@@ -161,45 +87,16 @@ status:
         {"completionTime":"2026-10-04T22:34:27Z","conditions":[{"lastTransitionTime":"2026-10-04T22:34:27Z","message":"the pod reached a terminal phase","observedGeneration":1,"reason":"Terminal","status":"False","type":"Ready"},{"lastTransitionTime":"2026-10-04T22:32:55Z","message":"the deno process failed and the restart policy is Never","observedGeneration":1,"reason":"ProcessFailed","status":"False","type":"Complete"}],"exitCode":1,"message":"the deno process exited with code 1","outputs":{"accessJwt":"eyJ0eXAiOiJhdCtqd3QiLCJhbGciOiJFUzI1NksiLCJraWQiOiJkaWQ6a2V5OnpRM3NoV2JWcHZnelphVUpGR2VOZHZZYWJnZTFvOThXWUJ2ZU1OTXRrQzd5TkFqWVAjYXRwcm90byJ9.eyJpc3MiOiJkaWQ6a2V5OnpRM3NoV2JWcHZnelphVUpGR2VOZHZZYWJnZTFvOThXWUJ2ZU1OTXRrQzd5TkFqWVAiLCJzdWIiOiJkaWQ6cGxjOmQ0enI3enVpd3Vvamx6c2ptNWloaHZrdyIsImhhbmRsZSI6ImFsaWNlLW11dWVjcmduIiwiYXVkIjoiZGlkOmtleTp6UTNzaFdiVnB2Z3paYVVKRkdlTmR2WWFiZ2Uxbzk4V1lCdmVNTk10a0M3eU5BallQIiwiaWF0IjoxNzkxMTUzMTc1LCJleHAiOjE3OTExNTQwNzUsImp0aSI6InVPM0RTUlQtUUFkZENmNlR4dzVfZ0EifQ.DW5Rbu8vDHd9UmYofYqcXXj0H_kHQtmf58UHRtiKMJoaEvP1-UflYJGNFyJdlk4A6RRbeWoHVWeDNYboZzt3GQ","createAccountStatus":"200","did":"did:plc:d4zr7zuiwuojlzsjm5ihhvkw","firstWriteStatus":"200","gotAccessJwt":"yes","handle":"alice-muuecrgn","plcAlsoKnownAs":"[\"at://alice-muuecrgn\"]","plcService":"[{\"id\":\"#atproto_pds\",\"type\":\"AtprotoPersonalDataServer\",\"serviceEndpoint\":\"https://pds.default.alice.svc.kcp.local\"}]","plcStatus":"200","relayFrames":"3","relaySawCommit":"timeout","secondWriteStatus":"200","verdict":"fail"},"phase":"Failed","ready":false,"restarts":0,"runID":"pod-20261004T223255.538264722-6","startTime":"2026-10-04T22:32:55Z"}
 
       accept: fail
-    passed: false
-  agentLog: "accept.sh bidder host check changed `https://` → `http://127.0.0.1:2586`,
-    comment now states why schemes differ (PDS appends TLS leaf flags, bidder declares
-    none, parser rejects unknown flags). `70-bidder.yaml` already matched spec — no
-    TLS leaf written, no TLS flags appended, `SERVICE_TLS: \"true\"` kept.\n\n`bash
-    -n` OK. `go test ./...` exit zero.\n\nFiles: `deploy/examples/atproto/market/accept.sh`.\n\n⚠
-    claude.ai connectors are disabled because ANTHROPIC_API_KEY or another auth source
-    is set and takes precedence over your claude.ai login · Unset it to load your
-    organization's connectors\n[claude-code:unrecognized_model] {\"model\":\"deepseek-v4-flash\",\"query_source\":\"sdk\"}\nok
-    \ \tgithub.com/johnandersen777/deno-kcp/api/v1alpha1\t(cached)\n?   \tgithub.com/johnandersen777/deno-kcp/cmd/deno-kcp-provider\t[no
-    test files]\nok  \tgithub.com/johnandersen777/deno-kcp/internal/denojob\t(cached)\nok
-    \ \tgithub.com/johnandersen777/deno-kcp/internal/denopod\t(cached)\nok  \tgithub.com/johnandersen777/deno-kcp/internal/denorun\t(cached)\n?
-    \  \tgithub.com/johnandersen777/deno-kcp/internal/livegate\t[no test files]\nok
-    \ \tgithub.com/johnandersen777/deno-kcp/internal/policyengine\t(cached)\nok  \tgithub.com/johnandersen777/deno-kcp/internal/policyworkflowpod\t(cached)\nok
-    \ \tgithub.com/johnandersen777/deno-kcp/internal/policyworkflowrun\t(cached)\nok
-    \ \tgithub.com/johnandersen777/deno-kcp/internal/provider\t0.044s\nok  \tgithub.com/johnandersen777/deno-kcp/internal/trigger\t(cached)\nok
-    \ \tgithub.com/johnandersen777/deno-kcp/test/integration\t(cached)"
-  branch: spec/deploy-examples-atproto-market/957db736
-  commit: e33a5585dc1ac9d3bf63bc1ebdcf5dbb45369989
-  filesTouched:
-  - deploy/examples/atproto/market/accept.sh
-  message: 'realized deploy-examples-atproto-market on spec/deploy-examples-atproto-market/957db736:
-    1 file(s) touched, verify exit 0'
-  phase: Succeeded
   progress:
-  - at: "2026-10-04T22:27:31Z"
+    turns: 1
+    tools:
+    - tool: Edit
+      count: 1
+    - tool: Read
+      count: 2
     files:
     - deploy/examples/atproto/market/70-bidder.yaml
-    tool: Read
-  - at: "2026-10-04T22:27:31Z"
-    files:
     - deploy/examples/atproto/market/accept.sh
-    tool: Read
-  - at: "2026-10-04T22:27:34Z"
-    files:
-    - deploy/examples/atproto/market/accept.sh
-    tool: Edit
-  - at: "2026-10-04T22:27:48Z"
-    note: turn
-  - at: "2026-10-04T22:27:48Z"
-    note: turn
-    turn: 1
+    notes: 2
+    first: "2026-10-04T22:27:31Z"
+    last: "2026-10-04T22:27:48Z"

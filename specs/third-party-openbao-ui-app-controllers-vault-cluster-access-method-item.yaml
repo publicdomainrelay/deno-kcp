@@ -1,16 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/ui/app/controllers/vault/cluster/access/method/item/create.js
-  create.js@third_party/openbao/ui/app/controllers/vault/cluster/access/method/item/create.js
-- file:third_party/openbao/ui/app/controllers/vault/cluster/access/method/item/edit.js
-  edit.js@third_party/openbao/ui/app/controllers/vault/cluster/access/method/item/edit.js
-- file:third_party/openbao/ui/app/controllers/vault/cluster/access/method/item/list.js
-  list.js@third_party/openbao/ui/app/controllers/vault/cluster/access/method/item/list.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-app-controllers-vault-cluster-access-method-item
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: The context exists to describe how the OpenBao UI item controllers manage
     route-model lifecycle and list-filter state. create.js exists so a controller
     singleton can unload a route model safely after the create screen is left, avoiding
@@ -18,84 +13,89 @@ spec:
     edit route reuses that exact cleanup contract without duplicating it. list.js
     exists so the item list screen can paginate, filter by name, and support keyboard-style
     first-partial-match selection while delegating data refresh to the list route.
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/method/item/create.js
-    id: r.create-cleanup-clears-controller-model
+  - id: r.create-cleanup-clears-controller-model
     level: MUST
     text: cleanupModel MUST set the controller's model property to null before unloading
       the record, because Ember controllers are singletons and would otherwise keep
       a reference to the disposed model.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/controllers/vault/cluster/access/method/item/create.js
-    id: r.create-cleanup-model-skips-unsafe-models
+  - id: r.create-cleanup-model-skips-unsafe-models
     level: MUST
     text: cleanupModel MUST return without touching the model when the model is absent,
       or when it is saving, destroyed, or destroying, so that an in-flight save or
       an already-torn-down record is never unloaded.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/controllers/vault/cluster/access/method/item/create.js
-    id: r.create-cleanup-model-unloads-record
+  - id: r.create-cleanup-model-unloads-record
     level: MUST
     text: The create controller MUST expose a cleanupModel method that unloads the
       current route model from the Ember Data store via the shared remove-record utility,
       so that leaving the create screen does not leave the record cached.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/controllers/vault/cluster/access/method/item/create.js
-    id: r.create-cleanup-rolls-back-dirty-attributes
+  - id: r.create-cleanup-rolls-back-dirty-attributes
     level: SHOULD
     text: Before unloading, cleanupModel SHOULD call rollbackAttributes when the model
       has dirty attributes and implements that method, to release the pending change
       set and avoid a memory leak.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/controllers/vault/cluster/access/method/item/create.js
-    id: r.create-injects-store-service
+  - id: r.create-injects-store-service
     level: MUST
     text: The create controller MUST inject the Ember Data store service, which is
       the store passed to removeRecord when unloading the model.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/method/item/edit.js
-    id: r.edit-extends-create-controller
+    codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/method/item/create.js
+  - id: r.edit-extends-create-controller
     level: MUST
     text: The edit controller MUST extend the create controller and MUST NOT override
       any of its behavior, so create and edit share one identical model-cleanup contract
       without duplication.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/method/item/list.js
-    id: r.list-actions
+    codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/method/item/edit.js
+  - id: r.list-actions
     level: MUST
     text: The list controller MUST provide the actions setFilter and setFilterFocus
       to write the filter and filterFocused properties, and a refresh action that
       sends reload to bubble the request up to the list route instead of refetching
       locally.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/controllers/vault/cluster/access/method/item/list.js
-    id: r.list-declares-page-query-params
+  - id: r.list-declares-page-query-params
     level: MUST
     text: The list controller MUST declare the query parameters page and pageFilter,
       mapped to the same-named URL query keys, with defaults of page equal to 1 and
       pageFilter equal to null.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/controllers/vault/cluster/access/method/item/list.js
-    id: r.list-filter-matches-key
+  - id: r.list-filter-matches-key
     level: MUST
     text: The list controller MUST expose a filterMatchesKey computed property, dependent
       on filter and on the model array, that is true only when the model is non-empty
       and contains an entry whose id equals the current filter.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/controllers/vault/cluster/access/method/item/list.js
-    id: r.list-first-partial-match
+  - id: r.list-first-partial-match
     level: MUST
     text: The list controller MUST expose a firstPartialMatch computed property that
       returns null when the filter already matches a key or no id starts with the
       escaped filter, and otherwise returns the single matching record, or returns
       an object carrying the model's shared prefix id when several entries share that
       prefix, so the UI can offer the common prefix as the next completion.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/controllers/vault/cluster/access/method/item/list.js
-    id: r.list-is-loading-default
+  - id: r.list-is-loading-default
     level: MAY
     text: The list controller MAY carry an isLoading flag defaulting to false, used
       by the list template to show a loading state while the route reloads.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/method/item/list.js
+codeRefIndex:
+- file:third_party/openbao/ui/app/controllers/vault/cluster/access/method/item/create.js
+  create.js@third_party/openbao/ui/app/controllers/vault/cluster/access/method/item/create.js
+- file:third_party/openbao/ui/app/controllers/vault/cluster/access/method/item/edit.js
+  edit.js@third_party/openbao/ui/app/controllers/vault/cluster/access/method/item/edit.js
+- file:third_party/openbao/ui/app/controllers/vault/cluster/access/method/item/list.js
+  list.js@third_party/openbao/ui/app/controllers/vault/cluster/access/method/item/list.js

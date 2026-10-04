@@ -1,4 +1,96 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-ui-app-routes-vault-cluster-settings
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'This context exists so the cluster settings area of the OpenBao UI has
+    well-defined route entry points: mounting a new secrets engine, configuring an
+    existing aws or ssh engine, and viewing the seal state. The redirecting index
+    route keeps the bare settings URL from rendering an empty page, the mount route
+    clears stale secret-engine records before an engine is mounted, and the configure
+    route gates access so only backend types the UI can actually configure are reachable.'
+  requirements:
+  - id: r.configure-secret-backend-aws-after-model
+    level: MUST
+    text: The configure-secret-backend afterModel hook issues queryRecord for the
+      secret-engine with backend and type taken from the model when the model type
+      is aws, and otherwise returns the model unchanged.
+    codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/settings/configure-secret-backend.js
+  - id: r.configure-secret-backend-find-record
+    level: SHOULD
+    text: After the type check passes, the configure-secret-backend model hook calls
+      findRecord for the backend and returns the queried model whether that call resolves
+      or rejects, so a failed refresh does not block configuration of an already listed
+      engine.
+    codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/settings/configure-secret-backend.js
+  - id: r.configure-secret-backend-refresh-action
+    level: SHOULD
+    text: The configure-secret-backend route exposes a refreshRoute action that calls
+      this.refresh to re-run the route hooks, giving templates a way to reload the
+      backend after a change.
+    codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/settings/configure-secret-backend.js
+  - id: r.configure-secret-backend-reset-controller
+    level: MUST
+    text: The configure-secret-backend resetController hook calls controller.reset
+      only when the route is exiting, so controller state survives model refreshes.
+    codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/settings/configure-secret-backend.js
+  - id: r.configure-secret-backend-setup-controller
+    level: MUST
+    text: The configure-secret-backend setupController hook sets configured to true
+      on the controller when the model carries a publicKey, then defers to the superclass
+      implementation.
+    codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/settings/configure-secret-backend.js
+  - id: r.configure-secret-backend-type-gate
+    level: MUST
+    text: The configure-secret-backend model hook reads the backend path segment from
+      the route params, queries the secret-engine model with that path, and when no
+      record is returned or the record type is outside the CONFIGURABLE_BACKEND_TYPES
+      list of aws and ssh, it throws an AdapterError whose httpStatus is set to 404.
+    codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/settings/configure-secret-backend.js
+  - id: r.mount-secret-backend-model
+    level: MUST
+    text: VaultClusterSettingsMountSecretBackendRoute.model creates a new secret-engine
+      record, sets its config association to a newly created mount-config record,
+      and returns the secret-engine record as the route model.
+    codeRefs:
+    - class:807977493cffaddb7054934fbc73f2f4
+    - file:third_party/openbao/ui/app/routes/vault/cluster/settings/mount-secret-backend.js
+  - id: r.mount-secret-backend-unload
+    level: MUST
+    text: VaultClusterSettingsMountSecretBackendRoute.beforeModel unloads every cached
+      secret-engine record from the store, so a newly mounted engine cannot collide
+      with a stale record of the same name.
+    codeRefs:
+    - class:807977493cffaddb7054934fbc73f2f4
+    - file:third_party/openbao/ui/app/routes/vault/cluster/settings/mount-secret-backend.js
+  - id: r.seal-model
+    level: MUST
+    text: The seal route model hook returns an RSVP hash whose cluster key is the
+      modelFor of vault.cluster and whose seal key is the capabilities record found
+      for the path sys/seal.
+    codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/settings/seal.js
+  - id: r.settings-index-redirect
+    level: MUST
+    text: The settings index route aborts a transition when the transition target
+      name equals its own route name, and replaces the transition with vault.cluster.settings.mount-secret-backend,
+      so the bare settings URL never renders the index template.
+    codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/settings/index.js
+  interfaces:
+  - name: VaultClusterSettingsMountSecretBackendRoute
+    kind: class
+    signature: class VaultClusterSettingsMountSecretBackendRoute extends Route
+    file: third_party/openbao/ui/app/routes/vault/cluster/settings/mount-secret-backend.js
 codeRefIndex:
 - class:807977493cffaddb7054934fbc73f2f4 VaultClusterSettingsMountSecretBackendRoute@third_party/openbao/ui/app/routes/vault/cluster/settings/mount-secret-backend.js:9
 - file:third_party/openbao/ui/app/routes/vault/cluster/settings/configure-secret-backend.js
@@ -7,95 +99,3 @@ codeRefIndex:
 - file:third_party/openbao/ui/app/routes/vault/cluster/settings/mount-secret-backend.js
   mount-secret-backend.js@third_party/openbao/ui/app/routes/vault/cluster/settings/mount-secret-backend.js
 - file:third_party/openbao/ui/app/routes/vault/cluster/settings/seal.js seal.js@third_party/openbao/ui/app/routes/vault/cluster/settings/seal.js
-kind: SystemContext
-metadata:
-  name: third-party-openbao-ui-app-routes-vault-cluster-settings
-  namespace: default
-spec:
-  intent: 'This context exists so the cluster settings area of the OpenBao UI has
-    well-defined route entry points: mounting a new secrets engine, configuring an
-    existing aws or ssh engine, and viewing the seal state. The redirecting index
-    route keeps the bare settings URL from rendering an empty page, the mount route
-    clears stale secret-engine records before an engine is mounted, and the configure
-    route gates access so only backend types the UI can actually configure are reachable.'
-  interfaces:
-  - file: third_party/openbao/ui/app/routes/vault/cluster/settings/mount-secret-backend.js
-    kind: class
-    name: VaultClusterSettingsMountSecretBackendRoute
-    signature: class VaultClusterSettingsMountSecretBackendRoute extends Route
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - file:third_party/openbao/ui/app/routes/vault/cluster/settings/configure-secret-backend.js
-    id: r.configure-secret-backend-aws-after-model
-    level: MUST
-    text: The configure-secret-backend afterModel hook issues queryRecord for the
-      secret-engine with backend and type taken from the model when the model type
-      is aws, and otherwise returns the model unchanged.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/routes/vault/cluster/settings/configure-secret-backend.js
-    id: r.configure-secret-backend-find-record
-    level: SHOULD
-    text: After the type check passes, the configure-secret-backend model hook calls
-      findRecord for the backend and returns the queried model whether that call resolves
-      or rejects, so a failed refresh does not block configuration of an already listed
-      engine.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/routes/vault/cluster/settings/configure-secret-backend.js
-    id: r.configure-secret-backend-refresh-action
-    level: SHOULD
-    text: The configure-secret-backend route exposes a refreshRoute action that calls
-      this.refresh to re-run the route hooks, giving templates a way to reload the
-      backend after a change.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/routes/vault/cluster/settings/configure-secret-backend.js
-    id: r.configure-secret-backend-reset-controller
-    level: MUST
-    text: The configure-secret-backend resetController hook calls controller.reset
-      only when the route is exiting, so controller state survives model refreshes.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/routes/vault/cluster/settings/configure-secret-backend.js
-    id: r.configure-secret-backend-setup-controller
-    level: MUST
-    text: The configure-secret-backend setupController hook sets configured to true
-      on the controller when the model carries a publicKey, then defers to the superclass
-      implementation.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/routes/vault/cluster/settings/configure-secret-backend.js
-    id: r.configure-secret-backend-type-gate
-    level: MUST
-    text: The configure-secret-backend model hook reads the backend path segment from
-      the route params, queries the secret-engine model with that path, and when no
-      record is returned or the record type is outside the CONFIGURABLE_BACKEND_TYPES
-      list of aws and ssh, it throws an AdapterError whose httpStatus is set to 404.
-  - codeRefs:
-    - class:807977493cffaddb7054934fbc73f2f4
-    - file:third_party/openbao/ui/app/routes/vault/cluster/settings/mount-secret-backend.js
-    id: r.mount-secret-backend-model
-    level: MUST
-    text: VaultClusterSettingsMountSecretBackendRoute.model creates a new secret-engine
-      record, sets its config association to a newly created mount-config record,
-      and returns the secret-engine record as the route model.
-  - codeRefs:
-    - class:807977493cffaddb7054934fbc73f2f4
-    - file:third_party/openbao/ui/app/routes/vault/cluster/settings/mount-secret-backend.js
-    id: r.mount-secret-backend-unload
-    level: MUST
-    text: VaultClusterSettingsMountSecretBackendRoute.beforeModel unloads every cached
-      secret-engine record from the store, so a newly mounted engine cannot collide
-      with a stale record of the same name.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/routes/vault/cluster/settings/seal.js
-    id: r.seal-model
-    level: MUST
-    text: The seal route model hook returns an RSVP hash whose cluster key is the
-      modelFor of vault.cluster and whose seal key is the capabilities record found
-      for the path sys/seal.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/routes/vault/cluster/settings/index.js
-    id: r.settings-index-redirect
-    level: MUST
-    text: The settings index route aborts a transition when the transition target
-      name equals its own route name, and replaces the transition with vault.cluster.settings.mount-secret-backend,
-      so the bare settings URL never renders the index template.
-  upstream: self

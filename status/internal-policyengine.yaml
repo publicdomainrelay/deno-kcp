@@ -1,70 +1,70 @@
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 42ce5aae7aa756e0ff42fadfd956e8327dd77b2711487f1e0c24c37c62a6b053
+realizedSpecHash: 5b79d97de81e90b5b3bb0cf0991c95779b782fc8740db874ea5408cd1a62830e
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
+- type: CodeSynced
+  status: "True"
   reason: InterfacesObserved
-  status: "True"
-  type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+  message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+- type: Drifted
   status: "False"
-  type: Drifted
-- message: the spec passes the validator
-  reason: ValidatorPassed
+  reason: FingerprintEqual
+  message: observed facts match the synced fingerprint
+- type: SpecValid
   status: "True"
-  type: SpecValid
+  reason: ValidatorPassed
+  message: the spec passes the validator
 observed:
   files:
   - internal/policyengine/policyengine.go
   - internal/policyengine/policyengine_test.go
-  fingerprint: 42ce5aae7aa756e0ff42fadfd956e8327dd77b2711487f1e0c24c37c62a6b053
   interfaces:
-  - codegraphId: type_alias:c2475e9a59e50fceb012111299966c7a
-    file: internal/policyengine/policyengine.go
+  - name: ExecutionState
     kind: type_alias
+    file: internal/policyengine/policyengine.go
     line: 16
-    name: ExecutionState
-  - codegraphId: struct:51a6de2d483d5be40201c7de454f6cd7
-    file: internal/policyengine/policyengine.go
+    codegraphId: type_alias:c2475e9a59e50fceb012111299966c7a
+  - name: ExecutionObservation
     kind: struct
+    file: internal/policyengine/policyengine.go
     line: 24
-    name: ExecutionObservation
-  - codegraphId: struct:7b1226e6c85673295723299601dd8674
-    file: internal/policyengine/policyengine.go
+    codegraphId: struct:51a6de2d483d5be40201c7de454f6cd7
+  - name: Observed
     kind: struct
+    file: internal/policyengine/policyengine.go
     line: 32
-    name: Observed
-  - codegraphId: type_alias:43971b7fe73a576e55a3463fe8f33daf
-    file: internal/policyengine/policyengine.go
+    codegraphId: struct:7b1226e6c85673295723299601dd8674
+  - name: Op
     kind: type_alias
+    file: internal/policyengine/policyengine.go
     line: 46
-    name: Op
-  - codegraphId: struct:bea3d6cd026242f0ba9701845a99d9ef
-    file: internal/policyengine/policyengine.go
+    codegraphId: type_alias:43971b7fe73a576e55a3463fe8f33daf
+  - name: Result
     kind: struct
+    file: internal/policyengine/policyengine.go
     line: 58
-    name: Result
-  - codegraphId: struct:c5868ebca402d6036b8a7d908bf1a8ba
-    file: internal/policyengine/policyengine.go
+    codegraphId: struct:bea3d6cd026242f0ba9701845a99d9ef
+  - name: Options
     kind: struct
+    file: internal/policyengine/policyengine.go
     line: 86
-    name: Options
-  - codegraphId: struct:2c2a9e18bb5ac0b6ffbbc8977980dbed
-    file: internal/policyengine/policyengine.go
+    codegraphId: struct:c5868ebca402d6036b8a7d908bf1a8ba
+  - name: Reconciler
     kind: struct
+    file: internal/policyengine/policyengine.go
     line: 90
-    name: Reconciler
-  - codegraphId: function:26e6969406488bfc97e9ed77febe4974
-    file: internal/policyengine/policyengine.go
+    codegraphId: struct:2c2a9e18bb5ac0b6ffbbc8977980dbed
+  - name: New
     kind: function
-    line: 94
-    name: New
     signature: (opts Options) *Reconciler
-  - codegraphId: method:cf15bd5457ef89fffc8abf3947dbb830
     file: internal/policyengine/policyengine.go
+    line: 94
+    codegraphId: function:26e6969406488bfc97e9ed77febe4974
+  - name: Reconciler.Reconcile
     kind: method
-    line: 101
-    name: Reconciler.Reconcile
     signature: (ctx context.Context, o Observed) (Result, error)
-realizedSpecHash: 5b79d97de81e90b5b3bb0cf0991c95779b782fc8740db874ea5408cd1a62830e
-syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-syncedFingerprint: 42ce5aae7aa756e0ff42fadfd956e8327dd77b2711487f1e0c24c37c62a6b053
+    file: internal/policyengine/policyengine.go
+    line: 101
+    codegraphId: method:cf15bd5457ef89fffc8abf3947dbb830
+  fingerprint: 42ce5aae7aa756e0ff42fadfd956e8327dd77b2711487f1e0c24c37c62a6b053

@@ -1,17 +1,20 @@
+syncedCommit: 89cee50ec5aea977a42f904a758e506729e1158e
+syncedFingerprint: 0a5a641b69aea800e9a2ded8308e6a996d76678bd647c9f06239e34af8267425
+realizedSpecHash: 11ea14cbaf017caaf7f5a18ec8e2ab991fa3fa3e296a3a2b6007ab98527968f7
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
+- type: CodeSynced
+  status: "True"
   reason: InterfacesObserved
-  status: "True"
-  type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+  message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+- type: Drifted
   status: "False"
-  type: Drifted
-- message: the spec passes the validator
-  reason: ValidatorPassed
+  reason: FingerprintEqual
+  message: observed facts match the synced fingerprint
+- type: SpecValid
   status: "True"
-  type: SpecValid
+  reason: ValidatorPassed
+  message: the spec passes the validator
 observed:
   files:
   - third_party/openbao/sdk/helper/keysutil/cache.go
@@ -24,669 +27,666 @@ observed:
   - third_party/openbao/sdk/helper/keysutil/transit_lru.go
   - third_party/openbao/sdk/helper/keysutil/transit_syncmap.go
   - third_party/openbao/sdk/helper/keysutil/util.go
-  fingerprint: 0a5a641b69aea800e9a2ded8308e6a996d76678bd647c9f06239e34af8267425
   interfaces:
-  - codegraphId: interface:9909f324cd2f9daa8c6582439ed2481b
-    file: third_party/openbao/sdk/helper/keysutil/cache.go
+  - name: Cache
     kind: interface
+    file: third_party/openbao/sdk/helper/keysutil/cache.go
     line: 6
-    name: Cache
-  - codegraphId: method:257a9f13afec023d15e35113ce27240f
-    file: third_party/openbao/sdk/helper/keysutil/cache.go
+    codegraphId: interface:9909f324cd2f9daa8c6582439ed2481b
+  - name: Cache.Delete
     kind: method
-    line: 7
-    name: Cache.Delete
     signature: (key any)
-  - codegraphId: method:04fee9ba96ea41388d07e107983293f0
     file: third_party/openbao/sdk/helper/keysutil/cache.go
+    line: 7
+    codegraphId: method:257a9f13afec023d15e35113ce27240f
+  - name: Cache.Load
     kind: method
-    line: 8
-    name: Cache.Load
     signature: (key any) (value any, ok bool)
-  - codegraphId: method:376ed34a034324955284eee75206084e
     file: third_party/openbao/sdk/helper/keysutil/cache.go
+    line: 8
+    codegraphId: method:04fee9ba96ea41388d07e107983293f0
+  - name: Cache.Store
     kind: method
-    line: 9
-    name: Cache.Store
     signature: (key, value any)
-  - codegraphId: method:5e5c81c8218708b7b6879f8987f2bfd8
     file: third_party/openbao/sdk/helper/keysutil/cache.go
+    line: 9
+    codegraphId: method:376ed34a034324955284eee75206084e
+  - name: Cache.Size
     kind: method
-    line: 10
-    name: Cache.Size
     signature: () int
-  - codegraphId: type_alias:36df79a7b59d63ae935af35f8f287339
-    file: third_party/openbao/sdk/helper/keysutil/consts.go
+    file: third_party/openbao/sdk/helper/keysutil/cache.go
+    line: 10
+    codegraphId: method:5e5c81c8218708b7b6879f8987f2bfd8
+  - name: HashType
     kind: type_alias
+    file: third_party/openbao/sdk/helper/keysutil/consts.go
     line: 16
-    name: HashType
-  - codegraphId: type_alias:5dfb9ced51f33e96434c3c70903a32d5
-    file: third_party/openbao/sdk/helper/keysutil/consts.go
+    codegraphId: type_alias:36df79a7b59d63ae935af35f8f287339
+  - name: MarshalingType
     kind: type_alias
+    file: third_party/openbao/sdk/helper/keysutil/consts.go
     line: 32
-    name: MarshalingType
-  - codegraphId: struct:b0b50b9b3cdbeba1ba2b3f8176247396
-    file: third_party/openbao/sdk/helper/keysutil/encrypted_key_storage.go
+    codegraphId: type_alias:5dfb9ced51f33e96434c3c70903a32d5
+  - name: EncryptedKeyStorageConfig
     kind: struct
+    file: third_party/openbao/sdk/helper/keysutil/encrypted_key_storage.go
     line: 57
-    name: EncryptedKeyStorageConfig
-  - codegraphId: function:976f7d9bd248b78ce77da2af83a3520a
-    file: third_party/openbao/sdk/helper/keysutil/encrypted_key_storage.go
+    codegraphId: struct:b0b50b9b3cdbeba1ba2b3f8176247396
+  - name: NewEncryptedKeyStorageWrapper
     kind: function
-    line: 73
-    name: NewEncryptedKeyStorageWrapper
     signature: (config EncryptedKeyStorageConfig) (*EncryptedKeyStorageWrapper, error)
-  - codegraphId: struct:3bb567dad4b5321365c8000ceb408788
     file: third_party/openbao/sdk/helper/keysutil/encrypted_key_storage.go
+    line: 73
+    codegraphId: function:976f7d9bd248b78ce77da2af83a3520a
+  - name: EncryptedKeyStorageWrapper
     kind: struct
+    file: third_party/openbao/sdk/helper/keysutil/encrypted_key_storage.go
     line: 111
-    name: EncryptedKeyStorageWrapper
-  - codegraphId: method:f049289da8a2349c74bfc36308f8c06d
-    file: third_party/openbao/sdk/helper/keysutil/encrypted_key_storage.go
+    codegraphId: struct:3bb567dad4b5321365c8000ceb408788
+  - name: EncryptedKeyStorageWrapper.Wrap
     kind: method
-    line: 117
-    name: EncryptedKeyStorageWrapper.Wrap
     signature: (s logical.Storage) logical.Storage
-  - codegraphId: method:b8a34edf680ef4eeb3817e8289b21f2d
     file: third_party/openbao/sdk/helper/keysutil/encrypted_key_storage.go
+    line: 117
+    codegraphId: method:f049289da8a2349c74bfc36308f8c06d
+  - name: encryptedKeyStorage.List
     kind: method
-    line: 171
-    name: encryptedKeyStorage.List
     signature: (ctx context.Context, prefix string) ([]string, error)
-  - codegraphId: method:c0fbbaa5c646da57d68618c4977640d1
     file: third_party/openbao/sdk/helper/keysutil/encrypted_key_storage.go
+    line: 171
+    codegraphId: method:b8a34edf680ef4eeb3817e8289b21f2d
+  - name: encryptedKeyStorage.ListPage
     kind: method
-    line: 178
-    name: encryptedKeyStorage.ListPage
     signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
       error)
-  - codegraphId: method:17d516a3037d30a8b92859b7d264dab6
     file: third_party/openbao/sdk/helper/keysutil/encrypted_key_storage.go
+    line: 178
+    codegraphId: method:c0fbbaa5c646da57d68618c4977640d1
+  - name: encryptedKeyStorage.Get
     kind: method
-    line: 269
-    name: encryptedKeyStorage.Get
     signature: (ctx context.Context, path string) (*logical.StorageEntry, error)
-  - codegraphId: method:e9d9b29811b71818ba5d9c6ce8ee0f17
     file: third_party/openbao/sdk/helper/keysutil/encrypted_key_storage.go
+    line: 269
+    codegraphId: method:17d516a3037d30a8b92859b7d264dab6
+  - name: encryptedKeyStorage.Put
     kind: method
-    line: 279
-    name: encryptedKeyStorage.Put
     signature: (ctx context.Context, entry *logical.StorageEntry) error
-  - codegraphId: method:15d0f30ac3e1f0e49998469698347e87
     file: third_party/openbao/sdk/helper/keysutil/encrypted_key_storage.go
+    line: 279
+    codegraphId: method:e9d9b29811b71818ba5d9c6ce8ee0f17
+  - name: encryptedKeyStorage.Delete
     kind: method
-    line: 293
-    name: encryptedKeyStorage.Delete
     signature: (ctx context.Context, path string) error
-  - codegraphId: method:e13f05b965b64f9bb103d508cf51e187
     file: third_party/openbao/sdk/helper/keysutil/encrypted_key_storage.go
+    line: 293
+    codegraphId: method:15d0f30ac3e1f0e49998469698347e87
+  - name: transactionalEncryptedKeyStorage.BeginReadOnlyTx
     kind: method
+    signature: (ctx context.Context) (logical.Transaction, error)
+    file: third_party/openbao/sdk/helper/keysutil/encrypted_key_storage.go
     line: 340
-    name: transactionalEncryptedKeyStorage.BeginReadOnlyTx
-    signature: (ctx context.Context) (logical.Transaction, error)
-  - codegraphId: method:c7056f4c3212080630fce4c5e5b35b71
-    file: third_party/openbao/sdk/helper/keysutil/encrypted_key_storage.go
+    codegraphId: method:e13f05b965b64f9bb103d508cf51e187
+  - name: transactionalEncryptedKeyStorage.BeginTx
     kind: method
+    signature: (ctx context.Context) (logical.Transaction, error)
+    file: third_party/openbao/sdk/helper/keysutil/encrypted_key_storage.go
     line: 356
-    name: transactionalEncryptedKeyStorage.BeginTx
-    signature: (ctx context.Context) (logical.Transaction, error)
-  - codegraphId: method:0b460a8ecbf1bf5d8ab82e9760252e29
-    file: third_party/openbao/sdk/helper/keysutil/encrypted_key_storage.go
+    codegraphId: method:c7056f4c3212080630fce4c5e5b35b71
+  - name: eksTransaction.Commit
     kind: method
+    signature: (ctx context.Context) error
+    file: third_party/openbao/sdk/helper/keysutil/encrypted_key_storage.go
     line: 372
-    name: eksTransaction.Commit
+    codegraphId: method:0b460a8ecbf1bf5d8ab82e9760252e29
+  - name: eksTransaction.Rollback
+    kind: method
     signature: (ctx context.Context) error
-  - codegraphId: method:1c333695df8590a153afbc640ee61eaf
     file: third_party/openbao/sdk/helper/keysutil/encrypted_key_storage.go
-    kind: method
     line: 376
-    name: eksTransaction.Rollback
-    signature: (ctx context.Context) error
-  - codegraphId: struct:225d2a1686ff45d39a729626dba4321b
-    file: third_party/openbao/sdk/helper/keysutil/lock_manager.go
+    codegraphId: method:1c333695df8590a153afbc640ee61eaf
+  - name: PolicyRequest
     kind: struct
+    file: third_party/openbao/sdk/helper/keysutil/lock_manager.go
     line: 26
-    name: PolicyRequest
-  - codegraphId: struct:170f6ca4551278fc9968cd65f2c9de9e
-    file: third_party/openbao/sdk/helper/keysutil/lock_manager.go
+    codegraphId: struct:225d2a1686ff45d39a729626dba4321b
+  - name: LockManager
     kind: struct
+    file: third_party/openbao/sdk/helper/keysutil/lock_manager.go
     line: 67
-    name: LockManager
-  - codegraphId: function:1d458ac94b2715da4e400ddfbf371dd9
-    file: third_party/openbao/sdk/helper/keysutil/lock_manager.go
+    codegraphId: struct:170f6ca4551278fc9968cd65f2c9de9e
+  - name: NewLockManager
     kind: function
-    line: 73
-    name: NewLockManager
     signature: (useCache bool, cacheSize int) (*LockManager, error)
-  - codegraphId: method:f21ea821cf90e12ae91d5967ea51bd78
     file: third_party/openbao/sdk/helper/keysutil/lock_manager.go
+    line: 73
+    codegraphId: function:1d458ac94b2715da4e400ddfbf371dd9
+  - name: LockManager.GetCacheSize
     kind: method
-    line: 99
-    name: LockManager.GetCacheSize
     signature: () int
-  - codegraphId: method:7a322b7d854325c460f3e5075e108812
     file: third_party/openbao/sdk/helper/keysutil/lock_manager.go
+    line: 99
+    codegraphId: method:f21ea821cf90e12ae91d5967ea51bd78
+  - name: LockManager.GetUseCache
     kind: method
-    line: 106
-    name: LockManager.GetUseCache
     signature: () bool
-  - codegraphId: method:cb7c5503861f17e9fb9f0cca023c2fd1
     file: third_party/openbao/sdk/helper/keysutil/lock_manager.go
+    line: 106
+    codegraphId: method:7a322b7d854325c460f3e5075e108812
+  - name: LockManager.InvalidatePolicy
     kind: method
-    line: 110
-    name: LockManager.InvalidatePolicy
     signature: (name string)
-  - codegraphId: method:fb3aa53e491171f649cbd2a166aedf7c
     file: third_party/openbao/sdk/helper/keysutil/lock_manager.go
+    line: 110
+    codegraphId: method:cb7c5503861f17e9fb9f0cca023c2fd1
+  - name: LockManager.InitCache
     kind: method
-    line: 116
-    name: LockManager.InitCache
     signature: (cacheSize int) error
-  - codegraphId: method:4773f04f99e92e341e53038b8fb984fd
     file: third_party/openbao/sdk/helper/keysutil/lock_manager.go
+    line: 116
+    codegraphId: method:fb3aa53e491171f649cbd2a166aedf7c
+  - name: LockManager.RestorePolicy
     kind: method
-    line: 136
-    name: LockManager.RestorePolicy
     signature: (ctx context.Context, storage logical.Storage, name, backup string,
       force bool) error
-  - codegraphId: method:b448ff9233c33897f753eae50590399b
     file: third_party/openbao/sdk/helper/keysutil/lock_manager.go
+    line: 136
+    codegraphId: method:4773f04f99e92e341e53038b8fb984fd
+  - name: LockManager.BackupPolicy
     kind: method
-    line: 236
-    name: LockManager.BackupPolicy
     signature: (ctx context.Context, storage logical.Storage, name string) (string,
       error)
-  - codegraphId: method:e0d4ea3f6e089656cb8f46efad702d4d
     file: third_party/openbao/sdk/helper/keysutil/lock_manager.go
+    line: 236
+    codegraphId: method:b448ff9233c33897f753eae50590399b
+  - name: LockManager.GetPolicy
     kind: method
+    signature: (ctx context.Context, req PolicyRequest, rand io.Reader) (retP *Policy,
+      retUpserted bool, retErr error)
+    file: third_party/openbao/sdk/helper/keysutil/lock_manager.go
     line: 282
-    name: LockManager.GetPolicy
+    codegraphId: method:e0d4ea3f6e089656cb8f46efad702d4d
+  - name: LockManager.GetPolicyExclusive
+    kind: method
     signature: (ctx context.Context, req PolicyRequest, rand io.Reader) (retP *Policy,
       retUpserted bool, retErr error)
-  - codegraphId: method:3e06437646719070046844a609076dd6
     file: third_party/openbao/sdk/helper/keysutil/lock_manager.go
-    kind: method
     line: 288
-    name: LockManager.GetPolicyExclusive
-    signature: (ctx context.Context, req PolicyRequest, rand io.Reader) (retP *Policy,
-      retUpserted bool, retErr error)
-  - codegraphId: method:626817b5ab9f2af789458d349482c770
-    file: third_party/openbao/sdk/helper/keysutil/lock_manager.go
+    codegraphId: method:3e06437646719070046844a609076dd6
+  - name: LockManager.GetPolicyWithLockType
     kind: method
-    line: 294
-    name: LockManager.GetPolicyWithLockType
     signature: (ctx context.Context, req PolicyRequest, rand io.Reader, exclusive
       bool) (retP *Policy, retUpserted bool, retErr error)
-  - codegraphId: method:b8cc6ef7620910b6b1f8a95a3689f794
     file: third_party/openbao/sdk/helper/keysutil/lock_manager.go
+    line: 294
+    codegraphId: method:626817b5ab9f2af789458d349482c770
+  - name: LockManager.ImportPolicy
     kind: method
-    line: 473
-    name: LockManager.ImportPolicy
     signature: (ctx context.Context, req PolicyRequest, key []byte, rand io.Reader)
       error
-  - codegraphId: method:05a633f13a53cd56881b9282c90c3a06
     file: third_party/openbao/sdk/helper/keysutil/lock_manager.go
+    line: 473
+    codegraphId: method:b8cc6ef7620910b6b1f8a95a3689f794
+  - name: LockManager.DeletePolicy
     kind: method
-    line: 529
-    name: LockManager.DeletePolicy
     signature: (ctx context.Context, storage logical.Storage, name string) error
-  - codegraphId: interface:830141fa8d760b438f5e31d59851eed4
-    file: third_party/openbao/sdk/helper/keysutil/policy.go
+    file: third_party/openbao/sdk/helper/keysutil/lock_manager.go
+    line: 529
+    codegraphId: method:05a633f13a53cd56881b9282c90c3a06
+  - name: AssociatedDataFactory
     kind: interface
+    file: third_party/openbao/sdk/helper/keysutil/policy.go
     line: 97
-    name: AssociatedDataFactory
-  - codegraphId: method:81d9df48cdb51c850676f876b242d1ea
-    file: third_party/openbao/sdk/helper/keysutil/policy.go
+    codegraphId: interface:830141fa8d760b438f5e31d59851eed4
+  - name: AssociatedDataFactory.GetAssociatedData
     kind: method
+    signature: () ([]byte, error)
+    file: third_party/openbao/sdk/helper/keysutil/policy.go
     line: 98
-    name: AssociatedDataFactory.GetAssociatedData
-    signature: () ([]byte, error)
-  - codegraphId: interface:8721bc8e07dffc831f75f3386e9b1e9e
-    file: third_party/openbao/sdk/helper/keysutil/policy.go
+    codegraphId: method:81d9df48cdb51c850676f876b242d1ea
+  - name: ExternalKeyFactory
     kind: interface
+    file: third_party/openbao/sdk/helper/keysutil/policy.go
     line: 101
-    name: ExternalKeyFactory
-  - codegraphId: method:f608dc7668de10a571e8d7de910a0254
-    file: third_party/openbao/sdk/helper/keysutil/policy.go
+    codegraphId: interface:8721bc8e07dffc831f75f3386e9b1e9e
+  - name: ExternalKeyFactory.GetExternalKey
     kind: method
-    line: 102
-    name: ExternalKeyFactory.GetExternalKey
     signature: (ref string) (context.Context, kms.Key, error)
-  - codegraphId: struct:a7d827117bd88fedafc037073c85f8f2
     file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 102
+    codegraphId: method:f608dc7668de10a571e8d7de910a0254
+  - name: RestoreInfo
     kind: struct
+    file: third_party/openbao/sdk/helper/keysutil/policy.go
     line: 105
-    name: RestoreInfo
-  - codegraphId: struct:3470a64dbd0e698952825830c36c35cf
-    file: third_party/openbao/sdk/helper/keysutil/policy.go
+    codegraphId: struct:a7d827117bd88fedafc037073c85f8f2
+  - name: BackupInfo
     kind: struct
+    file: third_party/openbao/sdk/helper/keysutil/policy.go
     line: 110
-    name: BackupInfo
-  - codegraphId: struct:e3351ed87573d5dbb30ad7486dfd2329
-    file: third_party/openbao/sdk/helper/keysutil/policy.go
+    codegraphId: struct:3470a64dbd0e698952825830c36c35cf
+  - name: SigningOptions
     kind: struct
+    file: third_party/openbao/sdk/helper/keysutil/policy.go
     line: 115
-    name: SigningOptions
-  - codegraphId: struct:4c8bcad0a43adbcb021b0082e95a2bcf
-    file: third_party/openbao/sdk/helper/keysutil/policy.go
+    codegraphId: struct:e3351ed87573d5dbb30ad7486dfd2329
+  - name: SigningResult
     kind: struct
+    file: third_party/openbao/sdk/helper/keysutil/policy.go
     line: 124
-    name: SigningResult
-  - codegraphId: type_alias:f62ba6318dea2fe9523945c69c564193
-    file: third_party/openbao/sdk/helper/keysutil/policy.go
+    codegraphId: struct:4c8bcad0a43adbcb021b0082e95a2bcf
+  - name: KeyType
     kind: type_alias
+    file: third_party/openbao/sdk/helper/keysutil/policy.go
     line: 133
-    name: KeyType
-  - codegraphId: method:400676ea1b1271f3a9e17ec23c03e297
-    file: third_party/openbao/sdk/helper/keysutil/policy.go
+    codegraphId: type_alias:f62ba6318dea2fe9523945c69c564193
+  - name: KeyType.EncryptionSupported
     kind: method
+    signature: () bool
+    file: third_party/openbao/sdk/helper/keysutil/policy.go
     line: 135
-    name: KeyType.EncryptionSupported
-    signature: () bool
-  - codegraphId: method:23ede54f884d8ccf0c57cf484599e312
-    file: third_party/openbao/sdk/helper/keysutil/policy.go
+    codegraphId: method:400676ea1b1271f3a9e17ec23c03e297
+  - name: KeyType.DecryptionSupported
     kind: method
+    signature: () bool
+    file: third_party/openbao/sdk/helper/keysutil/policy.go
     line: 146
-    name: KeyType.DecryptionSupported
-    signature: () bool
-  - codegraphId: method:2a0ee584815d96b65f4e206798cc3e7a
-    file: third_party/openbao/sdk/helper/keysutil/policy.go
+    codegraphId: method:23ede54f884d8ccf0c57cf484599e312
+  - name: KeyType.SigningSupported
     kind: method
+    signature: () bool
+    file: third_party/openbao/sdk/helper/keysutil/policy.go
     line: 157
-    name: KeyType.SigningSupported
-    signature: () bool
-  - codegraphId: method:f359cf15156e371c01953ce7a649d2e4
-    file: third_party/openbao/sdk/helper/keysutil/policy.go
+    codegraphId: method:2a0ee584815d96b65f4e206798cc3e7a
+  - name: KeyType.MLDSAExternalMuSupported
     kind: method
+    signature: () bool
+    file: third_party/openbao/sdk/helper/keysutil/policy.go
     line: 168
-    name: KeyType.MLDSAExternalMuSupported
-    signature: () bool
-  - codegraphId: method:fdd33bc0976bd9716aba1561e4fd2430
-    file: third_party/openbao/sdk/helper/keysutil/policy.go
+    codegraphId: method:f359cf15156e371c01953ce7a649d2e4
+  - name: KeyType.HashSignatureInput
     kind: method
+    signature: () bool
+    file: third_party/openbao/sdk/helper/keysutil/policy.go
     line: 178
-    name: KeyType.HashSignatureInput
-    signature: () bool
-  - codegraphId: method:b6856e7d2f614fbff306564d9a15e451
-    file: third_party/openbao/sdk/helper/keysutil/policy.go
+    codegraphId: method:fdd33bc0976bd9716aba1561e4fd2430
+  - name: KeyType.DerivationSupported
     kind: method
+    signature: () bool
+    file: third_party/openbao/sdk/helper/keysutil/policy.go
     line: 187
-    name: KeyType.DerivationSupported
-    signature: () bool
-  - codegraphId: method:10c919ab6415c55c48deccde25449eef
-    file: third_party/openbao/sdk/helper/keysutil/policy.go
+    codegraphId: method:b6856e7d2f614fbff306564d9a15e451
+  - name: KeyType.KeyAgreementSupported
     kind: method
+    signature: () bool
+    file: third_party/openbao/sdk/helper/keysutil/policy.go
     line: 197
-    name: KeyType.KeyAgreementSupported
-    signature: () bool
-  - codegraphId: method:c6aa65a65548fc079e8eb1b59aaeae6d
-    file: third_party/openbao/sdk/helper/keysutil/policy.go
+    codegraphId: method:10c919ab6415c55c48deccde25449eef
+  - name: KeyType.AssociatedDataSupported
     kind: method
+    signature: () bool
+    file: third_party/openbao/sdk/helper/keysutil/policy.go
     line: 205
-    name: KeyType.AssociatedDataSupported
-    signature: () bool
-  - codegraphId: method:4b20b09cdb7141e84837b2a82a4de0b2
-    file: third_party/openbao/sdk/helper/keysutil/policy.go
+    codegraphId: method:c6aa65a65548fc079e8eb1b59aaeae6d
+  - name: KeyType.ImportPublicKeySupported
     kind: method
+    signature: () bool
+    file: third_party/openbao/sdk/helper/keysutil/policy.go
     line: 215
-    name: KeyType.ImportPublicKeySupported
-    signature: () bool
-  - codegraphId: method:87504f17fc4b1ead793344a591896ebe
-    file: third_party/openbao/sdk/helper/keysutil/policy.go
+    codegraphId: method:4b20b09cdb7141e84837b2a82a4de0b2
+  - name: KeyType.DefaultHashAlgorithm
     kind: method
-    line: 225
-    name: KeyType.DefaultHashAlgorithm
     signature: () HashType
-  - codegraphId: method:5baa7c91f52b37f2f506c9bcd3d4d2bd
     file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 225
+    codegraphId: method:87504f17fc4b1ead793344a591896ebe
+  - name: KeyType.String
     kind: method
-    line: 238
-    name: KeyType.String
     signature: () string
-  - codegraphId: method:862933138156773000207d3fc5e33e3f
     file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 238
+    codegraphId: method:5baa7c91f52b37f2f506c9bcd3d4d2bd
+  - name: KeyType.MLDSAParams
     kind: method
-    line: 277
-    name: KeyType.MLDSAParams
     signature: () mldsa.Parameters
-  - codegraphId: struct:a39aaa86b2d81722e74a763f193cf4b9
     file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 277
+    codegraphId: method:862933138156773000207d3fc5e33e3f
+  - name: KeyData
     kind: struct
+    file: third_party/openbao/sdk/helper/keysutil/policy.go
     line: 290
-    name: KeyData
-  - codegraphId: struct:6e8c470f675e595fdcde4348a298cda0
-    file: third_party/openbao/sdk/helper/keysutil/policy.go
+    codegraphId: struct:a39aaa86b2d81722e74a763f193cf4b9
+  - name: KeyEntry
     kind: struct
+    file: third_party/openbao/sdk/helper/keysutil/policy.go
     line: 296
-    name: KeyEntry
-  - codegraphId: method:903901d7af38ffbe9b1b4a69c55aff3e
-    file: third_party/openbao/sdk/helper/keysutil/policy.go
+    codegraphId: struct:6e8c470f675e595fdcde4348a298cda0
+  - name: KeyEntry.IsPrivateKeyMissing
     kind: method
+    signature: () bool
+    file: third_party/openbao/sdk/helper/keysutil/policy.go
     line: 338
-    name: KeyEntry.IsPrivateKeyMissing
-    signature: () bool
-  - codegraphId: struct:e0a8fda5cfe6d2d721b6899e910899e7
-    file: third_party/openbao/sdk/helper/keysutil/policy.go
+    codegraphId: method:903901d7af38ffbe9b1b4a69c55aff3e
+  - name: PolicyConfig
     kind: struct
+    file: third_party/openbao/sdk/helper/keysutil/policy.go
     line: 350
-    name: PolicyConfig
-  - codegraphId: function:2a87cace92603382e5beb4edd336728b
-    file: third_party/openbao/sdk/helper/keysutil/policy.go
+    codegraphId: struct:e0a8fda5cfe6d2d721b6899e910899e7
+  - name: NewPolicy
     kind: function
-    line: 383
-    name: NewPolicy
     signature: (config PolicyConfig) *Policy
-  - codegraphId: function:3e4f6969d3d1220e944bc8d8c35af55c
     file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 383
+    codegraphId: function:2a87cace92603382e5beb4edd336728b
+  - name: LoadPolicy
     kind: function
-    line: 403
-    name: LoadPolicy
     signature: (ctx context.Context, s logical.Storage, path string) (*Policy, error)
-  - codegraphId: struct:cf02758bc800f1198208e7e2a9afcc56
     file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 403
+    codegraphId: function:3e4f6969d3d1220e944bc8d8c35af55c
+  - name: Policy
     kind: struct
+    file: third_party/openbao/sdk/helper/keysutil/policy.go
     line: 451
-    name: Policy
-  - codegraphId: method:817c72b44c0714633177297abc8ee7bb
-    file: third_party/openbao/sdk/helper/keysutil/policy.go
+    codegraphId: struct:cf02758bc800f1198208e7e2a9afcc56
+  - name: Policy.Lock
     kind: method
-    line: 552
-    name: Policy.Lock
     signature: (exclusive bool)
-  - codegraphId: method:2e8d9a0a75030b14e0da1bc2a9141c0d
     file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 552
+    codegraphId: method:817c72b44c0714633177297abc8ee7bb
+  - name: Policy.Unlock
     kind: method
-    line: 561
-    name: Policy.Unlock
     signature: ()
-  - codegraphId: method:5e0c08a5ff23d75797f79e1c588e4f4b
     file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 561
+    codegraphId: method:2e8d9a0a75030b14e0da1bc2a9141c0d
+  - name: Policy.LoadArchive
     kind: method
-    line: 576
-    name: Policy.LoadArchive
     signature: (ctx context.Context, storage logical.Storage) (*archivedKeys, error)
-  - codegraphId: method:355d1fe4be287bf0cf5a906147d00645
     file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 576
+    codegraphId: method:5e0c08a5ff23d75797f79e1c588e4f4b
+  - name: Policy.Persist
     kind: method
-    line: 699
-    name: Policy.Persist
     signature: (ctx context.Context, storage logical.Storage) (retErr error)
-  - codegraphId: method:ecd723c618ceffa0a0abd6729d0d6838
     file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 699
+    codegraphId: method:355d1fe4be287bf0cf5a906147d00645
+  - name: Policy.Serialize
     kind: method
-    line: 747
-    name: Policy.Serialize
     signature: () ([]byte, error)
-  - codegraphId: method:463c976028c5510964a4578b2300cc71
     file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 747
+    codegraphId: method:ecd723c618ceffa0a0abd6729d0d6838
+  - name: Policy.NeedsUpgrade
     kind: method
-    line: 751
-    name: Policy.NeedsUpgrade
     signature: () bool
-  - codegraphId: method:354d08fd351c6f0abd215b8d77dfdac5
     file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 751
+    codegraphId: method:463c976028c5510964a4578b2300cc71
+  - name: Policy.Upgrade
     kind: method
-    line: 787
-    name: Policy.Upgrade
     signature: (ctx context.Context, storage logical.Storage, randReader io.Reader)
       (retErr error)
-  - codegraphId: method:b7aa4afa816edd12aedd0d670121adae
     file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 787
+    codegraphId: method:354d08fd351c6f0abd215b8d77dfdac5
+  - name: Policy.GetKey
     kind: method
-    line: 869
-    name: Policy.GetKey
     signature: (context []byte, ver, numBytes int) ([]byte, error)
-  - codegraphId: method:8c9a09fe340129781136aa25d7d82cc9
     file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 869
+    codegraphId: method:b7aa4afa816edd12aedd0d670121adae
+  - name: Policy.DeriveKey
     kind: method
-    line: 890
-    name: Policy.DeriveKey
     signature: (context, salt []byte, ver int, numBytes int) ([]byte, error)
-  - codegraphId: method:3e1f8e93378110a60e7d5372ff3d82b1
     file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 890
+    codegraphId: method:8c9a09fe340129781136aa25d7d82cc9
+  - name: Policy.DeriveKeyECDH
     kind: method
-    line: 961
-    name: Policy.DeriveKeyECDH
     signature: (baseKeyVer int, peerPublicKeyPem []byte, derivedKeySizeInBytes int)
       ([]byte, error)
-  - codegraphId: method:16451025956eadbc37c061c25f4da7d0
     file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 961
+    codegraphId: method:3e1f8e93378110a60e7d5372ff3d82b1
+  - name: Policy.Encrypt
     kind: method
-    line: 1082
-    name: Policy.Encrypt
     signature: (ver int, context, nonce []byte, value string) (string, error)
-  - codegraphId: method:6216250b87c4fd0028f8e4bee1586af6
     file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 1082
+    codegraphId: method:16451025956eadbc37c061c25f4da7d0
+  - name: Policy.Decrypt
     kind: method
-    line: 1086
-    name: Policy.Decrypt
     signature: (context, nonce []byte, value string) (string, error)
-  - codegraphId: method:18f575ec48059faf1241d919a2544a20
     file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 1086
+    codegraphId: method:6216250b87c4fd0028f8e4bee1586af6
+  - name: Policy.DecryptWithFactory
     kind: method
-    line: 1090
-    name: Policy.DecryptWithFactory
     signature: (derivationContext, nonce []byte, value string, factories ...any) (string,
       error)
-  - codegraphId: method:3c8a73c632d997aef280e64ebef9f79c
     file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 1090
+    codegraphId: method:18f575ec48059faf1241d919a2544a20
+  - name: Policy.HMACKey
     kind: method
-    line: 1252
-    name: Policy.HMACKey
     signature: (version int) ([]byte, error)
-  - codegraphId: method:716a5e27139f0aa411523794d96712d5
     file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 1252
+    codegraphId: method:3c8a73c632d997aef280e64ebef9f79c
+  - name: Policy.Sign
     kind: method
-    line: 1277
-    name: Policy.Sign
     signature: (ver int, context, input []byte, hashAlgorithm HashType, sigAlgorithm
       string, marshaling MarshalingType) (*SigningResult, error)
-  - codegraphId: method:2102a48552a9a1f8264afd940ee07b38
     file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 1277
+    codegraphId: method:716a5e27139f0aa411523794d96712d5
+  - name: Policy.SignWithOptions
     kind: method
-    line: 1300
-    name: Policy.SignWithOptions
     signature: (ver int, derivationContext, input []byte, options *SigningOptions)
       (*SigningResult, error)
-  - codegraphId: method:7a32e6c3cbc4a63fa3abba73991239cd
     file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 1300
+    codegraphId: method:2102a48552a9a1f8264afd940ee07b38
+  - name: Policy.VerifySignature
     kind: method
-    line: 1540
-    name: Policy.VerifySignature
     signature: (context, input []byte, hashAlgorithm HashType, sigAlgorithm string,
       marshaling MarshalingType, sig string) (bool, error)
-  - codegraphId: method:0767af2699882fc39febeb829acf25e6
     file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 1540
+    codegraphId: method:7a32e6c3cbc4a63fa3abba73991239cd
+  - name: Policy.VerifySignatureWithOptions
     kind: method
-    line: 1549
-    name: Policy.VerifySignatureWithOptions
     signature: (derivationContext, input []byte, sig string, options *SigningOptions)
       (bool, error)
-  - codegraphId: method:cf43a15f9b4eef93119a2ff297ed8f12
     file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 1549
+    codegraphId: method:0767af2699882fc39febeb829acf25e6
+  - name: Policy.Import
     kind: method
-    line: 1788
-    name: Policy.Import
     signature: (ctx context.Context, storage logical.Storage, key []byte, randReader
       io.Reader) error
-  - codegraphId: method:345ac29b5e8076933e60f8d5ba8f8a90
     file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 1788
+    codegraphId: method:cf43a15f9b4eef93119a2ff297ed8f12
+  - name: Policy.ImportPublicOrPrivate
     kind: method
-    line: 1792
-    name: Policy.ImportPublicOrPrivate
     signature: (ctx context.Context, storage logical.Storage, key []byte, isPrivateKey
       bool, randReader io.Reader) error
-  - codegraphId: method:dacb21feeafc7e5cca60414718eec59e
     file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 1792
+    codegraphId: method:345ac29b5e8076933e60f8d5ba8f8a90
+  - name: Policy.Rotate
     kind: method
-    line: 1914
-    name: Policy.Rotate
     signature: (ctx context.Context, storage logical.Storage, randReader io.Reader)
       (retErr error)
-  - codegraphId: method:ea684e2d559324a22308e4141d2f2910
     file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 1914
+    codegraphId: method:dacb21feeafc7e5cca60414718eec59e
+  - name: Policy.RotateInMemory
     kind: method
-    line: 1950
-    name: Policy.RotateInMemory
     signature: (randReader io.Reader) (retErr error)
-  - codegraphId: method:1b95308c2ca66c604eb82a180508c114
     file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 1950
+    codegraphId: method:ea684e2d559324a22308e4141d2f2910
+  - name: Policy.MigrateKeyToKeysMap
     kind: method
-    line: 2097
-    name: Policy.MigrateKeyToKeysMap
     signature: ()
-  - codegraphId: method:201d5bbcc21048371fbf654450813940
     file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 2097
+    codegraphId: method:1b95308c2ca66c604eb82a180508c114
+  - name: Policy.Backup
     kind: method
-    line: 2110
-    name: Policy.Backup
     signature: (ctx context.Context, storage logical.Storage) (out string, retErr
       error)
-  - codegraphId: struct:c973efc7fc0783b6b24119ac8f594c57
     file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 2110
+    codegraphId: method:201d5bbcc21048371fbf654450813940
+  - name: SymmetricOpts
     kind: struct
+    file: third_party/openbao/sdk/helper/keysutil/policy.go
     line: 2200
-    name: SymmetricOpts
-  - codegraphId: method:2ad3b6f442876d1a25649fbba6052a34
-    file: third_party/openbao/sdk/helper/keysutil/policy.go
+    codegraphId: struct:c973efc7fc0783b6b24119ac8f594c57
+  - name: Policy.SymmetricEncryptRaw
     kind: method
-    line: 2214
-    name: Policy.SymmetricEncryptRaw
     signature: (ver int, encKey, plaintext []byte, opts SymmetricOpts) ([]byte, error)
-  - codegraphId: method:faee60fa64b4e20c649719fa7927a709
     file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 2214
+    codegraphId: method:2ad3b6f442876d1a25649fbba6052a34
+  - name: Policy.SymmetricDecryptRaw
     kind: method
-    line: 2306
-    name: Policy.SymmetricDecryptRaw
     signature: (encKey, ciphertext []byte, opts SymmetricOpts) ([]byte, error)
-  - codegraphId: method:6362904d1cbfd52b1fe002508cd76b61
     file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 2306
+    codegraphId: method:faee60fa64b4e20c649719fa7927a709
+  - name: Policy.EncryptWithFactory
     kind: method
-    line: 2368
-    name: Policy.EncryptWithFactory
     signature: (ver int, derivationContext []byte, nonce []byte, value string, factories
       ...any) (string, error)
-  - codegraphId: method:96c86c38b2d3c85e92314ad1c83923a7
     file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 2368
+    codegraphId: method:6362904d1cbfd52b1fe002508cd76b61
+  - name: Policy.KeyVersionCanBeUpdated
     kind: method
-    line: 2537
-    name: Policy.KeyVersionCanBeUpdated
     signature: (keyVersion int, isPrivateKey bool) error
-  - codegraphId: method:b2f5fc16184a710e752a18da90544834
     file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 2537
+    codegraphId: method:96c86c38b2d3c85e92314ad1c83923a7
+  - name: Policy.ImportPrivateKeyForVersion
     kind: method
-    line: 2559
-    name: Policy.ImportPrivateKeyForVersion
     signature: (ctx context.Context, storage logical.Storage, keyVersion int, key
       []byte) error
-  - codegraphId: method:26bd41c6ece3bf1034f147e1ee3d2f62
     file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 2559
+    codegraphId: method:b2f5fc16184a710e752a18da90544834
+  - name: Policy.WrapKey
     kind: method
-    line: 2787
-    name: Policy.WrapKey
     signature: (ver int, targetKey any, targetKeyType KeyType, hash hash.Hash) (string,
       error)
-  - codegraphId: method:36af6fbb7aa13b6ad546574c2b674d91
     file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 2787
+    codegraphId: method:26bd41c6ece3bf1034f147e1ee3d2f62
+  - name: KeyEntry.WrapKey
     kind: method
-    line: 2815
-    name: KeyEntry.WrapKey
     signature: (targetKey any, targetKeyType KeyType, hash hash.Hash) (string, error)
-  - codegraphId: method:6cb86415da26f6aff3123823dee92e3a
     file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 2815
+    codegraphId: method:36af6fbb7aa13b6ad546574c2b674d91
+  - name: Policy.CreateCSR
     kind: method
-    line: 2879
-    name: Policy.CreateCSR
     signature: (keyVersion int, csrTemplate *x509.CertificateRequest) ([]byte, error)
-  - codegraphId: method:c224aba4d12497ccced51f98b0f84bed
     file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 2879
+    codegraphId: method:6cb86415da26f6aff3123823dee92e3a
+  - name: Policy.PersistCertificateChain
     kind: method
-    line: 2957
-    name: Policy.PersistCertificateChain
     signature: (ctx context.Context, storage logical.Storage, keyVersion int, certificateChain
       []*x509.Certificate) error
-  - codegraphId: struct:105af8dcbda3d61cb093c61a1e5ebbb5
-    file: third_party/openbao/sdk/helper/keysutil/transit_lru.go
+    file: third_party/openbao/sdk/helper/keysutil/policy.go
+    line: 2957
+    codegraphId: method:c224aba4d12497ccced51f98b0f84bed
+  - name: TransitLRU
     kind: struct
+    file: third_party/openbao/sdk/helper/keysutil/transit_lru.go
     line: 8
-    name: TransitLRU
-  - codegraphId: function:9341a61164694f2381542a5ad588a34f
-    file: third_party/openbao/sdk/helper/keysutil/transit_lru.go
+    codegraphId: struct:105af8dcbda3d61cb093c61a1e5ebbb5
+  - name: NewTransitLRU
     kind: function
-    line: 13
-    name: NewTransitLRU
     signature: (size int) (*TransitLRU, error)
-  - codegraphId: method:53fb8f3cfe72e593b65a5584b127da26
     file: third_party/openbao/sdk/helper/keysutil/transit_lru.go
+    line: 13
+    codegraphId: function:9341a61164694f2381542a5ad588a34f
+  - name: TransitLRU.Delete
     kind: method
-    line: 18
-    name: TransitLRU.Delete
     signature: (key any)
-  - codegraphId: method:e51deee57cc31a3d0cb61c95d6e217ed
     file: third_party/openbao/sdk/helper/keysutil/transit_lru.go
+    line: 18
+    codegraphId: method:53fb8f3cfe72e593b65a5584b127da26
+  - name: TransitLRU.Load
     kind: method
-    line: 22
-    name: TransitLRU.Load
     signature: (key any) (value any, ok bool)
-  - codegraphId: method:58cca489a1d33cc3953ab5d6f7a599bf
     file: third_party/openbao/sdk/helper/keysutil/transit_lru.go
+    line: 22
+    codegraphId: method:e51deee57cc31a3d0cb61c95d6e217ed
+  - name: TransitLRU.Store
     kind: method
-    line: 26
-    name: TransitLRU.Store
     signature: (key, value any)
-  - codegraphId: method:2fc115aad9e7b5b1ec837bc8a1655523
     file: third_party/openbao/sdk/helper/keysutil/transit_lru.go
+    line: 26
+    codegraphId: method:58cca489a1d33cc3953ab5d6f7a599bf
+  - name: TransitLRU.Size
     kind: method
-    line: 30
-    name: TransitLRU.Size
     signature: () int
-  - codegraphId: struct:fdb4bec49844f04149ffca332b166a42
-    file: third_party/openbao/sdk/helper/keysutil/transit_syncmap.go
+    file: third_party/openbao/sdk/helper/keysutil/transit_lru.go
+    line: 30
+    codegraphId: method:2fc115aad9e7b5b1ec837bc8a1655523
+  - name: TransitSyncMap
     kind: struct
+    file: third_party/openbao/sdk/helper/keysutil/transit_syncmap.go
     line: 10
-    name: TransitSyncMap
-  - codegraphId: function:ff0ce92c8a83e968af8cfdafd51c6c30
-    file: third_party/openbao/sdk/helper/keysutil/transit_syncmap.go
+    codegraphId: struct:fdb4bec49844f04149ffca332b166a42
+  - name: NewTransitSyncMap
     kind: function
-    line: 14
-    name: NewTransitSyncMap
     signature: () *TransitSyncMap
-  - codegraphId: method:bedaf0366abc940906f42417fb4e9e2b
     file: third_party/openbao/sdk/helper/keysutil/transit_syncmap.go
+    line: 14
+    codegraphId: function:ff0ce92c8a83e968af8cfdafd51c6c30
+  - name: TransitSyncMap.Delete
     kind: method
-    line: 18
-    name: TransitSyncMap.Delete
     signature: (key any)
-  - codegraphId: method:cbfde08bdd9753e3d3f36e21f9bc3af6
     file: third_party/openbao/sdk/helper/keysutil/transit_syncmap.go
+    line: 18
+    codegraphId: method:bedaf0366abc940906f42417fb4e9e2b
+  - name: TransitSyncMap.Load
     kind: method
-    line: 22
-    name: TransitSyncMap.Load
     signature: (key any) (value any, ok bool)
-  - codegraphId: method:06ff2de84e1bf2a6067702e4f33f0ede
     file: third_party/openbao/sdk/helper/keysutil/transit_syncmap.go
+    line: 22
+    codegraphId: method:cbfde08bdd9753e3d3f36e21f9bc3af6
+  - name: TransitSyncMap.Store
     kind: method
-    line: 26
-    name: TransitSyncMap.Store
     signature: (key, value any)
-  - codegraphId: method:8e4f46e62f8c05df2876709152401f1c
     file: third_party/openbao/sdk/helper/keysutil/transit_syncmap.go
+    line: 26
+    codegraphId: method:06ff2de84e1bf2a6067702e4f33f0ede
+  - name: TransitSyncMap.Size
     kind: method
-    line: 30
-    name: TransitSyncMap.Size
     signature: () int
-  - codegraphId: function:ad43b9f8f61564bcf485a7abff33e733
-    file: third_party/openbao/sdk/helper/keysutil/util.go
+    file: third_party/openbao/sdk/helper/keysutil/transit_syncmap.go
+    line: 30
+    codegraphId: method:8e4f46e62f8c05df2876709152401f1c
+  - name: ParsePKCS8Ed25519PrivateKey
     kind: function
+    signature: (der []byte) (key any, err error)
+    file: third_party/openbao/sdk/helper/keysutil/util.go
     line: 75
-    name: ParsePKCS8Ed25519PrivateKey
-    signature: (der []byte) (key any, err error)
-  - codegraphId: function:67bb5a5d146c913f3def9109fe428458
-    file: third_party/openbao/sdk/helper/keysutil/util.go
+    codegraphId: function:ad43b9f8f61564bcf485a7abff33e733
+  - name: ParsePKCS8RSAPSSPrivateKey
     kind: function
-    line: 132
-    name: ParsePKCS8RSAPSSPrivateKey
     signature: (der []byte) (key any, err error)
-realizedSpecHash: 11ea14cbaf017caaf7f5a18ec8e2ab991fa3fa3e296a3a2b6007ab98527968f7
-syncedCommit: 89cee50ec5aea977a42f904a758e506729e1158e
-syncedFingerprint: 0a5a641b69aea800e9a2ded8308e6a996d76678bd647c9f06239e34af8267425
+    file: third_party/openbao/sdk/helper/keysutil/util.go
+    line: 132
+    codegraphId: function:67bb5a5d146c913f3def9109fe428458
+  fingerprint: 0a5a641b69aea800e9a2ded8308e6a996d76678bd647c9f06239e34af8267425

@@ -1,12 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/ui/lib/core/app/components/page/breadcrumbs.js breadcrumbs.js@third_party/openbao/ui/lib/core/app/components/page/breadcrumbs.js
-- file:third_party/openbao/ui/lib/core/app/components/page/error.js error.js@third_party/openbao/ui/lib/core/app/components/page/error.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-lib-core-app-components-page
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'The Ember build merges the app/ and addon/ trees, so a component owned
     by the addon must also have a module at the app-tree path for the resolver to
     find it. These two files exist to satisfy that requirement for the page breadcrumbs
@@ -14,35 +13,36 @@ spec:
     the addon implementation as the single source of truth while making the components
     resolvable from the app tree. The context documents only that shim contract: which
     addon module each file forwards to, and the license header both must retain.'
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/ui/lib/core/app/components/page/breadcrumbs.js
-    id: r.breadcrumbs-reexport
+  - id: r.breadcrumbs-reexport
     level: MUST
     text: The page breadcrumbs app module must re-export the default export of core/components/page/breadcrumbs
       as its own default export, so a consumer importing the app-tree path receives
       the addon breadcrumbs component unchanged.
-  - codeRefs:
-    - file:third_party/openbao/ui/lib/core/app/components/page/error.js
-    id: r.error-reexport
+    codeRefs:
+    - file:third_party/openbao/ui/lib/core/app/components/page/breadcrumbs.js
+  - id: r.error-reexport
     level: MUST
     text: The page error app module must re-export the default export of core/components/page/error
       as its own default export, so a consumer importing the app-tree path receives
       the addon page error component unchanged.
-  - codeRefs:
-    - file:third_party/openbao/ui/lib/core/app/components/page/breadcrumbs.js
+    codeRefs:
     - file:third_party/openbao/ui/lib/core/app/components/page/error.js
-    id: r.license-header
+  - id: r.license-header
     level: MUST
     text: 'Both modules must keep the HashiCorp copyright notice and the SPDX-License-Identifier:
       MPL-2.0 tag at the top of the file, before the export statement.'
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/core/app/components/page/breadcrumbs.js
     - file:third_party/openbao/ui/lib/core/app/components/page/error.js
-    id: r.shim-only
+  - id: r.shim-only
     level: SHOULD
     text: Each module should stay a pure re-export shim, adding no local classes,
       helpers, or side effects, so the single source of truth for the components remains
       the addon implementation.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/ui/lib/core/app/components/page/breadcrumbs.js
+    - file:third_party/openbao/ui/lib/core/app/components/page/error.js
+codeRefIndex:
+- file:third_party/openbao/ui/lib/core/app/components/page/breadcrumbs.js breadcrumbs.js@third_party/openbao/ui/lib/core/app/components/page/breadcrumbs.js
+- file:third_party/openbao/ui/lib/core/app/components/page/error.js error.js@third_party/openbao/ui/lib/core/app/components/page/error.js

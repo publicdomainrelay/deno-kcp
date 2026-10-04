@@ -1,13 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/internal/helper/tlsdebug/dummy_inject.go dummy_inject.go@third_party/openbao/internal/helper/tlsdebug/dummy_inject.go
-- file:third_party/openbao/internal/helper/tlsdebug/inject.go inject.go@third_party/openbao/internal/helper/tlsdebug/inject.go
-- function:6840fc0fc02bdfd7359c69c222489b7b Inject@third_party/openbao/internal/helper/tlsdebug/dummy_inject.go:11
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-helper-tlsdebug
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'This context documents the tlsdebug helper package as vendored under third_party/openbao:
     it exists so that builds can turn TLS session-key logging on or off without touching
     call sites, by swapping one file for another behind a build tag. The spec pins
@@ -15,59 +13,61 @@ spec:
     when the key log file cannot be opened, and the configuration side effect of setting
     KeyLogWriter, so a re-vendoring or local patch can be checked against what the
     code actually does rather than what the release build happens to compile in.'
-  interfaces:
-  - file: third_party/openbao/internal/helper/tlsdebug/dummy_inject.go
-    kind: function
-    name: Inject
-    signature: func Inject(_ hclog.Logger, config *tls.Config) *tls.Config
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/tlsdebug/dummy_inject.go
-    - function:6840fc0fc02bdfd7359c69c222489b7b
-    id: r.noop-variant-returns-config-unchanged
+  - id: r.noop-variant-returns-config-unchanged
     level: MUST
     text: The stub variant of Inject in dummy_inject.go must return the config argument
       exactly as received and must not read or use the hclog.Logger argument, so a
       build that compiles this file links no key-logging behaviour and mutates no
       TLS config.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/tlsdebug/inject.go
-    id: r.real-variant-injects-key-log-writer
+    codeRefs:
+    - file:third_party/openbao/internal/helper/tlsdebug/dummy_inject.go
+    - function:6840fc0fc02bdfd7359c69c222489b7b
+  - id: r.real-variant-injects-key-log-writer
     level: MUST
     text: When config is non-nil, Inject must open the key log file via openKeyLogFile,
       assign the resulting file to config.KeyLogWriter, and return that same config
       pointer so the caller's TLS config gains a session-key log sink in place.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/helper/tlsdebug/inject.go
-    id: r.real-variant-logs-warning-with-file-name
+  - id: r.real-variant-logs-warning-with-file-name
     level: MUST
     text: After opening the file, Inject must emit a warning through the passed logger
       carrying the message "injecting session key logger into TLS config" with the
       opened file's name as the log_file value.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/helper/tlsdebug/inject.go
-    id: r.real-variant-nil-config-guard
+  - id: r.real-variant-nil-config-guard
     level: MUST
     text: The real Inject implementation in inject.go must return nil immediately
       when the passed *tls.Config is nil, before any key log file is opened or any
       log line is emitted.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/helper/tlsdebug/inject.go
-    id: r.real-variant-open-failure-logs-and-continues
+  - id: r.real-variant-open-failure-logs-and-continues
     level: MUST
     text: When openKeyLogFile fails, Inject must report the failure with logger.Error
       under the message "could not open TLS key log file" and the error value, then
       continue in the same call rather than returning early; the returned file value
       is used unguarded afterwards, so the error path assumes openKeyLogFile yields
       a usable non-nil file.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/helper/tlsdebug/inject.go
-    - function:6840fc0fc02bdfd7359c69c222489b7b
-    id: r.variants-share-signature
+  - id: r.variants-share-signature
     level: MUST
     text: The stub and the real implementation must expose the identical exported
       symbol Inject with the signature taking an hclog.Logger and a *tls.Config and
       returning a *tls.Config, so that swapping the compiled file selects the behaviour
       without any call site change.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/internal/helper/tlsdebug/inject.go
+    - function:6840fc0fc02bdfd7359c69c222489b7b
+  interfaces:
+  - name: Inject
+    kind: function
+    signature: func Inject(_ hclog.Logger, config *tls.Config) *tls.Config
+    file: third_party/openbao/internal/helper/tlsdebug/dummy_inject.go
+codeRefIndex:
+- file:third_party/openbao/internal/helper/tlsdebug/dummy_inject.go dummy_inject.go@third_party/openbao/internal/helper/tlsdebug/dummy_inject.go
+- file:third_party/openbao/internal/helper/tlsdebug/inject.go inject.go@third_party/openbao/internal/helper/tlsdebug/inject.go
+- function:6840fc0fc02bdfd7359c69c222489b7b Inject@third_party/openbao/internal/helper/tlsdebug/dummy_inject.go:11

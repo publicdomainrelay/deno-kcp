@@ -1,12 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/internal/vault/external_tests/tlslistener_binary/tls_test.go
-  tls_test.go@third_party/openbao/internal/vault/external_tests/tlslistener_binary/tls_test.go
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-vault-external-tests-tlslistener-binary
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'This context exists to prove, against a real OpenBao binary in real containers,
     that the ACME-driven TLS listener works end to end: HTTP-01 and TLS-ALPN-01 challenge
     solving, privileged and non-privileged port binding, custom cache paths, custom
@@ -15,11 +14,8 @@ spec:
     root-privileged port 80/443 binding, Docker port publishing, or DNS-based challenge
     routing, so the checks run as skipped-by-default external tests gated on a built
     binary being supplied.'
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/internal/vault/external_tests/tlslistener_binary/tls_test.go
-    id: r.acme-listener-configuration
+  - id: r.acme-listener-configuration
     level: MUST
     text: Each scenario declares an additional plain TCP listener with tls_disable
       true to serve as the ACME directory server and an additional TCP listener with
@@ -28,49 +24,49 @@ spec:
       true with tls_acme_domains []string{"openbao.dadgarcorp.com"}, and the non-privileged
       scenario sets tls_acme_alpn_challenge_port 8222 and tls_acme_challenge_host
       127.0.0.1 to avoid root.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/tlslistener_binary/tls_test.go
-    id: r.active-node-and-timeout
+  - id: r.active-node-and-timeout
     level: MUST
     text: Each test waits for an active node with testcluster.WaitForActiveNode under
       a context bounded by a 60 second timeout, requires no error and a non-nil node,
       and obtains the API client from cluster.ClusterNodes[node].APIClient().
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/tlslistener_binary/tls_test.go
-    id: r.alpn-dns-deny-list
+  - id: r.alpn-dns-deny-list
     level: MUST
     text: The ALPN scenario installs a DNS resolver on the cluster network for dadgarcorp.com,
       adds A records for openbao.dadgarcorp.com and invalid.dadgarcorp.com pointing
       at the container IP, pushes the config, writes pki/config/acme with enabled
       true and the resolver's remote address, expects certificate acquisition to succeed
       for openbao.dadgarcorp.com:443 and to fail for invalid.dadgarcorp.com:443.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/tlslistener_binary/tls_test.go
-    id: r.docker-cluster-provisioning
+  - id: r.docker-cluster-provisioning
     level: MUST
     text: Each test builds DockerClusterOptions against image quay.io/openbao/openbao
       with tag latest, sets VaultBinary to the value of BAO_BINARY, sets Entrypoint
       to the result of entrypointPath, uses one core, and passes TRACE log level plus
       the scenario's AdditionalListeners into VaultNodeConfig, then starts the cluster
       with docker.NewTestDockerCluster and defers cluster.Cleanup.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/tlslistener_binary/tls_test.go
-    id: r.entrypoint-path-resolution
+  - id: r.entrypoint-path-resolution
     level: MUST
     text: entrypointPath derives the Docker entrypoint from the calling source file
       using runtime.Caller(0) and joins the file's directory with ../../../../.release/docker/docker-entrypoint.sh;
       when runtime.Caller reports not ok it logs that it is assuming a path and returns
       the same relative path unresolved.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/tlslistener_binary/tls_test.go
-    id: r.non-privileged-dns-routing
+  - id: r.non-privileged-dns-routing
     level: MUST
     text: The non-privileged scenario points the openbao.dadgarcorp.com A record at
       the container gateway IP so the ACME server reaches the listener through Docker's
       host 443 to container 8443 mapping.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/tlslistener_binary/tls_test.go
-    id: r.pki-self-hosting-setup
+  - id: r.pki-self-hosting-setup
     level: MUST
     text: setupPki mounts a pki secrets engine with 16h default and 32h max lease
       TTL and allowed response headers Last-Modified, Replay-Nonce, Link and Location,
@@ -78,24 +74,24 @@ spec:
       followed by the scenario's ACME port plus /v1/pki, enables pki/config/acme,
       generates an internal EC root named root with common name "Root R1", and returns
       the generated certificate string.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/tlslistener_binary/tls_test.go
-    id: r.root-privilege-per-scenario
+  - id: r.root-privilege-per-scenario
     level: MUST
     text: The privileged and ALPN scenarios set Root true so the container can bind
       ports 80 and 443, while the non-privileged scenario sets Root false and instead
       publishes container port 8443 as host port 443 through PublishPorts.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/tlslistener_binary/tls_test.go
-    id: r.skip-without-binary
+  - id: r.skip-without-binary
     level: MUST
     text: Every test function other than the helpers reads the BAO_BINARY variable
       through api.ReadBaoVariable and calls t.Skip with the message "only running
       docker test when $BAO_BINARY present" when that variable is empty, so the suite
       is a no-op unless a built binary path is supplied.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/tlslistener_binary/tls_test.go
-    id: r.tls-verification-container
+  - id: r.tls-verification-container
     level: MUST
     text: validateTLS builds and runs an Alpine image containing curl with the expected
       root certificate written to /root.pem, joins it to the cluster's container network,
@@ -103,4 +99,8 @@ spec:
       and the supplied nameserver, then runs curl --verbose --cacert /root.pem against
       https://<address>/v1/sys/health and fails the test when the command's non-zero
       return code disagrees with the expectFail argument.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/tlslistener_binary/tls_test.go
+codeRefIndex:
+- file:third_party/openbao/internal/vault/external_tests/tlslistener_binary/tls_test.go
+  tls_test.go@third_party/openbao/internal/vault/external_tests/tlslistener_binary/tls_test.go

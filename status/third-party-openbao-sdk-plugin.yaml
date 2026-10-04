@@ -1,17 +1,20 @@
+syncedCommit: 89cee50ec5aea977a42f904a758e506729e1158e
+syncedFingerprint: dc3753fe621ae3eb96201f481216f666af1d7970f84185ee8976e24156567e1f
+realizedSpecHash: e456de0821725a61333af32d7d34a0838c6419c8f142eac6fcc005d4b16b7206
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
+- type: CodeSynced
+  status: "True"
   reason: InterfacesObserved
-  status: "True"
-  type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+  message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+- type: Drifted
   status: "False"
-  type: Drifted
-- message: the spec passes the validator
-  reason: ValidatorPassed
+  reason: FingerprintEqual
+  message: observed facts match the synced fingerprint
+- type: SpecValid
   status: "True"
-  type: SpecValid
+  reason: ValidatorPassed
+  message: the spec passes the validator
 observed:
   files:
   - third_party/openbao/sdk/plugin/backend.go
@@ -29,806 +32,803 @@ observed:
   - third_party/openbao/sdk/plugin/plugin_v5.go
   - third_party/openbao/sdk/plugin/serve.go
   - third_party/openbao/sdk/plugin/storage_test.go
-  fingerprint: dc3753fe621ae3eb96201f481216f666af1d7970f84185ee8976e24156567e1f
   interfaces:
-  - codegraphId: struct:a503c0d462a2d348fcc0594174abc825
-    file: third_party/openbao/sdk/plugin/backend.go
+  - name: GRPCBackendPlugin
     kind: struct
+    file: third_party/openbao/sdk/plugin/backend.go
     line: 25
-    name: GRPCBackendPlugin
-  - codegraphId: method:0d2b3ec3df7e24317bcaa59cdffacde0
-    file: third_party/openbao/sdk/plugin/backend.go
+    codegraphId: struct:a503c0d462a2d348fcc0594174abc825
+  - name: GRPCBackendPlugin.GRPCServer
     kind: method
-    line: 36
-    name: GRPCBackendPlugin.GRPCServer
     signature: (broker *plugin.GRPCBroker, s *grpc.Server) error
-  - codegraphId: method:997450692afef7e5ec0642502549ce4f
     file: third_party/openbao/sdk/plugin/backend.go
+    line: 36
+    codegraphId: method:0d2b3ec3df7e24317bcaa59cdffacde0
+  - name: GRPCBackendPlugin.GRPCClient
     kind: method
-    line: 60
-    name: GRPCBackendPlugin.GRPCClient
     signature: (ctx context.Context, broker *plugin.GRPCBroker, c *grpc.ClientConn)
       (any, error)
-  - codegraphId: method:2b4b94171d09bc27210585e5a91bcb4e
-    file: third_party/openbao/sdk/plugin/grpc_backend_client.go
+    file: third_party/openbao/sdk/plugin/backend.go
+    line: 60
+    codegraphId: method:997450692afef7e5ec0642502549ce4f
+  - name: backendGRPCPluginClient.Initialize
     kind: method
-    line: 51
-    name: backendGRPCPluginClient.Initialize
     signature: (ctx context.Context, _ *logical.InitializationRequest) error
-  - codegraphId: method:1b7848a15e29d6ec84624977a059f707
     file: third_party/openbao/sdk/plugin/grpc_backend_client.go
+    line: 51
+    codegraphId: method:2b4b94171d09bc27210585e5a91bcb4e
+  - name: backendGRPCPluginClient.HandleRequest
     kind: method
-    line: 83
-    name: backendGRPCPluginClient.HandleRequest
     signature: (ctx context.Context, req *logical.Request) (*logical.Response, error)
-  - codegraphId: method:2bdb41cc13742562d20fd0cbb78c90d5
     file: third_party/openbao/sdk/plugin/grpc_backend_client.go
+    line: 83
+    codegraphId: method:1b7848a15e29d6ec84624977a059f707
+  - name: backendGRPCPluginClient.SpecialPaths
     kind: method
-    line: 119
-    name: backendGRPCPluginClient.SpecialPaths
     signature: () *logical.Paths
-  - codegraphId: method:32468eb19e567c90f508f68e9638ac96
     file: third_party/openbao/sdk/plugin/grpc_backend_client.go
+    line: 119
+    codegraphId: method:2bdb41cc13742562d20fd0cbb78c90d5
+  - name: backendGRPCPluginClient.System
     kind: method
-    line: 140
-    name: backendGRPCPluginClient.System
     signature: () logical.SystemView
-  - codegraphId: method:52b6837596c21a1265d816b14a5d018c
     file: third_party/openbao/sdk/plugin/grpc_backend_client.go
+    line: 140
+    codegraphId: method:32468eb19e567c90f508f68e9638ac96
+  - name: backendGRPCPluginClient.Logger
     kind: method
-    line: 146
-    name: backendGRPCPluginClient.Logger
     signature: () log.Logger
-  - codegraphId: method:849a48d975eba89fcea2bbba2cfe3767
     file: third_party/openbao/sdk/plugin/grpc_backend_client.go
+    line: 146
+    codegraphId: method:52b6837596c21a1265d816b14a5d018c
+  - name: backendGRPCPluginClient.HandleExistenceCheck
     kind: method
-    line: 150
-    name: backendGRPCPluginClient.HandleExistenceCheck
     signature: (ctx context.Context, req *logical.Request) (bool, bool, error)
-  - codegraphId: method:a11898aa7534655cd9ba23c29ab827c2
     file: third_party/openbao/sdk/plugin/grpc_backend_client.go
+    line: 150
+    codegraphId: method:849a48d975eba89fcea2bbba2cfe3767
+  - name: backendGRPCPluginClient.Cleanup
     kind: method
-    line: 180
-    name: backendGRPCPluginClient.Cleanup
     signature: (ctx context.Context)
-  - codegraphId: method:fa3fd4c37a02152629887b6a392cbc01
     file: third_party/openbao/sdk/plugin/grpc_backend_client.go
+    line: 180
+    codegraphId: method:a11898aa7534655cd9ba23c29ab827c2
+  - name: backendGRPCPluginClient.InvalidateKey
     kind: method
-    line: 199
-    name: backendGRPCPluginClient.InvalidateKey
     signature: (ctx context.Context, key string)
-  - codegraphId: method:6171e5e250fab85daba7f4057e0f8361
     file: third_party/openbao/sdk/plugin/grpc_backend_client.go
+    line: 199
+    codegraphId: method:fa3fd4c37a02152629887b6a392cbc01
+  - name: backendGRPCPluginClient.Setup
     kind: method
-    line: 214
-    name: backendGRPCPluginClient.Setup
     signature: (ctx context.Context, config *logical.BackendConfig) error
-  - codegraphId: method:ae7e1099a08c2758510eb7c78adfa8c9
     file: third_party/openbao/sdk/plugin/grpc_backend_client.go
+    line: 214
+    codegraphId: method:6171e5e250fab85daba7f4057e0f8361
+  - name: backendGRPCPluginClient.Type
     kind: method
-    line: 274
-    name: backendGRPCPluginClient.Type
     signature: () logical.BackendType
-  - codegraphId: method:22236a5bc814d9e48397b652c607d2b5
     file: third_party/openbao/sdk/plugin/grpc_backend_client.go
+    line: 274
+    codegraphId: method:ae7e1099a08c2758510eb7c78adfa8c9
+  - name: backendGRPCPluginClient.PluginVersion
     kind: method
-    line: 283
-    name: backendGRPCPluginClient.PluginVersion
     signature: () logical.PluginVersion
-  - codegraphId: method:f6ef18e4d1cae2d24bdc40d6d34388d3
     file: third_party/openbao/sdk/plugin/grpc_backend_client.go
+    line: 283
+    codegraphId: method:22236a5bc814d9e48397b652c607d2b5
+  - name: backendGRPCPluginClient.IsExternal
     kind: method
-    line: 299
-    name: backendGRPCPluginClient.IsExternal
     signature: () bool
-  - codegraphId: method:69224966363a14fd3c53f406c3df600e
-    file: third_party/openbao/sdk/plugin/grpc_backend_server.go
+    file: third_party/openbao/sdk/plugin/grpc_backend_client.go
+    line: 299
+    codegraphId: method:f6ef18e4d1cae2d24bdc40d6d34388d3
+  - name: backendGRPCPluginServer.Setup
     kind: method
-    line: 78
-    name: backendGRPCPluginServer.Setup
     signature: (ctx context.Context, args *pb.SetupArgs) (*pb.SetupReply, error)
-  - codegraphId: method:174d5d0103acb1b2ed4a07af8ea49a70
     file: third_party/openbao/sdk/plugin/grpc_backend_server.go
+    line: 78
+    codegraphId: method:69224966363a14fd3c53f406c3df600e
+  - name: backendGRPCPluginServer.HandleRequest
     kind: method
-    line: 129
-    name: backendGRPCPluginServer.HandleRequest
     signature: (ctx context.Context, args *pb.HandleRequestArgs) (*pb.HandleRequestReply,
       error)
-  - codegraphId: method:86c6017b49367f96bf8a53b00d36843a
     file: third_party/openbao/sdk/plugin/grpc_backend_server.go
+    line: 129
+    codegraphId: method:174d5d0103acb1b2ed4a07af8ea49a70
+  - name: backendGRPCPluginServer.Initialize
     kind: method
-    line: 162
-    name: backendGRPCPluginServer.Initialize
     signature: (ctx context.Context, _ *pb.InitializeArgs) (*pb.InitializeReply, error)
-  - codegraphId: method:7fa969afae8f26249e492ca183084ae9
     file: third_party/openbao/sdk/plugin/grpc_backend_server.go
+    line: 162
+    codegraphId: method:86c6017b49367f96bf8a53b00d36843a
+  - name: backendGRPCPluginServer.SpecialPaths
     kind: method
-    line: 188
-    name: backendGRPCPluginServer.SpecialPaths
     signature: (ctx context.Context, args *pb.Empty) (*pb.SpecialPathsReply, error)
-  - codegraphId: method:b9809ca3d0d49ddac6ce541c8c41bce2
     file: third_party/openbao/sdk/plugin/grpc_backend_server.go
+    line: 188
+    codegraphId: method:7fa969afae8f26249e492ca183084ae9
+  - name: backendGRPCPluginServer.HandleExistenceCheck
     kind: method
-    line: 212
-    name: backendGRPCPluginServer.HandleExistenceCheck
     signature: (ctx context.Context, args *pb.HandleExistenceCheckArgs) (*pb.HandleExistenceCheckReply,
       error)
-  - codegraphId: method:8828d5fb8d171f48905bed184ceb7b0e
     file: third_party/openbao/sdk/plugin/grpc_backend_server.go
+    line: 212
+    codegraphId: method:b9809ca3d0d49ddac6ce541c8c41bce2
+  - name: backendGRPCPluginServer.Cleanup
     kind: method
-    line: 240
-    name: backendGRPCPluginServer.Cleanup
     signature: (ctx context.Context, _ *pb.Empty) (*pb.Empty, error)
-  - codegraphId: method:457b5284d6a22cb351b84ae2142ed414
     file: third_party/openbao/sdk/plugin/grpc_backend_server.go
+    line: 240
+    codegraphId: method:8828d5fb8d171f48905bed184ceb7b0e
+  - name: backendGRPCPluginServer.InvalidateKey
     kind: method
-    line: 267
-    name: backendGRPCPluginServer.InvalidateKey
     signature: (ctx context.Context, args *pb.InvalidateKeyArgs) (*pb.Empty, error)
-  - codegraphId: method:d7835db581d6f33db54f4a6549e8502e
     file: third_party/openbao/sdk/plugin/grpc_backend_server.go
+    line: 267
+    codegraphId: method:457b5284d6a22cb351b84ae2142ed414
+  - name: backendGRPCPluginServer.Type
     kind: method
-    line: 281
-    name: backendGRPCPluginServer.Type
     signature: (ctx context.Context, _ *pb.Empty) (*pb.TypeReply, error)
-  - codegraphId: method:1c58ea704d1ea3d538ed36c65bd1e213
     file: third_party/openbao/sdk/plugin/grpc_backend_server.go
+    line: 281
+    codegraphId: method:d7835db581d6f33db54f4a6549e8502e
+  - name: backendGRPCPluginServer.Version
     kind: method
-    line: 292
-    name: backendGRPCPluginServer.Version
     signature: (ctx context.Context, _ *logical.Empty) (*logical.VersionReply, error)
-  - codegraphId: struct:75bff9d9341c05cb18f26dc8d7adf9af
-    file: third_party/openbao/sdk/plugin/grpc_storage.go
+    file: third_party/openbao/sdk/plugin/grpc_backend_server.go
+    line: 292
+    codegraphId: method:1c58ea704d1ea3d538ed36c65bd1e213
+  - name: GRPCStorageClient
     kind: struct
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
     line: 53
-    name: GRPCStorageClient
-  - codegraphId: struct:4cc4c7e1718050b53ac2cb7339bc6c46
-    file: third_party/openbao/sdk/plugin/grpc_storage.go
+    codegraphId: struct:75bff9d9341c05cb18f26dc8d7adf9af
+  - name: GRPCTransactionalStorageClient
     kind: struct
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
     line: 60
-    name: GRPCTransactionalStorageClient
-  - codegraphId: struct:68cb40d9fa339623f078211d9efe0d88
-    file: third_party/openbao/sdk/plugin/grpc_storage.go
+    codegraphId: struct:4cc4c7e1718050b53ac2cb7339bc6c46
+  - name: GRPCStorageClientTransaction
     kind: struct
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
     line: 66
-    name: GRPCStorageClientTransaction
-  - codegraphId: method:f5fd3dce8409afac9488cce9128b1095
-    file: third_party/openbao/sdk/plugin/grpc_storage.go
+    codegraphId: struct:68cb40d9fa339623f078211d9efe0d88
+  - name: GRPCStorageClient.List
     kind: method
-    line: 70
-    name: GRPCStorageClient.List
     signature: (ctx context.Context, prefix string) ([]string, error)
-  - codegraphId: method:2af708be0578b6d482b348656fbf5525
     file: third_party/openbao/sdk/plugin/grpc_storage.go
+    line: 70
+    codegraphId: method:f5fd3dce8409afac9488cce9128b1095
+  - name: GRPCStorageClient.ListPage
     kind: method
-    line: 84
-    name: GRPCStorageClient.ListPage
     signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
       error)
-  - codegraphId: method:af0cce5180fd3f3a609687842173904d
     file: third_party/openbao/sdk/plugin/grpc_storage.go
+    line: 84
+    codegraphId: method:2af708be0578b6d482b348656fbf5525
+  - name: GRPCStorageClient.Get
     kind: method
-    line: 126
-    name: GRPCStorageClient.Get
     signature: (ctx context.Context, key string) (*logical.StorageEntry, error)
-  - codegraphId: method:03d239f3a6001ecf6b8baf024b63c2ce
     file: third_party/openbao/sdk/plugin/grpc_storage.go
+    line: 126
+    codegraphId: method:af0cce5180fd3f3a609687842173904d
+  - name: GRPCStorageClient.Put
     kind: method
-    line: 140
-    name: GRPCStorageClient.Put
     signature: (ctx context.Context, entry *logical.StorageEntry) error
-  - codegraphId: method:c77cef73025aa7cc0c7cb4ebbe94872e
     file: third_party/openbao/sdk/plugin/grpc_storage.go
+    line: 140
+    codegraphId: method:03d239f3a6001ecf6b8baf024b63c2ce
+  - name: GRPCStorageClient.Delete
     kind: method
-    line: 154
-    name: GRPCStorageClient.Delete
     signature: (ctx context.Context, key string) error
-  - codegraphId: method:ce75c71d01169b33386fcc1b37edfcf7
     file: third_party/openbao/sdk/plugin/grpc_storage.go
+    line: 154
+    codegraphId: method:c77cef73025aa7cc0c7cb4ebbe94872e
+  - name: GRPCTransactionalStorageClient.BeginReadOnlyTx
     kind: method
+    signature: (ctx context.Context) (logical.Transaction, error)
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
     line: 168
-    name: GRPCTransactionalStorageClient.BeginReadOnlyTx
-    signature: (ctx context.Context) (logical.Transaction, error)
-  - codegraphId: method:b118df18a01349acaff756f826bcde96
-    file: third_party/openbao/sdk/plugin/grpc_storage.go
+    codegraphId: method:ce75c71d01169b33386fcc1b37edfcf7
+  - name: GRPCTransactionalStorageClient.BeginTx
     kind: method
+    signature: (ctx context.Context) (logical.Transaction, error)
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
     line: 182
-    name: GRPCTransactionalStorageClient.BeginTx
-    signature: (ctx context.Context) (logical.Transaction, error)
-  - codegraphId: method:b21f0c9f65bfabbac120694d4f7c8d8a
-    file: third_party/openbao/sdk/plugin/grpc_storage.go
+    codegraphId: method:b118df18a01349acaff756f826bcde96
+  - name: GRPCStorageClientTransaction.Commit
     kind: method
+    signature: (ctx context.Context) error
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
     line: 196
-    name: GRPCStorageClientTransaction.Commit
-    signature: (ctx context.Context) error
-  - codegraphId: method:0bfc2e84c1c3f42c856a3c8e25811b37
-    file: third_party/openbao/sdk/plugin/grpc_storage.go
+    codegraphId: method:b21f0c9f65bfabbac120694d4f7c8d8a
+  - name: GRPCStorageClientTransaction.Rollback
     kind: method
+    signature: (ctx context.Context) error
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
     line: 211
-    name: GRPCStorageClientTransaction.Rollback
-    signature: (ctx context.Context) error
-  - codegraphId: struct:36165ef9e16c455d89dcea90f1f30388
-    file: third_party/openbao/sdk/plugin/grpc_storage.go
+    codegraphId: method:0bfc2e84c1c3f42c856a3c8e25811b37
+  - name: GRPCStorageServer
     kind: struct
-    line: 227
-    name: GRPCStorageServer
-  - codegraphId: method:75f61143581794a8eb1671bad4483593
     file: third_party/openbao/sdk/plugin/grpc_storage.go
+    line: 227
+    codegraphId: struct:36165ef9e16c455d89dcea90f1f30388
+  - name: GRPCStorageServer.List
     kind: method
-    line: 236
-    name: GRPCStorageServer.List
     signature: (ctx context.Context, args *pb.StorageListArgs) (*pb.StorageListReply,
       error)
-  - codegraphId: method:f21d332644b649aa013dc602d0c3e3fb
     file: third_party/openbao/sdk/plugin/grpc_storage.go
+    line: 236
+    codegraphId: method:75f61143581794a8eb1671bad4483593
+  - name: GRPCStorageServer.ListPage
     kind: method
-    line: 256
-    name: GRPCStorageServer.ListPage
     signature: (ctx context.Context, args *pb.StorageListPageArgs) (*pb.StorageListReply,
       error)
-  - codegraphId: method:e62d5db3e874584c8e85f7aa82ef3f23
     file: third_party/openbao/sdk/plugin/grpc_storage.go
+    line: 256
+    codegraphId: method:f21d332644b649aa013dc602d0c3e3fb
+  - name: GRPCStorageServer.Get
     kind: method
-    line: 276
-    name: GRPCStorageServer.Get
     signature: (ctx context.Context, args *pb.StorageGetArgs) (*pb.StorageGetReply,
       error)
-  - codegraphId: method:c7c8d68ccf7cc2596400e9443b552e5e
     file: third_party/openbao/sdk/plugin/grpc_storage.go
+    line: 276
+    codegraphId: method:e62d5db3e874584c8e85f7aa82ef3f23
+  - name: GRPCStorageServer.Put
     kind: method
-    line: 302
-    name: GRPCStorageServer.Put
     signature: (ctx context.Context, args *pb.StoragePutArgs) (*pb.StoragePutReply,
       error)
-  - codegraphId: method:136decbd6e0368d8a3c88b89f1e20706
     file: third_party/openbao/sdk/plugin/grpc_storage.go
+    line: 302
+    codegraphId: method:c7c8d68ccf7cc2596400e9443b552e5e
+  - name: GRPCStorageServer.Delete
     kind: method
-    line: 321
-    name: GRPCStorageServer.Delete
     signature: (ctx context.Context, args *pb.StorageDeleteArgs) (*pb.StorageDeleteReply,
       error)
-  - codegraphId: method:87d30b96c7974d29b4b026a35d70dc99
     file: third_party/openbao/sdk/plugin/grpc_storage.go
+    line: 321
+    codegraphId: method:136decbd6e0368d8a3c88b89f1e20706
+  - name: GRPCStorageServer.IsTransactional
     kind: method
-    line: 340
-    name: GRPCStorageServer.IsTransactional
     signature: (ctx context.Context, args *pb.Empty) (*pb.StorageIsTransactionalReply,
       error)
-  - codegraphId: method:b2f1700bd74bead042a3b39ffab268ba
     file: third_party/openbao/sdk/plugin/grpc_storage.go
+    line: 340
+    codegraphId: method:87d30b96c7974d29b4b026a35d70dc99
+  - name: GRPCStorageServer.BeginReadOnlyTx
     kind: method
+    signature: (ctx context.Context, args *pb.Empty) (*pb.StorageBeginTxReply, error)
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
     line: 351
-    name: GRPCStorageServer.BeginReadOnlyTx
-    signature: (ctx context.Context, args *pb.Empty) (*pb.StorageBeginTxReply, error)
-  - codegraphId: method:89ebc98d3eb27194f9450850bc8306c4
-    file: third_party/openbao/sdk/plugin/grpc_storage.go
+    codegraphId: method:b2f1700bd74bead042a3b39ffab268ba
+  - name: GRPCStorageServer.BeginTx
     kind: method
+    signature: (ctx context.Context, args *pb.Empty) (*pb.StorageBeginTxReply, error)
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
     line: 379
-    name: GRPCStorageServer.BeginTx
-    signature: (ctx context.Context, args *pb.Empty) (*pb.StorageBeginTxReply, error)
-  - codegraphId: method:497ac0debf7f4e2768f4ce31af9d5819
-    file: third_party/openbao/sdk/plugin/grpc_storage.go
+    codegraphId: method:89ebc98d3eb27194f9450850bc8306c4
+  - name: GRPCStorageServer.Commit
     kind: method
-    line: 407
-    name: GRPCStorageServer.Commit
     signature: (ctx context.Context, args *pb.StorageCommitTxArgs) (*pb.StorageCommitTxReply,
       error)
-  - codegraphId: method:45f821daf05c11785b0e7b5b9143b7e3
     file: third_party/openbao/sdk/plugin/grpc_storage.go
+    line: 407
+    codegraphId: method:497ac0debf7f4e2768f4ce31af9d5819
+  - name: GRPCStorageServer.Rollback
     kind: method
-    line: 426
-    name: GRPCStorageServer.Rollback
     signature: (ctx context.Context, args *pb.StorageRollbackTxArgs) (*pb.StorageRollbackTxReply,
       error)
-  - codegraphId: struct:3311490cc6926794ff20c280ed074776
     file: third_party/openbao/sdk/plugin/grpc_storage.go
+    line: 426
+    codegraphId: method:45f821daf05c11785b0e7b5b9143b7e3
+  - name: NOOPStorage
     kind: struct
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
     line: 447
-    name: NOOPStorage
-  - codegraphId: method:b48d2ce520ef90129e6973a01e0f8074
-    file: third_party/openbao/sdk/plugin/grpc_storage.go
+    codegraphId: struct:3311490cc6926794ff20c280ed074776
+  - name: NOOPStorage.List
     kind: method
-    line: 449
-    name: NOOPStorage.List
     signature: (_ context.Context, prefix string) ([]string, error)
-  - codegraphId: method:ad7976fe5731b7deb62e55eafbff55a6
     file: third_party/openbao/sdk/plugin/grpc_storage.go
+    line: 449
+    codegraphId: method:b48d2ce520ef90129e6973a01e0f8074
+  - name: NOOPStorage.ListPage
     kind: method
-    line: 453
-    name: NOOPStorage.ListPage
     signature: (_ context.Context, prefix string, after string, limit int) ([]string,
       error)
-  - codegraphId: method:3653e0f25154a788fd8bf3e5584cf0bb
     file: third_party/openbao/sdk/plugin/grpc_storage.go
+    line: 453
+    codegraphId: method:ad7976fe5731b7deb62e55eafbff55a6
+  - name: NOOPStorage.Get
     kind: method
-    line: 457
-    name: NOOPStorage.Get
     signature: (_ context.Context, key string) (*logical.StorageEntry, error)
-  - codegraphId: method:b90b0c85be30968ce7d690be635d4af5
     file: third_party/openbao/sdk/plugin/grpc_storage.go
+    line: 457
+    codegraphId: method:3653e0f25154a788fd8bf3e5584cf0bb
+  - name: NOOPStorage.Put
     kind: method
-    line: 461
-    name: NOOPStorage.Put
     signature: (_ context.Context, entry *logical.StorageEntry) error
-  - codegraphId: method:eea055de18090a5d85bf81814bf4c023
     file: third_party/openbao/sdk/plugin/grpc_storage.go
+    line: 461
+    codegraphId: method:b90b0c85be30968ce7d690be635d4af5
+  - name: NOOPStorage.Delete
     kind: method
-    line: 465
-    name: NOOPStorage.Delete
     signature: (_ context.Context, key string) error
-  - codegraphId: method:bb04f4e7d6300db0c9d9eb7d2b8d30d2
-    file: third_party/openbao/sdk/plugin/grpc_system.go
+    file: third_party/openbao/sdk/plugin/grpc_storage.go
+    line: 465
+    codegraphId: method:eea055de18090a5d85bf81814bf4c023
+  - name: gRPCSystemViewClient.DefaultLeaseTTL
     kind: method
+    signature: () time.Duration
+    file: third_party/openbao/sdk/plugin/grpc_system.go
     line: 37
-    name: gRPCSystemViewClient.DefaultLeaseTTL
-    signature: () time.Duration
-  - codegraphId: method:62b42af3f498ecdedf39b47e5a59b142
-    file: third_party/openbao/sdk/plugin/grpc_system.go
+    codegraphId: method:bb04f4e7d6300db0c9d9eb7d2b8d30d2
+  - name: gRPCSystemViewClient.MaxLeaseTTL
     kind: method
+    signature: () time.Duration
+    file: third_party/openbao/sdk/plugin/grpc_system.go
     line: 46
-    name: gRPCSystemViewClient.MaxLeaseTTL
-    signature: () time.Duration
-  - codegraphId: method:9d63c2c5fb9316c9c75e74d4484061c5
-    file: third_party/openbao/sdk/plugin/grpc_system.go
+    codegraphId: method:62b42af3f498ecdedf39b47e5a59b142
+  - name: gRPCSystemViewClient.Tainted
     kind: method
+    signature: () bool
+    file: third_party/openbao/sdk/plugin/grpc_system.go
     line: 55
-    name: gRPCSystemViewClient.Tainted
-    signature: () bool
-  - codegraphId: method:2395253bf53d1ca1fa29f1fc054d3ac9
-    file: third_party/openbao/sdk/plugin/grpc_system.go
+    codegraphId: method:9d63c2c5fb9316c9c75e74d4484061c5
+  - name: gRPCSystemViewClient.CachingDisabled
     kind: method
+    signature: () bool
+    file: third_party/openbao/sdk/plugin/grpc_system.go
     line: 64
-    name: gRPCSystemViewClient.CachingDisabled
-    signature: () bool
-  - codegraphId: method:df5302098860fa1c559acabd0584a99d
-    file: third_party/openbao/sdk/plugin/grpc_system.go
+    codegraphId: method:2395253bf53d1ca1fa29f1fc054d3ac9
+  - name: gRPCSystemViewClient.ReplicationState
     kind: method
-    line: 73
-    name: gRPCSystemViewClient.ReplicationState
     signature: () consts.ReplicationState
-  - codegraphId: method:efdf4936ae6848e2d917209936a05933
     file: third_party/openbao/sdk/plugin/grpc_system.go
+    line: 73
+    codegraphId: method:df5302098860fa1c559acabd0584a99d
+  - name: gRPCSystemViewClient.ResponseWrapData
     kind: method
-    line: 82
-    name: gRPCSystemViewClient.ResponseWrapData
     signature: (ctx context.Context, data map[string]any, ttl time.Duration, jwt bool)
       (*wrapping.ResponseWrapInfo, error)
-  - codegraphId: method:1ae3ba74915527ef6a926ebbb0f3fc6d
     file: third_party/openbao/sdk/plugin/grpc_system.go
+    line: 82
+    codegraphId: method:efdf4936ae6848e2d917209936a05933
+  - name: gRPCSystemViewClient.NewPluginClient
     kind: method
-    line: 108
-    name: gRPCSystemViewClient.NewPluginClient
     signature: (ctx context.Context, config pluginutil.PluginClientConfig) (pluginutil.PluginClient,
       error)
-  - codegraphId: method:a46e8bdbd31d3f5cf2bcfae0f7a5ca24
     file: third_party/openbao/sdk/plugin/grpc_system.go
+    line: 108
+    codegraphId: method:1ae3ba74915527ef6a926ebbb0f3fc6d
+  - name: gRPCSystemViewClient.LookupPlugin
     kind: method
-    line: 112
-    name: gRPCSystemViewClient.LookupPlugin
     signature: (_ context.Context, _ string, _ consts.PluginType) (*pluginutil.PluginRunner,
       error)
-  - codegraphId: method:c83d99b9a7966749417ea648c9e58693
     file: third_party/openbao/sdk/plugin/grpc_system.go
+    line: 112
+    codegraphId: method:a46e8bdbd31d3f5cf2bcfae0f7a5ca24
+  - name: gRPCSystemViewClient.LookupPluginVersion
     kind: method
-    line: 116
-    name: gRPCSystemViewClient.LookupPluginVersion
     signature: (_ context.Context, _ string, _ consts.PluginType, _ string) (*pluginutil.PluginRunner,
       error)
-  - codegraphId: method:5601fa8d76148180217bd7e4bcbc8ac5
     file: third_party/openbao/sdk/plugin/grpc_system.go
+    line: 116
+    codegraphId: method:c83d99b9a7966749417ea648c9e58693
+  - name: gRPCSystemViewClient.ListVersionedPlugins
     kind: method
-    line: 120
-    name: gRPCSystemViewClient.ListVersionedPlugins
     signature: (_ context.Context, _ consts.PluginType) ([]pluginutil.VersionedPlugin,
       error)
-  - codegraphId: method:1d1c41691c3048a667c5cd4d8e0afd1b
     file: third_party/openbao/sdk/plugin/grpc_system.go
+    line: 120
+    codegraphId: method:5601fa8d76148180217bd7e4bcbc8ac5
+  - name: gRPCSystemViewClient.MlockEnabled
     kind: method
+    signature: () bool
+    file: third_party/openbao/sdk/plugin/grpc_system.go
     line: 124
-    name: gRPCSystemViewClient.MlockEnabled
-    signature: () bool
-  - codegraphId: method:551aaab528f8e62d257f4baf3aade951
-    file: third_party/openbao/sdk/plugin/grpc_system.go
+    codegraphId: method:1d1c41691c3048a667c5cd4d8e0afd1b
+  - name: gRPCSystemViewClient.LocalMount
     kind: method
+    signature: () bool
+    file: third_party/openbao/sdk/plugin/grpc_system.go
     line: 133
-    name: gRPCSystemViewClient.LocalMount
-    signature: () bool
-  - codegraphId: method:57a566aa4d92e2c762eadadf42057c42
-    file: third_party/openbao/sdk/plugin/grpc_system.go
+    codegraphId: method:551aaab528f8e62d257f4baf3aade951
+  - name: gRPCSystemViewClient.EntityInfo
     kind: method
-    line: 142
-    name: gRPCSystemViewClient.EntityInfo
     signature: (entityID string) (*logical.Entity, error)
-  - codegraphId: method:e0efc63498f235cd0515727182b848b6
     file: third_party/openbao/sdk/plugin/grpc_system.go
+    line: 142
+    codegraphId: method:57a566aa4d92e2c762eadadf42057c42
+  - name: gRPCSystemViewClient.GroupsForEntity
     kind: method
-    line: 156
-    name: gRPCSystemViewClient.GroupsForEntity
     signature: (entityID string) ([]*logical.Group, error)
-  - codegraphId: method:6aff4fc680fb4577d82c49b055e97031
     file: third_party/openbao/sdk/plugin/grpc_system.go
+    line: 156
+    codegraphId: method:e0efc63498f235cd0515727182b848b6
+  - name: gRPCSystemViewClient.PluginEnv
     kind: method
-    line: 170
-    name: gRPCSystemViewClient.PluginEnv
     signature: (ctx context.Context) (*logical.PluginEnvironment, error)
-  - codegraphId: method:0c70f9c91b6db5de7bbec6912b73a289
     file: third_party/openbao/sdk/plugin/grpc_system.go
+    line: 170
+    codegraphId: method:6aff4fc680fb4577d82c49b055e97031
+  - name: gRPCSystemViewClient.VaultVersion
     kind: method
+    signature: (ctx context.Context) (string, error)
+    file: third_party/openbao/sdk/plugin/grpc_system.go
     line: 179
-    name: gRPCSystemViewClient.VaultVersion
-    signature: (ctx context.Context) (string, error)
-  - codegraphId: method:c1020e640554a0650168abc499639ed7
-    file: third_party/openbao/sdk/plugin/grpc_system.go
+    codegraphId: method:0c70f9c91b6db5de7bbec6912b73a289
+  - name: gRPCSystemViewClient.GeneratePasswordFromPolicy
     kind: method
-    line: 188
-    name: gRPCSystemViewClient.GeneratePasswordFromPolicy
     signature: (ctx context.Context, policyName string) (password string, err error)
-  - codegraphId: method:3a1dca924eed95c6e760c193e701f724
     file: third_party/openbao/sdk/plugin/grpc_system.go
+    line: 188
+    codegraphId: method:c1020e640554a0650168abc499639ed7
+  - name: gRPCSystemViewClient.ClusterID
     kind: method
-    line: 199
-    name: gRPCSystemViewClient.ClusterID
     signature: (ctx context.Context) (string, error)
-  - codegraphId: method:ce78fa00ca219a668f694ac23fbc7351
     file: third_party/openbao/sdk/plugin/grpc_system.go
+    line: 199
+    codegraphId: method:3a1dca924eed95c6e760c193e701f724
+  - name: gRPCSystemViewClient.GetExternalKey
     kind: method
-    line: 208
-    name: gRPCSystemViewClient.GetExternalKey
     signature: (ctx context.Context, ref string) (kms.Key, error)
-  - codegraphId: method:3d20729ab9c557ad5d78002323aea05b
     file: third_party/openbao/sdk/plugin/grpc_system.go
+    line: 208
+    codegraphId: method:ce78fa00ca219a668f694ac23fbc7351
+  - name: gRPCSystemViewServer.DefaultLeaseTTL
     kind: method
+    signature: (ctx context.Context, _ *pb.Empty) (*pb.TTLReply, error)
+    file: third_party/openbao/sdk/plugin/grpc_system.go
     line: 218
-    name: gRPCSystemViewServer.DefaultLeaseTTL
-    signature: (ctx context.Context, _ *pb.Empty) (*pb.TTLReply, error)
-  - codegraphId: method:56f3c950c48a8b29aa4fe8cd387d11ff
-    file: third_party/openbao/sdk/plugin/grpc_system.go
+    codegraphId: method:3d20729ab9c557ad5d78002323aea05b
+  - name: gRPCSystemViewServer.MaxLeaseTTL
     kind: method
+    signature: (ctx context.Context, _ *pb.Empty) (*pb.TTLReply, error)
+    file: third_party/openbao/sdk/plugin/grpc_system.go
     line: 228
-    name: gRPCSystemViewServer.MaxLeaseTTL
-    signature: (ctx context.Context, _ *pb.Empty) (*pb.TTLReply, error)
-  - codegraphId: method:2827ddabfa1ea12b12ff2585eef1c0b5
-    file: third_party/openbao/sdk/plugin/grpc_system.go
+    codegraphId: method:56f3c950c48a8b29aa4fe8cd387d11ff
+  - name: gRPCSystemViewServer.Tainted
     kind: method
-    line: 238
-    name: gRPCSystemViewServer.Tainted
     signature: (ctx context.Context, _ *pb.Empty) (*pb.TaintedReply, error)
-  - codegraphId: method:0b9c4fcf76557462d9601358f6cd6b33
     file: third_party/openbao/sdk/plugin/grpc_system.go
+    line: 238
+    codegraphId: method:2827ddabfa1ea12b12ff2585eef1c0b5
+  - name: gRPCSystemViewServer.CachingDisabled
     kind: method
-    line: 248
-    name: gRPCSystemViewServer.CachingDisabled
     signature: (ctx context.Context, _ *pb.Empty) (*pb.CachingDisabledReply, error)
-  - codegraphId: method:fb7983ab86663ad5a00aaf4ed70262ed
     file: third_party/openbao/sdk/plugin/grpc_system.go
+    line: 248
+    codegraphId: method:0b9c4fcf76557462d9601358f6cd6b33
+  - name: gRPCSystemViewServer.ReplicationState
     kind: method
-    line: 258
-    name: gRPCSystemViewServer.ReplicationState
     signature: (ctx context.Context, _ *pb.Empty) (*pb.ReplicationStateReply, error)
-  - codegraphId: method:398632415ec05edc037747e24928860b
     file: third_party/openbao/sdk/plugin/grpc_system.go
+    line: 258
+    codegraphId: method:fb7983ab86663ad5a00aaf4ed70262ed
+  - name: gRPCSystemViewServer.ResponseWrapData
     kind: method
-    line: 268
-    name: gRPCSystemViewServer.ResponseWrapData
     signature: (ctx context.Context, args *pb.ResponseWrapDataArgs) (*pb.ResponseWrapDataReply,
       error)
-  - codegraphId: method:e26abcdb6480ea6847a2bdde7909e72e
     file: third_party/openbao/sdk/plugin/grpc_system.go
+    line: 268
+    codegraphId: method:398632415ec05edc037747e24928860b
+  - name: gRPCSystemViewServer.MlockEnabled
     kind: method
-    line: 296
-    name: gRPCSystemViewServer.MlockEnabled
     signature: (ctx context.Context, _ *pb.Empty) (*pb.MlockEnabledReply, error)
-  - codegraphId: method:2761d214a022b43b525b08cc20bf1f2e
     file: third_party/openbao/sdk/plugin/grpc_system.go
+    line: 296
+    codegraphId: method:e26abcdb6480ea6847a2bdde7909e72e
+  - name: gRPCSystemViewServer.LocalMount
     kind: method
-    line: 306
-    name: gRPCSystemViewServer.LocalMount
     signature: (ctx context.Context, _ *pb.Empty) (*pb.LocalMountReply, error)
-  - codegraphId: method:fdeaffa385a817571cccf38acc507597
     file: third_party/openbao/sdk/plugin/grpc_system.go
+    line: 306
+    codegraphId: method:2761d214a022b43b525b08cc20bf1f2e
+  - name: gRPCSystemViewServer.EntityInfo
     kind: method
-    line: 316
-    name: gRPCSystemViewServer.EntityInfo
     signature: (ctx context.Context, args *pb.EntityInfoArgs) (*pb.EntityInfoReply,
       error)
-  - codegraphId: method:e1cc9618ea74d0b8814aac12d7e4ec52
     file: third_party/openbao/sdk/plugin/grpc_system.go
+    line: 316
+    codegraphId: method:fdeaffa385a817571cccf38acc507597
+  - name: gRPCSystemViewServer.GroupsForEntity
     kind: method
-    line: 331
-    name: gRPCSystemViewServer.GroupsForEntity
     signature: (ctx context.Context, args *pb.EntityInfoArgs) (*pb.GroupsForEntityReply,
       error)
-  - codegraphId: method:cc1cb4ebeda431d45466d26314fedc2c
     file: third_party/openbao/sdk/plugin/grpc_system.go
+    line: 331
+    codegraphId: method:e1cc9618ea74d0b8814aac12d7e4ec52
+  - name: gRPCSystemViewServer.PluginEnv
     kind: method
-    line: 346
-    name: gRPCSystemViewServer.PluginEnv
     signature: (ctx context.Context, _ *pb.Empty) (*pb.PluginEnvReply, error)
-  - codegraphId: method:b0e00dbf53323e273e7b4b12db00bd58
     file: third_party/openbao/sdk/plugin/grpc_system.go
+    line: 346
+    codegraphId: method:cc1cb4ebeda431d45466d26314fedc2c
+  - name: gRPCSystemViewServer.GeneratePasswordFromPolicy
     kind: method
-    line: 361
-    name: gRPCSystemViewServer.GeneratePasswordFromPolicy
     signature: (ctx context.Context, req *pb.GeneratePasswordFromPolicyRequest) (*pb.GeneratePasswordFromPolicyReply,
       error)
-  - codegraphId: method:7cfdc096ae7c35dcaa4d4ed74a1e226d
     file: third_party/openbao/sdk/plugin/grpc_system.go
+    line: 361
+    codegraphId: method:b0e00dbf53323e273e7b4b12db00bd58
+  - name: gRPCSystemViewServer.ClusterInfo
     kind: method
-    line: 381
-    name: gRPCSystemViewServer.ClusterInfo
     signature: (ctx context.Context, _ *pb.Empty) (*pb.ClusterInfoReply, error)
-  - codegraphId: struct:e1626e6329eb97242334a06e3ae8490c
-    file: third_party/openbao/sdk/plugin/logger.go
+    file: third_party/openbao/sdk/plugin/grpc_system.go
+    line: 381
+    codegraphId: method:7cfdc096ae7c35dcaa4d4ed74a1e226d
+  - name: LoggerServer
     kind: struct
+    file: third_party/openbao/sdk/plugin/logger.go
     line: 8
-    name: LoggerServer
-  - codegraphId: method:6f823512103e15b7d2fb19f430b33018
-    file: third_party/openbao/sdk/plugin/logger.go
+    codegraphId: struct:e1626e6329eb97242334a06e3ae8490c
+  - name: LoggerServer.Trace
     kind: method
+    signature: (args *LoggerArgs, _ *struct{}) error
+    file: third_party/openbao/sdk/plugin/logger.go
     line: 12
-    name: LoggerServer.Trace
-    signature: (args *LoggerArgs, _ *struct{}) error
-  - codegraphId: method:b6507b22c172c90990e0eb7d4e8f0cec
-    file: third_party/openbao/sdk/plugin/logger.go
+    codegraphId: method:6f823512103e15b7d2fb19f430b33018
+  - name: LoggerServer.Debug
     kind: method
+    signature: (args *LoggerArgs, _ *struct{}) error
+    file: third_party/openbao/sdk/plugin/logger.go
     line: 17
-    name: LoggerServer.Debug
-    signature: (args *LoggerArgs, _ *struct{}) error
-  - codegraphId: method:53e2057919f10420235185dca2ee427e
-    file: third_party/openbao/sdk/plugin/logger.go
+    codegraphId: method:b6507b22c172c90990e0eb7d4e8f0cec
+  - name: LoggerServer.Info
     kind: method
+    signature: (args *LoggerArgs, _ *struct{}) error
+    file: third_party/openbao/sdk/plugin/logger.go
     line: 22
-    name: LoggerServer.Info
-    signature: (args *LoggerArgs, _ *struct{}) error
-  - codegraphId: method:4977729f86705e887d5ade2436ec205e
-    file: third_party/openbao/sdk/plugin/logger.go
+    codegraphId: method:53e2057919f10420235185dca2ee427e
+  - name: LoggerServer.Warn
     kind: method
+    signature: (args *LoggerArgs, reply *LoggerReply) error
+    file: third_party/openbao/sdk/plugin/logger.go
     line: 27
-    name: LoggerServer.Warn
-    signature: (args *LoggerArgs, reply *LoggerReply) error
-  - codegraphId: method:1ae9e1055c4c547f91bffecf87e3408b
-    file: third_party/openbao/sdk/plugin/logger.go
+    codegraphId: method:4977729f86705e887d5ade2436ec205e
+  - name: LoggerServer.Error
     kind: method
+    signature: (args *LoggerArgs, reply *LoggerReply) error
+    file: third_party/openbao/sdk/plugin/logger.go
     line: 32
-    name: LoggerServer.Error
-    signature: (args *LoggerArgs, reply *LoggerReply) error
-  - codegraphId: method:92eb0e725faced4fa0d99ea44e70cf97
-    file: third_party/openbao/sdk/plugin/logger.go
+    codegraphId: method:1ae9e1055c4c547f91bffecf87e3408b
+  - name: LoggerServer.Log
     kind: method
-    line: 37
-    name: LoggerServer.Log
     signature: (args *LoggerArgs, _ *struct{}) error
-  - codegraphId: method:3396e99d36fce725371b2778e424e876
     file: third_party/openbao/sdk/plugin/logger.go
+    line: 37
+    codegraphId: method:92eb0e725faced4fa0d99ea44e70cf97
+  - name: LoggerServer.SetLevel
     kind: method
-    line: 60
-    name: LoggerServer.SetLevel
     signature: (args int, _ *struct{}) error
-  - codegraphId: method:488f91ae4607e2292d664b435e509be9
     file: third_party/openbao/sdk/plugin/logger.go
+    line: 60
+    codegraphId: method:3396e99d36fce725371b2778e424e876
+  - name: LoggerServer.IsTrace
     kind: method
+    signature: (args any, reply *LoggerReply) error
+    file: third_party/openbao/sdk/plugin/logger.go
     line: 66
-    name: LoggerServer.IsTrace
-    signature: (args any, reply *LoggerReply) error
-  - codegraphId: method:d2462f5540638b8c135482ec04bcf790
-    file: third_party/openbao/sdk/plugin/logger.go
+    codegraphId: method:488f91ae4607e2292d664b435e509be9
+  - name: LoggerServer.IsDebug
     kind: method
+    signature: (args any, reply *LoggerReply) error
+    file: third_party/openbao/sdk/plugin/logger.go
     line: 74
-    name: LoggerServer.IsDebug
-    signature: (args any, reply *LoggerReply) error
-  - codegraphId: method:cd069b2e534930f4280bcda12c0355c7
-    file: third_party/openbao/sdk/plugin/logger.go
+    codegraphId: method:d2462f5540638b8c135482ec04bcf790
+  - name: LoggerServer.IsInfo
     kind: method
+    signature: (args any, reply *LoggerReply) error
+    file: third_party/openbao/sdk/plugin/logger.go
     line: 82
-    name: LoggerServer.IsInfo
-    signature: (args any, reply *LoggerReply) error
-  - codegraphId: method:3fc50b22a35911f3847c1171922e8a37
-    file: third_party/openbao/sdk/plugin/logger.go
+    codegraphId: method:cd069b2e534930f4280bcda12c0355c7
+  - name: LoggerServer.IsWarn
     kind: method
+    signature: (args any, reply *LoggerReply) error
+    file: third_party/openbao/sdk/plugin/logger.go
     line: 90
-    name: LoggerServer.IsWarn
-    signature: (args any, reply *LoggerReply) error
-  - codegraphId: struct:7541873c6f0569b781f1990617606094
-    file: third_party/openbao/sdk/plugin/logger.go
+    codegraphId: method:3fc50b22a35911f3847c1171922e8a37
+  - name: LoggerArgs
     kind: struct
+    file: third_party/openbao/sdk/plugin/logger.go
     line: 98
-    name: LoggerArgs
-  - codegraphId: struct:a5ad6798269be80327e32fe628b02f85
+    codegraphId: struct:7541873c6f0569b781f1990617606094
+  - name: LoggerReply
+    kind: struct
     file: third_party/openbao/sdk/plugin/logger.go
-    kind: struct
     line: 106
-    name: LoggerReply
-  - codegraphId: struct:f9823e24fba3e1260e837b886422d8ad
-    file: third_party/openbao/sdk/plugin/middleware.go
+    codegraphId: struct:a5ad6798269be80327e32fe628b02f85
+  - name: BackendTracingMiddleware
     kind: struct
+    file: third_party/openbao/sdk/plugin/middleware.go
     line: 16
-    name: BackendTracingMiddleware
-  - codegraphId: method:91284e7323134b9473a8506b919ebb3f
-    file: third_party/openbao/sdk/plugin/middleware.go
+    codegraphId: struct:f9823e24fba3e1260e837b886422d8ad
+  - name: BackendTracingMiddleware.Initialize
     kind: method
-    line: 25
-    name: BackendTracingMiddleware.Initialize
     signature: (ctx context.Context, req *logical.InitializationRequest) (err error)
-  - codegraphId: method:a9b16dd37ca7f3262412072c70d2b980
     file: third_party/openbao/sdk/plugin/middleware.go
+    line: 25
+    codegraphId: method:91284e7323134b9473a8506b919ebb3f
+  - name: BackendTracingMiddleware.HandleRequest
     kind: method
-    line: 34
-    name: BackendTracingMiddleware.HandleRequest
     signature: (ctx context.Context, req *logical.Request) (resp *logical.Response,
       err error)
-  - codegraphId: method:f8f27334db961c54bb8825d7d802016f
     file: third_party/openbao/sdk/plugin/middleware.go
+    line: 34
+    codegraphId: method:a9b16dd37ca7f3262412072c70d2b980
+  - name: BackendTracingMiddleware.SpecialPaths
     kind: method
-    line: 43
-    name: BackendTracingMiddleware.SpecialPaths
     signature: () *logical.Paths
-  - codegraphId: method:6c3b79a330f1e7fb9960dc33aabd1344
     file: third_party/openbao/sdk/plugin/middleware.go
+    line: 43
+    codegraphId: method:f8f27334db961c54bb8825d7d802016f
+  - name: BackendTracingMiddleware.System
     kind: method
-    line: 52
-    name: BackendTracingMiddleware.System
     signature: () logical.SystemView
-  - codegraphId: method:9db637163037661b5fbbb170477f6b5b
     file: third_party/openbao/sdk/plugin/middleware.go
+    line: 52
+    codegraphId: method:6c3b79a330f1e7fb9960dc33aabd1344
+  - name: BackendTracingMiddleware.Logger
     kind: method
-    line: 56
-    name: BackendTracingMiddleware.Logger
     signature: () log.Logger
-  - codegraphId: method:9986a138ce360977306f17709a79b2a9
     file: third_party/openbao/sdk/plugin/middleware.go
+    line: 56
+    codegraphId: method:9db637163037661b5fbbb170477f6b5b
+  - name: BackendTracingMiddleware.HandleExistenceCheck
     kind: method
-    line: 60
-    name: BackendTracingMiddleware.HandleExistenceCheck
     signature: (ctx context.Context, req *logical.Request) (found bool, exists bool,
       err error)
-  - codegraphId: method:59f04ddc1d9999dde1e74d9fc5048a1c
     file: third_party/openbao/sdk/plugin/middleware.go
+    line: 60
+    codegraphId: method:9986a138ce360977306f17709a79b2a9
+  - name: BackendTracingMiddleware.Cleanup
     kind: method
+    signature: (ctx context.Context)
+    file: third_party/openbao/sdk/plugin/middleware.go
     line: 69
-    name: BackendTracingMiddleware.Cleanup
-    signature: (ctx context.Context)
-  - codegraphId: method:b9cf47dc9e4fe3b8478ebaae51f24cfe
-    file: third_party/openbao/sdk/plugin/middleware.go
+    codegraphId: method:59f04ddc1d9999dde1e74d9fc5048a1c
+  - name: BackendTracingMiddleware.InvalidateKey
     kind: method
-    line: 78
-    name: BackendTracingMiddleware.InvalidateKey
     signature: (ctx context.Context, key string)
-  - codegraphId: method:f6a2cb63630585488da8793281efa51a
     file: third_party/openbao/sdk/plugin/middleware.go
+    line: 78
+    codegraphId: method:b9cf47dc9e4fe3b8478ebaae51f24cfe
+  - name: BackendTracingMiddleware.Setup
     kind: method
-    line: 87
-    name: BackendTracingMiddleware.Setup
     signature: (ctx context.Context, config *logical.BackendConfig) (err error)
-  - codegraphId: method:4c9edd8b5d478956d8e13fe47b9ab1f6
     file: third_party/openbao/sdk/plugin/middleware.go
+    line: 87
+    codegraphId: method:f6a2cb63630585488da8793281efa51a
+  - name: BackendTracingMiddleware.Type
     kind: method
-    line: 96
-    name: BackendTracingMiddleware.Type
     signature: () logical.BackendType
-  - codegraphId: method:6d67708fcb390a794fd381e1bce0fea4
     file: third_party/openbao/sdk/plugin/middleware.go
+    line: 96
+    codegraphId: method:4c9edd8b5d478956d8e13fe47b9ab1f6
+  - name: BackendTracingMiddleware.PluginVersion
     kind: method
-    line: 105
-    name: BackendTracingMiddleware.PluginVersion
     signature: () logical.PluginVersion
-  - codegraphId: struct:4ff22f80117fe175971f2ca0995534e2
-    file: third_party/openbao/sdk/plugin/plugin.go
+    file: third_party/openbao/sdk/plugin/middleware.go
+    line: 105
+    codegraphId: method:6d67708fcb390a794fd381e1bce0fea4
+  - name: BackendPluginClient
     kind: struct
+    file: third_party/openbao/sdk/plugin/plugin.go
     line: 21
-    name: BackendPluginClient
-  - codegraphId: method:0a9c4bf7a631037cad289dd4779bf323
-    file: third_party/openbao/sdk/plugin/plugin.go
+    codegraphId: struct:4ff22f80117fe175971f2ca0995534e2
+  - name: BackendPluginClient.Cleanup
     kind: method
-    line: 29
-    name: BackendPluginClient.Cleanup
     signature: (ctx context.Context)
-  - codegraphId: function:c7b21232958a5b231b82265ec8ac21a2
     file: third_party/openbao/sdk/plugin/plugin.go
+    line: 29
+    codegraphId: method:0a9c4bf7a631037cad289dd4779bf323
+  - name: NewBackendWithVersion
     kind: function
-    line: 38
-    name: NewBackendWithVersion
     signature: (ctx context.Context, pluginName string, pluginType consts.PluginType,
       sys pluginutil.LookRunnerUtil, conf *logical.BackendConfig, isMetadataMode bool,
       version string) (logical.Backend, error)
-  - codegraphId: function:6e3505f1f4c72782efe70fd3a74447ac
     file: third_party/openbao/sdk/plugin/plugin.go
+    line: 38
+    codegraphId: function:c7b21232958a5b231b82265ec8ac21a2
+  - name: NewBackend
     kind: function
-    line: 76
-    name: NewBackend
     signature: (ctx context.Context, pluginName string, pluginType consts.PluginType,
       sys pluginutil.LookRunnerUtil, conf *logical.BackendConfig, isMetadataMode bool)
       (logical.Backend, error)
-  - codegraphId: function:2102a0f2191f4030153f7abf9e3956e3
     file: third_party/openbao/sdk/plugin/plugin.go
+    line: 76
+    codegraphId: function:6e3505f1f4c72782efe70fd3a74447ac
+  - name: NewPluginClient
     kind: function
-    line: 80
-    name: NewPluginClient
     signature: (ctx context.Context, sys pluginutil.RunnerUtil, pluginRunner *pluginutil.PluginRunner,
       logger log.Logger, isMetadataMode bool) (logical.Backend, error)
-  - codegraphId: method:fa166f39c25c9aca21b6a93bae1fc16a
     file: third_party/openbao/sdk/plugin/plugin.go
+    line: 80
+    codegraphId: function:2102a0f2191f4030153f7abf9e3956e3
+  - name: BackendPluginClient.PluginVersion
     kind: method
+    signature: () logical.PluginVersion
+    file: third_party/openbao/sdk/plugin/plugin.go
     line: 150
-    name: BackendPluginClient.PluginVersion
-    signature: () logical.PluginVersion
-  - codegraphId: struct:7030d1a338b563e5b6ab73dcfc957b48
-    file: third_party/openbao/sdk/plugin/plugin_v5.go
+    codegraphId: method:fa166f39c25c9aca21b6a93bae1fc16a
+  - name: BackendPluginClientV5
     kind: struct
+    file: third_party/openbao/sdk/plugin/plugin_v5.go
     line: 21
-    name: BackendPluginClientV5
-  - codegraphId: type_alias:de240a20b03c3acb677fe02691925b5b
-    file: third_party/openbao/sdk/plugin/plugin_v5.go
+    codegraphId: struct:7030d1a338b563e5b6ab73dcfc957b48
+  - name: ContextKey
     kind: type_alias
+    file: third_party/openbao/sdk/plugin/plugin_v5.go
     line: 27
-    name: ContextKey
-  - codegraphId: method:bb98f92f7e7f53959d482198ae73019d
-    file: third_party/openbao/sdk/plugin/plugin_v5.go
+    codegraphId: type_alias:de240a20b03c3acb677fe02691925b5b
+  - name: ContextKey.String
     kind: method
-    line: 29
-    name: ContextKey.String
     signature: () string
-  - codegraphId: method:3b581a46e9f9f8d7182c6a41083e2d5f
     file: third_party/openbao/sdk/plugin/plugin_v5.go
+    line: 29
+    codegraphId: method:bb98f92f7e7f53959d482198ae73019d
+  - name: BackendPluginClientV5.Cleanup
     kind: method
-    line: 36
-    name: BackendPluginClientV5.Cleanup
     signature: (ctx context.Context)
-  - codegraphId: method:d5e6e4ab01a24a7f082237abe1e18150
     file: third_party/openbao/sdk/plugin/plugin_v5.go
+    line: 36
+    codegraphId: method:3b581a46e9f9f8d7182c6a41083e2d5f
+  - name: BackendPluginClientV5.IsExternal
     kind: method
-    line: 47
-    name: BackendPluginClientV5.IsExternal
     signature: () bool
-  - codegraphId: method:f906b4990b8bee324d73cedd4f5be3d6
     file: third_party/openbao/sdk/plugin/plugin_v5.go
+    line: 47
+    codegraphId: method:d5e6e4ab01a24a7f082237abe1e18150
+  - name: BackendPluginClientV5.PluginVersion
     kind: method
-    line: 51
-    name: BackendPluginClientV5.PluginVersion
     signature: () logical.PluginVersion
-  - codegraphId: function:a6733a8b57e4b20e4fa4378c8674dcf6
     file: third_party/openbao/sdk/plugin/plugin_v5.go
+    line: 51
+    codegraphId: method:f906b4990b8bee324d73cedd4f5be3d6
+  - name: NewBackendV5
     kind: function
-    line: 64
-    name: NewBackendV5
     signature: (ctx context.Context, pluginName string, pluginType consts.PluginType,
       pluginVersion string, sys pluginutil.LookRunnerUtil, conf *logical.BackendConfig)
       (logical.Backend, error)
-  - codegraphId: function:c9412851cff57cc07186a931b2d0570f
     file: third_party/openbao/sdk/plugin/plugin_v5.go
+    line: 64
+    codegraphId: function:a6733a8b57e4b20e4fa4378c8674dcf6
+  - name: Dispense
     kind: function
-    line: 115
-    name: Dispense
     signature: (rpcClient plugin.ClientProtocol, pluginClient pluginutil.PluginClient)
       (logical.Backend, error)
-  - codegraphId: function:f10fd7cb843087c77654f7dd89ad9c38
     file: third_party/openbao/sdk/plugin/plugin_v5.go
+    line: 115
+    codegraphId: function:c9412851cff57cc07186a931b2d0570f
+  - name: NewPluginClientV5
     kind: function
-    line: 143
-    name: NewPluginClientV5
     signature: (ctx context.Context, sys pluginutil.RunnerUtil, config pluginutil.PluginClientConfig)
       (logical.Backend, error)
-  - codegraphId: type_alias:ffcd33063c419df344c256774a320354
-    file: third_party/openbao/sdk/plugin/serve.go
+    file: third_party/openbao/sdk/plugin/plugin_v5.go
+    line: 143
+    codegraphId: function:f10fd7cb843087c77654f7dd89ad9c38
+  - name: TLSProviderFunc
     kind: type_alias
+    file: third_party/openbao/sdk/plugin/serve.go
     line: 23
-    name: TLSProviderFunc
-  - codegraphId: struct:093e9499ed0d32dc6fa3ba35860e4560
-    file: third_party/openbao/sdk/plugin/serve.go
+    codegraphId: type_alias:ffcd33063c419df344c256774a320354
+  - name: ServeOpts
     kind: struct
+    file: third_party/openbao/sdk/plugin/serve.go
     line: 25
-    name: ServeOpts
-  - codegraphId: function:ace0d2c743fe6cb870f3439eaeeef5fc
-    file: third_party/openbao/sdk/plugin/serve.go
+    codegraphId: struct:093e9499ed0d32dc6fa3ba35860e4560
+  - name: Serve
     kind: function
+    signature: (opts *ServeOpts) error
+    file: third_party/openbao/sdk/plugin/serve.go
     line: 33
-    name: Serve
-    signature: (opts *ServeOpts) error
-  - codegraphId: function:b052930f1568525b7416c6a7dd388b99
-    file: third_party/openbao/sdk/plugin/serve.go
+    codegraphId: function:ace0d2c743fe6cb870f3439eaeeef5fc
+  - name: ServeMultiplex
     kind: function
-    line: 96
-    name: ServeMultiplex
     signature: (opts *ServeOpts) error
-realizedSpecHash: e456de0821725a61333af32d7d34a0838c6419c8f142eac6fcc005d4b16b7206
-syncedCommit: 89cee50ec5aea977a42f904a758e506729e1158e
-syncedFingerprint: dc3753fe621ae3eb96201f481216f666af1d7970f84185ee8976e24156567e1f
+    file: third_party/openbao/sdk/plugin/serve.go
+    line: 96
+    codegraphId: function:b052930f1568525b7416c6a7dd388b99
+  fingerprint: dc3753fe621ae3eb96201f481216f666af1d7970f84185ee8976e24156567e1f

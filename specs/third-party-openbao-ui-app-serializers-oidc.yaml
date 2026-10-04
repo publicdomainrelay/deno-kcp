@@ -1,4 +1,104 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-ui-app-serializers-oidc
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'The context exists to pin down the payload-shaping contract of the OIDC
+    serializers in the vendored OpenBao UI, which sits in this repository as third-party
+    code. These classes are the single point where the raw OIDC LIST and READ responses
+    from the server are turned into records the Ember models can consume: get primaryKey
+    wrong and every record collides under an undefined key, and get normalizeItems
+    wrong and list views render rows with names but no body. Recording the two normalization
+    branches, the flattened keys/key_info shape, and the fact that only client and
+    provider override it keeps later edits from silently changing what the OIDC list
+    and detail screens receive.'
+  requirements:
+  - id: r.client-list-rehydration
+    level: MUST
+    text: 'OidcClientSerializer must override normalizeItems so that a list response
+      is rehydrated into fully attributed client models: when payload.data exists
+      and payload.data.keys is an array, it returns payload.data.keys mapped to one
+      object per key of the form { name: key, ...payload.data.key_info[key] }; this
+      is what makes every model attribute, not just the name, reachable from the LIST
+      response.'
+    codeRefs:
+    - class:335ce3d18d9109295d314eec8a9ec48a
+    - file:third_party/openbao/ui/app/serializers/oidc/client.js
+  - id: r.normalize-envelope-hoist-fallback
+    level: MUST
+    text: When payload.data is present but payload.data.keys is absent or not an array,
+      normalizeItems must copy the members of payload.data onto the payload itself
+      with Object.assign and then delete payload.data, returning the payload unchanged
+      in shape otherwise.
+    codeRefs:
+    - file:third_party/openbao/ui/app/serializers/oidc/client.js
+    - file:third_party/openbao/ui/app/serializers/oidc/provider.js
+  - id: r.normalize-returns-payload-untouched
+    level: MUST
+    text: When the payload carries no data envelope at all, normalizeItems must return
+      the payload as received, so READ responses and already-normalized payloads pass
+      through without rewriting.
+    codeRefs:
+    - file:third_party/openbao/ui/app/serializers/oidc/client.js
+    - file:third_party/openbao/ui/app/serializers/oidc/provider.js
+  - id: r.primary-key-is-name
+    level: MUST
+    text: Each OIDC serializer must extend the shared ApplicationSerializer and set
+      primaryKey to the string 'name', so every OIDC record (assignment, client, key,
+      provider, scope) is identified and looked up by its name attribute instead of
+      an id.
+    codeRefs:
+    - class:335ce3d18d9109295d314eec8a9ec48a
+    - class:390ba76e8ca0104a18fa597df8bfaf1c
+    - class:436fd8e63b5de854d1735c297f2e19c9
+    - class:a400db6099abad63dbcd66f5f6446c2f
+    - class:babc6ff432ad43bc649bc4e09e7193c0
+  - id: r.provider-list-normalization
+    level: MUST
+    text: OidcProviderSerializer must override normalizeItems with the same behavior
+      as the client serializer, flattening payload.data.keys against payload.data.key_info,
+      so the provider list view receives issuer metadata alongside each provider name.
+    codeRefs:
+    - class:babc6ff432ad43bc649bc4e09e7193c0
+    - file:third_party/openbao/ui/app/serializers/oidc/provider.js
+  - id: r.rely-on-base-normalization
+    level: SHOULD
+    text: OidcAssignmentSerializer, OidcKeySerializer, and OidcScopeSerializer should
+      declare only primaryKey and leave normalizeItems to ApplicationSerializer, so
+      their payload handling stays whatever the shared base defines.
+    codeRefs:
+    - class:390ba76e8ca0104a18fa597df8bfaf1c
+    - class:436fd8e63b5de854d1735c297f2e19c9
+    - class:a400db6099abad63dbcd66f5f6446c2f
+  interfaces:
+  - name: OidcAssignmentSerializer
+    kind: class
+    signature: export default class OidcAssignmentSerializer extends ApplicationSerializer
+      { primaryKey = 'name'; }
+    file: third_party/openbao/ui/app/serializers/oidc/assignment.js
+  - name: OidcClientSerializer
+    kind: class
+    signature: export default class OidcClientSerializer extends ApplicationSerializer
+      { primaryKey = 'name'; }
+    file: third_party/openbao/ui/app/serializers/oidc/client.js
+  - name: OidcKeySerializer
+    kind: class
+    signature: export default class OidcKeySerializer extends ApplicationSerializer
+      { primaryKey = 'name'; }
+    file: third_party/openbao/ui/app/serializers/oidc/key.js
+  - name: OidcProviderSerializer
+    kind: class
+    signature: export default class OidcProviderSerializer extends ApplicationSerializer
+      { primaryKey = 'name'; }
+    file: third_party/openbao/ui/app/serializers/oidc/provider.js
+  - name: OidcScopeSerializer
+    kind: class
+    signature: export default class OidcScopeSerializer extends ApplicationSerializer
+      { primaryKey = 'name'; }
+    file: third_party/openbao/ui/app/serializers/oidc/scope.js
 codeRefIndex:
 - class:335ce3d18d9109295d314eec8a9ec48a OidcClientSerializer@third_party/openbao/ui/app/serializers/oidc/client.js:8
 - class:390ba76e8ca0104a18fa597df8bfaf1c OidcKeySerializer@third_party/openbao/ui/app/serializers/oidc/key.js:8
@@ -10,103 +110,3 @@ codeRefIndex:
 - file:third_party/openbao/ui/app/serializers/oidc/key.js key.js@third_party/openbao/ui/app/serializers/oidc/key.js
 - file:third_party/openbao/ui/app/serializers/oidc/provider.js provider.js@third_party/openbao/ui/app/serializers/oidc/provider.js
 - file:third_party/openbao/ui/app/serializers/oidc/scope.js scope.js@third_party/openbao/ui/app/serializers/oidc/scope.js
-kind: SystemContext
-metadata:
-  name: third-party-openbao-ui-app-serializers-oidc
-  namespace: default
-spec:
-  intent: 'The context exists to pin down the payload-shaping contract of the OIDC
-    serializers in the vendored OpenBao UI, which sits in this repository as third-party
-    code. These classes are the single point where the raw OIDC LIST and READ responses
-    from the server are turned into records the Ember models can consume: get primaryKey
-    wrong and every record collides under an undefined key, and get normalizeItems
-    wrong and list views render rows with names but no body. Recording the two normalization
-    branches, the flattened keys/key_info shape, and the fact that only client and
-    provider override it keeps later edits from silently changing what the OIDC list
-    and detail screens receive.'
-  interfaces:
-  - file: third_party/openbao/ui/app/serializers/oidc/assignment.js
-    kind: class
-    name: OidcAssignmentSerializer
-    signature: export default class OidcAssignmentSerializer extends ApplicationSerializer
-      { primaryKey = 'name'; }
-  - file: third_party/openbao/ui/app/serializers/oidc/client.js
-    kind: class
-    name: OidcClientSerializer
-    signature: export default class OidcClientSerializer extends ApplicationSerializer
-      { primaryKey = 'name'; }
-  - file: third_party/openbao/ui/app/serializers/oidc/key.js
-    kind: class
-    name: OidcKeySerializer
-    signature: export default class OidcKeySerializer extends ApplicationSerializer
-      { primaryKey = 'name'; }
-  - file: third_party/openbao/ui/app/serializers/oidc/provider.js
-    kind: class
-    name: OidcProviderSerializer
-    signature: export default class OidcProviderSerializer extends ApplicationSerializer
-      { primaryKey = 'name'; }
-  - file: third_party/openbao/ui/app/serializers/oidc/scope.js
-    kind: class
-    name: OidcScopeSerializer
-    signature: export default class OidcScopeSerializer extends ApplicationSerializer
-      { primaryKey = 'name'; }
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - class:335ce3d18d9109295d314eec8a9ec48a
-    - file:third_party/openbao/ui/app/serializers/oidc/client.js
-    id: r.client-list-rehydration
-    level: MUST
-    text: 'OidcClientSerializer must override normalizeItems so that a list response
-      is rehydrated into fully attributed client models: when payload.data exists
-      and payload.data.keys is an array, it returns payload.data.keys mapped to one
-      object per key of the form { name: key, ...payload.data.key_info[key] }; this
-      is what makes every model attribute, not just the name, reachable from the LIST
-      response.'
-  - codeRefs:
-    - file:third_party/openbao/ui/app/serializers/oidc/client.js
-    - file:third_party/openbao/ui/app/serializers/oidc/provider.js
-    id: r.normalize-envelope-hoist-fallback
-    level: MUST
-    text: When payload.data is present but payload.data.keys is absent or not an array,
-      normalizeItems must copy the members of payload.data onto the payload itself
-      with Object.assign and then delete payload.data, returning the payload unchanged
-      in shape otherwise.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/serializers/oidc/client.js
-    - file:third_party/openbao/ui/app/serializers/oidc/provider.js
-    id: r.normalize-returns-payload-untouched
-    level: MUST
-    text: When the payload carries no data envelope at all, normalizeItems must return
-      the payload as received, so READ responses and already-normalized payloads pass
-      through without rewriting.
-  - codeRefs:
-    - class:335ce3d18d9109295d314eec8a9ec48a
-    - class:390ba76e8ca0104a18fa597df8bfaf1c
-    - class:436fd8e63b5de854d1735c297f2e19c9
-    - class:a400db6099abad63dbcd66f5f6446c2f
-    - class:babc6ff432ad43bc649bc4e09e7193c0
-    id: r.primary-key-is-name
-    level: MUST
-    text: Each OIDC serializer must extend the shared ApplicationSerializer and set
-      primaryKey to the string 'name', so every OIDC record (assignment, client, key,
-      provider, scope) is identified and looked up by its name attribute instead of
-      an id.
-  - codeRefs:
-    - class:babc6ff432ad43bc649bc4e09e7193c0
-    - file:third_party/openbao/ui/app/serializers/oidc/provider.js
-    id: r.provider-list-normalization
-    level: MUST
-    text: OidcProviderSerializer must override normalizeItems with the same behavior
-      as the client serializer, flattening payload.data.keys against payload.data.key_info,
-      so the provider list view receives issuer metadata alongside each provider name.
-  - codeRefs:
-    - class:390ba76e8ca0104a18fa597df8bfaf1c
-    - class:436fd8e63b5de854d1735c297f2e19c9
-    - class:a400db6099abad63dbcd66f5f6446c2f
-    id: r.rely-on-base-normalization
-    level: SHOULD
-    text: OidcAssignmentSerializer, OidcKeySerializer, and OidcScopeSerializer should
-      declare only primaryKey and leave normalizeItems to ApplicationSerializer, so
-      their payload handling stays whatever the shared base defines.
-  upstream: self

@@ -1,36 +1,36 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/ui/lib/core/app/utils/b64.js b64.js@third_party/openbao/ui/lib/core/app/utils/b64.js
-- file:third_party/openbao/ui/lib/core/app/utils/timestamp.js timestamp.js@third_party/openbao/ui/lib/core/app/utils/timestamp.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-lib-core-app-utils
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: This context exists to record the app/utils re-export shims for base64 and
     timestamp helpers in the vendored OpenBao UI core library, so that consumers reading
     the app/utils path know the real implementations live in core/utils and that these
     files are pass-throughs with no added behavior.
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/ui/lib/core/app/utils/b64.js
-    id: r.license-headers
+  - id: r.license-headers
     level: MUST
     text: 'Each file must keep its HashiCorp copyright notice and the SPDX-License-Identifier:
       MPL-2.0 header comment intact, as required for the vendored OpenBao sources.'
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/core/app/utils/b64.js
-    id: r.reexport-b64-helpers
+  - id: r.reexport-b64-helpers
     level: MUST
     text: The b64 module must re-export the named bindings encodeString and decodeString
       from core/utils/b64 without adding wrappers or modification, so callers importing
       from app/utils get the core base64 encode and decode functions.
-  - codeRefs:
-    - file:third_party/openbao/ui/lib/core/app/utils/timestamp.js
-    id: r.reexport-timestamp-default
+    codeRefs:
+    - file:third_party/openbao/ui/lib/core/app/utils/b64.js
+  - id: r.reexport-timestamp-default
     level: MUST
     text: The timestamp module must re-export the default export of core/utils/timestamp
       as its own default export, so importers of app/utils/timestamp receive the core
       timestamp implementation unchanged.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/ui/lib/core/app/utils/timestamp.js
+codeRefIndex:
+- file:third_party/openbao/ui/lib/core/app/utils/b64.js b64.js@third_party/openbao/ui/lib/core/app/utils/b64.js
+- file:third_party/openbao/ui/lib/core/app/utils/timestamp.js timestamp.js@third_party/openbao/ui/lib/core/app/utils/timestamp.js

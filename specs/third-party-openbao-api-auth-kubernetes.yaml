@@ -1,4 +1,123 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-api-auth-kubernetes
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: The context exists to specify the Kubernetes auth method client helper so
+    that callers and reimplementations know the exact constructor contract, option
+    semantics, error strings, and login entry point. It pins down which behaviors
+    are required of NewKubernetesAuth and of each LoginOption so that the Kubernetes
+    backend login can be constructed and exercised against an *api.Client without
+    reading the source. It also records that LoginOption here is a per-package type,
+    not shared with the approle, ldap, or userpass packages.
+  requirements:
+  - id: r.default-mount-path
+    level: MUST
+    text: NewKubernetesAuth must initialize the new KubernetesAuth with mountPath
+      set to defaultMountPath before any LoginOption is applied.
+    codeRefs:
+    - function:6018cdcb1153708818262d1b8e572716
+    - struct:aacb30786479f3c154e168149430a970
+  - id: r.default-token-file-fallback
+    level: MUST
+    text: 'When no option has supplied a service account token, NewKubernetesAuth
+      must read the token from defaultServiceAccountTokenPath and fail with "error
+      reading service account token from default location: %w" if that read fails.'
+    codeRefs:
+    - file:third_party/openbao/api/auth/kubernetes/kubernetes.go
+    - function:6018cdcb1153708818262d1b8e572716
+  - id: r.login-uses-client
+    level: MUST
+    text: KubernetesAuth.Login must accept a context.Context and an *api.Client and
+      return an *api.Secret, performing the Kubernetes auth login against the configured
+      mount path and role.
+    codeRefs:
+    - method:035d365a5053cf1f3dec72468c4cc875
+    - struct:aacb30786479f3c154e168149430a970
+  - id: r.mount-path-option
+    level: MUST
+    text: WithMountPath must return a LoginOption that sets the mount path on the
+      passed *KubernetesAuth and returns a nil error.
+    codeRefs:
+    - function:1aea8c53dc4a2d69df54b170c87873cb
+    - type_alias:7515089cf8eb51b5674e31d3d9fc3056
+  - id: r.options-applied-in-order
+    level: MUST
+    text: 'NewKubernetesAuth must call each supplied LoginOption in the order given,
+      passing the instantiated *KubernetesAuth, and must return a nil result wrapped
+      as "error with login option: %w" when an option returns a non-nil error.'
+    codeRefs:
+    - function:6018cdcb1153708818262d1b8e572716
+    - type_alias:7515089cf8eb51b5674e31d3d9fc3056
+  - id: r.role-name-required
+    level: MUST
+    text: NewKubernetesAuth must reject an empty roleName by returning the error "no
+      role name was provided" and a nil *KubernetesAuth, instead of returning a partially
+      built struct.
+    codeRefs:
+    - function:6018cdcb1153708818262d1b8e572716
+    - struct:aacb30786479f3c154e168149430a970
+  - id: r.token-env-option
+    level: MUST
+    text: WithServiceAccountTokenEnv must read the named environment variable and
+      return the error "service account token was specified with an environment variable
+      with an empty value" when the variable is empty; otherwise it must store the
+      value as the service account token and return nil.
+    codeRefs:
+    - function:de0f2ba1333fa8789f0bd0a7a47adf9d
+    - type_alias:7515089cf8eb51b5674e31d3d9fc3056
+  - id: r.token-literal-option
+    level: MUST
+    text: WithServiceAccountToken must return a LoginOption that stores the supplied
+      JWT directly as the service account token on the KubernetesAuth.
+    codeRefs:
+    - function:49833cec3190bb2ae6a53a181dab4f79
+    - type_alias:7515089cf8eb51b5674e31d3d9fc3056
+  - id: r.token-path-option
+    level: MUST
+    text: WithServiceAccountTokenPath must return a LoginOption that records the given
+      path as the location to read the service account token from.
+    codeRefs:
+    - function:65bbac571051a841d9f60bbeb8bf4d40
+    - type_alias:7515089cf8eb51b5674e31d3d9fc3056
+  interfaces:
+  - name: KubernetesAuth
+    kind: struct
+    signature: type KubernetesAuth struct
+    file: third_party/openbao/api/auth/kubernetes/kubernetes.go
+  - name: KubernetesAuth.Login
+    kind: method
+    signature: func (a *KubernetesAuth) Login(ctx context.Context, client *api.Client)
+      (*api.Secret, error)
+    file: third_party/openbao/api/auth/kubernetes/kubernetes.go
+  - name: LoginOption
+    kind: type_alias
+    signature: type LoginOption func(a *KubernetesAuth) error
+    file: third_party/openbao/api/auth/kubernetes/kubernetes.go
+  - name: NewKubernetesAuth
+    kind: function
+    signature: func NewKubernetesAuth(roleName string, opts ...LoginOption) (*KubernetesAuth,
+      error)
+    file: third_party/openbao/api/auth/kubernetes/kubernetes.go
+  - name: WithMountPath
+    kind: function
+    signature: func WithMountPath(mountPath string) LoginOption
+    file: third_party/openbao/api/auth/kubernetes/kubernetes.go
+  - name: WithServiceAccountToken
+    kind: function
+    signature: func WithServiceAccountToken(jwt string) LoginOption
+    file: third_party/openbao/api/auth/kubernetes/kubernetes.go
+  - name: WithServiceAccountTokenEnv
+    kind: function
+    signature: func WithServiceAccountTokenEnv(envVar string) LoginOption
+    file: third_party/openbao/api/auth/kubernetes/kubernetes.go
+  - name: WithServiceAccountTokenPath
+    kind: function
+    signature: func WithServiceAccountTokenPath(pathToToken string) LoginOption
+    file: third_party/openbao/api/auth/kubernetes/kubernetes.go
 codeRefIndex:
 - file:third_party/openbao/api/auth/kubernetes/kubernetes.go kubernetes.go@third_party/openbao/api/auth/kubernetes/kubernetes.go
 - function:1aea8c53dc4a2d69df54b170c87873cb WithMountPath@third_party/openbao/api/auth/kubernetes/kubernetes.go:92
@@ -9,122 +128,3 @@ codeRefIndex:
 - method:035d365a5053cf1f3dec72468c4cc875 KubernetesAuth.Login@third_party/openbao/api/auth/kubernetes/kubernetes.go:74
 - struct:aacb30786479f3c154e168149430a970 KubernetesAuth@third_party/openbao/api/auth/kubernetes/kubernetes.go:15
 - type_alias:7515089cf8eb51b5674e31d3d9fc3056 LoginOption@third_party/openbao/api/auth/kubernetes/kubernetes.go:23
-kind: SystemContext
-metadata:
-  name: third-party-openbao-api-auth-kubernetes
-  namespace: default
-spec:
-  intent: The context exists to specify the Kubernetes auth method client helper so
-    that callers and reimplementations know the exact constructor contract, option
-    semantics, error strings, and login entry point. It pins down which behaviors
-    are required of NewKubernetesAuth and of each LoginOption so that the Kubernetes
-    backend login can be constructed and exercised against an *api.Client without
-    reading the source. It also records that LoginOption here is a per-package type,
-    not shared with the approle, ldap, or userpass packages.
-  interfaces:
-  - file: third_party/openbao/api/auth/kubernetes/kubernetes.go
-    kind: struct
-    name: KubernetesAuth
-    signature: type KubernetesAuth struct
-  - file: third_party/openbao/api/auth/kubernetes/kubernetes.go
-    kind: method
-    name: KubernetesAuth.Login
-    signature: func (a *KubernetesAuth) Login(ctx context.Context, client *api.Client)
-      (*api.Secret, error)
-  - file: third_party/openbao/api/auth/kubernetes/kubernetes.go
-    kind: type_alias
-    name: LoginOption
-    signature: type LoginOption func(a *KubernetesAuth) error
-  - file: third_party/openbao/api/auth/kubernetes/kubernetes.go
-    kind: function
-    name: NewKubernetesAuth
-    signature: func NewKubernetesAuth(roleName string, opts ...LoginOption) (*KubernetesAuth,
-      error)
-  - file: third_party/openbao/api/auth/kubernetes/kubernetes.go
-    kind: function
-    name: WithMountPath
-    signature: func WithMountPath(mountPath string) LoginOption
-  - file: third_party/openbao/api/auth/kubernetes/kubernetes.go
-    kind: function
-    name: WithServiceAccountToken
-    signature: func WithServiceAccountToken(jwt string) LoginOption
-  - file: third_party/openbao/api/auth/kubernetes/kubernetes.go
-    kind: function
-    name: WithServiceAccountTokenEnv
-    signature: func WithServiceAccountTokenEnv(envVar string) LoginOption
-  - file: third_party/openbao/api/auth/kubernetes/kubernetes.go
-    kind: function
-    name: WithServiceAccountTokenPath
-    signature: func WithServiceAccountTokenPath(pathToToken string) LoginOption
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - function:6018cdcb1153708818262d1b8e572716
-    - struct:aacb30786479f3c154e168149430a970
-    id: r.default-mount-path
-    level: MUST
-    text: NewKubernetesAuth must initialize the new KubernetesAuth with mountPath
-      set to defaultMountPath before any LoginOption is applied.
-  - codeRefs:
-    - file:third_party/openbao/api/auth/kubernetes/kubernetes.go
-    - function:6018cdcb1153708818262d1b8e572716
-    id: r.default-token-file-fallback
-    level: MUST
-    text: 'When no option has supplied a service account token, NewKubernetesAuth
-      must read the token from defaultServiceAccountTokenPath and fail with "error
-      reading service account token from default location: %w" if that read fails.'
-  - codeRefs:
-    - method:035d365a5053cf1f3dec72468c4cc875
-    - struct:aacb30786479f3c154e168149430a970
-    id: r.login-uses-client
-    level: MUST
-    text: KubernetesAuth.Login must accept a context.Context and an *api.Client and
-      return an *api.Secret, performing the Kubernetes auth login against the configured
-      mount path and role.
-  - codeRefs:
-    - function:1aea8c53dc4a2d69df54b170c87873cb
-    - type_alias:7515089cf8eb51b5674e31d3d9fc3056
-    id: r.mount-path-option
-    level: MUST
-    text: WithMountPath must return a LoginOption that sets the mount path on the
-      passed *KubernetesAuth and returns a nil error.
-  - codeRefs:
-    - function:6018cdcb1153708818262d1b8e572716
-    - type_alias:7515089cf8eb51b5674e31d3d9fc3056
-    id: r.options-applied-in-order
-    level: MUST
-    text: 'NewKubernetesAuth must call each supplied LoginOption in the order given,
-      passing the instantiated *KubernetesAuth, and must return a nil result wrapped
-      as "error with login option: %w" when an option returns a non-nil error.'
-  - codeRefs:
-    - function:6018cdcb1153708818262d1b8e572716
-    - struct:aacb30786479f3c154e168149430a970
-    id: r.role-name-required
-    level: MUST
-    text: NewKubernetesAuth must reject an empty roleName by returning the error "no
-      role name was provided" and a nil *KubernetesAuth, instead of returning a partially
-      built struct.
-  - codeRefs:
-    - function:de0f2ba1333fa8789f0bd0a7a47adf9d
-    - type_alias:7515089cf8eb51b5674e31d3d9fc3056
-    id: r.token-env-option
-    level: MUST
-    text: WithServiceAccountTokenEnv must read the named environment variable and
-      return the error "service account token was specified with an environment variable
-      with an empty value" when the variable is empty; otherwise it must store the
-      value as the service account token and return nil.
-  - codeRefs:
-    - function:49833cec3190bb2ae6a53a181dab4f79
-    - type_alias:7515089cf8eb51b5674e31d3d9fc3056
-    id: r.token-literal-option
-    level: MUST
-    text: WithServiceAccountToken must return a LoginOption that stores the supplied
-      JWT directly as the service account token on the KubernetesAuth.
-  - codeRefs:
-    - function:65bbac571051a841d9f60bbeb8bf4d40
-    - type_alias:7515089cf8eb51b5674e31d3d9fc3056
-    id: r.token-path-option
-    level: MUST
-    text: WithServiceAccountTokenPath must return a LoginOption that records the given
-      path as the location to read the service account token from.
-  upstream: self

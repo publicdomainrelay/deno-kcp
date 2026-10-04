@@ -1,14 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- class:88cba2da41a41350ecfad514d4118378 KeymgmtProviderSerializer@third_party/openbao/ui/app/serializers/keymgmt/provider.js:8
-- class:d2f1cce48f9d3fc208c3a35c8df4e55a KeymgmtKeySerializer@third_party/openbao/ui/app/serializers/keymgmt/key.js:8
-- file:third_party/openbao/ui/app/serializers/keymgmt/key.js key.js@third_party/openbao/ui/app/serializers/keymgmt/key.js
-- file:third_party/openbao/ui/app/serializers/keymgmt/provider.js provider.js@third_party/openbao/ui/app/serializers/keymgmt/provider.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-app-serializers-keymgmt
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'The context exists so the key-management serializers can be described and
     reasoned about as one unit: how raw keymgmt API payloads become Ember Data records
     and how records become create/update request bodies. It matters because the key
@@ -16,69 +13,72 @@ spec:
     backend context from list entries, and because provider credentials live on the
     record rather than in the serialized attributes, so neither quirk can be handled
     by the default ApplicationSerializer behaviour that both classes extend.'
-  interfaces:
-  - file: third_party/openbao/ui/app/serializers/keymgmt/key.js
-    kind: class
-    name: KeymgmtKeySerializer
-    signature: class KeymgmtKeySerializer extends ApplicationSerializer
-  - file: third_party/openbao/ui/app/serializers/keymgmt/provider.js
-    kind: class
-    name: KeymgmtProviderSerializer
-    signature: class KeymgmtProviderSerializer extends ApplicationSerializer
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - class:d2f1cce48f9d3fc208c3a35c8df4e55a
-    - file:third_party/openbao/ui/app/serializers/keymgmt/key.js
-    id: r.key-list-normalization
+  - id: r.key-list-normalization
     level: MUST
     text: When the normalized payload is not versioned but is an array, KeymgmtKeySerializer.normalizeItems
       must map each element to an object holding only id and name, both taken from
       the element's id, plus backend taken from the parent payload's backend field;
       a payload that is neither versioned nor an array must be returned unchanged.
-  - codeRefs:
+    codeRefs:
     - class:d2f1cce48f9d3fc208c3a35c8df4e55a
     - file:third_party/openbao/ui/app/serializers/keymgmt/key.js
-    id: r.key-version-timestamps
+  - id: r.key-version-timestamps
     level: MUST
     text: When versions are present, the normalized key must carry created taken from
       the creation_time of the first version in key order and last_rotated taken from
       the creation_time of the last version in key order, with the last version compared
       only in the else branch so the first version is never also used as last_rotated
       and a single-version payload leaves last_rotated unset.
-  - codeRefs:
+    codeRefs:
     - class:d2f1cce48f9d3fc208c3a35c8df4e55a
     - file:third_party/openbao/ui/app/serializers/keymgmt/key.js
-    id: r.key-versions-object-to-array
+  - id: r.key-versions-object-to-array
     level: MUST
     text: KeymgmtKeySerializer.normalizeItems must, when the normalized payload carries
       a versions object whose keys are version numbers, replace that object with an
       array of version objects in key order, each entry having id set to its key parsed
       as a base-10 integer with that version's own fields spread alongside it.
-  - codeRefs:
-    - class:88cba2da41a41350ecfad514d4118378
-    - file:third_party/openbao/ui/app/serializers/keymgmt/provider.js
-    id: r.provider-list-normalization
+    codeRefs:
+    - class:d2f1cce48f9d3fc208c3a35c8df4e55a
+    - file:third_party/openbao/ui/app/serializers/keymgmt/key.js
+  - id: r.provider-list-normalization
     level: MUST
     text: KeymgmtProviderSerializer.normalizeItems must run the superclass normalization
       and then, only when the result is an array, set each provider's id to that provider's
       name and its backend to the parent payload's backend, returning the normalized
       value unchanged otherwise.
-  - codeRefs:
+    codeRefs:
     - class:88cba2da41a41350ecfad514d4118378
     - file:third_party/openbao/ui/app/serializers/keymgmt/provider.js
-    id: r.provider-primary-key-name
+  - id: r.provider-primary-key-name
     level: MUST
     text: KeymgmtProviderSerializer must set primaryKey to the string 'name', so provider
       records are identified by their name attribute rather than by an id attribute.
-  - codeRefs:
+    codeRefs:
     - class:88cba2da41a41350ecfad514d4118378
     - file:third_party/openbao/ui/app/serializers/keymgmt/provider.js
-    id: r.provider-serialize-credentials
+  - id: r.provider-serialize-credentials
     level: MUST
     text: KeymgmtProviderSerializer.serialize must call the superclass serialize with
       the original arguments and return the resulting JSON spread together with a
       credentials key holding snapshot.record.credentials, so provider credentials
       reach the request body alongside the serialized attributes even though they
       are not serialized attributes.
-  upstream: self
+    codeRefs:
+    - class:88cba2da41a41350ecfad514d4118378
+    - file:third_party/openbao/ui/app/serializers/keymgmt/provider.js
+  interfaces:
+  - name: KeymgmtKeySerializer
+    kind: class
+    signature: class KeymgmtKeySerializer extends ApplicationSerializer
+    file: third_party/openbao/ui/app/serializers/keymgmt/key.js
+  - name: KeymgmtProviderSerializer
+    kind: class
+    signature: class KeymgmtProviderSerializer extends ApplicationSerializer
+    file: third_party/openbao/ui/app/serializers/keymgmt/provider.js
+codeRefIndex:
+- class:88cba2da41a41350ecfad514d4118378 KeymgmtProviderSerializer@third_party/openbao/ui/app/serializers/keymgmt/provider.js:8
+- class:d2f1cce48f9d3fc208c3a35c8df4e55a KeymgmtKeySerializer@third_party/openbao/ui/app/serializers/keymgmt/key.js:8
+- file:third_party/openbao/ui/app/serializers/keymgmt/key.js key.js@third_party/openbao/ui/app/serializers/keymgmt/key.js
+- file:third_party/openbao/ui/app/serializers/keymgmt/provider.js provider.js@third_party/openbao/ui/app/serializers/keymgmt/provider.js

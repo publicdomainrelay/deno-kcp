@@ -1,75 +1,75 @@
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 6420f305cb1c121c18209507f309d0785cbe8814b8aa5904e9b07661fdc5aa63
+realizedSpecHash: 78fe70d21e2be69e7e76404f2eeb6e03852ebc180ebc600b483797b51e740c10
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
+- type: CodeSynced
+  status: "True"
   reason: InterfacesObserved
-  status: "True"
-  type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+  message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+- type: Drifted
   status: "False"
-  type: Drifted
-- message: the spec passes the validator
-  reason: ValidatorPassed
+  reason: FingerprintEqual
+  message: observed facts match the synced fingerprint
+- type: SpecValid
   status: "True"
-  type: SpecValid
+  reason: ValidatorPassed
+  message: the spec passes the validator
 observed:
   files:
   - third_party/openbao/internal/builtin/database/postgresql/passwordauthentication.go
   - third_party/openbao/internal/builtin/database/postgresql/postgresql.go
   - third_party/openbao/internal/builtin/database/postgresql/postgresql_test.go
-  fingerprint: 6420f305cb1c121c18209507f309d0785cbe8814b8aa5904e9b07661fdc5aa63
   interfaces:
-  - codegraphId: function:a2a5d9dc98ae361cc50affb0d7d7c011
-    file: third_party/openbao/internal/builtin/database/postgresql/postgresql.go
+  - name: New
     kind: function
-    line: 61
-    name: New
     signature: () (any, error)
-  - codegraphId: struct:28e857d7ee88863c8395d0194dcedc5e
     file: third_party/openbao/internal/builtin/database/postgresql/postgresql.go
+    line: 61
+    codegraphId: function:a2a5d9dc98ae361cc50affb0d7d7c011
+  - name: PostgreSQL
     kind: struct
-    line: 80
-    name: PostgreSQL
-  - codegraphId: method:104c6501594ab33e3be68a4b13902493
     file: third_party/openbao/internal/builtin/database/postgresql/postgresql.go
+    line: 80
+    codegraphId: struct:28e857d7ee88863c8395d0194dcedc5e
+  - name: PostgreSQL.Initialize
     kind: method
-    line: 87
-    name: PostgreSQL.Initialize
     signature: (ctx context.Context, req dbplugin.InitializeRequest) (dbplugin.InitializeResponse,
       error)
-  - codegraphId: method:816e944b2d4f0ba8b0c57ddc24124a85
     file: third_party/openbao/internal/builtin/database/postgresql/postgresql.go
+    line: 87
+    codegraphId: method:104c6501594ab33e3be68a4b13902493
+  - name: PostgreSQL.Type
     kind: method
-    line: 132
-    name: PostgreSQL.Type
     signature: () (string, error)
-  - codegraphId: method:fee9a15454325c0f80242ad693eab42a
     file: third_party/openbao/internal/builtin/database/postgresql/postgresql.go
+    line: 132
+    codegraphId: method:816e944b2d4f0ba8b0c57ddc24124a85
+  - name: PostgreSQL.UpdateUser
     kind: method
-    line: 145
-    name: PostgreSQL.UpdateUser
     signature: (ctx context.Context, req dbplugin.UpdateUserRequest) (dbplugin.UpdateUserResponse,
       error)
-  - codegraphId: method:e94446bf68d072b3dca3e5d40854d882
     file: third_party/openbao/internal/builtin/database/postgresql/postgresql.go
+    line: 145
+    codegraphId: method:fee9a15454325c0f80242ad693eab42a
+  - name: PostgreSQL.NewUser
     kind: method
-    line: 274
-    name: PostgreSQL.NewUser
     signature: (ctx context.Context, req dbplugin.NewUserRequest) (dbplugin.NewUserResponse,
       error)
-  - codegraphId: method:48ca6109fb985aad531f4872bc2dd8aa
     file: third_party/openbao/internal/builtin/database/postgresql/postgresql.go
+    line: 274
+    codegraphId: method:e94446bf68d072b3dca3e5d40854d882
+  - name: PostgreSQL.DeleteUser
     kind: method
-    line: 346
-    name: PostgreSQL.DeleteUser
     signature: (ctx context.Context, req dbplugin.DeleteUserRequest) (dbplugin.DeleteUserResponse,
       error)
-  - codegraphId: method:6ab2c58e15ee2bf7219365719071ae5b
     file: third_party/openbao/internal/builtin/database/postgresql/postgresql.go
+    line: 346
+    codegraphId: method:48ca6109fb985aad531f4872bc2dd8aa
+  - name: PostgreSQL.PluginVersion
     kind: method
-    line: 524
-    name: PostgreSQL.PluginVersion
     signature: () logical.PluginVersion
-realizedSpecHash: 78fe70d21e2be69e7e76404f2eeb6e03852ebc180ebc600b483797b51e740c10
-syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-syncedFingerprint: 6420f305cb1c121c18209507f309d0785cbe8814b8aa5904e9b07661fdc5aa63
+    file: third_party/openbao/internal/builtin/database/postgresql/postgresql.go
+    line: 524
+    codegraphId: method:6ab2c58e15ee2bf7219365719071ae5b
+  fingerprint: 6420f305cb1c121c18209507f309d0785cbe8814b8aa5904e9b07661fdc5aa63

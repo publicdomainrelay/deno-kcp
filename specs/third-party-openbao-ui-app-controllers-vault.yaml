@@ -1,11 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/ui/app/controllers/vault/cluster.js cluster.js@third_party/openbao/ui/app/controllers/vault/cluster.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-app-controllers-vault
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'The context documents the behaviour contract of the vendored OpenBao UI
     vault cluster controller: keeping the URL namespace query parameter and the namespace
     service in sync, and giving the cluster route a console open/closed state and
@@ -13,40 +13,40 @@ spec:
     surface (query params, observers, aliases, action) is described independently
     of the surrounding Ember application, and so any change to vendoring or upgrading
     OpenBao can be checked against these requirements.'
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/ui/app/controllers/vault/cluster.js
-    id: r.console-alias
+  - id: r.console-alias
     level: MUST
     text: consoleOpen is an alias of console.isOpen and activeCluster is an alias
       of auth.activeCluster, so reads of these controller properties reflect the injected
       console and auth services.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/controllers/vault/cluster.js
-    id: r.namespace-query-param
+  - id: r.namespace-query-param
     level: MUST
     text: The controller declares a query parameter namespaceQueryParam scoped to
       the controller and exposed in the URL as namespace, defaulting to the empty
       string.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/controllers/vault/cluster.js
-    id: r.namespace-sync
+  - id: r.namespace-sync
     level: MUST
     text: An observer on namespaceQueryParam pushes every change of the parameter
       into the namespace service by calling setNamespace, so the URL and the service
       state stay in step.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/controllers/vault/cluster.js
-    id: r.service-injections
+  - id: r.service-injections
     level: SHOULD
     text: The controller injects the services auth, store, media, router, permissions,
       namespace (as namespaceService), flash-messages, version (as vaultVersion),
       and console, which its aliases, observer, and action depend on.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/controllers/vault/cluster.js
-    id: r.toggle-console-action
+  - id: r.toggle-console-action
     level: MUST
     text: The actions hash provides a toggleConsole action that toggles the consoleOpen
       property.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault/cluster.js
+codeRefIndex:
+- file:third_party/openbao/ui/app/controllers/vault/cluster.js cluster.js@third_party/openbao/ui/app/controllers/vault/cluster.js

@@ -1,63 +1,63 @@
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 3276c22edeb9f13084e5940114171a5d99a0f370430c77c5e1dfb9e0fffc60c0
+realizedSpecHash: a338afcf65fc80ab7d447b958230c166870670886f2dcb1cdc0551e7e3f0b0dd
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
+- type: CodeSynced
+  status: "True"
   reason: InterfacesObserved
-  status: "True"
-  type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+  message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+- type: Drifted
   status: "False"
-  type: Drifted
-- message: the spec passes the validator
-  reason: ValidatorPassed
+  reason: FingerprintEqual
+  message: observed facts match the synced fingerprint
+- type: SpecValid
   status: "True"
-  type: SpecValid
+  reason: ValidatorPassed
+  message: the spec passes the validator
 observed:
   files:
   - third_party/openbao/internal/helper/dhutil/dhutil.go
   - third_party/openbao/internal/helper/dhutil/dhutil_test.go
-  fingerprint: 3276c22edeb9f13084e5940114171a5d99a0f370430c77c5e1dfb9e0fffc60c0
   interfaces:
-  - codegraphId: struct:f8f0dc19bdc2d73609c758f61a0592e6
-    file: third_party/openbao/internal/helper/dhutil/dhutil.go
+  - name: PublicKeyInfo
     kind: struct
+    file: third_party/openbao/internal/helper/dhutil/dhutil.go
     line: 21
-    name: PublicKeyInfo
-  - codegraphId: struct:6d3778c0fe4a755cb285791c52756c1a
-    file: third_party/openbao/internal/helper/dhutil/dhutil.go
+    codegraphId: struct:f8f0dc19bdc2d73609c758f61a0592e6
+  - name: Envelope
     kind: struct
+    file: third_party/openbao/internal/helper/dhutil/dhutil.go
     line: 25
-    name: Envelope
-  - codegraphId: function:d9a825b271260345358c73b6c33e069f
-    file: third_party/openbao/internal/helper/dhutil/dhutil.go
+    codegraphId: struct:6d3778c0fe4a755cb285791c52756c1a
+  - name: GeneratePublicPrivateKey
     kind: function
-    line: 33
-    name: GeneratePublicPrivateKey
     signature: () ([]byte, []byte, error)
-  - codegraphId: function:8ca2ccc79826b904a4ec08ee7760e712
     file: third_party/openbao/internal/helper/dhutil/dhutil.go
+    line: 33
+    codegraphId: function:d9a825b271260345358c73b6c33e069f
+  - name: GenerateSharedSecret
     kind: function
-    line: 46
-    name: GenerateSharedSecret
     signature: (ourPrivate, theirPublic []byte) ([]byte, error)
-  - codegraphId: function:e817a4230471d8db2fb10e5a3aad734b
     file: third_party/openbao/internal/helper/dhutil/dhutil.go
+    line: 46
+    codegraphId: function:8ca2ccc79826b904a4ec08ee7760e712
+  - name: DeriveSharedKey
     kind: function
-    line: 58
-    name: DeriveSharedKey
     signature: (secret, ourPublic, theirPublic []byte) ([]byte, error)
-  - codegraphId: function:f1f1a24b58704b9968cb6b555f5f2824
     file: third_party/openbao/internal/helper/dhutil/dhutil.go
+    line: 58
+    codegraphId: function:e817a4230471d8db2fb10e5a3aad734b
+  - name: EncryptAES
     kind: function
-    line: 101
-    name: EncryptAES
     signature: (key, plaintext, aad []byte) ([]byte, []byte, error)
-  - codegraphId: function:a0e84f63e82dabb9d7295ab7a589b596
     file: third_party/openbao/internal/helper/dhutil/dhutil.go
+    line: 101
+    codegraphId: function:f1f1a24b58704b9968cb6b555f5f2824
+  - name: DecryptAES
     kind: function
-    line: 128
-    name: DecryptAES
     signature: (key, ciphertext, nonce, aad []byte) ([]byte, error)
-realizedSpecHash: a338afcf65fc80ab7d447b958230c166870670886f2dcb1cdc0551e7e3f0b0dd
-syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-syncedFingerprint: 3276c22edeb9f13084e5940114171a5d99a0f370430c77c5e1dfb9e0fffc60c0
+    file: third_party/openbao/internal/helper/dhutil/dhutil.go
+    line: 128
+    codegraphId: function:a0e84f63e82dabb9d7295ab7a589b596
+  fingerprint: 3276c22edeb9f13084e5940114171a5d99a0f370430c77c5e1dfb9e0fffc60c0

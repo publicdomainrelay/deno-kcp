@@ -1,11 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/ui/lib/pki/config/environment.js environment.js@third_party/openbao/ui/lib/pki/config/environment.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-lib-pki-config
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'This context exists to pin down the build-time environment configuration
     seam of the vendored OpenBao PKI UI addon, so downstream tooling can rely on the
     module''s exported shape without reading the surrounding third-party tree. It
@@ -15,49 +15,49 @@ spec:
     toggles are declared here. It also records the file-level conventions that must
     survive any vendoring or patch operation: the Node scoping directives and the
     upstream license header.'
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/ui/lib/pki/config/environment.js
-    id: r.echo-environment
+  - id: r.echo-environment
     level: MUST
     text: The returned ENV object must copy the `environment` argument into its `environment`
       key unchanged, so the caller-supplied build target is visible to the application.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/pki/config/environment.js
-    id: r.exports-config-function
+  - id: r.exports-config-function
     level: MUST
     text: The module must export a single function through `module.exports` that accepts
       the Ember environment name as its only argument and returns the ENV object,
       so a consumer can invoke it once per build target.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/pki/config/environment.js
-    id: r.license-header
+  - id: r.license-header
     level: MUST
     text: The file must keep the HashiCorp copyright notice and the MPL-2.0 SPDX license
       identifier at the top, ahead of the directives and the export.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/pki/config/environment.js
-    id: r.module-prefix-pki
+  - id: r.module-prefix-pki
     level: MUST
     text: The returned ENV object must set `modulePrefix` to the literal string `pki`,
       which fixes the Ember module namespace for the addon.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/pki/config/environment.js
-    id: r.no-other-keys
+  - id: r.no-other-keys
     level: SHOULD
     text: The returned ENV object should stay limited to `modulePrefix` and `environment`,
       adding no API hostnames, feature flags, or nested configuration blocks.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/pki/config/environment.js
-    id: r.no-side-effects
+  - id: r.no-side-effects
     level: SHOULD
     text: The module should stay free of imports and top-level side effects, so requiring
       it only defines the exported function and mutates no shared state.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/pki/config/environment.js
-    id: r.node-strict-mode
+  - id: r.node-strict-mode
     level: MUST
     text: The file must run as a CommonJS module under Node with `'use strict'` in
       effect and the `/* eslint-env node */` directive marking it as Node-scoped.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/ui/lib/pki/config/environment.js
+codeRefIndex:
+- file:third_party/openbao/ui/lib/pki/config/environment.js environment.js@third_party/openbao/ui/lib/pki/config/environment.js

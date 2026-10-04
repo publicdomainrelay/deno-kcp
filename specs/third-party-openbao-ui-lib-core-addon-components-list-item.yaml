@@ -1,12 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/ui/lib/core/addon/components/list-item/content.js content.js@third_party/openbao/ui/lib/core/addon/components/list-item/content.js
-- file:third_party/openbao/ui/lib/core/addon/components/list-item/popup-menu.js popup-menu.js@third_party/openbao/ui/lib/core/addon/components/list-item/popup-menu.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-lib-core-addon-components-list-item
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: These files exist as reusable building blocks for rendering a list item's
     content region and its popup menu inside the OpenBao UI. content.js is the tagless
     wrapper that keeps list item markup free of an extra element, and popup-menu.js
@@ -15,42 +14,43 @@ spec:
     The context exists so the tagless-component contract and the popup menu's public
     properties and layout binding are stated explicitly for anyone consuming or modifying
     the list-item component family.
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/ui/lib/core/addon/components/list-item/content.js
-    - file:third_party/openbao/ui/lib/core/addon/components/list-item/popup-menu.js
-    id: r.both-default-export
+  - id: r.both-default-export
     level: MUST
     text: Each module must expose its component as the single anonymous default export
       of the file, so Ember resolves content and popup-menu by module path with no
       named export.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/core/addon/components/list-item/content.js
-    id: r.content-is-tagless
+    - file:third_party/openbao/ui/lib/core/addon/components/list-item/popup-menu.js
+  - id: r.content-is-tagless
     level: MUST
     text: The content component must be an @ember/component Component created with
       Component.extend and must set tagName to the empty string, so it renders no
       wrapping element of its own and leaves all markup to its template.
-  - codeRefs:
-    - file:third_party/openbao/ui/lib/core/addon/components/list-item/popup-menu.js
-    id: r.popup-menu-binds-layout
+    codeRefs:
+    - file:third_party/openbao/ui/lib/core/addon/components/list-item/content.js
+  - id: r.popup-menu-binds-layout
     level: MUST
     text: The popup-menu component must be an @ember/component Component created with
       Component.extend and must assign its layout to the template imported from ../../templates/components/list-item/popup-menu,
       so its markup comes from that external template file rather than being inline.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/core/addon/components/list-item/popup-menu.js
-    id: r.popup-menu-declares-properties
+  - id: r.popup-menu-declares-properties
     level: MUST
     text: The popup-menu component must declare two public properties, item and hasMenu,
       each defaulting to null; item carries the list item the menu belongs to and
       hasMenu carries whether a menu should be shown, and both are expected to be
       supplied by the caller.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/core/addon/components/list-item/popup-menu.js
-    id: r.popup-menu-is-tagless
+  - id: r.popup-menu-is-tagless
     level: MUST
     text: The popup-menu component must set tagName to the empty string, so it does
       not introduce a wrapping DOM element around the layout it renders.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/ui/lib/core/addon/components/list-item/popup-menu.js
+codeRefIndex:
+- file:third_party/openbao/ui/lib/core/addon/components/list-item/content.js content.js@third_party/openbao/ui/lib/core/addon/components/list-item/content.js
+- file:third_party/openbao/ui/lib/core/addon/components/list-item/popup-menu.js popup-menu.js@third_party/openbao/ui/lib/core/addon/components/list-item/popup-menu.js

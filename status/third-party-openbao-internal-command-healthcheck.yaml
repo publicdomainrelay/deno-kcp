@@ -1,17 +1,20 @@
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 3e12de852970a5ea01416c60caf096a1ceafe8a9e8368ba9d41827f269d93838
+realizedSpecHash: 866123c68e25ecd09576fbd09f4f3db2a415af890be85fc0abd2646313328a06
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
+- type: CodeSynced
+  status: "True"
   reason: InterfacesObserved
-  status: "True"
-  type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+  message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+- type: Drifted
   status: "False"
-  type: Drifted
-- message: the spec passes the validator
-  reason: ValidatorPassed
+  reason: FingerprintEqual
+  message: observed facts match the synced fingerprint
+- type: SpecValid
   status: "True"
-  type: SpecValid
+  reason: ValidatorPassed
+  message: the spec passes the validator
 observed:
   files:
   - third_party/openbao/internal/command/healthcheck/healthcheck.go
@@ -32,823 +35,820 @@ observed:
   - third_party/openbao/internal/command/healthcheck/pki_too_many_certs.go
   - third_party/openbao/internal/command/healthcheck/shared.go
   - third_party/openbao/internal/command/healthcheck/util.go
-  fingerprint: 3e12de852970a5ea01416c60caf096a1ceafe8a9e8368ba9d41827f269d93838
   interfaces:
-  - codegraphId: struct:6f83eee817b431df747ba6b6192eabef
-    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+  - name: Executor
     kind: struct
-    line: 41
-    name: Executor
-  - codegraphId: function:c24e52358e5abe8d906baeb02bc8b1e0
     file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    line: 41
+    codegraphId: struct:6f83eee817b431df747ba6b6192eabef
+  - name: NewExecutor
     kind: function
-    line: 53
-    name: NewExecutor
     signature: (client *api.Client, mount string) *Executor
-  - codegraphId: method:95d229150c4b8f8be156f956a8cbb3c7
     file: third_party/openbao/internal/command/healthcheck/healthcheck.go
-    kind: method
-    line: 63
-    name: Executor.AddCheck
-    signature: (c Check)
-  - codegraphId: method:61cd38eea299a604d0aedee7bf9e2430
-    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
-    kind: method
-    line: 67
-    name: Executor.BuildConfig
-    signature: (external map[string]any) error
-  - codegraphId: method:0411c690a98eda426fdf6148f1163e55
-    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
-    kind: method
-    line: 111
-    name: Executor.Execute
-    signature: () (map[string][]*Result, error)
-  - codegraphId: method:b240af5af0ea94bf248c5c8de0b8bfd2
-    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
-    kind: method
-    line: 146
-    name: Executor.FetchIfNotFetched
-    signature: (op logical.Operation, rawPath string) (*PathFetch, error)
-  - codegraphId: struct:c2542e9fadad6ee439121ce316a0a050
-    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
-    kind: struct
-    line: 199
-    name: PathFetch
-  - codegraphId: method:8aafccf81e6b0223a7e5941a1a5071c8
-    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
-    kind: method
-    line: 209
-    name: PathFetch.IsOK
-    signature: () bool
-  - codegraphId: method:203dfba5d97de1c106c7e63b864a55ee
-    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
-    kind: method
-    line: 213
-    name: PathFetch.IsSecretOK
-    signature: () bool
-  - codegraphId: method:3f31381121011fd3a0d614321a89b1fc
-    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
-    kind: method
-    line: 217
-    name: PathFetch.FetchSurfaceError
-    signature: () error
-  - codegraphId: method:ba222c4349c36446a5b6d00a5aeb4488
-    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
-    kind: method
-    line: 230
-    name: PathFetch.IsSecretPermissionsError
-    signature: () bool
-  - codegraphId: method:8f8d957c56e58deb9123430717f18a8f
-    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
-    kind: method
-    line: 234
-    name: PathFetch.IsUnsupportedPathError
-    signature: () bool
-  - codegraphId: method:47ddf3321e43daa2267e6f1be5cbd7fd
-    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
-    kind: method
-    line: 238
-    name: PathFetch.IsMissingResource
-    signature: () bool
-  - codegraphId: method:d0b387111db280483ed94bb19c21ad3e
-    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
-    kind: method
-    line: 242
-    name: PathFetch.Is404NotFound
-    signature: () bool
-  - codegraphId: interface:13fa7f9db19906441b5ec0e8114f755a
-    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
-    kind: interface
-    line: 246
-    name: Check
-  - codegraphId: method:56efce7a5b070904db4bf06ffa375390
-    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
-    kind: method
-    line: 247
-    name: Check.Name
-    signature: () string
-  - codegraphId: method:6d8744c3018fb7b0600143bb79618de2
-    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
-    kind: method
-    line: 248
-    name: Check.IsEnabled
-    signature: () bool
-  - codegraphId: method:662f8b0a53635bbcd173fd267b205fde
-    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
-    kind: method
-    line: 250
-    name: Check.DefaultConfig
-    signature: () map[string]any
-  - codegraphId: method:6a0cc06c0bc8c6fea48bdb67b07af536
-    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
-    kind: method
-    line: 251
-    name: Check.LoadConfig
-    signature: (config map[string]any) error
-  - codegraphId: method:5500f0e6a49a2ab36d423f5843216db4
-    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
-    kind: method
-    line: 253
-    name: Check.FetchResources
-    signature: (e *Executor) error
-  - codegraphId: method:1d2a57ceb86b7d83466ed6de90b18177
-    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
-    kind: method
-    line: 255
-    name: Check.Evaluate
-    signature: (e *Executor) ([]*Result, error)
-  - codegraphId: type_alias:daac9847e15849439ef7a7e1eb6a71cf
-    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
-    kind: type_alias
-    line: 258
-    name: ResultStatus
-  - codegraphId: struct:44ae149a27be8e3ad4eeb2eba8e2deeb
-    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
-    kind: struct
-    line: 290
-    name: Result
-  - codegraphId: function:a9cc1007b9b56fe138dbf440ce6d99c0
-    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
-    kind: function
-    line: 297
-    name: ValidateMountType
-    signature: (client *api.Client, mount string, expectedType string) error
-  - codegraphId: function:0ef5f642d30a554a0000f2cd937b320e
-    file: third_party/openbao/internal/command/healthcheck/pki.go
-    kind: function
-    line: 54
-    name: ParsePEMCert
-    signature: (contents string) (*x509.Certificate, error)
-  - codegraphId: struct:8565268bb07a461d7c34165fb04db6bb
-    file: third_party/openbao/internal/command/healthcheck/pki_allow_acme_headers.go
-    kind: struct
-    line: 15
-    name: AllowAcmeHeaders
-  - codegraphId: function:d7a2768569c134402c572a052a60cb71
-    file: third_party/openbao/internal/command/healthcheck/pki_allow_acme_headers.go
-    kind: function
-    line: 25
-    name: NewAllowAcmeHeaders
-    signature: () Check
-  - codegraphId: method:f134aa9ac024dbd5186197bd02775b0b
-    file: third_party/openbao/internal/command/healthcheck/pki_allow_acme_headers.go
-    kind: method
-    line: 29
-    name: AllowAcmeHeaders.Name
-    signature: () string
-  - codegraphId: method:4e9d05a25952ec1274ad96f6a4a3ecbe
-    file: third_party/openbao/internal/command/healthcheck/pki_allow_acme_headers.go
-    kind: method
-    line: 33
-    name: AllowAcmeHeaders.IsEnabled
-    signature: () bool
-  - codegraphId: method:24a4b5a724062b0c517909bd7fe1716f
-    file: third_party/openbao/internal/command/healthcheck/pki_allow_acme_headers.go
-    kind: method
-    line: 37
-    name: AllowAcmeHeaders.DefaultConfig
-    signature: () map[string]any
-  - codegraphId: method:5362223bbf54acbbe8011af303ad830d
-    file: third_party/openbao/internal/command/healthcheck/pki_allow_acme_headers.go
-    kind: method
-    line: 41
-    name: AllowAcmeHeaders.LoadConfig
-    signature: (config map[string]any) error
-  - codegraphId: method:f4877c42495aafbbde876eb10d267b61
-    file: third_party/openbao/internal/command/healthcheck/pki_allow_acme_headers.go
-    kind: method
-    line: 51
-    name: AllowAcmeHeaders.FetchResources
-    signature: (e *Executor) error
-  - codegraphId: method:f5b8348ff6aa0b829ee3e36805b6ce2b
-    file: third_party/openbao/internal/command/healthcheck/pki_allow_acme_headers.go
-    kind: method
-    line: 72
-    name: AllowAcmeHeaders.Evaluate
-    signature: (e *Executor) ([]*Result, error)
-  - codegraphId: struct:aa13dae2155445b31829c7a5ae328d75
-    file: third_party/openbao/internal/command/healthcheck/pki_allow_if_modified_since.go
-    kind: struct
-    line: 13
-    name: AllowIfModifiedSince
-  - codegraphId: function:1e1246a377112ae07852c5297cbfc93f
-    file: third_party/openbao/internal/command/healthcheck/pki_allow_if_modified_since.go
-    kind: function
-    line: 21
-    name: NewAllowIfModifiedSinceCheck
-    signature: () Check
-  - codegraphId: method:ff6e209bf2482ee2d24669c7a2a7526b
-    file: third_party/openbao/internal/command/healthcheck/pki_allow_if_modified_since.go
-    kind: method
-    line: 25
-    name: AllowIfModifiedSince.Name
-    signature: () string
-  - codegraphId: method:ba87749828ac0e25f50109b6f0dc89d4
-    file: third_party/openbao/internal/command/healthcheck/pki_allow_if_modified_since.go
-    kind: method
-    line: 29
-    name: AllowIfModifiedSince.IsEnabled
-    signature: () bool
-  - codegraphId: method:3ee9edc5aaa332fba3728a735f5a6cd3
-    file: third_party/openbao/internal/command/healthcheck/pki_allow_if_modified_since.go
-    kind: method
-    line: 33
-    name: AllowIfModifiedSince.DefaultConfig
-    signature: () map[string]any
-  - codegraphId: method:d51c3aa1a355096e8cb07581d432e8f0
-    file: third_party/openbao/internal/command/healthcheck/pki_allow_if_modified_since.go
-    kind: method
-    line: 37
-    name: AllowIfModifiedSince.LoadConfig
-    signature: (config map[string]any) error
-  - codegraphId: method:45d8a1c7c9d9623f9505f39a29637474
-    file: third_party/openbao/internal/command/healthcheck/pki_allow_if_modified_since.go
-    kind: method
-    line: 48
-    name: AllowIfModifiedSince.FetchResources
-    signature: (e *Executor) error
-  - codegraphId: method:a79079b0a69f4429f4ca2a47afd2e7de
-    file: third_party/openbao/internal/command/healthcheck/pki_allow_if_modified_since.go
-    kind: method
-    line: 62
-    name: AllowIfModifiedSince.Evaluate
-    signature: (e *Executor) (results []*Result, err error)
-  - codegraphId: struct:db2dddc895a8e2521176a8a0b3443031
-    file: third_party/openbao/internal/command/healthcheck/pki_audit_visibility.go
-    kind: struct
-    line: 59
-    name: AuditVisibility
-  - codegraphId: function:8b24c7f72f2aa1a37b4edf282a607373
-    file: third_party/openbao/internal/command/healthcheck/pki_audit_visibility.go
-    kind: function
-    line: 68
-    name: NewAuditVisibilityCheck
-    signature: () Check
-  - codegraphId: method:ec335dbc554443c31e350997118d0763
-    file: third_party/openbao/internal/command/healthcheck/pki_audit_visibility.go
-    kind: method
-    line: 74
-    name: AuditVisibility.Name
-    signature: () string
-  - codegraphId: method:519974b290ad78da6bc2bd4b054dc666
-    file: third_party/openbao/internal/command/healthcheck/pki_audit_visibility.go
-    kind: method
-    line: 78
-    name: AuditVisibility.IsEnabled
-    signature: () bool
-  - codegraphId: method:3156c47f693143592e083daca49b1178
-    file: third_party/openbao/internal/command/healthcheck/pki_audit_visibility.go
-    kind: method
-    line: 82
-    name: AuditVisibility.DefaultConfig
-    signature: () map[string]any
-  - codegraphId: method:cee02849b098649f5f24a43876d1bc88
-    file: third_party/openbao/internal/command/healthcheck/pki_audit_visibility.go
-    kind: method
-    line: 88
-    name: AuditVisibility.LoadConfig
-    signature: (config map[string]any) error
-  - codegraphId: method:568db9276f3cd4af1f49dee21fac8c68
-    file: third_party/openbao/internal/command/healthcheck/pki_audit_visibility.go
-    kind: method
-    line: 107
-    name: AuditVisibility.FetchResources
-    signature: (e *Executor) error
-  - codegraphId: method:0e233d42ba463cb79282de02e11f0e48
-    file: third_party/openbao/internal/command/healthcheck/pki_audit_visibility.go
-    kind: method
-    line: 121
-    name: AuditVisibility.Evaluate
-    signature: (e *Executor) (results []*Result, err error)
-  - codegraphId: struct:26ef833a993edaef289c2e75d887ea87
-    file: third_party/openbao/internal/command/healthcheck/pki_ca_validity_period.go
-    kind: struct
-    line: 16
-    name: CAValidityPeriod
-  - codegraphId: function:ec12110960e308662c5366933cfc5724
-    file: third_party/openbao/internal/command/healthcheck/pki_ca_validity_period.go
-    kind: function
-    line: 27
-    name: NewCAValidityPeriodCheck
-    signature: () Check
-  - codegraphId: method:11277cf05a8d6012d6cd48f8ebbda823
-    file: third_party/openbao/internal/command/healthcheck/pki_ca_validity_period.go
-    kind: method
-    line: 35
-    name: CAValidityPeriod.Name
-    signature: () string
-  - codegraphId: method:81cf406e5c4ab26fcb20b02166625b74
-    file: third_party/openbao/internal/command/healthcheck/pki_ca_validity_period.go
-    kind: method
-    line: 39
-    name: CAValidityPeriod.IsEnabled
-    signature: () bool
-  - codegraphId: method:1db968b9133edc4be5392a75c816eecc
-    file: third_party/openbao/internal/command/healthcheck/pki_ca_validity_period.go
-    kind: method
-    line: 43
-    name: CAValidityPeriod.DefaultConfig
-    signature: () map[string]any
-  - codegraphId: method:d25009b26c0fcb19aa74cf347ac7c4e5
-    file: third_party/openbao/internal/command/healthcheck/pki_ca_validity_period.go
-    kind: method
-    line: 54
-    name: CAValidityPeriod.LoadConfig
-    signature: (config map[string]any) error
-  - codegraphId: method:840c5ca82bc477d4fe434dd0867fe0ce
-    file: third_party/openbao/internal/command/healthcheck/pki_ca_validity_period.go
-    kind: method
-    line: 103
-    name: CAValidityPeriod.FetchResources
-    signature: (e *Executor) error
-  - codegraphId: method:190fd98fb43688a370e96892a5727b96
-    file: third_party/openbao/internal/command/healthcheck/pki_ca_validity_period.go
-    kind: method
-    line: 128
-    name: CAValidityPeriod.Evaluate
-    signature: (e *Executor) (results []*Result, err error)
-  - codegraphId: struct:49cffba43b115e5cab6d130adf868e8e
-    file: third_party/openbao/internal/command/healthcheck/pki_crl_validity_period.go
-    kind: struct
-    line: 16
-    name: CRLValidityPeriod
-  - codegraphId: function:33a4632b3c7ba9d554a2aad89a88864d
-    file: third_party/openbao/internal/command/healthcheck/pki_crl_validity_period.go
-    kind: function
-    line: 31
-    name: NewCRLValidityPeriodCheck
-    signature: () Check
-  - codegraphId: method:1ebefe0d44cc6c0b8cb86286e2b8efa6
-    file: third_party/openbao/internal/command/healthcheck/pki_crl_validity_period.go
-    kind: method
-    line: 38
-    name: CRLValidityPeriod.Name
-    signature: () string
-  - codegraphId: method:97fa3c6055eed2eb267266658c8a0da0
-    file: third_party/openbao/internal/command/healthcheck/pki_crl_validity_period.go
-    kind: method
-    line: 42
-    name: CRLValidityPeriod.IsEnabled
-    signature: () bool
-  - codegraphId: method:dabd76939c349270a143010cf89c4ef1
-    file: third_party/openbao/internal/command/healthcheck/pki_crl_validity_period.go
-    kind: method
-    line: 46
-    name: CRLValidityPeriod.DefaultConfig
-    signature: () map[string]any
-  - codegraphId: method:b2774493729bbed670d1b2ccdc4e62ff
-    file: third_party/openbao/internal/command/healthcheck/pki_crl_validity_period.go
-    kind: method
     line: 53
-    name: CRLValidityPeriod.LoadConfig
-    signature: (config map[string]any) error
-  - codegraphId: method:1a598297c43a96b6a7d50e61147d16e7
-    file: third_party/openbao/internal/command/healthcheck/pki_crl_validity_period.go
+    codegraphId: function:c24e52358e5abe8d906baeb02bc8b1e0
+  - name: Executor.AddCheck
     kind: method
-    line: 75
-    name: CRLValidityPeriod.FetchResources
-    signature: (e *Executor) error
-  - codegraphId: method:701478c017f9bd40cc04087df2d8b7b6
-    file: third_party/openbao/internal/command/healthcheck/pki_crl_validity_period.go
+    signature: (c Check)
+    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    line: 63
+    codegraphId: method:95d229150c4b8f8be156f956a8cbb3c7
+  - name: Executor.BuildConfig
     kind: method
-    line: 120
-    name: CRLValidityPeriod.Evaluate
-    signature: (e *Executor) (results []*Result, err error)
-  - codegraphId: struct:a0114b34b2e3cc2ff5cdec45b6b0baa3
-    file: third_party/openbao/internal/command/healthcheck/pki_enable_acme_issuance.go
+    signature: (external map[string]any) error
+    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    line: 67
+    codegraphId: method:61cd38eea299a604d0aedee7bf9e2430
+  - name: Executor.Execute
+    kind: method
+    signature: () (map[string][]*Result, error)
+    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    line: 111
+    codegraphId: method:0411c690a98eda426fdf6148f1163e55
+  - name: Executor.FetchIfNotFetched
+    kind: method
+    signature: (op logical.Operation, rawPath string) (*PathFetch, error)
+    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    line: 146
+    codegraphId: method:b240af5af0ea94bf248c5c8de0b8bfd2
+  - name: PathFetch
     kind: struct
-    line: 21
-    name: EnableAcmeIssuance
-  - codegraphId: function:2fae00b4adc47924ab586547fae4c624
-    file: third_party/openbao/internal/command/healthcheck/pki_enable_acme_issuance.go
-    kind: function
-    line: 31
-    name: NewEnableAcmeIssuance
-    signature: () Check
-  - codegraphId: method:7fa5efa599b82d07fee3cca96cf2d861
-    file: third_party/openbao/internal/command/healthcheck/pki_enable_acme_issuance.go
+    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    line: 199
+    codegraphId: struct:c2542e9fadad6ee439121ce316a0a050
+  - name: PathFetch.IsOK
     kind: method
-    line: 35
-    name: EnableAcmeIssuance.Name
-    signature: () string
-  - codegraphId: method:96e8fb0dd28f2fa142f217063265837c
-    file: third_party/openbao/internal/command/healthcheck/pki_enable_acme_issuance.go
-    kind: method
-    line: 39
-    name: EnableAcmeIssuance.IsEnabled
     signature: () bool
-  - codegraphId: method:39c33fd15766864c363f52e4978f2046
-    file: third_party/openbao/internal/command/healthcheck/pki_enable_acme_issuance.go
+    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    line: 209
+    codegraphId: method:8aafccf81e6b0223a7e5941a1a5071c8
+  - name: PathFetch.IsSecretOK
     kind: method
-    line: 43
-    name: EnableAcmeIssuance.DefaultConfig
+    signature: () bool
+    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    line: 213
+    codegraphId: method:203dfba5d97de1c106c7e63b864a55ee
+  - name: PathFetch.FetchSurfaceError
+    kind: method
+    signature: () error
+    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    line: 217
+    codegraphId: method:3f31381121011fd3a0d614321a89b1fc
+  - name: PathFetch.IsSecretPermissionsError
+    kind: method
+    signature: () bool
+    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    line: 230
+    codegraphId: method:ba222c4349c36446a5b6d00a5aeb4488
+  - name: PathFetch.IsUnsupportedPathError
+    kind: method
+    signature: () bool
+    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    line: 234
+    codegraphId: method:8f8d957c56e58deb9123430717f18a8f
+  - name: PathFetch.IsMissingResource
+    kind: method
+    signature: () bool
+    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    line: 238
+    codegraphId: method:47ddf3321e43daa2267e6f1be5cbd7fd
+  - name: PathFetch.Is404NotFound
+    kind: method
+    signature: () bool
+    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    line: 242
+    codegraphId: method:d0b387111db280483ed94bb19c21ad3e
+  - name: Check
+    kind: interface
+    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    line: 246
+    codegraphId: interface:13fa7f9db19906441b5ec0e8114f755a
+  - name: Check.Name
+    kind: method
+    signature: () string
+    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    line: 247
+    codegraphId: method:56efce7a5b070904db4bf06ffa375390
+  - name: Check.IsEnabled
+    kind: method
+    signature: () bool
+    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    line: 248
+    codegraphId: method:6d8744c3018fb7b0600143bb79618de2
+  - name: Check.DefaultConfig
+    kind: method
     signature: () map[string]any
-  - codegraphId: method:113126f948bfc231b196fee570f9c979
-    file: third_party/openbao/internal/command/healthcheck/pki_enable_acme_issuance.go
+    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    line: 250
+    codegraphId: method:662f8b0a53635bbcd173fd267b205fde
+  - name: Check.LoadConfig
     kind: method
-    line: 47
-    name: EnableAcmeIssuance.LoadConfig
     signature: (config map[string]any) error
-  - codegraphId: method:3f3d67a292ed36aa58ba81c690fee623
-    file: third_party/openbao/internal/command/healthcheck/pki_enable_acme_issuance.go
+    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    line: 251
+    codegraphId: method:6a0cc06c0bc8c6fea48bdb67b07af536
+  - name: Check.FetchResources
     kind: method
-    line: 57
-    name: EnableAcmeIssuance.FetchResources
     signature: (e *Executor) error
-  - codegraphId: method:160022fd0f2c05e18bc8d8a541d8ff70
-    file: third_party/openbao/internal/command/healthcheck/pki_enable_acme_issuance.go
+    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    line: 253
+    codegraphId: method:5500f0e6a49a2ab36d423f5843216db4
+  - name: Check.Evaluate
     kind: method
-    line: 169
-    name: EnableAcmeIssuance.Evaluate
-    signature: (e *Executor) (results []*Result, err error)
-  - codegraphId: struct:9c3d8e716d4e345a23c15a6d0eb514f0
-    file: third_party/openbao/internal/command/healthcheck/pki_enable_auto_tidy.go
+    signature: (e *Executor) ([]*Result, error)
+    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    line: 255
+    codegraphId: method:1d2a57ceb86b7d83466ed6de90b18177
+  - name: ResultStatus
+    kind: type_alias
+    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    line: 258
+    codegraphId: type_alias:daac9847e15849439ef7a7e1eb6a71cf
+  - name: Result
     kind: struct
+    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    line: 290
+    codegraphId: struct:44ae149a27be8e3ad4eeb2eba8e2deeb
+  - name: ValidateMountType
+    kind: function
+    signature: (client *api.Client, mount string, expectedType string) error
+    file: third_party/openbao/internal/command/healthcheck/healthcheck.go
+    line: 297
+    codegraphId: function:a9cc1007b9b56fe138dbf440ce6d99c0
+  - name: ParsePEMCert
+    kind: function
+    signature: (contents string) (*x509.Certificate, error)
+    file: third_party/openbao/internal/command/healthcheck/pki.go
+    line: 54
+    codegraphId: function:0ef5f642d30a554a0000f2cd937b320e
+  - name: AllowAcmeHeaders
+    kind: struct
+    file: third_party/openbao/internal/command/healthcheck/pki_allow_acme_headers.go
     line: 15
-    name: EnableAutoTidy
-  - codegraphId: function:095916289a578670387e0c999a08558f
-    file: third_party/openbao/internal/command/healthcheck/pki_enable_auto_tidy.go
+    codegraphId: struct:8565268bb07a461d7c34165fb04db6bb
+  - name: NewAllowAcmeHeaders
     kind: function
-    line: 27
-    name: NewEnableAutoTidyCheck
     signature: () Check
-  - codegraphId: method:860be8b36e12a4a3c59e20b82aaa67c9
-    file: third_party/openbao/internal/command/healthcheck/pki_enable_auto_tidy.go
+    file: third_party/openbao/internal/command/healthcheck/pki_allow_acme_headers.go
+    line: 25
+    codegraphId: function:d7a2768569c134402c572a052a60cb71
+  - name: AllowAcmeHeaders.Name
     kind: method
-    line: 31
-    name: EnableAutoTidy.Name
     signature: () string
-  - codegraphId: method:bfe16c62c6a1f93564fd0817e4cca23b
-    file: third_party/openbao/internal/command/healthcheck/pki_enable_auto_tidy.go
-    kind: method
-    line: 35
-    name: EnableAutoTidy.IsEnabled
-    signature: () bool
-  - codegraphId: method:c7ada3d6c1b176b7fd9f338f921b6173
-    file: third_party/openbao/internal/command/healthcheck/pki_enable_auto_tidy.go
-    kind: method
-    line: 39
-    name: EnableAutoTidy.DefaultConfig
-    signature: () map[string]any
-  - codegraphId: method:875c18ee2fab91f31d5f9e06b700ab24
-    file: third_party/openbao/internal/command/healthcheck/pki_enable_auto_tidy.go
-    kind: method
-    line: 57
-    name: EnableAutoTidy.LoadConfig
-    signature: (config map[string]any) error
-  - codegraphId: method:cef799440cfe59dd714e18649df6e245
-    file: third_party/openbao/internal/command/healthcheck/pki_enable_auto_tidy.go
-    kind: method
-    line: 89
-    name: EnableAutoTidy.FetchResources
-    signature: (e *Executor) error
-  - codegraphId: method:d13e7f0e1817e92c5bce0db96f17ba68
-    file: third_party/openbao/internal/command/healthcheck/pki_enable_auto_tidy.go
-    kind: method
-    line: 103
-    name: EnableAutoTidy.Evaluate
-    signature: (e *Executor) (results []*Result, err error)
-  - codegraphId: struct:58d3ae3263a4f90742a728b22b873ae4
-    file: third_party/openbao/internal/command/healthcheck/pki_hardware_backed_root.go
-    kind: struct
-    line: 14
-    name: HardwareBackedRoot
-  - codegraphId: function:6f16c4461b84933efd80d7ad5a028896
-    file: third_party/openbao/internal/command/healthcheck/pki_hardware_backed_root.go
-    kind: function
-    line: 24
-    name: NewHardwareBackedRootCheck
-    signature: () Check
-  - codegraphId: method:d3ba6f1f0a41a5e6df67779dcd48c17e
-    file: third_party/openbao/internal/command/healthcheck/pki_hardware_backed_root.go
-    kind: method
-    line: 32
-    name: HardwareBackedRoot.Name
-    signature: () string
-  - codegraphId: method:fa45d39c5945c67c5156307ac64e8594
-    file: third_party/openbao/internal/command/healthcheck/pki_hardware_backed_root.go
-    kind: method
-    line: 36
-    name: HardwareBackedRoot.IsEnabled
-    signature: () bool
-  - codegraphId: method:393f8a8c07f295aa178e1c7963a133e0
-    file: third_party/openbao/internal/command/healthcheck/pki_hardware_backed_root.go
-    kind: method
-    line: 40
-    name: HardwareBackedRoot.DefaultConfig
-    signature: () map[string]any
-  - codegraphId: method:0a08de947437056721f4503a56efde01
-    file: third_party/openbao/internal/command/healthcheck/pki_hardware_backed_root.go
-    kind: method
-    line: 46
-    name: HardwareBackedRoot.LoadConfig
-    signature: (config map[string]any) error
-  - codegraphId: method:ffd5b865d0d56fd586c3d55cdfc5fb2d
-    file: third_party/openbao/internal/command/healthcheck/pki_hardware_backed_root.go
-    kind: method
-    line: 56
-    name: HardwareBackedRoot.FetchResources
-    signature: (e *Executor) error
-  - codegraphId: method:7baff0ebfb587f46ed7c1d3b17126130
-    file: third_party/openbao/internal/command/healthcheck/pki_hardware_backed_root.go
-    kind: method
-    line: 113
-    name: HardwareBackedRoot.Evaluate
-    signature: (e *Executor) (results []*Result, err error)
-  - codegraphId: struct:0df11c467977b25417560cc02d8ef022
-    file: third_party/openbao/internal/command/healthcheck/pki_role_allows_glob_wildcards.go
-    kind: struct
-    line: 13
-    name: RoleAllowsGlobWildcards
-  - codegraphId: function:830d611f7e5599ce053a0bbcd4a239d0
-    file: third_party/openbao/internal/command/healthcheck/pki_role_allows_glob_wildcards.go
-    kind: function
-    line: 22
-    name: NewRoleAllowsGlobWildcardsCheck
-    signature: () Check
-  - codegraphId: method:b7bd40e97a0333e4440b9b7d4ef81ada
-    file: third_party/openbao/internal/command/healthcheck/pki_role_allows_glob_wildcards.go
-    kind: method
+    file: third_party/openbao/internal/command/healthcheck/pki_allow_acme_headers.go
     line: 29
-    name: RoleAllowsGlobWildcards.Name
-    signature: () string
-  - codegraphId: method:647bfceb8b3e101d146a24dd081df854
-    file: third_party/openbao/internal/command/healthcheck/pki_role_allows_glob_wildcards.go
+    codegraphId: method:f134aa9ac024dbd5186197bd02775b0b
+  - name: AllowAcmeHeaders.IsEnabled
     kind: method
-    line: 33
-    name: RoleAllowsGlobWildcards.IsEnabled
     signature: () bool
-  - codegraphId: method:13b3bef4a2f02dd79d22912d171318c2
-    file: third_party/openbao/internal/command/healthcheck/pki_role_allows_glob_wildcards.go
+    file: third_party/openbao/internal/command/healthcheck/pki_allow_acme_headers.go
+    line: 33
+    codegraphId: method:4e9d05a25952ec1274ad96f6a4a3ecbe
+  - name: AllowAcmeHeaders.DefaultConfig
     kind: method
-    line: 37
-    name: RoleAllowsGlobWildcards.DefaultConfig
     signature: () map[string]any
-  - codegraphId: method:5bd316b56d0128535cfae5b994c46ea9
-    file: third_party/openbao/internal/command/healthcheck/pki_role_allows_glob_wildcards.go
+    file: third_party/openbao/internal/command/healthcheck/pki_allow_acme_headers.go
+    line: 37
+    codegraphId: method:24a4b5a724062b0c517909bd7fe1716f
+  - name: AllowAcmeHeaders.LoadConfig
     kind: method
-    line: 41
-    name: RoleAllowsGlobWildcards.LoadConfig
     signature: (config map[string]any) error
-  - codegraphId: method:03b2746af69893a0f22538c93587f6cc
-    file: third_party/openbao/internal/command/healthcheck/pki_role_allows_glob_wildcards.go
+    file: third_party/openbao/internal/command/healthcheck/pki_allow_acme_headers.go
+    line: 41
+    codegraphId: method:5362223bbf54acbbe8011af303ad830d
+  - name: AllowAcmeHeaders.FetchResources
     kind: method
+    signature: (e *Executor) error
+    file: third_party/openbao/internal/command/healthcheck/pki_allow_acme_headers.go
     line: 51
-    name: RoleAllowsGlobWildcards.FetchResources
-    signature: (e *Executor) error
-  - codegraphId: method:b223e4020314beefd1b8fd081b977ee7
-    file: third_party/openbao/internal/command/healthcheck/pki_role_allows_glob_wildcards.go
+    codegraphId: method:f4877c42495aafbbde876eb10d267b61
+  - name: AllowAcmeHeaders.Evaluate
     kind: method
-    line: 82
-    name: RoleAllowsGlobWildcards.Evaluate
-    signature: (e *Executor) (results []*Result, err error)
-  - codegraphId: struct:20bb64b2eda73adc67482738579a6667
-    file: third_party/openbao/internal/command/healthcheck/pki_role_allows_localhost.go
+    signature: (e *Executor) ([]*Result, error)
+    file: third_party/openbao/internal/command/healthcheck/pki_allow_acme_headers.go
+    line: 72
+    codegraphId: method:f5b8348ff6aa0b829ee3e36805b6ce2b
+  - name: AllowIfModifiedSince
     kind: struct
-    line: 12
-    name: RoleAllowsLocalhost
-  - codegraphId: function:c2e7757edd9294fa5bbcecdd3fbeb87b
-    file: third_party/openbao/internal/command/healthcheck/pki_role_allows_localhost.go
+    file: third_party/openbao/internal/command/healthcheck/pki_allow_if_modified_since.go
+    line: 13
+    codegraphId: struct:aa13dae2155445b31829c7a5ae328d75
+  - name: NewAllowIfModifiedSinceCheck
     kind: function
+    signature: () Check
+    file: third_party/openbao/internal/command/healthcheck/pki_allow_if_modified_since.go
     line: 21
-    name: NewRoleAllowsLocalhostCheck
-    signature: () Check
-  - codegraphId: method:6622c42bcc19711bd3d6a7737cebe369
-    file: third_party/openbao/internal/command/healthcheck/pki_role_allows_localhost.go
+    codegraphId: function:1e1246a377112ae07852c5297cbfc93f
+  - name: AllowIfModifiedSince.Name
     kind: method
-    line: 28
-    name: RoleAllowsLocalhost.Name
     signature: () string
-  - codegraphId: method:e8e938ea4ab5f03066e3506ba2257d38
-    file: third_party/openbao/internal/command/healthcheck/pki_role_allows_localhost.go
-    kind: method
-    line: 32
-    name: RoleAllowsLocalhost.IsEnabled
-    signature: () bool
-  - codegraphId: method:dafd1d38b0b6b899157b5fba1ebeaabe
-    file: third_party/openbao/internal/command/healthcheck/pki_role_allows_localhost.go
-    kind: method
-    line: 36
-    name: RoleAllowsLocalhost.DefaultConfig
-    signature: () map[string]any
-  - codegraphId: method:db5c04d69337733344b6c7e200bc1b79
-    file: third_party/openbao/internal/command/healthcheck/pki_role_allows_localhost.go
-    kind: method
-    line: 40
-    name: RoleAllowsLocalhost.LoadConfig
-    signature: (config map[string]any) error
-  - codegraphId: method:4a2d2837e7e4dea2f99e9775e78630bd
-    file: third_party/openbao/internal/command/healthcheck/pki_role_allows_localhost.go
-    kind: method
-    line: 50
-    name: RoleAllowsLocalhost.FetchResources
-    signature: (e *Executor) error
-  - codegraphId: method:f922a2e0ef295588366c258dfac1dd14
-    file: third_party/openbao/internal/command/healthcheck/pki_role_allows_localhost.go
-    kind: method
-    line: 81
-    name: RoleAllowsLocalhost.Evaluate
-    signature: (e *Executor) (results []*Result, err error)
-  - codegraphId: struct:8bdf3daf60bcc59bbe9ec5cf35e1210c
-    file: third_party/openbao/internal/command/healthcheck/pki_role_no_store_false.go
-    kind: struct
-    line: 14
-    name: RoleNoStoreFalse
-  - codegraphId: function:e0270b356fd39d43e4fa6d4f90a867ee
-    file: third_party/openbao/internal/command/healthcheck/pki_role_no_store_false.go
-    kind: function
-    line: 26
-    name: NewRoleNoStoreFalseCheck
-    signature: () Check
-  - codegraphId: method:0670562dac9af9ba480ca8db285a12c2
-    file: third_party/openbao/internal/command/healthcheck/pki_role_no_store_false.go
-    kind: method
-    line: 34
-    name: RoleNoStoreFalse.Name
-    signature: () string
-  - codegraphId: method:07f4f39a1e4f1f26dcddebba9ad1b384
-    file: third_party/openbao/internal/command/healthcheck/pki_role_no_store_false.go
-    kind: method
-    line: 38
-    name: RoleNoStoreFalse.IsEnabled
-    signature: () bool
-  - codegraphId: method:9de6e490277e6b23259582b3192bb9be
-    file: third_party/openbao/internal/command/healthcheck/pki_role_no_store_false.go
-    kind: method
-    line: 42
-    name: RoleNoStoreFalse.DefaultConfig
-    signature: () map[string]any
-  - codegraphId: method:91a5dcb2b347ffe26a1b5026a0f97d82
-    file: third_party/openbao/internal/command/healthcheck/pki_role_no_store_false.go
-    kind: method
-    line: 48
-    name: RoleNoStoreFalse.LoadConfig
-    signature: (config map[string]any) error
-  - codegraphId: method:ba31fa2ff97424caba80b1063cba2668
-    file: third_party/openbao/internal/command/healthcheck/pki_role_no_store_false.go
-    kind: method
-    line: 65
-    name: RoleNoStoreFalse.FetchResources
-    signature: (e *Executor) error
-  - codegraphId: method:37407ac3f5146afec063342e20e38f4a
-    file: third_party/openbao/internal/command/healthcheck/pki_role_no_store_false.go
-    kind: method
-    line: 104
-    name: RoleNoStoreFalse.Evaluate
-    signature: (e *Executor) (results []*Result, err error)
-  - codegraphId: struct:e54030f831b42be81e2dcfddf24eabc8
-    file: third_party/openbao/internal/command/healthcheck/pki_root_issued_leaves.go
-    kind: struct
-    line: 14
-    name: RootIssuedLeaves
-  - codegraphId: function:29c57787bee6a0f0aaaea01696396bb2
-    file: third_party/openbao/internal/command/healthcheck/pki_root_issued_leaves.go
-    kind: function
+    file: third_party/openbao/internal/command/healthcheck/pki_allow_if_modified_since.go
     line: 25
-    name: NewRootIssuedLeavesCheck
-    signature: () Check
-  - codegraphId: method:a473ac3917ce58c6b6525aeafe9328ff
-    file: third_party/openbao/internal/command/healthcheck/pki_root_issued_leaves.go
+    codegraphId: method:ff6e209bf2482ee2d24669c7a2a7526b
+  - name: AllowIfModifiedSince.IsEnabled
     kind: method
-    line: 33
-    name: RootIssuedLeaves.Name
-    signature: () string
-  - codegraphId: method:ff69988a0d7a1b00e3ddd4d29eed94a3
-    file: third_party/openbao/internal/command/healthcheck/pki_root_issued_leaves.go
-    kind: method
-    line: 37
-    name: RootIssuedLeaves.IsEnabled
     signature: () bool
-  - codegraphId: method:3f4385d0ac856cc55fdc536827b2b0ea
-    file: third_party/openbao/internal/command/healthcheck/pki_root_issued_leaves.go
-    kind: method
-    line: 41
-    name: RootIssuedLeaves.DefaultConfig
-    signature: () map[string]any
-  - codegraphId: method:40d5d883490d3fb5f5b5d2f8281db521
-    file: third_party/openbao/internal/command/healthcheck/pki_root_issued_leaves.go
-    kind: method
-    line: 47
-    name: RootIssuedLeaves.LoadConfig
-    signature: (config map[string]any) error
-  - codegraphId: method:45e1e0597151fe4f959cbe68e483bb23
-    file: third_party/openbao/internal/command/healthcheck/pki_root_issued_leaves.go
-    kind: method
-    line: 63
-    name: RootIssuedLeaves.FetchResources
-    signature: (e *Executor) error
-  - codegraphId: method:2bbab82c0042ffb22e68e0c06c3e1753
-    file: third_party/openbao/internal/command/healthcheck/pki_root_issued_leaves.go
-    kind: method
-    line: 134
-    name: RootIssuedLeaves.Evaluate
-    signature: (e *Executor) (results []*Result, err error)
-  - codegraphId: struct:730053578bde164dd2420473f241bcd5
-    file: third_party/openbao/internal/command/healthcheck/pki_tidy_last_run.go
-    kind: struct
-    line: 15
-    name: TidyLastRun
-  - codegraphId: function:525a8f3a99ef64f1fc0a155612e676f5
-    file: third_party/openbao/internal/command/healthcheck/pki_tidy_last_run.go
-    kind: function
-    line: 25
-    name: NewTidyLastRunCheck
-    signature: () Check
-  - codegraphId: method:cc9a437d95b54ae0c3408e9e8cb3730d
-    file: third_party/openbao/internal/command/healthcheck/pki_tidy_last_run.go
-    kind: method
+    file: third_party/openbao/internal/command/healthcheck/pki_allow_if_modified_since.go
     line: 29
-    name: TidyLastRun.Name
-    signature: () string
-  - codegraphId: method:f54f748f7f5e053e4c012a256488513e
-    file: third_party/openbao/internal/command/healthcheck/pki_tidy_last_run.go
+    codegraphId: method:ba87749828ac0e25f50109b6f0dc89d4
+  - name: AllowIfModifiedSince.DefaultConfig
     kind: method
+    signature: () map[string]any
+    file: third_party/openbao/internal/command/healthcheck/pki_allow_if_modified_since.go
     line: 33
-    name: TidyLastRun.IsEnabled
-    signature: () bool
-  - codegraphId: method:10230bd64c4680eb18406694aec07a5d
-    file: third_party/openbao/internal/command/healthcheck/pki_tidy_last_run.go
+    codegraphId: method:3ee9edc5aaa332fba3728a735f5a6cd3
+  - name: AllowIfModifiedSince.LoadConfig
     kind: method
+    signature: (config map[string]any) error
+    file: third_party/openbao/internal/command/healthcheck/pki_allow_if_modified_since.go
     line: 37
-    name: TidyLastRun.DefaultConfig
-    signature: () map[string]any
-  - codegraphId: method:77f7501402c0188f9f29e1daf9e713f6
-    file: third_party/openbao/internal/command/healthcheck/pki_tidy_last_run.go
+    codegraphId: method:d51c3aa1a355096e8cb07581d432e8f0
+  - name: AllowIfModifiedSince.FetchResources
     kind: method
-    line: 44
-    name: TidyLastRun.LoadConfig
-    signature: (config map[string]any) error
-  - codegraphId: method:bcb04937b6eea9aa33a2d8820dea0e63
-    file: third_party/openbao/internal/command/healthcheck/pki_tidy_last_run.go
-    kind: method
-    line: 65
-    name: TidyLastRun.FetchResources
     signature: (e *Executor) error
-  - codegraphId: method:34133aefe48f2b0a44a3cf51f5b2012d
-    file: third_party/openbao/internal/command/healthcheck/pki_tidy_last_run.go
+    file: third_party/openbao/internal/command/healthcheck/pki_allow_if_modified_since.go
+    line: 48
+    codegraphId: method:45d8a1c7c9d9623f9505f39a29637474
+  - name: AllowIfModifiedSince.Evaluate
     kind: method
-    line: 80
-    name: TidyLastRun.Evaluate
     signature: (e *Executor) (results []*Result, err error)
-  - codegraphId: struct:09c330ce8435b3c3b03a90d454f2f920
-    file: third_party/openbao/internal/command/healthcheck/pki_too_many_certs.go
+    file: third_party/openbao/internal/command/healthcheck/pki_allow_if_modified_since.go
+    line: 62
+    codegraphId: method:a79079b0a69f4429f4ca2a47afd2e7de
+  - name: AuditVisibility
     kind: struct
-    line: 12
-    name: TooManyCerts
-  - codegraphId: function:d5a14ada5df01ecebbc5101d6149b1de
-    file: third_party/openbao/internal/command/healthcheck/pki_too_many_certs.go
+    file: third_party/openbao/internal/command/healthcheck/pki_audit_visibility.go
+    line: 59
+    codegraphId: struct:db2dddc895a8e2521176a8a0b3443031
+  - name: NewAuditVisibilityCheck
     kind: function
-    line: 23
-    name: NewTooManyCertsCheck
     signature: () Check
-  - codegraphId: method:c47865a16c8092a75fc43796a0e72e9e
-    file: third_party/openbao/internal/command/healthcheck/pki_too_many_certs.go
+    file: third_party/openbao/internal/command/healthcheck/pki_audit_visibility.go
+    line: 68
+    codegraphId: function:8b24c7f72f2aa1a37b4edf282a607373
+  - name: AuditVisibility.Name
     kind: method
-    line: 27
-    name: TooManyCerts.Name
     signature: () string
-  - codegraphId: method:c19545453aa0d980a60f2fe362fa4b7d
-    file: third_party/openbao/internal/command/healthcheck/pki_too_many_certs.go
+    file: third_party/openbao/internal/command/healthcheck/pki_audit_visibility.go
+    line: 74
+    codegraphId: method:ec335dbc554443c31e350997118d0763
+  - name: AuditVisibility.IsEnabled
     kind: method
-    line: 31
-    name: TooManyCerts.IsEnabled
     signature: () bool
-  - codegraphId: method:27ff9ebfa2f76c0e158fa512c4cea056
-    file: third_party/openbao/internal/command/healthcheck/pki_too_many_certs.go
-    kind: method
-    line: 35
-    name: TooManyCerts.DefaultConfig
-    signature: () map[string]any
-  - codegraphId: method:96e9000ec439ef901146308581e0a2e2
-    file: third_party/openbao/internal/command/healthcheck/pki_too_many_certs.go
-    kind: method
-    line: 42
-    name: TooManyCerts.LoadConfig
-    signature: (config map[string]any) error
-  - codegraphId: method:f29db6eb904841c985976a64f13a058f
-    file: third_party/openbao/internal/command/healthcheck/pki_too_many_certs.go
-    kind: method
-    line: 63
-    name: TooManyCerts.FetchResources
-    signature: (e *Executor) error
-  - codegraphId: method:d17ae33805ac332e8476ffaf1182cb00
-    file: third_party/openbao/internal/command/healthcheck/pki_too_many_certs.go
-    kind: method
+    file: third_party/openbao/internal/command/healthcheck/pki_audit_visibility.go
     line: 78
-    name: TooManyCerts.Evaluate
+    codegraphId: method:519974b290ad78da6bc2bd4b054dc666
+  - name: AuditVisibility.DefaultConfig
+    kind: method
+    signature: () map[string]any
+    file: third_party/openbao/internal/command/healthcheck/pki_audit_visibility.go
+    line: 82
+    codegraphId: method:3156c47f693143592e083daca49b1178
+  - name: AuditVisibility.LoadConfig
+    kind: method
+    signature: (config map[string]any) error
+    file: third_party/openbao/internal/command/healthcheck/pki_audit_visibility.go
+    line: 88
+    codegraphId: method:cee02849b098649f5f24a43876d1bc88
+  - name: AuditVisibility.FetchResources
+    kind: method
+    signature: (e *Executor) error
+    file: third_party/openbao/internal/command/healthcheck/pki_audit_visibility.go
+    line: 107
+    codegraphId: method:568db9276f3cd4af1f49dee21fac8c68
+  - name: AuditVisibility.Evaluate
+    kind: method
     signature: (e *Executor) (results []*Result, err error)
-  - codegraphId: function:a240f05e1200f40f0e8fefbfd9b4505a
-    file: third_party/openbao/internal/command/healthcheck/shared.go
+    file: third_party/openbao/internal/command/healthcheck/pki_audit_visibility.go
+    line: 121
+    codegraphId: method:0e233d42ba463cb79282de02e11f0e48
+  - name: CAValidityPeriod
+    kind: struct
+    file: third_party/openbao/internal/command/healthcheck/pki_ca_validity_period.go
+    line: 16
+    codegraphId: struct:26ef833a993edaef289c2e75d887ea87
+  - name: NewCAValidityPeriodCheck
     kind: function
+    signature: () Check
+    file: third_party/openbao/internal/command/healthcheck/pki_ca_validity_period.go
+    line: 27
+    codegraphId: function:ec12110960e308662c5366933cfc5724
+  - name: CAValidityPeriod.Name
+    kind: method
+    signature: () string
+    file: third_party/openbao/internal/command/healthcheck/pki_ca_validity_period.go
+    line: 35
+    codegraphId: method:11277cf05a8d6012d6cd48f8ebbda823
+  - name: CAValidityPeriod.IsEnabled
+    kind: method
+    signature: () bool
+    file: third_party/openbao/internal/command/healthcheck/pki_ca_validity_period.go
+    line: 39
+    codegraphId: method:81cf406e5c4ab26fcb20b02166625b74
+  - name: CAValidityPeriod.DefaultConfig
+    kind: method
+    signature: () map[string]any
+    file: third_party/openbao/internal/command/healthcheck/pki_ca_validity_period.go
+    line: 43
+    codegraphId: method:1db968b9133edc4be5392a75c816eecc
+  - name: CAValidityPeriod.LoadConfig
+    kind: method
+    signature: (config map[string]any) error
+    file: third_party/openbao/internal/command/healthcheck/pki_ca_validity_period.go
+    line: 54
+    codegraphId: method:d25009b26c0fcb19aa74cf347ac7c4e5
+  - name: CAValidityPeriod.FetchResources
+    kind: method
+    signature: (e *Executor) error
+    file: third_party/openbao/internal/command/healthcheck/pki_ca_validity_period.go
+    line: 103
+    codegraphId: method:840c5ca82bc477d4fe434dd0867fe0ce
+  - name: CAValidityPeriod.Evaluate
+    kind: method
+    signature: (e *Executor) (results []*Result, err error)
+    file: third_party/openbao/internal/command/healthcheck/pki_ca_validity_period.go
+    line: 128
+    codegraphId: method:190fd98fb43688a370e96892a5727b96
+  - name: CRLValidityPeriod
+    kind: struct
+    file: third_party/openbao/internal/command/healthcheck/pki_crl_validity_period.go
+    line: 16
+    codegraphId: struct:49cffba43b115e5cab6d130adf868e8e
+  - name: NewCRLValidityPeriodCheck
+    kind: function
+    signature: () Check
+    file: third_party/openbao/internal/command/healthcheck/pki_crl_validity_period.go
+    line: 31
+    codegraphId: function:33a4632b3c7ba9d554a2aad89a88864d
+  - name: CRLValidityPeriod.Name
+    kind: method
+    signature: () string
+    file: third_party/openbao/internal/command/healthcheck/pki_crl_validity_period.go
+    line: 38
+    codegraphId: method:1ebefe0d44cc6c0b8cb86286e2b8efa6
+  - name: CRLValidityPeriod.IsEnabled
+    kind: method
+    signature: () bool
+    file: third_party/openbao/internal/command/healthcheck/pki_crl_validity_period.go
+    line: 42
+    codegraphId: method:97fa3c6055eed2eb267266658c8a0da0
+  - name: CRLValidityPeriod.DefaultConfig
+    kind: method
+    signature: () map[string]any
+    file: third_party/openbao/internal/command/healthcheck/pki_crl_validity_period.go
+    line: 46
+    codegraphId: method:dabd76939c349270a143010cf89c4ef1
+  - name: CRLValidityPeriod.LoadConfig
+    kind: method
+    signature: (config map[string]any) error
+    file: third_party/openbao/internal/command/healthcheck/pki_crl_validity_period.go
+    line: 53
+    codegraphId: method:b2774493729bbed670d1b2ccdc4e62ff
+  - name: CRLValidityPeriod.FetchResources
+    kind: method
+    signature: (e *Executor) error
+    file: third_party/openbao/internal/command/healthcheck/pki_crl_validity_period.go
+    line: 75
+    codegraphId: method:1a598297c43a96b6a7d50e61147d16e7
+  - name: CRLValidityPeriod.Evaluate
+    kind: method
+    signature: (e *Executor) (results []*Result, err error)
+    file: third_party/openbao/internal/command/healthcheck/pki_crl_validity_period.go
+    line: 120
+    codegraphId: method:701478c017f9bd40cc04087df2d8b7b6
+  - name: EnableAcmeIssuance
+    kind: struct
+    file: third_party/openbao/internal/command/healthcheck/pki_enable_acme_issuance.go
+    line: 21
+    codegraphId: struct:a0114b34b2e3cc2ff5cdec45b6b0baa3
+  - name: NewEnableAcmeIssuance
+    kind: function
+    signature: () Check
+    file: third_party/openbao/internal/command/healthcheck/pki_enable_acme_issuance.go
+    line: 31
+    codegraphId: function:2fae00b4adc47924ab586547fae4c624
+  - name: EnableAcmeIssuance.Name
+    kind: method
+    signature: () string
+    file: third_party/openbao/internal/command/healthcheck/pki_enable_acme_issuance.go
+    line: 35
+    codegraphId: method:7fa5efa599b82d07fee3cca96cf2d861
+  - name: EnableAcmeIssuance.IsEnabled
+    kind: method
+    signature: () bool
+    file: third_party/openbao/internal/command/healthcheck/pki_enable_acme_issuance.go
+    line: 39
+    codegraphId: method:96e8fb0dd28f2fa142f217063265837c
+  - name: EnableAcmeIssuance.DefaultConfig
+    kind: method
+    signature: () map[string]any
+    file: third_party/openbao/internal/command/healthcheck/pki_enable_acme_issuance.go
+    line: 43
+    codegraphId: method:39c33fd15766864c363f52e4978f2046
+  - name: EnableAcmeIssuance.LoadConfig
+    kind: method
+    signature: (config map[string]any) error
+    file: third_party/openbao/internal/command/healthcheck/pki_enable_acme_issuance.go
+    line: 47
+    codegraphId: method:113126f948bfc231b196fee570f9c979
+  - name: EnableAcmeIssuance.FetchResources
+    kind: method
+    signature: (e *Executor) error
+    file: third_party/openbao/internal/command/healthcheck/pki_enable_acme_issuance.go
+    line: 57
+    codegraphId: method:3f3d67a292ed36aa58ba81c690fee623
+  - name: EnableAcmeIssuance.Evaluate
+    kind: method
+    signature: (e *Executor) (results []*Result, err error)
+    file: third_party/openbao/internal/command/healthcheck/pki_enable_acme_issuance.go
+    line: 169
+    codegraphId: method:160022fd0f2c05e18bc8d8a541d8ff70
+  - name: EnableAutoTidy
+    kind: struct
+    file: third_party/openbao/internal/command/healthcheck/pki_enable_auto_tidy.go
+    line: 15
+    codegraphId: struct:9c3d8e716d4e345a23c15a6d0eb514f0
+  - name: NewEnableAutoTidyCheck
+    kind: function
+    signature: () Check
+    file: third_party/openbao/internal/command/healthcheck/pki_enable_auto_tidy.go
+    line: 27
+    codegraphId: function:095916289a578670387e0c999a08558f
+  - name: EnableAutoTidy.Name
+    kind: method
+    signature: () string
+    file: third_party/openbao/internal/command/healthcheck/pki_enable_auto_tidy.go
+    line: 31
+    codegraphId: method:860be8b36e12a4a3c59e20b82aaa67c9
+  - name: EnableAutoTidy.IsEnabled
+    kind: method
+    signature: () bool
+    file: third_party/openbao/internal/command/healthcheck/pki_enable_auto_tidy.go
+    line: 35
+    codegraphId: method:bfe16c62c6a1f93564fd0817e4cca23b
+  - name: EnableAutoTidy.DefaultConfig
+    kind: method
+    signature: () map[string]any
+    file: third_party/openbao/internal/command/healthcheck/pki_enable_auto_tidy.go
+    line: 39
+    codegraphId: method:c7ada3d6c1b176b7fd9f338f921b6173
+  - name: EnableAutoTidy.LoadConfig
+    kind: method
+    signature: (config map[string]any) error
+    file: third_party/openbao/internal/command/healthcheck/pki_enable_auto_tidy.go
+    line: 57
+    codegraphId: method:875c18ee2fab91f31d5f9e06b700ab24
+  - name: EnableAutoTidy.FetchResources
+    kind: method
+    signature: (e *Executor) error
+    file: third_party/openbao/internal/command/healthcheck/pki_enable_auto_tidy.go
+    line: 89
+    codegraphId: method:cef799440cfe59dd714e18649df6e245
+  - name: EnableAutoTidy.Evaluate
+    kind: method
+    signature: (e *Executor) (results []*Result, err error)
+    file: third_party/openbao/internal/command/healthcheck/pki_enable_auto_tidy.go
+    line: 103
+    codegraphId: method:d13e7f0e1817e92c5bce0db96f17ba68
+  - name: HardwareBackedRoot
+    kind: struct
+    file: third_party/openbao/internal/command/healthcheck/pki_hardware_backed_root.go
+    line: 14
+    codegraphId: struct:58d3ae3263a4f90742a728b22b873ae4
+  - name: NewHardwareBackedRootCheck
+    kind: function
+    signature: () Check
+    file: third_party/openbao/internal/command/healthcheck/pki_hardware_backed_root.go
+    line: 24
+    codegraphId: function:6f16c4461b84933efd80d7ad5a028896
+  - name: HardwareBackedRoot.Name
+    kind: method
+    signature: () string
+    file: third_party/openbao/internal/command/healthcheck/pki_hardware_backed_root.go
+    line: 32
+    codegraphId: method:d3ba6f1f0a41a5e6df67779dcd48c17e
+  - name: HardwareBackedRoot.IsEnabled
+    kind: method
+    signature: () bool
+    file: third_party/openbao/internal/command/healthcheck/pki_hardware_backed_root.go
+    line: 36
+    codegraphId: method:fa45d39c5945c67c5156307ac64e8594
+  - name: HardwareBackedRoot.DefaultConfig
+    kind: method
+    signature: () map[string]any
+    file: third_party/openbao/internal/command/healthcheck/pki_hardware_backed_root.go
+    line: 40
+    codegraphId: method:393f8a8c07f295aa178e1c7963a133e0
+  - name: HardwareBackedRoot.LoadConfig
+    kind: method
+    signature: (config map[string]any) error
+    file: third_party/openbao/internal/command/healthcheck/pki_hardware_backed_root.go
+    line: 46
+    codegraphId: method:0a08de947437056721f4503a56efde01
+  - name: HardwareBackedRoot.FetchResources
+    kind: method
+    signature: (e *Executor) error
+    file: third_party/openbao/internal/command/healthcheck/pki_hardware_backed_root.go
+    line: 56
+    codegraphId: method:ffd5b865d0d56fd586c3d55cdfc5fb2d
+  - name: HardwareBackedRoot.Evaluate
+    kind: method
+    signature: (e *Executor) (results []*Result, err error)
+    file: third_party/openbao/internal/command/healthcheck/pki_hardware_backed_root.go
+    line: 113
+    codegraphId: method:7baff0ebfb587f46ed7c1d3b17126130
+  - name: RoleAllowsGlobWildcards
+    kind: struct
+    file: third_party/openbao/internal/command/healthcheck/pki_role_allows_glob_wildcards.go
+    line: 13
+    codegraphId: struct:0df11c467977b25417560cc02d8ef022
+  - name: NewRoleAllowsGlobWildcardsCheck
+    kind: function
+    signature: () Check
+    file: third_party/openbao/internal/command/healthcheck/pki_role_allows_glob_wildcards.go
+    line: 22
+    codegraphId: function:830d611f7e5599ce053a0bbcd4a239d0
+  - name: RoleAllowsGlobWildcards.Name
+    kind: method
+    signature: () string
+    file: third_party/openbao/internal/command/healthcheck/pki_role_allows_glob_wildcards.go
+    line: 29
+    codegraphId: method:b7bd40e97a0333e4440b9b7d4ef81ada
+  - name: RoleAllowsGlobWildcards.IsEnabled
+    kind: method
+    signature: () bool
+    file: third_party/openbao/internal/command/healthcheck/pki_role_allows_glob_wildcards.go
+    line: 33
+    codegraphId: method:647bfceb8b3e101d146a24dd081df854
+  - name: RoleAllowsGlobWildcards.DefaultConfig
+    kind: method
+    signature: () map[string]any
+    file: third_party/openbao/internal/command/healthcheck/pki_role_allows_glob_wildcards.go
+    line: 37
+    codegraphId: method:13b3bef4a2f02dd79d22912d171318c2
+  - name: RoleAllowsGlobWildcards.LoadConfig
+    kind: method
+    signature: (config map[string]any) error
+    file: third_party/openbao/internal/command/healthcheck/pki_role_allows_glob_wildcards.go
+    line: 41
+    codegraphId: method:5bd316b56d0128535cfae5b994c46ea9
+  - name: RoleAllowsGlobWildcards.FetchResources
+    kind: method
+    signature: (e *Executor) error
+    file: third_party/openbao/internal/command/healthcheck/pki_role_allows_glob_wildcards.go
+    line: 51
+    codegraphId: method:03b2746af69893a0f22538c93587f6cc
+  - name: RoleAllowsGlobWildcards.Evaluate
+    kind: method
+    signature: (e *Executor) (results []*Result, err error)
+    file: third_party/openbao/internal/command/healthcheck/pki_role_allows_glob_wildcards.go
+    line: 82
+    codegraphId: method:b223e4020314beefd1b8fd081b977ee7
+  - name: RoleAllowsLocalhost
+    kind: struct
+    file: third_party/openbao/internal/command/healthcheck/pki_role_allows_localhost.go
     line: 12
-    name: StringList
-    signature: (source any) ([]string, error)
-  - codegraphId: function:54151063fbf0369ccf78f584562776b5
-    file: third_party/openbao/internal/command/healthcheck/util.go
+    codegraphId: struct:20bb64b2eda73adc67482738579a6667
+  - name: NewRoleAllowsLocalhostCheck
     kind: function
+    signature: () Check
+    file: third_party/openbao/internal/command/healthcheck/pki_role_allows_localhost.go
+    line: 21
+    codegraphId: function:c2e7757edd9294fa5bbcecdd3fbeb87b
+  - name: RoleAllowsLocalhost.Name
+    kind: method
+    signature: () string
+    file: third_party/openbao/internal/command/healthcheck/pki_role_allows_localhost.go
+    line: 28
+    codegraphId: method:6622c42bcc19711bd3d6a7737cebe369
+  - name: RoleAllowsLocalhost.IsEnabled
+    kind: method
+    signature: () bool
+    file: third_party/openbao/internal/command/healthcheck/pki_role_allows_localhost.go
+    line: 32
+    codegraphId: method:e8e938ea4ab5f03066e3506ba2257d38
+  - name: RoleAllowsLocalhost.DefaultConfig
+    kind: method
+    signature: () map[string]any
+    file: third_party/openbao/internal/command/healthcheck/pki_role_allows_localhost.go
+    line: 36
+    codegraphId: method:dafd1d38b0b6b899157b5fba1ebeaabe
+  - name: RoleAllowsLocalhost.LoadConfig
+    kind: method
+    signature: (config map[string]any) error
+    file: third_party/openbao/internal/command/healthcheck/pki_role_allows_localhost.go
+    line: 40
+    codegraphId: method:db5c04d69337733344b6c7e200bc1b79
+  - name: RoleAllowsLocalhost.FetchResources
+    kind: method
+    signature: (e *Executor) error
+    file: third_party/openbao/internal/command/healthcheck/pki_role_allows_localhost.go
+    line: 50
+    codegraphId: method:4a2d2837e7e4dea2f99e9775e78630bd
+  - name: RoleAllowsLocalhost.Evaluate
+    kind: method
+    signature: (e *Executor) (results []*Result, err error)
+    file: third_party/openbao/internal/command/healthcheck/pki_role_allows_localhost.go
+    line: 81
+    codegraphId: method:f922a2e0ef295588366c258dfac1dd14
+  - name: RoleNoStoreFalse
+    kind: struct
+    file: third_party/openbao/internal/command/healthcheck/pki_role_no_store_false.go
+    line: 14
+    codegraphId: struct:8bdf3daf60bcc59bbe9ec5cf35e1210c
+  - name: NewRoleNoStoreFalseCheck
+    kind: function
+    signature: () Check
+    file: third_party/openbao/internal/command/healthcheck/pki_role_no_store_false.go
     line: 26
-    name: FormatDuration
+    codegraphId: function:e0270b356fd39d43e4fa6d4f90a867ee
+  - name: RoleNoStoreFalse.Name
+    kind: method
+    signature: () string
+    file: third_party/openbao/internal/command/healthcheck/pki_role_no_store_false.go
+    line: 34
+    codegraphId: method:0670562dac9af9ba480ca8db285a12c2
+  - name: RoleNoStoreFalse.IsEnabled
+    kind: method
+    signature: () bool
+    file: third_party/openbao/internal/command/healthcheck/pki_role_no_store_false.go
+    line: 38
+    codegraphId: method:07f4f39a1e4f1f26dcddebba9ad1b384
+  - name: RoleNoStoreFalse.DefaultConfig
+    kind: method
+    signature: () map[string]any
+    file: third_party/openbao/internal/command/healthcheck/pki_role_no_store_false.go
+    line: 42
+    codegraphId: method:9de6e490277e6b23259582b3192bb9be
+  - name: RoleNoStoreFalse.LoadConfig
+    kind: method
+    signature: (config map[string]any) error
+    file: third_party/openbao/internal/command/healthcheck/pki_role_no_store_false.go
+    line: 48
+    codegraphId: method:91a5dcb2b347ffe26a1b5026a0f97d82
+  - name: RoleNoStoreFalse.FetchResources
+    kind: method
+    signature: (e *Executor) error
+    file: third_party/openbao/internal/command/healthcheck/pki_role_no_store_false.go
+    line: 65
+    codegraphId: method:ba31fa2ff97424caba80b1063cba2668
+  - name: RoleNoStoreFalse.Evaluate
+    kind: method
+    signature: (e *Executor) (results []*Result, err error)
+    file: third_party/openbao/internal/command/healthcheck/pki_role_no_store_false.go
+    line: 104
+    codegraphId: method:37407ac3f5146afec063342e20e38f4a
+  - name: RootIssuedLeaves
+    kind: struct
+    file: third_party/openbao/internal/command/healthcheck/pki_root_issued_leaves.go
+    line: 14
+    codegraphId: struct:e54030f831b42be81e2dcfddf24eabc8
+  - name: NewRootIssuedLeavesCheck
+    kind: function
+    signature: () Check
+    file: third_party/openbao/internal/command/healthcheck/pki_root_issued_leaves.go
+    line: 25
+    codegraphId: function:29c57787bee6a0f0aaaea01696396bb2
+  - name: RootIssuedLeaves.Name
+    kind: method
+    signature: () string
+    file: third_party/openbao/internal/command/healthcheck/pki_root_issued_leaves.go
+    line: 33
+    codegraphId: method:a473ac3917ce58c6b6525aeafe9328ff
+  - name: RootIssuedLeaves.IsEnabled
+    kind: method
+    signature: () bool
+    file: third_party/openbao/internal/command/healthcheck/pki_root_issued_leaves.go
+    line: 37
+    codegraphId: method:ff69988a0d7a1b00e3ddd4d29eed94a3
+  - name: RootIssuedLeaves.DefaultConfig
+    kind: method
+    signature: () map[string]any
+    file: third_party/openbao/internal/command/healthcheck/pki_root_issued_leaves.go
+    line: 41
+    codegraphId: method:3f4385d0ac856cc55fdc536827b2b0ea
+  - name: RootIssuedLeaves.LoadConfig
+    kind: method
+    signature: (config map[string]any) error
+    file: third_party/openbao/internal/command/healthcheck/pki_root_issued_leaves.go
+    line: 47
+    codegraphId: method:40d5d883490d3fb5f5b5d2f8281db521
+  - name: RootIssuedLeaves.FetchResources
+    kind: method
+    signature: (e *Executor) error
+    file: third_party/openbao/internal/command/healthcheck/pki_root_issued_leaves.go
+    line: 63
+    codegraphId: method:45e1e0597151fe4f959cbe68e483bb23
+  - name: RootIssuedLeaves.Evaluate
+    kind: method
+    signature: (e *Executor) (results []*Result, err error)
+    file: third_party/openbao/internal/command/healthcheck/pki_root_issued_leaves.go
+    line: 134
+    codegraphId: method:2bbab82c0042ffb22e68e0c06c3e1753
+  - name: TidyLastRun
+    kind: struct
+    file: third_party/openbao/internal/command/healthcheck/pki_tidy_last_run.go
+    line: 15
+    codegraphId: struct:730053578bde164dd2420473f241bcd5
+  - name: NewTidyLastRunCheck
+    kind: function
+    signature: () Check
+    file: third_party/openbao/internal/command/healthcheck/pki_tidy_last_run.go
+    line: 25
+    codegraphId: function:525a8f3a99ef64f1fc0a155612e676f5
+  - name: TidyLastRun.Name
+    kind: method
+    signature: () string
+    file: third_party/openbao/internal/command/healthcheck/pki_tidy_last_run.go
+    line: 29
+    codegraphId: method:cc9a437d95b54ae0c3408e9e8cb3730d
+  - name: TidyLastRun.IsEnabled
+    kind: method
+    signature: () bool
+    file: third_party/openbao/internal/command/healthcheck/pki_tidy_last_run.go
+    line: 33
+    codegraphId: method:f54f748f7f5e053e4c012a256488513e
+  - name: TidyLastRun.DefaultConfig
+    kind: method
+    signature: () map[string]any
+    file: third_party/openbao/internal/command/healthcheck/pki_tidy_last_run.go
+    line: 37
+    codegraphId: method:10230bd64c4680eb18406694aec07a5d
+  - name: TidyLastRun.LoadConfig
+    kind: method
+    signature: (config map[string]any) error
+    file: third_party/openbao/internal/command/healthcheck/pki_tidy_last_run.go
+    line: 44
+    codegraphId: method:77f7501402c0188f9f29e1daf9e713f6
+  - name: TidyLastRun.FetchResources
+    kind: method
+    signature: (e *Executor) error
+    file: third_party/openbao/internal/command/healthcheck/pki_tidy_last_run.go
+    line: 65
+    codegraphId: method:bcb04937b6eea9aa33a2d8820dea0e63
+  - name: TidyLastRun.Evaluate
+    kind: method
+    signature: (e *Executor) (results []*Result, err error)
+    file: third_party/openbao/internal/command/healthcheck/pki_tidy_last_run.go
+    line: 80
+    codegraphId: method:34133aefe48f2b0a44a3cf51f5b2012d
+  - name: TooManyCerts
+    kind: struct
+    file: third_party/openbao/internal/command/healthcheck/pki_too_many_certs.go
+    line: 12
+    codegraphId: struct:09c330ce8435b3c3b03a90d454f2f920
+  - name: NewTooManyCertsCheck
+    kind: function
+    signature: () Check
+    file: third_party/openbao/internal/command/healthcheck/pki_too_many_certs.go
+    line: 23
+    codegraphId: function:d5a14ada5df01ecebbc5101d6149b1de
+  - name: TooManyCerts.Name
+    kind: method
+    signature: () string
+    file: third_party/openbao/internal/command/healthcheck/pki_too_many_certs.go
+    line: 27
+    codegraphId: method:c47865a16c8092a75fc43796a0e72e9e
+  - name: TooManyCerts.IsEnabled
+    kind: method
+    signature: () bool
+    file: third_party/openbao/internal/command/healthcheck/pki_too_many_certs.go
+    line: 31
+    codegraphId: method:c19545453aa0d980a60f2fe362fa4b7d
+  - name: TooManyCerts.DefaultConfig
+    kind: method
+    signature: () map[string]any
+    file: third_party/openbao/internal/command/healthcheck/pki_too_many_certs.go
+    line: 35
+    codegraphId: method:27ff9ebfa2f76c0e158fa512c4cea056
+  - name: TooManyCerts.LoadConfig
+    kind: method
+    signature: (config map[string]any) error
+    file: third_party/openbao/internal/command/healthcheck/pki_too_many_certs.go
+    line: 42
+    codegraphId: method:96e9000ec439ef901146308581e0a2e2
+  - name: TooManyCerts.FetchResources
+    kind: method
+    signature: (e *Executor) error
+    file: third_party/openbao/internal/command/healthcheck/pki_too_many_certs.go
+    line: 63
+    codegraphId: method:f29db6eb904841c985976a64f13a058f
+  - name: TooManyCerts.Evaluate
+    kind: method
+    signature: (e *Executor) (results []*Result, err error)
+    file: third_party/openbao/internal/command/healthcheck/pki_too_many_certs.go
+    line: 78
+    codegraphId: method:d17ae33805ac332e8476ffaf1182cb00
+  - name: StringList
+    kind: function
+    signature: (source any) ([]string, error)
+    file: third_party/openbao/internal/command/healthcheck/shared.go
+    line: 12
+    codegraphId: function:a240f05e1200f40f0e8fefbfd9b4505a
+  - name: FormatDuration
+    kind: function
     signature: (d time.Duration) string
-realizedSpecHash: 866123c68e25ecd09576fbd09f4f3db2a415af890be85fc0abd2646313328a06
-syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-syncedFingerprint: 3e12de852970a5ea01416c60caf096a1ceafe8a9e8368ba9d41827f269d93838
+    file: third_party/openbao/internal/command/healthcheck/util.go
+    line: 26
+    codegraphId: function:54151063fbf0369ccf78f584562776b5
+  fingerprint: 3e12de852970a5ea01416c60caf096a1ceafe8a9e8368ba9d41827f269d93838

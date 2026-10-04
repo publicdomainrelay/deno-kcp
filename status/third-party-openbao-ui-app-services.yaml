@@ -1,17 +1,20 @@
+syncedCommit: 89cee50ec5aea977a42f904a758e506729e1158e
+syncedFingerprint: 695d9b25359bb6b30596830f75a635e8effc19a00aea8e51cd15ec8762b49573
+realizedSpecHash: f2dc417238906920b51d0b9ba5294280aa1d37149524d78ed4c7f5035c5e0d66
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
+- type: CodeSynced
+  status: "True"
   reason: InterfacesObserved
-  status: "True"
-  type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+  message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+- type: Drifted
   status: "False"
-  type: Drifted
-- message: the spec passes the validator
-  reason: ValidatorPassed
+  reason: FingerprintEqual
+  message: observed facts match the synced fingerprint
+- type: SpecValid
   status: "True"
-  type: SpecValid
+  reason: ValidatorPassed
+  message: the spec passes the validator
 observed:
   files:
   - third_party/openbao/ui/app/services/auth.js
@@ -29,170 +32,167 @@ observed:
   - third_party/openbao/ui/app/services/store.js
   - third_party/openbao/ui/app/services/version.js
   - third_party/openbao/ui/app/services/wizard.js
-  fingerprint: 695d9b25359bb6b30596830f75a635e8effc19a00aea8e51cd15ec8762b49573
   interfaces:
-  - codegraphId: function:13427f18672747a5391378ed973ed72c
-    file: third_party/openbao/ui/app/services/console.js
+  - name: sanitizePath
     kind: function
+    signature: (path)
+    file: third_party/openbao/ui/app/services/console.js
     line: 17
-    name: sanitizePath
+    codegraphId: function:13427f18672747a5391378ed973ed72c
+  - name: ensureTrailingSlash
+    kind: function
     signature: (path)
-  - codegraphId: function:1ccafafd972835ba6fc1aa854f9a8539
     file: third_party/openbao/ui/app/services/console.js
-    kind: function
     line: 21
-    name: ensureTrailingSlash
-    signature: (path)
-  - codegraphId: class:af275923a92a215608382fe97f2d8688
-    file: third_party/openbao/ui/app/services/download.ts
+    codegraphId: function:1ccafafd972835ba6fc1aa854f9a8539
+  - name: DownloadService
     kind: class
+    file: third_party/openbao/ui/app/services/download.ts
     line: 26
-    name: DownloadService
-  - codegraphId: method:553396a9b18635bfe20efb25b62687af
-    file: third_party/openbao/ui/app/services/download.ts
+    codegraphId: class:af275923a92a215608382fe97f2d8688
+  - name: DownloadService.download
     kind: method
+    signature: '(filename: string, content: string, extension: string)'
+    file: third_party/openbao/ui/app/services/download.ts
     line: 27
-    name: DownloadService.download
-    signature: '(filename: string, content: string, extension: string)'
-  - codegraphId: method:4f54f7642bf1a445c771a915fbe5efa6
-    file: third_party/openbao/ui/app/services/download.ts
+    codegraphId: method:553396a9b18635bfe20efb25b62687af
+  - name: DownloadService.csv
     kind: method
+    signature: '(filename: string, content: string)'
+    file: third_party/openbao/ui/app/services/download.ts
     line: 54
-    name: DownloadService.csv
-    signature: '(filename: string, content: string)'
-  - codegraphId: method:0d4b3ee147f38cd03ea91be129338068
-    file: third_party/openbao/ui/app/services/download.ts
+    codegraphId: method:4f54f7642bf1a445c771a915fbe5efa6
+  - name: DownloadService.pem
     kind: method
+    signature: '(filename: string, content: string)'
+    file: third_party/openbao/ui/app/services/download.ts
     line: 58
-    name: DownloadService.pem
-    signature: '(filename: string, content: string)'
-  - codegraphId: method:47d7d7e5d087ac0ef9513bbef7f1315b
-    file: third_party/openbao/ui/app/services/download.ts
+    codegraphId: method:0d4b3ee147f38cd03ea91be129338068
+  - name: DownloadService.miscExtension
     kind: method
-    line: 62
-    name: DownloadService.miscExtension
     signature: '(filename: string, content: string, extension: string)'
-  - codegraphId: class:67c07d2c6e37cd165e8ed870559d4a05
+    file: third_party/openbao/ui/app/services/download.ts
+    line: 62
+    codegraphId: method:47d7d7e5d087ac0ef9513bbef7f1315b
+  - name: FlashMessageService
+    kind: class
     file: third_party/openbao/ui/app/services/flash-messages.ts
-    kind: class
     line: 13
-    name: FlashMessageService
-  - codegraphId: class:9b3d47aa296196f4fd1818bbfa7c90af
+    codegraphId: class:67c07d2c6e37cd165e8ed870559d4a05
+  - name: HostRouterService
+    kind: class
     file: third_party/openbao/ui/app/services/host-router.js
-    kind: class
     line: 7
-    name: HostRouterService
-  - codegraphId: class:a789412b3977033afb25f43922152cfe
+    codegraphId: class:9b3d47aa296196f4fd1818bbfa7c90af
+  - name: GeneratedItemModel
+    kind: class
     file: third_party/openbao/ui/app/services/path-help.js
-    kind: class
     line: 354
-    name: GeneratedItemModel
-  - codegraphId: class:0d95776ac55404673339ad39a9892ef4
+    codegraphId: class:a789412b3977033afb25f43922152cfe
+  - name: SecretMountPath
+    kind: class
     file: third_party/openbao/ui/app/services/secret-mount-path.js
-    kind: class
     line: 11
-    name: SecretMountPath
-  - codegraphId: function:6671fd9bfb9f840f19fce39ba116ac2c
-    file: third_party/openbao/ui/app/services/store.js
+    codegraphId: class:0d95776ac55404673339ad39a9892ef4
+  - name: normalizeModelName
     kind: function
+    signature: (modelName)
+    file: third_party/openbao/ui/app/services/store.js
     line: 19
-    name: normalizeModelName
-    signature: (modelName)
-  - codegraphId: function:8d239422baacb069c43a54b81f511395
-    file: third_party/openbao/ui/app/services/store.js
+    codegraphId: function:6671fd9bfb9f840f19fce39ba116ac2c
+  - name: keyForCache
     kind: function
-    line: 23
-    name: keyForCache
     signature: (query)
-  - codegraphId: function:c5b6ec8dec93ae551039dd0b25c0bc5d
     file: third_party/openbao/ui/app/services/store.js
+    line: 23
+    codegraphId: function:8d239422baacb069c43a54b81f511395
+  - name: lazyCaches
     kind: function
+    signature: ()
+    file: third_party/openbao/ui/app/services/store.js
     line: 40
-    name: lazyCaches
-    signature: ()
-  - codegraphId: function:d38f98216d8dca73ed692421bcc7a205
-    file: third_party/openbao/ui/app/services/store.js
+    codegraphId: function:c5b6ec8dec93ae551039dd0b25c0bc5d
+  - name: setLazyCacheForModel
     kind: function
-    line: 51
-    name: setLazyCacheForModel
     signature: (modelName, key, value)
-  - codegraphId: function:e62fc0bd114d913a87f99a9db56abc29
     file: third_party/openbao/ui/app/services/store.js
+    line: 51
+    codegraphId: function:d38f98216d8dca73ed692421bcc7a205
+  - name: getLazyCacheForModel
     kind: function
-    line: 60
-    name: getLazyCacheForModel
     signature: (modelName, key)
-  - codegraphId: function:c6141d39afac5de27458e8202f626ce7
     file: third_party/openbao/ui/app/services/store.js
+    line: 60
+    codegraphId: function:e62fc0bd114d913a87f99a9db56abc29
+  - name: lazyCacheForModel
     kind: function
+    signature: (modelName)
+    file: third_party/openbao/ui/app/services/store.js
     line: 68
-    name: lazyCacheForModel
-    signature: (modelName)
-  - codegraphId: function:8336f37e1dc58f0cf182787323887f80
-    file: third_party/openbao/ui/app/services/store.js
+    codegraphId: function:c6141d39afac5de27458e8202f626ce7
+  - name: lazyPaginatedQuery
     kind: function
-    line: 83
-    name: lazyPaginatedQuery
     signature: (modelType, query /*, options*/)
-  - codegraphId: function:221954b4abb9b85de706d8aa5bc37257
     file: third_party/openbao/ui/app/services/store.js
+    line: 83
+    codegraphId: function:8336f37e1dc58f0cf182787323887f80
+  - name: filterData
     kind: function
-    line: 114
-    name: filterData
     signature: (filter, dataset)
-  - codegraphId: function:6d0ebc7db29f257eb139aad2cbea6b1b
     file: third_party/openbao/ui/app/services/store.js
+    line: 114
+    codegraphId: function:221954b4abb9b85de706d8aa5bc37257
+  - name: constructResponse
     kind: function
+    signature: (modelName, query)
+    file: third_party/openbao/ui/app/services/store.js
     line: 130
-    name: constructResponse
-    signature: (modelName, query)
-  - codegraphId: function:39c2f6bbcb266757380c50615a00a1e0
-    file: third_party/openbao/ui/app/services/store.js
+    codegraphId: function:6d0ebc7db29f257eb139aad2cbea6b1b
+  - name: fetchPage
     kind: function
+    signature: (modelName, query)
+    file: third_party/openbao/ui/app/services/store.js
     line: 157
-    name: fetchPage
-    signature: (modelName, query)
-  - codegraphId: function:462bf0f233dd05ba72aea4202092c4a5
-    file: third_party/openbao/ui/app/services/store.js
+    codegraphId: function:39c2f6bbcb266757380c50615a00a1e0
+  - name: getDataset
     kind: function
+    signature: (modelName, query)
+    file: third_party/openbao/ui/app/services/store.js
     line: 179
-    name: getDataset
-    signature: (modelName, query)
-  - codegraphId: function:8126ae3de73956609cc9a5437da35520
-    file: third_party/openbao/ui/app/services/store.js
+    codegraphId: function:462bf0f233dd05ba72aea4202092c4a5
+  - name: storeDataset
     kind: function
-    line: 185
-    name: storeDataset
     signature: (modelName, query, response, array)
-  - codegraphId: function:9eea2287c14c0ff7e08400fee8e94cc2
     file: third_party/openbao/ui/app/services/store.js
+    line: 185
+    codegraphId: function:8126ae3de73956609cc9a5437da35520
+  - name: clearDataset
     kind: function
+    signature: (modelName)
+    file: third_party/openbao/ui/app/services/store.js
     line: 194
-    name: clearDataset
-    signature: (modelName)
-  - codegraphId: function:170ada2c881e4ec2bd0421ea0ab6ae79
-    file: third_party/openbao/ui/app/services/store.js
+    codegraphId: function:9eea2287c14c0ff7e08400fee8e94cc2
+  - name: clearAllDatasets
     kind: function
-    line: 207
-    name: clearAllDatasets
     signature: ()
-  - codegraphId: function:1ed8b09033f376e25bfe671b5916cad1
     file: third_party/openbao/ui/app/services/store.js
+    line: 207
+    codegraphId: function:170ada2c881e4ec2bd0421ea0ab6ae79
+  - name: unloadAll
     kind: function
-    line: 211
-    name: unloadAll
     signature: (modelName)
-  - codegraphId: function:c3528d5b23da120dd766143027ca2a39
     file: third_party/openbao/ui/app/services/store.js
+    line: 211
+    codegraphId: function:1ed8b09033f376e25bfe671b5916cad1
+  - name: unloadRecord
     kind: function
-    line: 224
-    name: unloadRecord
     signature: (record)
-  - codegraphId: class:08551e8ef841997f1051eeed52bc8baf
-    file: third_party/openbao/ui/app/services/version.js
+    file: third_party/openbao/ui/app/services/store.js
+    line: 224
+    codegraphId: function:c3528d5b23da120dd766143027ca2a39
+  - name: VersionService
     kind: class
+    file: third_party/openbao/ui/app/services/version.js
     line: 10
-    name: VersionService
-realizedSpecHash: f2dc417238906920b51d0b9ba5294280aa1d37149524d78ed4c7f5035c5e0d66
-syncedCommit: 89cee50ec5aea977a42f904a758e506729e1158e
-syncedFingerprint: 695d9b25359bb6b30596830f75a635e8effc19a00aea8e51cd15ec8762b49573
+    codegraphId: class:08551e8ef841997f1051eeed52bc8baf
+  fingerprint: 695d9b25359bb6b30596830f75a635e8effc19a00aea8e51cd15ec8762b49573

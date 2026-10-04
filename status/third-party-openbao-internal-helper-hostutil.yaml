@@ -1,17 +1,20 @@
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: b93513c7dba187cdf55409ecdbd77c4634d16f4a8cbe7449af7b49a1576d805a
+realizedSpecHash: 19b2c330c3a0169218fc963d7d78f92fb6352aebdb02be4ded3cf6dde300c374
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
+- type: CodeSynced
+  status: "True"
   reason: InterfacesObserved
-  status: "True"
-  type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+  message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+- type: Drifted
   status: "False"
-  type: Drifted
-- message: the spec passes the validator
-  reason: ValidatorPassed
+  reason: FingerprintEqual
+  message: observed facts match the synced fingerprint
+- type: SpecValid
   status: "True"
-  type: SpecValid
+  reason: ValidatorPassed
+  message: the spec passes the validator
 observed:
   files:
   - third_party/openbao/internal/helper/hostutil/hostinfo.go
@@ -19,58 +22,55 @@ observed:
   - third_party/openbao/internal/helper/hostutil/hostinfo_openbsd.go
   - third_party/openbao/internal/helper/hostutil/hostinfo_test.go
   - third_party/openbao/internal/helper/hostutil/hostinfo_util.go
-  fingerprint: b93513c7dba187cdf55409ecdbd77c4634d16f4a8cbe7449af7b49a1576d805a
   interfaces:
-  - codegraphId: struct:d82e9192ff68b78dfa2b195096b2dc7a
-    file: third_party/openbao/internal/helper/hostutil/hostinfo.go
+  - name: HostInfo
     kind: struct
+    file: third_party/openbao/internal/helper/hostutil/hostinfo.go
     line: 23
-    name: HostInfo
-  - codegraphId: function:61d7cdc83eea9ff7205895179f2252ac
-    file: third_party/openbao/internal/helper/hostutil/hostinfo.go
+    codegraphId: struct:d82e9192ff68b78dfa2b195096b2dc7a
+  - name: CollectHostInfo
     kind: function
-    line: 46
-    name: CollectHostInfo
     signature: (ctx context.Context) (*HostInfo, error)
-  - codegraphId: function:96269bbb5e7637f45dc4f9fb793bbe49
     file: third_party/openbao/internal/helper/hostutil/hostinfo.go
+    line: 46
+    codegraphId: function:61d7cdc83eea9ff7205895179f2252ac
+  - name: CollectHostMemory
     kind: function
-    line: 95
-    name: CollectHostMemory
     signature: (ctx context.Context) (*VirtualMemoryStat, error)
-  - codegraphId: function:adde1148d10668fb793553e39ebe044a
     file: third_party/openbao/internal/helper/hostutil/hostinfo.go
+    line: 95
+    codegraphId: function:96269bbb5e7637f45dc4f9fb793bbe49
+  - name: CollectHostInfoStat
     kind: function
-    line: 140
-    name: CollectHostInfoStat
     signature: (ctx context.Context) (*HostInfoStat, error)
-  - codegraphId: struct:c78d894f02c6a75cf9c18dfe4eec0a35
-    file: third_party/openbao/internal/helper/hostutil/hostinfo_error.go
+    file: third_party/openbao/internal/helper/hostutil/hostinfo.go
+    line: 140
+    codegraphId: function:adde1148d10668fb793553e39ebe044a
+  - name: HostInfoError
     kind: struct
+    file: third_party/openbao/internal/helper/hostutil/hostinfo_error.go
     line: 9
-    name: HostInfoError
-  - codegraphId: method:b376ea34fe363a4f5ca9f8615a824a52
-    file: third_party/openbao/internal/helper/hostutil/hostinfo_error.go
+    codegraphId: struct:c78d894f02c6a75cf9c18dfe4eec0a35
+  - name: HostInfoError.WrappedErrors
     kind: method
-    line: 14
-    name: HostInfoError.WrappedErrors
     signature: () []error
-  - codegraphId: method:285401c48151e16655d99e402398f11e
     file: third_party/openbao/internal/helper/hostutil/hostinfo_error.go
+    line: 14
+    codegraphId: method:b376ea34fe363a4f5ca9f8615a824a52
+  - name: HostInfoError.Error
     kind: method
-    line: 18
-    name: HostInfoError.Error
     signature: () string
-  - codegraphId: struct:43f3aac19b9221371b774a6c71a272af
-    file: third_party/openbao/internal/helper/hostutil/hostinfo_util.go
+    file: third_party/openbao/internal/helper/hostutil/hostinfo_error.go
+    line: 18
+    codegraphId: method:285401c48151e16655d99e402398f11e
+  - name: VirtualMemoryStat
     kind: struct
+    file: third_party/openbao/internal/helper/hostutil/hostinfo_util.go
     line: 39
-    name: VirtualMemoryStat
-  - codegraphId: struct:8bc82c9291538be26dc922db9630ff7e
-    file: third_party/openbao/internal/helper/hostutil/hostinfo_util.go
+    codegraphId: struct:43f3aac19b9221371b774a6c71a272af
+  - name: HostInfoStat
     kind: struct
+    file: third_party/openbao/internal/helper/hostutil/hostinfo_util.go
     line: 110
-    name: HostInfoStat
-realizedSpecHash: 19b2c330c3a0169218fc963d7d78f92fb6352aebdb02be4ded3cf6dde300c374
-syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-syncedFingerprint: b93513c7dba187cdf55409ecdbd77c4634d16f4a8cbe7449af7b49a1576d805a
+    codegraphId: struct:8bc82c9291538be26dc922db9630ff7e
+  fingerprint: b93513c7dba187cdf55409ecdbd77c4634d16f4a8cbe7449af7b49a1576d805a

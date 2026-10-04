@@ -1,4 +1,141 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-ui-app-models-pki-config
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'This context exists so the PKI configuration edit surface has a describable
+    contract: which configuration fields each of the four config endpoints (acme,
+    cluster, crl, urls) accepts, how those fields render in the form, and how the
+    UI decides whether the current token may write them. It is a third-party UI model
+    layer (vendored under third_party/openbao), consumed by pki-configuration-edit.ts,
+    and it maps one-to-one onto the PKI engine''s config/* API paths.'
+  requirements:
+  - id: r.acme-capabilities
+    level: MUST
+    text: PkiConfigAcmeModel exposes acmePath as lazyCapabilities on apiPath `${'id'}/config/acme`
+      keyed by id, and canSet is true unless acmePath.get('canUpdate') is exactly
+      false — an unresolved capability must not lock the form.
+    codeRefs:
+    - class:11f9538efb972a0a6a640217e161c307
+    - file:third_party/openbao/ui/app/models/pki/config/acme.js
+  - id: r.acme-eab-policy-values
+    level: MUST
+    text: The ACME model restricts eabPolicy to the possible values not-required,
+      new-account-required and always-required, so the form renders a fixed choice
+      list instead of free text.
+    codeRefs:
+    - class:11f9538efb972a0a6a640217e161c307
+    - file:third_party/openbao/ui/app/models/pki/config/acme.js
+  - id: r.acme-form-fields
+    level: MUST
+    text: PkiConfigAcmeModel declares, in this order because declaration order fixes
+      form order, the attributes enabled (boolean), defaultDirectoryPolicy (string),
+      allowedRoles (array, stringArray editor), allowRoleExtKeyUsage (boolean), allowedIssuers
+      (array, stringArray editor), eabPolicy (string) and dnsResolver (string).
+    codeRefs:
+    - class:11f9538efb972a0a6a640217e161c307
+    - file:third_party/openbao/ui/app/models/pki/config/acme.js
+  - id: r.acme-help-url
+    level: MUST
+    text: PkiConfigAcmeModel.getHelpUrl(backendPath) returns `/v1/${backendPath}/config/acme?help=1`,
+      and useOpenAPI is true so the OpenAPI-backed form uses that endpoint for field
+      documentation.
+    codeRefs:
+    - class:11f9538efb972a0a6a640217e161c307
+    - file:third_party/openbao/ui/app/models/pki/config/acme.js
+  - id: r.backend-path-as-model-id
+    level: MUST
+    text: Each of the four config models takes the PKI backend/mount value as its
+      record ID, because that ID is interpolated into the lazy capabilities API path
+      and into the help URL.
+    codeRefs:
+    - file:third_party/openbao/ui/app/models/pki/config/acme.js
+    - file:third_party/openbao/ui/app/models/pki/config/cluster.js
+    - file:third_party/openbao/ui/app/models/pki/config/crl.js
+    - file:third_party/openbao/ui/app/models/pki/config/urls.js
+  - id: r.cluster-form-fields
+    level: MUST
+    text: PkiConfigClusterModel declares path (string, the performance replication
+      cluster's API mount path including namespaces) and aiaPath (string, the AIA
+      distribution point), which may refer to an external non-OpenBao responder.
+    codeRefs:
+    - class:811c1c2b377c20e67c49d062851b8405
+    - file:third_party/openbao/ui/app/models/pki/config/cluster.js
+  - id: r.cluster-help-url-and-capabilities
+    level: MUST
+    text: PkiConfigClusterModel returns `/v1/${backendPath}/config/cluster?help=1`
+      from getHelpUrl, sets useOpenAPI true, and gates canSet on clusterPath, a lazyCapabilities
+      binding to `${'id'}/config/cluster` that is false only when canUpdate is exactly
+      false.
+    codeRefs:
+    - class:811c1c2b377c20e67c49d062851b8405
+    - file:third_party/openbao/ui/app/models/pki/config/cluster.js
+  - id: r.crl-capabilities
+    level: MUST
+    text: PkiConfigCrlModel binds crlPath as lazyCapabilities on `${'id'}/config/crl`
+      keyed by id and defines canSet as true unless crlPath.get('canUpdate') is exactly
+      false.
+    codeRefs:
+    - class:0dcaa854434eaefbc976d6883d5ddd47
+    - file:third_party/openbao/ui/app/models/pki/config/crl.js
+  - id: r.crl-form-groups
+    level: MUST
+    text: PkiConfigCrlModel is decorated with withFormFields(null, formFieldGroups)
+      where the groups are 'Certificate Revocation List (CRL)' containing expiry,
+      autoRebuildGracePeriod and deltaRebuildInterval, and 'Online Certificate Status
+      Protocol (OCSP)' containing ocspExpiry — the null first argument means no top-level
+      fields, every field lives in a named group.
+    codeRefs:
+    - class:0dcaa854434eaefbc976d6883d5ddd47
+    - file:third_party/openbao/ui/app/models/pki/config/crl.js
+  - id: r.crl-ttl-boolean-pairing
+    level: MUST
+    text: 'Each CRL TTL string attribute is rendered as a toggled TTL editor bound
+      to a boolean attribute: expiry to disable with isOppositeValue true, ocspExpiry
+      to ocspDisable with isOppositeValue true, autoRebuildGracePeriod to autoRebuild
+      and deltaRebuildInterval to enableDelta both with isOppositeValue false; autoRebuild,
+      enableDelta and ocspDisable are plain booleans.'
+    codeRefs:
+    - class:0dcaa854434eaefbc976d6883d5ddd47
+    - file:third_party/openbao/ui/app/models/pki/config/crl.js
+  - id: r.urls-form-fields
+    level: MUST
+    text: PkiConfigUrlsModel declares issuingCertificates, crlDistributionPoints and
+      ocspServers, each an array attribute using the stringArray edit type with help
+      text suppressed, holding the alternative URL values emitted into issued certificates
+      for the Issuing Certificate, CRL Distribution Points and OCSP Servers fields.
+    codeRefs:
+    - class:c163acf9c02241811a259c1952b2a508
+    - file:third_party/openbao/ui/app/models/pki/config/urls.js
+  - id: r.urls-help-url-and-capabilities
+    level: MUST
+    text: PkiConfigUrlsModel returns `/v1/${backendPath}/config/urls?help=1` from
+      getHelpUrl, sets useOpenAPI true, and gates canSet on urlsPath, a lazyCapabilities
+      binding to `${'id'}/config/urls` that is false only when canUpdate is exactly
+      false.
+    codeRefs:
+    - class:c163acf9c02241811a259c1952b2a508
+    - file:third_party/openbao/ui/app/models/pki/config/urls.js
+  interfaces:
+  - name: PkiConfigAcmeModel
+    kind: class
+    signature: export default class PkiConfigAcmeModel extends Model
+    file: third_party/openbao/ui/app/models/pki/config/acme.js
+  - name: PkiConfigClusterModel
+    kind: class
+    signature: export default class PkiConfigClusterModel extends Model
+    file: third_party/openbao/ui/app/models/pki/config/cluster.js
+  - name: PkiConfigCrlModel
+    kind: class
+    signature: export default class PkiConfigCrlModel extends Model
+    file: third_party/openbao/ui/app/models/pki/config/crl.js
+  - name: PkiConfigUrlsModel
+    kind: class
+    signature: export default class PkiConfigUrlsModel extends Model
+    file: third_party/openbao/ui/app/models/pki/config/urls.js
 codeRefIndex:
 - class:0dcaa854434eaefbc976d6883d5ddd47 PkiConfigCrlModel@third_party/openbao/ui/app/models/pki/config/crl.js:19
 - class:11f9538efb972a0a6a640217e161c307 PkiConfigAcmeModel@third_party/openbao/ui/app/models/pki/config/acme.js:11
@@ -8,140 +145,3 @@ codeRefIndex:
 - file:third_party/openbao/ui/app/models/pki/config/cluster.js cluster.js@third_party/openbao/ui/app/models/pki/config/cluster.js
 - file:third_party/openbao/ui/app/models/pki/config/crl.js crl.js@third_party/openbao/ui/app/models/pki/config/crl.js
 - file:third_party/openbao/ui/app/models/pki/config/urls.js urls.js@third_party/openbao/ui/app/models/pki/config/urls.js
-kind: SystemContext
-metadata:
-  name: third-party-openbao-ui-app-models-pki-config
-  namespace: default
-spec:
-  intent: 'This context exists so the PKI configuration edit surface has a describable
-    contract: which configuration fields each of the four config endpoints (acme,
-    cluster, crl, urls) accepts, how those fields render in the form, and how the
-    UI decides whether the current token may write them. It is a third-party UI model
-    layer (vendored under third_party/openbao), consumed by pki-configuration-edit.ts,
-    and it maps one-to-one onto the PKI engine''s config/* API paths.'
-  interfaces:
-  - file: third_party/openbao/ui/app/models/pki/config/acme.js
-    kind: class
-    name: PkiConfigAcmeModel
-    signature: export default class PkiConfigAcmeModel extends Model
-  - file: third_party/openbao/ui/app/models/pki/config/cluster.js
-    kind: class
-    name: PkiConfigClusterModel
-    signature: export default class PkiConfigClusterModel extends Model
-  - file: third_party/openbao/ui/app/models/pki/config/crl.js
-    kind: class
-    name: PkiConfigCrlModel
-    signature: export default class PkiConfigCrlModel extends Model
-  - file: third_party/openbao/ui/app/models/pki/config/urls.js
-    kind: class
-    name: PkiConfigUrlsModel
-    signature: export default class PkiConfigUrlsModel extends Model
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - class:11f9538efb972a0a6a640217e161c307
-    - file:third_party/openbao/ui/app/models/pki/config/acme.js
-    id: r.acme-capabilities
-    level: MUST
-    text: PkiConfigAcmeModel exposes acmePath as lazyCapabilities on apiPath `${'id'}/config/acme`
-      keyed by id, and canSet is true unless acmePath.get('canUpdate') is exactly
-      false — an unresolved capability must not lock the form.
-  - codeRefs:
-    - class:11f9538efb972a0a6a640217e161c307
-    - file:third_party/openbao/ui/app/models/pki/config/acme.js
-    id: r.acme-eab-policy-values
-    level: MUST
-    text: The ACME model restricts eabPolicy to the possible values not-required,
-      new-account-required and always-required, so the form renders a fixed choice
-      list instead of free text.
-  - codeRefs:
-    - class:11f9538efb972a0a6a640217e161c307
-    - file:third_party/openbao/ui/app/models/pki/config/acme.js
-    id: r.acme-form-fields
-    level: MUST
-    text: PkiConfigAcmeModel declares, in this order because declaration order fixes
-      form order, the attributes enabled (boolean), defaultDirectoryPolicy (string),
-      allowedRoles (array, stringArray editor), allowRoleExtKeyUsage (boolean), allowedIssuers
-      (array, stringArray editor), eabPolicy (string) and dnsResolver (string).
-  - codeRefs:
-    - class:11f9538efb972a0a6a640217e161c307
-    - file:third_party/openbao/ui/app/models/pki/config/acme.js
-    id: r.acme-help-url
-    level: MUST
-    text: PkiConfigAcmeModel.getHelpUrl(backendPath) returns `/v1/${backendPath}/config/acme?help=1`,
-      and useOpenAPI is true so the OpenAPI-backed form uses that endpoint for field
-      documentation.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/models/pki/config/acme.js
-    - file:third_party/openbao/ui/app/models/pki/config/cluster.js
-    - file:third_party/openbao/ui/app/models/pki/config/crl.js
-    - file:third_party/openbao/ui/app/models/pki/config/urls.js
-    id: r.backend-path-as-model-id
-    level: MUST
-    text: Each of the four config models takes the PKI backend/mount value as its
-      record ID, because that ID is interpolated into the lazy capabilities API path
-      and into the help URL.
-  - codeRefs:
-    - class:811c1c2b377c20e67c49d062851b8405
-    - file:third_party/openbao/ui/app/models/pki/config/cluster.js
-    id: r.cluster-form-fields
-    level: MUST
-    text: PkiConfigClusterModel declares path (string, the performance replication
-      cluster's API mount path including namespaces) and aiaPath (string, the AIA
-      distribution point), which may refer to an external non-OpenBao responder.
-  - codeRefs:
-    - class:811c1c2b377c20e67c49d062851b8405
-    - file:third_party/openbao/ui/app/models/pki/config/cluster.js
-    id: r.cluster-help-url-and-capabilities
-    level: MUST
-    text: PkiConfigClusterModel returns `/v1/${backendPath}/config/cluster?help=1`
-      from getHelpUrl, sets useOpenAPI true, and gates canSet on clusterPath, a lazyCapabilities
-      binding to `${'id'}/config/cluster` that is false only when canUpdate is exactly
-      false.
-  - codeRefs:
-    - class:0dcaa854434eaefbc976d6883d5ddd47
-    - file:third_party/openbao/ui/app/models/pki/config/crl.js
-    id: r.crl-capabilities
-    level: MUST
-    text: PkiConfigCrlModel binds crlPath as lazyCapabilities on `${'id'}/config/crl`
-      keyed by id and defines canSet as true unless crlPath.get('canUpdate') is exactly
-      false.
-  - codeRefs:
-    - class:0dcaa854434eaefbc976d6883d5ddd47
-    - file:third_party/openbao/ui/app/models/pki/config/crl.js
-    id: r.crl-form-groups
-    level: MUST
-    text: PkiConfigCrlModel is decorated with withFormFields(null, formFieldGroups)
-      where the groups are 'Certificate Revocation List (CRL)' containing expiry,
-      autoRebuildGracePeriod and deltaRebuildInterval, and 'Online Certificate Status
-      Protocol (OCSP)' containing ocspExpiry — the null first argument means no top-level
-      fields, every field lives in a named group.
-  - codeRefs:
-    - class:0dcaa854434eaefbc976d6883d5ddd47
-    - file:third_party/openbao/ui/app/models/pki/config/crl.js
-    id: r.crl-ttl-boolean-pairing
-    level: MUST
-    text: 'Each CRL TTL string attribute is rendered as a toggled TTL editor bound
-      to a boolean attribute: expiry to disable with isOppositeValue true, ocspExpiry
-      to ocspDisable with isOppositeValue true, autoRebuildGracePeriod to autoRebuild
-      and deltaRebuildInterval to enableDelta both with isOppositeValue false; autoRebuild,
-      enableDelta and ocspDisable are plain booleans.'
-  - codeRefs:
-    - class:c163acf9c02241811a259c1952b2a508
-    - file:third_party/openbao/ui/app/models/pki/config/urls.js
-    id: r.urls-form-fields
-    level: MUST
-    text: PkiConfigUrlsModel declares issuingCertificates, crlDistributionPoints and
-      ocspServers, each an array attribute using the stringArray edit type with help
-      text suppressed, holding the alternative URL values emitted into issued certificates
-      for the Issuing Certificate, CRL Distribution Points and OCSP Servers fields.
-  - codeRefs:
-    - class:c163acf9c02241811a259c1952b2a508
-    - file:third_party/openbao/ui/app/models/pki/config/urls.js
-    id: r.urls-help-url-and-capabilities
-    level: MUST
-    text: PkiConfigUrlsModel returns `/v1/${backendPath}/config/urls?help=1` from
-      getHelpUrl, sets useOpenAPI true, and gates canSet on urlsPath, a lazyCapabilities
-      binding to `${'id'}/config/urls` that is false only when canUpdate is exactly
-      false.
-  upstream: self

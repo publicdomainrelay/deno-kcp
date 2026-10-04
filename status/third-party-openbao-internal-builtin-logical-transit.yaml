@@ -1,17 +1,20 @@
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 988fc2aa49824525fe0bdac7174918cc8f06867f71f912a9a07e1d686ae33e53
+realizedSpecHash: 2d94029b0d31643d5b531fe443f9dcaadb9b1e00a1de25ed0397363105bcdfc4
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
+- type: CodeSynced
+  status: "True"
   reason: InterfacesObserved
-  status: "True"
-  type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+  message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+- type: Drifted
   status: "False"
-  type: Drifted
-- message: the spec passes the validator
-  reason: ValidatorPassed
+  reason: FingerprintEqual
+  message: observed facts match the synced fingerprint
+- type: SpecValid
   status: "True"
-  type: SpecValid
+  reason: ValidatorPassed
+  message: the spec passes the validator
 observed:
   files:
   - third_party/openbao/internal/builtin/logical/transit/backend.go
@@ -61,84 +64,81 @@ observed:
   - third_party/openbao/internal/builtin/logical/transit/path_wrapping_key.go
   - third_party/openbao/internal/builtin/logical/transit/path_wrapping_key_test.go
   - third_party/openbao/internal/builtin/logical/transit/stepwise_test.go
-  fingerprint: 988fc2aa49824525fe0bdac7174918cc8f06867f71f912a9a07e1d686ae33e53
   interfaces:
-  - codegraphId: function:381085114a51d0b08808d3cd9f47ba55
-    file: third_party/openbao/internal/builtin/logical/transit/backend.go
+  - name: Factory
     kind: function
-    line: 30
-    name: Factory
     signature: (ctx context.Context, conf *logical.BackendConfig) (logical.Backend,
       error)
-  - codegraphId: function:37d054dd2d2f22457c13fdcf492f375b
     file: third_party/openbao/internal/builtin/logical/transit/backend.go
+    line: 30
+    codegraphId: function:381085114a51d0b08808d3cd9f47ba55
+  - name: Backend
     kind: function
-    line: 41
-    name: Backend
     signature: (ctx context.Context, conf *logical.BackendConfig) (*backend, error)
-  - codegraphId: function:000c05a4ec7691f25a33662ebe0d9ee3
     file: third_party/openbao/internal/builtin/logical/transit/backend.go
+    line: 41
+    codegraphId: function:37d054dd2d2f22457c13fdcf492f375b
+  - name: GetCacheSizeFromStorage
     kind: function
-    line: 128
-    name: GetCacheSizeFromStorage
     signature: (ctx context.Context, s logical.Storage) (int, error)
-  - codegraphId: method:2400c6b8a16531e50c59fb35814c969c
     file: third_party/openbao/internal/builtin/logical/transit/backend.go
+    line: 128
+    codegraphId: function:000c05a4ec7691f25a33662ebe0d9ee3
+  - name: backend.GetPolicy
     kind: method
+    signature: (ctx context.Context, polReq keysutil.PolicyRequest, rand io.Reader)
+      (retP *keysutil.Policy, retUpserted bool, retErr error)
+    file: third_party/openbao/internal/builtin/logical/transit/backend.go
     line: 145
-    name: backend.GetPolicy
+    codegraphId: method:2400c6b8a16531e50c59fb35814c969c
+  - name: backend.GetPolicyExclusive
+    kind: method
     signature: (ctx context.Context, polReq keysutil.PolicyRequest, rand io.Reader)
       (retP *keysutil.Policy, retUpserted bool, retErr error)
-  - codegraphId: method:5d7f51f802dc1ba580ffde2e8ae3055f
     file: third_party/openbao/internal/builtin/logical/transit/backend.go
-    kind: method
     line: 149
-    name: backend.GetPolicyExclusive
-    signature: (ctx context.Context, polReq keysutil.PolicyRequest, rand io.Reader)
-      (retP *keysutil.Policy, retUpserted bool, retErr error)
-  - codegraphId: struct:cd55fd15ab7316cd773b434a6dc39ee1
-    file: third_party/openbao/internal/builtin/logical/transit/backend.go
+    codegraphId: method:5d7f51f802dc1ba580ffde2e8ae3055f
+  - name: ExternalKeyFactory
     kind: struct
+    file: third_party/openbao/internal/builtin/logical/transit/backend.go
     line: 295
-    name: ExternalKeyFactory
-  - codegraphId: method:ee7e0af2d23d9f185a9b4788be656d2c
-    file: third_party/openbao/internal/builtin/logical/transit/backend.go
+    codegraphId: struct:cd55fd15ab7316cd773b434a6dc39ee1
+  - name: ExternalKeyFactory.GetExternalKey
     kind: method
-    line: 302
-    name: ExternalKeyFactory.GetExternalKey
     signature: (ref string) (context.Context, kms.Key, error)
-  - codegraphId: method:8c04a897e645419609f28c7fdcb6b705
     file: third_party/openbao/internal/builtin/logical/transit/backend.go
+    line: 302
+    codegraphId: method:ee7e0af2d23d9f185a9b4788be656d2c
+  - name: backend.ExternalKeyFactory
     kind: method
-    line: 307
-    name: backend.ExternalKeyFactory
     signature: (ctx context.Context) *ExternalKeyFactory
-  - codegraphId: struct:138a09d1182d6e96561fa588ee32f835
+    file: third_party/openbao/internal/builtin/logical/transit/backend.go
+    line: 307
+    codegraphId: method:8c04a897e645419609f28c7fdcb6b705
+  - name: DecryptBatchResponseItem
+    kind: struct
     file: third_party/openbao/internal/builtin/logical/transit/path_decrypt.go
-    kind: struct
     line: 17
-    name: DecryptBatchResponseItem
-  - codegraphId: struct:64ef55a31f10f09cb907d56fdfe1a039
-    file: third_party/openbao/internal/builtin/logical/transit/path_encrypt.go
+    codegraphId: struct:138a09d1182d6e96561fa588ee32f835
+  - name: BatchRequestItem
     kind: struct
+    file: third_party/openbao/internal/builtin/logical/transit/path_encrypt.go
     line: 22
-    name: BatchRequestItem
-  - codegraphId: struct:8a259263f720842e73cfba078b181b02
-    file: third_party/openbao/internal/builtin/logical/transit/path_encrypt.go
+    codegraphId: struct:64ef55a31f10f09cb907d56fdfe1a039
+  - name: EncryptBatchResponseItem
     kind: struct
+    file: third_party/openbao/internal/builtin/logical/transit/path_encrypt.go
     line: 47
-    name: EncryptBatchResponseItem
-  - codegraphId: struct:59998bebe79acfe50dcdd01d22da84f3
-    file: third_party/openbao/internal/builtin/logical/transit/path_encrypt.go
+    codegraphId: struct:8a259263f720842e73cfba078b181b02
+  - name: AssocDataFactory
     kind: struct
-    line: 64
-    name: AssocDataFactory
-  - codegraphId: method:814de26db1b9b84ef3959a0cbb03030e
     file: third_party/openbao/internal/builtin/logical/transit/path_encrypt.go
+    line: 64
+    codegraphId: struct:59998bebe79acfe50dcdd01d22da84f3
+  - name: AssocDataFactory.GetAssociatedData
     kind: method
-    line: 68
-    name: AssocDataFactory.GetAssociatedData
     signature: () ([]byte, error)
-realizedSpecHash: 2d94029b0d31643d5b531fe443f9dcaadb9b1e00a1de25ed0397363105bcdfc4
-syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
-syncedFingerprint: 988fc2aa49824525fe0bdac7174918cc8f06867f71f912a9a07e1d686ae33e53
+    file: third_party/openbao/internal/builtin/logical/transit/path_encrypt.go
+    line: 68
+    codegraphId: method:814de26db1b9b84ef3959a0cbb03030e
+  fingerprint: 988fc2aa49824525fe0bdac7174918cc8f06867f71f912a9a07e1d686ae33e53

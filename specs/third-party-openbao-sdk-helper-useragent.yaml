@@ -1,81 +1,81 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/sdk/helper/useragent/useragent.go useragent.go@third_party/openbao/sdk/helper/useragent/useragent.go
-- file:third_party/openbao/sdk/helper/useragent/useragent_test.go useragent_test.go@third_party/openbao/sdk/helper/useragent/useragent_test.go
-- function:c2b7b93f98bb13761bb4913658be6306 String@third_party/openbao/sdk/helper/useragent/useragent.go:40
-- function:f2ef3a3169d630fdb4bad111f1a84fbf PluginString@third_party/openbao/sdk/helper/useragent/useragent.go:55
 kind: SystemContext
 metadata:
   name: third-party-openbao-sdk-helper-useragent
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: The package exists so that OpenBao API clients and external plugins identify
     themselves consistently and machine-parsably in the User-Agent header. PluginString
     gives plugin processes a way to advertise the host Vault version and their own
     plugin name without hand-formatting the header, while String serves callers that
     only need the generic agent string. Keeping the format in one place makes the
     emitted header uniform across components.
-  interfaces:
-  - file: third_party/openbao/sdk/helper/useragent/useragent.go
-    kind: function
-    name: PluginString
-    signature: func PluginString(env *logical.PluginEnvironment, pluginName string,
-      comments ...string) string
-  - file: third_party/openbao/sdk/helper/useragent/useragent.go
-    kind: function
-    name: String
-    signature: func String(comments ...string) string
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/useragent/useragent.go
-    - function:f2ef3a3169d630fdb4bad111f1a84fbf
-    id: r.pluginstring-comment-parts-order
+  - id: r.pluginstring-comment-parts-order
     level: MUST
     text: PluginString must assemble the parenthesized comment list in the order project
       URL marker prefixed with '+', then the plugin name when pluginName is not empty,
       then the runtime version, then any caller comments, and must join those parts
       with the separator '; '.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/sdk/helper/useragent/useragent.go
     - function:f2ef3a3169d630fdb4bad111f1a84fbf
-    id: r.pluginstring-nil-env-empty
+  - id: r.pluginstring-nil-env-empty
     level: MUST
     text: PluginString must return the empty string when the passed logical.PluginEnvironment
       is nil, so a plugin without host environment information emits no agent header
       instead of a malformed one.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/useragent/useragent_test.go
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/useragent/useragent.go
     - function:f2ef3a3169d630fdb4bad111f1a84fbf
-    id: r.pluginstring-output-shape
+  - id: r.pluginstring-output-shape
     level: MUST
     text: PluginString must render the final result as the token 'Vault/', the resolved
       version, a space, and the joined comment list enclosed in parentheses, matching
       the shape the test file asserts, for example 'Vault/1.2.3 (+https://vault-test.com;
       azure-auth; go5.0; pid-abcdefg)'.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/useragent/useragent.go
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/useragent/useragent_test.go
     - function:f2ef3a3169d630fdb4bad111f1a84fbf
-    id: r.pluginstring-version-suffixes
+  - id: r.pluginstring-version-suffixes
     level: MUST
     text: PluginString must take the agent version from the environment's VaultVersion
       and append the prerelease value joined with '-' when VaultVersionPrerelease
       is not empty and the metadata value joined with '+' when VaultVersionMetadata
       is not empty, so prerelease and build metadata survive into the header.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/sdk/helper/useragent/useragent.go
-    - function:c2b7b93f98bb13761bb4913658be6306
-    id: r.string-builds-agent-from-comments
+    - function:f2ef3a3169d630fdb4bad111f1a84fbf
+  - id: r.string-builds-agent-from-comments
     level: MUST
     text: String must build and return a User-Agent string from the variadic comment
       parts supplied by the caller, joining those parts with the package's own project
       URL marker and runtime version so every caller emits the same base format.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/useragent/useragent_test.go
-    id: r.tests-cover-pluginstring
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/useragent/useragent.go
+    - function:c2b7b93f98bb13761bb4913658be6306
+  - id: r.tests-cover-pluginstring
     level: SHOULD
     text: The package's tests should pin PluginString behaviour by overriding the
       project URL and runtime version package variables and asserting the returned
       agent for the nil environment, no-plugin-name, plugin-name, and extra-comment
       cases.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/useragent/useragent_test.go
+  interfaces:
+  - name: PluginString
+    kind: function
+    signature: func PluginString(env *logical.PluginEnvironment, pluginName string,
+      comments ...string) string
+    file: third_party/openbao/sdk/helper/useragent/useragent.go
+  - name: String
+    kind: function
+    signature: func String(comments ...string) string
+    file: third_party/openbao/sdk/helper/useragent/useragent.go
+codeRefIndex:
+- file:third_party/openbao/sdk/helper/useragent/useragent.go useragent.go@third_party/openbao/sdk/helper/useragent/useragent.go
+- file:third_party/openbao/sdk/helper/useragent/useragent_test.go useragent_test.go@third_party/openbao/sdk/helper/useragent/useragent_test.go
+- function:c2b7b93f98bb13761bb4913658be6306 String@third_party/openbao/sdk/helper/useragent/useragent.go:40
+- function:f2ef3a3169d630fdb4bad111f1a84fbf PluginString@third_party/openbao/sdk/helper/useragent/useragent.go:55

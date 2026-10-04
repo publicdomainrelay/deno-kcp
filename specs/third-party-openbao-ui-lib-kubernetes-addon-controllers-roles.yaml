@@ -1,48 +1,48 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- class:141604e723dca54066003e3aac39ce43 KubernetesRolesController@third_party/openbao/ui/lib/kubernetes/addon/controllers/roles/index.js:8
-- file:third_party/openbao/ui/lib/kubernetes/addon/controllers/roles/index.js index.js@third_party/openbao/ui/lib/kubernetes/addon/controllers/roles/index.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-lib-kubernetes-addon-controllers-roles
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'This context exists to pin down the URL-state surface of the Kubernetes
     roles page: the roles route''s controller must declare pageFilter as a query parameter
     so the route can read and update the filter value from the query string, and so
     the page component that renders the roles list can drive it. It is a thin contract
     file, and the spec records that contract rather than any behavior, because the
     class carries no logic of its own.'
-  interfaces:
-  - file: third_party/openbao/ui/lib/kubernetes/addon/controllers/roles/index.js
-    kind: class
-    name: KubernetesRolesController
-    signature: export default class KubernetesRolesController extends Controller {
-      queryParams = ['pageFilter']; }
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - class:141604e723dca54066003e3aac39ce43
-    - file:third_party/openbao/ui/lib/kubernetes/addon/controllers/roles/index.js
-    id: r.default-export-controller
+  - id: r.default-export-controller
     level: MUST
     text: The module must default-export a class named KubernetesRolesController that
       extends the Ember Controller base class, so the Ember resolver can instantiate
       it as the controller for the Kubernetes roles route.
-  - codeRefs:
+    codeRefs:
+    - class:141604e723dca54066003e3aac39ce43
     - file:third_party/openbao/ui/lib/kubernetes/addon/controllers/roles/index.js
-    id: r.no-additional-state
+  - id: r.no-additional-state
     level: SHOULD
     text: The controller should carry only the queryParams declaration and no actions,
       computed properties, or injected services, keeping the roles route's request
       state in the URL and out of memory.
-  - codeRefs:
-    - class:141604e723dca54066003e3aac39ce43
+    codeRefs:
     - file:third_party/openbao/ui/lib/kubernetes/addon/controllers/roles/index.js
-    id: r.query-params-declares-page-filter
+  - id: r.query-params-declares-page-filter
     level: MUST
     text: KubernetesRolesController must declare a queryParams class property whose
       value is the array ['pageFilter'], so that the pageFilter query string parameter
       is bound to the controller and the roles route can read it from and write it
       to the URL.
-  upstream: self
+    codeRefs:
+    - class:141604e723dca54066003e3aac39ce43
+    - file:third_party/openbao/ui/lib/kubernetes/addon/controllers/roles/index.js
+  interfaces:
+  - name: KubernetesRolesController
+    kind: class
+    signature: export default class KubernetesRolesController extends Controller {
+      queryParams = ['pageFilter']; }
+    file: third_party/openbao/ui/lib/kubernetes/addon/controllers/roles/index.js
+codeRefIndex:
+- class:141604e723dca54066003e3aac39ce43 KubernetesRolesController@third_party/openbao/ui/lib/kubernetes/addon/controllers/roles/index.js:8
+- file:third_party/openbao/ui/lib/kubernetes/addon/controllers/roles/index.js index.js@third_party/openbao/ui/lib/kubernetes/addon/controllers/roles/index.js

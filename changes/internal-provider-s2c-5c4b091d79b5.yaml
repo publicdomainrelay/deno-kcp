@@ -4,49 +4,54 @@ metadata:
   name: internal-provider-s2c-5c4b091d79b5
   namespace: default
 spec:
-  delta:
-    requirements:
-    - id: r.watch-cache-keys-every-workspace
-      op: added
-      to:
-        codeRefs:
-        - file:internal/provider/watch.go
-        - file:internal/provider/watch_cache.go
-        id: r.watch-cache-keys-every-workspace
-        level: MUST
-        text: The provider watches every workspace through one wildcard informer,
-          and the same namespace and name can exist in more than one workspace --
-          a DenoPod named pds in namespace default exists in root:alice and in root:bob.
-          The watch cache must key every object by its logical cluster as well as
-          its namespace and name, so that two such objects are two independent cache
-          entries. Both survive an informer re-list, both are returned by allPods
-          and so appear in the virtual DNS table of every pod, and each is read back
-          by a Ref that names its own workspace. A workload must never be evicted
-          from the cache, dropped from the DNS table or skipped by the reconcile loop
-          because another workspace holds an object with the same namespace and name;
-          a DenoPod that is not ready must keep being reconciled and re-probed on
-          its own key until it is ready or reaches a terminal phase.
-    - id: r.watch-cache-keys-every-workspace-test
-      op: added
-      to:
-        codeRefs:
-        - file:internal/provider/watch_test.go
-        id: r.watch-cache-keys-every-workspace-test
-        level: MUST
-        text: An offline unit test inserts two DenoPods that share a namespace and
-          a name but carry different kcp.io/cluster annotations into the watch cache
-          and asserts that allPods returns both and that ReadPod resolves each one
-          from its own workspace. The test must fail when the cache keys objects by
-          namespace and name alone.
+  systemContext: internal-provider
   direction: SpecToCode
   fromSpecHash: d585aa61493e88ee63a2972d73d25ab44a8456ae3c4e4e6590bb5c8f09f8de4c
-  systemContext: internal-provider
   toSpecHash: 5c4b091d79b5f25241dbed814199a53274a9f2b7d0337b1340744dbe8de32ed8
+  delta:
+    counts:
+      added: 2
+    requirements:
+    - +r.watch-cache-keys-every-workspace
+    - +r.watch-cache-keys-every-workspace-test
 status:
+  phase: Succeeded
+  branch: spec/internal-provider/5c4b091d
+  commit: 3749680f064033dbfd6d5f458b665486a0779efc
+  filesTouched:
+  - internal/provider/service_dns_inject_test.go
+  - internal/provider/watch.go
+  - internal/provider/watch_cache.go
+  - internal/provider/watch_test.go
+  agentLog: ".../name-keyed indexer.\n- `internal/provider/watch_test.go` — added
+    `podObject` and `TestTheWatchCacheKeepsSameNamedPodsFromDifferentWorkspaces`:
+    two `pds` pods in `default`, one in `root:alice` one in `root:bob`, both survive
+    a re-list, `allPods` returns both, `ReadPod` resolves each by its own workspace.
+    Verified it fails (`allPods returned 1 pods`) when the key func is namespace/name
+    alone.\n- `internal/provider/service_dns_inject_test.go` — helper updated to the
+    `upsert` API.\n\nNote: the informer's internal store still keys by namespace/name,
+    so a workspace-scoped object deleted while the watch is disconnected (surfaced
+    only through a re-list, not a Delete delta) can linger in the reader's store.
+    Event-delivered deletes are handled correctly. Flagging because re-list-only deletion
+    is a residual limit of the wildcard informer, not something the overlay can recover.\n\n⚠
+    claude.ai connectors are disabled because ANTHROPIC_API_KEY or another auth source
+    is set and takes precedence over your claude.ai login · Unset it to load your
+    organization's connectors\n[claude-code:unrecognized_model] {\"model\":\"deepseek-v4-flash\",\"query_source\":\"sdk\"}\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/api/v1alpha1\t(cached)\n?   \tgithub.com/johnandersen777/deno-kcp/cmd/deno-kcp-provider\t[no
+    test files]\nok  \tgithub.com/johnandersen777/deno-kcp/internal/denojob\t(cached)\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/internal/denopod\t(cached)\nok  \tgithub.com/johnandersen777/deno-kcp/internal/denorun\t(cached)\n?
+    \  \tgithub.com/johnandersen777/deno-kcp/internal/livegate\t[no test files]\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/internal/policyengine\t(cached)\nok  \tgithub.com/johnandersen777/deno-kcp/internal/policyworkflowpod\t(cached)\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/internal/policyworkflowrun\t(cached)\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/internal/provider\t0.044s\nok  \tgithub.com/johnandersen777/deno-kcp/internal/trigger\t(cached)\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/test/integration\t(cached)"
+  message: 'realized internal-provider on spec/internal-provider/5c4b091d: 4 file(s)
+    touched, verify exit 0'
   acceptance:
-  - durationSeconds: 282.056429032
+  - name: market-live-acceptance
     exitCode: 1
-    name: market-live-acceptance
+    durationSeconds: 282.056429032
+    passed: false
     outputTail: |-
       ...denoruntime          08c3f9aba4aefd9a12977fddc4b97bdcd43139f0fd4aadea77398a3082ec8e6f
       policyworkflowruns   cd9f33381504ac4a52f7b79e9671747b34f03251f79146b1da6feb3e525e1793
@@ -141,86 +146,18 @@ status:
 
 
       accept: fail
-    passed: false
-  agentLog: ".../name-keyed indexer.\n- `internal/provider/watch_test.go` — added
-    `podObject` and `TestTheWatchCacheKeepsSameNamedPodsFromDifferentWorkspaces`:
-    two `pds` pods in `default`, one in `root:alice` one in `root:bob`, both survive
-    a re-list, `allPods` returns both, `ReadPod` resolves each by its own workspace.
-    Verified it fails (`allPods returned 1 pods`) when the key func is namespace/name
-    alone.\n- `internal/provider/service_dns_inject_test.go` — helper updated to the
-    `upsert` API.\n\nNote: the informer's internal store still keys by namespace/name,
-    so a workspace-scoped object deleted while the watch is disconnected (surfaced
-    only through a re-list, not a Delete delta) can linger in the reader's store.
-    Event-delivered deletes are handled correctly. Flagging because re-list-only deletion
-    is a residual limit of the wildcard informer, not something the overlay can recover.\n\n⚠
-    claude.ai connectors are disabled because ANTHROPIC_API_KEY or another auth source
-    is set and takes precedence over your claude.ai login · Unset it to load your
-    organization's connectors\n[claude-code:unrecognized_model] {\"model\":\"deepseek-v4-flash\",\"query_source\":\"sdk\"}\nok
-    \ \tgithub.com/johnandersen777/deno-kcp/api/v1alpha1\t(cached)\n?   \tgithub.com/johnandersen777/deno-kcp/cmd/deno-kcp-provider\t[no
-    test files]\nok  \tgithub.com/johnandersen777/deno-kcp/internal/denojob\t(cached)\nok
-    \ \tgithub.com/johnandersen777/deno-kcp/internal/denopod\t(cached)\nok  \tgithub.com/johnandersen777/deno-kcp/internal/denorun\t(cached)\n?
-    \  \tgithub.com/johnandersen777/deno-kcp/internal/livegate\t[no test files]\nok
-    \ \tgithub.com/johnandersen777/deno-kcp/internal/policyengine\t(cached)\nok  \tgithub.com/johnandersen777/deno-kcp/internal/policyworkflowpod\t(cached)\nok
-    \ \tgithub.com/johnandersen777/deno-kcp/internal/policyworkflowrun\t(cached)\nok
-    \ \tgithub.com/johnandersen777/deno-kcp/internal/provider\t0.044s\nok  \tgithub.com/johnandersen777/deno-kcp/internal/trigger\t(cached)\nok
-    \ \tgithub.com/johnandersen777/deno-kcp/test/integration\t(cached)"
-  branch: spec/internal-provider/5c4b091d
-  commit: 3749680f064033dbfd6d5f458b665486a0779efc
-  filesTouched:
-  - internal/provider/service_dns_inject_test.go
-  - internal/provider/watch.go
-  - internal/provider/watch_cache.go
-  - internal/provider/watch_test.go
-  message: 'realized internal-provider on spec/internal-provider/5c4b091d: 4 file(s)
-    touched, verify exit 0'
-  phase: Succeeded
   progress:
-  - at: "2026-10-04T21:11:01Z"
-    files:
-    - internal/provider/watch_cache.go
-    tool: Read
-  - at: "2026-10-04T21:11:01Z"
-    files:
-    - internal/provider/watch.go
-    tool: Read
-  - at: "2026-10-04T21:11:46Z"
+    turns: 1
+    tools:
+    - tool: Edit
+      count: 7
+    - tool: Read
+      count: 4
     files:
     - internal/provider/service_dns_inject_test.go
-    tool: Read
-  - at: "2026-10-04T21:12:19Z"
-    files:
+    - internal/provider/watch.go
     - internal/provider/watch_cache.go
-    tool: Edit
-  - at: "2026-10-04T21:12:27Z"
-    files:
-    - internal/provider/watch.go
-    tool: Edit
-  - at: "2026-10-04T21:12:32Z"
-    files:
     - internal/provider/watch_test.go
-    tool: Edit
-  - at: "2026-10-04T21:12:36Z"
-    files:
-    - internal/provider/service_dns_inject_test.go
-    tool: Edit
-  - at: "2026-10-04T21:12:42Z"
-    files:
-    - internal/provider/watch_test.go
-    tool: Edit
-  - at: "2026-10-04T21:12:47Z"
-    files:
-    - internal/provider/watch_test.go
-    tool: Read
-  - at: "2026-10-04T21:12:50Z"
-    files:
-    - internal/provider/watch_test.go
-    tool: Edit
-  - at: "2026-10-04T21:13:01Z"
-    files:
-    - internal/provider/watch.go
-    tool: Edit
-  - at: "2026-10-04T21:13:12Z"
-    note: turn
-  - at: "2026-10-04T21:13:13Z"
-    note: turn
-    turn: 1
+    notes: 2
+    first: "2026-10-04T21:11:01Z"
+    last: "2026-10-04T21:13:13Z"

@@ -1,49 +1,49 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/ui/lib/kubernetes/index.js index.js@third_party/openbao/ui/lib/kubernetes/index.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-lib-kubernetes
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'This context exists to record the contract of the Kubernetes UI engine''s
     index module: which engine name it registers, how it configures lazy loading,
     and how it answers the development-mode hook. It exists so that changes to the
     engine registration surface of the Kubernetes UI addon can be detected and checked
     against the expected bundling behavior, independent of the rest of the vendored
     OpenBao UI tree.'
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/ui/lib/kubernetes/index.js
-    id: r.developing-addon-true
+  - id: r.developing-addon-true
     level: MUST
     text: The isDevelopingAddon hook defined in the engine definition returns true,
       so Ember treats the Kubernetes UI addon as under development and skips the production
       packaging path.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/kubernetes/index.js
-    id: r.engine-name-kubernetes
+  - id: r.engine-name-kubernetes
     level: MUST
     text: The engine definition passed to buildEngine carries the name 'kubernetes',
       which fixes the engine identity used by the host application when mounting or
       resolving it.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/kubernetes/index.js
-    id: r.export-built-kubernetes-engine
+  - id: r.export-built-kubernetes-engine
     level: MUST
     text: The module exports the value returned by buildEngine from ember-engines/lib/engine-addon,
       so the Kubernetes UI is registered as an Ember engine rather than a plain addon.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/kubernetes/index.js
-    id: r.lazy-loading-disabled
+  - id: r.lazy-loading-disabled
     level: MUST
     text: The engine definition sets lazyLoading.enabled to false, so the Kubernetes
       engine is bundled with the host application instead of being loaded on demand.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/lib/kubernetes/index.js
-    id: r.third-party-license-header
+  - id: r.third-party-license-header
     level: SHOULD
     text: The file keeps its HashiCorp copyright and MPL-2.0 SPDX license header at
       the top, preserving the upstream licensing provenance of the vendored file.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/ui/lib/kubernetes/index.js
+codeRefIndex:
+- file:third_party/openbao/ui/lib/kubernetes/index.js index.js@third_party/openbao/ui/lib/kubernetes/index.js

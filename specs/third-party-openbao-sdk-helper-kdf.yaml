@@ -1,99 +1,99 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/sdk/helper/kdf/kdf.go kdf.go@third_party/openbao/sdk/helper/kdf/kdf.go
-- file:third_party/openbao/sdk/helper/kdf/kdf_test.go kdf_test.go@third_party/openbao/sdk/helper/kdf/kdf_test.go
-- function:57ef1c334238af3ef1acf9a5cfc81c66 CounterMode@third_party/openbao/sdk/helper/kdf/kdf.go:28
-- function:8b0939bcb7f14c09092be37897617ef5 HMACSHA256PRF@third_party/openbao/sdk/helper/kdf/kdf.go:82
-- type_alias:5e2017560087551f07a878e239569078 PRF@third_party/openbao/sdk/helper/kdf/kdf.go:23
 kind: SystemContext
 metadata:
   name: third-party-openbao-sdk-helper-kdf
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: This context exists to record the contract of the vendored OpenBao kdf helper
     so that callers deriving key material from a key plus context can rely on its
     alignment rules, counter layout, overflow guard, and output length, and so that
     the two entry points stay byte-for-byte compatible with the upstream vectors that
     kdf_test.go encodes.
-  interfaces:
-  - file: third_party/openbao/sdk/helper/kdf/kdf.go
-    kind: function
-    name: CounterMode
-    signature: func CounterMode(prf PRF, prfLen uint32, key []byte, context []byte,
-      bits uint32) ([]byte, error)
-  - file: third_party/openbao/sdk/helper/kdf/kdf.go
-    kind: function
-    name: HMACSHA256PRF
-    signature: func HMACSHA256PRF(key []byte, data []byte) ([]byte, error)
-  - file: third_party/openbao/sdk/helper/kdf/kdf.go
-    kind: type_alias
-    name: PRF
-    signature: type PRF func([]byte, []byte) ([]byte, error)
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - function:57ef1c334238af3ef1acf9a5cfc81c66
-    id: r.counter-mode-alignment
+  - id: r.counter-mode-alignment
     level: MUST
     text: CounterMode rejects a prfLen that is not a multiple of 8 with the error
       "PRF must be byte aligned", and rejects a requested bits value that is not a
       multiple of 8 with the error "bits required must be byte aligned".
-  - codeRefs:
+    codeRefs:
     - function:57ef1c334238af3ef1acf9a5cfc81c66
-    id: r.counter-mode-context-overflow
+  - id: r.counter-mode-context-overflow
     level: MUST
     text: 'CounterMode refuses a context longer than math.MaxInt-8 bytes with the
       error "too much context specified; would overflow: %d bytes", so the 4+len(context)+4
       input allocation cannot overflow.'
-  - codeRefs:
+    codeRefs:
     - function:57ef1c334238af3ef1acf9a5cfc81c66
-    id: r.counter-mode-input-layout
+  - id: r.counter-mode-input-layout
     level: MUST
     text: 'Each PRF input block is 4+len(context)+4 bytes: the leading 4 bytes hold
       the round index as a big-endian uint32, the middle bytes hold the caller context,
       and the trailing 4 bytes hold the requested bit count as a big-endian uint32.'
-  - codeRefs:
+    codeRefs:
     - function:57ef1c334238af3ef1acf9a5cfc81c66
-    id: r.counter-mode-output-length
+  - id: r.counter-mode-output-length
     level: MUST
     text: CounterMode concatenates the per-round PRF outputs and returns exactly bits/8
       bytes, discarding the surplus from the final round when bits is not a whole
       multiple of prfLen.
-  - codeRefs:
+    codeRefs:
     - function:57ef1c334238af3ef1acf9a5cfc81c66
-    id: r.counter-mode-prf-length
+  - id: r.counter-mode-prf-length
     level: MUST
     text: CounterMode verifies that each PRF result is exactly prfLen bits long and
       aborts with the error "PRF length mis-match (%d vs %d)" when it is not, propagating
       any PRF error unchanged.
-  - codeRefs:
+    codeRefs:
     - function:57ef1c334238af3ef1acf9a5cfc81c66
-    id: r.counter-mode-rounds
+  - id: r.counter-mode-rounds
     level: MUST
     text: CounterMode computes the round count as bits divided by prfLen, rounded
       up when the division is inexact, and calls the PRF once per round.
-  - codeRefs:
-    - function:8b0939bcb7f14c09092be37897617ef5
-    id: r.hmac-sha256-prf
+    codeRefs:
+    - function:57ef1c334238af3ef1acf9a5cfc81c66
+  - id: r.hmac-sha256-prf
     level: MUST
     text: HMACSHA256PRF computes HMAC-SHA256 over data keyed by key and returns the
       raw digest, never returning an error, which makes its output exactly 256 bits
       and thus usable as a PRF for CounterMode with prfLen 256.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/kdf/kdf_test.go
-    id: r.key-material-vectors
+    codeRefs:
+    - function:8b0939bcb7f14c09092be37897617ef5
+  - id: r.key-material-vectors
     level: MUST
     text: 'The package tests hold CounterMode and HMACSHA256PRF to externally generated
       Python vectors: CounterMode with HMACSHA256PRF and prfLen 256 on key bytes 1..16
       and context "the quick brown fox" must reproduce the recorded 32-byte digest
       at 256 bits, the returned length must equal the requested bit count for 128,
       256, 384 and 1024 bits, and the output must not contain the key bytes.'
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/kdf/kdf.go
-    - type_alias:5e2017560087551f07a878e239569078
-    id: r.prf-function-type
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/kdf/kdf_test.go
+  - id: r.prf-function-type
     level: MUST
     text: A PRF is any function of the form func([]byte, []byte) ([]byte, error),
       so CounterMode accepts an arbitrary pseudo-random function over a key and an
       input block.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/kdf/kdf.go
+    - type_alias:5e2017560087551f07a878e239569078
+  interfaces:
+  - name: CounterMode
+    kind: function
+    signature: func CounterMode(prf PRF, prfLen uint32, key []byte, context []byte,
+      bits uint32) ([]byte, error)
+    file: third_party/openbao/sdk/helper/kdf/kdf.go
+  - name: HMACSHA256PRF
+    kind: function
+    signature: func HMACSHA256PRF(key []byte, data []byte) ([]byte, error)
+    file: third_party/openbao/sdk/helper/kdf/kdf.go
+  - name: PRF
+    kind: type_alias
+    signature: type PRF func([]byte, []byte) ([]byte, error)
+    file: third_party/openbao/sdk/helper/kdf/kdf.go
+codeRefIndex:
+- file:third_party/openbao/sdk/helper/kdf/kdf.go kdf.go@third_party/openbao/sdk/helper/kdf/kdf.go
+- file:third_party/openbao/sdk/helper/kdf/kdf_test.go kdf_test.go@third_party/openbao/sdk/helper/kdf/kdf_test.go
+- function:57ef1c334238af3ef1acf9a5cfc81c66 CounterMode@third_party/openbao/sdk/helper/kdf/kdf.go:28
+- function:8b0939bcb7f14c09092be37897617ef5 HMACSHA256PRF@third_party/openbao/sdk/helper/kdf/kdf.go:82
+- type_alias:5e2017560087551f07a878e239569078 PRF@third_party/openbao/sdk/helper/kdf/kdf.go:23

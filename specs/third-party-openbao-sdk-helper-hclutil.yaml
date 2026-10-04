@@ -1,14 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/sdk/helper/hclutil/hcl.go hcl.go@third_party/openbao/sdk/helper/hclutil/hcl.go
-- function:6111decf716583b7ca8e7c49cdbe479b ParseConfig@third_party/openbao/sdk/helper/hclutil/hcl.go:77
-- function:630fc7a2c6d7b7c77ac4f6c7b54f855c WhenHCLKeyPresent@third_party/openbao/sdk/helper/hclutil/hcl.go:17
-- function:7331d1e1fd9fa4af3a0e6b8a4af38118 CheckHCLKeys@third_party/openbao/sdk/helper/hclutil/hcl.go:39
 kind: SystemContext
 metadata:
   name: third-party-openbao-sdk-helper-hclutil
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'This context exists to give the deno-kcp specification a stable description
     of the vendored OpenBao HCL parsing and key-validation helpers. The package is
     a dependency boundary: other packages in the vendored tree read configuration
@@ -17,66 +14,69 @@ spec:
     configuration keys are rejected. It is documented here so that consumers of the
     vendored OpenBao code can rely on the parsing and validation behaviour without
     depending on the internal layout of the helper file.'
-  interfaces:
-  - file: third_party/openbao/sdk/helper/hclutil/hcl.go
-    kind: function
-    name: CheckHCLKeys
-    signature: func CheckHCLKeys(node ast.Node, valid []string) error
-  - file: third_party/openbao/sdk/helper/hclutil/hcl.go
-    kind: function
-    name: ParseConfig
-    signature: func ParseConfig(data []byte) (*ast.File, error)
-  - file: third_party/openbao/sdk/helper/hclutil/hcl.go
-    kind: function
-    name: WhenHCLKeyPresent
-    signature: func WhenHCLKeyPresent(node ast.Node, key string, fn func(*ast.ObjectItem)
-      error) error
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/hclutil/hcl.go
-    - function:7331d1e1fd9fa4af3a0e6b8a4af38118
-    id: r.check-hcl-keys-accepts-object-node
+  - id: r.check-hcl-keys-accepts-object-node
     level: MUST
     text: CheckHCLKeys normalises the node it is given by taking the object list from
       an *ast.ObjectList directly and from an *ast.ObjectType via its List field;
       any other node type is rejected with an error of the form "cannot check HCL
       keys of type %T".
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/sdk/helper/hclutil/hcl.go
     - function:7331d1e1fd9fa4af3a0e6b8a4af38118
-    id: r.check-hcl-keys-rejects-unknown-keys
+  - id: r.check-hcl-keys-rejects-unknown-keys
     level: MUST
     text: CheckHCLKeys builds a set from the supplied valid key list and inspects
       every item in the object list; each item whose first key token is not in the
       set is reported as an error naming the key and its line number, and all such
       errors are accumulated into one multierror return so a single call reports every
       offending key.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/sdk/helper/hclutil/hcl.go
-    - function:6111decf716583b7ca8e7c49cdbe479b
-    id: r.parse-config-returns-ast-file
+    - function:7331d1e1fd9fa4af3a0e6b8a4af38118
+  - id: r.parse-config-returns-ast-file
     level: MUST
     text: ParseConfig accepts a raw configuration byte slice and returns a parsed
       *ast.File together with an error; the parsing path handles both HCL and JSON
       configuration input, and a parse failure is surfaced as a non-nil error rather
       than a partial file.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/sdk/helper/hclutil/hcl.go
-    - function:630fc7a2c6d7b7c77ac4f6c7b54f855c
-    id: r.when-hcl-key-present-ignores-other-nodes
+    - function:6111decf716583b7ca8e7c49cdbe479b
+  - id: r.when-hcl-key-present-ignores-other-nodes
     level: MUST
     text: WhenHCLKeyPresent accepts *ast.ObjectList and *ast.ObjectType nodes and
       derives the item list from each; for any other node type it returns nil without
       invoking the callback and without an error, so an absent or unexpected node
       shape is treated as nothing to do.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/sdk/helper/hclutil/hcl.go
     - function:630fc7a2c6d7b7c77ac4f6c7b54f855c
-    id: r.when-hcl-key-present-invokes-callback
+  - id: r.when-hcl-key-present-invokes-callback
     level: MUST
     text: WhenHCLKeyPresent filters the node's object list by the given key and invokes
       the supplied callback with each matching *ast.ObjectItem; errors returned by
       the callback are accumulated with multierror and returned after the walk completes,
       so one failing item does not stop the remaining items from being visited.
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/hclutil/hcl.go
+    - function:630fc7a2c6d7b7c77ac4f6c7b54f855c
+  interfaces:
+  - name: CheckHCLKeys
+    kind: function
+    signature: func CheckHCLKeys(node ast.Node, valid []string) error
+    file: third_party/openbao/sdk/helper/hclutil/hcl.go
+  - name: ParseConfig
+    kind: function
+    signature: func ParseConfig(data []byte) (*ast.File, error)
+    file: third_party/openbao/sdk/helper/hclutil/hcl.go
+  - name: WhenHCLKeyPresent
+    kind: function
+    signature: func WhenHCLKeyPresent(node ast.Node, key string, fn func(*ast.ObjectItem)
+      error) error
+    file: third_party/openbao/sdk/helper/hclutil/hcl.go
+codeRefIndex:
+- file:third_party/openbao/sdk/helper/hclutil/hcl.go hcl.go@third_party/openbao/sdk/helper/hclutil/hcl.go
+- function:6111decf716583b7ca8e7c49cdbe479b ParseConfig@third_party/openbao/sdk/helper/hclutil/hcl.go:77
+- function:630fc7a2c6d7b7c77ac4f6c7b54f855c WhenHCLKeyPresent@third_party/openbao/sdk/helper/hclutil/hcl.go:17
+- function:7331d1e1fd9fa4af3a0e6b8a4af38118 CheckHCLKeys@third_party/openbao/sdk/helper/hclutil/hcl.go:39

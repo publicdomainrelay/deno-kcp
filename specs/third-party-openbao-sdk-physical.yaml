@@ -1,4 +1,843 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-sdk-physical
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: This context exists so that every storage engine in deno-kcp and the third_party/openbao
+    tree can be programmed against one small interface while cache, encoding, fault
+    injection, view scoping, pagination and notification behaviour are composed as
+    wrappers instead of being baked into each engine. Callers depend on Backend plus
+    whichever optional capability interfaces a particular engine implements, and the
+    Exercise* helpers define what a correct implementation must do, so they act as
+    the executable specification for every backend and decorator.
+  requirements:
+  - id: r.backend-conformance-tests
+    level: MUST
+    text: ExerciseBackend, ExerciseBackend_ListPrefix, ExerciseHABackend and ExerciseTransactionalBackend
+      must be the conformance suite a backend runs against itself, covering basic
+      read, write and delete, prefix listing, locking across two HA backends, and
+      commit and rollback semantics, so every backend in the project is held to one
+      behaviour.
+    codeRefs:
+    - file:third_party/openbao/sdk/physical/testing.go
+    - function:34f9a200d286ca26f172fafe9c35b6d9
+    - function:ab3724de969fbcf4b7c60877fe893a52
+    - function:cdf9401bd1ce3d8e201d0bb21c095eb2
+    - function:f38102f89c2dd4dd5ab77bd257bb3242
+  - id: r.backend-contract
+    level: MUST
+    text: Backend must define exactly the storage contract Put(ctx, *Entry), Get(ctx,
+      key), Delete(ctx, key), List(ctx, prefix) and ListPage(ctx, prefix, after, limit),
+      so that every storage engine and every decorator in the package is programmable
+      against one interface.
+    codeRefs:
+    - interface:c42dc92aaf803810f2890fe01b5c2e74
+    - method:90d0f26d835b68dfd2e2fb5cf369ecc9
+    - method:b0109019be0473eecfda55b4725fe9e7
+    - method:c70a44f71273e5619bc9d984abbe0eb7
+    - method:df5b7487ed3c9362165f313858b129bc
+    - method:e0dd79955ca589a7e7a28ff75e3f99bd
+  - id: r.cache-invalidate
+    level: SHOULD
+    text: The cache must expose Invalidate so a single key can be dropped from memory
+      without a full purge, and must not cache keys that ShouldCache rejects, so health
+      and lock keys bypass the cache.
+    codeRefs:
+    - file:third_party/openbao/sdk/physical/cache.go
+    - method:38a1adf14495b6d3bf7c358c6cc3ac83
+    - method:b7a2798b7fe8309ddb44db1c630f1e2e
+    - method:dce8a4574d05b37899f35f8737f03cd9
+  - id: r.cache-layer
+    level: MUST
+    text: NewCache must wrap a Backend in an LRU cache of the given size that serves
+      Get from memory, writes through on Put and Delete, purges or disables itself
+      through ToggleablePurgemonster, and returns a cacheTransaction from BeginTx
+      and BeginReadOnlyTx that applies its buffered writes to the cache only after
+      the underlying transaction commits; CacheRefreshContext opts a call into a cache
+      refresh and that flag must be honoured on read.
+    codeRefs:
+    - function:34327220403569fa0aff0977c0c1f591
+    - function:ff4d7eee1ee723e8b6728c7b4904d7b3
+    - interface:3e369c75b5f78584ecb1fb21b4e3f76d
+    - interface:c551f864d0a2d50fbce634ac814b194c
+    - method:49c2c5b43f002a86e6cdd21df5e236fc
+    - method:59757faeb1505f1513aaed08368aecd6
+    - method:606a138a7fec3d3e2de986b2e445a895
+    - method:669f632567fcb141c59621312cd2ada1
+    - method:d2a50636c0acef479ab5a8d4dcd20399
+  - id: r.entry-record
+    level: MUST
+    text: Entry must be the unit of stored data carrying Key, Value and SealWrap,
+      with String rendering a human-readable form and Clone returning a copy whose
+      Value does not alias the original, so cached entries can be handed out without
+      letting callers mutate the store's copy.
+    codeRefs:
+    - file:third_party/openbao/sdk/physical/entry.go
+    - method:1e9458db4df54ab1e095336d02ec8291
+    - method:e4831f61ffb6b9b38ea13833b9d1c4e6
+    - struct:6d1685314383067122ddde5e7575b72e
+  - id: r.error-injector
+    level: MUST
+    text: NewErrorInjector must wrap a Backend and fail a percentage of read and write
+      operations set by SetErrorPercentage, starting from the percentage passed to
+      the constructor, so failure handling can be exercised; its transactional form
+      must delegate BeginTx and BeginReadOnlyTx to the wrapped backend.
+    codeRefs:
+    - function:714984d2ed75dac6bfd87f642ad23447
+    - interface:5b84e8caa4286b4b2b689fd80ebd982c
+    - method:21ad4cfa5e9d435d4e7b98662c286b7c
+    - method:54e8311f600071e530e66c8829de81a5
+    - method:8ce0c799baa8cb5521a15ff709d4f9ad
+    - method:9d4210c668df313546cd914b87438b82
+  - id: r.ha-and-fencing
+    level: MUST
+    text: HABackend must let a node take a lock on a key with LockWith and report
+      whether HA is available, FencingHABackend must let the lock of the active node
+      be registered for fencing, and Lock plus RemoteLock must model lock, unlock,
+      value retrieval and active-hold checks so leadership and fencing work over any
+      backend that implements them.
+    codeRefs:
+    - interface:05f1884eee66d15665c49c8df37093e2
+    - interface:78bc32a027b56ca8606681d66c086d75
+    - interface:8c498e2cc09fa8cf2e6cebb864101897
+    - interface:c4f6350d056e8dd0c44a4be82e5f4d52
+    - method:39e64095b3c2731bec496e6f9d83a437
+    - method:b4b2d66682d3ff1690be03763052bc7e
+    - method:eced766ac933e67ac9dc3b887af8dee0
+  - id: r.latency-injector
+    level: MUST
+    text: NewLatencyInjector must wrap a Backend and delay every Put, Get, Delete,
+      List and ListPage by the configured latency plus or minus a jitter percentage,
+      with SetLatency changing the delay at runtime so timing behaviour can be tuned
+      without rebuilding the backend chain.
+    codeRefs:
+    - function:2773de0d74caf975495b1df34f2aa3f2
+    - method:bfb76404b2485cdaed97b99a6ed2bb69
+    - method:df9fbb73cfa0e176f7558a5f99cf146f
+    - method:fc4b85d6d89264444aa804cbab2f4b5e
+    - struct:6814c01d24d533bd86c51d633e3ed326
+  - id: r.list-pagination
+    level: MUST
+    text: List must return the keys directly under a prefix, and ListPage must return
+      the same keys but starting after the given key and capped at limit, so a caller
+      can page through a large prefix by feeding the last key of one page back as
+      after.
+    codeRefs:
+    - interface:c42dc92aaf803810f2890fe01b5c2e74
+    - method:b0109019be0473eecfda55b4725fe9e7
+    - method:df5b7487ed3c9362165f313858b129bc
+  - id: r.lister-pagination
+    level: SHOULD
+    text: Lister must drive paginated listing over a backend, exposing SeekPrefix
+      to set the cursor and ListPage to return the current page of keys together with
+      the keys still remaining, so callers can stream a large prefix without holding
+      it all in memory.
+    codeRefs:
+    - file:third_party/openbao/sdk/physical/listing.go
+    - method:082b9444e66f470df2382ba626b3d47c
+    - method:903301af689bb47f9423be6a2c91683a
+    - struct:bdca7bea47a8a839f16a5d2320c1c5bf
+  - id: r.operation-and-factory-aliases
+    level: MAY
+    text: Operation, InvalidateFunc, Factory and WriteNotificationFunc may stay named
+      types so operation verbs, invalidation callbacks, backend constructors and write
+      notification callbacks are self-describing in signatures.
+    codeRefs:
+    - type_alias:088e88cc51204d45396356d351d30b3c
+    - type_alias:33b86ed3a30df440a3be670b55c5e8ba
+    - type_alias:92241f5fc12edd1a43cc696311e80203
+    - type_alias:cfca255d3a7b14ad2dcb681120ee5002
+  - id: r.optional-capabilities
+    level: MUST
+    text: ToggleablePurgemonster, CacheInvalidationBackend and RedirectDetect must
+      stay separate from Backend so cache purging, invalidation hook-up and host address
+      detection are discovered by type assertion, and a backend that does not support
+      them still satisfies Backend.
+    codeRefs:
+    - interface:105a98988cc407ace2a693c323fe82f0
+    - interface:3d13c6617dfad919aaca553fabf6b528
+    - interface:d74a7bde4c43f84103136095df7eeee9
+    - method:87f1c1ae650ab54554e746f7c2823ed4
+    - method:9c6852a96169247050fd8ccce0f56037
+  - id: r.permit-pool
+    level: MUST
+    text: NewPermitPool must bound the number of concurrent operations to the given
+      permit count, blocking in Acquire until a permit frees, releasing it in Release,
+      and reporting the outstanding count from CurrentPermits.
+    codeRefs:
+    - function:561c6b9266d3a78ad6b74428ac50ec7d
+    - method:73f4f5e3dbdbc2785e422a2c07f8bf80
+    - method:c25fb5faa3f522a39ad67f58a5437f14
+    - method:c60fd2c06818cef2fb49cc9198048173
+    - struct:03a3c1fe3ff0e393c6f0e45c695c5798
+  - id: r.physical-access-purge
+    level: MUST
+    text: NewPhysicalAccess must expose a Backend plus Purge over the wrapped store,
+      so an operator-facing path can delete a whole keyspace by listing and deleting
+      keys rather than touching single keys only.
+    codeRefs:
+    - file:third_party/openbao/sdk/physical/physical_access.go
+    - function:2c3211f729a5fb94085fd69b2f0be6c1
+    - method:06bfe54d55d7d12ca01fad789ea1d1c5
+    - method:7388501859c23bf4f54700997e6b21cb
+    - struct:df3721d3c77a1d9a71bc36b0792ebaa9
+  - id: r.prefix-view
+    level: MUST
+    text: 'NewView must scope a Backend to a fixed prefix: Get, Put and Delete must
+      address keys inside that prefix and List and ListPage must return results with
+      the prefix already stripped, so a caller sees a self-contained subtree and cannot
+      reach outside it.'
+    codeRefs:
+    - function:74f5abaeca87696c252646165f7d64bb
+    - method:4a2d96ce2188c5b8bc883354eb54e8dc
+    - method:66c85653a25af6fe5b7fc5933ea73fb2
+    - method:acf6ac641ccd2a39961630501c372d56
+    - method:bfdd975da6282f8d7d8b51d053b0d10d
+    - method:d2e603651f28a5362f2db38d7adda611
+    - struct:5bc75dfe5fc1d9713f0aa85b4d53da4e
+  - id: r.prefixes-helper
+    level: SHOULD
+    text: Prefixes must return the ancestor prefixes of a key path so cache and invalidation
+      code can walk from a leaf key up to its parent prefixes without re-parsing the
+      separators.
+    codeRefs:
+    - function:53225bb6c155915c3d2308b06988e63d
+  - id: r.replication-index
+    level: MUST
+    text: ReplicationIndexBackend must report the applied replication index and compare
+      two index values for greater-or-equal, so a follower can decide whether it is
+      behind the leader without decoding the index itself.
+    codeRefs:
+    - interface:13bd2e0d23b764cee32c11c2f8dc9018
+    - method:3e0174bce2e864f3d2829e37dc7583c4
+    - method:80d9c59fdb37241fac49f6caeac1b43e
+  - id: r.storage-encoding
+    level: MUST
+    text: NewStorageEncoding must return a Backend wrapping the given backend that
+      applies a storage encoding on every entry it writes and reverses it on every
+      entry it reads, and its transactional form must return a StorageEncodingTransaction
+      that applies the encoding on Put and passes Commit and Rollback through to the
+      wrapped transaction.
+    codeRefs:
+    - function:72f695e0a898c83f112db456c8a1d4b1
+    - interface:0047ee89f59f43dfe4e94ec0eee269e1
+    - interface:3abc2ea0c97155337bff68b1c25b282d
+    - interface:c55488afd8098351787fbc2017fc50be
+    - method:0775930799b3c6c71386dbd6956849ae
+    - method:0bd332eb0420eae831a35b27de7a080e
+    - method:a5ccf39e4acbab3fa36e5a1b3eb7791c
+  - id: r.transactions
+    level: MUST
+    text: Transactional must offer BeginReadOnlyTx and BeginTx returning a Transaction,
+      and Transaction must offer Commit and Rollback; TransactionalBackend must combine
+      Transactional with Backend so a caller can hold one value that is both a store
+      and a transaction factory.
+    codeRefs:
+    - interface:08ffcc14df3c8b65543b0d305373c3e9
+    - interface:9852d12ad0d3e5dbdf54721c45db0b05
+    - interface:a169b37932f13dfaab67c2887a0b2628
+    - method:5c8e9fb8611f650250e76ffef962a5a2
+    - method:6bc6aa931a840535c0cce016b506112b
+    - method:a8de377adade7c00825c85121c76f056
+    - method:e584b81c98057c68f9a170f9266091d2
+  - id: r.unfenced-write-context
+    level: MUST
+    text: UnfencedWriteCtx must mark a context as an unfenced write and IsUnfencedWrite
+      must read that mark back, so a write that must bypass the active-node fence
+      is distinguishable from an ordinary write further down the backend chain.
+    codeRefs:
+    - function:535042a02a24c9c58620a8f8f73e5bf3
+    - function:7a68fe5f09705029eb92a822dd50d285
+  - id: r.write-notifier
+    level: MUST
+    text: NewWriteNotifier must return a Backend that calls the supplied WriteNotificationFunc
+      after a successful Put and after a transaction commits, and that accepts an
+      InvalidateFunc through HookInvalidate so other components learn the keyspace
+      changed.
+    codeRefs:
+    - function:3aee5dde26ea2637ff9ca7a8b4120606
+    - method:9486c15807ce309a30801a9300fb6beb
+    - method:a45e787aaed05d32de40a9159ea18d20
+    - method:e8833094d318122c1592c109f76a4f0c
+    - type_alias:92241f5fc12edd1a43cc696311e80203
+  interfaces:
+  - name: Backend
+    kind: interface
+    signature: type Backend interface
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: Backend.Delete
+    kind: method
+    signature: (ctx context.Context, key string) error
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: Backend.Get
+    kind: method
+    signature: (ctx context.Context, key string) (*Entry, error)
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: Backend.List
+    kind: method
+    signature: (ctx context.Context, prefix string) ([]string, error)
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: Backend.ListPage
+    kind: method
+    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
+      error)
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: Backend.Put
+    kind: method
+    signature: (ctx context.Context, entry *Entry) error
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: Cache
+    kind: interface
+    signature: type Cache interface
+    file: third_party/openbao/sdk/physical/cache.go
+  - name: CacheInvalidationBackend
+    kind: interface
+    signature: type CacheInvalidationBackend interface
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: CacheInvalidationBackend.HookInvalidate
+    kind: method
+    signature: (hook InvalidateFunc)
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: CacheRefreshContext
+    kind: function
+    signature: func CacheRefreshContext(ctx context.Context, r bool) context.Context
+    file: third_party/openbao/sdk/physical/cache.go
+  - name: Entry
+    kind: struct
+    signature: type Entry struct
+    file: third_party/openbao/sdk/physical/entry.go
+  - name: Entry.Clone
+    kind: method
+    signature: () *Entry
+    file: third_party/openbao/sdk/physical/entry.go
+  - name: Entry.String
+    kind: method
+    signature: () string
+    file: third_party/openbao/sdk/physical/entry.go
+  - name: ErrorInjector
+    kind: interface
+    signature: type ErrorInjector interface
+    file: third_party/openbao/sdk/physical/error.go
+  - name: ErrorInjector.SetErrorPercentage
+    kind: method
+    signature: (int)
+    file: third_party/openbao/sdk/physical/error.go
+  - name: ExerciseBackend
+    kind: function
+    signature: func ExerciseBackend(t testing.TB, b Backend)
+    file: third_party/openbao/sdk/physical/testing.go
+  - name: ExerciseBackend_ListPrefix
+    kind: function
+    signature: func ExerciseBackend_ListPrefix(t testing.TB, b Backend)
+    file: third_party/openbao/sdk/physical/testing.go
+  - name: ExerciseHABackend
+    kind: function
+    signature: func ExerciseHABackend(t testing.TB, b HABackend, b2 HABackend)
+    file: third_party/openbao/sdk/physical/testing.go
+  - name: ExerciseTransactionalBackend
+    kind: function
+    signature: func ExerciseTransactionalBackend(t testing.TB, b TransactionalBackend)
+    file: third_party/openbao/sdk/physical/testing.go
+  - name: Factory
+    kind: type_alias
+    signature: type Factory func(map[string]string, log.Logger, metrics.MetricSink)
+      (Backend, error)
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: FencingHABackend
+    kind: interface
+    signature: type FencingHABackend interface
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: FencingHABackend.RegisterActiveNodeLock
+    kind: method
+    signature: (l Lock) error
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: HABackend
+    kind: interface
+    signature: type HABackend interface
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: HABackend.HAEnabled
+    kind: method
+    signature: () bool
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: HABackend.LockWith
+    kind: method
+    signature: (key, value string) (Lock, error)
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: InvalidateFunc
+    kind: type_alias
+    signature: type InvalidateFunc func(ctx context.Context, key string)
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: IsUnfencedWrite
+    kind: function
+    signature: func IsUnfencedWrite(ctx context.Context) bool
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: LatencyInjector
+    kind: struct
+    signature: type LatencyInjector struct
+    file: third_party/openbao/sdk/physical/latency.go
+  - name: LatencyInjector.Delete
+    kind: method
+    signature: (ctx context.Context, key string) error
+    file: third_party/openbao/sdk/physical/latency.go
+  - name: LatencyInjector.Get
+    kind: method
+    signature: (ctx context.Context, key string) (*Entry, error)
+    file: third_party/openbao/sdk/physical/latency.go
+  - name: LatencyInjector.List
+    kind: method
+    signature: (ctx context.Context, prefix string) ([]string, error)
+    file: third_party/openbao/sdk/physical/latency.go
+  - name: LatencyInjector.ListPage
+    kind: method
+    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
+      error)
+    file: third_party/openbao/sdk/physical/latency.go
+  - name: LatencyInjector.Put
+    kind: method
+    signature: (ctx context.Context, entry *Entry) error
+    file: third_party/openbao/sdk/physical/latency.go
+  - name: LatencyInjector.SetLatency
+    kind: method
+    signature: (latency time.Duration)
+    file: third_party/openbao/sdk/physical/latency.go
+  - name: Lister
+    kind: struct
+    signature: type Lister struct
+    file: third_party/openbao/sdk/physical/listing.go
+  - name: Lister.ListPage
+    kind: method
+    signature: (ctx context.Context) ([]string, []string, error)
+    file: third_party/openbao/sdk/physical/listing.go
+  - name: Lister.SeekPrefix
+    kind: method
+    signature: () []byte
+    file: third_party/openbao/sdk/physical/listing.go
+  - name: Lock
+    kind: interface
+    signature: type Lock interface
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: Lock.Lock
+    kind: method
+    signature: (stopCh <-chan struct{}) (<-chan struct{}, error)
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: Lock.Unlock
+    kind: method
+    signature: () error
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: Lock.Value
+    kind: method
+    signature: () (bool, string, error)
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: NewCache
+    kind: function
+    signature: func NewCache(b Backend, size int, logger log.Logger, metricSink metrics.MetricSink)
+      Cache
+    file: third_party/openbao/sdk/physical/cache.go
+  - name: NewErrorInjector
+    kind: function
+    signature: func NewErrorInjector(b Backend, errorPercent int, logger log.Logger)
+      ErrorInjector
+    file: third_party/openbao/sdk/physical/error.go
+  - name: NewLatencyInjector
+    kind: function
+    signature: func NewLatencyInjector(b Backend, latency time.Duration, jitter int,
+      logger log.Logger) *LatencyInjector
+    file: third_party/openbao/sdk/physical/latency.go
+  - name: NewPermitPool
+    kind: function
+    signature: func NewPermitPool(permits int) *PermitPool
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: NewPhysicalAccess
+    kind: function
+    signature: func NewPhysicalAccess(physical Backend) *PhysicalAccess
+    file: third_party/openbao/sdk/physical/physical_access.go
+  - name: NewStorageEncoding
+    kind: function
+    signature: func NewStorageEncoding(b Backend) Backend
+    file: third_party/openbao/sdk/physical/encoding.go
+  - name: NewView
+    kind: function
+    signature: func NewView(backend Backend, prefix string) *View
+    file: third_party/openbao/sdk/physical/physical_view.go
+  - name: NewWriteNotifier
+    kind: function
+    signature: func NewWriteNotifier(b Backend, logger log.Logger, notifyWrite WriteNotificationFunc)
+      Backend
+    file: third_party/openbao/sdk/physical/write_notifier.go
+  - name: Operation
+    kind: type_alias
+    signature: type Operation string
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: PermitPool
+    kind: struct
+    signature: type PermitPool struct
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: PermitPool.Acquire
+    kind: method
+    signature: ()
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: PermitPool.CurrentPermits
+    kind: method
+    signature: () int
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: PermitPool.Release
+    kind: method
+    signature: ()
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: PhysicalAccess
+    kind: struct
+    signature: type PhysicalAccess struct
+    file: third_party/openbao/sdk/physical/physical_access.go
+  - name: PhysicalAccess.Delete
+    kind: method
+    signature: (ctx context.Context, key string) error
+    file: third_party/openbao/sdk/physical/physical_access.go
+  - name: PhysicalAccess.Get
+    kind: method
+    signature: (ctx context.Context, key string) (*Entry, error)
+    file: third_party/openbao/sdk/physical/physical_access.go
+  - name: PhysicalAccess.List
+    kind: method
+    signature: (ctx context.Context, prefix string) ([]string, error)
+    file: third_party/openbao/sdk/physical/physical_access.go
+  - name: PhysicalAccess.ListPage
+    kind: method
+    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
+      error)
+    file: third_party/openbao/sdk/physical/physical_access.go
+  - name: PhysicalAccess.Purge
+    kind: method
+    signature: (ctx context.Context)
+    file: third_party/openbao/sdk/physical/physical_access.go
+  - name: PhysicalAccess.Put
+    kind: method
+    signature: (ctx context.Context, entry *Entry) error
+    file: third_party/openbao/sdk/physical/physical_access.go
+  - name: Prefixes
+    kind: function
+    signature: func Prefixes(s string) []string
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: RedirectDetect
+    kind: interface
+    signature: type RedirectDetect interface
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: RedirectDetect.DetectHostAddr
+    kind: method
+    signature: () (string, error)
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: RemoteLock
+    kind: interface
+    signature: type RemoteLock interface
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: RemoteLock.IsActivelyHeld
+    kind: method
+    signature: (ctx context.Context) (bool, error)
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: ReplicationIndexBackend
+    kind: interface
+    signature: type ReplicationIndexBackend interface
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: ReplicationIndexBackend.AppliedReplicationIndex
+    kind: method
+    signature: (ctx context.Context) (string, error)
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: ReplicationIndexBackend.GreaterEqualReplicationIndex
+    kind: method
+    signature: (ctx context.Context, left string, right string) (bool, error)
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: StorageEncoding
+    kind: interface
+    signature: type StorageEncoding interface
+    file: third_party/openbao/sdk/physical/encoding.go
+  - name: StorageEncodingTransaction
+    kind: interface
+    signature: type StorageEncodingTransaction interface
+    file: third_party/openbao/sdk/physical/encoding.go
+  - name: ToggleablePurgemonster
+    kind: interface
+    signature: type ToggleablePurgemonster interface
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: ToggleablePurgemonster.Invalidate
+    kind: method
+    signature: (ctx context.Context, key string)
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: ToggleablePurgemonster.Purge
+    kind: method
+    signature: (ctx context.Context)
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: ToggleablePurgemonster.SetEnabled
+    kind: method
+    signature: (bool)
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: Transaction
+    kind: interface
+    signature: type Transaction interface
+    file: third_party/openbao/sdk/physical/transactions.go
+  - name: Transaction.Commit
+    kind: method
+    signature: (context.Context) error
+    file: third_party/openbao/sdk/physical/transactions.go
+  - name: Transaction.Rollback
+    kind: method
+    signature: (context.Context) error
+    file: third_party/openbao/sdk/physical/transactions.go
+  - name: Transactional
+    kind: interface
+    signature: type Transactional interface
+    file: third_party/openbao/sdk/physical/transactions.go
+  - name: Transactional.BeginReadOnlyTx
+    kind: method
+    signature: (context.Context) (Transaction, error)
+    file: third_party/openbao/sdk/physical/transactions.go
+  - name: Transactional.BeginTx
+    kind: method
+    signature: (context.Context) (Transaction, error)
+    file: third_party/openbao/sdk/physical/transactions.go
+  - name: TransactionalBackend
+    kind: interface
+    signature: type TransactionalBackend interface
+    file: third_party/openbao/sdk/physical/transactions.go
+  - name: TransactionalCache
+    kind: interface
+    signature: type TransactionalCache interface
+    file: third_party/openbao/sdk/physical/cache.go
+  - name: TransactionalStorageEncoding
+    kind: interface
+    signature: type TransactionalStorageEncoding interface
+    file: third_party/openbao/sdk/physical/encoding.go
+  - name: UnfencedWriteCtx
+    kind: function
+    signature: func UnfencedWriteCtx(ctx context.Context) context.Context
+    file: third_party/openbao/sdk/physical/physical.go
+  - name: View
+    kind: struct
+    signature: type View struct
+    file: third_party/openbao/sdk/physical/physical_view.go
+  - name: View.Delete
+    kind: method
+    signature: (ctx context.Context, key string) error
+    file: third_party/openbao/sdk/physical/physical_view.go
+  - name: View.Get
+    kind: method
+    signature: (ctx context.Context, key string) (*Entry, error)
+    file: third_party/openbao/sdk/physical/physical_view.go
+  - name: View.List
+    kind: method
+    signature: (ctx context.Context, prefix string) ([]string, error)
+    file: third_party/openbao/sdk/physical/physical_view.go
+  - name: View.ListPage
+    kind: method
+    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
+      error)
+    file: third_party/openbao/sdk/physical/physical_view.go
+  - name: View.Put
+    kind: method
+    signature: (ctx context.Context, entry *Entry) error
+    file: third_party/openbao/sdk/physical/physical_view.go
+  - name: WriteNotificationFunc
+    kind: type_alias
+    signature: type WriteNotificationFunc func(ctx context.Context, key string, UpdateOp)
+      error
+    file: third_party/openbao/sdk/physical/write_notifier.go
+  - name: cache.Delete
+    kind: method
+    signature: (ctx context.Context, key string) error
+    file: third_party/openbao/sdk/physical/cache.go
+  - name: cache.Get
+    kind: method
+    signature: (ctx context.Context, key string) (*Entry, error)
+    file: third_party/openbao/sdk/physical/cache.go
+  - name: cache.Invalidate
+    kind: method
+    signature: (ctx context.Context, key string)
+    file: third_party/openbao/sdk/physical/cache.go
+  - name: cache.List
+    kind: method
+    signature: (ctx context.Context, prefix string) ([]string, error)
+    file: third_party/openbao/sdk/physical/cache.go
+  - name: cache.ListPage
+    kind: method
+    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
+      error)
+    file: third_party/openbao/sdk/physical/cache.go
+  - name: cache.Purge
+    kind: method
+    signature: (ctx context.Context)
+    file: third_party/openbao/sdk/physical/cache.go
+  - name: cache.Put
+    kind: method
+    signature: (ctx context.Context, entry *Entry) error
+    file: third_party/openbao/sdk/physical/cache.go
+  - name: cache.SetEnabled
+    kind: method
+    signature: (enabled bool)
+    file: third_party/openbao/sdk/physical/cache.go
+  - name: cache.ShouldCache
+    kind: method
+    signature: (key string) bool
+    file: third_party/openbao/sdk/physical/cache.go
+  - name: cacheTransaction.Commit
+    kind: method
+    signature: (ctx context.Context) error
+    file: third_party/openbao/sdk/physical/cache.go
+  - name: cacheTransaction.Delete
+    kind: method
+    signature: (ctx context.Context, key string) error
+    file: third_party/openbao/sdk/physical/cache.go
+  - name: cacheTransaction.Put
+    kind: method
+    signature: (ctx context.Context, entry *Entry) error
+    file: third_party/openbao/sdk/physical/cache.go
+  - name: cacheTransaction.Rollback
+    kind: method
+    signature: (ctx context.Context) error
+    file: third_party/openbao/sdk/physical/cache.go
+  - name: errorInjector.Delete
+    kind: method
+    signature: (ctx context.Context, key string) error
+    file: third_party/openbao/sdk/physical/error.go
+  - name: errorInjector.Get
+    kind: method
+    signature: (ctx context.Context, key string) (*Entry, error)
+    file: third_party/openbao/sdk/physical/error.go
+  - name: errorInjector.List
+    kind: method
+    signature: (ctx context.Context, prefix string) ([]string, error)
+    file: third_party/openbao/sdk/physical/error.go
+  - name: errorInjector.ListPage
+    kind: method
+    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
+      error)
+    file: third_party/openbao/sdk/physical/error.go
+  - name: errorInjector.Put
+    kind: method
+    signature: (ctx context.Context, entry *Entry) error
+    file: third_party/openbao/sdk/physical/error.go
+  - name: errorInjector.SetErrorPercentage
+    kind: method
+    signature: (p int)
+    file: third_party/openbao/sdk/physical/error.go
+  - name: errorInjectorTransaction.Commit
+    kind: method
+    signature: (ctx context.Context) error
+    file: third_party/openbao/sdk/physical/error.go
+  - name: errorInjectorTransaction.Rollback
+    kind: method
+    signature: (ctx context.Context) error
+    file: third_party/openbao/sdk/physical/error.go
+  - name: storageEncoding.Delete
+    kind: method
+    signature: (ctx context.Context, key string) error
+    file: third_party/openbao/sdk/physical/encoding.go
+  - name: storageEncoding.Purge
+    kind: method
+    signature: (ctx context.Context)
+    file: third_party/openbao/sdk/physical/encoding.go
+  - name: storageEncoding.Put
+    kind: method
+    signature: (ctx context.Context, entry *Entry) error
+    file: third_party/openbao/sdk/physical/encoding.go
+  - name: storageEncoding.SetEnabled
+    kind: method
+    signature: (enabled bool)
+    file: third_party/openbao/sdk/physical/encoding.go
+  - name: storageEncodingTransaction.Commit
+    kind: method
+    signature: (ctx context.Context) error
+    file: third_party/openbao/sdk/physical/encoding.go
+  - name: storageEncodingTransaction.Rollback
+    kind: method
+    signature: (ctx context.Context) error
+    file: third_party/openbao/sdk/physical/encoding.go
+  - name: transactionalCache.BeginReadOnlyTx
+    kind: method
+    signature: (ctx context.Context) (Transaction, error)
+    file: third_party/openbao/sdk/physical/cache.go
+  - name: transactionalCache.BeginTx
+    kind: method
+    signature: (ctx context.Context) (Transaction, error)
+    file: third_party/openbao/sdk/physical/cache.go
+  - name: transactionalErrorInjector.BeginReadOnlyTx
+    kind: method
+    signature: (ctx context.Context) (Transaction, error)
+    file: third_party/openbao/sdk/physical/error.go
+  - name: transactionalErrorInjector.BeginTx
+    kind: method
+    signature: (ctx context.Context) (Transaction, error)
+    file: third_party/openbao/sdk/physical/error.go
+  - name: transactionalStorageEncoding.BeginReadOnlyTx
+    kind: method
+    signature: (ctx context.Context) (Transaction, error)
+    file: third_party/openbao/sdk/physical/encoding.go
+  - name: transactionalStorageEncoding.BeginTx
+    kind: method
+    signature: (ctx context.Context) (Transaction, error)
+    file: third_party/openbao/sdk/physical/encoding.go
+  - name: transactionalWriteNotifier.BeginReadOnlyTx
+    kind: method
+    signature: (ctx context.Context) (Transaction, error)
+    file: third_party/openbao/sdk/physical/write_notifier.go
+  - name: transactionalWriteNotifier.BeginTx
+    kind: method
+    signature: (ctx context.Context) (Transaction, error)
+    file: third_party/openbao/sdk/physical/write_notifier.go
+  - name: writeNotifier.Delete
+    kind: method
+    signature: (ctx context.Context, key string) error
+    file: third_party/openbao/sdk/physical/write_notifier.go
+  - name: writeNotifier.Get
+    kind: method
+    signature: (ctx context.Context, key string) (*Entry, error)
+    file: third_party/openbao/sdk/physical/write_notifier.go
+  - name: writeNotifier.HookInvalidate
+    kind: method
+    signature: (hook InvalidateFunc)
+    file: third_party/openbao/sdk/physical/write_notifier.go
+  - name: writeNotifier.List
+    kind: method
+    signature: (ctx context.Context, prefix string) ([]string, error)
+    file: third_party/openbao/sdk/physical/write_notifier.go
+  - name: writeNotifier.ListPage
+    kind: method
+    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
+      error)
+    file: third_party/openbao/sdk/physical/write_notifier.go
+  - name: writeNotifier.Put
+    kind: method
+    signature: (ctx context.Context, entry *Entry) error
+    file: third_party/openbao/sdk/physical/write_notifier.go
+  - name: writeNotifierTransaction.Commit
+    kind: method
+    signature: (ctx context.Context) error
+    file: third_party/openbao/sdk/physical/write_notifier.go
+  - name: writeNotifierTransaction.Delete
+    kind: method
+    signature: (ctx context.Context, key string) error
+    file: third_party/openbao/sdk/physical/write_notifier.go
+  - name: writeNotifierTransaction.Get
+    kind: method
+    signature: (ctx context.Context, key string) (*Entry, error)
+    file: third_party/openbao/sdk/physical/write_notifier.go
+  - name: writeNotifierTransaction.List
+    kind: method
+    signature: (ctx context.Context, prefix string) ([]string, error)
+    file: third_party/openbao/sdk/physical/write_notifier.go
+  - name: writeNotifierTransaction.ListPage
+    kind: method
+    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
+      error)
+    file: third_party/openbao/sdk/physical/write_notifier.go
+  - name: writeNotifierTransaction.Put
+    kind: method
+    signature: (ctx context.Context, entry *Entry) error
+    file: third_party/openbao/sdk/physical/write_notifier.go
+  - name: writeNotifierTransaction.Rollback
+    kind: method
+    signature: (ctx context.Context) error
+    file: third_party/openbao/sdk/physical/write_notifier.go
 codeRefIndex:
 - file:third_party/openbao/sdk/physical/cache.go cache.go@third_party/openbao/sdk/physical/cache.go
 - file:third_party/openbao/sdk/physical/encoding.go encoding.go@third_party/openbao/sdk/physical/encoding.go
@@ -107,842 +946,3 @@ codeRefIndex:
 - type_alias:33b86ed3a30df440a3be670b55c5e8ba InvalidateFunc@third_party/openbao/sdk/physical/physical.go:72
 - type_alias:92241f5fc12edd1a43cc696311e80203 WriteNotificationFunc@third_party/openbao/sdk/physical/write_notifier.go:12
 - type_alias:cfca255d3a7b14ad2dcb681120ee5002 Operation@third_party/openbao/sdk/physical/physical.go:19
-kind: SystemContext
-metadata:
-  name: third-party-openbao-sdk-physical
-  namespace: default
-spec:
-  intent: This context exists so that every storage engine in deno-kcp and the third_party/openbao
-    tree can be programmed against one small interface while cache, encoding, fault
-    injection, view scoping, pagination and notification behaviour are composed as
-    wrappers instead of being baked into each engine. Callers depend on Backend plus
-    whichever optional capability interfaces a particular engine implements, and the
-    Exercise* helpers define what a correct implementation must do, so they act as
-    the executable specification for every backend and decorator.
-  interfaces:
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: interface
-    name: Backend
-    signature: type Backend interface
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: method
-    name: Backend.Delete
-    signature: (ctx context.Context, key string) error
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: method
-    name: Backend.Get
-    signature: (ctx context.Context, key string) (*Entry, error)
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: method
-    name: Backend.List
-    signature: (ctx context.Context, prefix string) ([]string, error)
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: method
-    name: Backend.ListPage
-    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
-      error)
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: method
-    name: Backend.Put
-    signature: (ctx context.Context, entry *Entry) error
-  - file: third_party/openbao/sdk/physical/cache.go
-    kind: interface
-    name: Cache
-    signature: type Cache interface
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: interface
-    name: CacheInvalidationBackend
-    signature: type CacheInvalidationBackend interface
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: method
-    name: CacheInvalidationBackend.HookInvalidate
-    signature: (hook InvalidateFunc)
-  - file: third_party/openbao/sdk/physical/cache.go
-    kind: function
-    name: CacheRefreshContext
-    signature: func CacheRefreshContext(ctx context.Context, r bool) context.Context
-  - file: third_party/openbao/sdk/physical/entry.go
-    kind: struct
-    name: Entry
-    signature: type Entry struct
-  - file: third_party/openbao/sdk/physical/entry.go
-    kind: method
-    name: Entry.Clone
-    signature: () *Entry
-  - file: third_party/openbao/sdk/physical/entry.go
-    kind: method
-    name: Entry.String
-    signature: () string
-  - file: third_party/openbao/sdk/physical/error.go
-    kind: interface
-    name: ErrorInjector
-    signature: type ErrorInjector interface
-  - file: third_party/openbao/sdk/physical/error.go
-    kind: method
-    name: ErrorInjector.SetErrorPercentage
-    signature: (int)
-  - file: third_party/openbao/sdk/physical/testing.go
-    kind: function
-    name: ExerciseBackend
-    signature: func ExerciseBackend(t testing.TB, b Backend)
-  - file: third_party/openbao/sdk/physical/testing.go
-    kind: function
-    name: ExerciseBackend_ListPrefix
-    signature: func ExerciseBackend_ListPrefix(t testing.TB, b Backend)
-  - file: third_party/openbao/sdk/physical/testing.go
-    kind: function
-    name: ExerciseHABackend
-    signature: func ExerciseHABackend(t testing.TB, b HABackend, b2 HABackend)
-  - file: third_party/openbao/sdk/physical/testing.go
-    kind: function
-    name: ExerciseTransactionalBackend
-    signature: func ExerciseTransactionalBackend(t testing.TB, b TransactionalBackend)
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: type_alias
-    name: Factory
-    signature: type Factory func(map[string]string, log.Logger, metrics.MetricSink)
-      (Backend, error)
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: interface
-    name: FencingHABackend
-    signature: type FencingHABackend interface
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: method
-    name: FencingHABackend.RegisterActiveNodeLock
-    signature: (l Lock) error
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: interface
-    name: HABackend
-    signature: type HABackend interface
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: method
-    name: HABackend.HAEnabled
-    signature: () bool
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: method
-    name: HABackend.LockWith
-    signature: (key, value string) (Lock, error)
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: type_alias
-    name: InvalidateFunc
-    signature: type InvalidateFunc func(ctx context.Context, key string)
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: function
-    name: IsUnfencedWrite
-    signature: func IsUnfencedWrite(ctx context.Context) bool
-  - file: third_party/openbao/sdk/physical/latency.go
-    kind: struct
-    name: LatencyInjector
-    signature: type LatencyInjector struct
-  - file: third_party/openbao/sdk/physical/latency.go
-    kind: method
-    name: LatencyInjector.Delete
-    signature: (ctx context.Context, key string) error
-  - file: third_party/openbao/sdk/physical/latency.go
-    kind: method
-    name: LatencyInjector.Get
-    signature: (ctx context.Context, key string) (*Entry, error)
-  - file: third_party/openbao/sdk/physical/latency.go
-    kind: method
-    name: LatencyInjector.List
-    signature: (ctx context.Context, prefix string) ([]string, error)
-  - file: third_party/openbao/sdk/physical/latency.go
-    kind: method
-    name: LatencyInjector.ListPage
-    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
-      error)
-  - file: third_party/openbao/sdk/physical/latency.go
-    kind: method
-    name: LatencyInjector.Put
-    signature: (ctx context.Context, entry *Entry) error
-  - file: third_party/openbao/sdk/physical/latency.go
-    kind: method
-    name: LatencyInjector.SetLatency
-    signature: (latency time.Duration)
-  - file: third_party/openbao/sdk/physical/listing.go
-    kind: struct
-    name: Lister
-    signature: type Lister struct
-  - file: third_party/openbao/sdk/physical/listing.go
-    kind: method
-    name: Lister.ListPage
-    signature: (ctx context.Context) ([]string, []string, error)
-  - file: third_party/openbao/sdk/physical/listing.go
-    kind: method
-    name: Lister.SeekPrefix
-    signature: () []byte
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: interface
-    name: Lock
-    signature: type Lock interface
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: method
-    name: Lock.Lock
-    signature: (stopCh <-chan struct{}) (<-chan struct{}, error)
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: method
-    name: Lock.Unlock
-    signature: () error
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: method
-    name: Lock.Value
-    signature: () (bool, string, error)
-  - file: third_party/openbao/sdk/physical/cache.go
-    kind: function
-    name: NewCache
-    signature: func NewCache(b Backend, size int, logger log.Logger, metricSink metrics.MetricSink)
-      Cache
-  - file: third_party/openbao/sdk/physical/error.go
-    kind: function
-    name: NewErrorInjector
-    signature: func NewErrorInjector(b Backend, errorPercent int, logger log.Logger)
-      ErrorInjector
-  - file: third_party/openbao/sdk/physical/latency.go
-    kind: function
-    name: NewLatencyInjector
-    signature: func NewLatencyInjector(b Backend, latency time.Duration, jitter int,
-      logger log.Logger) *LatencyInjector
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: function
-    name: NewPermitPool
-    signature: func NewPermitPool(permits int) *PermitPool
-  - file: third_party/openbao/sdk/physical/physical_access.go
-    kind: function
-    name: NewPhysicalAccess
-    signature: func NewPhysicalAccess(physical Backend) *PhysicalAccess
-  - file: third_party/openbao/sdk/physical/encoding.go
-    kind: function
-    name: NewStorageEncoding
-    signature: func NewStorageEncoding(b Backend) Backend
-  - file: third_party/openbao/sdk/physical/physical_view.go
-    kind: function
-    name: NewView
-    signature: func NewView(backend Backend, prefix string) *View
-  - file: third_party/openbao/sdk/physical/write_notifier.go
-    kind: function
-    name: NewWriteNotifier
-    signature: func NewWriteNotifier(b Backend, logger log.Logger, notifyWrite WriteNotificationFunc)
-      Backend
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: type_alias
-    name: Operation
-    signature: type Operation string
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: struct
-    name: PermitPool
-    signature: type PermitPool struct
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: method
-    name: PermitPool.Acquire
-    signature: ()
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: method
-    name: PermitPool.CurrentPermits
-    signature: () int
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: method
-    name: PermitPool.Release
-    signature: ()
-  - file: third_party/openbao/sdk/physical/physical_access.go
-    kind: struct
-    name: PhysicalAccess
-    signature: type PhysicalAccess struct
-  - file: third_party/openbao/sdk/physical/physical_access.go
-    kind: method
-    name: PhysicalAccess.Delete
-    signature: (ctx context.Context, key string) error
-  - file: third_party/openbao/sdk/physical/physical_access.go
-    kind: method
-    name: PhysicalAccess.Get
-    signature: (ctx context.Context, key string) (*Entry, error)
-  - file: third_party/openbao/sdk/physical/physical_access.go
-    kind: method
-    name: PhysicalAccess.List
-    signature: (ctx context.Context, prefix string) ([]string, error)
-  - file: third_party/openbao/sdk/physical/physical_access.go
-    kind: method
-    name: PhysicalAccess.ListPage
-    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
-      error)
-  - file: third_party/openbao/sdk/physical/physical_access.go
-    kind: method
-    name: PhysicalAccess.Purge
-    signature: (ctx context.Context)
-  - file: third_party/openbao/sdk/physical/physical_access.go
-    kind: method
-    name: PhysicalAccess.Put
-    signature: (ctx context.Context, entry *Entry) error
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: function
-    name: Prefixes
-    signature: func Prefixes(s string) []string
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: interface
-    name: RedirectDetect
-    signature: type RedirectDetect interface
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: method
-    name: RedirectDetect.DetectHostAddr
-    signature: () (string, error)
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: interface
-    name: RemoteLock
-    signature: type RemoteLock interface
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: method
-    name: RemoteLock.IsActivelyHeld
-    signature: (ctx context.Context) (bool, error)
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: interface
-    name: ReplicationIndexBackend
-    signature: type ReplicationIndexBackend interface
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: method
-    name: ReplicationIndexBackend.AppliedReplicationIndex
-    signature: (ctx context.Context) (string, error)
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: method
-    name: ReplicationIndexBackend.GreaterEqualReplicationIndex
-    signature: (ctx context.Context, left string, right string) (bool, error)
-  - file: third_party/openbao/sdk/physical/encoding.go
-    kind: interface
-    name: StorageEncoding
-    signature: type StorageEncoding interface
-  - file: third_party/openbao/sdk/physical/encoding.go
-    kind: interface
-    name: StorageEncodingTransaction
-    signature: type StorageEncodingTransaction interface
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: interface
-    name: ToggleablePurgemonster
-    signature: type ToggleablePurgemonster interface
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: method
-    name: ToggleablePurgemonster.Invalidate
-    signature: (ctx context.Context, key string)
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: method
-    name: ToggleablePurgemonster.Purge
-    signature: (ctx context.Context)
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: method
-    name: ToggleablePurgemonster.SetEnabled
-    signature: (bool)
-  - file: third_party/openbao/sdk/physical/transactions.go
-    kind: interface
-    name: Transaction
-    signature: type Transaction interface
-  - file: third_party/openbao/sdk/physical/transactions.go
-    kind: method
-    name: Transaction.Commit
-    signature: (context.Context) error
-  - file: third_party/openbao/sdk/physical/transactions.go
-    kind: method
-    name: Transaction.Rollback
-    signature: (context.Context) error
-  - file: third_party/openbao/sdk/physical/transactions.go
-    kind: interface
-    name: Transactional
-    signature: type Transactional interface
-  - file: third_party/openbao/sdk/physical/transactions.go
-    kind: method
-    name: Transactional.BeginReadOnlyTx
-    signature: (context.Context) (Transaction, error)
-  - file: third_party/openbao/sdk/physical/transactions.go
-    kind: method
-    name: Transactional.BeginTx
-    signature: (context.Context) (Transaction, error)
-  - file: third_party/openbao/sdk/physical/transactions.go
-    kind: interface
-    name: TransactionalBackend
-    signature: type TransactionalBackend interface
-  - file: third_party/openbao/sdk/physical/cache.go
-    kind: interface
-    name: TransactionalCache
-    signature: type TransactionalCache interface
-  - file: third_party/openbao/sdk/physical/encoding.go
-    kind: interface
-    name: TransactionalStorageEncoding
-    signature: type TransactionalStorageEncoding interface
-  - file: third_party/openbao/sdk/physical/physical.go
-    kind: function
-    name: UnfencedWriteCtx
-    signature: func UnfencedWriteCtx(ctx context.Context) context.Context
-  - file: third_party/openbao/sdk/physical/physical_view.go
-    kind: struct
-    name: View
-    signature: type View struct
-  - file: third_party/openbao/sdk/physical/physical_view.go
-    kind: method
-    name: View.Delete
-    signature: (ctx context.Context, key string) error
-  - file: third_party/openbao/sdk/physical/physical_view.go
-    kind: method
-    name: View.Get
-    signature: (ctx context.Context, key string) (*Entry, error)
-  - file: third_party/openbao/sdk/physical/physical_view.go
-    kind: method
-    name: View.List
-    signature: (ctx context.Context, prefix string) ([]string, error)
-  - file: third_party/openbao/sdk/physical/physical_view.go
-    kind: method
-    name: View.ListPage
-    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
-      error)
-  - file: third_party/openbao/sdk/physical/physical_view.go
-    kind: method
-    name: View.Put
-    signature: (ctx context.Context, entry *Entry) error
-  - file: third_party/openbao/sdk/physical/write_notifier.go
-    kind: type_alias
-    name: WriteNotificationFunc
-    signature: type WriteNotificationFunc func(ctx context.Context, key string, UpdateOp)
-      error
-  - file: third_party/openbao/sdk/physical/cache.go
-    kind: method
-    name: cache.Delete
-    signature: (ctx context.Context, key string) error
-  - file: third_party/openbao/sdk/physical/cache.go
-    kind: method
-    name: cache.Get
-    signature: (ctx context.Context, key string) (*Entry, error)
-  - file: third_party/openbao/sdk/physical/cache.go
-    kind: method
-    name: cache.Invalidate
-    signature: (ctx context.Context, key string)
-  - file: third_party/openbao/sdk/physical/cache.go
-    kind: method
-    name: cache.List
-    signature: (ctx context.Context, prefix string) ([]string, error)
-  - file: third_party/openbao/sdk/physical/cache.go
-    kind: method
-    name: cache.ListPage
-    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
-      error)
-  - file: third_party/openbao/sdk/physical/cache.go
-    kind: method
-    name: cache.Purge
-    signature: (ctx context.Context)
-  - file: third_party/openbao/sdk/physical/cache.go
-    kind: method
-    name: cache.Put
-    signature: (ctx context.Context, entry *Entry) error
-  - file: third_party/openbao/sdk/physical/cache.go
-    kind: method
-    name: cache.SetEnabled
-    signature: (enabled bool)
-  - file: third_party/openbao/sdk/physical/cache.go
-    kind: method
-    name: cache.ShouldCache
-    signature: (key string) bool
-  - file: third_party/openbao/sdk/physical/cache.go
-    kind: method
-    name: cacheTransaction.Commit
-    signature: (ctx context.Context) error
-  - file: third_party/openbao/sdk/physical/cache.go
-    kind: method
-    name: cacheTransaction.Delete
-    signature: (ctx context.Context, key string) error
-  - file: third_party/openbao/sdk/physical/cache.go
-    kind: method
-    name: cacheTransaction.Put
-    signature: (ctx context.Context, entry *Entry) error
-  - file: third_party/openbao/sdk/physical/cache.go
-    kind: method
-    name: cacheTransaction.Rollback
-    signature: (ctx context.Context) error
-  - file: third_party/openbao/sdk/physical/error.go
-    kind: method
-    name: errorInjector.Delete
-    signature: (ctx context.Context, key string) error
-  - file: third_party/openbao/sdk/physical/error.go
-    kind: method
-    name: errorInjector.Get
-    signature: (ctx context.Context, key string) (*Entry, error)
-  - file: third_party/openbao/sdk/physical/error.go
-    kind: method
-    name: errorInjector.List
-    signature: (ctx context.Context, prefix string) ([]string, error)
-  - file: third_party/openbao/sdk/physical/error.go
-    kind: method
-    name: errorInjector.ListPage
-    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
-      error)
-  - file: third_party/openbao/sdk/physical/error.go
-    kind: method
-    name: errorInjector.Put
-    signature: (ctx context.Context, entry *Entry) error
-  - file: third_party/openbao/sdk/physical/error.go
-    kind: method
-    name: errorInjector.SetErrorPercentage
-    signature: (p int)
-  - file: third_party/openbao/sdk/physical/error.go
-    kind: method
-    name: errorInjectorTransaction.Commit
-    signature: (ctx context.Context) error
-  - file: third_party/openbao/sdk/physical/error.go
-    kind: method
-    name: errorInjectorTransaction.Rollback
-    signature: (ctx context.Context) error
-  - file: third_party/openbao/sdk/physical/encoding.go
-    kind: method
-    name: storageEncoding.Delete
-    signature: (ctx context.Context, key string) error
-  - file: third_party/openbao/sdk/physical/encoding.go
-    kind: method
-    name: storageEncoding.Purge
-    signature: (ctx context.Context)
-  - file: third_party/openbao/sdk/physical/encoding.go
-    kind: method
-    name: storageEncoding.Put
-    signature: (ctx context.Context, entry *Entry) error
-  - file: third_party/openbao/sdk/physical/encoding.go
-    kind: method
-    name: storageEncoding.SetEnabled
-    signature: (enabled bool)
-  - file: third_party/openbao/sdk/physical/encoding.go
-    kind: method
-    name: storageEncodingTransaction.Commit
-    signature: (ctx context.Context) error
-  - file: third_party/openbao/sdk/physical/encoding.go
-    kind: method
-    name: storageEncodingTransaction.Rollback
-    signature: (ctx context.Context) error
-  - file: third_party/openbao/sdk/physical/cache.go
-    kind: method
-    name: transactionalCache.BeginReadOnlyTx
-    signature: (ctx context.Context) (Transaction, error)
-  - file: third_party/openbao/sdk/physical/cache.go
-    kind: method
-    name: transactionalCache.BeginTx
-    signature: (ctx context.Context) (Transaction, error)
-  - file: third_party/openbao/sdk/physical/error.go
-    kind: method
-    name: transactionalErrorInjector.BeginReadOnlyTx
-    signature: (ctx context.Context) (Transaction, error)
-  - file: third_party/openbao/sdk/physical/error.go
-    kind: method
-    name: transactionalErrorInjector.BeginTx
-    signature: (ctx context.Context) (Transaction, error)
-  - file: third_party/openbao/sdk/physical/encoding.go
-    kind: method
-    name: transactionalStorageEncoding.BeginReadOnlyTx
-    signature: (ctx context.Context) (Transaction, error)
-  - file: third_party/openbao/sdk/physical/encoding.go
-    kind: method
-    name: transactionalStorageEncoding.BeginTx
-    signature: (ctx context.Context) (Transaction, error)
-  - file: third_party/openbao/sdk/physical/write_notifier.go
-    kind: method
-    name: transactionalWriteNotifier.BeginReadOnlyTx
-    signature: (ctx context.Context) (Transaction, error)
-  - file: third_party/openbao/sdk/physical/write_notifier.go
-    kind: method
-    name: transactionalWriteNotifier.BeginTx
-    signature: (ctx context.Context) (Transaction, error)
-  - file: third_party/openbao/sdk/physical/write_notifier.go
-    kind: method
-    name: writeNotifier.Delete
-    signature: (ctx context.Context, key string) error
-  - file: third_party/openbao/sdk/physical/write_notifier.go
-    kind: method
-    name: writeNotifier.Get
-    signature: (ctx context.Context, key string) (*Entry, error)
-  - file: third_party/openbao/sdk/physical/write_notifier.go
-    kind: method
-    name: writeNotifier.HookInvalidate
-    signature: (hook InvalidateFunc)
-  - file: third_party/openbao/sdk/physical/write_notifier.go
-    kind: method
-    name: writeNotifier.List
-    signature: (ctx context.Context, prefix string) ([]string, error)
-  - file: third_party/openbao/sdk/physical/write_notifier.go
-    kind: method
-    name: writeNotifier.ListPage
-    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
-      error)
-  - file: third_party/openbao/sdk/physical/write_notifier.go
-    kind: method
-    name: writeNotifier.Put
-    signature: (ctx context.Context, entry *Entry) error
-  - file: third_party/openbao/sdk/physical/write_notifier.go
-    kind: method
-    name: writeNotifierTransaction.Commit
-    signature: (ctx context.Context) error
-  - file: third_party/openbao/sdk/physical/write_notifier.go
-    kind: method
-    name: writeNotifierTransaction.Delete
-    signature: (ctx context.Context, key string) error
-  - file: third_party/openbao/sdk/physical/write_notifier.go
-    kind: method
-    name: writeNotifierTransaction.Get
-    signature: (ctx context.Context, key string) (*Entry, error)
-  - file: third_party/openbao/sdk/physical/write_notifier.go
-    kind: method
-    name: writeNotifierTransaction.List
-    signature: (ctx context.Context, prefix string) ([]string, error)
-  - file: third_party/openbao/sdk/physical/write_notifier.go
-    kind: method
-    name: writeNotifierTransaction.ListPage
-    signature: (ctx context.Context, prefix string, after string, limit int) ([]string,
-      error)
-  - file: third_party/openbao/sdk/physical/write_notifier.go
-    kind: method
-    name: writeNotifierTransaction.Put
-    signature: (ctx context.Context, entry *Entry) error
-  - file: third_party/openbao/sdk/physical/write_notifier.go
-    kind: method
-    name: writeNotifierTransaction.Rollback
-    signature: (ctx context.Context) error
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - file:third_party/openbao/sdk/physical/testing.go
-    - function:34f9a200d286ca26f172fafe9c35b6d9
-    - function:ab3724de969fbcf4b7c60877fe893a52
-    - function:cdf9401bd1ce3d8e201d0bb21c095eb2
-    - function:f38102f89c2dd4dd5ab77bd257bb3242
-    id: r.backend-conformance-tests
-    level: MUST
-    text: ExerciseBackend, ExerciseBackend_ListPrefix, ExerciseHABackend and ExerciseTransactionalBackend
-      must be the conformance suite a backend runs against itself, covering basic
-      read, write and delete, prefix listing, locking across two HA backends, and
-      commit and rollback semantics, so every backend in the project is held to one
-      behaviour.
-  - codeRefs:
-    - interface:c42dc92aaf803810f2890fe01b5c2e74
-    - method:90d0f26d835b68dfd2e2fb5cf369ecc9
-    - method:b0109019be0473eecfda55b4725fe9e7
-    - method:c70a44f71273e5619bc9d984abbe0eb7
-    - method:df5b7487ed3c9362165f313858b129bc
-    - method:e0dd79955ca589a7e7a28ff75e3f99bd
-    id: r.backend-contract
-    level: MUST
-    text: Backend must define exactly the storage contract Put(ctx, *Entry), Get(ctx,
-      key), Delete(ctx, key), List(ctx, prefix) and ListPage(ctx, prefix, after, limit),
-      so that every storage engine and every decorator in the package is programmable
-      against one interface.
-  - codeRefs:
-    - file:third_party/openbao/sdk/physical/cache.go
-    - method:38a1adf14495b6d3bf7c358c6cc3ac83
-    - method:b7a2798b7fe8309ddb44db1c630f1e2e
-    - method:dce8a4574d05b37899f35f8737f03cd9
-    id: r.cache-invalidate
-    level: SHOULD
-    text: The cache must expose Invalidate so a single key can be dropped from memory
-      without a full purge, and must not cache keys that ShouldCache rejects, so health
-      and lock keys bypass the cache.
-  - codeRefs:
-    - function:34327220403569fa0aff0977c0c1f591
-    - function:ff4d7eee1ee723e8b6728c7b4904d7b3
-    - interface:3e369c75b5f78584ecb1fb21b4e3f76d
-    - interface:c551f864d0a2d50fbce634ac814b194c
-    - method:49c2c5b43f002a86e6cdd21df5e236fc
-    - method:59757faeb1505f1513aaed08368aecd6
-    - method:606a138a7fec3d3e2de986b2e445a895
-    - method:669f632567fcb141c59621312cd2ada1
-    - method:d2a50636c0acef479ab5a8d4dcd20399
-    id: r.cache-layer
-    level: MUST
-    text: NewCache must wrap a Backend in an LRU cache of the given size that serves
-      Get from memory, writes through on Put and Delete, purges or disables itself
-      through ToggleablePurgemonster, and returns a cacheTransaction from BeginTx
-      and BeginReadOnlyTx that applies its buffered writes to the cache only after
-      the underlying transaction commits; CacheRefreshContext opts a call into a cache
-      refresh and that flag must be honoured on read.
-  - codeRefs:
-    - file:third_party/openbao/sdk/physical/entry.go
-    - method:1e9458db4df54ab1e095336d02ec8291
-    - method:e4831f61ffb6b9b38ea13833b9d1c4e6
-    - struct:6d1685314383067122ddde5e7575b72e
-    id: r.entry-record
-    level: MUST
-    text: Entry must be the unit of stored data carrying Key, Value and SealWrap,
-      with String rendering a human-readable form and Clone returning a copy whose
-      Value does not alias the original, so cached entries can be handed out without
-      letting callers mutate the store's copy.
-  - codeRefs:
-    - function:714984d2ed75dac6bfd87f642ad23447
-    - interface:5b84e8caa4286b4b2b689fd80ebd982c
-    - method:21ad4cfa5e9d435d4e7b98662c286b7c
-    - method:54e8311f600071e530e66c8829de81a5
-    - method:8ce0c799baa8cb5521a15ff709d4f9ad
-    - method:9d4210c668df313546cd914b87438b82
-    id: r.error-injector
-    level: MUST
-    text: NewErrorInjector must wrap a Backend and fail a percentage of read and write
-      operations set by SetErrorPercentage, starting from the percentage passed to
-      the constructor, so failure handling can be exercised; its transactional form
-      must delegate BeginTx and BeginReadOnlyTx to the wrapped backend.
-  - codeRefs:
-    - interface:05f1884eee66d15665c49c8df37093e2
-    - interface:78bc32a027b56ca8606681d66c086d75
-    - interface:8c498e2cc09fa8cf2e6cebb864101897
-    - interface:c4f6350d056e8dd0c44a4be82e5f4d52
-    - method:39e64095b3c2731bec496e6f9d83a437
-    - method:b4b2d66682d3ff1690be03763052bc7e
-    - method:eced766ac933e67ac9dc3b887af8dee0
-    id: r.ha-and-fencing
-    level: MUST
-    text: HABackend must let a node take a lock on a key with LockWith and report
-      whether HA is available, FencingHABackend must let the lock of the active node
-      be registered for fencing, and Lock plus RemoteLock must model lock, unlock,
-      value retrieval and active-hold checks so leadership and fencing work over any
-      backend that implements them.
-  - codeRefs:
-    - function:2773de0d74caf975495b1df34f2aa3f2
-    - method:bfb76404b2485cdaed97b99a6ed2bb69
-    - method:df9fbb73cfa0e176f7558a5f99cf146f
-    - method:fc4b85d6d89264444aa804cbab2f4b5e
-    - struct:6814c01d24d533bd86c51d633e3ed326
-    id: r.latency-injector
-    level: MUST
-    text: NewLatencyInjector must wrap a Backend and delay every Put, Get, Delete,
-      List and ListPage by the configured latency plus or minus a jitter percentage,
-      with SetLatency changing the delay at runtime so timing behaviour can be tuned
-      without rebuilding the backend chain.
-  - codeRefs:
-    - interface:c42dc92aaf803810f2890fe01b5c2e74
-    - method:b0109019be0473eecfda55b4725fe9e7
-    - method:df5b7487ed3c9362165f313858b129bc
-    id: r.list-pagination
-    level: MUST
-    text: List must return the keys directly under a prefix, and ListPage must return
-      the same keys but starting after the given key and capped at limit, so a caller
-      can page through a large prefix by feeding the last key of one page back as
-      after.
-  - codeRefs:
-    - file:third_party/openbao/sdk/physical/listing.go
-    - method:082b9444e66f470df2382ba626b3d47c
-    - method:903301af689bb47f9423be6a2c91683a
-    - struct:bdca7bea47a8a839f16a5d2320c1c5bf
-    id: r.lister-pagination
-    level: SHOULD
-    text: Lister must drive paginated listing over a backend, exposing SeekPrefix
-      to set the cursor and ListPage to return the current page of keys together with
-      the keys still remaining, so callers can stream a large prefix without holding
-      it all in memory.
-  - codeRefs:
-    - type_alias:088e88cc51204d45396356d351d30b3c
-    - type_alias:33b86ed3a30df440a3be670b55c5e8ba
-    - type_alias:92241f5fc12edd1a43cc696311e80203
-    - type_alias:cfca255d3a7b14ad2dcb681120ee5002
-    id: r.operation-and-factory-aliases
-    level: MAY
-    text: Operation, InvalidateFunc, Factory and WriteNotificationFunc may stay named
-      types so operation verbs, invalidation callbacks, backend constructors and write
-      notification callbacks are self-describing in signatures.
-  - codeRefs:
-    - interface:105a98988cc407ace2a693c323fe82f0
-    - interface:3d13c6617dfad919aaca553fabf6b528
-    - interface:d74a7bde4c43f84103136095df7eeee9
-    - method:87f1c1ae650ab54554e746f7c2823ed4
-    - method:9c6852a96169247050fd8ccce0f56037
-    id: r.optional-capabilities
-    level: MUST
-    text: ToggleablePurgemonster, CacheInvalidationBackend and RedirectDetect must
-      stay separate from Backend so cache purging, invalidation hook-up and host address
-      detection are discovered by type assertion, and a backend that does not support
-      them still satisfies Backend.
-  - codeRefs:
-    - function:561c6b9266d3a78ad6b74428ac50ec7d
-    - method:73f4f5e3dbdbc2785e422a2c07f8bf80
-    - method:c25fb5faa3f522a39ad67f58a5437f14
-    - method:c60fd2c06818cef2fb49cc9198048173
-    - struct:03a3c1fe3ff0e393c6f0e45c695c5798
-    id: r.permit-pool
-    level: MUST
-    text: NewPermitPool must bound the number of concurrent operations to the given
-      permit count, blocking in Acquire until a permit frees, releasing it in Release,
-      and reporting the outstanding count from CurrentPermits.
-  - codeRefs:
-    - file:third_party/openbao/sdk/physical/physical_access.go
-    - function:2c3211f729a5fb94085fd69b2f0be6c1
-    - method:06bfe54d55d7d12ca01fad789ea1d1c5
-    - method:7388501859c23bf4f54700997e6b21cb
-    - struct:df3721d3c77a1d9a71bc36b0792ebaa9
-    id: r.physical-access-purge
-    level: MUST
-    text: NewPhysicalAccess must expose a Backend plus Purge over the wrapped store,
-      so an operator-facing path can delete a whole keyspace by listing and deleting
-      keys rather than touching single keys only.
-  - codeRefs:
-    - function:74f5abaeca87696c252646165f7d64bb
-    - method:4a2d96ce2188c5b8bc883354eb54e8dc
-    - method:66c85653a25af6fe5b7fc5933ea73fb2
-    - method:acf6ac641ccd2a39961630501c372d56
-    - method:bfdd975da6282f8d7d8b51d053b0d10d
-    - method:d2e603651f28a5362f2db38d7adda611
-    - struct:5bc75dfe5fc1d9713f0aa85b4d53da4e
-    id: r.prefix-view
-    level: MUST
-    text: 'NewView must scope a Backend to a fixed prefix: Get, Put and Delete must
-      address keys inside that prefix and List and ListPage must return results with
-      the prefix already stripped, so a caller sees a self-contained subtree and cannot
-      reach outside it.'
-  - codeRefs:
-    - function:53225bb6c155915c3d2308b06988e63d
-    id: r.prefixes-helper
-    level: SHOULD
-    text: Prefixes must return the ancestor prefixes of a key path so cache and invalidation
-      code can walk from a leaf key up to its parent prefixes without re-parsing the
-      separators.
-  - codeRefs:
-    - interface:13bd2e0d23b764cee32c11c2f8dc9018
-    - method:3e0174bce2e864f3d2829e37dc7583c4
-    - method:80d9c59fdb37241fac49f6caeac1b43e
-    id: r.replication-index
-    level: MUST
-    text: ReplicationIndexBackend must report the applied replication index and compare
-      two index values for greater-or-equal, so a follower can decide whether it is
-      behind the leader without decoding the index itself.
-  - codeRefs:
-    - function:72f695e0a898c83f112db456c8a1d4b1
-    - interface:0047ee89f59f43dfe4e94ec0eee269e1
-    - interface:3abc2ea0c97155337bff68b1c25b282d
-    - interface:c55488afd8098351787fbc2017fc50be
-    - method:0775930799b3c6c71386dbd6956849ae
-    - method:0bd332eb0420eae831a35b27de7a080e
-    - method:a5ccf39e4acbab3fa36e5a1b3eb7791c
-    id: r.storage-encoding
-    level: MUST
-    text: NewStorageEncoding must return a Backend wrapping the given backend that
-      applies a storage encoding on every entry it writes and reverses it on every
-      entry it reads, and its transactional form must return a StorageEncodingTransaction
-      that applies the encoding on Put and passes Commit and Rollback through to the
-      wrapped transaction.
-  - codeRefs:
-    - interface:08ffcc14df3c8b65543b0d305373c3e9
-    - interface:9852d12ad0d3e5dbdf54721c45db0b05
-    - interface:a169b37932f13dfaab67c2887a0b2628
-    - method:5c8e9fb8611f650250e76ffef962a5a2
-    - method:6bc6aa931a840535c0cce016b506112b
-    - method:a8de377adade7c00825c85121c76f056
-    - method:e584b81c98057c68f9a170f9266091d2
-    id: r.transactions
-    level: MUST
-    text: Transactional must offer BeginReadOnlyTx and BeginTx returning a Transaction,
-      and Transaction must offer Commit and Rollback; TransactionalBackend must combine
-      Transactional with Backend so a caller can hold one value that is both a store
-      and a transaction factory.
-  - codeRefs:
-    - function:535042a02a24c9c58620a8f8f73e5bf3
-    - function:7a68fe5f09705029eb92a822dd50d285
-    id: r.unfenced-write-context
-    level: MUST
-    text: UnfencedWriteCtx must mark a context as an unfenced write and IsUnfencedWrite
-      must read that mark back, so a write that must bypass the active-node fence
-      is distinguishable from an ordinary write further down the backend chain.
-  - codeRefs:
-    - function:3aee5dde26ea2637ff9ca7a8b4120606
-    - method:9486c15807ce309a30801a9300fb6beb
-    - method:a45e787aaed05d32de40a9159ea18d20
-    - method:e8833094d318122c1592c109f76a4f0c
-    - type_alias:92241f5fc12edd1a43cc696311e80203
-    id: r.write-notifier
-    level: MUST
-    text: NewWriteNotifier must return a Backend that calls the supplied WriteNotificationFunc
-      after a successful Put and after a transaction commits, and that accepts an
-      InvalidateFunc through HookInvalidate so other components learn the keyspace
-      changed.
-  upstream: self

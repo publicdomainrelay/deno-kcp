@@ -1,4 +1,210 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-sdk-helper-cel
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'This context exists so that CEL (Common Expression Language) expressions
+    inside OpenBao policies and secret engines can be built, validated and evaluated
+    against a consistent environment. It is the SDK-level surface that engine authors
+    call: the helpers add reusable functions and identity variables to a CEL environment,
+    and the program type turns stored expression text plus caller-supplied evaluation
+    data into a single evaluated value. Keeping it at the SDK layer means every consumer
+    of the CEL feature shares the same extension set, the same identity variable names,
+    and the same compile-then-evaluate pipeline instead of each engine re-implementing
+    it.'
+  requirements:
+  - id: r.add-identity
+    level: MUST
+    text: AddIdentity must write client_token and entity_id from the logical request
+      into the data map, and when entity_id is non-empty must resolve groups through
+      view.GroupsForEntity and entity info through view.EntityInfo into entity_groups
+      and entity_info, returning an error wrapping the cause as "unable to resolve
+      groups" or "unable to resolve entity info" on failure; when entity_id is empty
+      it must set entity_groups and entity_info to nil and return nil.
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/cel/helpers.go
+    - function:8e228c24cb7d4873ab46c74eee1bf034
+  - id: r.cel-extension-functions
+    level: MUST
+    text: 'CelGoExtFunctions must return a slice of cel.EnvOption that enables the
+      CEL extension libraries: strings, lists, optional types, regex, math, sets and
+      encoders, appended in that order.'
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/cel/helpers.go
+    - function:87c9bd82e4d2219acc7dbab3eb9d5f53
+  - id: r.check-valid-email
+    level: MUST
+    text: CheckValidEmailFunction must register a CEL function named check_valid_email
+      with an overload check_valid_email_string that takes one string argument and
+      returns bool, bound to the internal checkValidEmail implementation.
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/cel/helpers.go
+    - function:217536dc3d8611f03fbd0bdc93a8c780
+  - id: r.eval-config-environment
+    level: MUST
+    text: EvalConfig.ToOptions must assemble the environment options for the program,
+      including the CEL extension functions, the identity declarations and the check_valid_email
+      function; EvalConfig.ToEnv must turn the config into a compiled *cel.Env, returning
+      an error when the environment cannot be built.
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/cel/program.go
+    - method:506431c8fa963826b50d515c8c677c97
+    - method:9fec7e2ecc4848e6520deaf1f6911923
+    - struct:b8c5f354c902b6956f2b927c9847eaa0
+  - id: r.framework-field-schema
+    level: MUST
+    text: FrameworkFieldSchema must return the framework.FieldSchema that describes
+      how a CEL program is declared as a field, so engines can accept a program through
+      framework field data.
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/cel/program.go
+    - function:58f702756fac08f5ba5e092531541b26
+  - id: r.helper-test-coverage
+    level: SHOULD
+    text: TestCELHelpers in helpers_test.go should exercise the environment options
+      produced by CheckValidEmailFunction and CelGoExtFunctions, so changes to the
+      extension set or the email function are caught by the package tests.
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/cel/helpers_test.go
+  - id: r.identity-declarations
+    level: MUST
+    text: 'IdentityDeclarations must declare four CEL variables for the identity subsystem:
+      client_token as dyn, entity_id as string, entity_groups as a list of dyn, and
+      entity_info as a map from string to dyn.'
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/cel/helpers.go
+    - function:97fd18ecd0deba8e960b5448c9634251
+  - id: r.json-functions
+    level: MUST
+    text: EncodeJSONFunction must register a CEL function named encode_json and DecodeJSONFunction
+      must register one named decode_json, each with a single-string overload that
+      returns dyn through its unary binding.
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/cel/helpers.go
+    - function:a15efeda210e88bf6a901b97ae33b5d7
+    - function:ae4893d22b69a3a9d4196b3a6c02495f
+  - id: r.json-program-from-request
+    level: MUST
+    text: JSONProgramFromRequest must build a *Program from framework.FieldData, returning
+      an error when the field data cannot be read into a program.
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/cel/program.go
+    - function:950d1b6de5662233c5a63816d5b62a2e
+  - id: r.program-evaluate
+    level: MUST
+    text: Program.Evaluate must evaluate the program under the given context and EvalConfig
+      with the supplied evaluation data and return the resulting ref.Val, first evaluating
+      the program's variables so that computed variables are added to the evaluation
+      data.
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/cel/program.go
+    - method:3c4b9a623c352969ba180f77da6d359e
+    - method:7c8435f0735ddb61e1c7cd45db47f88b
+    - struct:6a56695d0522bd7f30ba29ae36cc8ac8
+  - id: r.program-validate
+    level: MUST
+    text: Program.Validate must check the program against the environment produced
+      from the given EvalConfig and report an error when the expressions do not compile;
+      Program.ValidateVars and Variable.Validate must perform the same check for the
+      program's variables, returning the environment that carries them.
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/cel/program.go
+    - method:39a89e07c0007d44ab33d00d86a16aa7
+    - method:b545eff1ac521ba68f9512e2203d4e8b
+    - method:cf1b8b5a35d9e0d7b5e7471fd17171ba
+  - id: r.variable-evaluate
+    level: MUST
+    text: Variable.Evaluate must evaluate one variable's expression against the environment
+      and evaluation data and return the environment carrying the variable's result,
+      so that later expressions can reference it.
+    codeRefs:
+    - file:third_party/openbao/sdk/helper/cel/program.go
+    - method:569442811997bf2ff6bd8e0f200bfd77
+    - struct:5fabc76fc387175cfee71ef415a06024
+  interfaces:
+  - name: AddIdentity
+    kind: function
+    signature: func AddIdentity(view logical.SystemView, req *logical.Request, data
+      map[string]any) error
+    file: third_party/openbao/sdk/helper/cel/helpers.go
+  - name: CelGoExtFunctions
+    kind: function
+    signature: func CelGoExtFunctions() []cel.EnvOption
+    file: third_party/openbao/sdk/helper/cel/helpers.go
+  - name: CheckValidEmailFunction
+    kind: function
+    signature: func CheckValidEmailFunction() cel.EnvOption
+    file: third_party/openbao/sdk/helper/cel/helpers.go
+  - name: DecodeJSONFunction
+    kind: function
+    signature: func DecodeJSONFunction() cel.EnvOption
+    file: third_party/openbao/sdk/helper/cel/helpers.go
+  - name: EncodeJSONFunction
+    kind: function
+    signature: func EncodeJSONFunction() cel.EnvOption
+    file: third_party/openbao/sdk/helper/cel/helpers.go
+  - name: EvalConfig
+    kind: struct
+    signature: type EvalConfig
+    file: third_party/openbao/sdk/helper/cel/program.go
+  - name: EvalConfig.ToEnv
+    kind: method
+    signature: func (c *EvalConfig) ToEnv() (*cel.Env, error)
+    file: third_party/openbao/sdk/helper/cel/program.go
+  - name: EvalConfig.ToOptions
+    kind: method
+    signature: func (c *EvalConfig) ToOptions() []cel.EnvOption
+    file: third_party/openbao/sdk/helper/cel/program.go
+  - name: FrameworkFieldSchema
+    kind: function
+    signature: func FrameworkFieldSchema() *framework.FieldSchema
+    file: third_party/openbao/sdk/helper/cel/program.go
+  - name: IdentityDeclarations
+    kind: function
+    signature: func IdentityDeclarations() []cel.EnvOption
+    file: third_party/openbao/sdk/helper/cel/helpers.go
+  - name: JSONProgramFromRequest
+    kind: function
+    signature: func JSONProgramFromRequest(data *framework.FieldData) (*Program, error)
+    file: third_party/openbao/sdk/helper/cel/program.go
+  - name: Program
+    kind: struct
+    signature: type Program
+    file: third_party/openbao/sdk/helper/cel/program.go
+  - name: Program.Evaluate
+    kind: method
+    signature: func (p *Program) Evaluate(ctx context.Context, config *EvalConfig,
+      evalData map[string]any) (ref.Val, error)
+    file: third_party/openbao/sdk/helper/cel/program.go
+  - name: Program.EvaluateVars
+    kind: method
+    signature: func (p *Program) EvaluateVars(ctx context.Context, env *cel.Env, evalData
+      map[string]any) (*cel.Env, error)
+    file: third_party/openbao/sdk/helper/cel/program.go
+  - name: Program.Validate
+    kind: method
+    signature: func (p *Program) Validate(config *EvalConfig) error
+    file: third_party/openbao/sdk/helper/cel/program.go
+  - name: Program.ValidateVars
+    kind: method
+    signature: func (p *Program) ValidateVars(env *cel.Env) (*cel.Env, error)
+    file: third_party/openbao/sdk/helper/cel/program.go
+  - name: Variable
+    kind: struct
+    signature: type Variable
+    file: third_party/openbao/sdk/helper/cel/program.go
+  - name: Variable.Evaluate
+    kind: method
+    signature: func (v *Variable) Evaluate(ctx context.Context, env *cel.Env, evalData
+      map[string]any) (*cel.Env, error)
+    file: third_party/openbao/sdk/helper/cel/program.go
+  - name: Variable.Validate
+    kind: method
+    signature: func (v *Variable) Validate(env *cel.Env) (*cel.Env, error)
+    file: third_party/openbao/sdk/helper/cel/program.go
 codeRefIndex:
 - file:third_party/openbao/sdk/helper/cel/helpers.go helpers.go@third_party/openbao/sdk/helper/cel/helpers.go
 - file:third_party/openbao/sdk/helper/cel/helpers_test.go helpers_test.go@third_party/openbao/sdk/helper/cel/helpers_test.go
@@ -22,209 +228,3 @@ codeRefIndex:
 - struct:5fabc76fc387175cfee71ef415a06024 Variable@third_party/openbao/sdk/helper/cel/program.go:38
 - struct:6a56695d0522bd7f30ba29ae36cc8ac8 Program@third_party/openbao/sdk/helper/cel/program.go:28
 - struct:b8c5f354c902b6956f2b927c9847eaa0 EvalConfig@third_party/openbao/sdk/helper/cel/program.go:57
-kind: SystemContext
-metadata:
-  name: third-party-openbao-sdk-helper-cel
-  namespace: default
-spec:
-  intent: 'This context exists so that CEL (Common Expression Language) expressions
-    inside OpenBao policies and secret engines can be built, validated and evaluated
-    against a consistent environment. It is the SDK-level surface that engine authors
-    call: the helpers add reusable functions and identity variables to a CEL environment,
-    and the program type turns stored expression text plus caller-supplied evaluation
-    data into a single evaluated value. Keeping it at the SDK layer means every consumer
-    of the CEL feature shares the same extension set, the same identity variable names,
-    and the same compile-then-evaluate pipeline instead of each engine re-implementing
-    it.'
-  interfaces:
-  - file: third_party/openbao/sdk/helper/cel/helpers.go
-    kind: function
-    name: AddIdentity
-    signature: func AddIdentity(view logical.SystemView, req *logical.Request, data
-      map[string]any) error
-  - file: third_party/openbao/sdk/helper/cel/helpers.go
-    kind: function
-    name: CelGoExtFunctions
-    signature: func CelGoExtFunctions() []cel.EnvOption
-  - file: third_party/openbao/sdk/helper/cel/helpers.go
-    kind: function
-    name: CheckValidEmailFunction
-    signature: func CheckValidEmailFunction() cel.EnvOption
-  - file: third_party/openbao/sdk/helper/cel/helpers.go
-    kind: function
-    name: DecodeJSONFunction
-    signature: func DecodeJSONFunction() cel.EnvOption
-  - file: third_party/openbao/sdk/helper/cel/helpers.go
-    kind: function
-    name: EncodeJSONFunction
-    signature: func EncodeJSONFunction() cel.EnvOption
-  - file: third_party/openbao/sdk/helper/cel/program.go
-    kind: struct
-    name: EvalConfig
-    signature: type EvalConfig
-  - file: third_party/openbao/sdk/helper/cel/program.go
-    kind: method
-    name: EvalConfig.ToEnv
-    signature: func (c *EvalConfig) ToEnv() (*cel.Env, error)
-  - file: third_party/openbao/sdk/helper/cel/program.go
-    kind: method
-    name: EvalConfig.ToOptions
-    signature: func (c *EvalConfig) ToOptions() []cel.EnvOption
-  - file: third_party/openbao/sdk/helper/cel/program.go
-    kind: function
-    name: FrameworkFieldSchema
-    signature: func FrameworkFieldSchema() *framework.FieldSchema
-  - file: third_party/openbao/sdk/helper/cel/helpers.go
-    kind: function
-    name: IdentityDeclarations
-    signature: func IdentityDeclarations() []cel.EnvOption
-  - file: third_party/openbao/sdk/helper/cel/program.go
-    kind: function
-    name: JSONProgramFromRequest
-    signature: func JSONProgramFromRequest(data *framework.FieldData) (*Program, error)
-  - file: third_party/openbao/sdk/helper/cel/program.go
-    kind: struct
-    name: Program
-    signature: type Program
-  - file: third_party/openbao/sdk/helper/cel/program.go
-    kind: method
-    name: Program.Evaluate
-    signature: func (p *Program) Evaluate(ctx context.Context, config *EvalConfig,
-      evalData map[string]any) (ref.Val, error)
-  - file: third_party/openbao/sdk/helper/cel/program.go
-    kind: method
-    name: Program.EvaluateVars
-    signature: func (p *Program) EvaluateVars(ctx context.Context, env *cel.Env, evalData
-      map[string]any) (*cel.Env, error)
-  - file: third_party/openbao/sdk/helper/cel/program.go
-    kind: method
-    name: Program.Validate
-    signature: func (p *Program) Validate(config *EvalConfig) error
-  - file: third_party/openbao/sdk/helper/cel/program.go
-    kind: method
-    name: Program.ValidateVars
-    signature: func (p *Program) ValidateVars(env *cel.Env) (*cel.Env, error)
-  - file: third_party/openbao/sdk/helper/cel/program.go
-    kind: struct
-    name: Variable
-    signature: type Variable
-  - file: third_party/openbao/sdk/helper/cel/program.go
-    kind: method
-    name: Variable.Evaluate
-    signature: func (v *Variable) Evaluate(ctx context.Context, env *cel.Env, evalData
-      map[string]any) (*cel.Env, error)
-  - file: third_party/openbao/sdk/helper/cel/program.go
-    kind: method
-    name: Variable.Validate
-    signature: func (v *Variable) Validate(env *cel.Env) (*cel.Env, error)
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/cel/helpers.go
-    - function:8e228c24cb7d4873ab46c74eee1bf034
-    id: r.add-identity
-    level: MUST
-    text: AddIdentity must write client_token and entity_id from the logical request
-      into the data map, and when entity_id is non-empty must resolve groups through
-      view.GroupsForEntity and entity info through view.EntityInfo into entity_groups
-      and entity_info, returning an error wrapping the cause as "unable to resolve
-      groups" or "unable to resolve entity info" on failure; when entity_id is empty
-      it must set entity_groups and entity_info to nil and return nil.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/cel/helpers.go
-    - function:87c9bd82e4d2219acc7dbab3eb9d5f53
-    id: r.cel-extension-functions
-    level: MUST
-    text: 'CelGoExtFunctions must return a slice of cel.EnvOption that enables the
-      CEL extension libraries: strings, lists, optional types, regex, math, sets and
-      encoders, appended in that order.'
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/cel/helpers.go
-    - function:217536dc3d8611f03fbd0bdc93a8c780
-    id: r.check-valid-email
-    level: MUST
-    text: CheckValidEmailFunction must register a CEL function named check_valid_email
-      with an overload check_valid_email_string that takes one string argument and
-      returns bool, bound to the internal checkValidEmail implementation.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/cel/program.go
-    - method:506431c8fa963826b50d515c8c677c97
-    - method:9fec7e2ecc4848e6520deaf1f6911923
-    - struct:b8c5f354c902b6956f2b927c9847eaa0
-    id: r.eval-config-environment
-    level: MUST
-    text: EvalConfig.ToOptions must assemble the environment options for the program,
-      including the CEL extension functions, the identity declarations and the check_valid_email
-      function; EvalConfig.ToEnv must turn the config into a compiled *cel.Env, returning
-      an error when the environment cannot be built.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/cel/program.go
-    - function:58f702756fac08f5ba5e092531541b26
-    id: r.framework-field-schema
-    level: MUST
-    text: FrameworkFieldSchema must return the framework.FieldSchema that describes
-      how a CEL program is declared as a field, so engines can accept a program through
-      framework field data.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/cel/helpers_test.go
-    id: r.helper-test-coverage
-    level: SHOULD
-    text: TestCELHelpers in helpers_test.go should exercise the environment options
-      produced by CheckValidEmailFunction and CelGoExtFunctions, so changes to the
-      extension set or the email function are caught by the package tests.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/cel/helpers.go
-    - function:97fd18ecd0deba8e960b5448c9634251
-    id: r.identity-declarations
-    level: MUST
-    text: 'IdentityDeclarations must declare four CEL variables for the identity subsystem:
-      client_token as dyn, entity_id as string, entity_groups as a list of dyn, and
-      entity_info as a map from string to dyn.'
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/cel/helpers.go
-    - function:a15efeda210e88bf6a901b97ae33b5d7
-    - function:ae4893d22b69a3a9d4196b3a6c02495f
-    id: r.json-functions
-    level: MUST
-    text: EncodeJSONFunction must register a CEL function named encode_json and DecodeJSONFunction
-      must register one named decode_json, each with a single-string overload that
-      returns dyn through its unary binding.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/cel/program.go
-    - function:950d1b6de5662233c5a63816d5b62a2e
-    id: r.json-program-from-request
-    level: MUST
-    text: JSONProgramFromRequest must build a *Program from framework.FieldData, returning
-      an error when the field data cannot be read into a program.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/cel/program.go
-    - method:3c4b9a623c352969ba180f77da6d359e
-    - method:7c8435f0735ddb61e1c7cd45db47f88b
-    - struct:6a56695d0522bd7f30ba29ae36cc8ac8
-    id: r.program-evaluate
-    level: MUST
-    text: Program.Evaluate must evaluate the program under the given context and EvalConfig
-      with the supplied evaluation data and return the resulting ref.Val, first evaluating
-      the program's variables so that computed variables are added to the evaluation
-      data.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/cel/program.go
-    - method:39a89e07c0007d44ab33d00d86a16aa7
-    - method:b545eff1ac521ba68f9512e2203d4e8b
-    - method:cf1b8b5a35d9e0d7b5e7471fd17171ba
-    id: r.program-validate
-    level: MUST
-    text: Program.Validate must check the program against the environment produced
-      from the given EvalConfig and report an error when the expressions do not compile;
-      Program.ValidateVars and Variable.Validate must perform the same check for the
-      program's variables, returning the environment that carries them.
-  - codeRefs:
-    - file:third_party/openbao/sdk/helper/cel/program.go
-    - method:569442811997bf2ff6bd8e0f200bfd77
-    - struct:5fabc76fc387175cfee71ef415a06024
-    id: r.variable-evaluate
-    level: MUST
-    text: Variable.Evaluate must evaluate one variable's expression against the environment
-      and evaluation data and return the environment carrying the variable's result,
-      so that later expressions can reference it.
-  upstream: self

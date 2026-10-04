@@ -1,14 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/ui/app/adapters/auth-config/aws/client.js client.js@third_party/openbao/ui/app/adapters/auth-config/aws/client.js
-- file:third_party/openbao/ui/app/adapters/auth-config/aws/identity-accesslist.js
-  identity-accesslist.js@third_party/openbao/ui/app/adapters/auth-config/aws/identity-accesslist.js
-- file:third_party/openbao/ui/app/adapters/auth-config/aws/roletag-denylist.js roletag-denylist.js@third_party/openbao/ui/app/adapters/auth-config/aws/roletag-denylist.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-app-adapters-auth-config-aws
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: The context exists so that the AWS auth-config sub-resources in the OpenBao
     UI resolve to separate Ember Data adapter classes while sharing one implementation.
     Each of client, identity-accesslist, and roletag-denylist needs its own module
@@ -18,45 +15,40 @@ spec:
     that these files are pure aliases, which tells a reader that any change to AWS
     config request behavior belongs in the base adapter rather than in these three
     modules.
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/ui/app/adapters/auth-config/aws/client.js
-    id: r.aws-client-adapter-extends-shared-base
+  - id: r.aws-client-adapter-extends-shared-base
     level: MUST
     text: The aws/client.js adapter module MUST import the shared AuthConfig adapter
       from ../_base and export its extend() result unchanged, so the AWS client auth-config
       model resolves to an adapter with no behavior of its own.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/adapters/auth-config/aws/identity-accesslist.js
-    id: r.aws-identity-accesslist-adapter-extends-shared-base
+    codeRefs:
+    - file:third_party/openbao/ui/app/adapters/auth-config/aws/client.js
+  - id: r.aws-identity-accesslist-adapter-extends-shared-base
     level: MUST
     text: The aws/identity-accesslist.js adapter module MUST import the shared AuthConfig
       adapter from ../_base and export its extend() result unchanged, so the identity
       accesslist model resolves to its own adapter class that inherits the base URL
       and record handling.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/adapters/auth-config/aws/roletag-denylist.js
-    id: r.aws-roletag-denylist-adapter-extends-shared-base
+    codeRefs:
+    - file:third_party/openbao/ui/app/adapters/auth-config/aws/identity-accesslist.js
+  - id: r.aws-roletag-denylist-adapter-extends-shared-base
     level: MUST
     text: The aws/roletag-denylist.js adapter module MUST import the shared AuthConfig
       adapter from ../_base and export its extend() result unchanged, so the role
       tag denylist model resolves to its own adapter class that inherits the base
       URL and record handling.
-  - codeRefs:
-    - file:third_party/openbao/ui/app/adapters/auth-config/aws/client.js
-    - file:third_party/openbao/ui/app/adapters/auth-config/aws/identity-accesslist.js
+    codeRefs:
     - file:third_party/openbao/ui/app/adapters/auth-config/aws/roletag-denylist.js
-    id: r.license-header-preserved
+  - id: r.license-header-preserved
     level: MUST
     text: Each of the three AWS adapter files MUST keep the HashiCorp copyright line
       and the MPL-2.0 SPDX identifier at the top of the file, since the files are
       vendored from the upstream OpenBao UI tree.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/ui/app/adapters/auth-config/aws/client.js
     - file:third_party/openbao/ui/app/adapters/auth-config/aws/identity-accesslist.js
     - file:third_party/openbao/ui/app/adapters/auth-config/aws/roletag-denylist.js
-    id: r.shared-auth-config-semantics-not-duplicated
+  - id: r.shared-auth-config-semantics-not-duplicated
     level: SHOULD
     text: 'The three AWS adapters SHOULD stay free of overrides, so that the inherited
       behavior stays defined once in the base adapter for all AWS auth-config sub-resources:
@@ -64,4 +56,12 @@ spec:
       rewritten to tidy/<type>, a URL of /v1/auth/<backendId>/config plus the type
       segment when the model name includes aws, and createRecord/updateRecord that
       resolve with the owning backend id.'
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/ui/app/adapters/auth-config/aws/client.js
+    - file:third_party/openbao/ui/app/adapters/auth-config/aws/identity-accesslist.js
+    - file:third_party/openbao/ui/app/adapters/auth-config/aws/roletag-denylist.js
+codeRefIndex:
+- file:third_party/openbao/ui/app/adapters/auth-config/aws/client.js client.js@third_party/openbao/ui/app/adapters/auth-config/aws/client.js
+- file:third_party/openbao/ui/app/adapters/auth-config/aws/identity-accesslist.js
+  identity-accesslist.js@third_party/openbao/ui/app/adapters/auth-config/aws/identity-accesslist.js
+- file:third_party/openbao/ui/app/adapters/auth-config/aws/roletag-denylist.js roletag-denylist.js@third_party/openbao/ui/app/adapters/auth-config/aws/roletag-denylist.js

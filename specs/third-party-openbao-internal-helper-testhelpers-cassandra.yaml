@@ -1,4 +1,128 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-internal-helper-testhelpers-cassandra
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: 'Test code elsewhere in the OpenBao tree needs a real Cassandra instance
+    to run against, without hand-writing container plumbing at each call site. This
+    package exists to make that a two-line affair: call PrepareTestContainer with
+    a handful of ContainerOpt values, get back a Host for dialing and a function to
+    tear the container down. The option type keeps the container configuration extensible,
+    so a test can override the container name, image, version, environment, copied-in
+    files or TLS settings without the helper growing a wide parameter list.'
+  requirements:
+  - id: r.container-name-option
+    level: MUST
+    text: ContainerName returns a ContainerOpt that stores the given name into the
+      config's containerName field, letting a test choose the container's name instead
+      of the default.
+    codeRefs:
+    - function:40f2da8de98527bf8c5d4d2b06f7d8f8
+  - id: r.container-opt-mutates-config
+    level: MUST
+    text: ContainerOpt is a function type that takes the unexported *containerConfig
+      and mutates it in place. Every option constructor returns a ContainerOpt closure
+      rather than applying a change immediately, so options compose and the caller
+      controls when the config is built.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/testhelpers/cassandra/cassandrahelper.go
+    - type_alias:1cd08c234bd12bc84a1d75ad3362361c
+  - id: r.copy-from-to-option
+    level: MUST
+    text: CopyFromTo returns a ContainerOpt that records a map of source-to-destination
+      paths, describing files to copy into the container before the test runs.
+    codeRefs:
+    - function:fc3150b1861d24d52432db0ab4ba5962
+  - id: r.env-option
+    level: MUST
+    text: Env returns a ContainerOpt that adds the given key/value string to the config's
+      environment, so a test can pass environment variables to the Cassandra process
+      inside the container.
+    codeRefs:
+    - function:2b630857476af42dc596b46a36261999
+  - id: r.host-connection-url
+    level: MUST
+    text: Host is the value a test receives for the running container, and Host.ConnectionURL
+      returns the connection string built from that host, so a caller can dial Cassandra
+      without assembling the address itself.
+    codeRefs:
+    - method:fb7dc8f908b8113434214c44b2cb071b
+    - struct:839588e21b06749bbdac09175ae9e408
+  - id: r.image-option-resets-env
+    level: MUST
+    text: Image returns a ContainerOpt that sets both the image name and the version,
+      and additionally sets the config's env to nil. The reset is required because
+      the default environment is unlikely to apply to a non-default Cassandra image,
+      so a stale environment must not survive an image override.
+    codeRefs:
+    - function:fdc25797e7d95b511da2b4d4b581fa0a
+  - id: r.prepare-test-container
+    level: MUST
+    text: PrepareTestContainer takes a *testing.T and any number of ContainerOpt values,
+      applies them, starts the Cassandra container, and returns both a Host for connecting
+      and a func() the caller invokes to tear the container down. Passing the *testing.T
+      binds the container's lifecycle to the test.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/testhelpers/cassandra/cassandrahelper.go
+    - function:98a2033d4ddcaed92d4946a66bce091a
+  - id: r.ssl-opts-option
+    level: MUST
+    text: SslOpts returns a ContainerOpt that stores a *gocql.SslOptions into the
+      config's sslOpts field, carrying the TLS settings the client uses when connecting
+      to the container.
+    codeRefs:
+    - function:9b0701d28874b705d4abd59c29ed3284
+  - id: r.version-option
+    level: MUST
+    text: Version returns a ContainerOpt that stores the given version string into
+      the config's version field, selecting which Cassandra build the container runs.
+    codeRefs:
+    - function:ba9a876f597ac2a05049ac3c71d19bf6
+  interfaces:
+  - name: ContainerName
+    kind: function
+    signature: func ContainerName(name string) ContainerOpt
+    file: third_party/openbao/internal/helper/testhelpers/cassandra/cassandrahelper.go
+  - name: ContainerOpt
+    kind: type_alias
+    signature: type ContainerOpt func(*containerConfig)
+    file: third_party/openbao/internal/helper/testhelpers/cassandra/cassandrahelper.go
+  - name: CopyFromTo
+    kind: function
+    signature: func CopyFromTo(copyFromTo map[string]string) ContainerOpt
+    file: third_party/openbao/internal/helper/testhelpers/cassandra/cassandrahelper.go
+  - name: Env
+    kind: function
+    signature: func Env(keyValue string) ContainerOpt
+    file: third_party/openbao/internal/helper/testhelpers/cassandra/cassandrahelper.go
+  - name: Host
+    kind: struct
+    signature: type Host struct
+    file: third_party/openbao/internal/helper/testhelpers/cassandra/cassandrahelper.go
+  - name: Host.ConnectionURL
+    kind: method
+    signature: func (h Host) ConnectionURL() string
+    file: third_party/openbao/internal/helper/testhelpers/cassandra/cassandrahelper.go
+  - name: Image
+    kind: function
+    signature: func Image(imageName string, version string) ContainerOpt
+    file: third_party/openbao/internal/helper/testhelpers/cassandra/cassandrahelper.go
+  - name: PrepareTestContainer
+    kind: function
+    signature: func PrepareTestContainer(t *testing.T, opts ...ContainerOpt) (Host,
+      func())
+    file: third_party/openbao/internal/helper/testhelpers/cassandra/cassandrahelper.go
+  - name: SslOpts
+    kind: function
+    signature: func SslOpts(sslOpts *gocql.SslOptions) ContainerOpt
+    file: third_party/openbao/internal/helper/testhelpers/cassandra/cassandrahelper.go
+  - name: Version
+    kind: function
+    signature: func Version(version string) ContainerOpt
+    file: third_party/openbao/internal/helper/testhelpers/cassandra/cassandrahelper.go
 codeRefIndex:
 - file:third_party/openbao/internal/helper/testhelpers/cassandra/cassandrahelper.go
   cassandrahelper.go@third_party/openbao/internal/helper/testhelpers/cassandra/cassandrahelper.go
@@ -12,127 +136,3 @@ codeRefIndex:
 - method:fb7dc8f908b8113434214c44b2cb071b Host.ConnectionURL@third_party/openbao/internal/helper/testhelpers/cassandra/cassandrahelper.go:77
 - struct:839588e21b06749bbdac09175ae9e408 Host@third_party/openbao/internal/helper/testhelpers/cassandra/cassandrahelper.go:72
 - type_alias:1cd08c234bd12bc84a1d75ad3362361c ContainerOpt@third_party/openbao/internal/helper/testhelpers/cassandra/cassandrahelper.go:29
-kind: SystemContext
-metadata:
-  name: third-party-openbao-internal-helper-testhelpers-cassandra
-  namespace: default
-spec:
-  intent: 'Test code elsewhere in the OpenBao tree needs a real Cassandra instance
-    to run against, without hand-writing container plumbing at each call site. This
-    package exists to make that a two-line affair: call PrepareTestContainer with
-    a handful of ContainerOpt values, get back a Host for dialing and a function to
-    tear the container down. The option type keeps the container configuration extensible,
-    so a test can override the container name, image, version, environment, copied-in
-    files or TLS settings without the helper growing a wide parameter list.'
-  interfaces:
-  - file: third_party/openbao/internal/helper/testhelpers/cassandra/cassandrahelper.go
-    kind: function
-    name: ContainerName
-    signature: func ContainerName(name string) ContainerOpt
-  - file: third_party/openbao/internal/helper/testhelpers/cassandra/cassandrahelper.go
-    kind: type_alias
-    name: ContainerOpt
-    signature: type ContainerOpt func(*containerConfig)
-  - file: third_party/openbao/internal/helper/testhelpers/cassandra/cassandrahelper.go
-    kind: function
-    name: CopyFromTo
-    signature: func CopyFromTo(copyFromTo map[string]string) ContainerOpt
-  - file: third_party/openbao/internal/helper/testhelpers/cassandra/cassandrahelper.go
-    kind: function
-    name: Env
-    signature: func Env(keyValue string) ContainerOpt
-  - file: third_party/openbao/internal/helper/testhelpers/cassandra/cassandrahelper.go
-    kind: struct
-    name: Host
-    signature: type Host struct
-  - file: third_party/openbao/internal/helper/testhelpers/cassandra/cassandrahelper.go
-    kind: method
-    name: Host.ConnectionURL
-    signature: func (h Host) ConnectionURL() string
-  - file: third_party/openbao/internal/helper/testhelpers/cassandra/cassandrahelper.go
-    kind: function
-    name: Image
-    signature: func Image(imageName string, version string) ContainerOpt
-  - file: third_party/openbao/internal/helper/testhelpers/cassandra/cassandrahelper.go
-    kind: function
-    name: PrepareTestContainer
-    signature: func PrepareTestContainer(t *testing.T, opts ...ContainerOpt) (Host,
-      func())
-  - file: third_party/openbao/internal/helper/testhelpers/cassandra/cassandrahelper.go
-    kind: function
-    name: SslOpts
-    signature: func SslOpts(sslOpts *gocql.SslOptions) ContainerOpt
-  - file: third_party/openbao/internal/helper/testhelpers/cassandra/cassandrahelper.go
-    kind: function
-    name: Version
-    signature: func Version(version string) ContainerOpt
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - function:40f2da8de98527bf8c5d4d2b06f7d8f8
-    id: r.container-name-option
-    level: MUST
-    text: ContainerName returns a ContainerOpt that stores the given name into the
-      config's containerName field, letting a test choose the container's name instead
-      of the default.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/testhelpers/cassandra/cassandrahelper.go
-    - type_alias:1cd08c234bd12bc84a1d75ad3362361c
-    id: r.container-opt-mutates-config
-    level: MUST
-    text: ContainerOpt is a function type that takes the unexported *containerConfig
-      and mutates it in place. Every option constructor returns a ContainerOpt closure
-      rather than applying a change immediately, so options compose and the caller
-      controls when the config is built.
-  - codeRefs:
-    - function:fc3150b1861d24d52432db0ab4ba5962
-    id: r.copy-from-to-option
-    level: MUST
-    text: CopyFromTo returns a ContainerOpt that records a map of source-to-destination
-      paths, describing files to copy into the container before the test runs.
-  - codeRefs:
-    - function:2b630857476af42dc596b46a36261999
-    id: r.env-option
-    level: MUST
-    text: Env returns a ContainerOpt that adds the given key/value string to the config's
-      environment, so a test can pass environment variables to the Cassandra process
-      inside the container.
-  - codeRefs:
-    - method:fb7dc8f908b8113434214c44b2cb071b
-    - struct:839588e21b06749bbdac09175ae9e408
-    id: r.host-connection-url
-    level: MUST
-    text: Host is the value a test receives for the running container, and Host.ConnectionURL
-      returns the connection string built from that host, so a caller can dial Cassandra
-      without assembling the address itself.
-  - codeRefs:
-    - function:fdc25797e7d95b511da2b4d4b581fa0a
-    id: r.image-option-resets-env
-    level: MUST
-    text: Image returns a ContainerOpt that sets both the image name and the version,
-      and additionally sets the config's env to nil. The reset is required because
-      the default environment is unlikely to apply to a non-default Cassandra image,
-      so a stale environment must not survive an image override.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/testhelpers/cassandra/cassandrahelper.go
-    - function:98a2033d4ddcaed92d4946a66bce091a
-    id: r.prepare-test-container
-    level: MUST
-    text: PrepareTestContainer takes a *testing.T and any number of ContainerOpt values,
-      applies them, starts the Cassandra container, and returns both a Host for connecting
-      and a func() the caller invokes to tear the container down. Passing the *testing.T
-      binds the container's lifecycle to the test.
-  - codeRefs:
-    - function:9b0701d28874b705d4abd59c29ed3284
-    id: r.ssl-opts-option
-    level: MUST
-    text: SslOpts returns a ContainerOpt that stores a *gocql.SslOptions into the
-      config's sslOpts field, carrying the TLS settings the client uses when connecting
-      to the container.
-  - codeRefs:
-    - function:ba9a876f597ac2a05049ac3c71d19bf6
-    id: r.version-option
-    level: MUST
-    text: Version returns a ContainerOpt that stores the given version string into
-      the config's version field, selecting which Cassandra build the container runs.
-  upstream: self

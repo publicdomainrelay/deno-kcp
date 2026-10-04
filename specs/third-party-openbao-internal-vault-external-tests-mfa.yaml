@@ -1,11 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:third_party/openbao/internal/vault/external_tests/mfa/login_mfa_test.go login_mfa_test.go@third_party/openbao/internal/vault/external_tests/mfa/login_mfa_test.go
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-vault-external-tests-mfa
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'The context exists to pin down the observable contract of the identity
     MFA API as exercised from outside the core: which provider types accept which
     config fields, that a method id is stable across re-writes of the same name, that
@@ -15,34 +15,31 @@ spec:
     identity_group_ids or identity_entity_ids, and that deleted entries stay deleted
     across seal and unseal. It is a black-box regression gate for the MFA subsystem,
     not production code.'
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - file:third_party/openbao/internal/vault/external_tests/mfa/login_mfa_test.go
-    id: r.cluster-harness-per-test
+  - id: r.cluster-harness-per-test
     level: MUST
     text: Every test must build its cluster with vault.NewTestCluster using vaulthttp.Handler
       as the TestClusterOptions HandlerFunc, wait for the core to become active, clean
       the cluster on exit, and where a credential backend is needed register the userpass
       factory and enable auth at the userpass path before using its mount accessor.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/mfa/login_mfa_test.go
-    id: r.global-list-completeness
+  - id: r.global-list-completeness
     level: MUST
     text: Listing identity/mfa/method globally must return a non-nil response whose
       keys entry and whose key_info map each contain exactly as many entries as the
       number of method configs created.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/mfa/login_mfa_test.go
-    id: r.global-method-read-and-delete
+  - id: r.global-method-read-and-delete
     level: MUST
     text: Reading identity/mfa/method/<method_id> without a provider type must return
       the method with its matching id, deleting an invalid path must fail, and after
       a successful delete on the id-bearing path a read must yield a nil response
       with a nil error (the 404 translation).
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/mfa/login_mfa_test.go
-    id: r.login-enforcement-crud
+  - id: r.login-enforcement-crud
     level: MUST
     text: Writing a login enforcement to identity/mfa/login-enforcement/<name> must
       persist mfa_method_ids and auth_method_accessors such that a read returns equivalent
@@ -50,23 +47,23 @@ spec:
       a later write adding identity_group_ids and identity_entity_ids must be readable
       back as equivalent slices, and after delete the read must return nil response
       with nil error both immediately and after sealing and unsealing the cluster.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/mfa/login_mfa_test.go
-    id: r.login-enforcement-requires-method-ids
+  - id: r.login-enforcement-requires-method-ids
     level: MUST
     text: Writing an empty login enforcement config must fail with an error whose
       text contains "missing method ids".
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/mfa/login_mfa_test.go
-    id: r.login-enforcement-requires-one-scope
+  - id: r.login-enforcement-requires-one-scope
     level: MUST
     text: Writing a login enforcement with mfa_method_ids but none of auth_method_accessors,
       auth_method_types, identity_group_ids or identity_entity_ids must fail with
       an error whose text contains "One of auth_method_accessors, auth_method_types,
       identity_group_ids, identity_entity_ids must be specified".
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/mfa/login_mfa_test.go
-    id: r.method-crud-round-trip
+  - id: r.method-crud-round-trip
     level: MUST
     text: For each of the totp, duo, okta and pingid providers, writing a config to
       identity/mfa/method/<type> must return a non-empty method_id; reading identity/mfa/method/<type>/<method_id>
@@ -74,19 +71,22 @@ spec:
       listing identity/mfa/method/<type> must include that method id in keys; an update
       through the same id-bearing path must be visible on the next read; and reading
       the id through a different provider type path must fail.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/mfa/login_mfa_test.go
-    id: r.method-name-uniqueness
+  - id: r.method-name-uniqueness
     level: MUST
     text: Writing a method config that carries method_name must return a method_id,
       and re-writing the same method_name must return the same method_id; writing
       a second config with a new name must succeed; updating an existing method to
       take another method's name must fail; and a method_name that contains a slash
       such as "ns1/<original>" must be accepted.
-  - codeRefs:
+    codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/mfa/login_mfa_test.go
-    id: r.update-nonexistent-config-is-404
+  - id: r.update-nonexistent-config-is-404
     level: MUST
     text: 'Writing a totp config to identity/mfa/method/totp/<id> for a method id
       that does not exist must fail with an error whose text contains "Code: 404".'
-  upstream: self
+    codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/mfa/login_mfa_test.go
+codeRefIndex:
+- file:third_party/openbao/internal/vault/external_tests/mfa/login_mfa_test.go login_mfa_test.go@third_party/openbao/internal/vault/external_tests/mfa/login_mfa_test.go

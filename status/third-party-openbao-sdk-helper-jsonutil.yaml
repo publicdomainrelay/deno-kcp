@@ -1,47 +1,47 @@
+syncedCommit: 89cee50ec5aea977a42f904a758e506729e1158e
+syncedFingerprint: 2a3a57ed389c7ca49b39bfc6852879d4473143b2ae9226f50b978523c7c99dd0
+realizedSpecHash: 5f790b4e5e15bf719f2ab15669ae024bbd4a437cfb1c2d2f1f2df65a91d69809
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
+- type: CodeSynced
+  status: "True"
   reason: InterfacesObserved
-  status: "True"
-  type: CodeSynced
-- message: observed facts match the synced fingerprint
-  reason: FingerprintEqual
+  message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+- type: Drifted
   status: "False"
-  type: Drifted
-- message: the spec passes the validator
-  reason: ValidatorPassed
+  reason: FingerprintEqual
+  message: observed facts match the synced fingerprint
+- type: SpecValid
   status: "True"
-  type: SpecValid
+  reason: ValidatorPassed
+  message: the spec passes the validator
 observed:
   files:
   - third_party/openbao/sdk/helper/jsonutil/json.go
   - third_party/openbao/sdk/helper/jsonutil/json_test.go
-  fingerprint: 2a3a57ed389c7ca49b39bfc6852879d4473143b2ae9226f50b978523c7c99dd0
   interfaces:
-  - codegraphId: function:182e13ed382d22eedd3d9a5a1a2a4585
-    file: third_party/openbao/sdk/helper/jsonutil/json.go
+  - name: EncodeJSON
     kind: function
-    line: 18
-    name: EncodeJSON
     signature: (in any) ([]byte, error)
-  - codegraphId: function:f8402c5f985190e386f7283f906c2157
     file: third_party/openbao/sdk/helper/jsonutil/json.go
+    line: 18
+    codegraphId: function:182e13ed382d22eedd3d9a5a1a2a4585
+  - name: EncodeJSONAndCompress
     kind: function
-    line: 34
-    name: EncodeJSONAndCompress
     signature: (in any, config *compressutil.CompressionConfig) ([]byte, error)
-  - codegraphId: function:186d1ab83658f923b0f4e72c1353748e
     file: third_party/openbao/sdk/helper/jsonutil/json.go
+    line: 34
+    codegraphId: function:f8402c5f985190e386f7283f906c2157
+  - name: DecodeJSON
     kind: function
-    line: 60
-    name: DecodeJSON
     signature: (data []byte, out any) error
-  - codegraphId: function:508dfa21a4c58aba9d9ec2ee8d9f996a
     file: third_party/openbao/sdk/helper/jsonutil/json.go
+    line: 60
+    codegraphId: function:186d1ab83658f923b0f4e72c1353748e
+  - name: DecodeJSONFromReader
     kind: function
-    line: 88
-    name: DecodeJSONFromReader
     signature: (r io.Reader, out any) error
-realizedSpecHash: 5f790b4e5e15bf719f2ab15669ae024bbd4a437cfb1c2d2f1f2df65a91d69809
-syncedCommit: 89cee50ec5aea977a42f904a758e506729e1158e
-syncedFingerprint: 2a3a57ed389c7ca49b39bfc6852879d4473143b2ae9226f50b978523c7c99dd0
+    file: third_party/openbao/sdk/helper/jsonutil/json.go
+    line: 88
+    codegraphId: function:508dfa21a4c58aba9d9ec2ee8d9f996a
+  fingerprint: 2a3a57ed389c7ca49b39bfc6852879d4473143b2ae9226f50b978523c7c99dd0

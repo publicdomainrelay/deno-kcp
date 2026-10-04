@@ -1,17 +1,98 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- file:internal/baoembed/cmd/baoembed/main.go main.go@internal/baoembed/cmd/baoembed/main.go
 kind: SystemContext
 metadata:
   name: internal-baoembed-cmd-baoembed
   namespace: default
 spec:
-  arch:
-    code:
+  repository: deno-kcp
+  upstream: up.openbao
+  overlay:
+  - ov.baopki
+  orchestrator: orch.baoembed
+  intent: 'This context exists to give the repository''s integration tests and developers
+    a runnable OpenBao server without an external install. The `test/integration`
+    helpers build this package (see `baoembedBinary`, which runs `go build -o bin
+    ./cmd/baoembed` with its working directory at `internal/baoembed`) and start it
+    with `startProcess`, which launches the binary with stdout and stderr redirected
+    into a log file and a new process group. Because the tests need to know when the
+    server is up and, under TLS, which CA to trust, the command''s contract is its
+    readiness line: everything here is shaped around emitting `BAOEMBED <url>` (with
+    the CA path when TLS is on) only after the embedded server accepts connections,
+    and around accepting its configuration from flags with environment fallbacks so
+    a test can drive it either way.'
+  requirements:
+  - id: r.flag-env-fallbacks
+    level: MUST
+    text: 'Each configuration value is taken from a flag that falls back to an environment
+      variable: `-addr` from `BAOEMBED_ADDR` defaulting to `127.0.0.1:8200`, `-root-token`
+      from `BAOEMBED_ROOT_TOKEN` defaulting to `root`, `-tls` from `BAOEMBED_TLS`
+      being `1`, and `-tls-dir` from `BAOEMBED_TLS_DIR` defaulting to empty.'
+    codeRefs:
     - file:internal/baoembed/cmd/baoembed/main.go
-    form: list
+  - id: r.poll-until-server-answers
+    level: MUST
+    text: The command polls the server address on a fixed interval rather than trusting
+      an address the server reports, and only emits the readiness line once the embedded
+      server accepts connections.
+    codeRefs:
+    - file:internal/baoembed/cmd/baoembed/main.go
+  - id: r.readiness-line-prefix
+    level: MUST
+    text: The command signals readiness by printing a line that begins with the constant
+      `readyPrefix`, whose value is "BAOEMBED ".
+    codeRefs:
+    - file:internal/baoembed/cmd/baoembed/main.go
+  - id: r.root-token-export
+    level: MUST
+    text: 'The command sets the environment variable `BAO_DEV_ROOT_TOKEN_ID` to the
+      configured root token before starting the embedded server; if `os.Setenv` fails
+      it writes `baoembed: setting the root token: %v` to stderr and exits with status
+      1.'
+    codeRefs:
+    - file:internal/baoembed/cmd/baoembed/main.go
+  - id: r.serve-before-ready
+    level: MUST
+    text: The command is a `main` package entry point invoked as `main`, so it starts
+      the embedded OpenBao development server on the configured address and holds
+      it running rather than returning.
+    codeRefs:
+    - file:internal/baoembed/cmd/baoembed/main.go
+  - id: r.test-build-and-start
+    level: SHOULD
+    text: Integration tests build this command once (cached behind a `sync.Once`)
+      by running `go build -o bin ./cmd/baoembed` with its working directory set to
+      `internal/baoembed`, and gate the run on `livegate.Require` when the build fails.
+    codeRefs:
+    - file:internal/baoembed/cmd/baoembed/main.go
+  - id: r.tls-ca-path-in-ready-line
+    level: MUST
+    text: In TLS mode the command serves `https` and the readiness line reports the
+      generated CA certificate path, formed by joining the TLS directory with `devTLSCAFile`;
+      without TLS the scheme is `http` and no CA path is reported.
+    codeRefs:
+    - file:internal/baoembed/cmd/baoembed/main.go
+  - id: r.tls-mode-cert-directory
+    level: MUST
+    text: 'In TLS mode the command uses the given TLS directory, or creates a fresh
+      temporary directory when none is given, then calls `os.MkdirAll` with mode `0o700`
+      because OpenBao refuses a certificate directory that does not exist; a failure
+      writes `baoembed: making the certificate directory %s: %v` to stderr and exits
+      with status 1.'
+    codeRefs:
+    - file:internal/baoembed/cmd/baoembed/main.go
+  arch:
     id: sc.openbao-embedded
     kind: node
+    section: system_contexts
+    form: list
+    parent: sc.test.integration-cluster
+    slot: overlay[3]
+    upstream: up.openbao
+    overlay:
+    - ov.baopki
+    orchestrator: orch.baoembed
+    code:
+    - file:internal/baoembed/cmd/baoembed/main.go
     node:
       code:
         driver: internal/baoembed/cmd/baoembed/main.go:readyPrefix
@@ -28,86 +109,5 @@ spec:
       - sc.example.openbao
       upstream: up.openbao
       use: live_tests
-    orchestrator: orch.baoembed
-    overlay:
-    - ov.baopki
-    parent: sc.test.integration-cluster
-    section: system_contexts
-    slot: overlay[3]
-    upstream: up.openbao
-  intent: 'This context exists to give the repository''s integration tests and developers
-    a runnable OpenBao server without an external install. The `test/integration`
-    helpers build this package (see `baoembedBinary`, which runs `go build -o bin
-    ./cmd/baoembed` with its working directory at `internal/baoembed`) and start it
-    with `startProcess`, which launches the binary with stdout and stderr redirected
-    into a log file and a new process group. Because the tests need to know when the
-    server is up and, under TLS, which CA to trust, the command''s contract is its
-    readiness line: everything here is shaped around emitting `BAOEMBED <url>` (with
-    the CA path when TLS is on) only after the embedded server accepts connections,
-    and around accepting its configuration from flags with environment fallbacks so
-    a test can drive it either way.'
-  orchestrator: orch.baoembed
-  overlay:
-  - ov.baopki
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - file:internal/baoembed/cmd/baoembed/main.go
-    id: r.flag-env-fallbacks
-    level: MUST
-    text: 'Each configuration value is taken from a flag that falls back to an environment
-      variable: `-addr` from `BAOEMBED_ADDR` defaulting to `127.0.0.1:8200`, `-root-token`
-      from `BAOEMBED_ROOT_TOKEN` defaulting to `root`, `-tls` from `BAOEMBED_TLS`
-      being `1`, and `-tls-dir` from `BAOEMBED_TLS_DIR` defaulting to empty.'
-  - codeRefs:
-    - file:internal/baoembed/cmd/baoembed/main.go
-    id: r.poll-until-server-answers
-    level: MUST
-    text: The command polls the server address on a fixed interval rather than trusting
-      an address the server reports, and only emits the readiness line once the embedded
-      server accepts connections.
-  - codeRefs:
-    - file:internal/baoembed/cmd/baoembed/main.go
-    id: r.readiness-line-prefix
-    level: MUST
-    text: The command signals readiness by printing a line that begins with the constant
-      `readyPrefix`, whose value is "BAOEMBED ".
-  - codeRefs:
-    - file:internal/baoembed/cmd/baoembed/main.go
-    id: r.root-token-export
-    level: MUST
-    text: 'The command sets the environment variable `BAO_DEV_ROOT_TOKEN_ID` to the
-      configured root token before starting the embedded server; if `os.Setenv` fails
-      it writes `baoembed: setting the root token: %v` to stderr and exits with status
-      1.'
-  - codeRefs:
-    - file:internal/baoembed/cmd/baoembed/main.go
-    id: r.serve-before-ready
-    level: MUST
-    text: The command is a `main` package entry point invoked as `main`, so it starts
-      the embedded OpenBao development server on the configured address and holds
-      it running rather than returning.
-  - codeRefs:
-    - file:internal/baoembed/cmd/baoembed/main.go
-    id: r.test-build-and-start
-    level: SHOULD
-    text: Integration tests build this command once (cached behind a `sync.Once`)
-      by running `go build -o bin ./cmd/baoembed` with its working directory set to
-      `internal/baoembed`, and gate the run on `livegate.Require` when the build fails.
-  - codeRefs:
-    - file:internal/baoembed/cmd/baoembed/main.go
-    id: r.tls-ca-path-in-ready-line
-    level: MUST
-    text: In TLS mode the command serves `https` and the readiness line reports the
-      generated CA certificate path, formed by joining the TLS directory with `devTLSCAFile`;
-      without TLS the scheme is `http` and no CA path is reported.
-  - codeRefs:
-    - file:internal/baoembed/cmd/baoembed/main.go
-    id: r.tls-mode-cert-directory
-    level: MUST
-    text: 'In TLS mode the command uses the given TLS directory, or creates a fresh
-      temporary directory when none is given, then calls `os.MkdirAll` with mode `0o700`
-      because OpenBao refuses a certificate directory that does not exist; a failure
-      writes `baoembed: making the certificate directory %s: %v` to stderr and exits
-      with status 1.'
-  upstream: up.openbao
+codeRefIndex:
+- file:internal/baoembed/cmd/baoembed/main.go main.go@internal/baoembed/cmd/baoembed/main.go

@@ -1,13 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- class:fb0235e29ebf4a2474c3616b1c9d07cd OidcProviderController@third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/providers/provider.js:10
-- file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/providers/provider.js
-  provider.js@third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/providers/provider.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-providers
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: 'This context exists to pin down the behavior of the OIDC provider route
     controller inside the OpenBao UI so that the edit-route detection and header-visibility
     contract are specified rather than inferred. It records that route state is derived
@@ -15,44 +13,46 @@ spec:
     and that the header is shown only outside the edit route. Anyone porting, refactoring,
     or testing the OIDC providers UI needs this contract: the controller holds no
     other state and computes no other derived value.'
-  interfaces:
-  - file: third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/providers/provider.js
-    kind: class
-    name: OidcProviderController
-    signature: export default class OidcProviderController extends Controller
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - class:fb0235e29ebf4a2474c3616b1c9d07cd
-    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/providers/provider.js
-    id: r.constructor-subscribes-route-change
+  - id: r.constructor-subscribes-route-change
     level: MUST
     text: The constructor must call super with the forwarded arguments and register
       a handler on the router's routeDidChange event that destructures targetName
       and assigns isEditRoute the value true when targetName includes the substring
       'edit', and false when it does not.
-  - codeRefs:
+    codeRefs:
     - class:fb0235e29ebf4a2474c3616b1c9d07cd
     - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/providers/provider.js
-    id: r.module-default-export
+  - id: r.module-default-export
     level: MUST
     text: The file third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/providers/provider.js
       must define OidcProviderController as an Ember Controller subclass and export
       it as the module default.
-  - codeRefs:
+    codeRefs:
     - class:fb0235e29ebf4a2474c3616b1c9d07cd
     - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/providers/provider.js
-    id: r.router-service-injection
+  - id: r.router-service-injection
     level: MUST
     text: OidcProviderController must inject the Ember router service into the router
       property so the controller can observe route transitions, and must declare isEditRoute
       as a tracked property so changes to it re-render the template.
-  - codeRefs:
+    codeRefs:
     - class:fb0235e29ebf4a2474c3616b1c9d07cd
     - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/providers/provider.js
-    id: r.show-header-inverts-edit-route
+  - id: r.show-header-inverts-edit-route
     level: MUST
     text: The showHeader getter must return the negation of isEditRoute, so the header
       is shown only when the current route is not the edit route and is hidden while
       the edit form is rendered.
-  upstream: self
+    codeRefs:
+    - class:fb0235e29ebf4a2474c3616b1c9d07cd
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/providers/provider.js
+  interfaces:
+  - name: OidcProviderController
+    kind: class
+    signature: export default class OidcProviderController extends Controller
+    file: third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/providers/provider.js
+codeRefIndex:
+- class:fb0235e29ebf4a2474c3616b1c9d07cd OidcProviderController@third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/providers/provider.js:10
+- file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/providers/provider.js
+  provider.js@third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/providers/provider.js

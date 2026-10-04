@@ -1,4 +1,265 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: third-party-openbao-internal-helper-kmsplugin
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  intent: KMS plugins in OpenBao must be usable before core is created and are declarative
+    only, so they need their own catalog separate from the main core plugin catalog.
+    This context gives core a stable way to obtain a sealed or unsealed KMS, key or
+    auto-unseal wrapper by name from either a builtin or an external plugin, and keeps
+    those long-lived objects correct across plugin process restarts and configuration
+    reloads without the caller ever seeing gkwplugin.ErrPluginShutdown.
+  requirements:
+  - id: r.catalog-construction
+    level: MUST
+    text: NewCatalog MUST derive the plugin directory from config.PluginDirectory,
+      making it absolute and symlink-evaluated when non-empty (errors wrapped as "expand
+      plugin directory"), build the plugin name lookup with buildConfigLookup, and
+      return a Catalog carrying the hclog logger named "kms", an empty client map
+      sized to the plugin count, and the configured plugin file UID and permissions.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/kmsplugin/catalog.go
+    - function:99c53ec37df8b361c1dc4fe016564398
+    - struct:f505aca759e0d5ab602240d7661125bd
+  - id: r.client-refcount
+    level: MUST
+    text: 'Clients MUST be cached by clientKey and reference counted: a repeat lookup
+      of the same key increments refs and returns the cached client, close decrements
+      refs, panics with "kmsplugin: tried to close client more than once" when refs
+      is already zero, and at zero refs kills the plugin process and removes the entry
+      from the catalog map only if the stored client is still that client.'
+    codeRefs:
+    - file:third_party/openbao/internal/helper/kmsplugin/catalog.go
+  - id: r.close-and-finalize
+    level: MUST
+    text: remoteKMS.Close and remoteWrapper.Finalize MUST take the write lock, release
+      the underlying client reference, treat gkwplugin.ErrPluginShutdown as success,
+      and nil out the inner KMS or client so that later calls report "KMS was closed"
+      or "wrapper was finalized" instead of reloading and replaying.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/kmsplugin/wrapper.go
+    - method:466c4dd2f94ffcdf032d43d103192d40
+    - method:e1a88070e93159d6c6612cfd62d22535
+  - id: r.configure-wrapper
+    level: MUST
+    text: 'Catalog.ConfigureWrapper MUST obtain a wrapper by name, either from the
+      builtinWrappers map (kmip, static, transit types) or dispensed as "wrapper"
+      from a plugin client ("unknown wrapper: %s" otherwise), call SetConfig with
+      the supplied options, close the remote client if SetConfig fails, and annotate
+      the returned WrapperConfig metadata key "builtin" with "true" or "false" according
+      to the dispatch path.'
+    codeRefs:
+    - file:third_party/openbao/internal/helper/kmsplugin/wrapper.go
+    - method:a8d787ef27ff1570e4953f5b2e950e98
+  - id: r.metadata-lookup
+    level: MUST
+    text: 'Catalog.GetMetadata MUST dispense "metadata" from the plugin client and
+      close that client if the dispense fails, fall back to the builtinMetadata map
+      (transit with transit.SensitiveKMSFields) when no plugin config exists, and
+      return "unknown plugin: %s" otherwise.'
+    codeRefs:
+    - file:third_party/openbao/internal/helper/kmsplugin/metadata.go
+    - method:762ebaea4f3d9751288c919ecdfd3086
+  - id: r.open-and-config-replay
+    level: MUST
+    text: remoteKMS.Open MUST record its OpenOptions and replay Open on the reinstantiated
+      KMS during reload; remoteWrapper.SetConfig and remoteWrapper.Init MUST record
+      their options and, on reload, replay SetConfig and then Init on the new wrapper,
+      committing the new client and wrapper only when both replays succeed. A reload
+      that finds the canary already advanced MUST be a no-op so concurrent callers
+      do not reload twice.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/kmsplugin/wrapper.go
+    - method:4760ea2f2d142cb98411add7b24c3a99
+    - method:8348e49626285f53cc456f1c5103f91a
+    - method:d54eef420df20a8d0e75a873ae8cae4e
+  - id: r.open-kms-dispatch
+    level: MUST
+    text: 'Catalog.OpenKMS MUST resolve the name through the client lookup; a plugin
+      client is dispensed as "kms" and wrapped in a remoteKMS, a name with no plugin
+      config falls back to the builtinKMSes map ("transit"), and any other name returns
+      "unknown plugin: %s". The returned KMS MUST have Open called with the supplied
+      options, and the client MUST be closed if dispense or Open fails.'
+    codeRefs:
+    - file:third_party/openbao/internal/helper/kmsplugin/kms.go
+    - method:a2074535537a502f8f3a05b893030b3b
+  - id: r.plugin-path-and-checksum-checks
+    level: MUST
+    text: Starting an external plugin MUST fail with "plugin directory not configured"
+      when no plugin directory is set, MUST verify through checkFilePath that the
+      symlink-resolved command path lies inside the plugin directory (or the OCI plugin
+      cache directory for image plugins) else return "cannot execute files outside
+      of configured plugin directory", MUST enforce owner permissions when VaultEnableFilePermissionsCheckEnv
+      parses true, and MUST install a plugin.SecureConfig with the SHA-256 hash when
+      the plugin config carries a SHA256Sum (hex decode failure reported as "invalid
+      plugin sha256").
+    codeRefs:
+    - file:third_party/openbao/internal/helper/kmsplugin/catalog.go
+  - id: r.plugin-type-filter
+    level: MUST
+    text: The config lookup MUST ignore plugins whose type does not parse as consts.PluginTypeKMS
+      and MUST reject a configuration that registers more than one version of the
+      same plugin name with the error "cannot register several versions of plugin
+      %q".
+    codeRefs:
+    - file:third_party/openbao/internal/helper/kmsplugin/catalog.go
+    - function:99c53ec37df8b361c1dc4fe016564398
+  - id: r.reload-config-eviction
+    level: MUST
+    text: Catalog.ReloadConfig MUST rebuild the plugin lookup from the new server
+      config, replace c.plugins, and under the catalog mutex kill and delete every
+      cached client whose clientKey is absent from the new config, logging the eviction;
+      unchanged clients MUST be kept.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/kmsplugin/catalog.go
+    - method:39299e5ae4e8b9db146dd7e281ad3795
+  - id: r.remote-kms-shutdown-retry
+    level: MUST
+    text: remoteKMS and remoteKey MUST run every remote call through a retry helper
+      that holds a read lock, records the current canary, and treats a gkwplugin.ErrPluginShutdown
+      result as a signal to reload the plugin and KMS and retry once; remoteKey MUST
+      first try reloading only the key, then reload the KMS and the key, and MUST
+      return a non-shutdown error unchanged. Calls on a closed instance MUST return
+      "KMS was closed" or "key was closed".
+    codeRefs:
+    - method:1c6fd20ea8dc79b95591de2714383b81
+    - method:4760ea2f2d142cb98411add7b24c3a99
+    - method:607235ba27d01589d303ec3f88e51418
+    - method:756edcba37642f43afddbf3d07ecf8fc
+    - method:7a02da7d84ca6b512039f02a219e0b45
+    - method:c143c6f142920c746fa249bece6eccd4
+    - method:cfb90db6340621ea6dfbc893bf81b2d5
+    - method:e1a88070e93159d6c6612cfd62d22535
+  - id: r.remote-wrapper-surface
+    level: MUST
+    text: remoteWrapper MUST forward SetConfig, Init, Finalize, Type, KeyId, Encrypt
+      and Decrypt to the dispensed wrapper, running the non-finalizing calls through
+      the shutdown-retry helper so the caller sees successful results across a plugin
+      restart.
+    codeRefs:
+    - method:30b192e5ac3a26f1e561b4e5472b8f3e
+    - method:466c4dd2f94ffcdf032d43d103192d40
+    - method:4bb019b429a33e752872982045033762
+    - method:5ce1fff93401331e049ffeb0e1803115
+    - method:8348e49626285f53cc456f1c5103f91a
+    - method:906506648737d1f6df97c040ab255e7b
+    - method:d54eef420df20a8d0e75a873ae8cae4e
+  - id: r.test-coverage
+    level: SHOULD
+    text: Tests SHOULD exercise catalog client lookup and reuse, config reload eviction,
+      bad client config, the KMS open/key/cipher surface, metadata lookup, and wrapper
+      configuration, reload and builtin dispatch paths.
+    codeRefs:
+    - file:third_party/openbao/internal/helper/kmsplugin/catalog_test.go
+    - file:third_party/openbao/internal/helper/kmsplugin/kms_test.go
+    - file:third_party/openbao/internal/helper/kmsplugin/metadata_test.go
+    - file:third_party/openbao/internal/helper/kmsplugin/wrapper_test.go
+  interfaces:
+  - name: Catalog
+    kind: struct
+    signature: type Catalog struct
+    file: third_party/openbao/internal/helper/kmsplugin/catalog.go
+  - name: Catalog.ConfigureWrapper
+    kind: method
+    signature: func (c *Catalog) ConfigureWrapper(ctx context.Context, name string,
+      opts ...wrapping.Option) (wrapping.Wrapper, *wrapping.WrapperConfig, error)
+    file: third_party/openbao/internal/helper/kmsplugin/wrapper.go
+  - name: Catalog.GetMetadata
+    kind: method
+    signature: func (c *Catalog) GetMetadata(ctx context.Context, name string) (plugin.Metadata,
+      error)
+    file: third_party/openbao/internal/helper/kmsplugin/metadata.go
+  - name: Catalog.OpenKMS
+    kind: method
+    signature: func (c *Catalog) OpenKMS(ctx context.Context, name string, opts *kms.OpenOptions)
+      (s kms.KMS, err error)
+    file: third_party/openbao/internal/helper/kmsplugin/kms.go
+  - name: Catalog.ReloadConfig
+    kind: method
+    signature: func (c *Catalog) ReloadConfig(config *server.Config) error
+    file: third_party/openbao/internal/helper/kmsplugin/catalog.go
+  - name: NewCatalog
+    kind: function
+    signature: func NewCatalog(logger hclog.Logger, config *server.Config) (*Catalog,
+      error)
+    file: third_party/openbao/internal/helper/kmsplugin/catalog.go
+  - name: remoteKMS.Close
+    kind: method
+    signature: func (s *remoteKMS) Close(ctx context.Context) error
+    file: third_party/openbao/internal/helper/kmsplugin/kms.go
+  - name: remoteKMS.GetKey
+    kind: method
+    signature: func (s *remoteKMS) GetKey(ctx context.Context, opts *kms.KeyOptions)
+      (key kms.Key, err error)
+    file: third_party/openbao/internal/helper/kmsplugin/kms.go
+  - name: remoteKMS.Open
+    kind: method
+    signature: func (s *remoteKMS) Open(ctx context.Context, opts *kms.OpenOptions)
+      error
+    file: third_party/openbao/internal/helper/kmsplugin/kms.go
+  - name: remoteKey.Decrypt
+    kind: method
+    signature: func (k *remoteKey) Decrypt(ctx context.Context, opts *kms.CipherOptions)
+      (plaintext []byte, err error)
+    file: third_party/openbao/internal/helper/kmsplugin/kms.go
+  - name: remoteKey.Encrypt
+    kind: method
+    signature: func (k *remoteKey) Encrypt(ctx context.Context, opts *kms.CipherOptions)
+      (ciphertext []byte, err error)
+    file: third_party/openbao/internal/helper/kmsplugin/kms.go
+  - name: remoteKey.ExportPublic
+    kind: method
+    signature: func (k *remoteKey) ExportPublic(ctx context.Context) (public crypto.PublicKey,
+      err error)
+    file: third_party/openbao/internal/helper/kmsplugin/kms.go
+  - name: remoteKey.Sign
+    kind: method
+    signature: func (k *remoteKey) Sign(ctx context.Context, opts *kms.SignOptions)
+      (signature []byte, err error)
+    file: third_party/openbao/internal/helper/kmsplugin/kms.go
+  - name: remoteKey.Verify
+    kind: method
+    signature: func (k *remoteKey) Verify(ctx context.Context, opts *kms.VerifyOptions)
+      error
+    file: third_party/openbao/internal/helper/kmsplugin/kms.go
+  - name: remoteWrapper.Decrypt
+    kind: method
+    signature: func (w *remoteWrapper) Decrypt(ctx context.Context, blob *wrapping.BlobInfo,
+      opts ...wrapping.Option) (plaintext []byte, err error)
+    file: third_party/openbao/internal/helper/kmsplugin/wrapper.go
+  - name: remoteWrapper.Encrypt
+    kind: method
+    signature: func (w *remoteWrapper) Encrypt(ctx context.Context, plaintext []byte,
+      opts ...wrapping.Option) (blob *wrapping.BlobInfo, err error)
+    file: third_party/openbao/internal/helper/kmsplugin/wrapper.go
+  - name: remoteWrapper.Finalize
+    kind: method
+    signature: func (w *remoteWrapper) Finalize(ctx context.Context, opts ...wrapping.Option)
+      error
+    file: third_party/openbao/internal/helper/kmsplugin/wrapper.go
+  - name: remoteWrapper.Init
+    kind: method
+    signature: func (w *remoteWrapper) Init(ctx context.Context, opts ...wrapping.Option)
+      error
+    file: third_party/openbao/internal/helper/kmsplugin/wrapper.go
+  - name: remoteWrapper.KeyId
+    kind: method
+    signature: func (w *remoteWrapper) KeyId(ctx context.Context) (id string, err
+      error)
+    file: third_party/openbao/internal/helper/kmsplugin/wrapper.go
+  - name: remoteWrapper.SetConfig
+    kind: method
+    signature: func (w *remoteWrapper) SetConfig(ctx context.Context, opts ...wrapping.Option)
+      (config *wrapping.WrapperConfig, err error)
+    file: third_party/openbao/internal/helper/kmsplugin/wrapper.go
+  - name: remoteWrapper.Type
+    kind: method
+    signature: func (w *remoteWrapper) Type(ctx context.Context) (ty wrapping.WrapperType,
+      err error)
+    file: third_party/openbao/internal/helper/kmsplugin/wrapper.go
 codeRefIndex:
 - file:third_party/openbao/internal/helper/kmsplugin/catalog.go catalog.go@third_party/openbao/internal/helper/kmsplugin/catalog.go
 - file:third_party/openbao/internal/helper/kmsplugin/catalog_test.go catalog_test.go@third_party/openbao/internal/helper/kmsplugin/catalog_test.go
@@ -29,264 +290,3 @@ codeRefIndex:
 - method:d54eef420df20a8d0e75a873ae8cae4e remoteWrapper.Init@third_party/openbao/internal/helper/kmsplugin/wrapper.go:207
 - method:e1a88070e93159d6c6612cfd62d22535 remoteKMS.Close@third_party/openbao/internal/helper/kmsplugin/kms.go:167
 - struct:f505aca759e0d5ab602240d7661125bd Catalog@third_party/openbao/internal/helper/kmsplugin/catalog.go:32
-kind: SystemContext
-metadata:
-  name: third-party-openbao-internal-helper-kmsplugin
-  namespace: default
-spec:
-  intent: KMS plugins in OpenBao must be usable before core is created and are declarative
-    only, so they need their own catalog separate from the main core plugin catalog.
-    This context gives core a stable way to obtain a sealed or unsealed KMS, key or
-    auto-unseal wrapper by name from either a builtin or an external plugin, and keeps
-    those long-lived objects correct across plugin process restarts and configuration
-    reloads without the caller ever seeing gkwplugin.ErrPluginShutdown.
-  interfaces:
-  - file: third_party/openbao/internal/helper/kmsplugin/catalog.go
-    kind: struct
-    name: Catalog
-    signature: type Catalog struct
-  - file: third_party/openbao/internal/helper/kmsplugin/wrapper.go
-    kind: method
-    name: Catalog.ConfigureWrapper
-    signature: func (c *Catalog) ConfigureWrapper(ctx context.Context, name string,
-      opts ...wrapping.Option) (wrapping.Wrapper, *wrapping.WrapperConfig, error)
-  - file: third_party/openbao/internal/helper/kmsplugin/metadata.go
-    kind: method
-    name: Catalog.GetMetadata
-    signature: func (c *Catalog) GetMetadata(ctx context.Context, name string) (plugin.Metadata,
-      error)
-  - file: third_party/openbao/internal/helper/kmsplugin/kms.go
-    kind: method
-    name: Catalog.OpenKMS
-    signature: func (c *Catalog) OpenKMS(ctx context.Context, name string, opts *kms.OpenOptions)
-      (s kms.KMS, err error)
-  - file: third_party/openbao/internal/helper/kmsplugin/catalog.go
-    kind: method
-    name: Catalog.ReloadConfig
-    signature: func (c *Catalog) ReloadConfig(config *server.Config) error
-  - file: third_party/openbao/internal/helper/kmsplugin/catalog.go
-    kind: function
-    name: NewCatalog
-    signature: func NewCatalog(logger hclog.Logger, config *server.Config) (*Catalog,
-      error)
-  - file: third_party/openbao/internal/helper/kmsplugin/kms.go
-    kind: method
-    name: remoteKMS.Close
-    signature: func (s *remoteKMS) Close(ctx context.Context) error
-  - file: third_party/openbao/internal/helper/kmsplugin/kms.go
-    kind: method
-    name: remoteKMS.GetKey
-    signature: func (s *remoteKMS) GetKey(ctx context.Context, opts *kms.KeyOptions)
-      (key kms.Key, err error)
-  - file: third_party/openbao/internal/helper/kmsplugin/kms.go
-    kind: method
-    name: remoteKMS.Open
-    signature: func (s *remoteKMS) Open(ctx context.Context, opts *kms.OpenOptions)
-      error
-  - file: third_party/openbao/internal/helper/kmsplugin/kms.go
-    kind: method
-    name: remoteKey.Decrypt
-    signature: func (k *remoteKey) Decrypt(ctx context.Context, opts *kms.CipherOptions)
-      (plaintext []byte, err error)
-  - file: third_party/openbao/internal/helper/kmsplugin/kms.go
-    kind: method
-    name: remoteKey.Encrypt
-    signature: func (k *remoteKey) Encrypt(ctx context.Context, opts *kms.CipherOptions)
-      (ciphertext []byte, err error)
-  - file: third_party/openbao/internal/helper/kmsplugin/kms.go
-    kind: method
-    name: remoteKey.ExportPublic
-    signature: func (k *remoteKey) ExportPublic(ctx context.Context) (public crypto.PublicKey,
-      err error)
-  - file: third_party/openbao/internal/helper/kmsplugin/kms.go
-    kind: method
-    name: remoteKey.Sign
-    signature: func (k *remoteKey) Sign(ctx context.Context, opts *kms.SignOptions)
-      (signature []byte, err error)
-  - file: third_party/openbao/internal/helper/kmsplugin/kms.go
-    kind: method
-    name: remoteKey.Verify
-    signature: func (k *remoteKey) Verify(ctx context.Context, opts *kms.VerifyOptions)
-      error
-  - file: third_party/openbao/internal/helper/kmsplugin/wrapper.go
-    kind: method
-    name: remoteWrapper.Decrypt
-    signature: func (w *remoteWrapper) Decrypt(ctx context.Context, blob *wrapping.BlobInfo,
-      opts ...wrapping.Option) (plaintext []byte, err error)
-  - file: third_party/openbao/internal/helper/kmsplugin/wrapper.go
-    kind: method
-    name: remoteWrapper.Encrypt
-    signature: func (w *remoteWrapper) Encrypt(ctx context.Context, plaintext []byte,
-      opts ...wrapping.Option) (blob *wrapping.BlobInfo, err error)
-  - file: third_party/openbao/internal/helper/kmsplugin/wrapper.go
-    kind: method
-    name: remoteWrapper.Finalize
-    signature: func (w *remoteWrapper) Finalize(ctx context.Context, opts ...wrapping.Option)
-      error
-  - file: third_party/openbao/internal/helper/kmsplugin/wrapper.go
-    kind: method
-    name: remoteWrapper.Init
-    signature: func (w *remoteWrapper) Init(ctx context.Context, opts ...wrapping.Option)
-      error
-  - file: third_party/openbao/internal/helper/kmsplugin/wrapper.go
-    kind: method
-    name: remoteWrapper.KeyId
-    signature: func (w *remoteWrapper) KeyId(ctx context.Context) (id string, err
-      error)
-  - file: third_party/openbao/internal/helper/kmsplugin/wrapper.go
-    kind: method
-    name: remoteWrapper.SetConfig
-    signature: func (w *remoteWrapper) SetConfig(ctx context.Context, opts ...wrapping.Option)
-      (config *wrapping.WrapperConfig, err error)
-  - file: third_party/openbao/internal/helper/kmsplugin/wrapper.go
-    kind: method
-    name: remoteWrapper.Type
-    signature: func (w *remoteWrapper) Type(ctx context.Context) (ty wrapping.WrapperType,
-      err error)
-  repository: deno-kcp
-  requirements:
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/kmsplugin/catalog.go
-    - function:99c53ec37df8b361c1dc4fe016564398
-    - struct:f505aca759e0d5ab602240d7661125bd
-    id: r.catalog-construction
-    level: MUST
-    text: NewCatalog MUST derive the plugin directory from config.PluginDirectory,
-      making it absolute and symlink-evaluated when non-empty (errors wrapped as "expand
-      plugin directory"), build the plugin name lookup with buildConfigLookup, and
-      return a Catalog carrying the hclog logger named "kms", an empty client map
-      sized to the plugin count, and the configured plugin file UID and permissions.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/kmsplugin/catalog.go
-    id: r.client-refcount
-    level: MUST
-    text: 'Clients MUST be cached by clientKey and reference counted: a repeat lookup
-      of the same key increments refs and returns the cached client, close decrements
-      refs, panics with "kmsplugin: tried to close client more than once" when refs
-      is already zero, and at zero refs kills the plugin process and removes the entry
-      from the catalog map only if the stored client is still that client.'
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/kmsplugin/wrapper.go
-    - method:466c4dd2f94ffcdf032d43d103192d40
-    - method:e1a88070e93159d6c6612cfd62d22535
-    id: r.close-and-finalize
-    level: MUST
-    text: remoteKMS.Close and remoteWrapper.Finalize MUST take the write lock, release
-      the underlying client reference, treat gkwplugin.ErrPluginShutdown as success,
-      and nil out the inner KMS or client so that later calls report "KMS was closed"
-      or "wrapper was finalized" instead of reloading and replaying.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/kmsplugin/wrapper.go
-    - method:a8d787ef27ff1570e4953f5b2e950e98
-    id: r.configure-wrapper
-    level: MUST
-    text: 'Catalog.ConfigureWrapper MUST obtain a wrapper by name, either from the
-      builtinWrappers map (kmip, static, transit types) or dispensed as "wrapper"
-      from a plugin client ("unknown wrapper: %s" otherwise), call SetConfig with
-      the supplied options, close the remote client if SetConfig fails, and annotate
-      the returned WrapperConfig metadata key "builtin" with "true" or "false" according
-      to the dispatch path.'
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/kmsplugin/metadata.go
-    - method:762ebaea4f3d9751288c919ecdfd3086
-    id: r.metadata-lookup
-    level: MUST
-    text: 'Catalog.GetMetadata MUST dispense "metadata" from the plugin client and
-      close that client if the dispense fails, fall back to the builtinMetadata map
-      (transit with transit.SensitiveKMSFields) when no plugin config exists, and
-      return "unknown plugin: %s" otherwise.'
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/kmsplugin/wrapper.go
-    - method:4760ea2f2d142cb98411add7b24c3a99
-    - method:8348e49626285f53cc456f1c5103f91a
-    - method:d54eef420df20a8d0e75a873ae8cae4e
-    id: r.open-and-config-replay
-    level: MUST
-    text: remoteKMS.Open MUST record its OpenOptions and replay Open on the reinstantiated
-      KMS during reload; remoteWrapper.SetConfig and remoteWrapper.Init MUST record
-      their options and, on reload, replay SetConfig and then Init on the new wrapper,
-      committing the new client and wrapper only when both replays succeed. A reload
-      that finds the canary already advanced MUST be a no-op so concurrent callers
-      do not reload twice.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/kmsplugin/kms.go
-    - method:a2074535537a502f8f3a05b893030b3b
-    id: r.open-kms-dispatch
-    level: MUST
-    text: 'Catalog.OpenKMS MUST resolve the name through the client lookup; a plugin
-      client is dispensed as "kms" and wrapped in a remoteKMS, a name with no plugin
-      config falls back to the builtinKMSes map ("transit"), and any other name returns
-      "unknown plugin: %s". The returned KMS MUST have Open called with the supplied
-      options, and the client MUST be closed if dispense or Open fails.'
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/kmsplugin/catalog.go
-    id: r.plugin-path-and-checksum-checks
-    level: MUST
-    text: Starting an external plugin MUST fail with "plugin directory not configured"
-      when no plugin directory is set, MUST verify through checkFilePath that the
-      symlink-resolved command path lies inside the plugin directory (or the OCI plugin
-      cache directory for image plugins) else return "cannot execute files outside
-      of configured plugin directory", MUST enforce owner permissions when VaultEnableFilePermissionsCheckEnv
-      parses true, and MUST install a plugin.SecureConfig with the SHA-256 hash when
-      the plugin config carries a SHA256Sum (hex decode failure reported as "invalid
-      plugin sha256").
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/kmsplugin/catalog.go
-    - function:99c53ec37df8b361c1dc4fe016564398
-    id: r.plugin-type-filter
-    level: MUST
-    text: The config lookup MUST ignore plugins whose type does not parse as consts.PluginTypeKMS
-      and MUST reject a configuration that registers more than one version of the
-      same plugin name with the error "cannot register several versions of plugin
-      %q".
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/kmsplugin/catalog.go
-    - method:39299e5ae4e8b9db146dd7e281ad3795
-    id: r.reload-config-eviction
-    level: MUST
-    text: Catalog.ReloadConfig MUST rebuild the plugin lookup from the new server
-      config, replace c.plugins, and under the catalog mutex kill and delete every
-      cached client whose clientKey is absent from the new config, logging the eviction;
-      unchanged clients MUST be kept.
-  - codeRefs:
-    - method:1c6fd20ea8dc79b95591de2714383b81
-    - method:4760ea2f2d142cb98411add7b24c3a99
-    - method:607235ba27d01589d303ec3f88e51418
-    - method:756edcba37642f43afddbf3d07ecf8fc
-    - method:7a02da7d84ca6b512039f02a219e0b45
-    - method:c143c6f142920c746fa249bece6eccd4
-    - method:cfb90db6340621ea6dfbc893bf81b2d5
-    - method:e1a88070e93159d6c6612cfd62d22535
-    id: r.remote-kms-shutdown-retry
-    level: MUST
-    text: remoteKMS and remoteKey MUST run every remote call through a retry helper
-      that holds a read lock, records the current canary, and treats a gkwplugin.ErrPluginShutdown
-      result as a signal to reload the plugin and KMS and retry once; remoteKey MUST
-      first try reloading only the key, then reload the KMS and the key, and MUST
-      return a non-shutdown error unchanged. Calls on a closed instance MUST return
-      "KMS was closed" or "key was closed".
-  - codeRefs:
-    - method:30b192e5ac3a26f1e561b4e5472b8f3e
-    - method:466c4dd2f94ffcdf032d43d103192d40
-    - method:4bb019b429a33e752872982045033762
-    - method:5ce1fff93401331e049ffeb0e1803115
-    - method:8348e49626285f53cc456f1c5103f91a
-    - method:906506648737d1f6df97c040ab255e7b
-    - method:d54eef420df20a8d0e75a873ae8cae4e
-    id: r.remote-wrapper-surface
-    level: MUST
-    text: remoteWrapper MUST forward SetConfig, Init, Finalize, Type, KeyId, Encrypt
-      and Decrypt to the dispensed wrapper, running the non-finalizing calls through
-      the shutdown-retry helper so the caller sees successful results across a plugin
-      restart.
-  - codeRefs:
-    - file:third_party/openbao/internal/helper/kmsplugin/catalog_test.go
-    - file:third_party/openbao/internal/helper/kmsplugin/kms_test.go
-    - file:third_party/openbao/internal/helper/kmsplugin/metadata_test.go
-    - file:third_party/openbao/internal/helper/kmsplugin/wrapper_test.go
-    id: r.test-coverage
-    level: SHOULD
-    text: Tests SHOULD exercise catalog client lookup and reuse, config reload eviction,
-      bad client config, the KMS open/key/cipher surface, metadata lookup, and wrapper
-      configuration, reload and builtin dispatch paths.
-  upstream: self

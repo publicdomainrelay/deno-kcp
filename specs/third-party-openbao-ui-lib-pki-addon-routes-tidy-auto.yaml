@@ -1,14 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
-codeRefIndex:
-- class:6b05ec6b33e475fe67d3f65696a0be77 PkiTidyAutoConfigureRoute@third_party/openbao/ui/lib/pki/addon/routes/tidy/auto/configure.js:6
-- class:f1fbb8aefa06338a4ba393c2cf2e4742 TidyAutoIndexRoute@third_party/openbao/ui/lib/pki/addon/routes/tidy/auto/index.js:4
-- file:third_party/openbao/ui/lib/pki/addon/routes/tidy/auto/configure.js configure.js@third_party/openbao/ui/lib/pki/addon/routes/tidy/auto/configure.js
-- file:third_party/openbao/ui/lib/pki/addon/routes/tidy/auto/index.js index.js@third_party/openbao/ui/lib/pki/addon/routes/tidy/auto/index.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-lib-pki-addon-routes-tidy-auto
   namespace: default
 spec:
+  repository: deno-kcp
+  upstream: self
   intent: The context exists so the automatic tidy configuration and index screens
     of the PKI secrets engine keep a described, checkable contract for their breadcrumb
     navigation and mount-path-driven titles, which the shared route tests and other
@@ -16,21 +13,8 @@ spec:
     their breadcrumb depth and link targets must stay consistent with the parent structures
     they sit under, and their titles must follow whichever mount path the engine is
     mounted at.
-  interfaces:
-  - file: third_party/openbao/ui/lib/pki/addon/routes/tidy/auto/configure.js
-    kind: class
-    name: PkiTidyAutoConfigureRoute
-    signature: class PkiTidyAutoConfigureRoute extends Route
-  - file: third_party/openbao/ui/lib/pki/addon/routes/tidy/auto/index.js
-    kind: class
-    name: TidyAutoIndexRoute
-    signature: class TidyAutoIndexRoute extends Route
-  repository: deno-kcp
   requirements:
-  - codeRefs:
-    - class:6b05ec6b33e475fe67d3f65696a0be77
-    - file:third_party/openbao/ui/lib/pki/addon/routes/tidy/auto/configure.js
-    id: r.configure-route-breadcrumbs
+  - id: r.configure-route-breadcrumbs
     level: MUST
     text: 'PkiTidyAutoConfigureRoute.setupController must call super with the controller
       and resolvedModel, then set controller.breadcrumbs to exactly six entries in
@@ -39,31 +23,47 @@ spec:
       ''configuration.index'' and models [currentPath]; ''tidy'' with route ''tidy''
       and models [currentPath]; ''auto'' with route ''tidy.auto'' and models [currentPath];
       and a final ''configure'' leaf carrying no route.'
-  - codeRefs:
+    codeRefs:
     - class:6b05ec6b33e475fe67d3f65696a0be77
     - file:third_party/openbao/ui/lib/pki/addon/routes/tidy/auto/configure.js
-    id: r.configure-route-services
+  - id: r.configure-route-services
     level: MUST
     text: PkiTidyAutoConfigureRoute must inject the store and secretMountPath services,
       and must read the mounted engine path from secretMountPath.currentPath when
       building breadcrumbs; it declares no model and inherits one from the tidy/auto
       parent route.
-  - codeRefs:
-    - class:f1fbb8aefa06338a4ba393c2cf2e4742
-    - file:third_party/openbao/ui/lib/pki/addon/routes/tidy/auto/index.js
-    id: r.index-route-breadcrumbs
+    codeRefs:
+    - class:6b05ec6b33e475fe67d3f65696a0be77
+    - file:third_party/openbao/ui/lib/pki/addon/routes/tidy/auto/configure.js
+  - id: r.index-route-breadcrumbs
     level: MUST
     text: 'TidyAutoIndexRoute.setupController must call super with the arguments object,
       then set controller.breadcrumbs to exactly four entries in order: secrets with
       route ''secrets'' and linkExternal true; the secretMountPath.currentPath with
       route ''overview'' and models [currentPath]; ''tidy'' with route ''tidy.index''
       and models [currentPath]; and a final ''auto'' leaf carrying no route.'
-  - codeRefs:
+    codeRefs:
     - class:f1fbb8aefa06338a4ba393c2cf2e4742
     - file:third_party/openbao/ui/lib/pki/addon/routes/tidy/auto/index.js
-    id: r.index-route-title
+  - id: r.index-route-title
     level: MUST
     text: TidyAutoIndexRoute.setupController must set controller.title to secretMountPath.currentPath
       so the page title tracks the mounted engine path, and the route must inject
       the store and secretMountPath services while declaring no model of its own.
-  upstream: self
+    codeRefs:
+    - class:f1fbb8aefa06338a4ba393c2cf2e4742
+    - file:third_party/openbao/ui/lib/pki/addon/routes/tidy/auto/index.js
+  interfaces:
+  - name: PkiTidyAutoConfigureRoute
+    kind: class
+    signature: class PkiTidyAutoConfigureRoute extends Route
+    file: third_party/openbao/ui/lib/pki/addon/routes/tidy/auto/configure.js
+  - name: TidyAutoIndexRoute
+    kind: class
+    signature: class TidyAutoIndexRoute extends Route
+    file: third_party/openbao/ui/lib/pki/addon/routes/tidy/auto/index.js
+codeRefIndex:
+- class:6b05ec6b33e475fe67d3f65696a0be77 PkiTidyAutoConfigureRoute@third_party/openbao/ui/lib/pki/addon/routes/tidy/auto/configure.js:6
+- class:f1fbb8aefa06338a4ba393c2cf2e4742 TidyAutoIndexRoute@third_party/openbao/ui/lib/pki/addon/routes/tidy/auto/index.js:4
+- file:third_party/openbao/ui/lib/pki/addon/routes/tidy/auto/configure.js configure.js@third_party/openbao/ui/lib/pki/addon/routes/tidy/auto/configure.js
+- file:third_party/openbao/ui/lib/pki/addon/routes/tidy/auto/index.js index.js@third_party/openbao/ui/lib/pki/addon/routes/tidy/auto/index.js
