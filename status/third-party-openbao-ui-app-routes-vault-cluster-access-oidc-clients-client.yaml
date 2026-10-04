@@ -1,15 +1,39 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: OidcClientDetailsRoute, OidcClientEditRoute, OidcClientProvidersRoute'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/client/details.js
+  - third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/client/edit.js
+  - third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/client/providers.js
+  fingerprint: 69275b9e8248f987dbd155ba22d1794af4b0107e7e87c87e803557c3765c0359
+  interfaces:
+  - codegraphId: class:7f1cb0f1c4fee1deecf68d6f592c15b5
+    file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/client/details.js
+    kind: class
+    line: 7
+    name: OidcClientDetailsRoute
+  - codegraphId: class:56f63b8c4d657f5b5b97e5a1e90267fe
+    file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/client/edit.js
+    kind: class
+    line: 8
+    name: OidcClientEditRoute
+  - codegraphId: class:d81a601a448cf767deb20b2bd5266e2e
+    file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc/clients/client/providers.js
+    kind: class
+    line: 9
+    name: OidcClientProvidersRoute
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 59d36bbe1209de77d054e44cbdc6f3276570a4ae3e10ba9e4c3d096383f15ef8
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 69275b9e8248f987dbd155ba22d1794af4b0107e7e87c87e803557c3765c0359
