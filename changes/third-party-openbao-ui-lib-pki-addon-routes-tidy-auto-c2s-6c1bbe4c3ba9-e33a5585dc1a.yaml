@@ -10,5 +10,20 @@ spec:
   systemContext: third-party-openbao-ui-lib-pki-addon-routes-tidy-auto
   toCommit: e33a5585dc1ac9d3bf63bc1ebdcf5dbb45369989
 status:
-  message: the agent is summarizing third-party-openbao-ui-lib-pki-addon-routes-tidy-auto
-  phase: Running
+  agentLog: This context covers two Ember route classes in the OpenBao PKI UI addon
+    that serve the automatic tidy configuration screens under a secrets engine mount.
+    PkiTidyAutoConfigureRoute in third_party/openbao/ui/lib/pki/addon/routes/tidy/auto/configure.js
+    injects the store and secretMountPath services and, in setupController(controller,
+    resolvedModel), calls super and then sets a six-entry breadcrumb trail running
+    secrets, the current mount path (overview), configuration.index, tidy, tidy.auto,
+    and a bare configure leaf. TidyAutoIndexRoute in third_party/openbao/ui/lib/pki/addon/routes/tidy/auto/index.js
+    injects the same two services and, in setupController(controller), calls super
+    with arguments and sets a four-entry breadcrumb trail running secrets, the current
+    mount path (overview), tidy.index, and a bare auto leaf, plus a controller title
+    equal to the current mount path. Both rely on the parent tidy/auto route for their
+    model rather than declaring one.
+  message: wrote 4 requirement(s) and 0 interface(s) for third-party-openbao-ui-lib-pki-addon-routes-tidy-auto;
+    interface PkiTidyAutoConfigureRoute.setupController is not in the observed facts;
+    dropped; interface TidyAutoIndexRoute.setupController is not in the observed facts;
+    dropped
+  phase: Succeeded
