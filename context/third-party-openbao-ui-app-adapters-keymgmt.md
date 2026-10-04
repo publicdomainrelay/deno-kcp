@@ -9,5 +9,7 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `class:86750a0003380b8bbb6f7552f83a6809` class KeymgmtKeyAdapter (third_party/openbao/ui/app/adapters/keymgmt/key.js)
+- `file:third_party/openbao/ui/app/adapters/keymgmt/key.js` file key.js (third_party/openbao/ui/app/adapters/keymgmt/key.js)
+- `file:third_party/openbao/ui/app/adapters/keymgmt/provider.js` file provider.js (third_party/openbao/ui/app/adapters/keymgmt/provider.js)
 <!-- SPECD_MANAGED_END -->

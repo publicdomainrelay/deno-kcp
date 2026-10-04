@@ -9,5 +9,6 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/ui/app/adapters/kubernetes/config.js` file config.js (third_party/openbao/ui/app/adapters/kubernetes/config.js)
+- `file:third_party/openbao/ui/app/adapters/kubernetes/role.js` file role.js (third_party/openbao/ui/app/adapters/kubernetes/role.js)
 <!-- SPECD_MANAGED_END -->
