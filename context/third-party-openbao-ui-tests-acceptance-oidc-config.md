@@ -9,5 +9,7 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/ui/tests/acceptance/oidc-config/clients-assignments-test.js` file clients-assignments-test.js (third_party/openbao/ui/tests/acceptance/oidc-config/clients-assignments-test.js)
+- `file:third_party/openbao/ui/tests/acceptance/oidc-config/clients-keys-test.js` file clients-keys-test.js (third_party/openbao/ui/tests/acceptance/oidc-config/clients-keys-test.js)
+- `file:third_party/openbao/ui/tests/acceptance/oidc-config/providers-scopes-test.js` file providers-scopes-test.js (third_party/openbao/ui/tests/acceptance/oidc-config/providers-scopes-test.js)
 <!-- SPECD_MANAGED_END -->
