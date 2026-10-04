@@ -159,9 +159,26 @@ apply_pod relay  30-relay-relay.yaml
 # both, and after bob's own PDS so the two share a workspace from the first
 # reconcile.
 apply_pod bob    70-bidder.yaml
-# The verifier needs every peer in its table, and a pod created in the same
-# second as its peers can start with an empty one.
-sleep 10
+# The verifier reaches alice's PDS, the PLC directory and the relay, so a fixed
+# sleep in front of a pod whose restartPolicy is Never waits for nothing. What is
+# waited for instead is the provider's own verdict on alice's PDS: phase Running
+# with ready true is the readiness probe resolving pds.default.alice.svc.kcp.local
+# through the shim's table and answering on /xrpc/_health, which is the same name
+# and the same path the verifier uses. The wait shares the bounded WAIT_SECONDS
+# deadline used everywhere else, and when it expires the verifier is created
+# anyway, so the run reports a verifier that could not reach its peers instead of
+# stopping here.
+verifier_deadline=$(( $(date +%s) + WAIT_SECONDS ))
+while :; do
+  phase=$(KC --server="$S/clusters/root:alice" get denopod pds -o jsonpath='{.status.phase}' 2>/dev/null || true)
+  ready=$(KC --server="$S/clusters/root:alice" get denopod pds -o jsonpath='{.status.ready}' 2>/dev/null || true)
+  [ "$phase" = "Running" ] && [ "$ready" = "true" ] && break
+  if [ "$(date +%s)" -ge "$verifier_deadline" ]; then
+    echo "alice pds in root:alice never reported Running and ready within ${WAIT_SECONDS}s; creating the verifier anyway so the run reports it" >&2
+    break
+  fi
+  sleep 2
+done
 apply_pod alice  50-verifier.yaml
 
 deadline=$(( $(date +%s) + WAIT_SECONDS ))
@@ -199,14 +216,14 @@ for ws in $WORKSPACES; do
   echo "  root:$ws $(KC --server="$S/clusters/root:$ws" get openbao openbao -o jsonpath='{.status.namespace} serial={.status.serial}')"
 done
 echo
-echo "health:"
-echo "  plc     curl http://127.0.0.1:2587/health"
-echo "  relay   curl http://127.0.0.1:2584/xrpc/_health"
-echo "  pds     curl http://127.0.0.1:2583/xrpc/_health"
-echo "  bob pds curl http://127.0.0.1:2585/xrpc/_health"
-echo "  bidder  curl http://127.0.0.1:2586/oauth-client-metadata.json"
+echo "health, https because every service pod sets SERVICE_TLS true:"
+echo "  plc     curl -k https://127.0.0.1:2587/health"
+echo "  relay   curl -k https://127.0.0.1:2584/xrpc/_health"
+echo "  pds     curl -k https://127.0.0.1:2583/xrpc/_health"
+echo "  bob pds curl -k https://127.0.0.1:2585/xrpc/_health"
+echo "  bidder  curl -k https://127.0.0.1:2586/oauth-client-metadata.json"
 echo
 echo "create alice:"
-echo "  curl -sS -X POST http://127.0.0.1:2583/xrpc/com.atproto.server.createAccount \\"
+echo "  curl -k -sS -X POST https://127.0.0.1:2583/xrpc/com.atproto.server.createAccount \\"
 echo "    -H 'content-type: application/json' \\"
 echo "    -d '{\"handle\":\"alice\",\"password\":\"hunter2\"}'"
