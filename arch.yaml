@@ -1129,10 +1129,16 @@ system_contexts:
       in root:bob each reached phase Running and report ready true; DenoPod verifier
       in root:alice reached the terminal phase Succeeded; bob pds answers on its own
       name, which the provider proves with its readiness probe through the shim (kcpdns
-      pds.default.bob.svc.kcp.local /xrpc/_health) and the host proves with curl http://127.0.0.1:2585/xrpc/_health;
-      the bidder answers on bidder.default.bob.svc.kcp.local /oauth-client-metadata.json
-      and on http://127.0.0.1:2586/oauth-client-metadata.json; and the five long-running
-      pods are still Running with ready true when they are read a second time at least
+      pds.default.bob.svc.kcp.local /xrpc/_health) and the host proves by fetching
+      the same path from outside with curl https://127.0.0.1:2585/xrpc/_health; the
+      bidder answers on bidder.default.bob.svc.kcp.local /oauth-client-metadata.json
+      and on https://127.0.0.1:2586/oauth-client-metadata.json. Both host checks use
+      https, because every service pod sets SERVICE_TLS true and the provider issues
+      it a leaf, so the listener the host reaches is the TLS one; an http:// fetch
+      of a TLS listener is not a check of anything and must not be written. http_code
+      reports the status curl printed, and prints 000 exactly once when the fetch
+      failed rather than appending a second fallback. And the five long-running pods
+      are still Running with ready true when they are read a second time at least
       ten seconds later, so a pod that dies after startup fails the run. It prints
       a final table naming every check and its result, prints the tail of the provider
       log and the status of the failing pod when a check fails, and exits 0 only when
