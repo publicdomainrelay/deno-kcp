@@ -708,6 +708,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.wal-rollback-cleanup` (MUST): "TestCreds_wal_rollback must configure the mount with the BROKEN_JWT service account JWT, assert creds creation fails with a forbidden error naming the broken-jwt service account, then poll with checkObjects to confirm the Role and RoleBinding do exist immediately after the failure while the ServiceAccount never does, and that all created objects are gone once the WAL minimum age (10 seconds in tests) has passed."
 - added `r.wal-test-opt-in` (MUST): "TestCreds_wal_rollback must skip when the K8S_WAL_TEST environment variable is not defined, so the rollback test is opt-in on top of the package gate."
 
+### third-party-openbao-internal-builtin-logical-kubernetes-integrationtest-kind
+
+- intent: "" -> "The context exists so the Kubernetes backend integration tests can stand up a real cluster whose API server is reachable from the test process at a fixed loopback address. The host-port mapping is the contract: tests expect something listening on host 127.0.0.1:38300 to be forwarded to the cluster's container port 8200, which is where the OpenBao server under test is addressed. Keeping the mapping in a checked-in YAML file makes the cluster topology reproducible across machines instead of relying on manual kind flags."
+- added `r.cluster-kind` (MUST): "The fixture declares a kind object of kind Cluster with apiVersion kind.x-k8s.io/v1alpha4, matching the schema kind accepts for a cluster config."
+- added `r.host-port-mapping` (MUST): "That node maps container port 8200 to host port 38300 over the TCP protocol, so a client reaching host port 38300 lands on the cluster workload listening on 8200."
+- added `r.license-header` (SHOULD): "The file opens with the HashiCorp copyright notice and the SPDX-License-Identifier MPL-2.0 comment, keeping it consistent with the rest of the vendored OpenBao tree."
+- added `r.loopback-listen-address` (MUST): "The mapping sets listenAddress to 127.0.0.1, so the published port binds the loopback interface only and is not exposed on external interfaces."
+- added `r.single-control-plane-node` (MUST): "The cluster defines exactly one node and gives it the control-plane role, so the integration test cluster has a single schedulable control plane and no separate workers."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -717,5 +726,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-builtin-logical-kubernetes-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-kubernetes-cmd-kubernetes-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-kubernetes-integrationtest-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-builtin-logical-kubernetes-integrationtest-kind-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-builtin-logical-kubernetes-integrationtest-kind-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-kubernetes-integrationtest-vault-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |

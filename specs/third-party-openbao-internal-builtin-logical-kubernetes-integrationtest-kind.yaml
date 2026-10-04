@@ -7,5 +7,46 @@ metadata:
   name: third-party-openbao-internal-builtin-logical-kubernetes-integrationtest-kind
   namespace: default
 spec:
+  intent: 'The context exists so the Kubernetes backend integration tests can stand
+    up a real cluster whose API server is reachable from the test process at a fixed
+    loopback address. The host-port mapping is the contract: tests expect something
+    listening on host 127.0.0.1:38300 to be forwarded to the cluster''s container
+    port 8200, which is where the OpenBao server under test is addressed. Keeping
+    the mapping in a checked-in YAML file makes the cluster topology reproducible
+    across machines instead of relying on manual kind flags.'
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/kind/config.yaml
+    id: r.cluster-kind
+    level: MUST
+    text: The fixture declares a kind object of kind Cluster with apiVersion kind.x-k8s.io/v1alpha4,
+      matching the schema kind accepts for a cluster config.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/kind/config.yaml
+    id: r.host-port-mapping
+    level: MUST
+    text: That node maps container port 8200 to host port 38300 over the TCP protocol,
+      so a client reaching host port 38300 lands on the cluster workload listening
+      on 8200.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/kind/config.yaml
+    id: r.license-header
+    level: SHOULD
+    text: The file opens with the HashiCorp copyright notice and the SPDX-License-Identifier
+      MPL-2.0 comment, keeping it consistent with the rest of the vendored OpenBao
+      tree.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/kind/config.yaml
+    id: r.loopback-listen-address
+    level: MUST
+    text: The mapping sets listenAddress to 127.0.0.1, so the published port binds
+      the loopback interface only and is not exposed on external interfaces.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/kubernetes/integrationtest/kind/config.yaml
+    id: r.single-control-plane-node
+    level: MUST
+    text: The cluster defines exactly one node and gives it the control-plane role,
+      so the integration test cluster has a single schedulable control plane and no
+      separate workers.
   upstream: self
