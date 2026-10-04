@@ -59963,7 +59963,7 @@ system_contexts:
   - class:f8da6f2e7636894abc232fd2194036a2 SidebarNavClusterComponent@third_party/openbao/ui/app/components/sidebar/nav/cluster.js:4
   - file:third_party/openbao/ui/app/components/sidebar/nav/cluster.js cluster.js@third_party/openbao/ui/app/components/sidebar/nav/cluster.js
   id: sc.third-party-openbao-ui-app-components-sidebar-nav
-  intent: The context exists so the specification records the exported surface and
+  intent: This context exists so the specification records the exported surface and
     the delegation behavior of the sidebar cluster navigation component without re-reading
     the source. It gives downstream readers the class name and file location, the
     four injected service dependencies, and the fact that the only public member is
@@ -59983,8 +59983,8 @@ system_contexts:
     id: r.cluster-getter-delegates
     level: MUST
     text: The cluster getter must return the cluster property of the injected currentCluster
-      service, reading it through on every access rather than caching or copying it,
-      and must perform no transformation on the returned value.
+      service, reading it through on every access instead of caching or copying it,
+      and must apply no transformation to the returned value.
   - codeRefs:
     - class:f8da6f2e7636894abc232fd2194036a2
     - file:third_party/openbao/ui/app/components/sidebar/nav/cluster.js
@@ -59998,9 +59998,10 @@ system_contexts:
     - file:third_party/openbao/ui/app/components/sidebar/nav/cluster.js
     id: r.injects-four-services
     level: MUST
-    text: 'SidebarNavClusterComponent must declare four Ember service injections using
-      the @service decorator: currentCluster, version, auth, and namespace. version,
-      auth, and namespace are declared but not read anywhere in the class body.'
+    text: 'SidebarNavClusterComponent must declare four Ember service injections with
+      the @service decorator: currentCluster, version, auth, and namespace. Only currentCluster
+      is read inside the class body; version, auth, and namespace are declared and
+      never used.'
   upstream: self
 - code:
   - third_party/openbao/ui/app/components/splash-page/splash-content.js

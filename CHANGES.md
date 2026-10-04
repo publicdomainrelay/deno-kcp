@@ -4161,10 +4161,10 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 
 ### third-party-openbao-ui-app-components-sidebar-nav
 
-- intent: "" -> "The context exists so the specification records the exported surface and the delegation behavior of the sidebar cluster navigation component without re-reading the source. It gives downstream readers the class name and file location, the four injected service dependencies, and the fact that the only public member is a getter that proxies the cluster value from the currentCluster service. It is a documentation anchor for a vendored third-party file, not a specification of behavior that the repository itself implements."
-- added `r.cluster-getter-delegates` (MUST): "The cluster getter must return the cluster property of the injected currentCluster service, reading it through on every access rather than caching or copying it, and must perform no transformation on the returned value."
+- intent: "" -> "This context exists so the specification records the exported surface and the delegation behavior of the sidebar cluster navigation component without re-reading the source. It gives downstream readers the class name and file location, the four injected service dependencies, and the fact that the only public member is a getter that proxies the cluster value from the currentCluster service. It is a documentation anchor for a vendored third-party file, not a specification of behavior that the repository itself implements."
+- added `r.cluster-getter-delegates` (MUST): "The cluster getter must return the cluster property of the injected currentCluster service, reading it through on every access instead of caching or copying it, and must apply no transformation to the returned value."
 - added `r.exports-cluster-nav-component` (MUST): "The file third_party/openbao/ui/app/components/sidebar/nav/cluster.js must export exactly one default class, SidebarNavClusterComponent, which extends the Component base class imported from @glimmer/component."
-- added `r.injects-four-services` (MUST): "SidebarNavClusterComponent must declare four Ember service injections using the @service decorator: currentCluster, version, auth, and namespace. version, auth, and namespace are declared but not read anywhere in the class body."
+- added `r.injects-four-services` (MUST): "SidebarNavClusterComponent must declare four Ember service injections with the @service decorator: currentCluster, version, auth, and namespace. Only currentCluster is read inside the class body; version, auth, and namespace are declared and never used."
 
 ### third-party-openbao-ui-app-components-splash-page
 
@@ -4499,7 +4499,8 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-components-sidebar-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-components-sidebar-header-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-components-sidebar-nav-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-components-sidebar-nav-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-components-sidebar-nav-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-components-splash-page-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-components-splash-page-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-components-transit-key-action-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
