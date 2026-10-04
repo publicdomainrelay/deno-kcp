@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so callers can declare a password or random-string policy as HCL and get back an executable generator, and so the same package can be driven from the server's logical API layer. It is a vendored copy of OpenBao's internal/helper/random inside deno-kcp, so its public surface must keep the upstream shapes: ParsePolicy and ParsePolicyBytes for direct use, PolicyParser for callers that need a custom rule registry, the Rule interface plus CharsetRule for custom constraints, JSON serialization for storing policies, and HandleRandomAPI for the HTTP-facing endpoint.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
