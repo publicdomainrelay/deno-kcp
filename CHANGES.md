@@ -4749,6 +4749,22 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.sign-role-csr` (MUST): "PkiCertificateSignModel extends PkiCertificateBaseModel and adds the role, csr and removeRootsFromChain attributes, so a signing request carries the target role, the submitted certificate signing request, and whether roots are stripped from the returned chain."
 - added `r.sign-validations` (SHOULD): "PkiCertificateSignModel participates in model validation, so the role and csr fields are checked through ModelValidations before the sign request is submitted."
 
+### third-party-openbao-ui-app-models-pki-config
+
+- intent: "" -> "This context exists so the PKI configuration edit surface has a describable contract: which configuration fields each of the four config endpoints (acme, cluster, crl, urls) accepts, how those fields render in the form, and how the UI decides whether the current token may write them. It is a third-party UI model layer (vendored under third_party/openbao), consumed by pki-configuration-edit.ts, and it maps one-to-one onto the PKI engine's config/* API paths."
+- added `r.acme-capabilities` (MUST): "PkiConfigAcmeModel exposes acmePath as lazyCapabilities on apiPath `${'id'}/config/acme` keyed by id, and canSet is true unless acmePath.get('canUpdate') is exactly false — an unresolved capability must not lock the form."
+- added `r.acme-eab-policy-values` (MUST): "The ACME model restricts eabPolicy to the possible values not-required, new-account-required and always-required, so the form renders a fixed choice list instead of free text."
+- added `r.acme-form-fields` (MUST): "PkiConfigAcmeModel declares, in this order because declaration order fixes form order, the attributes enabled (boolean), defaultDirectoryPolicy (string), allowedRoles (array, stringArray editor), allowRoleExtKeyUsage (boolean), allowedIssuers (array, stringArray editor), eabPolicy (string) and dnsResolver (string)."
+- added `r.acme-help-url` (MUST): "PkiConfigAcmeModel.getHelpUrl(backendPath) returns `/v1/${backendPath}/config/acme?help=1`, and useOpenAPI is true so the OpenAPI-backed form uses that endpoint for field documentation."
+- added `r.backend-path-as-model-id` (MUST): "Each of the four config models takes the PKI backend/mount value as its record ID, because that ID is interpolated into the lazy capabilities API path and into the help URL."
+- added `r.cluster-form-fields` (MUST): "PkiConfigClusterModel declares path (string, the performance replication cluster's API mount path including namespaces) and aiaPath (string, the AIA distribution point), which may refer to an external non-OpenBao responder."
+- added `r.cluster-help-url-and-capabilities` (MUST): "PkiConfigClusterModel returns `/v1/${backendPath}/config/cluster?help=1` from getHelpUrl, sets useOpenAPI true, and gates canSet on clusterPath, a lazyCapabilities binding to `${'id'}/config/cluster` that is false only when canUpdate is exactly false."
+- added `r.crl-capabilities` (MUST): "PkiConfigCrlModel binds crlPath as lazyCapabilities on `${'id'}/config/crl` keyed by id and defines canSet as true unless crlPath.get('canUpdate') is exactly false."
+- added `r.crl-form-groups` (MUST): "PkiConfigCrlModel is decorated with withFormFields(null, formFieldGroups) where the groups are 'Certificate Revocation List (CRL)' containing expiry, autoRebuildGracePeriod and deltaRebuildInterval, and 'Online Certificate Status Protocol (OCSP)' containing ocspExpiry — the null first argument means no top-level fields, every field lives in a named group."
+- added `r.crl-ttl-boolean-pairing` (MUST): "Each CRL TTL string attribute is rendered as a toggled TTL editor bound to a boolean attribute: expiry to disable with isOppositeValue true, ocspExpiry to ocspDisable with isOppositeValue true, autoRebuildGracePeriod to autoRebuild and deltaRebuildInterval to enableDelta both with isOppositeValue false; autoRebuild, enableDelta and ocspDisable are plain booleans."
+- added `r.urls-form-fields` (MUST): "PkiConfigUrlsModel declares issuingCertificates, crlDistributionPoints and ocspServers, each an array attribute using the stringArray edit type with help text suppressed, holding the alternative URL values emitted into issued certificates for the Issuing Certificate, CRL Distribution Points and OCSP Servers fields."
+- added `r.urls-help-url-and-capabilities` (MUST): "PkiConfigUrlsModel returns `/v1/${backendPath}/config/urls?help=1` from getHelpUrl, sets useOpenAPI true, and gates canSet on urlsPath, a lazyCapabilities binding to `${'id'}/config/urls` that is false only when canUpdate is exactly false."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5137,6 +5153,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-models-oidc-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-models-pki-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-models-pki-certificate-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-models-pki-config-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-ui-app-models-policy-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-models-pki-config-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-models-policy-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the PKI configuration edit surface has a describable contract: which configuration fields each of the four config endpoints (acme, cluster, crl, urls) accepts, how those fields render in the form, and how the UI decides whether the current token may write them. It is a third-party UI model layer (vendored under third_party/openbao), consumed by pki-configuration-edit.ts, and it maps one-to-one onto the PKI engine's config/* API paths.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
