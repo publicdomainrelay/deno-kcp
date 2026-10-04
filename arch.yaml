@@ -36546,7 +36546,80 @@ system_contexts:
   - file:third_party/openbao/internal/vault/external_tests/sealmigrationext/seal_migration_pre14_test.go
     seal_migration_pre14_test.go@third_party/openbao/internal/vault/external_tests/sealmigrationext/seal_migration_pre14_test.go
   id: sc.third-party-openbao-internal-vault-external-tests-sealmigrationext
+  intent: This context exists so the seal-migration scenarios that the shared internal/vault/external_tests/sealmigration
+    package implements can be driven from a thin external test surface without duplicating
+    the scenario bodies. The file supplies the concrete test entrypoints for Shamir-to-Transit,
+    Transit-to-Shamir and Transit-to-Transit migration, split across the pre-1.4 and
+    post-1.4 variants, and it fixes the per-test in-memory storage construction and
+    the base-port offset that keeps the parallel tests from colliding on listening
+    ports.
   name: third-party-openbao-internal-vault-external-tests-sealmigrationext
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/sealmigrationext/seal_migration_pre14_test.go
+    id: r.base-port-offset
+    level: MUST
+    text: 'Every test must pass a port derived from a sealmigration base-port constant
+      plus 300: BasePort_ShamirToTransit_Pre14 for the pre-1.4 Shamir-to-Transit test,
+      BasePort_TransitToShamir_Pre14 for the pre-1.4 Transit-to-Shamir test, BasePort_TransitToShamir_Post14
+      for the post-1.4 Transit-to-Shamir test and BasePort_TransitToTransit for the
+      Transit-to-Transit test, so parallel runs on shared storage do not collide on
+      listening ports.'
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/sealmigrationext/seal_migration_pre14_test.go
+    id: r.debug-named-logger
+    level: MUST
+    text: Each test must build its logger with logging.NewVaultLogger at hclog.Debug
+      level and rename it with t.Name(), so log records carry the test name.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/sealmigrationext/seal_migration_pre14_test.go
+    id: r.delegate-to-sealmigration
+    level: MUST
+    text: Each test must delegate the scenario body to the matching parameterized
+      helper in the sealmigration package, passing the logger, the storage handle
+      and a base port, rather than implementing migration steps itself.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/sealmigrationext/seal_migration_pre14_test.go
+    id: r.distinct-scenarios
+    level: MUST
+    text: 'The package must expose exactly five top-level tests, one for each seal-migration
+      scenario: Shamir-to-Transit before 1.4, Transit-to-Shamir before 1.4, Shamir-to-Transit
+      after 1.4, Transit-to-Shamir after 1.4 and Transit-to-Transit after 1.4.'
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/sealmigrationext/seal_migration_pre14_test.go
+    id: r.inmem-reusable-storage
+    level: MUST
+    text: Each test must obtain storage by calling teststorage.MakeReusableStorage
+      with a backend produced by teststorage.MakeInmemBackend, and must defer the
+      cleanup function that MakeReusableStorage returns so the storage is torn down
+      when the test ends.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/sealmigrationext/seal_migration_pre14_test.go
+    id: r.parallel
+    level: MUST
+    text: Every test in the package must call t.Parallel() before doing any other
+      work, so the scenarios run concurrently.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/sealmigrationext/seal_migration_pre14_test.go
+    id: r.post14-transit-to-shamir
+    level: MUST
+    text: TestSealMigration_TransitToShamir_Post14 must call sealmigration.ParamTestSealMigrationTransitToShamir_Post14
+      with BasePort_TransitToShamir_Post14 plus 300, mirroring the pre-1.4 Transit-to-Shamir
+      test at a different port base.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/sealmigrationext/seal_migration_pre14_test.go
+    id: r.pre14-shamir-to-transit-wiring
+    level: MUST
+    text: TestSealMigration_ShamirToTransit_Pre14 must call sealmigration.ParamTestSealMigrationShamirToTransit_Pre14,
+      while TestSealMigration_ShamirToTransit_Post14 must call sealmigration.ParamTestSealMigrationTransitToShamir_Post14,
+      which is the helper the file actually wires to that test name.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/sealmigrationext/seal_migration_pre14_test.go
+    id: r.transit-to-transit
+    level: SHOULD
+    text: The Transit-to-Transit scenario must run only in its post-1.4 form, through
+      sealmigration.ParamTestSealMigration_TransitToTransit, with no pre-1.4 counterpart
+      in this package.
   upstream: self
 - code:
   - third_party/openbao/internal/vault/external_tests/standby/read_only_standby_test.go

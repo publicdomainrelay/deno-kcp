@@ -10,5 +10,25 @@ spec:
   systemContext: third-party-openbao-internal-vault-external-tests-sealmigrationext
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-vault-external-tests-sealmigrationext
-  phase: Running
+  agentLog: 'Package sealmigrationext holds Go integration tests that exercise OpenBao
+    seal migration from the outside. The single file, third_party/openbao/internal/vault/external_tests/sealmigrationext/seal_migration_pre14_test.go,
+    declares five top-level test functions: TestSealMigration_ShamirToTransit_Pre14,
+    TestSealMigration_TransitToShamir_Pre14, TestSealMigration_ShamirToTransit_Post14,
+    TestSealMigration_TransitToShamir_Post14 and TestSealMigration_TransitToTransit_Post14.
+    Each one calls t.Parallel(), builds an hclog logger at Debug level named after
+    the test, obtains reusable in-memory storage through teststorage.MakeReusableStorage
+    and teststorage.MakeInmemBackend, defers the returned cleanup, and then delegates
+    the real work to a parameterized helper in the sibling package internal/vault/external_tests/sealmigration,
+    passing the logger, the storage handle and a distinct base port taken from that
+    package''s constants plus an offset of 300. The package therefore owns no migration
+    logic itself; it only selects which seal-migration scenario to run, on which storage,
+    and on which port range, so the shared sealmigration package can be reused by
+    other external surfaces.'
+  message: wrote 9 requirement(s) and 0 interface(s) for third-party-openbao-internal-vault-external-tests-sealmigrationext;
+    interface TestSealMigration_ShamirToTransit_Pre14 is not in the observed facts;
+    dropped; interface TestSealMigration_TransitToShamir_Pre14 is not in the observed
+    facts; dropped; interface TestSealMigration_ShamirToTransit_Post14 is not in the
+    observed facts; dropped; interface TestSealMigration_TransitToShamir_Post14 is
+    not in the observed facts; dropped; interface TestSealMigration_TransitToTransit_Post14
+    is not in the observed facts; dropped
+  phase: Succeeded

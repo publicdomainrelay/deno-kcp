@@ -2567,6 +2567,19 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.remount-backend-with-failing-rollback` (MUST): "Remounting a backend whose periodic rollback function returns an error must succeed: a write to sys/remount moving that mount to a new path must not return an error, and the cores must then seal and unseal."
 - added `r.router-tests-use-http-handler-and-real-cluster` (MUST): "Both tests must build the cluster with vault.NewTestCluster using vaulthttp.Handler as the handler func, wait for the first core to become active, drive it through cluster.Cores[0].Client, and clean the cluster up on exit."
 
+### third-party-openbao-internal-vault-external-tests-sealmigrationext
+
+- intent: "" -> "This context exists so the seal-migration scenarios that the shared internal/vault/external_tests/sealmigration package implements can be driven from a thin external test surface without duplicating the scenario bodies. The file supplies the concrete test entrypoints for Shamir-to-Transit, Transit-to-Shamir and Transit-to-Transit migration, split across the pre-1.4 and post-1.4 variants, and it fixes the per-test in-memory storage construction and the base-port offset that keeps the parallel tests from colliding on listening ports."
+- added `r.base-port-offset` (MUST): "Every test must pass a port derived from a sealmigration base-port constant plus 300: BasePort_ShamirToTransit_Pre14 for the pre-1.4 Shamir-to-Transit test, BasePort_TransitToShamir_Pre14 for the pre-1.4 Transit-to-Shamir test, BasePort_TransitToShamir_Post14 for the post-1.4 Transit-to-Shamir test and BasePort_TransitToTransit for the Transit-to-Transit test, so parallel runs on shared storage do not collide on listening ports."
+- added `r.debug-named-logger` (MUST): "Each test must build its logger with logging.NewVaultLogger at hclog.Debug level and rename it with t.Name(), so log records carry the test name."
+- added `r.delegate-to-sealmigration` (MUST): "Each test must delegate the scenario body to the matching parameterized helper in the sealmigration package, passing the logger, the storage handle and a base port, rather than implementing migration steps itself."
+- added `r.distinct-scenarios` (MUST): "The package must expose exactly five top-level tests, one for each seal-migration scenario: Shamir-to-Transit before 1.4, Transit-to-Shamir before 1.4, Shamir-to-Transit after 1.4, Transit-to-Shamir after 1.4 and Transit-to-Transit after 1.4."
+- added `r.inmem-reusable-storage` (MUST): "Each test must obtain storage by calling teststorage.MakeReusableStorage with a backend produced by teststorage.MakeInmemBackend, and must defer the cleanup function that MakeReusableStorage returns so the storage is torn down when the test ends."
+- added `r.parallel` (MUST): "Every test in the package must call t.Parallel() before doing any other work, so the scenarios run concurrently."
+- added `r.post14-transit-to-shamir` (MUST): "TestSealMigration_TransitToShamir_Post14 must call sealmigration.ParamTestSealMigrationTransitToShamir_Post14 with BasePort_TransitToShamir_Post14 plus 300, mirroring the pre-1.4 Transit-to-Shamir test at a different port base."
+- added `r.pre14-shamir-to-transit-wiring` (MUST): "TestSealMigration_ShamirToTransit_Pre14 must call sealmigration.ParamTestSealMigrationShamirToTransit_Pre14, while TestSealMigration_ShamirToTransit_Post14 must call sealmigration.ParamTestSealMigrationTransitToShamir_Post14, which is the helper the file actually wires to that test name."
+- added `r.transit-to-transit` (SHOULD): "The Transit-to-Transit scenario must run only in its post-1.4 form, through sealmigration.ParamTestSealMigration_TransitToTransit, with no pre-1.4 counterpart in this package."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -2745,5 +2758,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-vault-external-tests-response-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-response-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-router-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-vault-external-tests-sealmigration-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-internal-vault-external-tests-sealmigrationext-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-vault-external-tests-sealmigration-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-internal-vault-external-tests-sealmigrationext-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
