@@ -1,10 +1,211 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
 - file:third_party/openbao/internal/command/agentproxyshared/sink/sink.go sink.go@third_party/openbao/internal/command/agentproxyshared/sink/sink.go
+- function:2f41b009a7ffd88a0049dfd048945027 NewSinkServer@third_party/openbao/internal/command/agentproxyshared/sink/sink.go:60
+- interface:0cd1f681043f9d746f5097add6157e65 SinkReader@third_party/openbao/internal/command/agentproxyshared/sink/sink.go:25
+- interface:69a57c3657369fde08e7d237a02f64b7 Sink@third_party/openbao/internal/command/agentproxyshared/sink/sink.go:21
+- method:55bc74ab20086a4a1747d7325eebdf07 SinkReader.Token@third_party/openbao/internal/command/agentproxyshared/sink/sink.go:26
+- method:63fd61f4db5ab68916313ad158ac8c58 Sink.WriteToken@third_party/openbao/internal/command/agentproxyshared/sink/sink.go:22
+- method:a588aa6c95d117ad20bf34755c761423 SinkServer.Run@third_party/openbao/internal/command/agentproxyshared/sink/sink.go:71
+- struct:79c67763e1eb080619b9463cd322fbe4 SinkServerConfig@third_party/openbao/internal/command/agentproxyshared/sink/sink.go:44
+- struct:cf40f598989975787152ae0484c4fc75 SinkServer@third_party/openbao/internal/command/agentproxyshared/sink/sink.go:52
+- struct:ff6363c0efe5a7c163853d933a2f2fca SinkConfig@third_party/openbao/internal/command/agentproxyshared/sink/sink.go:29
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-command-agentproxyshared-sink
   namespace: default
 spec:
+  intent: 'This context exists to specify the agent''s sink subsystem: the abstraction
+    over anywhere an auth token can be delivered, the per-sink configuration and key
+    material that transforms a token on the way out, and the server loop that fans
+    one freshly received token out to every configured sink with retry and shutdown
+    semantics. It is the contract that concrete sinks — file, in-memory, mock and
+    similar — implement, and the contract the agent cache and proxy layers call into
+    when a token changes. The spec pins down the exported surface (Sink, SinkReader,
+    SinkConfig, SinkServerConfig, SinkServer, NewSinkServer, SinkServer.Run) and the
+    invariants the run loop must keep, so implementations and callers can be checked
+    against the code that is actually present.'
+  interfaces:
+  - file: third_party/openbao/internal/command/agentproxyshared/sink/sink.go
+    kind: function
+    name: NewSinkServer
+    signature: func NewSinkServer(conf *SinkServerConfig) *SinkServer
+  - file: third_party/openbao/internal/command/agentproxyshared/sink/sink.go
+    kind: interface
+    name: Sink
+    signature: type Sink interface { WriteToken(string) error }
+  - file: third_party/openbao/internal/command/agentproxyshared/sink/sink.go
+    kind: method
+    name: Sink.WriteToken
+    signature: WriteToken(string) error
+  - file: third_party/openbao/internal/command/agentproxyshared/sink/sink.go
+    kind: struct
+    name: SinkConfig
+    signature: type SinkConfig struct { Sink; Logger hclog.Logger; Config map[string]any;
+      Client *api.Client; WrapTTL time.Duration; DHType string; DHPath string; DeriveKey
+      bool; AAD string; cachedRemotePubKey []byte; cachedPubKey []byte; cachedPriKey
+      []byte }
+  - file: third_party/openbao/internal/command/agentproxyshared/sink/sink.go
+    kind: interface
+    name: SinkReader
+    signature: type SinkReader interface { Token() string }
+  - file: third_party/openbao/internal/command/agentproxyshared/sink/sink.go
+    kind: method
+    name: SinkReader.Token
+    signature: Token() string
+  - file: third_party/openbao/internal/command/agentproxyshared/sink/sink.go
+    kind: struct
+    name: SinkServer
+    signature: type SinkServer struct { logger hclog.Logger; client *api.Client; random
+      *rand.Rand; exitAfterAuth bool; remaining atomic.Int32 }
+  - file: third_party/openbao/internal/command/agentproxyshared/sink/sink.go
+    kind: method
+    name: SinkServer.Run
+    signature: func (ss *SinkServer) Run(ctx context.Context, incoming chan string,
+      sinks []*SinkConfig) error
+  - file: third_party/openbao/internal/command/agentproxyshared/sink/sink.go
+    kind: struct
+    name: SinkServerConfig
+    signature: type SinkServerConfig struct { Logger hclog.Logger; Client *api.Client;
+      Context context.Context; ExitAfterAuth bool }
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/sink/sink.go
+    - struct:ff6363c0efe5a7c163853d933a2f2fca
+    id: r.dh-encrypt
+    level: MUST
+    text: 'When a SinkConfig has a non-empty DHType, the token is encrypted before
+      it reaches the sink: for curve25519 the remote public key is read from DHPath
+      and decoded once and cached, a local key pair is generated once and cached,
+      the shared secret is computed from the cached private and remote public keys,
+      DeriveKey selects dhutil.DeriveSharedKey over the raw secret, an empty AES key
+      is an error, and the token is sealed with EncryptAES using AAD and emitted as
+      an encoded JSON envelope carrying the local public key, nonce and encrypted
+      payload.'
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/sink/sink.go
+    - function:2f41b009a7ffd88a0049dfd048945027
+    - struct:cf40f598989975787152ae0484c4fc75
+    id: r.new-sink-server
+    level: MUST
+    text: NewSinkServer copies Logger, Client and ExitAfterAuth from the SinkServerConfig
+      into the SinkServer and seeds a math/rand source from time.Now().Nanosecond();
+      the remaining counter starts at zero and SinkServer's fields stay unexported.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/sink/sink.go
+    - method:a588aa6c95d117ad20bf34755c761423
+    id: r.run-context-cancel
+    level: MUST
+    text: Run selects on ctx.Done() and returns a nil error when the context is canceled,
+      both while waiting for an incoming token and while waiting to write one.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/sink/sink.go
+    - method:a588aa6c95d117ad20bf34755c761423
+    - struct:79c67763e1eb080619b9463cd322fbe4
+    id: r.run-exit-after-auth
+    level: MUST
+    text: When ExitAfterAuth is set, Run returns nil either on receiving a token while
+      the sink list is empty (logging "no sinks, exitAfterAuth, bye") or after a successful
+      write leaves the remaining counter at zero; with no sinks and ExitAfterAuth
+      unset it logs at trace level and keeps running.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/sink/sink.go
+    - method:a588aa6c95d117ad20bf34755c761423
+    - struct:cf40f598989975787152ae0484c4fc75
+    id: r.run-fanout
+    level: MUST
+    text: For a new token and a non-empty sink list, Run drains any pending work from
+      the sink channel, records the token as latest, then enqueues one sinkToken per
+      SinkConfig while incrementing the remaining atomic counter once per sink; each
+      dequeued sinkToken is written and decrements the counter.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/sink/sink.go
+    - method:a588aa6c95d117ad20bf34755c761423
+    id: r.run-logging
+    level: SHOULD
+    text: Run logs "starting sink server" on entry and "sink server stopped" on exit
+      through the configured hclog logger, and logs "no sinks, ignoring new token"
+      at trace level when a token arrives with no sinks configured.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/sink/sink.go
+    - method:a588aa6c95d117ad20bf34755c761423
+    id: r.run-nil-channel
+    level: MUST
+    text: 'SinkServer.Run rejects a nil incoming channel before starting its loop
+      and returns the error "sink server: incoming channel is nil".'
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/sink/sink.go
+    - method:a588aa6c95d117ad20bf34755c761423
+    id: r.run-retry-backoff
+    level: MUST
+    text: When writeSink returns an error, Run logs "error returned by sink function,
+      retrying" with the error and the backoff, waits a randomized backoff drawn from
+      2 seconds plus ss.random until 2 seconds minus 1 second, that is in the range
+      [1s, 3s), and re-enqueues the same sinkToken; a context cancellation during
+      the wait stops the timer and returns nil.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/sink/sink.go
+    - method:a588aa6c95d117ad20bf34755c761423
+    id: r.run-token-dedup
+    level: MUST
+    text: Run keeps the most recent token and ignores any incoming token equal to
+      it, so a repeated token is not fanned out to the sinks again.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/sink/sink.go
+    - struct:ff6363c0efe5a7c163853d933a2f2fca
+    id: r.sink-config-fields
+    level: MUST
+    text: 'SinkConfig embeds a Sink and carries the per-sink settings that govern
+      output: Logger, Config, Client, WrapTTL, DHType, DHPath, DeriveKey and AAD,
+      plus unexported caches cachedRemotePubKey, cachedPubKey and cachedPriKey that
+      hold the DH material between token writes so keys are generated and the remote
+      key read at most once per sink.'
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/sink/sink.go
+    - interface:69a57c3657369fde08e7d237a02f64b7
+    - method:63fd61f4db5ab68916313ad158ac8c58
+    id: r.sink-contract
+    level: MUST
+    text: The Sink interface declares exactly one method, WriteToken(string) error,
+      and every concrete sink destination must implement it; SinkServer.Run delivers
+      tokens only through this method, never through a concrete sink type.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/sink/sink.go
+    - interface:0cd1f681043f9d746f5097add6157e65
+    - method:55bc74ab20086a4a1747d7325eebdf07
+    id: r.sink-reader-contract
+    level: MUST
+    text: The SinkReader interface declares exactly one method, Token() string, so
+      a caller can read back the token a sink currently holds without depending on
+      the destination type.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/sink/sink.go
+    - struct:79c67763e1eb080619b9463cd322fbe4
+    id: r.sink-server-config-fields
+    level: MUST
+    text: SinkServerConfig carries the Logger, api Client, Context and ExitAfterAuth
+      switch that NewSinkServer consumes; the context field is present in the config
+      type even though Run takes its own ctx argument.
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/sink/sink.go
+    - struct:ff6363c0efe5a7c163853d933a2f2fca
+    id: r.wrap-ttl
+    level: MUST
+    text: 'When a SinkConfig has a non-zero WrapTTL, the token is first wrapped: the
+      client is cloned with headers, its token set to the token being wrapped, a wrapping
+      lookup function returning the TTL string is installed, and sys/wrapping/wrap
+      is called; any clone, write, nil-secret or nil-wrap-info failure aborts the
+      write with a descriptive error rather than writing the raw token, and the encoded
+      WrapInfo becomes the new token.'
+  - codeRefs:
+    - file:third_party/openbao/internal/command/agentproxyshared/sink/sink.go
+    - method:63fd61f4db5ab68916313ad158ac8c58
+    - method:a588aa6c95d117ad20bf34755c761423
+    id: r.write-sink-transform-order
+    level: MUST
+    text: The per-sink write path checks that the token being written is still the
+      latest token, then applies wrapping first and encryption second, and passes
+      the resulting token to Sink.WriteToken; a token that has been superseded is
+      skipped without error.
   upstream: self

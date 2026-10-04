@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to specify the agent's sink subsystem: the abstraction over anywhere an auth token can be delivered, the per-sink configuration and key material that transforms a token on the way out, and the server loop that fans one freshly received token out to every configured sink with retry and shutdown semantics. It is the contract that concrete sinks — file, in-memory, mock and similar — implement, and the contract the agent cache and proxy layers call into when a token changes. The spec pins down the exported surface (Sink, SinkReader, SinkConfig, SinkServerConfig, SinkServer, NewSinkServer, SinkServer.Run) and the invariants the run loop must keep, so implementations and callers can be checked against the code that is actually present.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
