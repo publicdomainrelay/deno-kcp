@@ -65568,13 +65568,95 @@ system_contexts:
   - third_party/openbao/ui/app/routes/vault/cluster/access/methods.js
   - third_party/openbao/ui/app/routes/vault/cluster/access/oidc.js
   codeRefIndex:
+  - class:9373017409ee56837c91b943f45e421f VaultClusterAccessMethodsRoute@third_party/openbao/ui/app/routes/vault/cluster/access/methods.js:9
+  - class:bd9bfe3d7c9bb4073a2764299a2dd55e OidcConfigureRoute@third_party/openbao/ui/app/routes/vault/cluster/access/oidc.js:8
   - file:third_party/openbao/ui/app/routes/vault/cluster/access/identity.js identity.js@third_party/openbao/ui/app/routes/vault/cluster/access/identity.js
   - file:third_party/openbao/ui/app/routes/vault/cluster/access/leases.js leases.js@third_party/openbao/ui/app/routes/vault/cluster/access/leases.js
   - file:third_party/openbao/ui/app/routes/vault/cluster/access/method.js method.js@third_party/openbao/ui/app/routes/vault/cluster/access/method.js
   - file:third_party/openbao/ui/app/routes/vault/cluster/access/methods.js methods.js@third_party/openbao/ui/app/routes/vault/cluster/access/methods.js
   - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc.js oidc.js@third_party/openbao/ui/app/routes/vault/cluster/access/oidc.js
   id: sc.third-party-openbao-ui-app-routes-vault-cluster-access
+  intent: 'This context describes the cluster-access routing surface of the vendored
+    OpenBao web UI: the list route for auth methods, the OIDC configure placeholder
+    route, and the identity, leases and per-method detail routes. It exists so the
+    routes'' data loading, param mapping and 404 behaviour are recorded as a specification
+    before any change to the vendored UI is made.'
+  interfaces:
+  - file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc.js
+    kind: class
+    name: OidcConfigureRoute
+    signature: class OidcConfigureRoute extends Route {}
+  - file: third_party/openbao/ui/app/routes/vault/cluster/access/methods.js
+    kind: class
+    name: VaultClusterAccessMethodsRoute
+    signature: class VaultClusterAccessMethodsRoute extends Route
   name: third-party-openbao-ui-app-routes-vault-cluster-access
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/identity.js
+    id: r.identity-param-to-model
+    level: MUST
+    text: The identity route's model(params) must translate params.item_type 'entities'
+      to model 'entity' and 'groups' to model 'group' and return that string.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/identity.js
+    id: r.identity-unknown-type-404
+    level: MUST
+    text: The identity route must throw an AdapterError with httpStatus 404 when params.item_type
+      is not one of the two known keys, instead of returning an undefined model.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/leases.js
+    id: r.leases-capabilities-record
+    level: MUST
+    text: The leases route must extend ClusterBaseRoute and its model hook must return
+      store.findRecord('capabilities', 'sys/leases/lookup/'), so the page is gated
+      on that capability record.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/method.js
+    id: r.method-attaches-path-help
+    level: MUST
+    text: For a matched auth method the method route must call the injected path-help
+      service getPaths(model.apiPath, path), set the resulting paths on the model,
+      and return that model.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/method.js
+    id: r.method-injects-services
+    level: MUST
+    text: The method route must inject both the store service and the path-help service,
+      since the model hook depends on each.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/method.js
+    id: r.method-lookup-by-path
+    level: MUST
+    text: The method route's model(params) must load all auth-method records, select
+      the one whose id equals params.path, and throw an AdapterError with httpStatus
+      404 when no record matches.
+  - codeRefs:
+    - class:9373017409ee56837c91b943f45e421f
+    id: r.methods-injects-store
+    level: MUST
+    text: VaultClusterAccessMethodsRoute must inject the store service, because the
+      model hook reads auth-method records exclusively through it.
+  - codeRefs:
+    - class:9373017409ee56837c91b943f45e421f
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/methods.js
+    id: r.methods-lists-auth-methods
+    level: MUST
+    text: VaultClusterAccessMethodsRoute.model must return the result of store.findAll('auth-method'),
+      so the access/methods page lists every mounted auth method.
+  - codeRefs:
+    - class:9373017409ee56837c91b943f45e421f
+    id: r.methods-query-params-refresh
+    level: MUST
+    text: 'VaultClusterAccessMethodsRoute must declare queryParams page and pageFilter,
+      both with refreshModel: true, so changing either param re-runs the model hook.'
+  - codeRefs:
+    - class:bd9bfe3d7c9bb4073a2764299a2dd55e
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/oidc.js
+    id: r.oidc-configure-placeholder
+    level: MUST
+    text: OidcConfigureRoute must remain a bare Route subclass with no model or hook
+      overrides, so the OIDC configure path resolves through the parent route's data.
   upstream: self
 - code:
   - third_party/openbao/ui/app/routes/vault/cluster/access/identity/create.js

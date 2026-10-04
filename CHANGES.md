@@ -4828,6 +4828,20 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.tools-and-settings-models` (MUST): "The tools route must return the parent vault.cluster model via modelFor, and the settings route must return an empty model object."
 - added `r.unseal-route-inherits-base` (MUST): "The unseal route is an empty extension of the cluster route base, contributing no model or hooks beyond what the base provides."
 
+### third-party-openbao-ui-app-routes-vault-cluster-access
+
+- intent: "" -> "This context describes the cluster-access routing surface of the vendored OpenBao web UI: the list route for auth methods, the OIDC configure placeholder route, and the identity, leases and per-method detail routes. It exists so the routes' data loading, param mapping and 404 behaviour are recorded as a specification before any change to the vendored UI is made."
+- added `r.identity-param-to-model` (MUST): "The identity route's model(params) must translate params.item_type 'entities' to model 'entity' and 'groups' to model 'group' and return that string."
+- added `r.identity-unknown-type-404` (MUST): "The identity route must throw an AdapterError with httpStatus 404 when params.item_type is not one of the two known keys, instead of returning an undefined model."
+- added `r.leases-capabilities-record` (MUST): "The leases route must extend ClusterBaseRoute and its model hook must return store.findRecord('capabilities', 'sys/leases/lookup/'), so the page is gated on that capability record."
+- added `r.method-attaches-path-help` (MUST): "For a matched auth method the method route must call the injected path-help service getPaths(model.apiPath, path), set the resulting paths on the model, and return that model."
+- added `r.method-injects-services` (MUST): "The method route must inject both the store service and the path-help service, since the model hook depends on each."
+- added `r.method-lookup-by-path` (MUST): "The method route's model(params) must load all auth-method records, select the one whose id equals params.path, and throw an AdapterError with httpStatus 404 when no record matches."
+- added `r.methods-injects-store` (MUST): "VaultClusterAccessMethodsRoute must inject the store service, because the model hook reads auth-method records exclusively through it."
+- added `r.methods-lists-auth-methods` (MUST): "VaultClusterAccessMethodsRoute.model must return the result of store.findAll('auth-method'), so the access/methods page lists every mounted auth method."
+- added `r.methods-query-params-refresh` (MUST): "VaultClusterAccessMethodsRoute must declare queryParams page and pageFilter, both with refreshModel: true, so changing either param re-runs the model hook."
+- added `r.oidc-configure-placeholder` (MUST): "OidcConfigureRoute must remain a bare Route subclass with no model or hook overrides, so the OIDC configure path resolves through the parent route's data."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5221,6 +5235,8 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-models-policy-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-routes-vault-cluster-access-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-routes-vault-cluster-access-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-routes-vault-cluster-access-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-routes-vault-cluster-access-identity-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
