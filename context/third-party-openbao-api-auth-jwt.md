@@ -2,13 +2,124 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to describe the JWT auth method of the embedded OpenBao client library that deno-kcp carries under third_party, so that the role-based login path used against an OpenBao server has a written contract independent of the surrounding vendored tree. It records how a JWTAuth value is validated and assembled, how options mutate it, and where the token comes from, so callers can rely on construction either failing fast with a named error or yielding a JWTAuth ready to log in.
 
 _Write the prose above and the fields in the spec block. `codeRefs` and the resolved references below are maintained by the tool; an edit there is lost._
 
 ## spec
 
 ```yaml spec
+interfaces:
+- file: third_party/openbao/api/auth/jwt/jwt.go
+  kind: struct
+  name: JWTAuth
+  signature: type JWTAuth struct
+- file: third_party/openbao/api/auth/jwt/jwt.go
+  kind: method
+  name: JWTAuth.Login
+  signature: func (a *JWTAuth) Login(ctx context.Context, client *api.Client) (*api.Secret,
+    error)
+- file: third_party/openbao/api/auth/jwt/jwt.go
+  kind: function
+  name: New
+  signature: func New(roleName string, opts ...Option) (*JWTAuth, error)
+- file: third_party/openbao/api/auth/jwt/jwt.go
+  kind: type_alias
+  name: Option
+  signature: type Option func(a *JWTAuth) error
+- file: third_party/openbao/api/auth/jwt/jwt.go
+  kind: function
+  name: WithMountPath
+  signature: func WithMountPath(mountPath string) Option
+- file: third_party/openbao/api/auth/jwt/jwt.go
+  kind: function
+  name: WithToken
+  signature: func WithToken(token string) Option
+- file: third_party/openbao/api/auth/jwt/jwt.go
+  kind: function
+  name: WithTokenFromEnv
+  signature: func WithTokenFromEnv(env string) Option
+- file: third_party/openbao/api/auth/jwt/jwt.go
+  kind: function
+  name: WithTokenFromPath
+  signature: func WithTokenFromPath(path string) Option
+requirements:
+- codeRefs:
+  - file:third_party/openbao/api/auth/jwt/jwt.go
+  - function:6cd6a31e27f327715c4ff05f356f84e5
+  id: r.default-mount-path
+  level: MUST
+  text: New must initialize the JWTAuth mountPath to DefaultMountPath before applying
+    any option.
+- codeRefs:
+  - method:bd156f15d59c7a024f3b42cc22eaaf42
+  - struct:abb2bb341ee56ffb83644c314d2fc9e4
+  id: r.login-signature
+  level: MUST
+  text: JWTAuth.Login must take a context and an OpenBao api.Client and return an
+    api.Secret together with an error.
+- codeRefs:
+  - file:third_party/openbao/api/auth/jwt/jwt.go
+  - function:6cd6a31e27f327715c4ff05f356f84e5
+  id: r.mount-path-non-empty
+  level: MUST
+  text: New must return ErrInvalidMountPath when the mountPath is empty after the
+    options are applied.
+- codeRefs:
+  - file:third_party/openbao/api/auth/jwt/jwt.go
+  - function:6cd6a31e27f327715c4ff05f356f84e5
+  id: r.new-requires-role-name
+  level: MUST
+  text: New must return ErrNoRoleName when roleName is the empty string.
+- codeRefs:
+  - file:third_party/openbao/api/auth/jwt/jwt.go
+  - type_alias:a4524c14e23c21e6a0c9ec52c5c0345f
+  id: r.option-signature
+  level: MUST
+  text: Option must be a func of a single *JWTAuth argument returning an error, so
+    every option constructor composes through New.
+- codeRefs:
+  - function:6cd6a31e27f327715c4ff05f356f84e5
+  - type_alias:a4524c14e23c21e6a0c9ec52c5c0345f
+  id: r.options-applied-in-order
+  level: MUST
+  text: New must apply each Option in the order given and return the option's error
+    immediately, without returning a JWTAuth, when an option fails.
+- codeRefs:
+  - file:third_party/openbao/api/auth/jwt/jwt.go
+  - function:6cd6a31e27f327715c4ff05f356f84e5
+  id: r.token-or-path-required
+  level: MUST
+  text: New must return ErrNoToken when both token and tokenPath are empty after the
+    options are applied.
+- codeRefs:
+  - function:04979f4a112ef4def1b90b2d82880584
+  - struct:abb2bb341ee56ffb83644c314d2fc9e4
+  id: r.with-mount-path-sets-mount
+  level: MUST
+  text: WithMountPath must return an Option that sets the JWTAuth mount path to the
+    given path and returns a nil error.
+- codeRefs:
+  - function:5b77232edaba34ac15adc8636b883ad9
+  - struct:abb2bb341ee56ffb83644c314d2fc9e4
+  id: r.with-token-from-env-reads-env
+  level: MUST
+  text: WithTokenFromEnv must return an Option that sets the JWTAuth token to the
+    value of the named environment variable read with os.Getenv.
+- codeRefs:
+  - function:1b614483408b422219bfc3d70828cf47
+  - struct:abb2bb341ee56ffb83644c314d2fc9e4
+  id: r.with-token-from-path-sets-path
+  level: MUST
+  text: WithTokenFromPath must return an Option that sets the JWTAuth token path to
+    the given path and returns a nil error.
+- codeRefs:
+  - function:eeaf585452aa898fd223655de1516ade
+  - struct:abb2bb341ee56ffb83644c314d2fc9e4
+  id: r.with-token-sets-token
+  level: MUST
+  text: WithToken must return an Option that sets the JWTAuth token to the given string
+    and returns a nil error.
 upstream: self
 ```
 
