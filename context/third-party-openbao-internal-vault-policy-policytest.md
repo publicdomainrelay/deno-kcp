@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to pin the observable behaviour of layered Vault ACL evaluation: an ACL assembled from several stacked policies must allow, deny or grant root privileges on exactly the paths and operations the table lists. It lives in policytest rather than a _test.go file so multiple packages can import it and run the identical suite against ACLs they build by different construction paths, which keeps layered-policy resolution honest across callers without duplicating the expectation table.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

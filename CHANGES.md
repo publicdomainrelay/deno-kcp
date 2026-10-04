@@ -2749,6 +2749,16 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.store-set-and-get` (MUST): "Store.SetPolicy writes a policy to the barrier for its namespace and can enforce a compare-and-swap version, while Store.GetPolicy reads a policy by name and type and Store.GetNonEGPPolicyType reports the stored type of a non-endpoint-governing policy, all returning errors on storage failure and nil when nothing is stored."
 - added `r.templating-substitution-limits` (MUST): "When re-parsing a templated policy the store blocks the substitutions the policy did not opt into: it blocks "/" unless AllowSlashesInIdentityTemplates is set, and blocks "*" and "+" unless AllowWildcardsInIdentityTemplates is set, so a template can never widen a policy path beyond its declared permissions."
 
+### third-party-openbao-internal-vault-policy-policytest
+
+- intent: "" -> "This context exists to pin the observable behaviour of layered Vault ACL evaluation: an ACL assembled from several stacked policies must allow, deny or grant root privileges on exactly the paths and operations the table lists. It lives in policytest rather than a _test.go file so multiple packages can import it and run the identical suite against ACLs they build by different construction paths, which keeps layered-policy resolution honest across callers without duplicating the expectation table."
+- added `r.baseline-not-root` (MUST): "Before the case table runs, a read request for path sys/mount/foo must be evaluated through acl.AllowOperation with a namespace-scoped context, and the result must not report RootPrivs; a root result fails with "unexpected root"."
+- added `r.caller-supplied-acl` (MUST): "TestLayeredACL must accept the ACL and namespace under test as parameters rather than constructing them, so any caller can run the same suite against an ACL it built by its own layering path."
+- added `r.case-table` (MUST): "The suite must carry a table of 26 cases, each fixing a logical.Operation, a path, an expected Allowed value and an expected RootPrivs value; 11 cases expect allowed, 15 expect denied, and 5 expect root privileges."
+- added `r.covered-semantics` (MUST): "The table must cover the layered-policy semantics it documents: the root path denied read but allowed help without root privileges, wildcard grants under dev/ and stage/aws/ that do carry root privileges, a denied sys/seal-adjacent read next to an allowed sys/seal update with root privileges, hidden path segments denied, a stage subpath denied for update, and read/list/update/create/patch all denied on paths no policy names."
+- added `r.fresh-request-per-case` (MUST): "Each case must build its own logical.Request and namespace context, set the case operation and path on it, and call acl.AllowOperation with the root-privilege argument false, so no request state leaks between cases."
+- added `r.mismatch-fails` (MUST): "A case must fail the test when the observed Allowed value differs from the expected one, and separately when the observed RootPrivs value differs, reporting the case and both observed values in the fatal message."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -2940,4 +2950,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-vault-identity-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-policy-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-policy-policytest-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-internal-vault-policy-policytest-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-internal-vault-quotas-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
