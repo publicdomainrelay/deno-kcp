@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists to pin down the behaviour of the OIDC form components as a specification: which args they read from the model, which tracked state they expose for validation and error display, how the allow_all/limited selection is translated into wildcard list values on save, which TTL fields are defaulted, and how the two callbacks are fired. The components are a vendored third_party OpenBao UI subtree inside deno-kcp, so the intent is to describe the code as it stands rather than to propose changes to it.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

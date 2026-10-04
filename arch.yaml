@@ -59560,13 +59560,184 @@ system_contexts:
   - third_party/openbao/ui/app/components/oidc/provider-form.js
   - third_party/openbao/ui/app/components/oidc/scope-form.js
   codeRefIndex:
+  - class:28eff4c80b648ee04bd195dee6bf7562 OidcKeyForm@third_party/openbao/ui/app/components/oidc/key-form.js:27
+  - class:7dea11225442cc2f9d552642f73d018e OidcClientForm@third_party/openbao/ui/app/components/oidc/client-form.js:25
+  - class:9c4cd717761d56accce6a72795c02502 OidcAssignmentFormComponent@third_party/openbao/ui/app/components/oidc/assignment-form.js:29
+  - class:c1743ba2045e81e3a32650e5a1eef2a5 OidcProviderForm@third_party/openbao/ui/app/components/oidc/provider-form.js:27
+  - class:c2dff3613a6257ae7431c4fc75fcabb0 OidcScopeFormComponent@third_party/openbao/ui/app/components/oidc/scope-form.js:27
   - file:third_party/openbao/ui/app/components/oidc/assignment-form.js assignment-form.js@third_party/openbao/ui/app/components/oidc/assignment-form.js
   - file:third_party/openbao/ui/app/components/oidc/client-form.js client-form.js@third_party/openbao/ui/app/components/oidc/client-form.js
   - file:third_party/openbao/ui/app/components/oidc/key-form.js key-form.js@third_party/openbao/ui/app/components/oidc/key-form.js
   - file:third_party/openbao/ui/app/components/oidc/provider-form.js provider-form.js@third_party/openbao/ui/app/components/oidc/provider-form.js
   - file:third_party/openbao/ui/app/components/oidc/scope-form.js scope-form.js@third_party/openbao/ui/app/components/oidc/scope-form.js
   id: sc.third-party-openbao-ui-app-components-oidc
+  intent: 'The context exists to pin down the behaviour of the OIDC form components
+    as a specification: which args they read from the model, which tracked state they
+    expose for validation and error display, how the allow_all/limited selection is
+    translated into wildcard list values on save, which TTL fields are defaulted,
+    and how the two callbacks are fired. The components are a vendored third_party
+    OpenBao UI subtree inside deno-kcp, so the intent is to describe the code as it
+    stands rather than to propose changes to it.'
+  interfaces:
+  - file: third_party/openbao/ui/app/components/oidc/assignment-form.js
+    kind: class
+    name: OidcAssignmentFormComponent
+    signature: class OidcAssignmentFormComponent extends Component
+  - file: third_party/openbao/ui/app/components/oidc/client-form.js
+    kind: class
+    name: OidcClientForm
+    signature: class OidcClientForm extends Component
+  - file: third_party/openbao/ui/app/components/oidc/key-form.js
+    kind: class
+    name: OidcKeyForm
+    signature: class OidcKeyForm extends Component
+  - file: third_party/openbao/ui/app/components/oidc/provider-form.js
+    kind: class
+    name: OidcProviderForm
+    signature: class OidcProviderForm extends Component
+  - file: third_party/openbao/ui/app/components/oidc/scope-form.js
+    kind: class
+    name: OidcScopeFormComponent
+    signature: class OidcScopeFormComponent extends Component
   name: third-party-openbao-ui-app-components-oidc
+  requirements:
+  - codeRefs:
+    - class:9c4cd717761d56accce6a72795c02502
+    - file:third_party/openbao/ui/app/components/oidc/assignment-form.js
+    id: r.assignment-field-writers
+    level: MUST
+    text: 'The assignment form must write form input into the model: handleOperation
+      sets model.name to target.value, onEntitiesSelect sets model.entityIds to the
+      selected ids, and onGroupsSelect sets model.groupIds to the selected ids.'
+  - codeRefs:
+    - class:9c4cd717761d56accce6a72795c02502
+    - file:third_party/openbao/ui/app/components/oidc/assignment-form.js
+    id: r.assignment-save-passes-model
+    level: MUST
+    text: The assignment form's save task must, on the valid path, flash a success
+      message naming the assignment and pass this.args.model itself as the single
+      argument to onSave, because the form may be rendered in a modal and the parent
+      needs the saved record; on the error path it must set errorBanner only.
+  - codeRefs:
+    - class:28eff4c80b648ee04bd195dee6bf7562
+    - class:7dea11225442cc2f9d552642f73d018e
+    - class:9c4cd717761d56accce6a72795c02502
+    - class:c1743ba2045e81e3a32650e5a1eef2a5
+    - class:c2dff3613a6257ae7431c4fc75fcabb0
+    id: r.cancel-rolls-back-or-unloads
+    level: MUST
+    text: Every form's cancel action must pick 'unloadRecord' when this.args.model.isNew
+      is true and 'rollbackAttributes' otherwise, invoke that method on the model,
+      then invoke the onCancel callback from this.args.
+  - codeRefs:
+    - class:7dea11225442cc2f9d552642f73d018e
+    - file:third_party/openbao/ui/app/components/oidc/client-form.js
+    id: r.client-assignment-mode-init
+    level: MUST
+    text: OidcClientForm must initialize radioCardGroupValue to 'allow_all' when model.assignments
+      is absent or contains 'allow_all', and to 'limited' otherwise; its modelAssignments
+      getter must return an empty array when assignments is exactly ['allow_all']
+      (so no chips render) and the assignments list otherwise.
+  - codeRefs:
+    - class:7dea11225442cc2f9d552642f73d018e
+    - file:third_party/openbao/ui/app/components/oidc/client-form.js
+    id: r.client-assignment-selection
+    level: MUST
+    text: 'handleAssignmentSelection must set model.assignments directly when the
+      selection is an array from the search-select component, and otherwise treat
+      the selection as the radio card value: store it in radioCardGroupValue and clear
+      model.assignments to an empty array so the UI reflects an empty selection.'
+  - codeRefs:
+    - class:7dea11225442cc2f9d552642f73d018e
+    - file:third_party/openbao/ui/app/components/oidc/client-form.js
+    id: r.client-save-normalizes-assignments-and-ttl
+    level: MUST
+    text: On a valid client save, when radioCardGroupValue is 'allow_all' the form
+      must set model.assignments to ['allow_all'] (the UI permits allow_all or a list,
+      never both), and it must coerce a numeric-zero idTokenTtl or accessTokenTtl
+      to the string '24h' before saving.
+  - codeRefs:
+    - class:28eff4c80b648ee04bd195dee6bf7562
+    - file:third_party/openbao/ui/app/components/oidc/key-form.js
+    id: r.key-allow-all-and-ttl-defaults
+    level: MUST
+    text: OidcKeyForm must initialize radioCardGroupValue to 'allow_all' when model.allowedClientIds
+      is absent or includes '*', and on a valid save set model.allowedClientIds to
+      ['*'] in allow_all mode, coercing a numeric-zero rotationPeriod or verificationTtl
+      to '24h' before saving.
+  - codeRefs:
+    - class:28eff4c80b648ee04bd195dee6bf7562
+    - file:third_party/openbao/ui/app/components/oidc/key-form.js
+    id: r.key-client-selection-and-filter
+    level: MUST
+    text: 'handleClientSelection must map an array selection to the client ids via
+      client.clientId, and otherwise set radioCardGroupValue and clear model.allowedClientIds;
+      filterDropdownOptions must return the search-select query {paramKey: ''key'',
+      filterFor: [model.name]} so only clients referencing this key are offered.'
+  - codeRefs:
+    - class:c1743ba2045e81e3a32650e5a1eef2a5
+    - file:third_party/openbao/ui/app/components/oidc/provider-form.js
+    id: r.provider-allow-all-and-selection
+    level: MUST
+    text: OidcProviderForm must derive radioCardGroupValue from model.allowedClientIds
+      the same way as the key form, set model.allowedClientIds to ['*'] on a valid
+      save in allow_all mode, and map or clear model.allowedClientIds in handleClientSelection.
+  - codeRefs:
+    - class:c1743ba2045e81e3a32650e5a1eef2a5
+    - file:third_party/openbao/ui/app/components/oidc/provider-form.js
+    id: r.provider-client-tooltip
+    level: MUST
+    text: OidcProviderForm.renderInfoTooltip must return the message 'The application
+      associated with this client_id no longer exists' when the selected client id
+      is absent from the search-select dropdownOptions, and false when the client
+      is present.
+  - codeRefs:
+    - class:c1743ba2045e81e3a32650e5a1eef2a5
+    - file:third_party/openbao/ui/app/components/oidc/provider-form.js
+    id: r.provider-issuer-parse
+    level: MUST
+    text: OidcProviderForm.setIssuer, fired from the did-insert modifier, must set
+      model.issuer to the empty string for a new model and to the origin of the existing
+      issuer parsed by core/utils/parse-url for a persisted one.
+  - codeRefs:
+    - class:28eff4c80b648ee04bd195dee6bf7562
+    - class:7dea11225442cc2f9d552642f73d018e
+    - class:c1743ba2045e81e3a32650e5a1eef2a5
+    - class:c2dff3613a6257ae7431c4fc75fcabb0
+    id: r.save-error-banner
+    level: MUST
+    text: When a save throws, each form must set errorBanner to error.errors joined
+      with '. ' when error.errors exists and to error.message otherwise, and set invalidFormAlert
+      to 'There was an error submitting this form.'.
+  - codeRefs:
+    - class:28eff4c80b648ee04bd195dee6bf7562
+    - class:7dea11225442cc2f9d552642f73d018e
+    - class:c1743ba2045e81e3a32650e5a1eef2a5
+    - class:c2dff3613a6257ae7431c4fc75fcabb0
+    id: r.save-flashes-and-calls-onsave
+    level: MUST
+    text: After a successful model save each form must push a flashMessages.success
+      message that reads either 'created' or 'updated' according to model.isNew, names
+      the record by model.name, and then invoke the onSave callback from this.args.
+  - codeRefs:
+    - class:28eff4c80b648ee04bd195dee6bf7562
+    - class:7dea11225442cc2f9d552642f73d018e
+    - class:9c4cd717761d56accce6a72795c02502
+    - class:c1743ba2045e81e3a32650e5a1eef2a5
+    - class:c2dff3613a6257ae7431c4fc75fcabb0
+    id: r.save-validates-model-first
+    level: MUST
+    text: Every OIDC form's save task must call event.preventDefault(), then this.args.model.validate(),
+      store the returned state into tracked modelValidations when invalid (null when
+      valid), and call this.args.model.save() only when the model is valid.
+  - codeRefs:
+    - class:c2dff3613a6257ae7431c4fc75fcabb0
+    - file:third_party/openbao/ui/app/components/oidc/scope-form.js
+    id: r.scope-example-template
+    level: SHOULD
+    text: OidcScopeFormComponent must expose an exampleTemplate string holding the
+      templated JSON identity example, kept as a multi-line literal so JsonEditor
+      renders its whitespace correctly.
   upstream: self
 - code:
   - third_party/openbao/ui/app/components/secret-list/database-list-item.js
