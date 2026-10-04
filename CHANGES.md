@@ -2159,6 +2159,16 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.sanitize` (MUST): "Sanitize maps each rune of its input to itself when it is a letter, a number, or one of '-', '_' or '.', and to '-' otherwise, so the result contains only Kubernetes-legal characters."
 - added `r.shutdown-cancels-retries` (MUST): "Shutdown closes the client's stop channel, and the in-flight request context watches that channel so an in-progress retry loop is cancelled instead of hanging at process exit."
 
+### third-party-openbao-internal-serviceregistration-kubernetes-client-cmd-kubeclient
+
+- intent: "" -> "It exists to give operators and developers a throwaway, dependency-light binary for manual testing of the Kubernetes service-registration client against a live cluster. It is meant to be built and copied into a running container so that real `GetPod` and `PatchPod` requests can be issued from inside the cluster, which is why it ships as a `main` package under a `cmd/` directory rather than as a library."
+- added `r.client-construction` (MUST): "After parsing flags the command builds the client with `client.New(hclog.Default())` and panics if that constructor returns an error."
+- added `r.config-flags` (MUST): "The command reads its configuration only from four string flags registered in `init`, each defaulting to the empty string and backed by no environment variable: `-call` selects the operation, `-patches` supplies the comma-separated patch list, `-namespace` supplies the Kubernetes namespace, and `-pod-name` supplies the pod name. A flag that is absent leaves its variable empty, and `flag.Parse()` is called before any client work."
+- added `r.get-pod-call` (MUST): "When `-call` is `get-pod`, the command calls `GetPod` with the `-namespace` and `-pod-name` values, JSON-marshals the returned pod, and prints it with the `pod: ` prefix; a call error panics."
+- added `r.patch-pod-call` (MUST): "When `-call` is `patch-pod`, the command splits the `-patches` value on `,` and then each entry on `:`, requiring exactly two fields per entry and panicking with `unable to split %s from selectors provided of %s` otherwise, then builds a `client.Patch` per pair with `client.Replace` as the operation, the first field as the path and the second as the value, and calls `PatchPod` with the namespace, pod name and those patches; a call error panics."
+- added `r.shutdown-handling` (MUST): "The work runs in a goroutine that closes its completion channel with `defer` when done, and `main` blocks in a select over that channel and a shutdown channel; the shutdown channel is produced by `makeShutdownCh`, which registers `os.Interrupt` and `syscall.SIGTERM` on a buffered signal channel and closes the result channel on the first signal, at which point `main` prints `Interrupt received, exiting...` and returns."
+- added `r.unsupported-call` (MUST): "Any `-call` value other than `get-pod` or `patch-pod`, including the empty default, panics with `unsupported call provided: %q`."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -2295,5 +2305,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-serviceregistration-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-serviceregistration-kubernetes-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-serviceregistration-kubernetes-client-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-serviceregistration-kubernetes-client-cmd-kubeclient-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-serviceregistration-kubernetes-client-cmd-kubeclient-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-serviceregistration-kubernetes-testing-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
