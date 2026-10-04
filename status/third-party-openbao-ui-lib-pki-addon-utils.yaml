@@ -1,15 +1,28 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: keyParamsByType'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/ui/lib/pki/addon/utils/action-params.js
+  fingerprint: b1fe9bfe7c58273e51e837e8c40ee5b1046f2862227f1699b0501631e9779f81
+  interfaces:
+  - codegraphId: function:a2c20955acafe88071116f40dd7a1c79
+    file: third_party/openbao/ui/lib/pki/addon/utils/action-params.js
+    kind: function
+    line: 11
+    name: keyParamsByType
+    signature: (type)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 2c38891b718125ba651be542f8f0ac5a2b679f26eb8290fbb575079a144b66dd
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: b1fe9bfe7c58273e51e837e8c40ee5b1046f2862227f1699b0501631e9779f81

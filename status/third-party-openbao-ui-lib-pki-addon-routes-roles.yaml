@@ -1,15 +1,33 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: PkiRolesCreateRoute, PkiRolesIndexRoute'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/ui/lib/pki/addon/routes/roles/create.js
+  - third_party/openbao/ui/lib/pki/addon/routes/roles/index.js
+  fingerprint: a3d76e646ff5ec0e387f1549c93bf7e2112f077c801518e3b86e135ed3677ca3
+  interfaces:
+  - codegraphId: class:238b6e12742a458a3bce1ac75810a4a6
+    file: third_party/openbao/ui/lib/pki/addon/routes/roles/create.js
+    kind: class
+    line: 12
+    name: PkiRolesCreateRoute
+  - codegraphId: class:23a6de23f5f18e3cec44322f7d779e76
+    file: third_party/openbao/ui/lib/pki/addon/routes/roles/index.js
+    kind: class
+    line: 12
+    name: PkiRolesIndexRoute
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 49af2173c746c1f94d9e881bdcdbc671c7116a82f4e2711977af479cee080125
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: a3d76e646ff5ec0e387f1549c93bf7e2112f077c801518e3b86e135ed3677ca3

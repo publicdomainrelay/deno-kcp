@@ -9,5 +9,5 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/ui/lib/pki/app/utils/action-params.js` file action-params.js (third_party/openbao/ui/lib/pki/app/utils/action-params.js)
 <!-- SPECD_MANAGED_END -->
