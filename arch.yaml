@@ -62387,7 +62387,54 @@ system_contexts:
   - file:third_party/openbao/ui/app/controllers/vault/cluster/settings/auth/enable.js
     enable.js@third_party/openbao/ui/app/controllers/vault/cluster/settings/auth/enable.js
   id: sc.third-party-openbao-ui-app-controllers-vault-cluster-settings-auth
+  intent: This context covers the OpenBao UI auth-settings controllers that manage
+    lifecycle around mounting an auth method and configuring it. configure-section
+    exists to prevent a stale model from leaking across singleton controller instances
+    and to release the Ember Data record from the store once the section is torn down;
+    enable exists to forward a successful auth-method mount to the configuration route
+    using the safe transition helper, so navigation honors permissions and route accessibility.
   name: third-party-openbao-ui-app-controllers-vault-cluster-settings-auth
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/settings/auth/configure-section.js
+    id: r.cleanup-model-guards
+    level: MUST
+    text: cleanupModel() must return without touching the model when no model is set,
+      or when the model is saving, destroyed, or destroying, so records still in flight
+      are never unloaded.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/settings/auth/configure-section.js
+    id: r.cleanup-removes-record
+    level: MUST
+    text: cleanupModel() must call removeRecord with the injected store and the model
+      when the model exposes a unloadRecord function, and must not call it otherwise.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/settings/auth/configure-section.js
+    id: r.cleanup-unsets-singleton-model
+    level: MUST
+    text: cleanupModel() must always set the controller's model to null after the
+      guards pass, because controllers are singletons and a retained model would leak
+      between route visits.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/settings/auth/configure-section.js
+    id: r.configure-section-store-service
+    level: MUST
+    text: The configure-section controller must inject the store service, which cleanupModel
+      uses as the owner of the record being removed.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/settings/auth/enable.js
+    id: r.enable-on-mount-success-transition
+    level: MUST
+    text: The enable controller's onMountSuccess(type, path) action must transition
+      to the vault.cluster.settings.auth.configure route with the mounted method's
+      path, using transitionToSafe with the injected router so an unauthorized route
+      is not entered.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/settings/auth/enable.js
+    id: r.enable-router-service
+    level: MUST
+    text: The enable controller must inject the router service and pass it to transitionToSafe
+      rather than calling transitionTo on the controller directly.
   upstream: self
 - code:
   - third_party/openbao/ui/app/decorators/model-expanded-attributes.js

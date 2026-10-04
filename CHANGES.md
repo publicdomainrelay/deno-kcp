@@ -4494,6 +4494,16 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.supported-backend-branch` (MUST): "The redirect decision must first test the mounted type against the SUPPORTED_BACKENDS list produced by the supportedSecretBackends() helper; the constant is computed once at module load, not per invocation."
 - added `r.unsupported-backend-fallback` (MUST): "For a type not present in SUPPORTED_BACKENDS, the controller must redirect to the generic vault.cluster.secrets.backends list route without passing the mount path."
 
+### third-party-openbao-ui-app-controllers-vault-cluster-settings-auth
+
+- intent: "" -> "This context covers the OpenBao UI auth-settings controllers that manage lifecycle around mounting an auth method and configuring it. configure-section exists to prevent a stale model from leaking across singleton controller instances and to release the Ember Data record from the store once the section is torn down; enable exists to forward a successful auth-method mount to the configuration route using the safe transition helper, so navigation honors permissions and route accessibility."
+- added `r.cleanup-model-guards` (MUST): "cleanupModel() must return without touching the model when no model is set, or when the model is saving, destroyed, or destroying, so records still in flight are never unloaded."
+- added `r.cleanup-removes-record` (MUST): "cleanupModel() must call removeRecord with the injected store and the model when the model exposes a unloadRecord function, and must not call it otherwise."
+- added `r.cleanup-unsets-singleton-model` (MUST): "cleanupModel() must always set the controller's model to null after the guards pass, because controllers are singletons and a retained model would leak between route visits."
+- added `r.configure-section-store-service` (MUST): "The configure-section controller must inject the store service, which cleanupModel uses as the owner of the record being removed."
+- added `r.enable-on-mount-success-transition` (MUST): "The enable controller's onMountSuccess(type, path) action must transition to the vault.cluster.settings.auth.configure route with the mounted method's path, using transitionToSafe with the injected router so an unauthorized route is not entered."
+- added `r.enable-router-service` (MUST): "The enable controller must inject the router service and pass it to transitionToSafe rather than calling transitionTo on the controller directly."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4858,6 +4868,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-controllers-vault-cluster-secrets-backend-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-secrets-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-settings-auth-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-settings-auth-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-settings-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-settings-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
