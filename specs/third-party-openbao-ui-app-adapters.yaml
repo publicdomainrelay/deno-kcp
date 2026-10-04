@@ -71,11 +71,28 @@ spec:
   requirements:
   - codeRefs:
     - file:third_party/openbao/ui/app/adapters/auth-method.js
+    - file:third_party/openbao/ui/app/adapters/aws-credential.js
     - file:third_party/openbao/ui/app/adapters/capabilities.js
+    - file:third_party/openbao/ui/app/adapters/cluster.js
+    - file:third_party/openbao/ui/app/adapters/console.js
+    - file:third_party/openbao/ui/app/adapters/generated-item-list.js
     - file:third_party/openbao/ui/app/adapters/lease.js
+    - file:third_party/openbao/ui/app/adapters/node.js
+    - file:third_party/openbao/ui/app/adapters/permissions.js
     - file:third_party/openbao/ui/app/adapters/policy.js
+    - file:third_party/openbao/ui/app/adapters/raft-join.js
+    - file:third_party/openbao/ui/app/adapters/role-aws.js
+    - file:third_party/openbao/ui/app/adapters/role-jwt.js
+    - file:third_party/openbao/ui/app/adapters/role-ssh.js
     - file:third_party/openbao/ui/app/adapters/secret-engine.js
+    - file:third_party/openbao/ui/app/adapters/secret-v2-version.js
     - file:third_party/openbao/ui/app/adapters/secret-v2.js
+    - file:third_party/openbao/ui/app/adapters/secret.js
+    - file:third_party/openbao/ui/app/adapters/server.js
+    - file:third_party/openbao/ui/app/adapters/ssh-otp-credential.js
+    - file:third_party/openbao/ui/app/adapters/ssh-sign.js
+    - file:third_party/openbao/ui/app/adapters/ssh.js
+    - file:third_party/openbao/ui/app/adapters/tools.js
     - file:third_party/openbao/ui/app/adapters/transit-key.js
     id: r.adapters-cover-domain-resources
     level: SHOULD
@@ -111,6 +128,7 @@ spec:
       so MFA method writes use one combined path instead of the default record URLs.
   - codeRefs:
     - class:ad7d2caad4e670533a67733f34b30743
+    - file:third_party/openbao/ui/app/adapters/mfa-setup.js
     id: r.mfa-setup-admin-destroy
     level: MUST
     text: MfaSetupAdapter.adminDestroy POSTs the given data to `/v1/identity/mfa/method/totp/admin-destroy`,
@@ -135,9 +153,10 @@ spec:
       silently overwrites an existing named record.'
   - codeRefs:
     - class:6b10cfbc89c71d4a5b55c8bd178c37a5
+    - file:third_party/openbao/ui/app/adapters/named-path.js
     id: r.named-path-find-record-name-backfill
     level: SHOULD
-    text: NamedPathAdapter.findRecord backfills resp.data.name with the id supplied
+    text: NamedPathAdapter.findRecord backfills resp.data.name with the name supplied
       to findRecord when the response omits a name, so Ember Data does not reject
       a record pushed without an id.
   - codeRefs:
@@ -149,6 +168,7 @@ spec:
       that need PUT override saveMethod rather than reimplementing the save path.
   - codeRefs:
     - class:6b10cfbc89c71d4a5b55c8bd178c37a5
+    - file:third_party/openbao/ui/app/adapters/named-path.js
     id: r.named-path-save-record
     level: MUST
     text: NamedPathAdapter._saveRecord serializes the snapshot through the model serializer,
@@ -157,12 +177,14 @@ spec:
       is empty.
   - codeRefs:
     - class:6b10cfbc89c71d4a5b55c8bd178c37a5
+    - file:third_party/openbao/ui/app/adapters/named-path.js
     id: r.named-path-update-same-endpoint
     level: MUST
     text: NamedPathAdapter.updateRecord delegates to the same _saveRecord path as
       create, because create and update share one endpoint and one verb.
   - codeRefs:
     - class:27606a943785b17d2d3432ad7b9aedd5
+    - file:third_party/openbao/ui/app/adapters/namespace.js
     id: r.namespace-create-record-id
     level: MUST
     text: NamespaceAdapter creates a record with the namespace path taken from snapshot.attr('path')
@@ -170,11 +192,13 @@ spec:
       response carries no identifier of its own.
   - codeRefs:
     - class:27606a943785b17d2d3432ad7b9aedd5
+    - file:third_party/openbao/ui/app/adapters/namespace.js
     id: r.namespace-find-all-namespace-option
     level: MUST
     text: NamespaceAdapter.findAll forwards snapshot.adapterOptions.namespace to the
       request when that option is defined, and otherwise falls back to the superclass
-      findAll.
+      findAll, so a scoped listing carries the namespace option while an unscoped
+      one uses the default request.
   - codeRefs:
     - class:27606a943785b17d2d3432ad7b9aedd5
     - file:third_party/openbao/ui/app/adapters/namespace.js
@@ -186,12 +210,14 @@ spec:
       ordinary listing uses the LIST query form.
   - codeRefs:
     - class:27606a943785b17d2d3432ad7b9aedd5
+    - file:third_party/openbao/ui/app/adapters/namespace.js
     id: r.namespace-path-for-type
     level: MUST
     text: NamespaceAdapter.pathForType returns 'namespaces', so model URLs for namespaces
       are built under the namespaces path segment.
   - codeRefs:
     - class:27606a943785b17d2d3432ad7b9aedd5
+    - file:third_party/openbao/ui/app/adapters/namespace.js
     id: r.namespace-query-list
     level: MUST
     text: NamespaceAdapter.query issues a GET to `/${urlPrefix}/namespaces?list=true`
