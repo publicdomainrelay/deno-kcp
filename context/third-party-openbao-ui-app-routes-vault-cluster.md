@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to describe the routing contract of the OpenBao UI cluster subtree as vendored into this repository. It is the boundary between the URL space under a cluster and the controllers, services and templates behind it, so anyone changing cluster entry points, the OIDC login handshake, or the logout flow needs to know which route owns which transition. It is documented from the code as it is, including the pre-login versus post-login split, the accepted policy types, and the query-parameter conventions (authMethod, redirect_to, o, prompt, namespace) the routes read and write.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

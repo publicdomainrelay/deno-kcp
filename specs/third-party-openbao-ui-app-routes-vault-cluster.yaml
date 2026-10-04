@@ -1,5 +1,10 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
+- class:73d2d4131d52fe4cc4310d970fc51dc6 VaultClusterRedirectRoute@third_party/openbao/ui/app/routes/vault/cluster/redirect.js:10
+- class:7911c3068799e0312fcedaec5b1f6009 InitRoute@third_party/openbao/ui/app/routes/vault/cluster/init.js:8
+- class:bed77d511f7bd7322650b4bc89bd75e3 VaultClusterOidcProviderNsRoute@third_party/openbao/ui/app/routes/vault/cluster/oidc-provider-ns.js:8
+- class:c2968a558da6ed2976992f89e6227f03 MfaSetupRoute@third_party/openbao/ui/app/routes/vault/cluster/mfa-setup.js:8
+- class:cdf9f334beaf9b12bcdbd47e5bc8cb03 VaultClusterOidcProviderRoute@third_party/openbao/ui/app/routes/vault/cluster/oidc-provider.js:14
 - file:third_party/openbao/ui/app/routes/vault/cluster/access.js access.js@third_party/openbao/ui/app/routes/vault/cluster/access.js
 - file:third_party/openbao/ui/app/routes/vault/cluster/auth.js auth.js@third_party/openbao/ui/app/routes/vault/cluster/auth.js
 - file:third_party/openbao/ui/app/routes/vault/cluster/cluster-route-base.js cluster-route-base.js@third_party/openbao/ui/app/routes/vault/cluster/cluster-route-base.js
@@ -18,10 +23,213 @@ codeRefIndex:
 - file:third_party/openbao/ui/app/routes/vault/cluster/storage.js storage.js@third_party/openbao/ui/app/routes/vault/cluster/storage.js
 - file:third_party/openbao/ui/app/routes/vault/cluster/tools.js tools.js@third_party/openbao/ui/app/routes/vault/cluster/tools.js
 - file:third_party/openbao/ui/app/routes/vault/cluster/unseal.js unseal.js@third_party/openbao/ui/app/routes/vault/cluster/unseal.js
+- function:2dd792848591de1362c9a840acbadcf7 getParamsForCallback@third_party/openbao/ui/app/routes/vault/cluster/oidc-callback.js:8
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-app-routes-vault-cluster
   namespace: default
 spec:
+  intent: This context exists to describe the routing contract of the OpenBao UI cluster
+    subtree as vendored into this repository. It is the boundary between the URL space
+    under a cluster and the controllers, services and templates behind it, so anyone
+    changing cluster entry points, the OIDC login handshake, or the logout flow needs
+    to know which route owns which transition. It is documented from the code as it
+    is, including the pre-login versus post-login split, the accepted policy types,
+    and the query-parameter conventions (authMethod, redirect_to, o, prompt, namespace)
+    the routes read and write.
+  interfaces:
+  - file: third_party/openbao/ui/app/routes/vault/cluster/init.js
+    kind: class
+    name: InitRoute
+    signature: class InitRoute extends ClusterRoute
+  - file: third_party/openbao/ui/app/routes/vault/cluster/mfa-setup.js
+    kind: class
+    name: MfaSetupRoute
+    signature: class MfaSetupRoute extends Route
+  - file: third_party/openbao/ui/app/routes/vault/cluster/oidc-provider-ns.js
+    kind: class
+    name: VaultClusterOidcProviderNsRoute
+    signature: class VaultClusterOidcProviderNsRoute extends VaultClusterOidcProviderRoute
+  - file: third_party/openbao/ui/app/routes/vault/cluster/oidc-provider.js
+    kind: class
+    name: VaultClusterOidcProviderRoute
+    signature: class VaultClusterOidcProviderRoute extends Route
+  - file: third_party/openbao/ui/app/routes/vault/cluster/redirect.js
+    kind: class
+    name: VaultClusterRedirectRoute
+    signature: class VaultClusterRedirectRoute extends Route
+  - file: third_party/openbao/ui/app/routes/vault/cluster/oidc-callback.js
+    kind: function
+    name: getParamsForCallback
+    signature: function getParamsForCallback(qp, searchString)
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access.js
+    id: r.access-route-unloads-models
+    level: MUST
+    text: The access route must return an empty model, and on deactivate must unload
+      all records of types capabilities, identity/group, identity/group-alias and
+      identity/alias from the store.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/auth.js
+    id: r.auth-route-params-and-welcome
+    level: MUST
+    text: 'The auth route must declare authMethod as a query param with replace: true,
+      reset the controller to wrappedToken '''' and authMethod ''token'' on resetController,
+      and in afterModel show config.welcomeMessage as a sticky flash message at priority
+      300 when that config value is set.'
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/cluster-route-base.js
+    id: r.cluster-route-base-contract
+    level: MUST
+    text: 'cluster-route-base is the base for all cluster routes that are pre-login
+      states: its model returns the model of the parent vault.cluster route, and its
+      resetController calls controller.reset when the controller defines it.'
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/index.js
+    id: r.index-route-redirects-to-secrets
+    level: MUST
+    text: The cluster index route must transition to vault.cluster.secrets in beforeModel,
+      so the bare cluster URL resolves to the secrets list.
+  - codeRefs:
+    - class:7911c3068799e0312fcedaec5b1f6009
+    - file:third_party/openbao/ui/app/routes/vault/cluster/init.js
+    id: r.init-route-inherits-base
+    level: MUST
+    text: InitRoute must be an empty subclass of the cluster route base, adding no
+      behaviour of its own so it inherits the parent cluster model and controller
+      reset.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/logout.js
+    id: r.logout-route-clears-session
+    level: MUST
+    text: The logout route's beforeModel must delete the current token, reset the
+      namespace service, close and clear the console log, clear flash messages and
+      reset permissions, then send the user to vault.cluster.auth carrying the previous
+      auth type as the with query param and the previous namespace as the namespace
+      query param when one existed. Under test it uses router.replaceWith and otherwise
+      assigns location via router.urlFor. Its deactivate must unload all 'secret'
+      and 'secret-engine' records from the store.
+  - codeRefs:
+    - class:c2968a558da6ed2976992f89e6227f03
+    - file:third_party/openbao/ui/app/routes/vault/cluster/mfa-setup.js
+    id: r.mfa-setup-empty-route
+    level: MUST
+    text: MfaSetupRoute must extend the Ember Route class with no overridden hooks,
+      so the MFA setup screen is rendered purely by its template and controller.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/oidc-callback.js
+    - function:2dd792848591de1362c9a840acbadcf7
+    id: r.oidc-callback-payload
+    level: MUST
+    text: getParamsForCallback(qp, searchString) must decode the search string, take
+      path, code, state and namespace from the query params, and treat a ',ns=' suffix
+      on the state as carrying the namespace, checking both the state param and the
+      state read back through URLSearchParams so SSO providers that do not URL-encode
+      state still resolve; the namespace from state must win over the cluster namespace.
+      It returns a payload of source 'oidc-callback' plus path, code and state defaulted
+      to empty strings, and adds namespace only when one was found.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/oidc-callback.js
+    id: r.oidc-callback-post-message
+    level: MUST
+    text: The oidc-callback route must leave model empty so the template renders immediately,
+      build the callback payload in afterModel from its own route params plus the
+      cluster namespaceQueryParam, and post it to window.opener with window.origin
+      as target origin. setupController must set the controller pageContainer to the
+      .page-container element.
+  - codeRefs:
+    - class:cdf9f334beaf9b12bcdbd47e5bc8cb03
+    - file:third_party/openbao/ui/app/routes/vault/cluster/oidc-provider.js
+    id: r.oidc-provider-auth-redirect
+    level: MUST
+    text: VaultClusterOidcProviderRoute.beforeModel must strip any redirect_to carried
+      over from auth, and when there is no current token or the prompt query param
+      is 'login' it must redirect to vault.cluster.auth with redirect_to set to the
+      provider URL and o set to the provider name, deleting the current token when
+      the user was already logged in and clearing prompt to avoid a redirect loop.
+      The built URL must have any leading /ui segment removed before it is used as
+      redirect_to, and a namespace must be included in the auth query params when
+      one is present.
+  - codeRefs:
+    - class:cdf9f334beaf9b12bcdbd47e5bc8cb03
+    - file:third_party/openbao/ui/app/routes/vault/cluster/oidc-provider.js
+    id: r.oidc-provider-error-mapping
+    level: MUST
+    text: 'On a failed authorize call the OIDC provider route must map errors: ''max_age_violation''
+      or a response listing ''permission denied'' redirects to auth with the token
+      deleted, ''invalid_redirect_uri'' returns a ''Redirect URI mismatch'' error
+      model, ''invalid_client_id'' returns an ''Invalid client ID'' error model, and
+      any other error is passed through to the decoded redirect as query params.'
+  - codeRefs:
+    - class:cdf9f334beaf9b12bcdbd47e5bc8cb03
+    - file:third_party/openbao/ui/app/routes/vault/cluster/oidc-provider.js
+    id: r.oidc-provider-model-authorize
+    level: MUST
+    text: VaultClusterOidcProviderRoute.model must request `${window.origin}/v1/identity/oidc/provider/{provider_name}/authorize`
+      with the remaining query params, throwing 'Missing required query params' when
+      redirect_uri is absent. With prompt 'consent' it returns the server code, decoded
+      redirect and state; otherwise it redirects the window to the decoded redirect
+      with code and state, returning the redirect URL.
+  - codeRefs:
+    - class:bed77d511f7bd7322650b4bc89bd75e3
+    - file:third_party/openbao/ui/app/routes/vault/cluster/oidc-provider-ns.js
+    id: r.oidc-provider-ns-variant
+    level: MUST
+    text: VaultClusterOidcProviderNsRoute must be an empty subclass of VaultClusterOidcProviderRoute
+      so the namespace is taken from the route params instead of the cluster, reusing
+      the whole authorize, consent and error behaviour.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/policies.js
+    id: r.policies-route-type-guard
+    level: MUST
+    text: The policies route must accept only the policy types acl, egp and rgp, and
+      when params.type is not one of them must transition to its own route with the
+      first allowed type; otherwise it returns an empty model.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/policy.js
+    id: r.policy-route-type-guard
+    level: MUST
+    text: The policy route must apply the same acl/egp/rgp allow list, transitioning
+      to vault.cluster.policies with the first allowed type when the type is unknown,
+      redirecting non-acl types to vault.cluster.policies for that type, and returning
+      an empty model only for acl.
+  - codeRefs:
+    - class:73d2d4131d52fe4cc4310d970fc51dc6
+    - file:third_party/openbao/ui/app/routes/vault/cluster/redirect.js
+    id: r.redirect-route-dispatch
+    level: MUST
+    text: 'VaultClusterRedirectRoute.beforeModel must split redirect_to out of the
+      query params and then: when authenticated and redirect_to is present, replace
+      the URL with redirect_to; when authenticated with no redirect, replace with
+      the cluster route keeping the other params; otherwise replace with the auth
+      route keeping the other params. After the transition follows redirects it must
+      clear the vault controller redirectTo.'
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/secrets.js
+    id: r.secrets-route-empty
+    level: MAY
+    text: The secrets route may remain a bare extension of the cluster base with no
+      overrides, relying on the base model and reset behaviour.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/storage.js
+    id: r.storage-route-queries-servers
+    level: MUST
+    text: The storage route must load its model with store.query('server', {}) rather
+      than findAll so stale peer records do not persist, and must expose a doRefresh
+      action that calls this.refresh().
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/settings.js
+    - file:third_party/openbao/ui/app/routes/vault/cluster/tools.js
+    id: r.tools-and-settings-models
+    level: MUST
+    text: The tools route must return the parent vault.cluster model via modelFor,
+      and the settings route must return an empty model object.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/unseal.js
+    id: r.unseal-route-inherits-base
+    level: MUST
+    text: The unseal route is an empty extension of the cluster route base, contributing
+      no model or hooks beyond what the base provides.
   upstream: self
