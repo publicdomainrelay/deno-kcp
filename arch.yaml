@@ -49682,8 +49682,81 @@ system_contexts:
   codeRefIndex:
   - file:third_party/openbao/sdk/helper/shamir/shamir.go shamir.go@third_party/openbao/sdk/helper/shamir/shamir.go
   - file:third_party/openbao/sdk/helper/shamir/shamir_test.go shamir_test.go@third_party/openbao/sdk/helper/shamir/shamir_test.go
+  - function:7c7f7568411dd04ccd3451e8d8c9cff3 Combine@third_party/openbao/sdk/helper/shamir/shamir.go:251
+  - function:dceeb09d33aec206c77220dcb7ad614f Split@third_party/openbao/sdk/helper/shamir/shamir.go:192
   id: sc.third-party-openbao-sdk-helper-shamir
+  intent: 'This context exists so the deno-kcp repository can use OpenBao''s Shamir
+    Secret Sharing helper for key splitting and reconstruction without depending on
+    an external module. It is vendor code: the spec records the contract the two exported
+    functions must honor so that callers upstream in this repo, and the accompanying
+    tests, keep the same behavior across vendoring updates. The context draws the
+    boundary at the exported surface plus the observable error conditions, since the
+    internal arithmetic helpers (`add`, `mult`, `div`, `makePolynomial`, `evaluate`,
+    `interpolatePolynomial`, `shuffledXCoordinates`) are implementation detail that
+    only matters through the results `Split` and `Combine` produce.'
+  interfaces:
+  - file: third_party/openbao/sdk/helper/shamir/shamir.go
+    kind: function
+    name: Combine
+    signature: func Combine(parts [][]byte) ([]byte, error)
+  - file: third_party/openbao/sdk/helper/shamir/shamir.go
+    kind: function
+    name: Split
+    signature: func Split(secret []byte, parts, threshold int) ([][]byte, error)
   name: third-party-openbao-sdk-helper-shamir
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/shamir/shamir.go
+    - function:7c7f7568411dd04ccd3451e8d8c9cff3
+    id: r.combine-reconstructs-secret
+    level: MUST
+    text: Combine must return a secret buffer of length `len(parts[0])-1` and fill
+      each byte by taking the x coordinate from the trailing byte of every part and
+      the y values from that byte index across all parts, then interpolating the polynomial
+      at x = 0 to recover the intercept, which is the original secret byte.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/shamir/shamir.go
+    - function:7c7f7568411dd04ccd3451e8d8c9cff3
+    id: r.combine-validates-parts
+    level: MUST
+    text: Combine must reject the input with an error and return no secret when fewer
+      than two parts are supplied ("less than two parts cannot be used to reconstruct
+      the secret"), when the first part is shorter than two bytes ("parts must be
+      at least two bytes"), when any part's length differs from the first part's ("all
+      parts must be the same length"), or when two parts carry the same trailing x-coordinate
+      byte ("duplicate part detected").
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/shamir/shamir_test.go
+    - function:7c7f7568411dd04ccd3451e8d8c9cff3
+    - function:dceeb09d33aec206c77220dcb7ad614f
+    id: r.roundtrip-recovers-secret
+    level: MUST
+    text: A secret produced by Split must be recovered byte-for-byte by Combine when
+      given any threshold-many of the returned parts, and the package tests must exercise
+      that round trip alongside the invalid-input paths for both functions.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/shamir/shamir.go
+    - function:dceeb09d33aec206c77220dcb7ad614f
+    id: r.split-encodes-parts
+    level: MUST
+    text: Split must return exactly `parts` byte slices, each of length `len(secret)+1`.
+      The trailing byte of every slice holds that part's x coordinate, drawn once
+      from a shuffled set of distinct x coordinates so no two parts share an x value;
+      the leading `len(secret)` bytes hold the polynomial evaluation for the corresponding
+      secret byte, using a separately generated random polynomial of degree `threshold-1`
+      per byte.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/shamir/shamir.go
+    - function:dceeb09d33aec206c77220dcb7ad614f
+    id: r.split-validates-parameters
+    level: MUST
+    text: Split must reject the request with an error and return no parts when the
+      part count is less than the threshold ("parts cannot be less than threshold"),
+      when the part count exceeds 255 ("parts cannot exceed 255"), when the threshold
+      is below 2 ("threshold must be at least 2"), when the threshold exceeds 255
+      ("threshold cannot exceed 255"), or when the secret is empty ("cannot split
+      an empty secret"). No random coordinates are drawn and no output is allocated
+      before these checks pass.
   upstream: self
 - code:
   - third_party/openbao/sdk/helper/stepwise/helpers.go

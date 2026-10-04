@@ -3364,6 +3364,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.generate-otp-branch-on-length` (MUST): "GenerateOTP reads defaultBase64EncodedOTPLength (16) random bytes and returns them base64 StdEncoding-encoded when otpLength is 0, and returns a base62 random string of exactly otpLength characters otherwise; a short read or random-source failure returns an empty string and a wrapped error."
 - added `r.round-trip-consistency` (SHOULD): "A token encoded by EncodeToken with an OTP from GenerateOTP must decode back to the original token through DecodeToken with the matching otpLength, for both the zero and non-zero length paths."
 
+### third-party-openbao-sdk-helper-shamir
+
+- intent: "" -> "This context exists so the deno-kcp repository can use OpenBao's Shamir Secret Sharing helper for key splitting and reconstruction without depending on an external module. It is vendor code: the spec records the contract the two exported functions must honor so that callers upstream in this repo, and the accompanying tests, keep the same behavior across vendoring updates. The context draws the boundary at the exported surface plus the observable error conditions, since the internal arithmetic helpers (`add`, `mult`, `div`, `makePolynomial`, `evaluate`, `interpolatePolynomial`, `shuffledXCoordinates`) are implementation detail that only matters through the results `Split` and `Combine` produce."
+- added `r.combine-reconstructs-secret` (MUST): "Combine must return a secret buffer of length `len(parts[0])-1` and fill each byte by taking the x coordinate from the trailing byte of every part and the y values from that byte index across all parts, then interpolating the polynomial at x = 0 to recover the intercept, which is the original secret byte."
+- added `r.combine-validates-parts` (MUST): "Combine must reject the input with an error and return no secret when fewer than two parts are supplied ("less than two parts cannot be used to reconstruct the secret"), when the first part is shorter than two bytes ("parts must be at least two bytes"), when any part's length differs from the first part's ("all parts must be the same length"), or when two parts carry the same trailing x-coordinate byte ("duplicate part detected")."
+- added `r.roundtrip-recovers-secret` (MUST): "A secret produced by Split must be recovered byte-for-byte by Combine when given any threshold-many of the returned parts, and the package tests must exercise that round trip alongside the invalid-input paths for both functions."
+- added `r.split-encodes-parts` (MUST): "Split must return exactly `parts` byte slices, each of length `len(secret)+1`. The trailing byte of every slice holds that part's x coordinate, drawn once from a shuffled set of distinct x coordinates so no two parts share an x value; the leading `len(secret)` bytes hold the polynomial evaluation for the corresponding secret byte, using a separately generated random polynomial of degree `threshold-1` per byte."
+- added `r.split-validates-parameters` (MUST): "Split must reject the request with an error and return no parts when the part count is less than the threshold ("parts cannot be less than threshold"), when the part count exceeds 255 ("parts cannot exceed 255"), when the threshold is below 2 ("threshold must be at least 2"), when the threshold exceeds 255 ("threshold cannot exceed 255"), or when the secret is empty ("cannot split an empty secret"). No random coordinates are drawn and no output is allocated before these checks pass."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -3613,4 +3622,4 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-sdk-helper-policyutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-roottoken-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-salt-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-sdk-helper-shamir-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-helper-shamir-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
