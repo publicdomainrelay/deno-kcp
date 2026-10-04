@@ -7,5 +7,58 @@ metadata:
   name: third-party-openbao-internal-vault-external-tests-expiration
   namespace: default
 spec:
+  intent: 'The context exists to verify, from outside the vault core, that the irrevocable-lease
+    reporting surface of the expiration subsystem behaves correctly end to end over
+    HTTP: that sys/leases/count and sys/leases report zero leases on a fresh cluster,
+    report the exact injected count and per-mount breakdown after injection, and that
+    sys/leases applies the default return cap with its warning until the caller passes
+    limit=none. It is the external acceptance layer for the irrevocable lease listing
+    and counting endpoints, so it pins the response shape (lease_count, counts, leases,
+    mount_id, warnings) that API consumers depend on.'
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/expiration/expiration_test.go
+    id: r.cluster-fixture
+    level: MUST
+    text: Each test starts a vault test cluster created by vault.NewTestCluster with
+      the vault HTTP handler wired through vaulthttp.Handler and NumCores set to 1,
+      calls Start, and defers Cleanup, then drives the cluster through cluster.Cores[0].Client
+      and cluster.Cores[0].Core.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/expiration/expiration_test.go
+    id: r.lease-count-endpoint
+    level: MUST
+    text: A read of sys/leases/count with parameter type=irrevocable must return a
+      non-nil response with no warnings, a lease_count of 0 and an empty counts map
+      on a cluster with no irrevocable leases; after core.InjectIrrevocableLeases
+      injects 50 leases under the root namespace, the same read must return lease_count
+      50 and a per-mount counts map whose mount set and per-mount values match the
+      map returned by the injection.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/expiration/expiration_test.go
+    id: r.lease-list-default-limit
+    level: MUST
+    text: When the number of injected irrevocable leases exceeds vault.MaxIrrevocableLeasesToReturn
+      (the test injects MaxIrrevocableLeasesToReturn+50), a sys/leases read with type=irrevocable
+      and no limit must return exactly one warning equal to vault.MaxIrrevocableLeasesWarning,
+      and repeating the read with limit=none must return no warnings, a lease_count
+      equal to the injected total, and a per-mount mount_id tally deep-equal to the
+      injected per-mount map.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/expiration/expiration_test.go
+    id: r.lease-list-endpoint
+    level: MUST
+    text: A read of sys/leases with parameter type=irrevocable must return a non-nil
+      response with no warnings, lease_count 0 and an empty leases list on a fresh
+      cluster; after 50 irrevocable leases are injected, it must return lease_count
+      50 and a leases list whose entries each carry a mount_id string, with a tally
+      of mount_id values across the list deep-equal to the injected per-mount map.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/external_tests/expiration/expiration_test.go
+    id: r.numeric-decoding
+    level: SHOULD
+    text: Numeric fields in the API responses (lease_count and each per-mount count)
+      are decoded as json.Number and converted with Int64, so the tests assert on
+      exact integer values rather than float64.
   upstream: self

@@ -2319,6 +2319,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.wrapped-secret-id-accessor-match` (MUST): "When the client wrapping lookup function returns `5m`, writing an empty payload to `auth/approle/role/test-role-1/secret-id` MUST succeed and return wrap info, and after the wrapping token is unwrapped the `WrapInfo.WrappedAccessor` from the wrapped response MUST equal the unwrapped response's `secret_id_accessor` value."
 - added `r.wrapped-tests-disable-cache` (SHOULD): "The wrapped and non-wrapped secret-id tests SHOULD configure the core with `DisableCache: true` and a null logger so that the wrapping accessor comparison is not masked by caching of the underlying core state."
 
+### third-party-openbao-internal-vault-external-tests-expiration
+
+- intent: "" -> "The context exists to verify, from outside the vault core, that the irrevocable-lease reporting surface of the expiration subsystem behaves correctly end to end over HTTP: that sys/leases/count and sys/leases report zero leases on a fresh cluster, report the exact injected count and per-mount breakdown after injection, and that sys/leases applies the default return cap with its warning until the caller passes limit=none. It is the external acceptance layer for the irrevocable lease listing and counting endpoints, so it pins the response shape (lease_count, counts, leases, mount_id, warnings) that API consumers depend on."
+- added `r.cluster-fixture` (MUST): "Each test starts a vault test cluster created by vault.NewTestCluster with the vault HTTP handler wired through vaulthttp.Handler and NumCores set to 1, calls Start, and defers Cleanup, then drives the cluster through cluster.Cores[0].Client and cluster.Cores[0].Core."
+- added `r.lease-count-endpoint` (MUST): "A read of sys/leases/count with parameter type=irrevocable must return a non-nil response with no warnings, a lease_count of 0 and an empty counts map on a cluster with no irrevocable leases; after core.InjectIrrevocableLeases injects 50 leases under the root namespace, the same read must return lease_count 50 and a per-mount counts map whose mount set and per-mount values match the map returned by the injection."
+- added `r.lease-list-default-limit` (MUST): "When the number of injected irrevocable leases exceeds vault.MaxIrrevocableLeasesToReturn (the test injects MaxIrrevocableLeasesToReturn+50), a sys/leases read with type=irrevocable and no limit must return exactly one warning equal to vault.MaxIrrevocableLeasesWarning, and repeating the read with limit=none must return no warnings, a lease_count equal to the injected total, and a per-mount mount_id tally deep-equal to the injected per-mount map."
+- added `r.lease-list-endpoint` (MUST): "A read of sys/leases with parameter type=irrevocable must return a non-nil response with no warnings, lease_count 0 and an empty leases list on a fresh cluster; after 50 irrevocable leases are injected, it must return lease_count 50 and a leases list whose entries each carry a mount_id string, with a tally of mount_id values across the list deep-equal to the injected per-mount map."
+- added `r.numeric-decoding` (SHOULD): "Numeric fields in the API responses (lease_count and each per-mount count) are decoded as json.Number and converted with Int64, so the tests assert on exact integer values rather than float64."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -2466,5 +2475,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-vault-external-keys-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-api-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-approle-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-vault-external-tests-expiration-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-vault-external-tests-expiration-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-external-tests-identity-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
