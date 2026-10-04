@@ -1,0 +1,54 @@
+conditions:
+- message: 'undeclared: NewApproleAuthMethod, approleMethod.Authenticate, approleMethod.CredSuccess,
+    approleMethod.NewCreds, approleMethod.Shutdown'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/command/agentproxyshared/auth/approle/approle.go
+  fingerprint: 327abd6985040e6ae570491bbec023a9fa0d00b0a23ef136101c27755b2ac336
+  interfaces:
+  - codegraphId: function:23702cdb560ebaf22d5fff5fe0a2c7b2
+    file: third_party/openbao/internal/command/agentproxyshared/auth/approle/approle.go
+    kind: function
+    line: 32
+    name: NewApproleAuthMethod
+    signature: (conf *auth.AuthConfig) (auth.AuthMethod, error)
+  - codegraphId: method:ae0e8df4f98addd9a1a546ad3ef7d460
+    file: third_party/openbao/internal/command/agentproxyshared/auth/approle/approle.go
+    kind: method
+    line: 92
+    name: approleMethod.Authenticate
+    signature: (ctx context.Context, client *api.Client) (string, http.Header, map[string]any,
+      error)
+  - codegraphId: method:9efa2f8bd29ab6444a35fa65ae08f0ca
+    file: third_party/openbao/internal/command/agentproxyshared/auth/approle/approle.go
+    kind: method
+    line: 205
+    name: approleMethod.NewCreds
+    signature: () chan struct{}
+  - codegraphId: method:a052addb3a943fe663c151d4ec54fa5a
+    file: third_party/openbao/internal/command/agentproxyshared/auth/approle/approle.go
+    kind: method
+    line: 209
+    name: approleMethod.CredSuccess
+    signature: ()
+  - codegraphId: method:7b0e6de5a77ea6d0d6cffa4a561afdf9
+    file: third_party/openbao/internal/command/agentproxyshared/auth/approle/approle.go
+    kind: method
+    line: 212
+    name: approleMethod.Shutdown
+    signature: ()
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 6e4e99fdf8c57c2ccfd5bf43bab33bf44f3cfcd10d1df9f858a54aa38c21a041
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 327abd6985040e6ae570491bbec023a9fa0d00b0a23ef136101c27755b2ac336

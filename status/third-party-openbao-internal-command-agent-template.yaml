@@ -1,0 +1,52 @@
+conditions:
+- message: 'undeclared: NewServer, Server, Server.Run, Server.Stop, ServerConfig'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/command/agent/template/template.go
+  - third_party/openbao/internal/command/agent/template/template_test.go
+  fingerprint: 318816cd87317c85bd5473fc66f4f751e297b80176d07fc29b75588d3158e3f6
+  interfaces:
+  - codegraphId: struct:264a18de453074c01711a78e413c9c08
+    file: third_party/openbao/internal/command/agent/template/template.go
+    kind: struct
+    line: 39
+    name: ServerConfig
+  - codegraphId: struct:57207bdcd5ca90e05fed9af466416b7f
+    file: third_party/openbao/internal/command/agent/template/template.go
+    kind: struct
+    line: 61
+    name: Server
+  - codegraphId: function:a8686accea59bb747ec05fed62bd2585
+    file: third_party/openbao/internal/command/agent/template/template.go
+    kind: function
+    line: 89
+    name: NewServer
+    signature: (conf *ServerConfig) *Server
+  - codegraphId: method:d9dd6f48d0065ecd94dcb0ceec98c148
+    file: third_party/openbao/internal/command/agent/template/template.go
+    kind: method
+    line: 108
+    name: Server.Run
+    signature: (ctx context.Context, incoming chan string, templates []*ctconfig.TemplateConfig)
+      error
+  - codegraphId: method:990e84dbe81ed2f87ab34932c0f7bfb0
+    file: third_party/openbao/internal/command/agent/template/template.go
+    kind: method
+    line: 289
+    name: Server.Stop
+    signature: ()
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 18b78d9ef480cb81be21b9e6fea2fc75115d95df0182d9c6e1ead47c5d17ff42
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 318816cd87317c85bd5473fc66f4f751e297b80176d07fc29b75588d3158e3f6

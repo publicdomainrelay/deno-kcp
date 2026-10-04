@@ -1,0 +1,61 @@
+conditions:
+- message: 'undeclared: NewCertAuthMethod, certMethod.AuthClient, certMethod.Authenticate,
+    certMethod.CredSuccess, certMethod.NewCreds, certMethod.Shutdown'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/command/agentproxyshared/auth/cert/cert.go
+  - third_party/openbao/internal/command/agentproxyshared/auth/cert/cert_test.go
+  fingerprint: be786195ff33ac5c2b088790238b96ba6b9cd5594f2156b69a8dac7e816b2ef1
+  interfaces:
+  - codegraphId: function:72c0b4a6fb15e6576d02c8b829aa8eee
+    file: third_party/openbao/internal/command/agentproxyshared/auth/cert/cert.go
+    kind: function
+    line: 34
+    name: NewCertAuthMethod
+    signature: (conf *auth.AuthConfig) (auth.AuthMethod, error)
+  - codegraphId: method:7751c7f52375b2b2f7cf5af5395cb14d
+    file: third_party/openbao/internal/command/agentproxyshared/auth/cert/cert.go
+    kind: method
+    line: 93
+    name: certMethod.Authenticate
+    signature: (_ context.Context, client *api.Client) (string, http.Header, map[string]any,
+      error)
+  - codegraphId: method:f2f59a52905ef7981a48da042ea46b1c
+    file: third_party/openbao/internal/command/agentproxyshared/auth/cert/cert.go
+    kind: method
+    line: 105
+    name: certMethod.NewCreds
+    signature: () chan struct{}
+  - codegraphId: method:f4018509912bf7d804f7eb0bb134b395
+    file: third_party/openbao/internal/command/agentproxyshared/auth/cert/cert.go
+    kind: method
+    line: 109
+    name: certMethod.CredSuccess
+    signature: ()
+  - codegraphId: method:1e8a9476171783802a48d8ae2a820e70
+    file: third_party/openbao/internal/command/agentproxyshared/auth/cert/cert.go
+    kind: method
+    line: 111
+    name: certMethod.Shutdown
+    signature: ()
+  - codegraphId: method:74691b628a048e5ca411f2fa36bec155
+    file: third_party/openbao/internal/command/agentproxyshared/auth/cert/cert.go
+    kind: method
+    line: 116
+    name: certMethod.AuthClient
+    signature: (client *api.Client) (*api.Client, error)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 123be023fec056cd85f0b00ae3feb126c03a4598f00b02e61256441996655092
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: be786195ff33ac5c2b088790238b96ba6b9cd5594f2156b69a8dac7e816b2ef1

@@ -1,0 +1,100 @@
+conditions:
+- message: 'undeclared: AuthConfig, AuthHandler, AuthHandler.Run, AuthHandlerConfig,
+    AuthMethod, AuthMethod.Authenticate, AuthMethod.CredSuccess, AuthMethod.NewCreds,
+    AuthMethod.Shutdown, AuthMethodWithClient, AuthMethodWithClient.AuthClient, NewAuthHandler,
+    autoAuthBackoff.String'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/command/agentproxyshared/auth/auth.go
+  - third_party/openbao/internal/command/agentproxyshared/auth/auth_test.go
+  fingerprint: 3650b99c305946b5bcdad0670fa2fc83c6820ba3a3689f1962fd737ee3dd0d15
+  interfaces:
+  - codegraphId: interface:0d74489ab0d559a9769b26c729cee007
+    file: third_party/openbao/internal/command/agentproxyshared/auth/auth.go
+    kind: interface
+    line: 28
+    name: AuthMethod
+  - codegraphId: method:3031eb440e4b09b483f86a106036de8b
+    file: third_party/openbao/internal/command/agentproxyshared/auth/auth.go
+    kind: method
+    line: 31
+    name: AuthMethod.Authenticate
+    signature: (context.Context, *api.Client) (string, http.Header, map[string]any,
+      error)
+  - codegraphId: method:05b8dcd27eda904ebd0f01667b26547e
+    file: third_party/openbao/internal/command/agentproxyshared/auth/auth.go
+    kind: method
+    line: 32
+    name: AuthMethod.NewCreds
+    signature: () chan struct{}
+  - codegraphId: method:dd14a787df21b4dd31349d380e916be1
+    file: third_party/openbao/internal/command/agentproxyshared/auth/auth.go
+    kind: method
+    line: 33
+    name: AuthMethod.CredSuccess
+    signature: ()
+  - codegraphId: method:600796333fc443a1fcce1cf63eae033e
+    file: third_party/openbao/internal/command/agentproxyshared/auth/auth.go
+    kind: method
+    line: 34
+    name: AuthMethod.Shutdown
+    signature: ()
+  - codegraphId: interface:d197ccafdc0a79f7b5f34693af3e4723
+    file: third_party/openbao/internal/command/agentproxyshared/auth/auth.go
+    kind: interface
+    line: 39
+    name: AuthMethodWithClient
+  - codegraphId: method:0e8ea0d941e22ea58ef3a88d096fefb4
+    file: third_party/openbao/internal/command/agentproxyshared/auth/auth.go
+    kind: method
+    line: 41
+    name: AuthMethodWithClient.AuthClient
+    signature: (client *api.Client) (*api.Client, error)
+  - codegraphId: struct:f1af97701d51ef4e9dbcff6f27be7097
+    file: third_party/openbao/internal/command/agentproxyshared/auth/auth.go
+    kind: struct
+    line: 44
+    name: AuthConfig
+  - codegraphId: struct:aca458a585521ce17b4a96b9a546b1af
+    file: third_party/openbao/internal/command/agentproxyshared/auth/auth.go
+    kind: struct
+    line: 53
+    name: AuthHandler
+  - codegraphId: struct:283295d326d630f31d67353ca011a1f7
+    file: third_party/openbao/internal/command/agentproxyshared/auth/auth.go
+    kind: struct
+    line: 72
+    name: AuthHandlerConfig
+  - codegraphId: function:dce3dfc9a119cb3f8d51a85e7cc0c4c1
+    file: third_party/openbao/internal/command/agentproxyshared/auth/auth.go
+    kind: function
+    line: 91
+    name: NewAuthHandler
+    signature: (conf *AuthHandlerConfig) *AuthHandler
+  - codegraphId: method:ad8dc37f5a35b58de42ae1227cece785
+    file: third_party/openbao/internal/command/agentproxyshared/auth/auth.go
+    kind: method
+    line: 132
+    name: AuthHandler.Run
+    signature: (ctx context.Context, am AuthMethod) error
+  - codegraphId: method:356a9104cf38f50d20bdd8b28b005400
+    file: third_party/openbao/internal/command/agentproxyshared/auth/auth.go
+    kind: method
+    line: 549
+    name: autoAuthBackoff.String
+    signature: () string
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: e3a513f56e7bef25ab5b60ffe7c16eea1e235fadc26061b133532fc5e18104f7
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 3650b99c305946b5bcdad0670fa2fc83c6820ba3a3689f1962fd737ee3dd0d15

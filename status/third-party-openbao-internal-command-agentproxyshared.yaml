@@ -1,0 +1,43 @@
+conditions:
+- message: 'undeclared: AddPersistentStorageToLeaseCache, GetAutoAuthMethodFromConfig,
+    PersistConfig'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/command/agentproxyshared/helpers.go
+  - third_party/openbao/internal/command/agentproxyshared/helpers_test.go
+  fingerprint: 47ea09b280743e375ec14a95834c7d111aaea488aae48313e4eae659c03a14ea
+  interfaces:
+  - codegraphId: function:558242af32f8480a238cc113a963d2c4
+    file: third_party/openbao/internal/command/agentproxyshared/helpers.go
+    kind: function
+    line: 30
+    name: GetAutoAuthMethodFromConfig
+    signature: (autoAuthMethodType string, authConfig *auth.AuthConfig, vaultAddress
+      string) (auth.AuthMethod, error)
+  - codegraphId: struct:0524d0ccf8fc5e3a4157d968c7521a94
+    file: third_party/openbao/internal/command/agentproxyshared/helpers.go
+    kind: struct
+    line: 48
+    name: PersistConfig
+  - codegraphId: function:66faeada19cce16e9efb4b9fcfb6016d
+    file: third_party/openbao/internal/command/agentproxyshared/helpers.go
+    kind: function
+    line: 58
+    name: AddPersistentStorageToLeaseCache
+    signature: (ctx context.Context, leaseCache *cache.LeaseCache, persistConfig *PersistConfig,
+      logger log.Logger) (func() error, string, error)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 18eca584121c2a94504c7a2ad2405c264ccee893695e5d820da525d2c2b243b2
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 47ea09b280743e375ec14a95834c7d111aaea488aae48313e4eae659c03a14ea
