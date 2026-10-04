@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to specify the six MFA component classes that the OpenBao UI uses to satisfy a login MFA challenge and to configure MFA methods and login enforcements. It captures the observable behaviour of each class — the constraint resolution and passcode validation of the login form, the two enrollment wizard steps, the method edit modal state machine, and the login enforcement form's target flattening, auth-method lookup and enforcement caching — so that these third-party components are described by what the code actually does rather than by the upstream templates that render them.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

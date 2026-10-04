@@ -4075,6 +4075,22 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.provider-edit-save` (MUST): "KeymgmtProviderEdit.onSave prevents the default event, awaits model.validate(); when valid it clears modelValidations and performs saveTask, otherwise it stores the returned validation state on modelValidations; saveTask saves the model and transitions to the secrets backend show route with the model id and query param itemType='provider', flashing a danger message on failure."
 - added `r.provider-edit-show-fetch` (MUST): "KeymgmtProviderEdit performs fetchKeys in its constructor when the mode argument is 'show', so the key count shown on the details tab and the key list on the keys tab are populated on render."
 
+### third-party-openbao-ui-app-components-mfa
+
+- intent: "" -> "This context exists to specify the six MFA component classes that the OpenBao UI uses to satisfy a login MFA challenge and to configure MFA methods and login enforcements. It captures the observable behaviour of each class — the constraint resolution and passcode validation of the login form, the two enrollment wizard steps, the method edit modal state machine, and the login enforcement form's target flattening, auth-method lookup and enforcement caching — so that these third-party components are described by what the code actually does rather than by the upstream templates that render them."
+- added `r.login-enforcement-auth-methods` (MUST): "MfaLoginEnforcementForm.fetchAuthMethods() must be called from the constructor and must fetch from sys/auth so that only auth method types that have mounts can be selected as targets, and mfaMethodIds() must expose the selected method ids used by save()."
+- added `r.login-enforcement-header-fetch` (MUST): "MfaLoginEnforcementHeaderComponent must call fetchEnforcements() only when args.isInline is true, and fetchEnforcements() must query the mfa-login-enforcement store, cache the result in _enforcements, and fall back to an empty enforcements list when the query fails."
+- added `r.login-enforcement-header-select` (MUST): "MfaLoginEnforcementHeaderComponent.onEnforcementSelect([name]) must treat the search-select argument as an array of enforcement names, look the matching record up in the cached list, and pass that model to args.onEnforcementSelect."
+- added `r.login-enforcement-save-targets` (MUST): "MfaLoginEnforcementForm.save() must persist the named enforcement with its targets, setTargetValue(selected) and addTarget() must append the current selection as a target using the selected target type's key, removeTarget(target) must delete a target from the list, onMethodChange(selectedIds) must record the chosen MFA method ids, and errors() must expose modelErrors for the template."
+- added `r.login-enforcement-target-flattening` (MUST): "MfaLoginEnforcementForm.flattenTargets() must iterate targetTypes — the accessor, method, identity/group and identity/entity entries with keys auth_method_accessors, auth_method_types, identity_groups and identity_entities — and aggregate each of those model arrays into one flat targets list of {label, key, value} objects, called from the constructor."
+- added `r.login-enforcement-target-state` (MUST): "MfaLoginEnforcementForm must call resetTargetState() from the constructor to clear selectedTargetValue and eagerly load identity groups and entities as searchSelect options, and onTargetSelect(type) must set selectedTargetType and reload the options for that target type."
+- added `r.method-form-edit-modal` (MUST): "MfaMethodForm must hold editValidations and isEditModalActive state, initSave(e) must prevent the default event and open the edit modal, save() must persist the edited method through the store, and cancel() must close the modal without saving."
+- added `r.mfa-form-constraint-resolution` (MUST): "MfaForm must resolve the active MFA constraints from its auth service and expose them through constraints(), multiConstraint(), singleConstraintMultiMethod() and singlePasscode(), and must render a human-readable prompt through description()."
+- added `r.mfa-form-countdown-and-delay` (MUST): "MfaForm must track a countdown and an error value and must set the codeDelayMessage through newCodeDelay(message) when the server rejects a passcode for arriving too soon."
+- added `r.mfa-form-validate-and-submit` (MUST): "MfaForm.validate() must verify the entered passcode against the selected constraint, onSelect(constraint, id) must record which constraint and method the user chose, and submit(e) must prevent the default event and submit the passcode for that selection."
+- added `r.setup-step-one` (MUST): "MfaSetupStepOne must exist as the first exported step component of the MFA enrollment flow and take its data from component arguments rather than from services."
+- added `r.setup-step-two` (MUST): "MfaSetupStepTwo must exist as the second exported step component of the MFA enrollment flow, presenting the verification or completion stage of the setup wizard."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4389,6 +4405,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-components-identity-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-components-keymgmt-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-components-keymgmt-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-components-mfa-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-components-mfa-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-components-modal-form-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

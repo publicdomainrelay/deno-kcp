@@ -1,5 +1,11 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
+- class:099b26fd3cb365a6bee9e9e93aa21874 MfaSetupStepTwo@third_party/openbao/ui/app/components/mfa/mfa-setup-step-two.js:21
+- class:59bddf67afefc7bf0dfb7e5a4cfae104 MfaMethodForm@third_party/openbao/ui/app/components/mfa/method-form.js:24
+- class:9d6a9f20ff7ad56b499f3ea377bb83d7 MfaForm@third_party/openbao/ui/app/components/mfa/mfa-form.js:29
+- class:c8a1bb970a71df08690d5aae53db9bd5 MfaLoginEnforcementForm@third_party/openbao/ui/app/components/mfa/mfa-login-enforcement-form.js:30
+- class:e868b1ce8e2914d48880c56287a9f284 MfaSetupStepOne@third_party/openbao/ui/app/components/mfa/mfa-setup-step-one.js:22
+- class:e9ade19f95ff6b436504d72c47646ba7 MfaLoginEnforcementHeaderComponent@third_party/openbao/ui/app/components/mfa/mfa-login-enforcement-header.js:29
 - file:third_party/openbao/ui/app/components/mfa/method-form.js method-form.js@third_party/openbao/ui/app/components/mfa/method-form.js
 - file:third_party/openbao/ui/app/components/mfa/mfa-form.js mfa-form.js@third_party/openbao/ui/app/components/mfa/mfa-form.js
 - file:third_party/openbao/ui/app/components/mfa/mfa-login-enforcement-form.js mfa-login-enforcement-form.js@third_party/openbao/ui/app/components/mfa/mfa-login-enforcement-form.js
@@ -11,5 +17,144 @@ metadata:
   name: third-party-openbao-ui-app-components-mfa
   namespace: default
 spec:
+  intent: This context exists to specify the six MFA component classes that the OpenBao
+    UI uses to satisfy a login MFA challenge and to configure MFA methods and login
+    enforcements. It captures the observable behaviour of each class — the constraint
+    resolution and passcode validation of the login form, the two enrollment wizard
+    steps, the method edit modal state machine, and the login enforcement form's target
+    flattening, auth-method lookup and enforcement caching — so that these third-party
+    components are described by what the code actually does rather than by the upstream
+    templates that render them.
+  interfaces:
+  - file: third_party/openbao/ui/app/components/mfa/mfa-form.js
+    kind: class
+    name: MfaForm
+    signature: class MfaForm()
+  - file: third_party/openbao/ui/app/components/mfa/mfa-login-enforcement-form.js
+    kind: class
+    name: MfaLoginEnforcementForm
+    signature: class MfaLoginEnforcementForm()
+  - file: third_party/openbao/ui/app/components/mfa/mfa-login-enforcement-header.js
+    kind: class
+    name: MfaLoginEnforcementHeaderComponent
+    signature: class MfaLoginEnforcementHeaderComponent()
+  - file: third_party/openbao/ui/app/components/mfa/method-form.js
+    kind: class
+    name: MfaMethodForm
+    signature: class MfaMethodForm()
+  - file: third_party/openbao/ui/app/components/mfa/mfa-setup-step-one.js
+    kind: class
+    name: MfaSetupStepOne
+    signature: class MfaSetupStepOne()
+  - file: third_party/openbao/ui/app/components/mfa/mfa-setup-step-two.js
+    kind: class
+    name: MfaSetupStepTwo
+    signature: class MfaSetupStepTwo()
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - class:c8a1bb970a71df08690d5aae53db9bd5
+    - file:third_party/openbao/ui/app/components/mfa/mfa-login-enforcement-form.js
+    id: r.login-enforcement-auth-methods
+    level: MUST
+    text: MfaLoginEnforcementForm.fetchAuthMethods() must be called from the constructor
+      and must fetch from sys/auth so that only auth method types that have mounts
+      can be selected as targets, and mfaMethodIds() must expose the selected method
+      ids used by save().
+  - codeRefs:
+    - class:e9ade19f95ff6b436504d72c47646ba7
+    - file:third_party/openbao/ui/app/components/mfa/mfa-login-enforcement-header.js
+    id: r.login-enforcement-header-fetch
+    level: MUST
+    text: MfaLoginEnforcementHeaderComponent must call fetchEnforcements() only when
+      args.isInline is true, and fetchEnforcements() must query the mfa-login-enforcement
+      store, cache the result in _enforcements, and fall back to an empty enforcements
+      list when the query fails.
+  - codeRefs:
+    - class:e9ade19f95ff6b436504d72c47646ba7
+    - file:third_party/openbao/ui/app/components/mfa/mfa-login-enforcement-header.js
+    id: r.login-enforcement-header-select
+    level: MUST
+    text: MfaLoginEnforcementHeaderComponent.onEnforcementSelect([name]) must treat
+      the search-select argument as an array of enforcement names, look the matching
+      record up in the cached list, and pass that model to args.onEnforcementSelect.
+  - codeRefs:
+    - class:c8a1bb970a71df08690d5aae53db9bd5
+    - file:third_party/openbao/ui/app/components/mfa/mfa-login-enforcement-form.js
+    id: r.login-enforcement-save-targets
+    level: MUST
+    text: MfaLoginEnforcementForm.save() must persist the named enforcement with its
+      targets, setTargetValue(selected) and addTarget() must append the current selection
+      as a target using the selected target type's key, removeTarget(target) must
+      delete a target from the list, onMethodChange(selectedIds) must record the chosen
+      MFA method ids, and errors() must expose modelErrors for the template.
+  - codeRefs:
+    - class:c8a1bb970a71df08690d5aae53db9bd5
+    - file:third_party/openbao/ui/app/components/mfa/mfa-login-enforcement-form.js
+    id: r.login-enforcement-target-flattening
+    level: MUST
+    text: MfaLoginEnforcementForm.flattenTargets() must iterate targetTypes — the
+      accessor, method, identity/group and identity/entity entries with keys auth_method_accessors,
+      auth_method_types, identity_groups and identity_entities — and aggregate each
+      of those model arrays into one flat targets list of {label, key, value} objects,
+      called from the constructor.
+  - codeRefs:
+    - class:c8a1bb970a71df08690d5aae53db9bd5
+    - file:third_party/openbao/ui/app/components/mfa/mfa-login-enforcement-form.js
+    id: r.login-enforcement-target-state
+    level: MUST
+    text: MfaLoginEnforcementForm must call resetTargetState() from the constructor
+      to clear selectedTargetValue and eagerly load identity groups and entities as
+      searchSelect options, and onTargetSelect(type) must set selectedTargetType and
+      reload the options for that target type.
+  - codeRefs:
+    - class:59bddf67afefc7bf0dfb7e5a4cfae104
+    - file:third_party/openbao/ui/app/components/mfa/method-form.js
+    id: r.method-form-edit-modal
+    level: MUST
+    text: MfaMethodForm must hold editValidations and isEditModalActive state, initSave(e)
+      must prevent the default event and open the edit modal, save() must persist
+      the edited method through the store, and cancel() must close the modal without
+      saving.
+  - codeRefs:
+    - class:9d6a9f20ff7ad56b499f3ea377bb83d7
+    - file:third_party/openbao/ui/app/components/mfa/mfa-form.js
+    id: r.mfa-form-constraint-resolution
+    level: MUST
+    text: MfaForm must resolve the active MFA constraints from its auth service and
+      expose them through constraints(), multiConstraint(), singleConstraintMultiMethod()
+      and singlePasscode(), and must render a human-readable prompt through description().
+  - codeRefs:
+    - class:9d6a9f20ff7ad56b499f3ea377bb83d7
+    - file:third_party/openbao/ui/app/components/mfa/mfa-form.js
+    id: r.mfa-form-countdown-and-delay
+    level: MUST
+    text: MfaForm must track a countdown and an error value and must set the codeDelayMessage
+      through newCodeDelay(message) when the server rejects a passcode for arriving
+      too soon.
+  - codeRefs:
+    - class:9d6a9f20ff7ad56b499f3ea377bb83d7
+    - file:third_party/openbao/ui/app/components/mfa/mfa-form.js
+    id: r.mfa-form-validate-and-submit
+    level: MUST
+    text: MfaForm.validate() must verify the entered passcode against the selected
+      constraint, onSelect(constraint, id) must record which constraint and method
+      the user chose, and submit(e) must prevent the default event and submit the
+      passcode for that selection.
+  - codeRefs:
+    - class:e868b1ce8e2914d48880c56287a9f284
+    - file:third_party/openbao/ui/app/components/mfa/mfa-setup-step-one.js
+    id: r.setup-step-one
+    level: MUST
+    text: MfaSetupStepOne must exist as the first exported step component of the MFA
+      enrollment flow and take its data from component arguments rather than from
+      services.
+  - codeRefs:
+    - class:099b26fd3cb365a6bee9e9e93aa21874
+    - file:third_party/openbao/ui/app/components/mfa/mfa-setup-step-two.js
+    id: r.setup-step-two
+    level: MUST
+    text: MfaSetupStepTwo must exist as the second exported step component of the
+      MFA enrollment flow, presenting the verification or completion stage of the
+      setup wizard.
   upstream: self
