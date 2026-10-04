@@ -3165,6 +3165,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.user-error-carries-message` (MUST): "UserError must be an exported struct in package errutil with a single exported field Err of type string, so that callers construct it with a composite literal such as errutil.UserError{Err: msg} and read the message back from the field."
 - added `r.user-error-implements-error` (MUST): "UserError must satisfy the standard error interface by defining Error() string on a value receiver that returns the Err field unchanged, with no prefix, wrapping, or reformatting, so callers return it directly as an error whose text is exactly the string they set."
 
+### third-party-openbao-sdk-helper-hclutil
+
+- intent: "" -> "This context exists to give the deno-kcp specification a stable description of the vendored OpenBao HCL parsing and key-validation helpers. The package is a dependency boundary: other packages in the vendored tree read configuration through it rather than touching the HCL AST library directly, so its three functions define the contract for how configuration bytes become a parsed AST and how unknown configuration keys are rejected. It is documented here so that consumers of the vendored OpenBao code can rely on the parsing and validation behaviour without depending on the internal layout of the helper file."
+- added `r.check-hcl-keys-accepts-object-node` (MUST): "CheckHCLKeys normalises the node it is given by taking the object list from an *ast.ObjectList directly and from an *ast.ObjectType via its List field; any other node type is rejected with an error of the form "cannot check HCL keys of type %T"."
+- added `r.check-hcl-keys-rejects-unknown-keys` (MUST): "CheckHCLKeys builds a set from the supplied valid key list and inspects every item in the object list; each item whose first key token is not in the set is reported as an error naming the key and its line number, and all such errors are accumulated into one multierror return so a single call reports every offending key."
+- added `r.parse-config-returns-ast-file` (MUST): "ParseConfig accepts a raw configuration byte slice and returns a parsed *ast.File together with an error; the parsing path handles both HCL and JSON configuration input, and a parse failure is surfaced as a non-nil error rather than a partial file."
+- added `r.when-hcl-key-present-ignores-other-nodes` (MUST): "WhenHCLKeyPresent accepts *ast.ObjectList and *ast.ObjectType nodes and derives the item list from each; for any other node type it returns nil without invoking the callback and without an error, so an absent or unexpected node shape is treated as nothing to do."
+- added `r.when-hcl-key-present-invokes-callback` (MUST): "WhenHCLKeyPresent filters the node's object list by the given key and invokes the supplied callback with each matching *ast.ObjectItem; errors returned by the callback are accumulated with multierror and returned after the walk completes, so one failing item does not stop the remaining items from being visited."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -3395,4 +3404,4 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-sdk-helper-docker-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-sdk-helper-errutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-errutil-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-sdk-helper-hclutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-helper-hclutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

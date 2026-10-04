@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to give the deno-kcp specification a stable description of the vendored OpenBao HCL parsing and key-validation helpers. The package is a dependency boundary: other packages in the vendored tree read configuration through it rather than touching the HCL AST library directly, so its three functions define the contract for how configuration bytes become a parsed AST and how unknown configuration keys are rejected. It is documented here so that consumers of the vendored OpenBao code can rely on the parsing and validation behaviour without depending on the internal layout of the helper file.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
