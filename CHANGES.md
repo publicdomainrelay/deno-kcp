@@ -624,9 +624,23 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.run-returns-nil-on-success` (MUST): "Run must return nil when construction and serving complete without error."
 - added `r.run-serves-dbplugin` (MUST): "Run must assert the constructed backend to dbplugin.Database and pass it to dbplugin.Serve so the plugin exposes the database plugin interface over RPC."
 
+### third-party-openbao-internal-builtin-logical-database-dbplugin
+
+- intent: "" -> "This context exists to verify the gRPC-backed database plugin client/server plumbing exposed by the dbplugin package. It pins the observable contract of a database plugin as seen through PluginFactoryVersion: Init must accept a single-entry configuration map, CreateUser must reject a duplicate display name and return the display name as the username, RenewUser must fail for unknown users and succeed for known ones, and RevokeUser must remove the user so that a later CreateUser with the same name succeeds. It also documents the out-of-process helper pattern in which one test function doubles as the plugin binary main when the go-plugin client execs it."
+- added `r-cluster-fixture` (MUST): "getCluster must start a vault.TestCluster with vaulthttp.Handler as the handler function, register the mock plugin under the name "test-plugin" via vault.TestAddTestPlugin with plugin type consts.PluginTypeDatabase and TestPlugin_GRPC_Main as the test plugin main, and return both the cluster and a dynamic system view built from the first core."
+- added `r-duplicate-user-rejected` (MUST): "TestPlugin_CreateUser must assert that the first CreateUser returns username and password both equal to "test", and that a second CreateUser with the same display name and role name returns a non-nil error, proving the first creation was persisted."
+- added `r-grpc-main-env-gate` (MUST): "TestPlugin_GRPC_Main must return immediately unless the plugin-unwrap-token or plugin-metadata-mode variable is set, so the function is inert as a normal test and acts only as the go-plugin server entry point when exec'd by the client; when active it must parse the --tls-skip-verify=true flag set and call dbplugin.Serve with an api.VaultPluginTLSProvider built from the API client meta."
+- added `r-plugin-factory-and-lifecycle-tests` (MUST): "TestPlugin_Init, TestPlugin_CreateUser, TestPlugin_RenewUser and TestPlugin_RevokeUser must each build the plugin with dbplugin.PluginFactoryVersion over namespace.RootContext, a null logger and the fixture's system view, defer cluster cleanup and plugin close, and fail the test on any returned error along the Init, CreateUser, RenewUser and RevokeUser path."
+- added `r.close-clears-users` (SHOULD): "Close must clear the users map and return nil, so a closed plugin holds no residual user state."
+- added `r.create-user-contract` (MUST): "CreateUser must return an error when the display name is empty, the expiration is zero, or the display name already exists in the users map; otherwise it must record the user and return the display name as the username with the literal password "test"."
+- added `r.init-requires-single-config-entry` (MUST): "Init and Initialize must both reject a configuration map whose length is not exactly one, and Init must echo the configuration map back on success; the tests pass the one-entry map {"test": 1}."
+- added `r.mock-plugin-implements-database` (MUST): "A mockPlugin value must satisfy dbplugin.Database, tracked by an in-memory users map from display name to a password slice, so the tests exercise the plugin over the same interface the real client uses."
+- added `r.renew-user-contract` (MUST): "RenewUser must return an error when the username is empty, the expiration is zero, or the username is absent from the users map, and must return nil for a user that exists."
+- added `r.revoke-user-contract` (MUST): "RevokeUser must return an error when the username is empty or unknown, and must delete the username from the users map on success so that a subsequent CreateUser with the same display name succeeds."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
 | --- | --- | --- | --- | --- | --- |
 | third-party-openbao-internal-builtin-logical-database-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-internal-builtin-logical-database-dbplugin-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-builtin-logical-database-dbplugin-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |

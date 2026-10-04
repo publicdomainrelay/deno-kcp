@@ -7,5 +7,92 @@ metadata:
   name: third-party-openbao-internal-builtin-logical-database-dbplugin
   namespace: default
 spec:
+  intent: 'This context exists to verify the gRPC-backed database plugin client/server
+    plumbing exposed by the dbplugin package. It pins the observable contract of a
+    database plugin as seen through PluginFactoryVersion: Init must accept a single-entry
+    configuration map, CreateUser must reject a duplicate display name and return
+    the display name as the username, RenewUser must fail for unknown users and succeed
+    for known ones, and RevokeUser must remove the user so that a later CreateUser
+    with the same name succeeds. It also documents the out-of-process helper pattern
+    in which one test function doubles as the plugin binary main when the go-plugin
+    client execs it.'
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/database/dbplugin/plugin_test.go
+    id: r-cluster-fixture
+    level: MUST
+    text: getCluster must start a vault.TestCluster with vaulthttp.Handler as the
+      handler function, register the mock plugin under the name "test-plugin" via
+      vault.TestAddTestPlugin with plugin type consts.PluginTypeDatabase and TestPlugin_GRPC_Main
+      as the test plugin main, and return both the cluster and a dynamic system view
+      built from the first core.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/database/dbplugin/plugin_test.go
+    id: r-duplicate-user-rejected
+    level: MUST
+    text: TestPlugin_CreateUser must assert that the first CreateUser returns username
+      and password both equal to "test", and that a second CreateUser with the same
+      display name and role name returns a non-nil error, proving the first creation
+      was persisted.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/database/dbplugin/plugin_test.go
+    id: r-grpc-main-env-gate
+    level: MUST
+    text: TestPlugin_GRPC_Main must return immediately unless the plugin-unwrap-token
+      or plugin-metadata-mode variable is set, so the function is inert as a normal
+      test and acts only as the go-plugin server entry point when exec'd by the client;
+      when active it must parse the --tls-skip-verify=true flag set and call dbplugin.Serve
+      with an api.VaultPluginTLSProvider built from the API client meta.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/database/dbplugin/plugin_test.go
+    id: r-plugin-factory-and-lifecycle-tests
+    level: MUST
+    text: TestPlugin_Init, TestPlugin_CreateUser, TestPlugin_RenewUser and TestPlugin_RevokeUser
+      must each build the plugin with dbplugin.PluginFactoryVersion over namespace.RootContext,
+      a null logger and the fixture's system view, defer cluster cleanup and plugin
+      close, and fail the test on any returned error along the Init, CreateUser, RenewUser
+      and RevokeUser path.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/database/dbplugin/plugin_test.go
+    id: r.close-clears-users
+    level: SHOULD
+    text: Close must clear the users map and return nil, so a closed plugin holds
+      no residual user state.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/database/dbplugin/plugin_test.go
+    id: r.create-user-contract
+    level: MUST
+    text: CreateUser must return an error when the display name is empty, the expiration
+      is zero, or the display name already exists in the users map; otherwise it must
+      record the user and return the display name as the username with the literal
+      password "test".
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/database/dbplugin/plugin_test.go
+    id: r.init-requires-single-config-entry
+    level: MUST
+    text: 'Init and Initialize must both reject a configuration map whose length is
+      not exactly one, and Init must echo the configuration map back on success; the
+      tests pass the one-entry map {"test": 1}.'
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/database/dbplugin/plugin_test.go
+    id: r.mock-plugin-implements-database
+    level: MUST
+    text: A mockPlugin value must satisfy dbplugin.Database, tracked by an in-memory
+      users map from display name to a password slice, so the tests exercise the plugin
+      over the same interface the real client uses.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/database/dbplugin/plugin_test.go
+    id: r.renew-user-contract
+    level: MUST
+    text: RenewUser must return an error when the username is empty, the expiration
+      is zero, or the username is absent from the users map, and must return nil for
+      a user that exists.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/database/dbplugin/plugin_test.go
+    id: r.revoke-user-contract
+    level: MUST
+    text: RevokeUser must return an error when the username is empty or unknown, and
+      must delete the username from the users map on success so that a subsequent
+      CreateUser with the same display name succeeds.
   upstream: self
