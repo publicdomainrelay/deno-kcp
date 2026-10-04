@@ -1,7 +1,7 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 kind: SpecChange
 metadata:
-  name: third-party-openbao-ui-app-components-c2s-6c1bbe4c3ba9-89cee50ec5ae
+  name: third-party-openbao-ui-app-components-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2
   namespace: default
 spec:
   delta: {}
@@ -10,20 +10,28 @@ spec:
   systemContext: third-party-openbao-ui-app-components
   toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
 status:
-  agentLog: 'This context is the vendored OpenBao web UI component layer under third_party/openbao/ui/app/components.
-    It holds 66 JavaScript modules, each exporting one default Ember component class
-    with a co-located template, that together render the OpenBao console: secret v2
-    read, edit, metadata, version and delete flows; auth forms including JWT/OIDC
-    and base64 input toggling; secrets engine mount and database engine configuration;
-    the crypto tool pages (wrap, unwrap, rewrap, lookup, hash, random) with TTL and
-    PGP file helpers; policy editing and OIDC consent; and shared presentation pieces
-    such as calendar and date dropdowns, pagination controls, flash messages, token
-    expiry warning, section tabs, selectable cards, hover copy button, secret links
-    and splash page. The classes talk to the Ember data store (for example DiffVersionSelector
-    uses the secret-v2-version adapter) and receive state through args, tracked properties
-    and service injection. The code is an unmodified third_party copy of upstream
-    OpenBao UI.'
-  message: wrote 17 requirement(s) and 38 interface(s) for third-party-openbao-ui-app-components;
+  agentLog: 'This context covers the Ember component modules vendored at third_party/openbao/ui/app/components/,
+    the presentation and form layer of the OpenBao (Bao) web console that deno-kcp
+    embeds as third_party source. Each module exports one default Ember component
+    class that a co-located template renders: CalendarWidget and DateDropdown for
+    date range and single-date picking, ConfigureAwsSecretComponent and ConfigureSshSecretComponent
+    for secrets engine configuration, DiffVersionSelector for comparing KV v2 secret
+    versions through jsondiffpatch, the SecretEdit/SecretCreateOrUpdate/SecretEditMetadata/SecretEditToolbar/SecretVersionMenu/SecretDeleteMenu
+    group for the secret v2 read, write, metadata and destroy flows, MountBackendForm
+    and MountAccessorSelect for enabling mounts, the DatabaseConnectionEdit/DatabaseRoleEdit/DatabaseRoleSettingForm/GenerateCredentialsDatabase/GetCredentialsCard
+    group for the database secrets engine, the crypto tool components ToolHash, ToolLookup,
+    ToolRandom, ToolWrap, ToolUnwrap, ToolRewrap and WrapTtlComponent, auth-form.js,
+    auth-jwt.js, auth-form-options.js and b64-toggle.js for login, PolicyFormComponent,
+    OidcConsentBlockComponent, FlashMessageComponent and TokenExpireWarning for policy
+    editing, OIDC consent and session feedback, plus small shared pieces such as SplashPage,
+    SectionTabs, SelectableCard, HoverCopyButton, GeneratedItemList, PaginationControls,
+    RegexValidator, SecretLink and ToolbarSecretLink. Because they are copied in rather
+    than depended on, their contracts, arguments and storage interactions have to
+    be described here instead of being read from a package.'
+  message: wrote 17 requirement(s) and 38 interface(s) for third-party-openbao-ui-app-components
+  phase: Succeeded
+superseded:
+- message: wrote 17 requirement(s) and 38 interface(s) for third-party-openbao-ui-app-components;
     interface CalendarWidget.startDate is not in the observed facts; dropped; interface
     CalendarWidget.endDate is not in the observed facts; dropped; interface CalendarWidget.displayYear
     is not in the observed facts; dropped; interface CalendarWidget.disableFutureYear
@@ -53,8 +61,5 @@ status:
     facts; dropped; interface auth-jwt.js is not in the observed facts; dropped; interface
     auth-form-options.js is not in the observed facts; dropped; interface b64-toggle.js
     is not in the observed facts; dropped
+  name: third-party-openbao-ui-app-components-c2s-6c1bbe4c3ba9-89cee50ec5ae
   phase: Succeeded
-superseded:
-- message: the agent is summarizing third-party-openbao-ui-app-components
-  name: third-party-openbao-ui-app-components-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2
-  phase: Running

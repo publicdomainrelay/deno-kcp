@@ -3988,7 +3988,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 
 ### third-party-openbao-ui-app-components
 
-- intent: "" -> "The context exists so that the vendored OpenBao console components can be described, referenced and reasoned about from the deno-kcp repository without reading every upstream file. It exists because the Bao/OpenBao UI is embedded as third_party source rather than a dependency, so its component contracts, args and storage interactions need to stay visible in this repository's own specification graph, and because reviewers must be able to tell what each vendored component does, and what it depends on, before touching it."
+- intent: "" -> "The context exists so the vendored OpenBao console components can be described, referenced and reasoned about from the deno-kcp repository without reading every upstream file. The Bao/OpenBao UI is embedded as third_party source rather than a dependency, so its component contracts, args and storage interactions need to stay visible in deno-kcp's own specification graph, and reviewers must be able to tell what each vendored component does, and what it depends on, before touching it. It also records that the directory is an unmodified copy of upstream OpenBao, so any edit is a deliberate divergence that must be kept minimal and traceable back to the upstream component it changes."
 - added `r.auth-components` (MUST): "auth-form.js drives login by rendering the auth methods offered by the backend and dispatching the chosen method, auth-jwt.js and auth-form-options.js render the JWT/OIDC and method-option variants of that form, and b64-toggle.js toggles base64 display of a value in the auth payload."
 - added `r.aws-secret-config` (MUST): "ConfigureAwsSecretComponent persists AWS secrets engine configuration: saveRootCreds(data, event) writes the root credentials, saveLease(data, event) writes the lease settings, and handleTtlChange(name, ttlObj) reconciles the submitted TTL object with the form state."
 - added `r.calendar-widget-range` (MUST): "CalendarWidget keeps currentDate, calendarDisplayDate, showCalendar, tooltipTarget and tooltipText as state; it derives startDate, endDate, displayYear and the disableFutureYear and disablePastYear bounds from them, builds the month grid with widgetMonths, and reacts to addTooltip, removeTooltip, addYear, subYear, toggleShowCalendar, handleDateShortcut(dropdown, { target }) and selectMonth(month, dropdown) by moving the displayed month or toggling the popup."
@@ -4343,7 +4343,9 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-components-basic-dropdown-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-components-basic-dropdown-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-components-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-components-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-components-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-components-console-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-components-console-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-components-identity-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-components-keymgmt-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

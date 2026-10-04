@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-The context exists so that the vendored OpenBao console components can be described, referenced and reasoned about from the deno-kcp repository without reading every upstream file. It exists because the Bao/OpenBao UI is embedded as third_party source rather than a dependency, so its component contracts, args and storage interactions need to stay visible in this repository's own specification graph, and because reviewers must be able to tell what each vendored component does, and what it depends on, before touching it.
+The context exists so the vendored OpenBao console components can be described, referenced and reasoned about from the deno-kcp repository without reading every upstream file. The Bao/OpenBao UI is embedded as third_party source rather than a dependency, so its component contracts, args and storage interactions need to stay visible in deno-kcp's own specification graph, and reviewers must be able to tell what each vendored component does, and what it depends on, before touching it. It also records that the directory is an unmodified copy of upstream OpenBao, so any edit is a deliberate divergence that must be kept minimal and traceable back to the upstream component it changes.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
