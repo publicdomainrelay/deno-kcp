@@ -1,0 +1,44 @@
+conditions:
+- message: 'undeclared: Backend, Factory, backend.Key'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/builtin/logical/totp/backend.go
+  - third_party/openbao/internal/builtin/logical/totp/backend_test.go
+  - third_party/openbao/internal/builtin/logical/totp/path_code.go
+  - third_party/openbao/internal/builtin/logical/totp/path_keys.go
+  fingerprint: 4fcba826b4908cbb06bcebd64313a68b3ef6eac58dbb6dd194b078d674477104
+  interfaces:
+  - codegraphId: function:2659f24939f08b8a6a28ecd0c1a9ad16
+    file: third_party/openbao/internal/builtin/logical/totp/backend.go
+    kind: function
+    line: 18
+    name: Factory
+    signature: (ctx context.Context, conf *logical.BackendConfig) (logical.Backend,
+      error)
+  - codegraphId: function:93c53f32f8e8d0b9cf6d2596526daf2b
+    file: third_party/openbao/internal/builtin/logical/totp/backend.go
+    kind: function
+    line: 26
+    name: Backend
+    signature: () *backend
+  - codegraphId: method:6dc117858b8c671f708f40ddf3aad3b4
+    file: third_party/openbao/internal/builtin/logical/totp/path_keys.go
+    kind: method
+    line: 164
+    name: backend.Key
+    signature: (ctx context.Context, s logical.Storage, n string) (*keyEntry, error)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: bc71c8547555b0ead5c96f0378157aa9be6041e658784b662891cbc479a20cdf
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 4fcba826b4908cbb06bcebd64313a68b3ef6eac58dbb6dd194b078d674477104
