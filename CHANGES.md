@@ -3264,7 +3264,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 
 ### third-party-openbao-sdk-helper-locksutil
 
-- intent: "" -> "This context exists so the deno-kcp repository carries the OpenBao SDK locksutil package as a third_party dependency rather than fetching it at build time. The package gives callers cancellable and key-sharded locking primitives: a context-aware mutex for code that must not block past a deadline, a keyed variant for serialising work per identifier without a global lock, and sharded lock arrays so many keys map onto a small fixed set of locks. It is not fork-owned code; it is described here so the vendored surface and its behaviour stay traceable."
+- intent: "" -> "This context exists so the deno-kcp repository carries the OpenBao SDK locksutil package as a third_party dependency rather than fetching it at build time, keeping the vendored surface and its behaviour traceable. The package gives callers cancellable and key-sharded locking primitives: a context-aware mutex for code that must not block past a deadline, a keyed variant for serialising work per identifier without a global lock, and sharded lock arrays so many keys map onto a small fixed set of locks. It is not fork-owned code; the requirement set records the contract the vendored copy must satisfy so an upstream refresh can be checked against it."
 - added `r.behaviour-pinned-by-tests` (SHOULD): "The observable behaviour of the package stays pinned by cancel_test.go, keyed_test.go and sharded_test.go, which exercise lock/unlock cycles, panic on improper unlock, cancellation during acquisition under synctest, and the sharded key helpers."
 - added `r.cancel-lock-acquire-honours-context` (MUST): "CancelLock.Lock selects between the context's Done channel and sending on the lock channel: if the context is cancelled or expires first it returns ctx.Err() without taking the lock, otherwise it acquires the lock and returns nil."
 - added `r.cancel-lock-blocks-then-succeeds-after-release` (MUST): "A goroutine blocked in CancelLock.Lock acquires the lock once the holder calls Unlock, so the lock serialises access rather than dropping waiters; cancel_test.go covers this with the Wait subtest."
@@ -3516,4 +3516,4 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-sdk-helper-keysutil-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-sdk-helper-ldaputil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-locksutil-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-sdk-helper-locksutil-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-helper-locksutil-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |

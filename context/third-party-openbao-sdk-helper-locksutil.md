@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-This context exists so the deno-kcp repository carries the OpenBao SDK locksutil package as a third_party dependency rather than fetching it at build time. The package gives callers cancellable and key-sharded locking primitives: a context-aware mutex for code that must not block past a deadline, a keyed variant for serialising work per identifier without a global lock, and sharded lock arrays so many keys map onto a small fixed set of locks. It is not fork-owned code; it is described here so the vendored surface and its behaviour stay traceable.
+This context exists so the deno-kcp repository carries the OpenBao SDK locksutil package as a third_party dependency rather than fetching it at build time, keeping the vendored surface and its behaviour traceable. The package gives callers cancellable and key-sharded locking primitives: a context-aware mutex for code that must not block past a deadline, a keyed variant for serialising work per identifier without a global lock, and sharded lock arrays so many keys map onto a small fixed set of locks. It is not fork-owned code; the requirement set records the contract the vendored copy must satisfy so an upstream refresh can be checked against it.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
