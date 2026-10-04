@@ -1,0 +1,23 @@
+# Context: third-party-openbao-ui-tests-integration-components-oidc
+
+Repository: `deno-kcp`
+
+_(empty: write what this context is for)_
+
+_Write the prose above and the fields in the spec block. `codeRefs` and the resolved references below are maintained by the tool; an edit there is lost._
+
+## spec
+
+```yaml spec
+upstream: self
+```
+
+<!-- SPECD_MANAGED_BEGIN -->
+## Resolved code references
+
+- `file:third_party/openbao/ui/tests/integration/components/oidc/assignment-form-test.js` file assignment-form-test.js (third_party/openbao/ui/tests/integration/components/oidc/assignment-form-test.js)
+- `file:third_party/openbao/ui/tests/integration/components/oidc/client-form-test.js` file client-form-test.js (third_party/openbao/ui/tests/integration/components/oidc/client-form-test.js)
+- `file:third_party/openbao/ui/tests/integration/components/oidc/key-form-test.js` file key-form-test.js (third_party/openbao/ui/tests/integration/components/oidc/key-form-test.js)
+- `file:third_party/openbao/ui/tests/integration/components/oidc/provider-form-test.js` file provider-form-test.js (third_party/openbao/ui/tests/integration/components/oidc/provider-form-test.js)
+- `file:third_party/openbao/ui/tests/integration/components/oidc/scope-form-test.js` file scope-form-test.js (third_party/openbao/ui/tests/integration/components/oidc/scope-form-test.js)
+<!-- SPECD_MANAGED_END -->
