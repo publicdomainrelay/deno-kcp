@@ -2,13 +2,127 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to pin down the contract of the syslog audit device so that the vendored OpenBao audit subsystem can construct it and route audit entries through it without reading the implementation. It records that syslog plugs into the same Factory/Backend interface that the audit package declares and that the file, http and socket packages also satisfy, which lets the registry treat every sink uniformly and lets a change to one backend be checked against the shared contract.
 
 _Write the prose above and the fields in the spec block. `codeRefs` and the resolved references below are maintained by the tool; an edit there is lost._
 
 ## spec
 
 ```yaml spec
+interfaces:
+- file: third_party/openbao/internal/builtin/audit/syslog/backend.go
+  kind: struct
+  name: Backend
+  signature: type Backend struct
+- file: third_party/openbao/internal/builtin/audit/syslog/backend.go
+  kind: method
+  name: Backend.GetHash
+  signature: func (b *Backend) GetHash(ctx context.Context, data string) (string,
+    error)
+- file: third_party/openbao/internal/builtin/audit/syslog/backend.go
+  kind: method
+  name: Backend.Invalidate
+  signature: func (b *Backend) Invalidate(_ context.Context)
+- file: third_party/openbao/internal/builtin/audit/syslog/backend.go
+  kind: method
+  name: Backend.LogRequest
+  signature: func (b *Backend) LogRequest(ctx context.Context, in *logical.LogInput)
+    error
+- file: third_party/openbao/internal/builtin/audit/syslog/backend.go
+  kind: method
+  name: Backend.LogResponse
+  signature: func (b *Backend) LogResponse(ctx context.Context, in *logical.LogInput)
+    error
+- file: third_party/openbao/internal/builtin/audit/syslog/backend.go
+  kind: method
+  name: Backend.LogTestMessage
+  signature: func (b *Backend) LogTestMessage(ctx context.Context, in *logical.LogInput,
+    config map[string]string) error
+- file: third_party/openbao/internal/builtin/audit/syslog/backend.go
+  kind: method
+  name: Backend.Reload
+  signature: func (b *Backend) Reload(_ context.Context) error
+- file: third_party/openbao/internal/builtin/audit/syslog/backend.go
+  kind: method
+  name: Backend.Salt
+  signature: func (b *Backend) Salt(ctx context.Context) (*salt.Salt, error)
+- file: third_party/openbao/internal/builtin/audit/syslog/backend.go
+  kind: function
+  name: Factory
+  signature: func Factory(ctx context.Context, conf *audit.BackendConfig) (audit.Backend,
+    error)
+requirements:
+- codeRefs:
+  - file:third_party/openbao/internal/builtin/audit/syslog/backend.go
+  - struct:b13846d838452ef018cd519120bf0849
+  id: r.backend-type
+  level: MUST
+  text: The syslog audit device state must be held in the Backend struct declared
+    in the syslog package.
+- codeRefs:
+  - file:third_party/openbao/internal/builtin/audit/syslog/backend.go
+  - function:1bb7d10c19625969a2fad559b9fc2914
+  id: r.factory-constructs-backend
+  level: MUST
+  text: The syslog audit backend must be constructed through Factory, which takes
+    a context.Context and an *audit.BackendConfig and returns an audit.Backend together
+    with an error.
+- codeRefs:
+  - file:third_party/openbao/internal/builtin/audit/syslog/backend.go
+  - method:d5bf16c0d9eab948ff1cdf09a7fed065
+  id: r.get-hash
+  level: MUST
+  text: Backend must implement GetHash to return the HMAC hash of a data string, so
+    sensitive values can be logged hashed.
+- codeRefs:
+  - file:third_party/openbao/internal/builtin/audit/syslog/backend.go
+  - method:252a807dadfe136645b090b47d7f110c
+  id: r.invalidate
+  level: MUST
+  text: Backend must implement Invalidate to drop cached state when the audit device
+    is invalidated.
+- codeRefs:
+  - file:third_party/openbao/internal/builtin/audit/syslog/backend.go
+  - method:977c2abb299b7ba82de1c2f36f532af5
+  id: r.log-request
+  level: MUST
+  text: Backend must implement LogRequest to write a request audit entry from the
+    given *logical.LogInput.
+- codeRefs:
+  - file:third_party/openbao/internal/builtin/audit/syslog/backend.go
+  - method:c55f56a838db46051967178e0a12e791
+  id: r.log-response
+  level: MUST
+  text: Backend must implement LogResponse to write a response audit entry from the
+    given *logical.LogInput.
+- codeRefs:
+  - file:third_party/openbao/internal/builtin/audit/syslog/backend.go
+  - method:ff26096cde106ddcce03b7d21b94a4e3
+  id: r.log-test-message
+  level: MUST
+  text: Backend must implement LogTestMessage so that an operator-triggered test entry
+    is written using the supplied *logical.LogInput and the per-call config map.
+- codeRefs:
+  - method:0c13207964141302df87a24ba0d56d5c
+  - method:252a807dadfe136645b090b47d7f110c
+  id: r.no-context-reload-invalidate
+  level: SHOULD
+  text: Reload and Invalidate should not depend on the passed context, taking it unnamed,
+    because neither needs cancellation while re-reading or clearing state.
+- codeRefs:
+  - file:third_party/openbao/internal/builtin/audit/syslog/backend.go
+  - method:0c13207964141302df87a24ba0d56d5c
+  id: r.reload
+  level: MUST
+  text: Backend must implement Reload to re-read the device configuration and return
+    an error when the reload fails.
+- codeRefs:
+  - file:third_party/openbao/internal/builtin/audit/syslog/backend.go
+  - method:8b769d342ef8e785df720cdf2b1c0dca
+  id: r.salt
+  level: MUST
+  text: Backend must implement Salt to return the *salt.Salt used when formatting
+    audit entries, or an error.
 upstream: self
 ```
 
