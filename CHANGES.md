@@ -3839,6 +3839,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.path-for-type-last-segment` (MUST): "`pathForType` reduces the model type to its last `/`-separated segment, so namespaced model names resolve to the trailing type name; the two list-tidy types `identity-accesslist` and `roletag-denylist` are special-cased to `tidy/<type>` instead."
 - added `r.per-method-subclass-inheritance` (MUST): "The azure, jwt, kubernetes, ldap, oidc and radius adapters each export `AuthConfig.extend()` with no property overrides, so all six inherit the base namespace, path derivation, URL building and create/update behavior unchanged."
 
+### third-party-openbao-ui-app-adapters-auth-config-aws
+
+- intent: "" -> "The context exists so that the AWS auth-config sub-resources in the OpenBao UI resolve to distinct Ember Data adapter classes while sharing one implementation. Each of client, identity-accesslist, and roletag-denylist needs its own module for the Ember resolver to find it by model name, but the request semantics are identical across the three, so the modules are deliberately empty subclasses of ../_base and the URL and record-id logic lives in one place. The spec records that these files are pure aliases, so any change to AWS config request behavior belongs in the base adapter, not here."
+- added `r.aws-client-adapter-extends-shared-base` (MUST): "The aws/client.js adapter module MUST import the shared AuthConfig adapter from ../_base and export its extend() result unchanged, so the AWS client auth-config model resolves to an adapter with no behavior of its own."
+- added `r.aws-identity-accesslist-adapter-extends-shared-base` (MUST): "The aws/identity-accesslist.js adapter module MUST import the shared AuthConfig adapter from ../_base and export its extend() result unchanged, so the identity accesslist model resolves to its own adapter class that inherits the base URL and record handling."
+- added `r.aws-roletag-denylist-adapter-extends-shared-base` (MUST): "The aws/roletag-denylist.js adapter module MUST import the shared AuthConfig adapter from ../_base and export its extend() result unchanged, so the role tag denylist model resolves to its own adapter class that inherits the base URL and record handling."
+- added `r.license-header-preserved` (MUST): "Each of the three adapter files MUST keep the HashiCorp copyright and MPL-2.0 SPDX license header, since the files are vendored from the upstream OpenBao UI tree."
+- added `r.shared-auth-config-semantics-not-duplicated` (SHOULD): "The three AWS adapters SHOULD stay free of overrides, so that the inherited behavior — namespace /v1/auth, per-type path segment with identity-accesslist and roletag-denylist rewritten to tidy/<type>, URL /v1/auth/<backendId>/config plus the type segment for aws models, and createRecord/updateRecord returning the owning backend id — remains defined once in the base adapter for all AWS auth-config sub-resources."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4120,6 +4129,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-tools-semgrep-ci-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-tools-semgrep-ci-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-adapters-auth-config-aws-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-adapters-auth-config-aws-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-adapters-auth-config-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-adapters-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-adapters-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |

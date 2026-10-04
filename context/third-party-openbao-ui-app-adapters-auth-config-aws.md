@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so that the AWS auth-config sub-resources in the OpenBao UI resolve to distinct Ember Data adapter classes while sharing one implementation. Each of client, identity-accesslist, and roletag-denylist needs its own module for the Ember resolver to find it by model name, but the request semantics are identical across the three, so the modules are deliberately empty subclasses of ../_base and the URL and record-id logic lives in one place. The spec records that these files are pure aliases, so any change to AWS config request behavior belongs in the base adapter, not here.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

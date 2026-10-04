@@ -56970,7 +56970,60 @@ system_contexts:
     identity-accesslist.js@third_party/openbao/ui/app/adapters/auth-config/aws/identity-accesslist.js
   - file:third_party/openbao/ui/app/adapters/auth-config/aws/roletag-denylist.js roletag-denylist.js@third_party/openbao/ui/app/adapters/auth-config/aws/roletag-denylist.js
   id: sc.third-party-openbao-ui-app-adapters-auth-config-aws
+  intent: The context exists so that the AWS auth-config sub-resources in the OpenBao
+    UI resolve to distinct Ember Data adapter classes while sharing one implementation.
+    Each of client, identity-accesslist, and roletag-denylist needs its own module
+    for the Ember resolver to find it by model name, but the request semantics are
+    identical across the three, so the modules are deliberately empty subclasses of
+    ../_base and the URL and record-id logic lives in one place. The spec records
+    that these files are pure aliases, so any change to AWS config request behavior
+    belongs in the base adapter, not here.
   name: third-party-openbao-ui-app-adapters-auth-config-aws
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/app/adapters/auth-config/aws/client.js
+    id: r.aws-client-adapter-extends-shared-base
+    level: MUST
+    text: The aws/client.js adapter module MUST import the shared AuthConfig adapter
+      from ../_base and export its extend() result unchanged, so the AWS client auth-config
+      model resolves to an adapter with no behavior of its own.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/adapters/auth-config/aws/identity-accesslist.js
+    id: r.aws-identity-accesslist-adapter-extends-shared-base
+    level: MUST
+    text: The aws/identity-accesslist.js adapter module MUST import the shared AuthConfig
+      adapter from ../_base and export its extend() result unchanged, so the identity
+      accesslist model resolves to its own adapter class that inherits the base URL
+      and record handling.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/adapters/auth-config/aws/roletag-denylist.js
+    id: r.aws-roletag-denylist-adapter-extends-shared-base
+    level: MUST
+    text: The aws/roletag-denylist.js adapter module MUST import the shared AuthConfig
+      adapter from ../_base and export its extend() result unchanged, so the role
+      tag denylist model resolves to its own adapter class that inherits the base
+      URL and record handling.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/adapters/auth-config/aws/client.js
+    - file:third_party/openbao/ui/app/adapters/auth-config/aws/identity-accesslist.js
+    - file:third_party/openbao/ui/app/adapters/auth-config/aws/roletag-denylist.js
+    id: r.license-header-preserved
+    level: MUST
+    text: Each of the three adapter files MUST keep the HashiCorp copyright and MPL-2.0
+      SPDX license header, since the files are vendored from the upstream OpenBao
+      UI tree.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/adapters/auth-config/aws/client.js
+    - file:third_party/openbao/ui/app/adapters/auth-config/aws/identity-accesslist.js
+    - file:third_party/openbao/ui/app/adapters/auth-config/aws/roletag-denylist.js
+    id: r.shared-auth-config-semantics-not-duplicated
+    level: SHOULD
+    text: The three AWS adapters SHOULD stay free of overrides, so that the inherited
+      behavior — namespace /v1/auth, per-type path segment with identity-accesslist
+      and roletag-denylist rewritten to tidy/<type>, URL /v1/auth/<backendId>/config
+      plus the type segment for aws models, and createRecord/updateRecord returning
+      the owning backend id — remains defined once in the base adapter for all AWS
+      auth-config sub-resources.
   upstream: self
 - code:
   - third_party/openbao/ui/app/adapters/clients/activity.js
