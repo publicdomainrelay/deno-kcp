@@ -1,10 +1,253 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
 - file:third_party/openbao/internal/vault/backend/testing.go testing.go@third_party/openbao/internal/vault/backend/testing.go
+- function:57eb4d38e21b406dd4763aee4420529a ClearTestCredentialBackends@third_party/openbao/internal/vault/backend/testing.go:209
+- function:69a7fbc005700978cc454b21ba9efc36 NoopBackendRollbackErrFactory@third_party/openbao/internal/vault/backend/testing.go:64
+- function:cc967e6d7ea63746c8e263fe3ece126c AddTestCredentialBackend@third_party/openbao/internal/vault/backend/testing.go:198
+- function:fcccc05413d30975e74101cb31ad3409 NoopBackendFactory@third_party/openbao/internal/vault/backend/testing.go:53
+- method:0b6d75def3df86f0bcab21a8a5a8085d Noop.Setup@third_party/openbao/internal/vault/backend/testing.go:146
+- method:44afc43d0e442bce553ef2a62c6bb0f1 Noop.HandleExistenceCheck@third_party/openbao/internal/vault/backend/testing.go:110
+- method:6e4253dace89d227a15c419c73e18a52 Noop.Type@third_party/openbao/internal/vault/backend/testing.go:158
+- method:b77a4e73366111cc2320afed7a6990b2 Noop.HandleRequest@third_party/openbao/internal/vault/backend/testing.go:76
+- method:c032931fd6f31a6ad7d1c76366645fd7 Noop.Logger@third_party/openbao/internal/vault/backend/testing.go:150
+- method:c794ca5683dc651f2fb9ac8c3409f9ab Noop.SpecialPaths@third_party/openbao/internal/vault/backend/testing.go:114
+- method:c8f28281ba05fc5d830c1d3f7d6a4507 Noop.System@third_party/openbao/internal/vault/backend/testing.go:121
+- method:d0cab1cb02b49236efb7732e3d672e3f InitializableBackend.Initialize@third_party/openbao/internal/vault/backend/testing.go:172
+- method:d271510d1d26b09a104119336a91d71f Noop.Cleanup@third_party/openbao/internal/vault/backend/testing.go:138
+- method:dbdd75c7431d78693b9460605023d865 Noop.Initialize@third_party/openbao/internal/vault/backend/testing.go:154
+- method:f4c560443492723b609b3a69f0741a96 Noop.InvalidateKey@third_party/openbao/internal/vault/backend/testing.go:142
+- struct:71f40cc634995a1d3ff47418d2519385 InitializableBackend@third_party/openbao/internal/vault/backend/testing.go:167
+- struct:949b8ac2028f104c9dc59a73c3754302 Noop@third_party/openbao/internal/vault/backend/testing.go:21
+- type_alias:d26122cb2a954bcd64e1f468a5ec0253 RouterTestHandlerFunc@third_party/openbao/internal/vault/backend/testing.go:19
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-vault-backend
   namespace: default
 spec:
+  intent: This context exists to give the vault test suite a controllable backend
+    double without a real secrets engine. Tests need to drive the core's routing,
+    rollback and lifecycle paths and then inspect what the core sent; Noop supplies
+    that by recording paths, requests and invalidated keys while returning canned
+    or handler-supplied responses, and by letting a test force rollback failures or
+    a panic on a chosen path. The two factories keep construction uniform with real
+    backends, and the credential-backend registry lets tests register an auth method
+    before the test core is built and clear it afterwards so state does not leak between
+    tests.
+  interfaces:
+  - file: third_party/openbao/internal/vault/backend/testing.go
+    kind: function
+    name: AddTestCredentialBackend
+    signature: func AddTestCredentialBackend(name string, factory logical.Factory)
+      error
+  - file: third_party/openbao/internal/vault/backend/testing.go
+    kind: function
+    name: ClearTestCredentialBackends
+    signature: func ClearTestCredentialBackends()
+  - file: third_party/openbao/internal/vault/backend/testing.go
+    kind: struct
+    name: InitializableBackend
+    signature: type InitializableBackend struct
+  - file: third_party/openbao/internal/vault/backend/testing.go
+    kind: method
+    name: InitializableBackend.Initialize
+    signature: func (b *InitializableBackend) Initialize(ctx context.Context, req
+      *logical.InitializationRequest) error
+  - file: third_party/openbao/internal/vault/backend/testing.go
+    kind: struct
+    name: Noop
+    signature: type Noop struct
+  - file: third_party/openbao/internal/vault/backend/testing.go
+    kind: method
+    name: Noop.Cleanup
+    signature: func (n *Noop) Cleanup(ctx context.Context)
+  - file: third_party/openbao/internal/vault/backend/testing.go
+    kind: method
+    name: Noop.HandleExistenceCheck
+    signature: func (n *Noop) HandleExistenceCheck(ctx context.Context, req *logical.Request)
+      (bool, bool, error)
+  - file: third_party/openbao/internal/vault/backend/testing.go
+    kind: method
+    name: Noop.HandleRequest
+    signature: func (n *Noop) HandleRequest(ctx context.Context, req *logical.Request)
+      (*logical.Response, error)
+  - file: third_party/openbao/internal/vault/backend/testing.go
+    kind: method
+    name: Noop.Initialize
+    signature: func (n *Noop) Initialize(ctx context.Context, req *logical.InitializationRequest)
+      error
+  - file: third_party/openbao/internal/vault/backend/testing.go
+    kind: method
+    name: Noop.InvalidateKey
+    signature: func (n *Noop) InvalidateKey(ctx context.Context, k string)
+  - file: third_party/openbao/internal/vault/backend/testing.go
+    kind: method
+    name: Noop.Logger
+    signature: func (n *Noop) Logger() log.Logger
+  - file: third_party/openbao/internal/vault/backend/testing.go
+    kind: method
+    name: Noop.Setup
+    signature: func (n *Noop) Setup(ctx context.Context, config *logical.BackendConfig)
+      error
+  - file: third_party/openbao/internal/vault/backend/testing.go
+    kind: method
+    name: Noop.SpecialPaths
+    signature: func (n *Noop) SpecialPaths() *logical.Paths
+  - file: third_party/openbao/internal/vault/backend/testing.go
+    kind: method
+    name: Noop.System
+    signature: func (n *Noop) System() logical.SystemView
+  - file: third_party/openbao/internal/vault/backend/testing.go
+    kind: method
+    name: Noop.Type
+    signature: func (n *Noop) Type() logical.BackendType
+  - file: third_party/openbao/internal/vault/backend/testing.go
+    kind: function
+    name: NoopBackendFactory
+    signature: func NoopBackendFactory(_ context.Context, cfg *logical.BackendConfig)
+      (logical.Backend, error)
+  - file: third_party/openbao/internal/vault/backend/testing.go
+    kind: function
+    name: NoopBackendRollbackErrFactory
+    signature: func NoopBackendRollbackErrFactory(_ context.Context, cfg *logical.BackendConfig)
+      (logical.Backend, error)
+  - file: third_party/openbao/internal/vault/backend/testing.go
+    kind: type_alias
+    name: RouterTestHandlerFunc
+    signature: type RouterTestHandlerFunc func(context.Context, *logical.Request)
+      (*logical.Response, error)
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/backend/testing.go
+    - function:cc967e6d7ea63746c8e263fe3ece126c
+    id: r.add-test-credential-backend-validates
+    level: MUST
+    text: AddTestCredentialBackend must reject an empty name with "missing backend
+      name" and a nil factory with "missing backend factory function", and otherwise
+      store the factory in the package-level TestCredentialBackends registry under
+      that name; it must be called before the test core is created.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/backend/testing.go
+    - function:57eb4d38e21b406dd4763aee4420529a
+    id: r.clear-test-credential-backends
+    level: MUST
+    text: ClearTestCredentialBackends must replace the TestCredentialBackends registry
+      with a fresh empty map so registrations do not leak between tests.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/backend/testing.go
+    - method:44afc43d0e442bce553ef2a62c6bb0f1
+    id: r.existence-check-always-false
+    level: MUST
+    text: Noop.HandleExistenceCheck must always report handlerFound false, itemExists
+      false and a nil error, so the core treats every path as nonexistent.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/backend/testing.go
+    - function:69a7fbc005700978cc454b21ba9efc36
+    - function:fcccc05413d30975e74101cb31ad3409
+    id: r.factories-parse-config
+    level: MUST
+    text: NoopBackendFactory and NoopBackendRollbackErrFactory must both read the
+      include_resolve_path_operations key from the BackendConfig with parseutil.ParseBool
+      and build a Noop whose IncludeResolvePathOperation carries that value, returning
+      the parse error instead of a backend when the value is not a boolean; the rollback
+      variant must additionally set RollbackErrs true.
+  - codeRefs:
+    - method:b77a4e73366111cc2320afed7a6990b2
+    - type_alias:d26122cb2a954bcd64e1f468a5ec0253
+    id: r.handle-request-delegates-to-handler
+    level: SHOULD
+    text: Noop.HandleRequest must default its response to the stored Response and,
+      when RequestHandler is non-nil, use RouterTestHandlerFunc to produce both the
+      response and the error instead, returning both to the caller after recording.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/backend/testing.go
+    - method:b77a4e73366111cc2320afed7a6990b2
+    id: r.handle-request-records-traffic
+    level: MUST
+    text: Noop.HandleRequest must copy the request under the mutex, append the request
+      path to Paths and append the copy to Requests, skipping the Requests append
+      for a ResolvePathOperation unless IncludeResolvePathOperation is set; the recorded
+      Paths entry is kept either way.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/backend/testing.go
+    - method:b77a4e73366111cc2320afed7a6990b2
+    id: r.handle-request-rejects-token-entry
+    level: MUST
+    text: Noop.HandleRequest must panic with "got a non-nil TokenEntry" when the incoming
+      request carries a token entry, so a test that leaks a token into a backend call
+      fails loudly instead of silently succeeding.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/backend/testing.go
+    - method:b77a4e73366111cc2320afed7a6990b2
+    id: r.handle-request-requires-storage
+    level: MUST
+    text: Noop.HandleRequest must return an error reading "missing view" when the
+      request has no storage, and must panic with "as you command" when the request
+      path is exactly "panic".
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/backend/testing.go
+    - method:b77a4e73366111cc2320afed7a6990b2
+    id: r.handle-request-rollback-error-mode
+    level: MUST
+    text: Noop.HandleRequest must return a nil response and the error "no-op backend
+      rollback has erred out" when RollbackErrs is true and the request operation
+      is "rollback", before any handler or recording work happens.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/backend/testing.go
+    - method:d0cab1cb02b49236efb7732e3d672e3f
+    - struct:71f40cc634995a1d3ff47418d2519385
+    id: r.initializable-backend-initializes-once
+    level: MUST
+    text: InitializableBackend must embed *Noop and add IsInitialized; its Initialize
+      must return the error "already initialized" on a second call, write the dummy
+      entry at key "initialize/zork" to the request storage to prove the storage is
+      not read-only, propagate a write failure, and only then set IsInitialized.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/backend/testing.go
+    - method:f4c560443492723b609b3a69f0741a96
+    id: r.invalidate-key-records
+    level: MUST
+    text: Noop.InvalidateKey must append the given key to Invalidations so a test
+      can assert which keys the core invalidated.
+  - codeRefs:
+    - method:0b6d75def3df86f0bcab21a8a5a8085d
+    - method:c032931fd6f31a6ad7d1c76366645fd7
+    - method:d271510d1d26b09a104119336a91d71f
+    - method:dbdd75c7431d78693b9460605023d865
+    id: r.lifecycle-methods-are-inert
+    level: MUST
+    text: Noop.Cleanup, Noop.Setup and Noop.Initialize must be inert no-ops that return
+      without error, and Noop.Logger must return a null hclog logger, so backend lifecycle
+      calls never disturb a test.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/backend/testing.go
+    - struct:949b8ac2028f104c9dc59a73c3754302
+    id: r.noop-implements-logical-backend
+    level: MUST
+    text: Noop must satisfy the logical.Backend interface so it can be registered
+      and routed like a real backend, holding a mutex, the recorded Root, Login, Paths,
+      Requests and Invalidations, an optional Response and RequestHandler, lease TTL
+      overrides, a BackendType, and the RollbackErrs switch.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/backend/testing.go
+    - method:c794ca5683dc651f2fb9ac8c3409f9ab
+    id: r.special-paths-from-fields
+    level: MUST
+    text: Noop.SpecialPaths must return a logical.Paths whose Root comes from the
+      Root field and whose Unauthenticated comes from the Login field.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/backend/testing.go
+    - method:c8f28281ba05fc5d830c1d3f7d6a4507
+    id: r.system-lease-ttl-defaults
+    level: MUST
+    text: Noop.System must return a logical.StaticSystemView with DefaultLeaseTTLVal
+      and MaxLeaseTTLVal taken from the fields of the same name when those are positive,
+      and otherwise from the 24-hour default and the 32-day maximum.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/backend/testing.go
+    - method:6e4253dace89d227a15c419c73e18a52
+    id: r.type-defaults-to-logical
+    level: MUST
+    text: Noop.Type must return logical.TypeLogical when BackendType is logical.TypeUnknown,
+      and otherwise return the BackendType field verbatim.
   upstream: self

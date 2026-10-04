@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to give the vault test suite a controllable backend double without a real secrets engine. Tests need to drive the core's routing, rollback and lifecycle paths and then inspect what the core sent; Noop supplies that by recording paths, requests and invalidated keys while returning canned or handler-supplied responses, and by letting a test force rollback failures or a panic on a chosen path. The two factories keep construction uniform with real backends, and the credential-backend registry lets tests register an auth method before the test core is built and clear it afterwards so state does not leak between tests.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

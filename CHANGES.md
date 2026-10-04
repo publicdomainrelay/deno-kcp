@@ -2185,6 +2185,26 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.unexpected-method` (MUST): "Any method other than GET or PATCH against the expected pod gets 400 with a message naming the unexpected method."
 - added `r.unknown-pod-not-found` (MUST): "A request whose namespace or pod name does not match ExpectedNamespace and ExpectedPodName gets 404 with the canned not-found response body, regardless of method."
 
+### third-party-openbao-internal-vault-backend
+
+- intent: "" -> "This context exists to give the vault test suite a controllable backend double without a real secrets engine. Tests need to drive the core's routing, rollback and lifecycle paths and then inspect what the core sent; Noop supplies that by recording paths, requests and invalidated keys while returning canned or handler-supplied responses, and by letting a test force rollback failures or a panic on a chosen path. The two factories keep construction uniform with real backends, and the credential-backend registry lets tests register an auth method before the test core is built and clear it afterwards so state does not leak between tests."
+- added `r.add-test-credential-backend-validates` (MUST): "AddTestCredentialBackend must reject an empty name with "missing backend name" and a nil factory with "missing backend factory function", and otherwise store the factory in the package-level TestCredentialBackends registry under that name; it must be called before the test core is created."
+- added `r.clear-test-credential-backends` (MUST): "ClearTestCredentialBackends must replace the TestCredentialBackends registry with a fresh empty map so registrations do not leak between tests."
+- added `r.existence-check-always-false` (MUST): "Noop.HandleExistenceCheck must always report handlerFound false, itemExists false and a nil error, so the core treats every path as nonexistent."
+- added `r.factories-parse-config` (MUST): "NoopBackendFactory and NoopBackendRollbackErrFactory must both read the include_resolve_path_operations key from the BackendConfig with parseutil.ParseBool and build a Noop whose IncludeResolvePathOperation carries that value, returning the parse error instead of a backend when the value is not a boolean; the rollback variant must additionally set RollbackErrs true."
+- added `r.handle-request-delegates-to-handler` (SHOULD): "Noop.HandleRequest must default its response to the stored Response and, when RequestHandler is non-nil, use RouterTestHandlerFunc to produce both the response and the error instead, returning both to the caller after recording."
+- added `r.handle-request-records-traffic` (MUST): "Noop.HandleRequest must copy the request under the mutex, append the request path to Paths and append the copy to Requests, skipping the Requests append for a ResolvePathOperation unless IncludeResolvePathOperation is set; the recorded Paths entry is kept either way."
+- added `r.handle-request-rejects-token-entry` (MUST): "Noop.HandleRequest must panic with "got a non-nil TokenEntry" when the incoming request carries a token entry, so a test that leaks a token into a backend call fails loudly instead of silently succeeding."
+- added `r.handle-request-requires-storage` (MUST): "Noop.HandleRequest must return an error reading "missing view" when the request has no storage, and must panic with "as you command" when the request path is exactly "panic"."
+- added `r.handle-request-rollback-error-mode` (MUST): "Noop.HandleRequest must return a nil response and the error "no-op backend rollback has erred out" when RollbackErrs is true and the request operation is "rollback", before any handler or recording work happens."
+- added `r.initializable-backend-initializes-once` (MUST): "InitializableBackend must embed *Noop and add IsInitialized; its Initialize must return the error "already initialized" on a second call, write the dummy entry at key "initialize/zork" to the request storage to prove the storage is not read-only, propagate a write failure, and only then set IsInitialized."
+- added `r.invalidate-key-records` (MUST): "Noop.InvalidateKey must append the given key to Invalidations so a test can assert which keys the core invalidated."
+- added `r.lifecycle-methods-are-inert` (MUST): "Noop.Cleanup, Noop.Setup and Noop.Initialize must be inert no-ops that return without error, and Noop.Logger must return a null hclog logger, so backend lifecycle calls never disturb a test."
+- added `r.noop-implements-logical-backend` (MUST): "Noop must satisfy the logical.Backend interface so it can be registered and routed like a real backend, holding a mutex, the recorded Root, Login, Paths, Requests and Invalidations, an optional Response and RequestHandler, lease TTL overrides, a BackendType, and the RollbackErrs switch."
+- added `r.special-paths-from-fields` (MUST): "Noop.SpecialPaths must return a logical.Paths whose Root comes from the Root field and whose Unauthenticated comes from the Login field."
+- added `r.system-lease-ttl-defaults` (MUST): "Noop.System must return a logical.StaticSystemView with DefaultLeaseTTLVal and MaxLeaseTTLVal taken from the fields of the same name when those are positive, and otherwise from the 24-hour default and the 32-day maximum."
+- added `r.type-defaults-to-logical` (MUST): "Noop.Type must return logical.TypeLogical when BackendType is logical.TypeUnknown, and otherwise return the BackendType field verbatim."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -2323,5 +2343,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-serviceregistration-kubernetes-client-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-serviceregistration-kubernetes-client-cmd-kubeclient-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-serviceregistration-kubernetes-testing-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-vault-backend-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-vault-backend-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
