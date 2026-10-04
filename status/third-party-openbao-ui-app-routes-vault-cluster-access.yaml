@@ -1,15 +1,36 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: OidcConfigureRoute, VaultClusterAccessMethodsRoute'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/ui/app/routes/vault/cluster/access/identity.js
+  - third_party/openbao/ui/app/routes/vault/cluster/access/leases.js
+  - third_party/openbao/ui/app/routes/vault/cluster/access/method.js
+  - third_party/openbao/ui/app/routes/vault/cluster/access/methods.js
+  - third_party/openbao/ui/app/routes/vault/cluster/access/oidc.js
+  fingerprint: e914cc90a114f098e8cf0863745a39d8ef96aea2fe69b5fd6d3b29aa5b8351ae
+  interfaces:
+  - codegraphId: class:9373017409ee56837c91b943f45e421f
+    file: third_party/openbao/ui/app/routes/vault/cluster/access/methods.js
+    kind: class
+    line: 9
+    name: VaultClusterAccessMethodsRoute
+  - codegraphId: class:bd9bfe3d7c9bb4073a2764299a2dd55e
+    file: third_party/openbao/ui/app/routes/vault/cluster/access/oidc.js
+    kind: class
+    line: 8
+    name: OidcConfigureRoute
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: a794f94bd219c351c371ec226981b173b7787beed26d41cf41ddde5476420fd4
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: e914cc90a114f098e8cf0863745a39d8ef96aea2fe69b5fd6d3b29aa5b8351ae
