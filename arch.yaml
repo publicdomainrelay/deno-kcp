@@ -19484,8 +19484,49 @@ system_contexts:
   - third_party/openbao/internal/helper/benchhelpers/benchhelpers.go
   codeRefIndex:
   - file:third_party/openbao/internal/helper/benchhelpers/benchhelpers.go benchhelpers.go@third_party/openbao/internal/helper/benchhelpers/benchhelpers.go
+  - function:a86b6e81dd96cb5082042370da2da224 TBtoT@third_party/openbao/internal/helper/benchhelpers/benchhelpers.go:20
+  - method:9a051bcbeb3fa590d0bbc011d3c272ea tbWrapper.Parallel@third_party/openbao/internal/helper/benchhelpers/benchhelpers.go:16
   id: sc.third-party-openbao-internal-helper-benchhelpers
+  intent: This context exists so tests written against the standard testing.TB surface,
+    including calls to Parallel, can be handed to interfaces that require testinginterface.T.
+    It bridges the two testing abstractions without rewriting the calling tests, and
+    deliberately neutralizes parallelism at that boundary.
+  interfaces:
+  - file: third_party/openbao/internal/helper/benchhelpers/benchhelpers.go
+    kind: function
+    name: TBtoT
+    signature: func TBtoT(tb testing.TB) testinginterface.T
+  - file: third_party/openbao/internal/helper/benchhelpers/benchhelpers.go
+    kind: method
+    name: tbWrapper.Parallel
+    signature: func (b tbWrapper) Parallel()
   name: third-party-openbao-internal-helper-benchhelpers
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/benchhelpers/benchhelpers.go
+    - function:a86b6e81dd96cb5082042370da2da224
+    - method:9a051bcbeb3fa590d0bbc011d3c272ea
+    id: r.parallel-is-noop
+    level: MUST
+    text: tbWrapper.Parallel must do nothing when called, so a test that reaches the
+      wrapper through TBtoT and calls Parallel runs serially instead of registering
+      as a parallel subtest.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/benchhelpers/benchhelpers.go
+    - function:a86b6e81dd96cb5082042370da2da224
+    id: r.tbtot-returns-testinginterface-t
+    level: MUST
+    text: TBtoT must accept any testing.TB and return a testinginterface.T obtained
+      by wrapping the argument in a tbWrapper value, so callers can pass standard
+      test handles to interfaces typed on testinginterface.T.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/benchhelpers/benchhelpers.go
+    - function:a86b6e81dd96cb5082042370da2da224
+    id: r.wrapper-embeds-testing-tb
+    level: MUST
+    text: tbWrapper must embed testing.TB, so all testing.TB methods other than the
+      overridden Parallel are promoted to the wrapper unchanged and the wrapper satisfies
+      testinginterface.T.
   upstream: self
 - code:
   - third_party/openbao/internal/helper/buffer/buffer.go

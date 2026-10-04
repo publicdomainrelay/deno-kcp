@@ -1362,6 +1362,13 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.testing-helper-in-memory` (MUST): "TestingTokenHelper holds the token in memory only: NewTestingTokenHelper constructs it, Store sets the held token, Get returns it, Erase clears it, and Path reports the in-memory location. It exists so command tests never touch the real token file."
 - added `r.token-helper-contract` (MUST): "TokenHelper is the storage abstraction: Path reports where the token lives, Get returns the stored token, Store writes a token, and Erase removes it. Every implementation in this package satisfies the interface so callers can swap file, subprocess and in-memory backends."
 
+### third-party-openbao-internal-helper-benchhelpers
+
+- intent: "" -> "This context exists so tests written against the standard testing.TB surface, including calls to Parallel, can be handed to interfaces that require testinginterface.T. It bridges the two testing abstractions without rewriting the calling tests, and deliberately neutralizes parallelism at that boundary."
+- added `r.parallel-is-noop` (MUST): "tbWrapper.Parallel must do nothing when called, so a test that reaches the wrapper through TBtoT and calls Parallel runs serially instead of registering as a parallel subtest."
+- added `r.tbtot-returns-testinginterface-t` (MUST): "TBtoT must accept any testing.TB and return a testinginterface.T obtained by wrapping the argument in a tbWrapper value, so callers can pass standard test handles to interfaces typed on testinginterface.T."
+- added `r.wrapper-embeds-testing-tb` (MUST): "tbWrapper must embed testing.TB, so all testing.TB methods other than the overridden Parallel are promoted to the wrapper unchanged and the wrapper satisfies testinginterface.T."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -1428,5 +1435,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-command-proxy-config-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-server-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-token-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-helper-benchhelpers-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-internal-helper-buffer-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-helper-benchhelpers-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-internal-helper-buffer-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |

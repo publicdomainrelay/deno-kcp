@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so tests written against the standard testing.TB surface, including calls to Parallel, can be handed to interfaces that require testinginterface.T. It bridges the two testing abstractions without rewriting the calling tests, and deliberately neutralizes parallelism at that boundary.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
