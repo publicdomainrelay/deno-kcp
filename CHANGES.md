@@ -1969,7 +1969,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.months-previous-to` (MUST): "MonthsPreviousTo returns the start of the month that lies the given number of whole months before the month containing now, used to compute the oldest month a caller wants to read."
 - added `r.parse-time-from-path` (MUST): "ParseTimeFromPath extracts a timestamp from a path string and returns the parsed time plus an error when the path carries no parseable time."
 - added `r.skip-at-end-of-month` (SHOULD): "SkipAtEndOfMonth is a test helper that skips the calling test with t.Skip when the current date is at the end of the month, so month-boundary tests do not run at a time that would make them flaky. It takes a *testing.T and lives beside the production helpers rather than in a _test file."
-- added `r.start-of-month` (MUST): "StartOfMonth returns the first instant of t's month, at 00:00:00.000000000 in t's own location, discarding t's day, clock and monotonic reading."
+- added `r.start-of-month` (MUST): "StartOfMonth returns the first instant of t's month, at 00:00:00.000000000 in t's own location, built from t's year and month with day 1 and a zero clock, so t's day, clock and monotonic reading are discarded."
 - added `r.start-of-next-month` (MUST): "StartOfNextMonth returns the first instant of the month after t's month, at midnight in t's location, computed as the month start plus AddDate(0, 1, 0)."
 - added `r.start-of-previous-month` (MUST): "StartOfPreviousMonth returns the first instant of the month before t's month, at midnight in t's location, computed by snapping t to its month start and subtracting one month with AddDate(0, -1, 0) so month lengths and leap years stay correct."
 
@@ -2091,4 +2091,4 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-helper-testhelpers-teststorage-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-testhelpers-teststorage-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-internal-helper-timeutil-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-helper-timeutil-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-helper-timeutil-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
