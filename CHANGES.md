@@ -4297,6 +4297,21 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.show-renew-lease` (MUST): "The show controller's renewLease action takes a model and an increment, calls renew on the lease adapter obtained from the model's store with the model id and the increment seconds when present, then sends refreshModel and schedules a success flash message naming the renewed lease id, and on failure joins the error messages into a danger flash message about renewing the lease."
 - added `r.show-revoke-lease` (MUST): "The show controller's revokeLease action calls destroyRecord on the passed model and then transitions safely to vault.cluster.access.leases.list-root."
 
+### third-party-openbao-ui-app-controllers-vault-cluster-access-method-item
+
+- intent: "" -> "The context exists to describe how the OpenBao UI item controllers manage route-model lifecycle and list-filter state. create.js exists so a controller singleton can unload a route model safely after the create screen is left, avoiding stale or dirty records leaking into the Ember Data store. edit.js exists so the edit route reuses that exact cleanup contract without duplicating it. list.js exists so the item list screen can paginate, filter by name, and support keyboard-style first-partial-match selection while delegating data refresh to the list route."
+- added `r.create-cleanup-clears-controller-model` (MUST): "cleanupModel MUST set the controller's model property to null before unloading the record, because Ember controllers are singletons and would otherwise keep a reference to the disposed model."
+- added `r.create-cleanup-model-skips-unsafe-models` (MUST): "cleanupModel MUST return without touching the model when the model is absent, or when it is saving, destroyed, or destroying, so that an in-flight save or an already-torn-down record is never unloaded."
+- added `r.create-cleanup-model-unloads-record` (MUST): "The create controller MUST expose a cleanupModel method that unloads the current route model from the Ember Data store via the shared remove-record utility, so that leaving the create screen does not leave the record cached."
+- added `r.create-cleanup-rolls-back-dirty-attributes` (SHOULD): "Before unloading, cleanupModel SHOULD call rollbackAttributes when the model has dirty attributes and implements that method, to release the pending change set and avoid a memory leak."
+- added `r.create-injects-store-service` (MUST): "The create controller MUST inject the Ember Data store service, which is the store passed to removeRecord when unloading the model."
+- added `r.edit-extends-create-controller` (MUST): "The edit controller MUST extend the create controller and MUST NOT override any of its behavior, so create and edit share one identical model-cleanup contract without duplication."
+- added `r.list-actions` (MUST): "The list controller MUST provide the actions setFilter and setFilterFocus to write the filter and filterFocused properties, and a refresh action that sends reload to bubble the request up to the list route instead of refetching locally."
+- added `r.list-declares-page-query-params` (MUST): "The list controller MUST declare the query parameters page and pageFilter, mapped to the same-named URL query keys, with defaults of page equal to 1 and pageFilter equal to null."
+- added `r.list-filter-matches-key` (MUST): "The list controller MUST expose a filterMatchesKey computed property, dependent on filter and on the model array, that is true only when the model is non-empty and contains an entry whose id equals the current filter."
+- added `r.list-first-partial-match` (MUST): "The list controller MUST expose a firstPartialMatch computed property that returns null when the filter already matches a key or no id starts with the escaped filter, and otherwise returns the single matching record, or returns an object carrying the model's shared prefix id when several entries share that prefix, so the UI can offer the common prefix as the next completion."
+- added `r.list-is-loading-default` (MAY): "The list controller MAY carry an isLoading flag defaulting to false, used by the list template to show a loading state while the route reloads."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4635,7 +4650,9 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-controllers-vault-cluster-access-identity-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-identity-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-leases-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-controllers-vault-cluster-access-method-item-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-access-method-item-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-access-mfa-enforcements-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
