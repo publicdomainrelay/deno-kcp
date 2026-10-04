@@ -5275,6 +5275,14 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.role-serialize-preserves-key-usage` (MUST): "PkiRoleSerializer marks name as serialize: false and, after delegating to the base serialize, coerces key_usage to an empty array when absent so the no-default-constraint case survives the stripping of empty arrays."
 - added `r.tidy-serialize-manual` (MUST): "PkiTidySerializer.serialize removes enabled and intervalDuration from the serialized payload when the tidy type is manual, and otherwise returns the base serialization unchanged."
 
+### third-party-openbao-ui-app-serializers-policy
+
+- intent: "" -> "This context exists so the UI can resolve a distinct serializer module per policy type while keeping one implementation. The Ember resolver maps each policy type's model and serializer by module path, so acl, egp and rgp each need their own file even though the wire format is the same. Declaring these as empty extensions of the base PolicySerializer means any later per-type normalization step can be added in one file without touching the other two or the shared base."
+- added `r.acl-serializer-extends-policy` (MUST): "The ACL policy serializer module default-exports a subclass of the serializer from ../policy, created by PolicySerializer.extend() with no additional properties or methods, so ACL policies are serialized exactly as the base policy serializer does."
+- added `r.egp-serializer-extends-policy` (MUST): "The EGP policy serializer module default-exports a subclass of the serializer from ../policy, created by PolicySerializer.extend() with no additional properties or methods, so EGP policies are serialized exactly as the base policy serializer does."
+- added `r.rgp-serializer-extends-policy` (MUST): "The RGP policy serializer module default-exports a subclass of the serializer from ../policy, created by PolicySerializer.extend() with no additional properties or methods, so RGP policies are serialized exactly as the base policy serializer does."
+- added `r.shared-base-serializer-reuse` (MUST): "Each of the three policy serializers must import the base serializer from the relative path ../policy rather than restating serialization logic, so the three types stay behaviourally identical and any change to the base propagates to all of them."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5723,5 +5731,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-serializers-pki-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-serializers-pki-certificate-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Failed |  | 0 | - |
 | third-party-openbao-ui-app-serializers-pki-certificate-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-ui-app-serializers-policy-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-serializers-policy-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

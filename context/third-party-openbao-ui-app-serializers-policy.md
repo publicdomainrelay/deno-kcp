@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the UI can resolve a distinct serializer module per policy type while keeping one implementation. The Ember resolver maps each policy type's model and serializer by module path, so acl, egp and rgp each need their own file even though the wire format is the same. Declaring these as empty extensions of the base PolicySerializer means any later per-type normalization step can be added in one file without touching the other two or the shared base.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

@@ -8,5 +8,46 @@ metadata:
   name: third-party-openbao-ui-app-serializers-policy
   namespace: default
 spec:
+  intent: This context exists so the UI can resolve a distinct serializer module per
+    policy type while keeping one implementation. The Ember resolver maps each policy
+    type's model and serializer by module path, so acl, egp and rgp each need their
+    own file even though the wire format is the same. Declaring these as empty extensions
+    of the base PolicySerializer means any later per-type normalization step can be
+    added in one file without touching the other two or the shared base.
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/app/serializers/policy/acl.js
+    id: r.acl-serializer-extends-policy
+    level: MUST
+    text: The ACL policy serializer module default-exports a subclass of the serializer
+      from ../policy, created by PolicySerializer.extend() with no additional properties
+      or methods, so ACL policies are serialized exactly as the base policy serializer
+      does.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/serializers/policy/egp.js
+    id: r.egp-serializer-extends-policy
+    level: MUST
+    text: The EGP policy serializer module default-exports a subclass of the serializer
+      from ../policy, created by PolicySerializer.extend() with no additional properties
+      or methods, so EGP policies are serialized exactly as the base policy serializer
+      does.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/serializers/policy/rgp.js
+    id: r.rgp-serializer-extends-policy
+    level: MUST
+    text: The RGP policy serializer module default-exports a subclass of the serializer
+      from ../policy, created by PolicySerializer.extend() with no additional properties
+      or methods, so RGP policies are serialized exactly as the base policy serializer
+      does.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/serializers/policy/acl.js
+    - file:third_party/openbao/ui/app/serializers/policy/egp.js
+    - file:third_party/openbao/ui/app/serializers/policy/rgp.js
+    id: r.shared-base-serializer-reuse
+    level: MUST
+    text: Each of the three policy serializers must import the base serializer from
+      the relative path ../policy rather than restating serialization logic, so the
+      three types stay behaviourally identical and any change to the base propagates
+      to all of them.
   upstream: self
