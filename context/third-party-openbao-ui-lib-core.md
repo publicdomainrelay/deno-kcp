@@ -9,5 +9,6 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/ui/lib/core/icon-mappings.js` file icon-mappings.js (third_party/openbao/ui/lib/core/icon-mappings.js)
+- `file:third_party/openbao/ui/lib/core/index.js` file index.js (third_party/openbao/ui/lib/core/index.js)
 <!-- SPECD_MANAGED_END -->
