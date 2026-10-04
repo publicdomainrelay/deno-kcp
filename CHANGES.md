@@ -5423,6 +5423,22 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.sanitized-html` (MUST): "sanitizedHtml takes a one-element array destructured as htmlString and returns sanitized markup for rendering, so templates can emit server-supplied HTML without trusting it verbatim."
 - added `r.set-flash-message-helper` (MUST): "The set-flash-message helper must stay exported from the addon helpers directory so templates push a flash message through the helper rather than reaching into the flash service directly."
 
+### third-party-openbao-ui-lib-core-addon-modifiers
+
+- intent: "" -> "This context exists so the OpenBao UI has one reusable way to attach a CodeMirror editor to any template element and drive it declaratively from named modifier arguments instead of imperative component code. It exists because the UI needs JSON/YAML/Ruby editing surfaces with linting, bracket matching, active-line highlighting, and theming, plus a controlled-value contract: the caller owns `content` and receives edits back through `onUpdate`, with focus events surfaced through `onFocus`. Keeping this behavior in a modifier lets templates declare an editor inline and lets the modifier own setup, teardown-free reuse, and the guard that prevents echoing a programmatic setValue back to the caller as a user edit."
+- added `r.class-is-ember-modifier-subclass` (MUST): "CodeMirrorModifier extends the ember-modifier Modifier base class and is the default export of its module, so it can be used as an element modifier in templates."
+- added `r.modes-and-addons-imported` (MUST): "The module imports the CodeMirror addons matchbrackets, active-line, lint and json-lint plus the ruby and javascript modes, because the editor options enable linting, bracket matching and active-line styling and only these modes are bundled."
+- added `r.modify-content-guarded-setvalue` (MUST): "After setup, modify returns early when named.content is falsy, and otherwise calls setValue(named.content) only when the editor's current value differs from named.content, so redundant writes do not occur."
+- added `r.modify-reapplies-readonly` (MUST): "On every invocation after setup, modify calls setOption('readOnly', named.readOnly) on the existing editor so read-only state tracks the named argument on each re-render."
+- added `r.modify-stores-named-and-defers-to-setup` (MUST): "CodeMirrorModifier.modify stores the named arguments on the instance and, when no editor exists yet, delegates to _setup and returns without touching an editor; it must not attempt option or value updates before setup."
+- added `r.named-contract-onupdate-onfocus` (MUST): "The named arguments object supplied by callers must provide readOnly, content, and the onUpdate and onFocus callbacks, since the modifier invokes them directly; gutters, extraKeys, lineNumbers, mode, theme and viewportMargin are optional and fall back to the documented defaults."
+- added `r.named-property-initialized-null` (SHOULD): "CodeMirrorModifier declares the named field initialized to null so the instance exposes a defined named property before the first modify invocation."
+- added `r.onchange-suppresses-initial-setvalue-echo` (MUST): "CodeMirrorModifier._onChange compares the editor's value against this.named.content and calls this.named.onUpdate(value, this._editor) only when they differ, so the change event produced by the initial programmatic setValue of content is not reported back to the caller."
+- added `r.onfocus-reports-value` (MUST): "CodeMirrorModifier._onFocus calls this.named.onFocus with the current editor value whenever the editor gains focus."
+- added `r.setup-editor-options-and-defaults` (MUST): "CodeMirrorModifier._setup constructs the CodeMirror editor on the element with gutters defaulting to ['CodeMirror-lint-markers'], gutters ordered before lint because lint caches their presence, matchBrackets true, lint {lintOnChange: true}, showCursorWhenSelecting true, styleActiveLine true, tabSize 2, and named values for extraKeys (default ''), lineNumbers, mode (default 'application/json'), readOnly (default false), theme (default 'hashi'), value (from named.content, default '') and viewportMargin (default '')."
+- added `r.setup-registers-bound-listeners` (MUST): "CodeMirrorModifier._setup registers the editor's 'change' and 'focus' events bound to _onChange and _onFocus respectively, and stores the editor on the instance as _editor so later modify calls reuse it."
+- added `r.setup-requires-element` (MUST): "CodeMirrorModifier._setup throws new Error('CodeMirror modifier has no element') when no element is passed, and only proceeds to construct the editor when an element is present."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5888,6 +5904,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-core-addon-decorators-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-core-addon-helpers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-core-addon-helpers-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-lib-core-addon-modifiers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-core-addon-modifiers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-core-addon-utils-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-lib-core-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

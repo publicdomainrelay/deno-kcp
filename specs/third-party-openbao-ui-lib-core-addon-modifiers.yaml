@@ -1,10 +1,126 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
+- class:86a8b2048dc6a1a9f9a7ea9494b1c105 CodeMirrorModifier@third_party/openbao/ui/lib/core/addon/modifiers/code-mirror.js:20
 - file:third_party/openbao/ui/lib/core/addon/modifiers/code-mirror.js code-mirror.js@third_party/openbao/ui/lib/core/addon/modifiers/code-mirror.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-lib-core-addon-modifiers
   namespace: default
 spec:
+  intent: 'This context exists so the OpenBao UI has one reusable way to attach a
+    CodeMirror editor to any template element and drive it declaratively from named
+    modifier arguments instead of imperative component code. It exists because the
+    UI needs JSON/YAML/Ruby editing surfaces with linting, bracket matching, active-line
+    highlighting, and theming, plus a controlled-value contract: the caller owns `content`
+    and receives edits back through `onUpdate`, with focus events surfaced through
+    `onFocus`. Keeping this behavior in a modifier lets templates declare an editor
+    inline and lets the modifier own setup, teardown-free reuse, and the guard that
+    prevents echoing a programmatic setValue back to the caller as a user edit.'
+  interfaces:
+  - file: third_party/openbao/ui/lib/core/addon/modifiers/code-mirror.js
+    kind: class
+    name: CodeMirrorModifier
+    signature: export default class CodeMirrorModifier extends Modifier
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - class:86a8b2048dc6a1a9f9a7ea9494b1c105
+    - file:third_party/openbao/ui/lib/core/addon/modifiers/code-mirror.js
+    id: r.class-is-ember-modifier-subclass
+    level: MUST
+    text: CodeMirrorModifier extends the ember-modifier Modifier base class and is
+      the default export of its module, so it can be used as an element modifier in
+      templates.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/addon/modifiers/code-mirror.js
+    id: r.modes-and-addons-imported
+    level: MUST
+    text: The module imports the CodeMirror addons matchbrackets, active-line, lint
+      and json-lint plus the ruby and javascript modes, because the editor options
+      enable linting, bracket matching and active-line styling and only these modes
+      are bundled.
+  - codeRefs:
+    - class:86a8b2048dc6a1a9f9a7ea9494b1c105
+    - file:third_party/openbao/ui/lib/core/addon/modifiers/code-mirror.js
+    id: r.modify-content-guarded-setvalue
+    level: MUST
+    text: After setup, modify returns early when named.content is falsy, and otherwise
+      calls setValue(named.content) only when the editor's current value differs from
+      named.content, so redundant writes do not occur.
+  - codeRefs:
+    - class:86a8b2048dc6a1a9f9a7ea9494b1c105
+    - file:third_party/openbao/ui/lib/core/addon/modifiers/code-mirror.js
+    id: r.modify-reapplies-readonly
+    level: MUST
+    text: On every invocation after setup, modify calls setOption('readOnly', named.readOnly)
+      on the existing editor so read-only state tracks the named argument on each
+      re-render.
+  - codeRefs:
+    - class:86a8b2048dc6a1a9f9a7ea9494b1c105
+    - file:third_party/openbao/ui/lib/core/addon/modifiers/code-mirror.js
+    id: r.modify-stores-named-and-defers-to-setup
+    level: MUST
+    text: CodeMirrorModifier.modify stores the named arguments on the instance and,
+      when no editor exists yet, delegates to _setup and returns without touching
+      an editor; it must not attempt option or value updates before setup.
+  - codeRefs:
+    - class:86a8b2048dc6a1a9f9a7ea9494b1c105
+    - file:third_party/openbao/ui/lib/core/addon/modifiers/code-mirror.js
+    id: r.named-contract-onupdate-onfocus
+    level: MUST
+    text: The named arguments object supplied by callers must provide readOnly, content,
+      and the onUpdate and onFocus callbacks, since the modifier invokes them directly;
+      gutters, extraKeys, lineNumbers, mode, theme and viewportMargin are optional
+      and fall back to the documented defaults.
+  - codeRefs:
+    - class:86a8b2048dc6a1a9f9a7ea9494b1c105
+    - file:third_party/openbao/ui/lib/core/addon/modifiers/code-mirror.js
+    id: r.named-property-initialized-null
+    level: SHOULD
+    text: CodeMirrorModifier declares the named field initialized to null so the instance
+      exposes a defined named property before the first modify invocation.
+  - codeRefs:
+    - class:86a8b2048dc6a1a9f9a7ea9494b1c105
+    - file:third_party/openbao/ui/lib/core/addon/modifiers/code-mirror.js
+    id: r.onchange-suppresses-initial-setvalue-echo
+    level: MUST
+    text: CodeMirrorModifier._onChange compares the editor's value against this.named.content
+      and calls this.named.onUpdate(value, this._editor) only when they differ, so
+      the change event produced by the initial programmatic setValue of content is
+      not reported back to the caller.
+  - codeRefs:
+    - class:86a8b2048dc6a1a9f9a7ea9494b1c105
+    - file:third_party/openbao/ui/lib/core/addon/modifiers/code-mirror.js
+    id: r.onfocus-reports-value
+    level: MUST
+    text: CodeMirrorModifier._onFocus calls this.named.onFocus with the current editor
+      value whenever the editor gains focus.
+  - codeRefs:
+    - class:86a8b2048dc6a1a9f9a7ea9494b1c105
+    - file:third_party/openbao/ui/lib/core/addon/modifiers/code-mirror.js
+    id: r.setup-editor-options-and-defaults
+    level: MUST
+    text: 'CodeMirrorModifier._setup constructs the CodeMirror editor on the element
+      with gutters defaulting to [''CodeMirror-lint-markers''], gutters ordered before
+      lint because lint caches their presence, matchBrackets true, lint {lintOnChange:
+      true}, showCursorWhenSelecting true, styleActiveLine true, tabSize 2, and named
+      values for extraKeys (default ''''), lineNumbers, mode (default ''application/json''),
+      readOnly (default false), theme (default ''hashi''), value (from named.content,
+      default '''') and viewportMargin (default '''').'
+  - codeRefs:
+    - class:86a8b2048dc6a1a9f9a7ea9494b1c105
+    - file:third_party/openbao/ui/lib/core/addon/modifiers/code-mirror.js
+    id: r.setup-registers-bound-listeners
+    level: MUST
+    text: CodeMirrorModifier._setup registers the editor's 'change' and 'focus' events
+      bound to _onChange and _onFocus respectively, and stores the editor on the instance
+      as _editor so later modify calls reuse it.
+  - codeRefs:
+    - class:86a8b2048dc6a1a9f9a7ea9494b1c105
+    - file:third_party/openbao/ui/lib/core/addon/modifiers/code-mirror.js
+    id: r.setup-requires-element
+    level: MUST
+    text: CodeMirrorModifier._setup throws new Error('CodeMirror modifier has no element')
+      when no element is passed, and only proceeds to construct the editor when an
+      element is present.
   upstream: self

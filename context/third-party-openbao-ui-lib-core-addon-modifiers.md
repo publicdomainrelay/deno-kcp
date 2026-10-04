@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the OpenBao UI has one reusable way to attach a CodeMirror editor to any template element and drive it declaratively from named modifier arguments instead of imperative component code. It exists because the UI needs JSON/YAML/Ruby editing surfaces with linting, bracket matching, active-line highlighting, and theming, plus a controlled-value contract: the caller owns `content` and receives edits back through `onUpdate`, with focus events surfaced through `onFocus`. Keeping this behavior in a modifier lets templates declare an editor inline and lets the modifier own setup, teardown-free reuse, and the guard that prevents echoing a programmatic setValue back to the caller as a user edit.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
