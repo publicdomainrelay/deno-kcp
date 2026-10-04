@@ -1,15 +1,41 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: StringOrDie, ToMap, ToString'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/sdk/helper/testhelpers/output.go
+  - third_party/openbao/sdk/helper/testhelpers/output_test.go
+  fingerprint: 1c467eba2962cbb379899a92e5396e4b581919e1dbb1df48ce50102de9cdba40
+  interfaces:
+  - codegraphId: function:fe6c34cd5e9cf6eebbe38b0e565c9720
+    file: third_party/openbao/sdk/helper/testhelpers/output.go
+    kind: function
+    line: 21
+    name: ToMap
+    signature: (in any) (map[string]any, error)
+  - codegraphId: function:1fd25832b47e8292842c30884cbefbef
+    file: third_party/openbao/sdk/helper/testhelpers/output.go
+    kind: function
+    line: 64
+    name: ToString
+    signature: (in any) string
+  - codegraphId: function:6d32caf88011c722292cc4781033d7de
+    file: third_party/openbao/sdk/helper/testhelpers/output.go
+    kind: function
+    line: 74
+    name: StringOrDie
+    signature: (t testing.T, in any) string
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: a1783c09b5f89d5d6cafa4c384c5aff00fca3061b14c6ea6eccf39643491c7eb
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 1c467eba2962cbb379899a92e5396e4b581919e1dbb1df48ce50102de9cdba40
