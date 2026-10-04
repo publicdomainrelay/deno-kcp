@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-This context exists to describe the shared helpers that the OpenBao UI depends on, so that their contracts are pinned independently of the components that call them. It matters because these helpers define cross-cutting behavior — how API paths are built from tagged templates, how server snake_case keys become camelCase, which database fields are valid for a role type, how PKI certificates are parsed and chain-verified, and what counts as a valid form value — and any change here ripples into many screens. The spec records the observed signatures and the concrete behavior each helper guarantees.
+This context exists to pin the contracts of the shared OpenBao UI helpers independently of the components that call them. These helpers define cross-cutting behavior — how API paths are built from tagged templates, how snake_case response keys become camelCase, which database fields are valid for a role type, how PKI certificates are parsed and chain-verified, and what counts as a valid form value — so a change in any one of them ripples into many screens. The spec records the observed signatures and the concrete behavior each helper guarantees, so callers can rely on them and reviewers can see when one drifts.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

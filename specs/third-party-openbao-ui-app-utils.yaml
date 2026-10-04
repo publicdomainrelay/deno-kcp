@@ -49,14 +49,14 @@ metadata:
   name: third-party-openbao-ui-app-utils
   namespace: default
 spec:
-  intent: This context exists to describe the shared helpers that the OpenBao UI depends
-    on, so that their contracts are pinned independently of the components that call
-    them. It matters because these helpers define cross-cutting behavior — how API
-    paths are built from tagged templates, how server snake_case keys become camelCase,
-    which database fields are valid for a role type, how PKI certificates are parsed
-    and chain-verified, and what counts as a valid form value — and any change here
-    ripples into many screens. The spec records the observed signatures and the concrete
-    behavior each helper guarantees.
+  intent: This context exists to pin the contracts of the shared OpenBao UI helpers
+    independently of the components that call them. These helpers define cross-cutting
+    behavior — how API paths are built from tagged templates, how snake_case response
+    keys become camelCase, which database fields are valid for a role type, how PKI
+    certificates are parsed and chain-verified, and what counts as a valid form value
+    — so a change in any one of them ripples into many screens. The spec records the
+    observed signatures and the concrete behavior each helper guarantees, so callers
+    can rely on them and reviewers can see when one drifts.
   interfaces:
   - file: third_party/openbao/ui/app/utils/api-path.js
     kind: function
@@ -178,11 +178,11 @@ spec:
     id: r.api-path-template
     level: MUST
     text: apiPath is a tagged template helper. It closes over the literal strings
-      and the interpolated keys, and returns a function that takes a data object,
-      substitutes data[key] for each key in order between the literal segments, and
-      joins the result into one path string. If the data object lacks keys, it asserts
-      that Object.keys(data).length is at least keys.length so that a missing key
-      fails loudly instead of producing an undefined segment.
+      and the interpolated keys and returns a function that takes a data object, substitutes
+      data[key] for each key in order between the literal segments, and joins the
+      result into one path string. If the data object lacks keys, it asserts that
+      Object.keys(data).length is at least keys.length, so a missing key fails loudly
+      instead of producing an undefined segment.
   - codeRefs:
     - file:third_party/openbao/ui/app/utils/camelize-object-keys.js
     - function:c37c36edd74a2a2dc59a53b59a08e17a
@@ -198,11 +198,11 @@ spec:
     id: r.database-field-lookup
     level: MUST
     text: database-helpers.js exposes the valid field lists for database roles and
-      statements. getStatementFields returns null when no type is given; otherwise
-      it returns the plugin-specific entry from STATEMENT_FIELDS[type] when that plugin
-      key exists, and falls back to the type's default entry. getRoleFields returns
-      null when no type is given, otherwise ROLE_FIELDS[type]. Both are used to filter
-      the attributes a role form shows.
+      statements. getStatementFields(type, plugin) returns null when no type is given;
+      otherwise it starts from the type's default entry in STATEMENT_FIELDS and returns
+      the plugin-specific entry instead when STATEMENT_FIELDS[type][plugin] exists.
+      getRoleFields(type) returns null when no type is given, otherwise ROLE_FIELDS[type].
+      Both are used to filter the attributes a role form shows.
   - codeRefs:
     - file:third_party/openbao/ui/app/utils/api-path.js
     - file:third_party/openbao/ui/app/utils/camelize-object-keys.js
@@ -234,7 +234,7 @@ spec:
       Its constructor initializes the stored value, fetch reads the identity back
       from persistence, set(id) writes the given id as the current identity, and reset
       clears the stored identity. The manager is the single place the UI reads and
-      writes the active identity so that other modules observe the same value.
+      writes the active identity, so other modules observe the same value.
   - codeRefs:
     - file:third_party/openbao/ui/app/utils/openapi-to-attrs.js
     - function:30601f42ea8c56d1c6bf4285b95edf0a
@@ -309,7 +309,7 @@ spec:
     level: MUST
     text: transitionToSafe(router, ...args) performs a router transition while guarding
       against the Ember transition-aborted error, so a superseded or aborted navigation
-      does not surface as an application error. Additional arguments are forwarded
+      does not surface as an application error. The additional arguments are forwarded
       to the underlying transition call.
   - codeRefs:
     - file:third_party/openbao/ui/app/utils/validators.js
@@ -324,6 +324,6 @@ spec:
       value's length against the optional min and max bounds, treating null as acceptable
       only when nullable is true; number(value, { nullable = false }) checks that
       the value is numeric, again accepting null only when nullable is true; containsWhiteSpace(value)
-      reports whether the value contains whitespace. Defaults are nullable false for
-      both options objects.
+      reports whether the value contains whitespace. The default for nullable is false
+      in both options objects.
   upstream: self
