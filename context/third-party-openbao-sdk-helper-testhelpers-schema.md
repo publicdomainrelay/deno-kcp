@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+Backend operations in OpenBao declare response schemas in framework.Path, but nothing at runtime guarantees the handler emits data matching that schema. This package exists so tests can assert the contract: it locates the declared schema for a path and operation, then validates the actual response payload against it, failing the test when they diverge. ResponseValidatingCallback lets a test install this check automatically on every response of a backend instead of writing a per-endpoint assertion.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

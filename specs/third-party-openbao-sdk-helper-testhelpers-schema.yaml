@@ -3,10 +3,160 @@ codeRefIndex:
 - file:third_party/openbao/sdk/helper/testhelpers/schema/response_validation.go response_validation.go@third_party/openbao/sdk/helper/testhelpers/schema/response_validation.go
 - file:third_party/openbao/sdk/helper/testhelpers/schema/response_validation_test.go
   response_validation_test.go@third_party/openbao/sdk/helper/testhelpers/schema/response_validation_test.go
+- function:0add55e58d3e6d6fd8305ffac07feca6 ValidateResponseData@third_party/openbao/sdk/helper/testhelpers/schema/response_validation.go:37
+- function:38af66172cd797663f08faa6edf77b97 GetResponseSchema@third_party/openbao/sdk/helper/testhelpers/schema/response_validation.go:127
+- function:5a07ba37fe94ef99e1e18ea189337dd5 ResponseValidatingCallback@third_party/openbao/sdk/helper/testhelpers/schema/response_validation.go:167
+- function:73eb67f134dbba510097d7a789c564f9 ValidateResponse@third_party/openbao/sdk/helper/testhelpers/schema/response_validation.go:22
+- function:f01c0a3a57987dfaec3675fe272193a0 FindResponseSchema@third_party/openbao/sdk/helper/testhelpers/schema/response_validation.go:115
 kind: SystemContext
 metadata:
   name: third-party-openbao-sdk-helper-testhelpers-schema
   namespace: default
 spec:
+  intent: 'Backend operations in OpenBao declare response schemas in framework.Path,
+    but nothing at runtime guarantees the handler emits data matching that schema.
+    This package exists so tests can assert the contract: it locates the declared
+    schema for a path and operation, then validates the actual response payload against
+    it, failing the test when they diverge. ResponseValidatingCallback lets a test
+    install this check automatically on every response of a backend instead of writing
+    a per-endpoint assertion.'
+  interfaces:
+  - file: third_party/openbao/sdk/helper/testhelpers/schema/response_validation.go
+    kind: function
+    name: FindResponseSchema
+    signature: func FindResponseSchema(t *testing.T, paths []*framework.Path, pathIdx
+      int, operation logical.Operation) *framework.Response
+  - file: third_party/openbao/sdk/helper/testhelpers/schema/response_validation.go
+    kind: function
+    name: GetResponseSchema
+    signature: func GetResponseSchema(t *testing.T, path *framework.Path, operation
+      logical.Operation) *framework.Response
+  - file: third_party/openbao/sdk/helper/testhelpers/schema/response_validation.go
+    kind: function
+    name: ResponseValidatingCallback
+    signature: func ResponseValidatingCallback(t *testing.T) func(logical.Backend,
+      *logical.Request, *logical.Response)
+  - file: third_party/openbao/sdk/helper/testhelpers/schema/response_validation.go
+    kind: function
+    name: ValidateResponse
+    signature: func ValidateResponse(t *testing.T, schema *framework.Response, response
+      *logical.Response, strict bool)
+  - file: third_party/openbao/sdk/helper/testhelpers/schema/response_validation.go
+    kind: function
+    name: ValidateResponseData
+    signature: func ValidateResponseData(t *testing.T, schema *framework.Response,
+      data map[string]any, strict bool)
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/testhelpers/schema/response_validation.go
+    - function:38af66172cd797663f08faa6edf77b97
+    - function:f01c0a3a57987dfaec3675fe272193a0
+    id: r.find-response-schema-index-bounds
+    level: MUST
+    text: FindResponseSchema must fail the test with a path index out of range message
+      when pathIdx is greater than or equal to the length of the paths slice, and
+      otherwise select paths[pathIdx] and delegate to GetResponseSchema with the same
+      operation.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/testhelpers/schema/response_validation.go
+    - function:38af66172cd797663f08faa6edf77b97
+    id: r.get-response-schema-operation-lookup
+    level: MUST
+    text: GetResponseSchema must look the requested logical.Operation up in path.Operations
+      and fail the test with a message naming path.Pattern and the operation when
+      the operation is absent.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/testhelpers/schema/response_validation.go
+    - function:38af66172cd797663f08faa6edf77b97
+    id: r.get-response-schema-status-order
+    level: MUST
+    text: GetResponseSchema must search the operation's declared responses for status
+      codes 200, 202, then 204 in that order, stop at the first status that has responses,
+      fail the test when none of the three has any, and return a pointer to the first
+      response declared for the matching status.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/testhelpers/schema/response_validation.go
+    - function:0add55e58d3e6d6fd8305ffac07feca6
+    - function:38af66172cd797663f08faa6edf77b97
+    - function:73eb67f134dbba510097d7a789c564f9
+    - function:f01c0a3a57987dfaec3675fe272193a0
+    id: r.helpers-marked-as-test-helpers
+    level: SHOULD
+    text: Each exported helper should call t.Helper() so that failures raised from
+      inside the package are attributed to the calling test line rather than to the
+      helper.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/testhelpers/schema/response_validation.go
+    id: r.json-roundtrip-normalization
+    level: SHOULD
+    text: The comparison should marshal the response data to JSON and unmarshal it
+      back before matching, so that nested values reach the schema validator in the
+      string-valued form those validators expect; a marshal or unmarshal failure should
+      surface as a wrapped error naming the step that failed.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/testhelpers/schema/response_validation.go
+    id: r.nil-schema-no-op
+    level: SHOULD
+    text: When the supplied framework.Response schema is nil the comparison should
+      return no error, so a path that declares no response schema silently passes
+      validation.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/testhelpers/schema/response_validation.go
+    id: r.reserved-fields-ignored
+    level: MUST
+    text: The comparison must delete the reserved logical response fields HTTPContentType,
+      HTTPRawBody, HTTPStatusCode, HTTPRawBodyAlreadyJSONDecoded, HTTPCacheControlHeader,
+      HTTPPragmaHeader and HTTPWWWAuthenticateHeader from the data before matching,
+      and must report an error when the schema itself declares one of those reserved
+      fields.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/testhelpers/schema/response_validation.go
+    id: r.skip-non-2xx
+    level: MUST
+    text: The comparison performed on behalf of ValidateResponseData must skip validation
+      entirely when the data carries a logical.HTTPStatusCode whose value is outside
+      the 200-299 range, so redirects and expected error responses are not held to
+      the schema.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/testhelpers/schema/response_validation.go
+    - function:0add55e58d3e6d6fd8305ffac07feca6
+    - function:73eb67f134dbba510097d7a789c564f9
+    id: r.strict-flag
+    level: MUST
+    text: The boolean strict argument accepted by ValidateResponse and ValidateResponseData
+      must be carried through to the underlying comparison so callers can choose between
+      lenient and strict schema matching.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/testhelpers/schema/response_validation_test.go
+    id: r.test-coverage
+    level: MUST
+    text: The package's behavior must be covered by response_validation_test.go, which
+      exercises the validation helpers against sample framework response schemas.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/testhelpers/schema/response_validation.go
+    - function:0add55e58d3e6d6fd8305ffac07feca6
+    id: r.validate-response-data-fails-test
+    level: MUST
+    text: ValidateResponseData must run the schema comparison against the supplied
+      data map and call t.Fatalf with the validation error and the offending response
+      data when the comparison returns an error, marking itself as a test helper.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/testhelpers/schema/response_validation.go
+    - function:0add55e58d3e6d6fd8305ffac07feca6
+    - function:73eb67f134dbba510097d7a789c564f9
+    id: r.validate-response-delegates
+    level: MUST
+    text: ValidateResponse must accept a possibly nil logical.Response and forward
+      its Data map to ValidateResponseData, passing nil data when the response itself
+      is nil, so that a missing response is validated as empty rather than skipped.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/testhelpers/schema/response_validation.go
+    - function:5a07ba37fe94ef99e1e18ea189337dd5
+    id: r.validating-callback-shape
+    level: MUST
+    text: ResponseValidatingCallback must return a function with the backend operation
+      handler signature func(logical.Backend, *logical.Request, *logical.Response)
+      that validates a response produced during a test against the schema, so it can
+      be substituted for a normal operation callback.
   upstream: self

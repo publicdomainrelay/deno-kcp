@@ -3502,6 +3502,23 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.tomap-json-tag-decoding` (MUST): "ToMap must decode its input into a map[string]any using a mapstructure decoder configured with TagName "json" and IgnoreUntaggedFields true, so field names come from json struct tags and fields without such a tag are omitted. Any error from constructing the decoder or decoding the input must be returned with a nil map."
 - added `r.tostring-error-as-text` (MUST): "ToString must render its input through ToMap; when ToMap fails it must return err.Error() as the string, and otherwise it must return fmt.Sprintf("%v", m) of the decoded map."
 
+### third-party-openbao-sdk-helper-testhelpers-schema
+
+- intent: "" -> "Backend operations in OpenBao declare response schemas in framework.Path, but nothing at runtime guarantees the handler emits data matching that schema. This package exists so tests can assert the contract: it locates the declared schema for a path and operation, then validates the actual response payload against it, failing the test when they diverge. ResponseValidatingCallback lets a test install this check automatically on every response of a backend instead of writing a per-endpoint assertion."
+- added `r.find-response-schema-index-bounds` (MUST): "FindResponseSchema must fail the test with a path index out of range message when pathIdx is greater than or equal to the length of the paths slice, and otherwise select paths[pathIdx] and delegate to GetResponseSchema with the same operation."
+- added `r.get-response-schema-operation-lookup` (MUST): "GetResponseSchema must look the requested logical.Operation up in path.Operations and fail the test with a message naming path.Pattern and the operation when the operation is absent."
+- added `r.get-response-schema-status-order` (MUST): "GetResponseSchema must search the operation's declared responses for status codes 200, 202, then 204 in that order, stop at the first status that has responses, fail the test when none of the three has any, and return a pointer to the first response declared for the matching status."
+- added `r.helpers-marked-as-test-helpers` (SHOULD): "Each exported helper should call t.Helper() so that failures raised from inside the package are attributed to the calling test line rather than to the helper."
+- added `r.json-roundtrip-normalization` (SHOULD): "The comparison should marshal the response data to JSON and unmarshal it back before matching, so that nested values reach the schema validator in the string-valued form those validators expect; a marshal or unmarshal failure should surface as a wrapped error naming the step that failed."
+- added `r.nil-schema-no-op` (SHOULD): "When the supplied framework.Response schema is nil the comparison should return no error, so a path that declares no response schema silently passes validation."
+- added `r.reserved-fields-ignored` (MUST): "The comparison must delete the reserved logical response fields HTTPContentType, HTTPRawBody, HTTPStatusCode, HTTPRawBodyAlreadyJSONDecoded, HTTPCacheControlHeader, HTTPPragmaHeader and HTTPWWWAuthenticateHeader from the data before matching, and must report an error when the schema itself declares one of those reserved fields."
+- added `r.skip-non-2xx` (MUST): "The comparison performed on behalf of ValidateResponseData must skip validation entirely when the data carries a logical.HTTPStatusCode whose value is outside the 200-299 range, so redirects and expected error responses are not held to the schema."
+- added `r.strict-flag` (MUST): "The boolean strict argument accepted by ValidateResponse and ValidateResponseData must be carried through to the underlying comparison so callers can choose between lenient and strict schema matching."
+- added `r.test-coverage` (MUST): "The package's behavior must be covered by response_validation_test.go, which exercises the validation helpers against sample framework response schemas."
+- added `r.validate-response-data-fails-test` (MUST): "ValidateResponseData must run the schema comparison against the supplied data map and call t.Fatalf with the validation error and the offending response data when the comparison returns an error, marking itself as a test helper."
+- added `r.validate-response-delegates` (MUST): "ValidateResponse must accept a possibly nil logical.Response and forward its Data map to ValidateResponseData, passing nil data when the response itself is nil, so that a missing response is validated as empty rather than skipped."
+- added `r.validating-callback-shape` (MUST): "ResponseValidatingCallback must return a function with the backend operation handler signature func(logical.Backend, *logical.Request, *logical.Response) that validates a response produced during a test against the schema, so it can be substituted for a normal operation callback."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -3761,4 +3778,4 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-sdk-helper-testcluster-docker-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-testhelpers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-helper-testhelpers-postgresql-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-sdk-helper-testhelpers-schema-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-helper-testhelpers-schema-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
