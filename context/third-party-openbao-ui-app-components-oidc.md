@@ -9,5 +9,9 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `file:third_party/openbao/ui/app/components/oidc/assignment-form.js` file assignment-form.js (third_party/openbao/ui/app/components/oidc/assignment-form.js)
+- `file:third_party/openbao/ui/app/components/oidc/client-form.js` file client-form.js (third_party/openbao/ui/app/components/oidc/client-form.js)
+- `file:third_party/openbao/ui/app/components/oidc/key-form.js` file key-form.js (third_party/openbao/ui/app/components/oidc/key-form.js)
+- `file:third_party/openbao/ui/app/components/oidc/provider-form.js` file provider-form.js (third_party/openbao/ui/app/components/oidc/provider-form.js)
+- `file:third_party/openbao/ui/app/components/oidc/scope-form.js` file scope-form.js (third_party/openbao/ui/app/components/oidc/scope-form.js)
 <!-- SPECD_MANAGED_END -->

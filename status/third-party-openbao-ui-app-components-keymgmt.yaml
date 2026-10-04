@@ -1,15 +1,39 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: KeymgmtDistribute, KeymgmtKeyEdit, KeymgmtProviderEdit'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/ui/app/components/keymgmt/distribute.js
+  - third_party/openbao/ui/app/components/keymgmt/key-edit.js
+  - third_party/openbao/ui/app/components/keymgmt/provider-edit.js
+  fingerprint: b7eaab5c1df6508408d6e82e3ba0abdea712e4222d161fbd11f5e7e80162056c
+  interfaces:
+  - codegraphId: class:c3fc7c3dd4ec847d66cb46c8395558b3
+    file: third_party/openbao/ui/app/components/keymgmt/distribute.js
+    kind: class
+    line: 39
+    name: KeymgmtDistribute
+  - codegraphId: class:f91c7ad1845695dc8fa2f8638afd6710
+    file: third_party/openbao/ui/app/components/keymgmt/key-edit.js
+    kind: class
+    line: 29
+    name: KeymgmtKeyEdit
+  - codegraphId: class:d539ad26851c107dd667ccacbad500a1
+    file: third_party/openbao/ui/app/components/keymgmt/provider-edit.js
+    kind: class
+    line: 27
+    name: KeymgmtProviderEdit
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 04013a49df0319acb3623733755823707b014438a38216f678348a9d3723b8d6
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: b7eaab5c1df6508408d6e82e3ba0abdea712e4222d161fbd11f5e7e80162056c
