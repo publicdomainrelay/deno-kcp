@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-This context exists to verify the identity secrets engine from outside its implementation package, so engine behaviour stays testable across refactors of internal code. Each file targets one slice of identity: entity aliases, entity lifecycle, groups, group aliases, cross-namespace visibility, login MFA by Duo and by TOTP, OIDC provider behaviour, and user lockouts. Because the tests are external, they pin the externally observable contract of the identity engine — request paths, response fields, and error conditions — and must keep passing as the engine internals change.
+The suite exists to verify the identity secrets engine from outside its implementation package, so engine behaviour stays testable as internal code is refactored. Because the tests are external, they pin the externally observable contract of the engine: request paths, response fields, and error conditions. Each file targets one slice of identity, and together they must keep passing while the engine internals change, which makes the tests the standing specification of the engine's public behaviour rather than a description of any particular implementation.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

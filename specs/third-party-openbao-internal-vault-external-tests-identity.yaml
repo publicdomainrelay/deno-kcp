@@ -24,14 +24,14 @@ metadata:
   name: third-party-openbao-internal-vault-external-tests-identity
   namespace: default
 spec:
-  intent: 'This context exists to verify the identity secrets engine from outside
-    its implementation package, so engine behaviour stays testable across refactors
-    of internal code. Each file targets one slice of identity: entity aliases, entity
-    lifecycle, groups, group aliases, cross-namespace visibility, login MFA by Duo
-    and by TOTP, OIDC provider behaviour, and user lockouts. Because the tests are
-    external, they pin the externally observable contract of the identity engine —
-    request paths, response fields, and error conditions — and must keep passing as
-    the engine internals change.'
+  intent: 'The suite exists to verify the identity secrets engine from outside its
+    implementation package, so engine behaviour stays testable as internal code is
+    refactored. Because the tests are external, they pin the externally observable
+    contract of the engine: request paths, response fields, and error conditions.
+    Each file targets one slice of identity, and together they must keep passing while
+    the engine internals change, which makes the tests the standing specification
+    of the engine''s public behaviour rather than a description of any particular
+    implementation.'
   repository: deno-kcp
   requirements:
   - codeRefs:
@@ -47,15 +47,15 @@ spec:
     level: MUST
     text: 'The suite must cover the full entity lifecycle end to end: create an entity,
       list and read it back, update its metadata, attach and detach aliases, and delete
-      it, asserting the API responses at each step.'
+      it, asserting the API response fields at each step.'
   - codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/identity/aliases_test.go
     id: r.entity-aliases-covered
     level: MUST
-    text: The external test suite must exercise entity alias creation, read, update,
-      and deletion through the identity engine's public API, including the case where
-      an alias is moved between entities, so alias reassignment stays observable from
-      outside the engine package.
+    text: The suite must exercise entity alias creation, read, update, and deletion
+      through the identity engine's public API, including the case where an alias
+      is moved between entities, so alias reassignment stays observable from outside
+      the engine package.
   - codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/identity/aliases_test.go
     - file:third_party/openbao/internal/vault/external_tests/identity/cross_namespace_test.go
@@ -71,8 +71,8 @@ spec:
     level: MUST
     text: Every file in this context must remain an external test, driving the identity
       engine only through exported API and the shared test harness, so the suite never
-      depends on identity package internals and the package must export no interface
-      of its own beyond test functions.
+      depends on identity package internals and the package exports no interface of
+      its own beyond test functions.
   - codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/identity/group_aliases_test.go
     id: r.group-aliases-covered
@@ -93,7 +93,8 @@ spec:
     level: MUST
     text: The suite must contain the baseline identity engine checks that mount the
       engine and assert the core read and lookup paths, giving the other identity
-      test files a shared starting contract.
+      test files a shared starting contract for the request paths and response fields
+      they build on.
   - codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/identity/login_mfa_duo_test.go
     id: r.login-mfa-duo
