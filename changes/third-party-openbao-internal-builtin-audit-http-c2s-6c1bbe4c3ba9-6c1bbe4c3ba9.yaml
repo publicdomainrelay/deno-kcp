@@ -10,5 +10,23 @@ spec:
   systemContext: third-party-openbao-internal-builtin-audit-http
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-builtin-audit-http
-  phase: Running
+  agentLog: 'This context covers the HTTP audit device of the vendored OpenBao tree
+    at third_party/openbao/internal/builtin/audit/http. backend.go defines the Backend
+    struct, which satisfies the audit.Backend contract by buffering a formatted JSON
+    audit entry and POSTing it to a configured URI with configured headers. Factory
+    builds a Backend from an audit.BackendConfig: it rejects a nil SaltConfig or nil
+    SaltView, requires the uri config value, resolves it with parseutil.ParsePath
+    under WithNoTrimSpaces and WithErrorOnMissingEnv and validates it with url.Parse,
+    decodes the optional headers JSON map of string to string slices and expands every
+    header value through parseutil.ParsePath, accepts only the json format (jsonx
+    is rejected as removed), defaults hmac_accessor to true, log_raw to false and
+    elide_list_responses to false, stores saltConfig and saltView, wires an audit.JSONFormatWriter
+    with the configured prefix and Backend.Salt as SaltFunc, and calls getClient once
+    so a broken HTTP client configuration fails at construction. The exported methods
+    Salt, GetHash, LogRequest, LogResponse, LogTestMessage, Reload and Invalidate
+    satisfy the audit.Backend interface, while the unexported log and getClient helpers
+    carry the actual write and client construction work. testing.go supplies GetTestAuditHandler,
+    a test-only http.HandlerFunc that records received audit payloads into a caller-provided
+    slice under a caller-provided mutex, checks required headers, and counts bad requests.'
+  message: wrote 15 requirement(s) and 10 interface(s) for third-party-openbao-internal-builtin-audit-http
+  phase: Succeeded

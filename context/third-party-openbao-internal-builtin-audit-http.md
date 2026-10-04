@@ -2,13 +2,177 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so that the HTTP audit device can be described, tested and reimplemented without reading the vendored source: it fixes the contract the audit subsystem depends on (a Backend that hashes with a salt, encodes log input through a JSON formatter, and POSTs the entry to a configured URI), the exact configuration keys and defaults Factory honours, and the failure modes callers must see at construction time rather than at first log. It also records the test-only handler the package uses to stand in for a remote audit endpoint, so end-to-end behaviour of the HTTP path is observable from tests.
 
 _Write the prose above and the fields in the spec block. `codeRefs` and the resolved references below are maintained by the tool; an edit there is lost._
 
 ## spec
 
 ```yaml spec
+interfaces:
+- file: third_party/openbao/internal/builtin/audit/http/backend.go
+  kind: struct
+  name: Backend
+  signature: type Backend struct
+- file: third_party/openbao/internal/builtin/audit/http/backend.go
+  kind: method
+  name: Backend.GetHash
+  signature: func (b *Backend) GetHash(ctx context.Context, data string) (string,
+    error)
+- file: third_party/openbao/internal/builtin/audit/http/backend.go
+  kind: method
+  name: Backend.Invalidate
+  signature: func (b *Backend) Invalidate(_ context.Context)
+- file: third_party/openbao/internal/builtin/audit/http/backend.go
+  kind: method
+  name: Backend.LogRequest
+  signature: func (b *Backend) LogRequest(ctx context.Context, in *logical.LogInput)
+    error
+- file: third_party/openbao/internal/builtin/audit/http/backend.go
+  kind: method
+  name: Backend.LogResponse
+  signature: func (b *Backend) LogResponse(ctx context.Context, in *logical.LogInput)
+    error
+- file: third_party/openbao/internal/builtin/audit/http/backend.go
+  kind: method
+  name: Backend.LogTestMessage
+  signature: func (b *Backend) LogTestMessage(ctx context.Context, in *logical.LogInput,
+    config map[string]string) error
+- file: third_party/openbao/internal/builtin/audit/http/backend.go
+  kind: method
+  name: Backend.Reload
+  signature: func (b *Backend) Reload(_ context.Context) error
+- file: third_party/openbao/internal/builtin/audit/http/backend.go
+  kind: method
+  name: Backend.Salt
+  signature: func (b *Backend) Salt(ctx context.Context) (*salt.Salt, error)
+- file: third_party/openbao/internal/builtin/audit/http/backend.go
+  kind: function
+  name: Factory
+  signature: func Factory(ctx context.Context, conf *audit.BackendConfig) (audit.Backend,
+    error)
+- file: third_party/openbao/internal/builtin/audit/http/testing.go
+  kind: function
+  name: GetTestAuditHandler
+  signature: func GetTestAuditHandler(t *testing.T, lock *sync.Mutex, logs *[]map[string]any,
+    path string, requiredHeaders http.Header, badRequests *int) http.HandlerFunc
+requirements:
+- codeRefs:
+  - method:179a3b9c0e58491f354ec4cfc318766a
+  - method:1f5a6642d322c7e19b8ec0833dded31d
+  - method:26a4cfe9cc2bf8924db4c407efff660a
+  - method:61b0c443f53626e8f698e0c2cfaf732f
+  - method:b689c9fd3423d00931d4c50b44ed37c6
+  - method:c3d47d9cb7259ae83b32e711619ec500
+  - method:d517f9951df6496b0847557b06b079ff
+  - struct:20dd53850adf10614f22517a31ba4402
+  id: r.backend-implements-audit-contract
+  level: MUST
+  text: Backend supplies Salt, GetHash, LogRequest, LogResponse, LogTestMessage, Reload
+    and Invalidate so that it satisfies the audit.Backend interface.
+- codeRefs:
+  - file:third_party/openbao/internal/builtin/audit/http/backend.go
+  - function:5420893024c784962ca66998e515722e
+  id: r.factory-rejects-nil-salt-config
+  level: MUST
+  text: Factory returns an error when conf.SaltConfig is nil.
+- codeRefs:
+  - file:third_party/openbao/internal/builtin/audit/http/backend.go
+  - function:5420893024c784962ca66998e515722e
+  id: r.factory-rejects-nil-salt-view
+  level: MUST
+  text: Factory returns an error when conf.SaltView is nil.
+- codeRefs:
+  - file:third_party/openbao/internal/builtin/audit/http/backend.go
+  - function:5420893024c784962ca66998e515722e
+  id: r.format-config-defaults
+  level: MUST
+  text: Factory sets hmacAccessor true by default, logRaw false by default, and elideListResponses
+    false by default, parsing each config value as a bool when present and failing
+    on a parse error.
+- codeRefs:
+  - file:third_party/openbao/internal/builtin/audit/http/backend.go
+  - function:5420893024c784962ca66998e515722e
+  id: r.format-json-only
+  level: MUST
+  text: Factory defaults the format to json, accepts only json, rejects jsonx with
+    an error stating that jsonx formatting has been removed, and rejects any other
+    format value.
+- codeRefs:
+  - function:5420893024c784962ca66998e515722e
+  - method:c3d47d9cb7259ae83b32e711619ec500
+  id: r.formatter-writer-wired
+  level: MUST
+  text: Factory assigns the Backend formatter an audit.JSONFormatWriter carrying the
+    prefix config value and Backend.Salt as its SaltFunc.
+- codeRefs:
+  - file:third_party/openbao/internal/builtin/audit/http/backend.go
+  - function:5420893024c784962ca66998e515722e
+  id: r.headers-json-decoded-and-expanded
+  level: MUST
+  text: When the headers config key is present, Factory unmarshals it as a JSON map
+    of string to string slice and runs parseutil.ParsePath with env expansion on every
+    header value, adding each expanded value to the http.Header.
+- codeRefs:
+  - function:5420893024c784962ca66998e515722e
+  id: r.http-client-checked-at-factory
+  level: MUST
+  text: Factory calls the backend getClient helper and fails when client construction
+    returns an error, so a bad HTTP client setup is caught at audit device creation.
+- codeRefs:
+  - file:third_party/openbao/internal/builtin/audit/http/backend_test.go
+  - function:5420893024c784962ca66998e515722e
+  - function:78289ad6a1c57b0dfc04ef875683bdec
+  id: r.integration-test-exercises-factory
+  level: SHOULD
+  text: The package test suite drives Factory against the test audit handler so that
+    the HTTP audit path is exercised end to end.
+- codeRefs:
+  - method:26a4cfe9cc2bf8924db4c407efff660a
+  - method:61b0c443f53626e8f698e0c2cfaf732f
+  - method:b689c9fd3423d00931d4c50b44ed37c6
+  id: r.log-entry-encoded-and-posted
+  level: MUST
+  text: LogRequest, LogResponse and LogTestMessage encode the logical.LogInput through
+    the configured formatter and deliver the buffered entry to the configured uri
+    with the configured headers.
+- codeRefs:
+  - method:1f5a6642d322c7e19b8ec0833dded31d
+  - method:d517f9951df6496b0847557b06b079ff
+  id: r.reload-and-invalidate
+  level: MUST
+  text: Backend.Reload accepts a context and returns an error, and Backend.Invalidate
+    accepts a context and returns nothing, matching the audit.Backend interface used
+    by the reload and cache invalidation paths.
+- codeRefs:
+  - method:179a3b9c0e58491f354ec4cfc318766a
+  - method:c3d47d9cb7259ae83b32e711619ec500
+  id: r.salt-backed-by-salt-view
+  level: MUST
+  text: Backend.Salt returns the salt.Salt for the backend, using the salt view and
+    salt config captured by Factory, and Backend.GetHash hashes data with that salt.
+- codeRefs:
+  - file:third_party/openbao/internal/builtin/audit/http/testing.go
+  - function:78289ad6a1c57b0dfc04ef875683bdec
+  id: r.test-handler-records-logs
+  level: SHOULD
+  text: GetTestAuditHandler returns an http.HandlerFunc that appends each decoded
+    audit entry to the caller-supplied logs slice under the caller-supplied mutex,
+    verifies the required headers, and increments the caller-supplied bad request
+    counter for malformed input.
+- codeRefs:
+  - file:third_party/openbao/internal/builtin/audit/http/backend.go
+  - function:5420893024c784962ca66998e515722e
+  id: r.uri-config-required
+  level: MUST
+  text: Factory requires the uri config key and fails when it is absent.
+- codeRefs:
+  - file:third_party/openbao/internal/builtin/audit/http/backend.go
+  - function:5420893024c784962ca66998e515722e
+  id: r.uri-resolved-and-parsed
+  level: MUST
+  text: Factory resolves the uri with parseutil.ParsePath using WithNoTrimSpaces and
+    WithErrorOnMissingEnv, then validates it with url.Parse, and fails on either error.
 upstream: self
 ```
 
