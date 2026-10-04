@@ -1,0 +1,34 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-ui-app-routes-vault-cluster-policies-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-ui-app-routes-vault-cluster-policies
+  toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
+status:
+  agentLog: 'This context covers the two Ember.js route modules behind the OpenBao
+    UI policy list and policy create screens in the vault cluster namespace. `third_party/openbao/ui/app/routes/vault/cluster/policies/index.js`
+    is the list route: it resolves the active policy type from `paramsFor(''vault.cluster.policies'').type`,
+    declares `page` and `pageFilter` as `refreshModel: true` query params, returns
+    an empty model for every type other than `acl`, and otherwise issues `store.lazyPaginatedQuery(''policy/<type>'')`
+    with `responsePath: ''data.keys''`, converting a 404 to an empty array only for
+    non-ACL types. Its `setupController` copies `pageFilter`, `model.meta.currentPage`
+    and the policy type onto the controller, `resetController` clears `pageFilter`
+    and `filter` on exit, `willTransition` scrolls to the top and clears all store
+    datasets when leaving the route, and the `reload` action clears datasets and calls
+    `refresh()`. `third_party/openbao/ui/app/routes/vault/cluster/policies/create.js`
+    is the new-policy route: it builds a `policy/<type>` record only for `acl`, otherwise
+    redirecting to the list route with that type, mirrors the policy type onto the
+    controller in `setupController`, calls the controller''s optional `cleanupModel`
+    on exit, and guards navigation with a dirty-attribute confirmation prompt.'
+  message: wrote 13 requirement(s) and 0 interface(s) for third-party-openbao-ui-app-routes-vault-cluster-policies;
+    the spec already said this
+  phase: Succeeded
+superseded:
+- message: wrote 13 requirement(s) and 0 interface(s) for third-party-openbao-ui-app-routes-vault-cluster-policies
+  name: third-party-openbao-ui-app-routes-vault-cluster-policies-c2s-6c1bbe4c3ba9-89cee50ec5ae
+  phase: Succeeded
