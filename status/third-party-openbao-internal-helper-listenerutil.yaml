@@ -1,0 +1,189 @@
+conditions:
+- message: 'undeclared: ACMECertGetter, ACMECertGetter.ALPNProtos, ACMECertGetter.Close,
+    ACMECertGetter.GetCertificate, ACMECertGetter.HandleHTTPChallenge, ACMECertGetter.Reload,
+    BufConnWrapper, BufConnWrapper.Dial, BufConnWrapper.DialContext, Listener, NewBufConnWrapper,
+    NewCertificateGetter, NewTLSReloadListener, ReloadableCertGetter, ReloadableCertGetter.GetCertificate,
+    ReloadableCertGetter.Reload, TLSConfig, UnixSocketListener, UnixSocketsConfig,
+    rmListener.Close, tlsReloadListener.Close, zapHclCore.Check, zapHclCore.Enabled,
+    zapHclCore.Sync, zapHclCore.With, zapHclCore.Write'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/helper/listenerutil/bufconn.go
+  - third_party/openbao/internal/helper/listenerutil/listener.go
+  - third_party/openbao/internal/helper/listenerutil/listener_test.go
+  - third_party/openbao/internal/helper/listenerutil/tls_acme.go
+  - third_party/openbao/internal/helper/listenerutil/tls_acme_test.go
+  - third_party/openbao/internal/helper/listenerutil/tls_autoreload.go
+  - third_party/openbao/internal/helper/listenerutil/tls_autoreload_test.go
+  fingerprint: 212f9516f0b9efb82c161feb1ae9dc4659d77aebecef6984ab66b952ec74e3cd
+  interfaces:
+  - codegraphId: struct:69069c4c5bdb6e0af39fb1a2d70de474
+    file: third_party/openbao/internal/helper/listenerutil/bufconn.go
+    kind: struct
+    line: 17
+    name: BufConnWrapper
+  - codegraphId: function:a82b61c4d5b2635503aaae5496eb6481
+    file: third_party/openbao/internal/helper/listenerutil/bufconn.go
+    kind: function
+    line: 23
+    name: NewBufConnWrapper
+    signature: (bcl *bufconn.Listener) *BufConnWrapper
+  - codegraphId: method:80950f0bf26ac573a83d76b841f108ac
+    file: third_party/openbao/internal/helper/listenerutil/bufconn.go
+    kind: method
+    line: 32
+    name: BufConnWrapper.Dial
+    signature: (_, _ string) (net.Conn, error)
+  - codegraphId: method:abedc81857554c1e51b7a810322a28bd
+    file: third_party/openbao/internal/helper/listenerutil/bufconn.go
+    kind: method
+    line: 39
+    name: BufConnWrapper.DialContext
+    signature: (ctx context.Context, _, _ string) (net.Conn, error)
+  - codegraphId: struct:6ebe737b4dbbb5ee1564c516b701d770
+    file: third_party/openbao/internal/helper/listenerutil/listener.go
+    kind: struct
+    line: 25
+    name: Listener
+  - codegraphId: struct:01f8eea6c1bc5ccb81a3105665bc2100
+    file: third_party/openbao/internal/helper/listenerutil/listener.go
+    kind: struct
+    line: 30
+    name: UnixSocketsConfig
+  - codegraphId: method:6fcfa9c9313be3dd282730630cc2ae71
+    file: third_party/openbao/internal/helper/listenerutil/listener.go
+    kind: method
+    line: 44
+    name: rmListener.Close
+    signature: () error
+  - codegraphId: function:ef7cace533196f8046df8aecdabca006
+    file: third_party/openbao/internal/helper/listenerutil/listener.go
+    kind: function
+    line: 67
+    name: UnixSocketListener
+    signature: (path string, unixSocketsConfig *UnixSocketsConfig) (net.Listener,
+      error)
+  - codegraphId: function:8d308b72974ac29a34f96bf99a2c94ea
+    file: third_party/openbao/internal/helper/listenerutil/listener.go
+    kind: function
+    line: 92
+    name: TLSConfig
+    signature: "(\n\tl *configutil.Listener,\n\tprops map[string]string,\n\tui cli.Ui,\n\tlogger
+      hclog.Logger,\n) (*tls.Config, ReloadableCertGetter, error)"
+  - codegraphId: interface:4a249a739fb26e7b33bdd06aaccd8520
+    file: third_party/openbao/internal/helper/listenerutil/tls_acme.go
+    kind: interface
+    line: 34
+    name: ReloadableCertGetter
+  - codegraphId: method:93f7278092bb45ca17a3fde4a6372ab9
+    file: third_party/openbao/internal/helper/listenerutil/tls_acme.go
+    kind: method
+    line: 35
+    name: ReloadableCertGetter.Reload
+    signature: () error
+  - codegraphId: method:0b6c089432a914aa0f61ba9279b84029
+    file: third_party/openbao/internal/helper/listenerutil/tls_acme.go
+    kind: method
+    line: 36
+    name: ReloadableCertGetter.GetCertificate
+    signature: (clientHello *tls.ClientHelloInfo) (*tls.Certificate, error)
+  - codegraphId: struct:d76bb3411f325b131d6ff332588c116c
+    file: third_party/openbao/internal/helper/listenerutil/tls_acme.go
+    kind: struct
+    line: 39
+    name: ACMECertGetter
+  - codegraphId: method:7094d903392bc0f180ed44c61e77ca28
+    file: third_party/openbao/internal/helper/listenerutil/tls_acme.go
+    kind: method
+    line: 49
+    name: ACMECertGetter.Close
+    signature: () error
+  - codegraphId: function:243cbb2c120f333647af6a079f7272ce
+    file: third_party/openbao/internal/helper/listenerutil/tls_acme.go
+    kind: function
+    line: 58
+    name: NewCertificateGetter
+    signature: (l *configutil.Listener, ui cli.Ui, logger hclog.Logger) (ReloadableCertGetter,
+      error)
+  - codegraphId: method:60acd45c90430863dcb73616a5764bd5
+    file: third_party/openbao/internal/helper/listenerutil/tls_acme.go
+    kind: method
+    line: 256
+    name: ACMECertGetter.ALPNProtos
+    signature: () []string
+  - codegraphId: method:534bb51f784d89dad3a8f22eba0a4202
+    file: third_party/openbao/internal/helper/listenerutil/tls_acme.go
+    kind: method
+    line: 260
+    name: ACMECertGetter.HandleHTTPChallenge
+    signature: (w http.ResponseWriter, r *http.Request) bool
+  - codegraphId: method:506a7d9b4523e0d642bb5c388725de81
+    file: third_party/openbao/internal/helper/listenerutil/tls_acme.go
+    kind: method
+    line: 264
+    name: ACMECertGetter.Reload
+    signature: () error
+  - codegraphId: method:9b045bb7e2f4878dfb93e81312e98c87
+    file: third_party/openbao/internal/helper/listenerutil/tls_acme.go
+    kind: method
+    line: 266
+    name: ACMECertGetter.GetCertificate
+    signature: (hello *tls.ClientHelloInfo) (*tls.Certificate, error)
+  - codegraphId: method:af6c5d2b3f786880c1182f3d38622cdd
+    file: third_party/openbao/internal/helper/listenerutil/tls_acme.go
+    kind: method
+    line: 279
+    name: zapHclCore.Enabled
+    signature: (zapcore.Level) bool
+  - codegraphId: method:e59b1974e9ea9d869607cb0324187cb8
+    file: third_party/openbao/internal/helper/listenerutil/tls_acme.go
+    kind: method
+    line: 280
+    name: zapHclCore.With
+    signature: ([]zapcore.Field) zapcore.Core
+  - codegraphId: method:bce781b1ee92d45e198fbc225eb20939
+    file: third_party/openbao/internal/helper/listenerutil/tls_acme.go
+    kind: method
+    line: 281
+    name: zapHclCore.Check
+    signature: (entry zapcore.Entry, checked *zapcore.CheckedEntry) *zapcore.CheckedEntry
+  - codegraphId: method:94b94801595d5e9238661e8d6a613726
+    file: third_party/openbao/internal/helper/listenerutil/tls_acme.go
+    kind: method
+    line: 285
+    name: zapHclCore.Write
+    signature: (entry zapcore.Entry, fields []zapcore.Field) error
+  - codegraphId: method:0e078a8bd948f6ce462f5f6b4b07b00a
+    file: third_party/openbao/internal/helper/listenerutil/tls_acme.go
+    kind: method
+    line: 367
+    name: zapHclCore.Sync
+    signature: () error
+  - codegraphId: function:5510d98d2ab4d1fbcff27a3dcc84253f
+    file: third_party/openbao/internal/helper/listenerutil/tls_autoreload.go
+    kind: function
+    line: 17
+    name: NewTLSReloadListener
+    signature: (ln net.Listener, paths []string, interval time.Duration, reload func()
+      error, logger hclog.Logger) net.Listener
+  - codegraphId: method:6f0874635cf31f04e9abb3bc6b8e4f12
+    file: third_party/openbao/internal/helper/listenerutil/tls_autoreload.go
+    kind: method
+    line: 33
+    name: tlsReloadListener.Close
+    signature: () error
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: 95c7a112b1fd0a22657c48bb145f95a3128967a9d35b07d947af4f525651dbb1
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 212f9516f0b9efb82c161feb1ae9dc4659d77aebecef6984ab66b952ec74e3cd

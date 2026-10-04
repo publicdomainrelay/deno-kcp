@@ -1,0 +1,705 @@
+conditions:
+- message: 'undeclared: Alias, Alias.Clone, Alias.Descriptor, Alias.GetCanonicalID,
+    Alias.GetCreationTime, Alias.GetCustomMetadata, Alias.GetID, Alias.GetLastUpdateTime,
+    Alias.GetLocal, Alias.GetLocalBucketKey, Alias.GetMergedFromCanonicalIDs, Alias.GetMetadata,
+    Alias.GetMountAccessor, Alias.GetMountPath, Alias.GetMountType, Alias.GetName,
+    Alias.GetNamespaceID, Alias.ProtoMessage, Alias.ProtoReflect, Alias.Reset, Alias.SentinelGet,
+    Alias.SentinelKeys, Alias.String, Entity, Entity.Clone, Entity.Descriptor, Entity.GetAliases,
+    Entity.GetBucketKey, Entity.GetCreationTime, Entity.GetDisabled, Entity.GetID,
+    Entity.GetLastUpdateTime, Entity.GetMFASecrets, Entity.GetMergedEntityIDs, Entity.GetMetadata,
+    Entity.GetName, Entity.GetNamespaceID, Entity.GetPolicies, Entity.ProtoMessage,
+    Entity.ProtoReflect, Entity.Reset, Entity.SentinelGet, Entity.SentinelKeys, Entity.String,
+    Entity.UpsertAlias, EntityStorageEntry, EntityStorageEntry.Descriptor, EntityStorageEntry.GetBucketKeyHash,
+    EntityStorageEntry.GetCreationTime, EntityStorageEntry.GetID, EntityStorageEntry.GetLastUpdateTime,
+    EntityStorageEntry.GetMFASecrets, EntityStorageEntry.GetMergedEntityIDs, EntityStorageEntry.GetMetadata,
+    EntityStorageEntry.GetName, EntityStorageEntry.GetPersonas, EntityStorageEntry.GetPolicies,
+    EntityStorageEntry.ProtoMessage, EntityStorageEntry.ProtoReflect, EntityStorageEntry.Reset,
+    EntityStorageEntry.String, Group, Group.Clone, Group.Descriptor, Group.GetAlias,
+    Group.GetBucketKey, Group.GetCreationTime, Group.GetID, Group.GetLastUpdateTime,
+    Group.GetMemberEntityIDs, Group.GetMetadata, Group.GetModifyIndex, Group.GetName,
+    Group.GetNamespaceID, Group.GetParentGroupIDs, Group.GetPolicies, Group.GetType,
+    Group.ProtoMessage, Group.ProtoReflect, Group.Reset, Group.SentinelGet, Group.SentinelKeys,
+    Group.String, LocalAliases, LocalAliases.Descriptor, LocalAliases.GetAliases,
+    LocalAliases.ProtoMessage, LocalAliases.ProtoReflect, LocalAliases.Reset, LocalAliases.String,
+    PersonaIndexEntry, PersonaIndexEntry.Descriptor, PersonaIndexEntry.GetCreationTime,
+    PersonaIndexEntry.GetEntityID, PersonaIndexEntry.GetID, PersonaIndexEntry.GetLastUpdateTime,
+    PersonaIndexEntry.GetMergedFromEntityIDs, PersonaIndexEntry.GetMetadata, PersonaIndexEntry.GetMountAccessor,
+    PersonaIndexEntry.GetMountPath, PersonaIndexEntry.GetMountType, PersonaIndexEntry.GetName,
+    PersonaIndexEntry.ProtoMessage, PersonaIndexEntry.ProtoReflect, PersonaIndexEntry.Reset,
+    PersonaIndexEntry.String, ToSDKAlias, ToSDKEntity, ToSDKGroup, ToSDKGroups'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/helper/identity/identity.go
+  - third_party/openbao/internal/helper/identity/sentinel.go
+  - third_party/openbao/internal/helper/identity/types.pb.go
+  fingerprint: 90ee838ed448b581c6a01fde7505c38d7a6f557e31a5ee00a63ba4b9bf74703b
+  interfaces:
+  - codegraphId: method:bfcd35be44bbca752cd28184e592c0ea
+    file: third_party/openbao/internal/helper/identity/identity.go
+    kind: method
+    line: 15
+    name: Group.Clone
+    signature: () (*Group, error)
+  - codegraphId: method:2ac86f8dcde200fcf7386b4ec3cd12e3
+    file: third_party/openbao/internal/helper/identity/identity.go
+    kind: method
+    line: 34
+    name: Entity.Clone
+    signature: () (*Entity, error)
+  - codegraphId: method:f6442409507b0c8d1ce147970db45259
+    file: third_party/openbao/internal/helper/identity/identity.go
+    kind: method
+    line: 53
+    name: Entity.UpsertAlias
+    signature: (alias *Alias)
+  - codegraphId: method:8084eb55189c0096ec47357ee88503e1
+    file: third_party/openbao/internal/helper/identity/identity.go
+    kind: method
+    line: 63
+    name: Alias.Clone
+    signature: () (*Alias, error)
+  - codegraphId: function:f0dbc95dbc4552d8b598838dc3963d39
+    file: third_party/openbao/internal/helper/identity/identity.go
+    kind: function
+    line: 83
+    name: ToSDKAlias
+    signature: (a *Alias) *logical.Alias
+  - codegraphId: function:2dea232655a7227c40ee3249769304c2
+    file: third_party/openbao/internal/helper/identity/identity.go
+    kind: function
+    line: 102
+    name: ToSDKEntity
+    signature: (e *Entity) *logical.Entity
+  - codegraphId: function:a56aa82127d755b088d2dbb960f2f300
+    file: third_party/openbao/internal/helper/identity/identity.go
+    kind: function
+    line: 127
+    name: ToSDKGroup
+    signature: (g *Group) *logical.Group
+  - codegraphId: function:565b69f3842b1e6add6876bc37af887b
+    file: third_party/openbao/internal/helper/identity/identity.go
+    kind: function
+    line: 144
+    name: ToSDKGroups
+    signature: (groups []*Group) []*logical.Group
+  - codegraphId: method:6ae4bc5f65012623a31e1cfaabd3050c
+    file: third_party/openbao/internal/helper/identity/sentinel.go
+    kind: method
+    line: 8
+    name: Entity.SentinelGet
+    signature: (key string) (any, error)
+  - codegraphId: method:5034f8fb0e5f72abaaa5f21845549ab8
+    file: third_party/openbao/internal/helper/identity/sentinel.go
+    kind: method
+    line: 34
+    name: Entity.SentinelKeys
+    signature: () []string
+  - codegraphId: method:d95c1751f424e3ac61122deedc655301
+    file: third_party/openbao/internal/helper/identity/sentinel.go
+    kind: method
+    line: 48
+    name: Alias.SentinelGet
+    signature: (key string) (any, error)
+  - codegraphId: method:c92d6261f236d42200cd88cc48862c04
+    file: third_party/openbao/internal/helper/identity/sentinel.go
+    kind: method
+    line: 76
+    name: Alias.SentinelKeys
+    signature: () []string
+  - codegraphId: method:33086909f4c7f44a4b4eba7b3b0e83d9
+    file: third_party/openbao/internal/helper/identity/sentinel.go
+    kind: method
+    line: 91
+    name: Group.SentinelGet
+    signature: (key string) (any, error)
+  - codegraphId: method:797e06da650642e6007919dc34801e0b
+    file: third_party/openbao/internal/helper/identity/sentinel.go
+    kind: method
+    line: 117
+    name: Group.SentinelKeys
+    signature: () []string
+  - codegraphId: struct:d2ada21a134a8dfe9198be9bdf217342
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: struct
+    line: 30
+    name: Group
+  - codegraphId: method:6465fe63042e22c40e54d00d574433fd
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 74
+    name: Group.Reset
+    signature: ()
+  - codegraphId: method:7d895808d101475c1060f0d4933c6a2b
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 81
+    name: Group.String
+    signature: () string
+  - codegraphId: method:dbb79870bedd6685bcee94210212675a
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 85
+    name: Group.ProtoMessage
+    signature: ()
+  - codegraphId: method:a1312413c6795ef1e0c46d671e93c62a
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 87
+    name: Group.ProtoReflect
+    signature: () protoreflect.Message
+  - codegraphId: method:07188bac0ddd0bdf184f40bfaaa358a4
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 100
+    name: Group.Descriptor
+    signature: () ([]byte, []int)
+  - codegraphId: method:f1073a2b2e29da8a32007ed75fd6f3b2
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 104
+    name: Group.GetID
+    signature: () string
+  - codegraphId: method:0cd9e5a7144fdf4f81caca70678adbb4
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 111
+    name: Group.GetName
+    signature: () string
+  - codegraphId: method:897db93618ba44d838604fcc90f5dee3
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 118
+    name: Group.GetPolicies
+    signature: () []string
+  - codegraphId: method:0990d3641a76b905e6a41983f8785fd5
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 125
+    name: Group.GetParentGroupIDs
+    signature: () []string
+  - codegraphId: method:4d02e5c3f8937b92b8e9d15eaa0371d7
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 132
+    name: Group.GetMemberEntityIDs
+    signature: () []string
+  - codegraphId: method:d828e830683952e35b46f84bc17300a6
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 139
+    name: Group.GetMetadata
+    signature: () map[string]string
+  - codegraphId: method:1b074507c8b2673724ee776090541db7
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 146
+    name: Group.GetCreationTime
+    signature: () *timestamppb.Timestamp
+  - codegraphId: method:3f0629ced431fa65c18afd1251a88fde
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 153
+    name: Group.GetLastUpdateTime
+    signature: () *timestamppb.Timestamp
+  - codegraphId: method:0f296dfb5192107082a5c668650c5aff
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 160
+    name: Group.GetModifyIndex
+    signature: () uint64
+  - codegraphId: method:dcc092ec25f3173dd7c40098e6bbce67
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 167
+    name: Group.GetBucketKey
+    signature: () string
+  - codegraphId: method:f335f1bc8cba50a053a953e07a30540f
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 174
+    name: Group.GetAlias
+    signature: () *Alias
+  - codegraphId: method:3ef05e60536baf567e56b8a9497ef19b
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 181
+    name: Group.GetType
+    signature: () string
+  - codegraphId: method:b463d3425fae3994be224c31b10027cd
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 188
+    name: Group.GetNamespaceID
+    signature: () string
+  - codegraphId: struct:8dff879cc034dd7e16620035440706cd
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: struct
+    line: 197
+    name: LocalAliases
+  - codegraphId: method:d993f52795d8774e5bbddd9ab62ea190
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 204
+    name: LocalAliases.Reset
+    signature: ()
+  - codegraphId: method:dc1dff29c93826ed866a738d7a041a58
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 211
+    name: LocalAliases.String
+    signature: () string
+  - codegraphId: method:8408ebb1a96d46d2393ad2fbb58a70dc
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 215
+    name: LocalAliases.ProtoMessage
+    signature: ()
+  - codegraphId: method:46780d87b13b5d16fe0a0e498b581e80
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 217
+    name: LocalAliases.ProtoReflect
+    signature: () protoreflect.Message
+  - codegraphId: method:d3928232c88120386f7fba7db526a68b
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 230
+    name: LocalAliases.Descriptor
+    signature: () ([]byte, []int)
+  - codegraphId: method:4470085374d7f4ba436e452ec8293f68
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 234
+    name: LocalAliases.GetAliases
+    signature: () []*Alias
+  - codegraphId: struct:25869f1643374a790924a3e56aa00521
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: struct
+    line: 243
+    name: Entity
+  - codegraphId: method:3ed4ed76b0799eb6836a4d8bf8deb852
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 295
+    name: Entity.Reset
+    signature: ()
+  - codegraphId: method:28df9afcf8f7eb8c3c9f22125436cb12
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 302
+    name: Entity.String
+    signature: () string
+  - codegraphId: method:6525cbf1614e4d2978933732e64e0113
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 306
+    name: Entity.ProtoMessage
+    signature: ()
+  - codegraphId: method:d6662c7dede989d9cdd1c30ef62ce44c
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 308
+    name: Entity.ProtoReflect
+    signature: () protoreflect.Message
+  - codegraphId: method:be092e606193a36b6adcdcd3e104ea88
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 321
+    name: Entity.Descriptor
+    signature: () ([]byte, []int)
+  - codegraphId: method:35115e00d99b877b233cd60c75025042
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 325
+    name: Entity.GetAliases
+    signature: () []*Alias
+  - codegraphId: method:f7dc0ff82ad7c94af164e0ebd1829d2d
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 332
+    name: Entity.GetID
+    signature: () string
+  - codegraphId: method:37d1c651299599200a11ac10f79430d6
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 339
+    name: Entity.GetName
+    signature: () string
+  - codegraphId: method:a506c415639f5dd2ef4757f6d2169370
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 346
+    name: Entity.GetMetadata
+    signature: () map[string]string
+  - codegraphId: method:494eb64560312218991148e364119c70
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 353
+    name: Entity.GetCreationTime
+    signature: () *timestamppb.Timestamp
+  - codegraphId: method:3f2ff671f75ec299da3b0b43dd8e3ba4
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 360
+    name: Entity.GetLastUpdateTime
+    signature: () *timestamppb.Timestamp
+  - codegraphId: method:72f4562b980b38d91fec66f54ca11d50
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 367
+    name: Entity.GetMergedEntityIDs
+    signature: () []string
+  - codegraphId: method:6697bb4e9908e9e69a325c05cce4064c
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 374
+    name: Entity.GetPolicies
+    signature: () []string
+  - codegraphId: method:2af2e4a9f91df441c10290f6043aa7cf
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 381
+    name: Entity.GetBucketKey
+    signature: () string
+  - codegraphId: method:c5c9c9956fea8c6b1a60522bff577895
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 388
+    name: Entity.GetMFASecrets
+    signature: () map[string]*mfa.Secret
+  - codegraphId: method:8a9e173ade16ae0e413f1e0955bbddd5
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 395
+    name: Entity.GetDisabled
+    signature: () bool
+  - codegraphId: method:8a9d7046edd691401f6fc57daa1fca33
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 402
+    name: Entity.GetNamespaceID
+    signature: () string
+  - codegraphId: struct:b60430e25f9e3f26f4a1f53626ce91e5
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: struct
+    line: 412
+    name: Alias
+  - codegraphId: method:542a3ced8dc08d352698121422996ee8
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 463
+    name: Alias.Reset
+    signature: ()
+  - codegraphId: method:45aee78f3df6456b1b7ff9a8d980fc41
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 470
+    name: Alias.String
+    signature: () string
+  - codegraphId: method:c41f4a083b0c790a0722806417b5a68c
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 474
+    name: Alias.ProtoMessage
+    signature: ()
+  - codegraphId: method:fa2959a5d127767c0fbdc452f7a0608a
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 476
+    name: Alias.ProtoReflect
+    signature: () protoreflect.Message
+  - codegraphId: method:e3e6a8752809785e05fcc5ee139e5774
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 489
+    name: Alias.Descriptor
+    signature: () ([]byte, []int)
+  - codegraphId: method:6cc7e3b4efa9fdefe765cf2968901ccb
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 493
+    name: Alias.GetID
+    signature: () string
+  - codegraphId: method:a0271af61f4006c44e2f13a806c23d22
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 500
+    name: Alias.GetCanonicalID
+    signature: () string
+  - codegraphId: method:c1e1bb7bc6558060c86c1cc8dfcb6fee
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 507
+    name: Alias.GetMountType
+    signature: () string
+  - codegraphId: method:814ae525e02cbc2016c4925e4ba439b9
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 514
+    name: Alias.GetMountAccessor
+    signature: () string
+  - codegraphId: method:f0d89585347315890884585ee20888b7
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 521
+    name: Alias.GetMountPath
+    signature: () string
+  - codegraphId: method:ebda247b59160a98a607c08715bcaacd
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 528
+    name: Alias.GetMetadata
+    signature: () map[string]string
+  - codegraphId: method:4021e634dba69aab9bd00e1945126142
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 535
+    name: Alias.GetName
+    signature: () string
+  - codegraphId: method:5ad26193a3bd1b2aca5a138cbf6b29da
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 542
+    name: Alias.GetCreationTime
+    signature: () *timestamppb.Timestamp
+  - codegraphId: method:927c75cc337f000f42e2c12958d0abfa
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 549
+    name: Alias.GetLastUpdateTime
+    signature: () *timestamppb.Timestamp
+  - codegraphId: method:3a59fc3ebf81f1bba50fb60f550ebe24
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 556
+    name: Alias.GetMergedFromCanonicalIDs
+    signature: () []string
+  - codegraphId: method:f2f95fea65ba852d35cc2c18a88a66fa
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 563
+    name: Alias.GetNamespaceID
+    signature: () string
+  - codegraphId: method:4b347d858e40f0f50ab3336fd4ec802c
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 570
+    name: Alias.GetCustomMetadata
+    signature: () map[string]string
+  - codegraphId: method:8bc7ccc4d133f8ce12a6a632b5156635
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 577
+    name: Alias.GetLocal
+    signature: () bool
+  - codegraphId: method:a0df55e799840b6954b162cb71d10bc3
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 584
+    name: Alias.GetLocalBucketKey
+    signature: () string
+  - codegraphId: struct:e02f51e1da79f484b9169f9342d482f2
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: struct
+    line: 592
+    name: EntityStorageEntry
+  - codegraphId: method:93866bb8c57c9722912e6237eea7558d
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 608
+    name: EntityStorageEntry.Reset
+    signature: ()
+  - codegraphId: method:eeb317da8a62ed324dde0b43c92704e0
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 615
+    name: EntityStorageEntry.String
+    signature: () string
+  - codegraphId: method:8f1559edd293fe65ffc9494c01c39d54
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 619
+    name: EntityStorageEntry.ProtoMessage
+    signature: ()
+  - codegraphId: method:1d45232cef5804a73e409bce8b322e0f
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 621
+    name: EntityStorageEntry.ProtoReflect
+    signature: () protoreflect.Message
+  - codegraphId: method:370391f1d1b670a349ff8ae2b7c28a5d
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 634
+    name: EntityStorageEntry.Descriptor
+    signature: () ([]byte, []int)
+  - codegraphId: method:e2b8444df9419169e16809ac6fc00cab
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 638
+    name: EntityStorageEntry.GetPersonas
+    signature: () []*PersonaIndexEntry
+  - codegraphId: method:9627412cb745cf4af9b59e14880e2084
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 645
+    name: EntityStorageEntry.GetID
+    signature: () string
+  - codegraphId: method:56ddad86501a1ab53631528dc66dfa1b
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 652
+    name: EntityStorageEntry.GetName
+    signature: () string
+  - codegraphId: method:257e51e5d27c25c8ffce6ebaea043727
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 659
+    name: EntityStorageEntry.GetMetadata
+    signature: () map[string]string
+  - codegraphId: method:784e61ea9716e6f3ac538aafd5f72193
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 666
+    name: EntityStorageEntry.GetCreationTime
+    signature: () *timestamppb.Timestamp
+  - codegraphId: method:5d730bbdf3adcad6de7237be420c747f
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 673
+    name: EntityStorageEntry.GetLastUpdateTime
+    signature: () *timestamppb.Timestamp
+  - codegraphId: method:7024fd60acce290117a30a409f784950
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 680
+    name: EntityStorageEntry.GetMergedEntityIDs
+    signature: () []string
+  - codegraphId: method:54aeba2dba3e7531305602cfa7248af9
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 687
+    name: EntityStorageEntry.GetPolicies
+    signature: () []string
+  - codegraphId: method:2a04e2723735fa06824cceb45c8497d8
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 694
+    name: EntityStorageEntry.GetBucketKeyHash
+    signature: () string
+  - codegraphId: method:9bcf62d9f2fcff6d61bb4be4f9adec2d
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 701
+    name: EntityStorageEntry.GetMFASecrets
+    signature: () map[string]*mfa.Secret
+  - codegraphId: struct:a226a1ba122a45f0cc9af9e498c06d2d
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: struct
+    line: 709
+    name: PersonaIndexEntry
+  - codegraphId: method:c2ad846d8f11bcb4b82c377bd6cd3e57
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 725
+    name: PersonaIndexEntry.Reset
+    signature: ()
+  - codegraphId: method:a8272457b6400108316580284b770f20
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 732
+    name: PersonaIndexEntry.String
+    signature: () string
+  - codegraphId: method:d4155a593ac726802d26729dc81fe2d5
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 736
+    name: PersonaIndexEntry.ProtoMessage
+    signature: ()
+  - codegraphId: method:52b0d695bf53c8740965c04aec7010d7
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 738
+    name: PersonaIndexEntry.ProtoReflect
+    signature: () protoreflect.Message
+  - codegraphId: method:80caea9a40fe0917248c402954013e83
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 751
+    name: PersonaIndexEntry.Descriptor
+    signature: () ([]byte, []int)
+  - codegraphId: method:fc22643b8e673d802895b7b61efae50b
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 755
+    name: PersonaIndexEntry.GetID
+    signature: () string
+  - codegraphId: method:177814e65fe6a22c0b973f933ce2d751
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 762
+    name: PersonaIndexEntry.GetEntityID
+    signature: () string
+  - codegraphId: method:21459f1476d4ad0526f18b0210c47f05
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 769
+    name: PersonaIndexEntry.GetMountType
+    signature: () string
+  - codegraphId: method:2cfe5b89173660182d2000010f7917a3
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 776
+    name: PersonaIndexEntry.GetMountAccessor
+    signature: () string
+  - codegraphId: method:b5e995a367c1b6fa25c3bd92631b72bd
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 783
+    name: PersonaIndexEntry.GetMountPath
+    signature: () string
+  - codegraphId: method:6aed99ce5896d321fca7be8e7e3c8f12
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 790
+    name: PersonaIndexEntry.GetMetadata
+    signature: () map[string]string
+  - codegraphId: method:2ea93462942a470f7d0b7eca34f7bb48
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 797
+    name: PersonaIndexEntry.GetName
+    signature: () string
+  - codegraphId: method:183fa03222159edc932ae71b61b95788
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 804
+    name: PersonaIndexEntry.GetCreationTime
+    signature: () *timestamppb.Timestamp
+  - codegraphId: method:fc13844321d9c0fb47d34c2f8c9aeb27
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 811
+    name: PersonaIndexEntry.GetLastUpdateTime
+    signature: () *timestamppb.Timestamp
+  - codegraphId: method:88970f8cfc062997f754a032d70c0303
+    file: third_party/openbao/internal/helper/identity/types.pb.go
+    kind: method
+    line: 818
+    name: PersonaIndexEntry.GetMergedFromEntityIDs
+    signature: () []string
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: f3175709d0efdb22fa4b2198914d28aeaf576df8d8a7cfe12e4f071f50cb886e
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 90ee838ed448b581c6a01fde7505c38d7a6f557e31a5ee00a63ba4b9bf74703b

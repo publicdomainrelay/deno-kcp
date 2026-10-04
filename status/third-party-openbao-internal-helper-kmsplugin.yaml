@@ -1,0 +1,166 @@
+conditions:
+- message: 'undeclared: Catalog, Catalog.ConfigureWrapper, Catalog.GetMetadata, Catalog.OpenKMS,
+    Catalog.ReloadConfig, NewCatalog, remoteKMS.Close, remoteKMS.GetKey, remoteKMS.Open,
+    remoteKey.Decrypt, remoteKey.Encrypt, remoteKey.ExportPublic, remoteKey.Sign,
+    remoteKey.Verify, remoteWrapper.Decrypt, remoteWrapper.Encrypt, remoteWrapper.Finalize,
+    remoteWrapper.Init, remoteWrapper.KeyId, remoteWrapper.SetConfig, remoteWrapper.Type'
+  reason: InterfacesMissing
+  status: "False"
+  type: CodeSynced
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
+  status: "False"
+  type: Drifted
+- message: the spec passes the validator
+  reason: ValidatorPassed
+  status: "True"
+  type: SpecValid
+observed:
+  files:
+  - third_party/openbao/internal/helper/kmsplugin/catalog.go
+  - third_party/openbao/internal/helper/kmsplugin/catalog_test.go
+  - third_party/openbao/internal/helper/kmsplugin/kms.go
+  - third_party/openbao/internal/helper/kmsplugin/kms_test.go
+  - third_party/openbao/internal/helper/kmsplugin/metadata.go
+  - third_party/openbao/internal/helper/kmsplugin/metadata_test.go
+  - third_party/openbao/internal/helper/kmsplugin/wrapper.go
+  - third_party/openbao/internal/helper/kmsplugin/wrapper_test.go
+  fingerprint: 06fe97fb8bfa6ea2ec81782ed054b0e589ab676f0370939ec7c4ef76a5531e5b
+  interfaces:
+  - codegraphId: struct:f505aca759e0d5ab602240d7661125bd
+    file: third_party/openbao/internal/helper/kmsplugin/catalog.go
+    kind: struct
+    line: 32
+    name: Catalog
+  - codegraphId: function:99c53ec37df8b361c1dc4fe016564398
+    file: third_party/openbao/internal/helper/kmsplugin/catalog.go
+    kind: function
+    line: 88
+    name: NewCatalog
+    signature: (logger hclog.Logger, config *server.Config) (*Catalog, error)
+  - codegraphId: method:39299e5ae4e8b9db146dd7e281ad3795
+    file: third_party/openbao/internal/helper/kmsplugin/catalog.go
+    kind: method
+    line: 268
+    name: Catalog.ReloadConfig
+    signature: (config *server.Config) error
+  - codegraphId: method:a2074535537a502f8f3a05b893030b3b
+    file: third_party/openbao/internal/helper/kmsplugin/kms.go
+    kind: method
+    line: 24
+    name: Catalog.OpenKMS
+    signature: (ctx context.Context, name string, opts *kms.OpenOptions) (s kms.KMS,
+      err error)
+  - codegraphId: method:4760ea2f2d142cb98411add7b24c3a99
+    file: third_party/openbao/internal/helper/kmsplugin/kms.go
+    kind: method
+    line: 153
+    name: remoteKMS.Open
+    signature: (ctx context.Context, opts *kms.OpenOptions) error
+  - codegraphId: method:e1a88070e93159d6c6612cfd62d22535
+    file: third_party/openbao/internal/helper/kmsplugin/kms.go
+    kind: method
+    line: 167
+    name: remoteKMS.Close
+    signature: (ctx context.Context) error
+  - codegraphId: method:c143c6f142920c746fa249bece6eccd4
+    file: third_party/openbao/internal/helper/kmsplugin/kms.go
+    kind: method
+    line: 185
+    name: remoteKMS.GetKey
+    signature: (ctx context.Context, opts *kms.KeyOptions) (key kms.Key, err error)
+  - codegraphId: method:756edcba37642f43afddbf3d07ecf8fc
+    file: third_party/openbao/internal/helper/kmsplugin/kms.go
+    kind: method
+    line: 301
+    name: remoteKey.Encrypt
+    signature: (ctx context.Context, opts *kms.CipherOptions) (ciphertext []byte,
+      err error)
+  - codegraphId: method:cfb90db6340621ea6dfbc893bf81b2d5
+    file: third_party/openbao/internal/helper/kmsplugin/kms.go
+    kind: method
+    line: 309
+    name: remoteKey.Decrypt
+    signature: (ctx context.Context, opts *kms.CipherOptions) (plaintext []byte, err
+      error)
+  - codegraphId: method:1c6fd20ea8dc79b95591de2714383b81
+    file: third_party/openbao/internal/helper/kmsplugin/kms.go
+    kind: method
+    line: 317
+    name: remoteKey.Sign
+    signature: (ctx context.Context, opts *kms.SignOptions) (signature []byte, err
+      error)
+  - codegraphId: method:607235ba27d01589d303ec3f88e51418
+    file: third_party/openbao/internal/helper/kmsplugin/kms.go
+    kind: method
+    line: 325
+    name: remoteKey.Verify
+    signature: (ctx context.Context, opts *kms.VerifyOptions) error
+  - codegraphId: method:7a02da7d84ca6b512039f02a219e0b45
+    file: third_party/openbao/internal/helper/kmsplugin/kms.go
+    kind: method
+    line: 331
+    name: remoteKey.ExportPublic
+    signature: (ctx context.Context) (public crypto.PublicKey, err error)
+  - codegraphId: method:762ebaea4f3d9751288c919ecdfd3086
+    file: third_party/openbao/internal/helper/kmsplugin/metadata.go
+    kind: method
+    line: 21
+    name: Catalog.GetMetadata
+    signature: (ctx context.Context, name string) (plugin.Metadata, error)
+  - codegraphId: method:a8d787ef27ff1570e4953f5b2e950e98
+    file: third_party/openbao/internal/helper/kmsplugin/wrapper.go
+    kind: method
+    line: 42
+    name: Catalog.ConfigureWrapper
+    signature: (ctx context.Context, name string, opts ...wrapping.Option) (wrapping.Wrapper,
+      *wrapping.WrapperConfig, error)
+  - codegraphId: method:8348e49626285f53cc456f1c5103f91a
+    file: third_party/openbao/internal/helper/kmsplugin/wrapper.go
+    kind: method
+    line: 191
+    name: remoteWrapper.SetConfig
+    signature: (ctx context.Context, opts ...wrapping.Option) (config *wrapping.WrapperConfig,
+      err error)
+  - codegraphId: method:d54eef420df20a8d0e75a873ae8cae4e
+    file: third_party/openbao/internal/helper/kmsplugin/wrapper.go
+    kind: method
+    line: 207
+    name: remoteWrapper.Init
+    signature: (ctx context.Context, opts ...wrapping.Option) error
+  - codegraphId: method:466c4dd2f94ffcdf032d43d103192d40
+    file: third_party/openbao/internal/helper/kmsplugin/wrapper.go
+    kind: method
+    line: 222
+    name: remoteWrapper.Finalize
+    signature: (ctx context.Context, opts ...wrapping.Option) error
+  - codegraphId: method:5ce1fff93401331e049ffeb0e1803115
+    file: third_party/openbao/internal/helper/kmsplugin/wrapper.go
+    kind: method
+    line: 243
+    name: remoteWrapper.Type
+    signature: (ctx context.Context) (ty wrapping.WrapperType, err error)
+  - codegraphId: method:906506648737d1f6df97c040ab255e7b
+    file: third_party/openbao/internal/helper/kmsplugin/wrapper.go
+    kind: method
+    line: 251
+    name: remoteWrapper.KeyId
+    signature: (ctx context.Context) (id string, err error)
+  - codegraphId: method:30b192e5ac3a26f1e561b4e5472b8f3e
+    file: third_party/openbao/internal/helper/kmsplugin/wrapper.go
+    kind: method
+    line: 259
+    name: remoteWrapper.Encrypt
+    signature: (ctx context.Context, plaintext []byte, opts ...wrapping.Option) (blob
+      *wrapping.BlobInfo, err error)
+  - codegraphId: method:4bb019b429a33e752872982045033762
+    file: third_party/openbao/internal/helper/kmsplugin/wrapper.go
+    kind: method
+    line: 267
+    name: remoteWrapper.Decrypt
+    signature: (ctx context.Context, blob *wrapping.BlobInfo, opts ...wrapping.Option)
+      (plaintext []byte, err error)
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: f2dfc29f28a667a8e403a2a306d6f75b53c20037d5dfe1a54ca39c7f6d31ceb6
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 06fe97fb8bfa6ea2ec81782ed054b0e589ab676f0370939ec7c4ef76a5531e5b
