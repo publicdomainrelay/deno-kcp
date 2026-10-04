@@ -10,5 +10,17 @@ spec:
   systemContext: third-party-openbao
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao
-  phase: Running
+  agentLog: 'This context covers the vendored third-party OpenBao tree that lives
+    at third_party/openbao inside the deno-kcp repository. The observed facts list
+    exactly four files in that tree: two golangci-lint configurations (.golangci.yml
+    and .golangci.deprecations.yml), the Go entry point main.go, and publiccode.yml
+    project metadata. No Go interfaces, functions, or types are observed in this context,
+    and none are exported to the surrounding deno-kcp module. The CodeGraph query
+    that surfaced this context returned a low-confidence match against the internal/provider
+    package (ReadOpenBao, ListOpenBaos, deleteOpenBao), which belongs to deno-kcp''s
+    own Kubernetes-style provider for OpenBao resources, not to the vendored tree
+    itself; those symbols are adjacent background, not part of this context. The context
+    therefore describes a self-contained upstream copy plus its lint and metadata
+    configuration, and nothing else.'
+  message: wrote 5 requirement(s) and 0 interface(s) for third-party-openbao
+  phase: Succeeded
