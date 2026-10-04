@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so the UI can describe each OpenBao API resource once, as a typed client-side record, and let routes, serializers, and form components share that description. The models carry the field list, defaults, labels and help text the form layer renders, the derived flags (for example whether a secret engine is KV v2, whether a secret version is deleted, whether an auth method can be edited or disabled), and the API path each record reads and writes, so that the rest of the UI never hard-codes those details per screen.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
