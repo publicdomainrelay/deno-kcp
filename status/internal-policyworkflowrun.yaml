@@ -1,21 +1,76 @@
 conditions:
-- message: 'missing: Admission, New, Observed, Op, Options, Reconciler, Reconciler.Reconcile,
-    Result, RunObservation, RunState; unresolved: r.admission-gate: method:76266912e5bed07cf34b1126aad5c33b,
-    r.admission-gate: struct:8c9b381b504c108fe27f810920616d23, r.defaults-filled:
-    function:5365b491262d3c8638b4a45db22fc36e, r.defaults-filled: struct:30ba817e4728c201876b801d6ab2334e,
-    r.deletion-teardown: type_alias:9dfd60ec68bf9ea12c085e274c36feb8, r.name-required:
-    file:internal/policyworkflowrun/policyworkflowrun.go, r.running-observation: struct:2605e325b5ce4d8a38ae867d7b08178b,
-    r.start-run: type_alias:0d84b5d35fb4e8418432c2610ef317b0, r.status-carried: struct:b66ec1a8abbbf54f699b1689a5d827fb,
-    r.terminal-finish: struct:c8b0144b7a7dfafc8abd4dcdf36838ca'
-  reason: InterfacesMissing
-  status: "False"
+- message: every declared interface is observed, nothing undeclared is exported and
+    every requirement code ref resolves
+  reason: InterfacesObserved
+  status: "True"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - internal/policyworkflowrun/policyworkflowrun.go
+  - internal/policyworkflowrun/policyworkflowrun_test.go
+  fingerprint: 7100fdb7134e8c81bb81ed7a3cd2a18d1a2c20d48b1c091e24c7398a17a26432
+  interfaces:
+  - codegraphId: type_alias:9dfd60ec68bf9ea12c085e274c36feb8
+    file: internal/policyworkflowrun/policyworkflowrun.go
+    kind: type_alias
+    line: 18
+    name: RunState
+  - codegraphId: struct:2605e325b5ce4d8a38ae867d7b08178b
+    file: internal/policyworkflowrun/policyworkflowrun.go
+    kind: struct
+    line: 28
+    name: RunObservation
+  - codegraphId: struct:8c9b381b504c108fe27f810920616d23
+    file: internal/policyworkflowrun/policyworkflowrun.go
+    kind: struct
+    line: 40
+    name: Admission
+  - codegraphId: struct:c8b0144b7a7dfafc8abd4dcdf36838ca
+    file: internal/policyworkflowrun/policyworkflowrun.go
+    kind: struct
+    line: 48
+    name: Observed
+  - codegraphId: type_alias:0d84b5d35fb4e8418432c2610ef317b0
+    file: internal/policyworkflowrun/policyworkflowrun.go
+    kind: type_alias
+    line: 60
+    name: Op
+  - codegraphId: struct:b66ec1a8abbbf54f699b1689a5d827fb
+    file: internal/policyworkflowrun/policyworkflowrun.go
+    kind: struct
+    line: 72
+    name: Result
+  - codegraphId: struct:30ba817e4728c201876b801d6ab2334e
+    file: internal/policyworkflowrun/policyworkflowrun.go
+    kind: struct
+    line: 104
+    name: Options
+  - codegraphId: struct:207fbdc97b53f7117bbe22a0a498b07d
+    file: internal/policyworkflowrun/policyworkflowrun.go
+    kind: struct
+    line: 110
+    name: Reconciler
+  - codegraphId: function:5365b491262d3c8638b4a45db22fc36e
+    file: internal/policyworkflowrun/policyworkflowrun.go
+    kind: function
+    line: 114
+    name: New
+    signature: (opts Options) *Reconciler
+  - codegraphId: method:76266912e5bed07cf34b1126aad5c33b
+    file: internal/policyworkflowrun/policyworkflowrun.go
+    kind: method
+    line: 124
+    name: Reconciler.Reconcile
+    signature: (ctx context.Context, o Observed) (Result, error)
+observedCommit: 44bd6951fa6bf8f6e6d0264e27b7dfe6b967e21e
+realizedSpecHash: b2333ccf6cf0bcc82fdff29867abf7c0cc988e1e6fa11d4521ad6abbe10793b7
+syncedCommit: 44bd6951fa6bf8f6e6d0264e27b7dfe6b967e21e
+syncedFingerprint: 7100fdb7134e8c81bb81ed7a3cd2a18d1a2c20d48b1c091e24c7398a17a26432
