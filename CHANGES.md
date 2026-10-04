@@ -5865,6 +5865,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.route-guard` (MUST): "The returned decorator must check Object.prototype.isPrototypeOf.call(Route, SuperClass); when the check fails it must log 'withConfig decorator must be used on an instance of ember Route class. Decorator not applied to returned class' to console.error and return SuperClass unchanged."
 - added `r.wrapped-class` (MUST): "When the guard passes, the decorator must return a class CheckConfig that extends SuperClass, injects the secretMountPath service, and initializes shouldPromptConfig to false."
 
+### third-party-openbao-ui-lib-pki-addon-helpers
+
+- intent: "" -> "These helpers exist so PKI templates can read the active mount path and build transition links without touching services directly. The mount path helper gives templates one stable accessor for the current secret mount. The transition-to helper wraps router.transitionTo so a link click is intercepted, its default browser action suppressed, and the query params of the target route are resolved before navigation. The context documents these two adapters as the PKI addon's helper surface."
+- added `r.current-mount-path-returns-service-value` (MUST): "CurrentMountPathHelper, an Ember Helper subclass, declares secretMountPath as an injected service and its compute method takes no arguments and returns secretMountPath.currentPath, so templates receive the path of the secret mount currently being viewed."
+- added `r.pki-helpers-are-default-exports` (MUST): "Both files export their helper class as the module default, so the PKI addon resolves them as current-mount-path and transition-to helpers by convention."
+- added `r.transition-to-navigates-with-resolved-query-params` (MUST): "After suppressing the default action, the handler performs the navigation by calling router.transitionTo with handleQueryParams applied to the params array, spreading the result, and returns that call's result to the caller."
+- added `r.transition-to-returns-event-handler` (MUST): "TransitionToHelper, an Ember Helper subclass, declares router as an injected service bound to host-router, and compute takes the params to forward and returns a function that accepts an optional event."
+- added `r.transition-to-suppresses-default-only-when-possible` (MUST): "The returned handler calls preventDefault only when the event argument is not undefined and its preventDefault member is a function, so a missing event or an event without preventDefault is passed over without a type error."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -6390,6 +6399,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-pki-addon-decorators-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-decorators-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-helpers-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-lib-pki-addon-helpers-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-routes-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |

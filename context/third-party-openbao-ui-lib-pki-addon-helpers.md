@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+These helpers exist so PKI templates can read the active mount path and build transition links without touching services directly. The mount path helper gives templates one stable accessor for the current secret mount. The transition-to helper wraps router.transitionTo so a link click is intercepted, its default browser action suppressed, and the query params of the target route are resolved before navigation. The context documents these two adapters as the PKI addon's helper surface.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

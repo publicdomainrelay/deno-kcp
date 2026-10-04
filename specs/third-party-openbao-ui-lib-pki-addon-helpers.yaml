@@ -1,5 +1,7 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
+- class:3ca659cc61d957c68100411551638231 CurrentMountPathHelper@third_party/openbao/ui/lib/pki/addon/helpers/current-mount-path.js:10
+- class:94cb4eb7e90eef645c5b81681e8fffa0 TransitionToHelper@third_party/openbao/ui/lib/pki/addon/helpers/transition-to.js:10
 - file:third_party/openbao/ui/lib/pki/addon/helpers/current-mount-path.js current-mount-path.js@third_party/openbao/ui/lib/pki/addon/helpers/current-mount-path.js
 - file:third_party/openbao/ui/lib/pki/addon/helpers/transition-to.js transition-to.js@third_party/openbao/ui/lib/pki/addon/helpers/transition-to.js
 kind: SystemContext
@@ -7,5 +9,62 @@ metadata:
   name: third-party-openbao-ui-lib-pki-addon-helpers
   namespace: default
 spec:
+  intent: These helpers exist so PKI templates can read the active mount path and
+    build transition links without touching services directly. The mount path helper
+    gives templates one stable accessor for the current secret mount. The transition-to
+    helper wraps router.transitionTo so a link click is intercepted, its default browser
+    action suppressed, and the query params of the target route are resolved before
+    navigation. The context documents these two adapters as the PKI addon's helper
+    surface.
+  interfaces:
+  - file: third_party/openbao/ui/lib/pki/addon/helpers/current-mount-path.js
+    kind: class
+    name: CurrentMountPathHelper
+    signature: class CurrentMountPathHelper extends Helper
+  - file: third_party/openbao/ui/lib/pki/addon/helpers/transition-to.js
+    kind: class
+    name: TransitionToHelper
+    signature: class TransitionToHelper extends Helper
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - class:3ca659cc61d957c68100411551638231
+    - file:third_party/openbao/ui/lib/pki/addon/helpers/current-mount-path.js
+    id: r.current-mount-path-returns-service-value
+    level: MUST
+    text: CurrentMountPathHelper, an Ember Helper subclass, declares secretMountPath
+      as an injected service and its compute method takes no arguments and returns
+      secretMountPath.currentPath, so templates receive the path of the secret mount
+      currently being viewed.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/pki/addon/helpers/current-mount-path.js
+    - file:third_party/openbao/ui/lib/pki/addon/helpers/transition-to.js
+    id: r.pki-helpers-are-default-exports
+    level: MUST
+    text: Both files export their helper class as the module default, so the PKI addon
+      resolves them as current-mount-path and transition-to helpers by convention.
+  - codeRefs:
+    - class:94cb4eb7e90eef645c5b81681e8fffa0
+    - file:third_party/openbao/ui/lib/pki/addon/helpers/transition-to.js
+    id: r.transition-to-navigates-with-resolved-query-params
+    level: MUST
+    text: After suppressing the default action, the handler performs the navigation
+      by calling router.transitionTo with handleQueryParams applied to the params
+      array, spreading the result, and returns that call's result to the caller.
+  - codeRefs:
+    - class:94cb4eb7e90eef645c5b81681e8fffa0
+    - file:third_party/openbao/ui/lib/pki/addon/helpers/transition-to.js
+    id: r.transition-to-returns-event-handler
+    level: MUST
+    text: TransitionToHelper, an Ember Helper subclass, declares router as an injected
+      service bound to host-router, and compute takes the params to forward and returns
+      a function that accepts an optional event.
+  - codeRefs:
+    - class:94cb4eb7e90eef645c5b81681e8fffa0
+    - file:third_party/openbao/ui/lib/pki/addon/helpers/transition-to.js
+    id: r.transition-to-suppresses-default-only-when-possible
+    level: MUST
+    text: The returned handler calls preventDefault only when the event argument is
+      not undefined and its preventDefault member is a function, so a missing event
+      or an event without preventDefault is passed over without a type error.
   upstream: self
