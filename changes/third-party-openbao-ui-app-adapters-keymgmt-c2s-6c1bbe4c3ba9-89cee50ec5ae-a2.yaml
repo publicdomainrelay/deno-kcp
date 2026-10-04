@@ -56,9 +56,54 @@ status:
     observed facts; dropped
   phase: Succeeded
 superseded:
-- message: the agent is summarizing third-party-openbao-ui-app-adapters-keymgmt
+- message: |-
+    ...hen reloads the keymgmt/key record from the store; removeFromProvider DELETEs '<backend>/kms/<provider>/key/<name>' and, on success, clears model.provider.",
+          "codeRefs": [
+            "class:86750a0003380b8bbb6f7552f83a6809"
+          ]
+        },
+        {
+          "id": "r.provider-adapter-paths",
+          "level": "MUST",
+          "text": "The keymgmt/provider adapter maps pathForType to 'kms', rewrites the 'kms' segment to '<backend>/kms' in buildURL from the snapshot or query, and exposes buildKeysURL which appends '/<provider>/key' to a query-scoped provider URL.",
+          "codeRefs": [
+            "file:third_party/openbao/ui/app/adapters/keymgmt/provider.js"
+          ]
+        },
+        {
+          "id": "r.provider-write-verbs",
+          "level": "MUST",
+          "text": "The keymgmt/provider adapter creates providers with a PUT rather than a POST, sending the serialized snapshot to the updateRecord URL, and returns the serialized data as the resolved value.",
+          "codeRefs": [
+            "file:third_party/openbao/ui/app/adapters/keymgmt/provider.js"
+          ]
+        },
+        {
+          "id": "r.provider-find-and-list",
+          "level": "MUST",
+          "text": "The keymgmt/provider adapter decorates findRecord responses by copying the lookup name into resp.data, and its query fetches every named key in the listing through findRecord using a mocked snapshot that answers only the 'backend' attribute, replacing data.keys with the full records and setting resp.backend.",
+          "codeRefs": [
+            "file:third_party/openbao/ui/app/adapters/keymgmt/provider.js"
+          ]
+        }
+      ],
+      "interfaces": [
+        {
+          "name": "KeymgmtKeyAdapter",
+          "kind": "class",
+          "signature": "class KeymgmtKeyAdapter extends ApplicationAdapter",
+          "file": "third_party/openbao/ui/app/adapters/keymgmt/key.js"
+        },
+        {
+          "name": "KeymgmtKeyAdapter",
+          "kind": "class",
+          "signature": "class KeymgmtKeyAdapter extends ApplicationAdapter",
+          "file": "third_party/openbao/ui/app/adapters/keymgmt/provider.js"
+        }
+      ]
+    }
   name: third-party-openbao-ui-app-adapters-keymgmt-c2s-6c1bbe4c3ba9-89cee50ec5ae-a3
-  phase: Running
+  phase: Failed
 - message: |-
     ...he snapshot and sends a PUT (not POST) to the update-record URL built with the provider's name, resolving with the serialized data so the caller receives the record it sent.",
           "codeRefs": ["file:third_party/openbao/ui/app/adapters/keymgmt/provider.js"]
