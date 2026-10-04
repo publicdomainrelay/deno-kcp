@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to describe the tidy-status polling behavior of the PKI addon's tidy index route. The controller gives the pki.tidy.index template a live view of the secret engine's tidy operation by refreshing tidyStatus on a fixed 5 second interval, while disabling polling under acceptance tests to keep promises settled and avoiding loop termination on transient request failures.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

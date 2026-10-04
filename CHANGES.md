@@ -5847,6 +5847,16 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.sign-controller-tracks-submission` (MUST): "PkiRolesSignController extends Ember's Controller and holds a tracked hasSubmitted property that starts as false; this flag is the controller's only state for the role sign route."
 - added `r.sign-toggle-title` (MUST): "PkiRolesSignController exposes an action toggleTitle() that assigns hasSubmitted the negation of its current value, so calling it once flips the flag from false to true and calling it again flips it back."
 
+### third-party-openbao-ui-lib-pki-addon-controllers-tidy
+
+- intent: "" -> "This context exists to describe the tidy-status polling behavior of the PKI addon's tidy index route. The controller gives the pki.tidy.index template a live view of the secret engine's tidy operation by refreshing tidyStatus on a fixed 5 second interval, while disabling polling under acceptance tests to keep promises settled and avoiding loop termination on transient request failures."
+- added `r.disable-poll-in-tests` (MUST): "When Ember.testing is true, pollTidyStatus returns before its first timeout and does no polling, so acceptance tests do not hang on promises that never settle."
+- added `r.injected-services` (MUST): "The controller injects the store and secretMountPath services, making the Ember Data store and the current secret engine mount path available to the tidy index route."
+- added `r.poll-tidy-status-interval` (MUST): "The controller polls the tidy status in an endless loop, waiting POLL_INTERVAL_MS (5000 ms) before each call to this.fetchTidyStatus(), and assigns the returned response to the tracked tidyStatus property so the template reflects the latest tidy state."
+- added `r.survive-fetch-errors` (MUST): "A failing fetchTidyStatus call must not end the loop: the error is caught and the task keeps polling on the next interval, leaving the previous tidyStatus value in place."
+- added `r.task-cancelled-on-route-exit` (SHOULD): "pollTidyStatus stays a cancellable ember-concurrency task so that resetController() cancels it when the pki.tidy.index route is left, stopping the poll loop."
+- added `r.tidy-status-initial-null` (MUST): "The controller declares tidyStatus as a tracked property initialized to null, so consumers can distinguish 'no status fetched yet' from a fetched status object."
+
 ### third-party-openbao-ui-lib-pki-addon-decorators
 
 - intent: "" -> "This context exists so the PKI engine routes can detect whether a secrets engine has been configured before rendering. The withConfig decorator wraps a route and, during beforeModel, probes the unauthenticated pki/issuer endpoint for the current mount path. Routes apply the decorator to gain a shouldPromptConfig flag that the view layer can use to prompt the user for configuration. The guard keeps the decorator safe to apply only to Ember Route subclasses, degrading to a console error and the original class instead of throwing."
@@ -6376,7 +6386,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-pki-addon-controllers-roles-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-controllers-roles-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-controllers-roles-role-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-lib-pki-addon-controllers-tidy-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-pki-addon-controllers-tidy-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-decorators-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-decorators-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |

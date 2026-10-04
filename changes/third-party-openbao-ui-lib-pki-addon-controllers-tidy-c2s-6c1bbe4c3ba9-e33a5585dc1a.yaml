@@ -10,5 +10,16 @@ spec:
   systemContext: third-party-openbao-ui-lib-pki-addon-controllers-tidy
   toCommit: e33a5585dc1ac9d3bf63bc1ebdcf5dbb45369989
 status:
-  message: the agent is summarizing third-party-openbao-ui-lib-pki-addon-controllers-tidy
-  phase: Running
+  agentLog: 'This context covers a single Ember.js controller file, third_party/openbao/ui/lib/pki/addon/controllers/tidy/index.js,
+    vendored from the OpenBao UI. It exports a default PkiTidyIndexController that
+    extends Ember''s Controller and injects the store and secretMountPath services.
+    The controller holds a tracked tidyStatus property, initially null, and runs an
+    ember-concurrency task pollTidyStatus that loops forever: it returns immediately
+    when Ember.testing is true, otherwise it waits POLL_INTERVAL_MS (5000 ms), calls
+    this.fetchTidyStatus(), assigns the response to tidyStatus, and swallows any error
+    so the loop continues. The task is cancelled by resetController() when the pki.tidy.index
+    route is left.'
+  message: wrote 6 requirement(s) and 1 interface(s) for third-party-openbao-ui-lib-pki-addon-controllers-tidy;
+    interface PkiTidyIndexController.pollTidyStatus is not in the observed facts;
+    dropped
+  phase: Succeeded

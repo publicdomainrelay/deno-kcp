@@ -1,10 +1,70 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
+- class:a10e46a1c1ea70fb8bd55ac9fe989d4c PkiTidyIndexController@third_party/openbao/ui/lib/pki/addon/controllers/tidy/index.js:13
 - file:third_party/openbao/ui/lib/pki/addon/controllers/tidy/index.js index.js@third_party/openbao/ui/lib/pki/addon/controllers/tidy/index.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-lib-pki-addon-controllers-tidy
   namespace: default
 spec:
+  intent: This context exists to describe the tidy-status polling behavior of the
+    PKI addon's tidy index route. The controller gives the pki.tidy.index template
+    a live view of the secret engine's tidy operation by refreshing tidyStatus on
+    a fixed 5 second interval, while disabling polling under acceptance tests to keep
+    promises settled and avoiding loop termination on transient request failures.
+  interfaces:
+  - file: third_party/openbao/ui/lib/pki/addon/controllers/tidy/index.js
+    kind: class
+    name: PkiTidyIndexController
+    signature: class PkiTidyIndexController extends Controller
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - class:a10e46a1c1ea70fb8bd55ac9fe989d4c
+    - file:third_party/openbao/ui/lib/pki/addon/controllers/tidy/index.js
+    id: r.disable-poll-in-tests
+    level: MUST
+    text: When Ember.testing is true, pollTidyStatus returns before its first timeout
+      and does no polling, so acceptance tests do not hang on promises that never
+      settle.
+  - codeRefs:
+    - class:a10e46a1c1ea70fb8bd55ac9fe989d4c
+    - file:third_party/openbao/ui/lib/pki/addon/controllers/tidy/index.js
+    id: r.injected-services
+    level: MUST
+    text: The controller injects the store and secretMountPath services, making the
+      Ember Data store and the current secret engine mount path available to the tidy
+      index route.
+  - codeRefs:
+    - class:a10e46a1c1ea70fb8bd55ac9fe989d4c
+    - file:third_party/openbao/ui/lib/pki/addon/controllers/tidy/index.js
+    id: r.poll-tidy-status-interval
+    level: MUST
+    text: The controller polls the tidy status in an endless loop, waiting POLL_INTERVAL_MS
+      (5000 ms) before each call to this.fetchTidyStatus(), and assigns the returned
+      response to the tracked tidyStatus property so the template reflects the latest
+      tidy state.
+  - codeRefs:
+    - class:a10e46a1c1ea70fb8bd55ac9fe989d4c
+    - file:third_party/openbao/ui/lib/pki/addon/controllers/tidy/index.js
+    id: r.survive-fetch-errors
+    level: MUST
+    text: 'A failing fetchTidyStatus call must not end the loop: the error is caught
+      and the task keeps polling on the next interval, leaving the previous tidyStatus
+      value in place.'
+  - codeRefs:
+    - class:a10e46a1c1ea70fb8bd55ac9fe989d4c
+    - file:third_party/openbao/ui/lib/pki/addon/controllers/tidy/index.js
+    id: r.task-cancelled-on-route-exit
+    level: SHOULD
+    text: pollTidyStatus stays a cancellable ember-concurrency task so that resetController()
+      cancels it when the pki.tidy.index route is left, stopping the poll loop.
+  - codeRefs:
+    - class:a10e46a1c1ea70fb8bd55ac9fe989d4c
+    - file:third_party/openbao/ui/lib/pki/addon/controllers/tidy/index.js
+    id: r.tidy-status-initial-null
+    level: MUST
+    text: The controller declares tidyStatus as a tracked property initialized to
+      null, so consumers can distinguish 'no status fetched yet' from a fetched status
+      object.
   upstream: self
