@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the OpenBao agent and proxy commands have one described surface for the response cache: the Proxier interface that hides whether a request goes straight to the API or through a caching layer, the concrete APIProxy and LeaseCache implementations of that interface, the ProxyHandler that exposes them over HTTP, the listener bootstrap, and the shared request/response and testing types. It describes the code that is present in third_party/openbao/internal/command/agentproxyshared/cache so that other parts of the repository can rely on these exported constructors, methods, and types without re-reading the source.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

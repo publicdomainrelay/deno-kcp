@@ -1144,6 +1144,25 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.test-coverage` (SHOULD): "The test file exercises the constructor with an empty config map, with an empty file path value, and the authenticate path, so the rejection and token-reading branches stay pinned."
 - added `r.token-read-and-cache` (MUST): "Authenticate reads the configured token file, trims surrounding whitespace, and when the read yields bytes stores the trimmed value in the method's cached token and returns it in the request body under the key "token" with a nil request path header and a nil error."
 
+### third-party-openbao-internal-command-agentproxyshared-cache
+
+- intent: "" -> "This context exists so the OpenBao agent and proxy commands have one described surface for the response cache: the Proxier interface that hides whether a request goes straight to the API or through a caching layer, the concrete APIProxy and LeaseCache implementations of that interface, the ProxyHandler that exposes them over HTTP, the listener bootstrap, and the shared request/response and testing types. It describes the code that is present in third_party/openbao/internal/command/agentproxyshared/cache so that other parts of the repository can rely on these exported constructors, methods, and types without re-reading the source."
+- added `r.apiproxy-requires-client` (MUST): "NewAPIProxy must reject a nil APIProxyConfig.Client by returning a nil Proxier and an error reading "nil API client"; otherwise it must construct an APIProxy carrying the config's client, logger, user agent string and user agent string function."
+- added `r.cache-clear-handler` (MUST): "LeaseCache.HandleCacheClear must return an http.Handler that clears cached entries for the request, so an operator or the agent's own control path can invalidate the cache over HTTP."
+- added `r.cache-meta-in-response` (MAY): "SendResponse may carry CacheMeta describing the cache state of the response so handlers and clients can tell a cached answer from a freshly proxied one."
+- added `r.lease-cache-construction` (MUST): "NewLeaseCache must construct a LeaseCache from a LeaseCacheConfig, returning an error rather than a partially usable cache when the configuration is invalid, and the resulting LeaseCache must serve as the Proxier that stores and reuses responses."
+- added `r.lease-cache-entry-maintenance` (MUST): "LeaseCache must expose entry maintenance that acts on the in-memory cache index: Set inserts or updates an index entry, Evict removes one, and Flush clears the cache, each returning an error when the underlying cache operation fails."
+- added `r.lease-cache-send-caching` (MUST): "LeaseCache.Send must decide per request whether the response is cacheable, serve a matching entry from the in-memory index when one is valid, and otherwise fetch through the upstream client and store the result with its lease so later identical requests are satisfied without hitting upstream."
+- added `r.lease-cache-shutdown-and-autoauth` (MUST): "LeaseCache must track shutdown state through SetShuttingDown so in-flight behavior changes once the agent stops, and must accept a token through RegisterAutoAuthToken so requests can be authorized with the auto-auth token rather than the client's own."
+- added `r.listener-bootstrap` (MUST): "StartListener must turn a configutil.Listener plus an hclog.Logger into a ListenerBundle containing the bound listeners and the address they serve on, returning an error when the listener cannot be created."
+- added `r.persistent-storage-hooks` (MUST): "LeaseCache must support optional BoltDB-backed persistence: SetPersistentStorage attaches a *cacheboltdb.BoltStorage, PersistentStorage returns the attached storage, and Restore repopulates the in-memory cache from that storage for the given context."
+- added `r.proxier-single-method` (MUST): "The Proxier interface must stay the single-method contract for sending a request through the cache layer: Send takes a context and a *SendRequest and returns a *SendResponse or an error, and both APIProxy and LeaseCache must satisfy it."
+- added `r.proxy-handler-wiring` (MUST): "ProxyHandler must build an http.Handler that sends requests through the supplied Proxier, writes to the supplied inmemSink, logs through the supplied hclog.Logger, and honors the proxyVaultToken flag when deciding whether the client's Vault token is forwarded."
+- added `r.send-request-shape` (MUST): "SendRequest must remain the unit of work handed to a Proxier, carrying the outgoing *http.Request plus the request metadata the cache needs to key and authorize the call, so both the plain proxy and the lease cache accept the same input."
+- added `r.send-response-construction` (MUST): "NewSendResponse must combine an api.Response with its already-read response body bytes into a SendResponse, so downstream cache and handler code can inspect status, headers and CacheMeta together with the body."
+- added `r.test-doubles-implement-proxier` (SHOULD): "The testing helpers must keep mock Proxiers implementing the Proxier interface so cache tests can substitute the upstream: NewMockProxier returns a mock that serves a fixed list of responses and reports its position through ResponseIndex, while mockTokenVerifierProxier and mockDelayProxier add request-token capture and delayed responses respectively."
+- added `r.user-agent-annotated` (SHOULD): "APIProxy.Send should set the outgoing User-Agent from the userAgentStringFunction applied to the proxied client's user agent, falling back to the configured userAgentString when the proxied client supplies none."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -1192,6 +1211,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-command-agentproxyshared-auth-kubernetes-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agentproxyshared-auth-token-file-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agentproxyshared-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-command-agentproxyshared-cache-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-command-agentproxyshared-cache-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-command-agentproxyshared-cache-cacheboltdb-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-internal-command-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
