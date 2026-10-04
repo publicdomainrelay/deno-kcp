@@ -4,5 +4,125 @@ metadata:
   name: third-party-openbao-api
   namespace: default
 spec:
+  intent: This context exists to pin down how a caller authenticates against OpenBao
+    credential backends and manages tokens from the Go API client, so that the Auth/AuthMethod
+    seam and the MFA paths are described exactly as the vendored code implements them.
+    It names the client entry point (Client.Auth), the delegation contract every backend
+    satisfies (AuthMethod.Login), the MFA login and validation calls, and the token
+    create accessor, so that the observed exports and their obligations are captured
+    rather than inferred.
+  interfaces:
+  - file: third_party/openbao/api/auth.go
+    kind: struct
+    name: Auth
+    signature: type Auth struct { c *Client }
+  - file: third_party/openbao/api/auth.go
+    kind: method
+    name: Auth.Login
+    signature: func (a *Auth) Login(ctx context.Context, authMethod AuthMethod) (*Secret,
+      error)
+  - file: third_party/openbao/api/auth.go
+    kind: method
+    name: Auth.MFALogin
+    signature: func (a *Auth) MFALogin(ctx context.Context, authMethod AuthMethod,
+      creds ...string) (*Secret, error)
+  - file: third_party/openbao/api/auth.go
+    kind: method
+    name: Auth.MFAValidate
+    signature: func (a *Auth) MFAValidate(ctx context.Context, mfaSecret *Secret,
+      payload map[string]any) (*Secret, error)
+  - file: third_party/openbao/api/auth.go
+    kind: method
+    name: Auth.Token
+    signature: func (a *Auth) Token() *TokenAuth
+  - file: third_party/openbao/api/auth.go
+    kind: interface
+    name: AuthMethod
+    signature: type AuthMethod interface { Login(ctx context.Context, client *Client)
+      (*Secret, error) }
+  - file: third_party/openbao/api/auth.go
+    kind: method
+    name: AuthMethod.Login
+    signature: Login(ctx context.Context, client *Client) (*Secret, error)
+  - file: third_party/openbao/api/auth.go
+    kind: method
+    name: Client.Auth
+    signature: func (c *Client) Auth() *Auth
+  - file: third_party/openbao/api/sys_mfa.go
+    kind: method
+    name: Sys.MFAValidate
+    signature: func (c *Sys) MFAValidate(requestID string, payload map[string]any)
+      (*Secret, error)
+  - file: third_party/openbao/api/auth_token.go
+    kind: struct
+    name: TokenAuth
+    signature: type TokenAuth struct { c *Client }
+  - file: third_party/openbao/api/auth_token.go
+    kind: method
+    name: TokenAuth.Create
+    signature: func (c *TokenAuth) Create(opts *TokenCreateRequest) (*Secret, error)
+  - file: third_party/openbao/api/auth_token.go
+    kind: method
+    name: TokenAuth.CreateWithContext
+    signature: func (c *TokenAuth) CreateWithContext(ctx context.Context, opts *TokenCreateRequest)
+      (*Secret, error)
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/api/auth.go
+    id: r.auth-entry-point
+    level: MUST
+    text: The credential-backend API client is obtained by calling Client.Auth(),
+      which returns an *Auth bound to that client.
+  - codeRefs:
+    - file:third_party/openbao/api/auth.go
+    id: r.auth-login-delegates
+    level: MUST
+    text: Auth.Login takes an AuthMethod and delegates the actual credential exchange
+      to that method's Login, returning its *Secret or error.
+  - codeRefs:
+    - file:third_party/openbao/api/auth.go
+    id: r.authmethod-seam
+    level: MUST
+    text: Every credential backend integrates by implementing the AuthMethod interface,
+      whose only method is Login(ctx context.Context, client *Client) (*Secret, error).
+  - codeRefs:
+    - file:third_party/openbao/api/auth.go
+    id: r.mfa-login-creds
+    level: MUST
+    text: Auth.MFALogin accepts an AuthMethod plus variadic MFA credential strings
+      and selects the single-phase or two-phase MFA flow accordingly.
+  - codeRefs:
+    - file:third_party/openbao/api/auth.go
+    id: r.mfa-validate
+    level: MUST
+    text: Auth.MFAValidate validates a given MFA secret against a payload map and
+      returns the resulting *Secret or error.
+  - codeRefs:
+    - file:third_party/openbao/api/sys_mfa.go
+    id: r.sys-mfa-validate
+    level: SHOULD
+    text: Sys.MFAValidate takes a requestID and payload map and forwards to the context-aware
+      MFA validate call with context.Background().
+  - codeRefs:
+    - file:third_party/openbao/api/auth.go
+    - file:third_party/openbao/api/auth_token.go
+    id: r.token-auth-accessor
+    level: MUST
+    text: Auth.Token() returns a *TokenAuth carrying the same underlying client, giving
+      access to token create operations.
+  - codeRefs:
+    - file:third_party/openbao/api/auth_token.go
+    id: r.token-create-context
+    level: MUST
+    text: TokenAuth.Create forwards to TokenAuth.CreateWithContext using context.Background(),
+      so the context-aware variant remains the single implementation point.
+  - codeRefs:
+    - file:third_party/openbao/api/auth.go
+    id: r.two-phase-mfa-contract
+    level: MUST
+    text: The two-phase MFA login path calls AuthMethod.Login and, when the returned
+      secret is nil, lacks Auth, or lacks MFARequirement, appends the warning "expected
+      secret to contain MFARequirements" to the secret and returns the error "assumed
+      two-phase MFA login, returned secret is missing MFARequirements".
   upstream: self
