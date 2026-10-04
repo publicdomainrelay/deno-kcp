@@ -8,5 +8,71 @@ metadata:
   name: third-party-openbao-ui-app-routes-vault-cluster-access-method
   namespace: default
 spec:
+  intent: These routes exist to route the user into the correct sub-view of an authentication
+    method in the OpenBao UI. The index route exists so that visiting an auth method
+    with no further path forwards the user to the first tab of that method, computed
+    from the method type and its navigable paths. The item route exists so that a
+    URL naming an item type (for example a role or a user) builds the corresponding
+    generated model type and populates the controller with the navigable paths belonging
+    to that item type. The section route exists to guard the method's configuration
+    section, so that only the section named 'configuration' resolves and anything
+    else is reported as not found.
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/method/index.js
+    id: r.index-injects-router-service
+    level: MUST
+    text: The index route must inject the Ember router service as 'router' and use
+      it for the redirect transition, so the index route renders nothing of its own.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/method/index.js
+    id: r.index-redirects-to-active-tab
+    level: MUST
+    text: The index route must run beforeModel, read methodType and paths from the
+      parent 'vault.cluster.access.method' model, keep only paths whose navigation
+      flag is true (or null when paths are absent), pass [methodType, 'authConfig',
+      paths] to the tabsForAuthSection helper, and transition the router to the routeParams
+      of the first returned tab.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item.js
+    id: r.item-controller-sets-paths
+    level: MUST
+    text: The item route's setupController must set itemType on the controller, call
+      pathHelp.getPaths(apiPath, authMethodPath, itemType), keep only paths whose
+      navigation flag is true, further keep only paths whose itemType list includes
+      the current itemType, and set the resulting path strings as 'paths' on the controller.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item.js
+    id: r.item-resolves-generated-model
+    level: MUST
+    text: The item route must run beforeModel by reading item_type from its own route
+      params, path (the auth method path) from the 'vault.cluster.access.method' params,
+      and apiPath and type from the parent method model, then must build a model type
+      named 'generated-<singularized itemType>-<type>' using ember-inflector singularize
+      and resolve it through the injected pathHelp service with getNewModel(modelType,
+      authMethodPath, apiPath, itemType).
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/method/item.js
+    id: r.item-shares-method-info-lookup
+    level: SHOULD
+    text: The item route should expose a getMethodAndModelInfo method that returns
+      apiPath, type, authMethodPath and itemType together, and both beforeModel and
+      setupController should obtain those values only through it so the two hooks
+      cannot diverge.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/method/section.js
+    id: r.section-controller-sets-navigable-paths
+    level: MUST
+    text: The section route's setupController must set the section name on the controller
+      and set 'paths' on the controller to the parent method model's paths.paths filtered
+      down to entries whose navigation flag is true.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/method/section.js
+    id: r.section-only-configuration
+    level: MUST
+    text: The section route's model hook must read section_name from params and, when
+      it is not the literal 'configuration', throw an AdapterError whose httpStatus
+      is set to 404; when it is 'configuration' it must return the parent 'vault.cluster.access.method'
+      model.
   upstream: self
