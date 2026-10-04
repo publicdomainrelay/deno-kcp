@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists to statically catch Go mistakes that are cheap to make and expensive to debug: host/port concatenation done with fmt.Sprintf instead of net.JoinHostPort, path joining done with strings.Join, mutexes locked but not unlocked on a return branch, logger messages built with fmt.Sprintf, direct physical-storage access that bypasses encryption, replication state checks that should use IsPerfSecondary/IsDRSecondary helpers, and self-comparison expressions. It is a vendored copy, so it must keep the upstream rule ids, severities, messages, and suppression patterns intact so results stay comparable with upstream OpenBao.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
