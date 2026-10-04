@@ -1,0 +1,37 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-ui-app-routes-vault-cluster-access-oidc-scopes-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-ui-app-routes-vault-cluster-access-oidc-scopes
+  toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
+status:
+  agentLog: Three Ember.js route modules under third_party/openbao/ui/app/routes/vault/cluster/access/oidc/scopes/
+    implement the routing surface for OIDC scope management in the OpenBao web UI.
+    create.js default-exports OidcScopesCreateRoute, index.js default-exports OidcScopesRoute,
+    and scope.js default-exports OidcScopeRoute; all three extend the Ember Route
+    base class, declare an injected `store` service property, and override the `model`
+    hook. The create route's hook body is observed in full and returns `this.store.createRecord('oidc/scope')`,
+    an unsaved client-side record, so the create screen never fetches a server record.
+    The index route's hook takes no parameters and serves the scope list screen. The
+    scope route's hook takes a destructured `{ name }` parameter, keyed on the scope
+    name from the route's dynamic segment, and serves a single scope's detail screen.
+    The modules export nothing besides their default class.
+  message: wrote 5 requirement(s) and 3 interface(s) for third-party-openbao-ui-app-routes-vault-cluster-access-oidc-scopes;
+    interface OidcScopesCreateRoute.model is not in the observed facts; dropped; interface
+    OidcScopesRoute.model is not in the observed facts; dropped; interface OidcScopeRoute.model
+    is not in the observed facts; dropped
+  phase: Succeeded
+superseded:
+- message: wrote 5 requirement(s) and 0 interface(s) for third-party-openbao-ui-app-routes-vault-cluster-access-oidc-scopes;
+    interface OidcScopesCreateRoute.model is not in the observed facts; dropped; interface
+    OidcScopesCreateRoute.store is not in the observed facts; dropped; interface OidcScopesRoute.model
+    is not in the observed facts; dropped; interface OidcScopesRoute.store is not
+    in the observed facts; dropped; interface OidcScopeRoute.model is not in the observed
+    facts; dropped; interface OidcScopeRoute.store is not in the observed facts; dropped
+  name: third-party-openbao-ui-app-routes-vault-cluster-access-oidc-scopes-c2s-6c1bbe4c3ba9-89cee50ec5ae
+  phase: Succeeded
