@@ -1,10 +1,54 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
+- class:34396245abe24178c1632c49362ed09b MfaConfigureRoute@third_party/openbao/ui/app/routes/vault/cluster/access/mfa/index.js:9
 - file:third_party/openbao/ui/app/routes/vault/cluster/access/mfa/index.js index.js@third_party/openbao/ui/app/routes/vault/cluster/access/mfa/index.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-app-routes-vault-cluster-access-mfa
   namespace: default
 spec:
+  intent: The route is the landing route for the MFA configure path under the cluster
+    access area. It exists to route an operator away from the configure landing page
+    when MFA methods already exist, and to leave the operator on that landing page
+    when the query finds no methods, so the configure flow is only shown when there
+    is nothing configured yet.
+  interfaces:
+  - file: third_party/openbao/ui/app/routes/vault/cluster/access/mfa/index.js
+    kind: class
+    name: MfaConfigureRoute
+    signature: class MfaConfigureRoute extends Route
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - class:34396245abe24178c1632c49362ed09b
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/mfa/index.js
+    id: r.redirect-when-mfa-methods-exist
+    level: MUST
+    text: On the MFA configure landing route, `beforeModel` must query the `mfa-method`
+      model with an empty query object; when that query resolves, the route must transition
+      to `vault.cluster.access.mfa.methods.index` so the operator sees the methods
+      page instead of the configure page.
+  - codeRefs:
+    - class:34396245abe24178c1632c49362ed09b
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/mfa/index.js
+    id: r.return-query-promise
+    level: MUST
+    text: '`beforeModel` must return the promise chain built from the store query
+      so Ember waits for the query and any resulting transition before the route resolves.'
+  - codeRefs:
+    - class:34396245abe24178c1632c49362ed09b
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/mfa/index.js
+    id: r.services-injected
+    level: MUST
+    text: '`MfaConfigureRoute` must obtain its dependencies through Ember service
+      injection: `store` for the model query and `router` for the redirect, with no
+      direct module imports of the store or router instances.'
+  - codeRefs:
+    - class:34396245abe24178c1632c49362ed09b
+    - file:third_party/openbao/ui/app/routes/vault/cluster/access/mfa/index.js
+    id: r.stay-when-query-fails
+    level: MUST
+    text: When the `mfa-method` query rejects, `beforeModel` must swallow the rejection
+      and leave the operator on the configure landing page; no transition happens
+      and no error propagates from the hook.
   upstream: self

@@ -4919,6 +4919,14 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.show-controller-state` (MUST): "The show route's setupController must set the controller's itemType to the singularized item type and methodModel to the parent vault.cluster.access.method model."
 - added `r.show-model-query` (MUST): "The show route's model hook must take item_id from params, derive the model name as `generated-${singularize(itemType)}-${methodModel.type}`, and issue store.queryRecord with id set to item_id and authMethodPath set to the parent method model's id; unlike edit, show must not install a dirty-attribute transition guard or an exit cleanup."
 
+### third-party-openbao-ui-app-routes-vault-cluster-access-mfa
+
+- intent: "" -> "The route is the landing route for the MFA configure path under the cluster access area. It exists to route an operator away from the configure landing page when MFA methods already exist, and to leave the operator on that landing page when the query finds no methods, so the configure flow is only shown when there is nothing configured yet."
+- added `r.redirect-when-mfa-methods-exist` (MUST): "On the MFA configure landing route, `beforeModel` must query the `mfa-method` model with an empty query object; when that query resolves, the route must transition to `vault.cluster.access.mfa.methods.index` so the operator sees the methods page instead of the configure page."
+- added `r.return-query-promise` (MUST): "`beforeModel` must return the promise chain built from the store query so Ember waits for the query and any resulting transition before the route resolves."
+- added `r.services-injected` (MUST): "`MfaConfigureRoute` must obtain its dependencies through Ember service injection: `store` for the model query and `router` for the redirect, with no direct module imports of the store or router instances."
+- added `r.stay-when-query-fails` (MUST): "When the `mfa-method` query rejects, `beforeModel` must swallow the rejection and leave the operator on the configure landing page; no transition happens and no error propagates from the hook."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5321,5 +5329,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-routes-vault-cluster-access-method-item-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-method-item-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-access-mfa-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-routes-vault-cluster-access-mfa-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-routes-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
