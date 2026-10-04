@@ -13,7 +13,10 @@ spec:
     opt-in. The fixture layer exists so that every live test describes intent in terms
     of typed Kubernetes objects and named expectations rather than raw HTTP, and so
     the OpenBao version certificates are issued by is the one the repository pins,
-    never whatever binary happens to be on PATH.
+    never whatever binary happens to be on PATH. The example registry covers every
+    kcp-kind manifest the repository ships, including the atproto market manifests
+    under deploy/examples/atproto/market, so the offline tier decodes and schema-fits
+    them with no cluster.
   interfaces:
   - file: test/integration/openbao_live_test.go
     kind: function
@@ -364,6 +367,25 @@ spec:
     level: SHOULD
     text: The live suite drives the published example chain end to end, and separately
       a direct run with its readers, against a real kcp.
+  - codeRefs:
+    - file:test/integration/examples.go
+    - file:test/integration/offline_test.go
+    id: r.market-examples-are-registered
+    level: MUST
+    text: The offline example registry covers the atproto market manifests. exampleFiles()
+      in test/integration/examples.go carries an entry for every kcp-kind manifest
+      under deploy/examples/atproto/market -- 15-openbao-global.yaml, 15-openbao-relay.yaml,
+      15-openbao-alice.yaml, 15-openbao-bob.yaml, 20-global-plc.yaml, 30-relay-relay.yaml,
+      40-alice-pds.yaml, 50-verifier.yaml, 60-bob-pds.yaml and 70-bidder.yaml -- with
+      File holding the manifest's path relative to deploy/examples (e.g. atproto/market/70-bidder.yaml),
+      and loadExampleFile joining that path onto localExamples(). exampleFilesOnDisk()
+      walks deploy/examples recursively and returns the same relative paths. The two
+      non-kcp manifests 00-workspaces.yaml and 10-rbac.yaml are declared non-examples
+      by name in examples.go, and TestExampleInventoryMatchesDisk subtracts them from
+      the disk walk so the inventory still agrees with disk. TestEveryExampleDecodesFromDisk
+      and TestExamplesFitTheInstalledSchemas then decode and schema-fit the market
+      manifests with the existing DenoPod and OpenBao entries and the existing denopod
+      and openbao APIResourceSchemas.
   - codeRefs:
     - file:test/integration/bao_test.go
     - file:test/integration/openbao_live_test.go
