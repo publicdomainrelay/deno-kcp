@@ -4584,6 +4584,21 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.secret-object-and-tree` (MAY): "kv-object.js must model a secret's key/value pairs for UI editing, and path-to-tree.js must turn a flat list of secret paths into the nested tree the list views render."
 - added `r.storage-adapters` (SHOULD): "local-storage.js, memory-storage.js and token-storage.js must supply the interchangeable persistence adapters the UI uses for tokens and other state, so storage can be swapped between the browser's local storage and an in-memory store."
 
+### third-party-openbao-ui-app-machines
+
+- intent: "" -> "These modules exist to declare, as data rather than as code, the step graph of every OpenBao UI setup wizard flow. Keeping the transitions in plain configuration objects lets one generic wizard engine walk any flow, render the right component at each level, and drive route changes, so a new wizard step is added by editing a config rather than by writing new control logic. This context is the declarative half of that engine; the effect handlers and renderers it names are supplied elsewhere."
+- added `r.complete-state` (MUST): "Every machine has a terminal complete state whose entry runs the completeFeature action, so finished flows notify the engine and finish."
+- added `r.default-export-statechart` (MUST): "Each machine module default-exports a state-chart object carrying a `key` string, an `initial` state name and a `states` map, so the wizard engine can instantiate any flow from configuration alone."
+- added `r.entry-effects` (MUST): "Every state declares its side effects in an `onEntry` list of effect descriptors or bare action names, so entering a state performs renders, route transitions and named actions without the state itself holding logic."
+- added `r.global-reset-done` (SHOULD): "auth-machine.js and secrets-machine.js declare top-level RESET, DONE and ERROR (secrets only) transitions, so a global event can reset a flow to idle or force it to complete from any state."
+- added `r.guarded-transitions` (MUST): "Transitions may branch on a `cond` predicate over the backend type, so secrets-machine.js routes to the details step only when the chosen type is in the list returned by supportedSecretBackends() and to the list step otherwise, and further branches per type to connection, role, secret, encryption, provider or list."
+- added `r.render-levels` (MUST): "Render effects name a `level` (feature, step, detail or tutorial) together with a `component` path, and a null component clears that level, so the wizard engine can paint and clear each display layer independently."
+- added `r.repeat-transitions` (SHOULD): "secrets-machine.js display state answers a REPEAT event with a type-guarded branch that routes back to the create-root route for the current backend type, passing itemType=provider in the query params for keymgmt."
+- added `r.route-transitions` (MUST): "State entry emits routeTransition effects naming the target route and its params, so entering a wizard step navigates the host application to the matching route."
+- added `r.supported-backends-at-load` (MUST): "secrets-machine.js calls supportedSecretBackends() once at import time and closes over the resulting array in its guard functions, so backend support is fixed at module load rather than re-evaluated per transition."
+- added `r.tools-sequence` (MUST): "tools-machine.js models the wrap, wrapped, lookup, info, rewrap, rewrapped, unwrap and unwrapped sequence, advancing on LOOKUP, CONTINUE, REWRAP and UNWRAP events before reaching complete."
+- added `r.tutorial-lifecycle` (MUST): "tutorial-machine.js models a nested init/active flow with DISMISS, DONE and PAUSE transitions and dismissed, paused and complete states whose entries clear the feature, step and detail render levels and run handleDismissed, handlePaused and handleResume actions."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4959,6 +4974,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-instance-initializers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-instance-initializers-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-lib-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-machines-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-machines-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-macros-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

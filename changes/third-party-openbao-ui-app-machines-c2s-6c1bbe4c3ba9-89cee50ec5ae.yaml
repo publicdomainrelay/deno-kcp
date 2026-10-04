@@ -10,5 +10,19 @@ spec:
   systemContext: third-party-openbao-ui-app-machines
   toCommit: 89cee50ec5aea977a42f904a758e506729e1158e
 status:
-  message: the agent is summarizing third-party-openbao-ui-app-machines
-  phase: Running
+  agentLog: 'This context holds the five XState machine configuration modules that
+    drive the OpenBao web UI setup wizard: auth-machine.js, policies-machine.js, secrets-machine.js,
+    tools-machine.js and tutorial-machine.js. Each module default-exports a plain
+    state-chart object with `key`, `initial`, a top-level `on` transition map, and
+    a `states` map whose entries declare `onEntry` effect lists and `on` event transitions.
+    The effect entries are declarative objects of the form `{ type: ''routeTransition''
+    | ''render'', ... }` or bare action-name strings such as `completeFeature`, `handleDismissed`,
+    `handlePaused`, `handleResume`, `showTutorialAlways`, `showTutorialWhenAuthenticated`
+    and `clearFeatureData`; the concrete implementations live outside these modules.
+    secrets-machine.js is the only one with an import: it calls `supportedSecretBackends`
+    from `vault/helpers/supported-secret-backends` once at module load and uses the
+    result in transition guards. wizard-constants.js aggregates the five configs into
+    a single MACHINES lookup keyed by tutorial, secrets, policies, tools and authentication,
+    which is how the wizard engine selects a machine by feature name.'
+  message: wrote 11 requirement(s) and 0 interface(s) for third-party-openbao-ui-app-machines
+  phase: Succeeded

@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+These modules exist to declare, as data rather than as code, the step graph of every OpenBao UI setup wizard flow. Keeping the transitions in plain configuration objects lets one generic wizard engine walk any flow, render the right component at each level, and drive route changes, so a new wizard step is added by editing a config rather than by writing new control logic. This context is the declarative half of that engine; the effect handlers and renderers it names are supplied elsewhere.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
