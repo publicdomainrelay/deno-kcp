@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+To record that the observed list-item module paths under app/ are pure pass-through re-export shims, so that consumers resolving components via the app tree get the core package implementations, and so that any later change to list-item behavior is understood to belong in the core module rather than in these two files.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

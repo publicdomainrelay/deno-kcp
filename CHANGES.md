@@ -5481,6 +5481,14 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.menu-reexports-core-default` (MUST): "menu.js must re-export, as its default export, the default export of the module 'core/components/linkable-item/menu', and must define no other exports or logic of its own, so that a consumer importing the app-level menu component receives exactly the core component."
 - added `r.module-path-fidelity` (MUST): "Each re-export must keep pointing at the core/components/linkable-item path, so that consumers importing from the app/components path resolve the same component the core path provides and the shim never diverges from the core implementation."
 
+### third-party-openbao-ui-lib-core-app-components-list-item
+
+- intent: "" -> "To record that the observed list-item module paths under app/ are pure pass-through re-export shims, so that consumers resolving components via the app tree get the core package implementations, and so that any later change to list-item behavior is understood to belong in the core module rather than in these two files."
+- added `r.behavior-lives-in-core` (SHOULD): "Changes to list-item content or popup-menu behavior should be made in the core package modules that these files point at, leaving the app/ shims as one-line re-exports."
+- added `r.preserve-upstream-license-header` (MUST): "Both files must keep the upstream HashiCorp copyright notice and the SPDX-License-Identifier MPL-2.0 header comment intact, since they are vendored copies of upstream OpenBao sources."
+- added `r.re-export-content-default` (MUST): "content.js must re-export the default binding of 'core/components/list-item/content' as its own default export, exporting no other bindings and defining no component logic itself."
+- added `r.re-export-popup-menu-default` (MUST): "popup-menu.js must re-export the default binding of 'core/components/list-item/popup-menu' as its own default export, exporting no other bindings and defining no component logic itself."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5954,5 +5962,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-core-app-components-linkable-item-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-core-app-components-linkable-item-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-core-app-components-list-item-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-lib-core-app-components-page-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-core-app-components-page-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-core-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

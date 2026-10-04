@@ -71720,7 +71720,42 @@ system_contexts:
   - file:third_party/openbao/ui/lib/core/app/components/list-item/content.js content.js@third_party/openbao/ui/lib/core/app/components/list-item/content.js
   - file:third_party/openbao/ui/lib/core/app/components/list-item/popup-menu.js popup-menu.js@third_party/openbao/ui/lib/core/app/components/list-item/popup-menu.js
   id: sc.third-party-openbao-ui-lib-core-app-components-list-item
+  intent: To record that the observed list-item module paths under app/ are pure pass-through
+    re-export shims, so that consumers resolving components via the app tree get the
+    core package implementations, and so that any later change to list-item behavior
+    is understood to belong in the core module rather than in these two files.
   name: third-party-openbao-ui-lib-core-app-components-list-item
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/app/components/list-item/content.js
+    - file:third_party/openbao/ui/lib/core/app/components/list-item/popup-menu.js
+    id: r.behavior-lives-in-core
+    level: SHOULD
+    text: Changes to list-item content or popup-menu behavior should be made in the
+      core package modules that these files point at, leaving the app/ shims as one-line
+      re-exports.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/app/components/list-item/content.js
+    - file:third_party/openbao/ui/lib/core/app/components/list-item/popup-menu.js
+    id: r.preserve-upstream-license-header
+    level: MUST
+    text: Both files must keep the upstream HashiCorp copyright notice and the SPDX-License-Identifier
+      MPL-2.0 header comment intact, since they are vendored copies of upstream OpenBao
+      sources.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/app/components/list-item/content.js
+    id: r.re-export-content-default
+    level: MUST
+    text: content.js must re-export the default binding of 'core/components/list-item/content'
+      as its own default export, exporting no other bindings and defining no component
+      logic itself.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/core/app/components/list-item/popup-menu.js
+    id: r.re-export-popup-menu-default
+    level: MUST
+    text: popup-menu.js must re-export the default binding of 'core/components/list-item/popup-menu'
+      as its own default export, exporting no other bindings and defining no component
+      logic itself.
   upstream: self
 - code:
   - third_party/openbao/ui/lib/core/app/components/page/breadcrumbs.js
