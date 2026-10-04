@@ -5249,6 +5249,16 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.config-serializer-identity-key` (MUST): "The Kubernetes config serializer declares primaryKey = 'backend', so an Ember Data record is identified by its backend while the payload built by serialize() carries no backend key."
 - added `r.role-serialize-drops-backend` (MUST): "The Kubernetes role serializer's serialize() calls super.serialize with the forwarded arguments and deletes json.backend before returning, without applying the config serializer's manual-CA cleanup."
 
+### third-party-openbao-ui-app-serializers-oidc
+
+- intent: "" -> "The context exists to pin down the payload-shaping contract of the OIDC serializers in the vendored OpenBao UI, which sits in this repository as third-party code. It matters because these classes are the single point where the raw OIDC LIST and READ responses from the server are turned into records the Ember models can consume: get primaryKey wrong and every record collides under an undefined key, and get normalizeItems wrong and list views render rows with names but no body. Recording the two normalization branches, the flattened keys/key_info shape, and the fact that only client and provider override it keeps later edits from silently changing what the OIDC list and detail screens receive."
+- added `r.client-list-rehydration` (MUST): "OidcClientSerializer must override normalizeItems so that a list response is rehydrated into fully attributed client models: when payload.data exists and payload.data.keys is an array, it returns payload.data.keys mapped to one object per key of the form { name: key, ...payload.data.key_info[key] }; this is what makes every model attribute, not just the name, reachable from the LIST response."
+- added `r.normalize-envelope-hoist-fallback` (MUST): "When payload.data is present but payload.data.keys is absent or not an array, normalizeItems must copy the members of payload.data onto the payload itself with Object.assign and then delete payload.data, returning the payload unchanged in shape otherwise."
+- added `r.normalize-returns-payload-untouched` (MUST): "When the payload carries no data envelope at all, normalizeItems must return the payload as received, so READ responses and already-normalized payloads pass through without rewriting."
+- added `r.primary-key-is-name` (MUST): "Each OIDC serializer must extend the shared ApplicationSerializer and set primaryKey to the string 'name', so every OIDC record (assignment, client, key, provider, scope) is identified and looked up by its name attribute instead of an id."
+- added `r.provider-list-normalization` (MUST): "OidcProviderSerializer must override normalizeItems with the same behavior as the client serializer, flattening payload.data.keys against payload.data.key_info, so the provider list view receives issuer metadata alongside each provider name."
+- added `r.rely-on-base-normalization` (SHOULD): "OidcAssignmentSerializer, OidcKeySerializer, and OidcScopeSerializer should declare only primaryKey and leave normalizeItems to ApplicationSerializer, so their payload handling stays whatever the shared base defines."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5693,5 +5703,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-serializers-kubernetes-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Failed |  | 0 | - |
 | third-party-openbao-ui-app-serializers-kubernetes-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-serializers-oidc-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-serializers-oidc-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-serializers-pki-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
