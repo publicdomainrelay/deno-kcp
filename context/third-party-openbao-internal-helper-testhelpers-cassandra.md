@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+Test code elsewhere in the OpenBao tree needs a real Cassandra instance to run against, without hand-writing container plumbing at each call site. This package exists to make that a two-line affair: call PrepareTestContainer with a handful of ContainerOpt values, get back a Host for dialing and a function to tear the container down. The option type keeps the container configuration extensible, so a test can override the container name, image, version, environment, copied-in files or TLS settings without the helper growing a wide parameter list.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

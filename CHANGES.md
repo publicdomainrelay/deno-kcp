@@ -1799,6 +1799,19 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.propagate-errors` (MUST): "Both helpers must return the error from the underlying SDK template call untouched, and UseTemplateForFiltering must return the generated string alongside that error, so callers can distinguish compile-time failure from evaluation failure."
 - added `r.render-with-key-and-path` (MUST): "UseTemplateForFiltering must evaluate the supplied template.StringTemplate through Generate with a data map containing exactly the keys "key" and "path", bound to the caller's key and path arguments respectively, so filter templates can reference {{.key}} and {{.path}}."
 
+### third-party-openbao-internal-helper-testhelpers-cassandra
+
+- intent: "" -> "Test code elsewhere in the OpenBao tree needs a real Cassandra instance to run against, without hand-writing container plumbing at each call site. This package exists to make that a two-line affair: call PrepareTestContainer with a handful of ContainerOpt values, get back a Host for dialing and a function to tear the container down. The option type keeps the container configuration extensible, so a test can override the container name, image, version, environment, copied-in files or TLS settings without the helper growing a wide parameter list."
+- added `r.container-name-option` (MUST): "ContainerName returns a ContainerOpt that stores the given name into the config's containerName field, letting a test choose the container's name instead of the default."
+- added `r.container-opt-mutates-config` (MUST): "ContainerOpt is a function type that takes the unexported *containerConfig and mutates it in place. Every option constructor returns a ContainerOpt closure rather than applying a change immediately, so options compose and the caller controls when the config is built."
+- added `r.copy-from-to-option` (MUST): "CopyFromTo returns a ContainerOpt that records a map of source-to-destination paths, describing files to copy into the container before the test runs."
+- added `r.env-option` (MUST): "Env returns a ContainerOpt that adds the given key/value string to the config's environment, so a test can pass environment variables to the Cassandra process inside the container."
+- added `r.host-connection-url` (MUST): "Host is the value a test receives for the running container, and Host.ConnectionURL returns the connection string built from that host, so a caller can dial Cassandra without assembling the address itself."
+- added `r.image-option-resets-env` (MUST): "Image returns a ContainerOpt that sets both the image name and the version, and additionally sets the config's env to nil. The reset is required because the default environment is unlikely to apply to a non-default Cassandra image, so a stale environment must not survive an image override."
+- added `r.prepare-test-container` (MUST): "PrepareTestContainer takes a *testing.T and any number of ContainerOpt values, applies them, starts the Cassandra container, and returns both a Host for connecting and a func() the caller invokes to tear the container down. Passing the *testing.T binds the container's lifecycle to the test."
+- added `r.ssl-opts-option` (MUST): "SslOpts returns a ContainerOpt that stores a *gocql.SslOptions into the config's sslOpts field, carrying the TLS settings the client uses when connecting to the container."
+- added `r.version-option` (MUST): "Version returns a ContainerOpt that stores the given version string into the config's version field, selecting which Cassandra build the container runs."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -1905,4 +1918,4 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-helper-systemd-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-template-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-testhelpers-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-internal-helper-testhelpers-cassandra-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-helper-testhelpers-cassandra-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
