@@ -1,15 +1,27 @@
 conditions:
-- message: every declared interface is observed, nothing undeclared is exported and
-    every requirement code ref resolves
-  reason: InterfacesObserved
-  status: "True"
+- message: 'undeclared: OidcKeyController'
+  reason: InterfacesMissing
+  status: "False"
   type: CodeSynced
-- message: no synced fingerprint has been recorded yet
-  reason: NotSyncedYet
+- message: observed facts match the synced fingerprint
+  reason: FingerprintEqual
   status: "False"
   type: Drifted
 - message: the spec passes the validator
   reason: ValidatorPassed
   status: "True"
   type: SpecValid
-observed: {}
+observed:
+  files:
+  - third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/keys/key.js
+  fingerprint: 7968669ebbc9dec4487b90bdbab2d4c32d23c13e8ecd528ba3774a3346e89bbd
+  interfaces:
+  - codegraphId: class:15b4ca10ba703e0bbe511a57f87c7c64
+    file: third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/keys/key.js
+    kind: class
+    line: 10
+    name: OidcKeyController
+observedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+realizedSpecHash: a71e4fc84db5ecaa4b9bc6721240b3c6b4f96455a14fd702b29f4191957ea1e3
+syncedCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+syncedFingerprint: 7968669ebbc9dec4487b90bdbab2d4c32d23c13e8ecd528ba3774a3346e89bbd

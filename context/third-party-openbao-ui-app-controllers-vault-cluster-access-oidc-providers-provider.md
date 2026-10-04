@@ -9,5 +9,6 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `class:f6fc4e6f70657055d0c2d0e0a0a6736a` class OidcProviderDetailsController (third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/providers/provider/details.js)
+- `file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/providers/provider/details.js` file details.js (third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/providers/provider/details.js)
 <!-- SPECD_MANAGED_END -->
