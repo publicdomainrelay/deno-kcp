@@ -73601,16 +73601,118 @@ system_contexts:
   codeRefIndex:
   - file:third_party/openbao/ui/lib/pki/index.js index.js@third_party/openbao/ui/lib/pki/index.js
   id: sc.third-party-openbao-ui-lib-pki
+  intent: The context exists to pin down the entrypoint that registers the PKI feature
+    area of the OpenBao web UI as an Ember engine addon, so consumers of this repository
+    know how the PKI UI is packaged, under what name it is mounted, and that it is
+    loaded eagerly rather than lazily. It is part of the vendored third_party/openbao
+    subtree, kept as-is from upstream rather than reimplemented, and it sits upstream
+    of the component and model code that the PKI engine renders.
   name: third-party-openbao-ui-lib-pki
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/pki/index.js
+    id: r.commonjs-export
+    level: MUST
+    text: The addon must be published through module.exports using a require of ember-engines/lib/engine-addon,
+      matching the CommonJS build-tool convention that Ember addon index files are
+      loaded with, rather than ESM export syntax.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/pki/index.js
+    id: r.developing-addon-true
+    level: MUST
+    text: The definition must supply an isDevelopingAddon method that returns true
+      unconditionally, so Ember treats the addon as under development for every build
+      rather than only when linked locally.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/pki/index.js
+    id: r.engine-name-pki
+    level: MUST
+    text: The engine addon definition must set name to the string 'pki', which is
+      the identifier the host application mounts and resolves the engine under.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/pki/index.js
+    id: r.lazy-loading-disabled
+    level: MUST
+    text: The engine must disable lazy loading by setting lazyLoading.enabled to false,
+      so the PKI UI assets are emitted into the main build instead of being fetched
+      as a separate bundle on route entry.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/pki/index.js
+    id: r.mpl-2.0-header
+    level: MUST
+    text: 'The file must retain the HashiCorp copyright notice and the SPDX-License-Identifier:
+      MPL-2.0 header comment, because this is vendored upstream code redistributed
+      under the Mozilla Public License 2.0.'
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/pki/index.js
+    id: r.pki-engine-addon
+    level: MUST
+    text: The module must export an Ember engine addon built by calling buildEngine,
+      so the PKI UI is consumed as an engine rather than a plain addon.
   upstream: self
 - code:
   - third_party/openbao/ui/lib/pki/addon/engine.js
   - third_party/openbao/ui/lib/pki/addon/routes.js
   codeRefIndex:
+  - class:c54f0a4df0f27bc8cff3a755b9e76744 PkiEngine@third_party/openbao/ui/lib/pki/addon/engine.js:15
   - file:third_party/openbao/ui/lib/pki/addon/engine.js engine.js@third_party/openbao/ui/lib/pki/addon/engine.js
   - file:third_party/openbao/ui/lib/pki/addon/routes.js routes.js@third_party/openbao/ui/lib/pki/addon/routes.js
   id: sc.third-party-openbao-ui-lib-pki-addon
+  intent: This context exists so the PKI addon can be loaded as a lazy, isolated Ember
+    engine inside the wider OpenBao UI host application. Splitting the addon into
+    an engine class plus a separate route map lets the host mount the whole PKI surface
+    under one prefix, hand it only the services it is allowed to use through the explicit
+    dependencies list, and keep its external route references declared rather than
+    discovered at runtime. The context is described here only at its entrypoint level,
+    because the facts available are the engine class definition and the two entry
+    files, not the components or models the addon resolves internally.
+  interfaces:
+  - file: third_party/openbao/ui/lib/pki/addon/engine.js
+    kind: class
+    name: PkiEngine
+    signature: class PkiEngine extends Engine
   name: third-party-openbao-ui-lib-pki-addon
+  requirements:
+  - codeRefs:
+    - class:c54f0a4df0f27bc8cff3a755b9e76744
+    - file:third_party/openbao/ui/lib/pki/addon/engine.js
+    id: r.engine-extends-ember-engine
+    level: MUST
+    text: PkiEngine MUST be the default export of engine.js and MUST extend Ember's
+      Engine base class, so the host application can mount the PKI addon as an engine.
+  - codeRefs:
+    - class:c54f0a4df0f27bc8cff3a755b9e76744
+    - file:third_party/openbao/ui/lib/pki/addon/engine.js
+    id: r.engine-external-routes
+    level: MUST
+    text: PkiEngine MUST declare dependencies.externalRoutes as secrets, secretsListRootConfiguration
+      and externalMountIssuer, so links from inside the engine to those host routes
+      resolve.
+  - codeRefs:
+    - class:c54f0a4df0f27bc8cff3a755b9e76744
+    - file:third_party/openbao/ui/lib/pki/addon/engine.js
+    id: r.engine-module-prefix-and-resolver
+    level: MUST
+    text: PkiEngine MUST set modulePrefix to the addon module namespace and assign
+      the matching Resolver, so the engine resolves its own components, routes and
+      models from that namespace instead of the host application's.
+  - codeRefs:
+    - class:c54f0a4df0f27bc8cff3a755b9e76744
+    - file:third_party/openbao/ui/lib/pki/addon/engine.js
+    id: r.engine-service-dependencies
+    level: MUST
+    text: PkiEngine MUST declare its injected host services in dependencies.services,
+      listing auth, download, flash-messages, namespace, path-help, host-router, secret-mount-path,
+      store and version; a service used by the addon but absent from this list will
+      not be available to it.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/pki/addon/engine.js
+    - file:third_party/openbao/ui/lib/pki/addon/routes.js
+    id: r.route-map-separate-file
+    level: MUST
+    text: The addon's route map MUST be declared in routes.js, kept separate from
+      the engine class in engine.js, so route changes do not alter the engine's dependency
+      or resolver configuration.
   upstream: self
 - code:
   - third_party/openbao/ui/lib/pki/addon/components/parsed-certificate-info-rows.ts

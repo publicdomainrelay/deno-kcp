@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the PKI addon can be loaded as a lazy, isolated Ember engine inside the wider OpenBao UI host application. Splitting the addon into an engine class plus a separate route map lets the host mount the whole PKI surface under one prefix, hand it only the services it is allowed to use through the explicit dependencies list, and keep its external route references declared rather than discovered at runtime. The context is described here only at its entrypoint level, because the facts available are the engine class definition and the two entry files, not the components or models the addon resolves internally.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

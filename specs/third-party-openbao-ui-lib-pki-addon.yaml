@@ -1,5 +1,6 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
+- class:c54f0a4df0f27bc8cff3a755b9e76744 PkiEngine@third_party/openbao/ui/lib/pki/addon/engine.js:15
 - file:third_party/openbao/ui/lib/pki/addon/engine.js engine.js@third_party/openbao/ui/lib/pki/addon/engine.js
 - file:third_party/openbao/ui/lib/pki/addon/routes.js routes.js@third_party/openbao/ui/lib/pki/addon/routes.js
 kind: SystemContext
@@ -7,5 +8,59 @@ metadata:
   name: third-party-openbao-ui-lib-pki-addon
   namespace: default
 spec:
+  intent: This context exists so the PKI addon can be loaded as a lazy, isolated Ember
+    engine inside the wider OpenBao UI host application. Splitting the addon into
+    an engine class plus a separate route map lets the host mount the whole PKI surface
+    under one prefix, hand it only the services it is allowed to use through the explicit
+    dependencies list, and keep its external route references declared rather than
+    discovered at runtime. The context is described here only at its entrypoint level,
+    because the facts available are the engine class definition and the two entry
+    files, not the components or models the addon resolves internally.
+  interfaces:
+  - file: third_party/openbao/ui/lib/pki/addon/engine.js
+    kind: class
+    name: PkiEngine
+    signature: class PkiEngine extends Engine
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - class:c54f0a4df0f27bc8cff3a755b9e76744
+    - file:third_party/openbao/ui/lib/pki/addon/engine.js
+    id: r.engine-extends-ember-engine
+    level: MUST
+    text: PkiEngine MUST be the default export of engine.js and MUST extend Ember's
+      Engine base class, so the host application can mount the PKI addon as an engine.
+  - codeRefs:
+    - class:c54f0a4df0f27bc8cff3a755b9e76744
+    - file:third_party/openbao/ui/lib/pki/addon/engine.js
+    id: r.engine-external-routes
+    level: MUST
+    text: PkiEngine MUST declare dependencies.externalRoutes as secrets, secretsListRootConfiguration
+      and externalMountIssuer, so links from inside the engine to those host routes
+      resolve.
+  - codeRefs:
+    - class:c54f0a4df0f27bc8cff3a755b9e76744
+    - file:third_party/openbao/ui/lib/pki/addon/engine.js
+    id: r.engine-module-prefix-and-resolver
+    level: MUST
+    text: PkiEngine MUST set modulePrefix to the addon module namespace and assign
+      the matching Resolver, so the engine resolves its own components, routes and
+      models from that namespace instead of the host application's.
+  - codeRefs:
+    - class:c54f0a4df0f27bc8cff3a755b9e76744
+    - file:third_party/openbao/ui/lib/pki/addon/engine.js
+    id: r.engine-service-dependencies
+    level: MUST
+    text: PkiEngine MUST declare its injected host services in dependencies.services,
+      listing auth, download, flash-messages, namespace, path-help, host-router, secret-mount-path,
+      store and version; a service used by the addon but absent from this list will
+      not be available to it.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/pki/addon/engine.js
+    - file:third_party/openbao/ui/lib/pki/addon/routes.js
+    id: r.route-map-separate-file
+    level: MUST
+    text: The addon's route map MUST be declared in routes.js, kept separate from
+      the engine class in engine.js, so route changes do not alter the engine's dependency
+      or resolver configuration.
   upstream: self
