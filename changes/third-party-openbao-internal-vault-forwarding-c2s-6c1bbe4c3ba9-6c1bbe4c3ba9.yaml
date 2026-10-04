@@ -10,5 +10,20 @@ spec:
   systemContext: third-party-openbao-internal-vault-forwarding
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-internal-vault-forwarding
-  phase: Running
+  agentLog: 'This context covers the `forwarding` package of OpenBao at `third_party/openbao/internal/vault/forwarding/`.
+    The package implements the standby-to-active request forwarding transport: a gRPC
+    `RequestForwarding` service defined in `request_forwarding_service.proto` and
+    generated into `request_forwarding_service.pb.go` and `request_forwarding_service_grpc.pb.go`,
+    a server side in `request_forwarding.go` that builds the gRPC server, registers
+    the handler only under HA, performs TLS certificate lookup for cluster mTLS, and
+    hands off connections to an HTTP/2 server, and a client side in `request_forwarding_rpc.go`
+    that heartbeats with `Echo`, synchronizes namespace unseal keys in both directions,
+    and consumes a server-streaming invalidation feed. Small unexported interfaces
+    (`clusterInfoGetter`, `core`, `clusterPeerClusterAddrsCache`) define what the
+    package needs from the vault core, so the package can be described without importing
+    core.'
+  message: wrote 26 requirement(s) and 56 interface(s) for third-party-openbao-internal-vault-forwarding;
+    interface forwarding.ForwardingConfig is not in the observed facts; dropped; interface
+    clusterInfoGetter is not in the observed facts; dropped; interface core is not
+    in the observed facts; dropped
+  phase: Succeeded

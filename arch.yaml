@@ -37253,8 +37253,541 @@ system_contexts:
     request_forwarding_service.pb.go@third_party/openbao/internal/vault/forwarding/request_forwarding_service.pb.go
   - file:third_party/openbao/internal/vault/forwarding/request_forwarding_service_grpc.pb.go
     request_forwarding_service_grpc.pb.go@third_party/openbao/internal/vault/forwarding/request_forwarding_service_grpc.pb.go
+  - function:026de1a79700fc1f78d3fd8fe04f7fcd NewRequestForwardingHandler@third_party/openbao/internal/vault/forwarding/request_forwarding.go:83
+  - function:0cb099a795e1619529e0e06329fa7eeb NewClient@third_party/openbao/internal/vault/forwarding/request_forwarding_rpc.go:215
+  - function:5746c17f5551e7b23f705b7db65f052f NewRequestForwardingClient@third_party/openbao/internal/vault/forwarding/request_forwarding_service_grpc.pb.go:64
+  - function:684d05cae83340677266163547b53c6d LegacyPackageFallback@third_party/openbao/internal/vault/forwarding/request_forwarding_rpc.go:547
+  - function:fc4a929af8ea5f97ae855ee4d8ffcb5c RegisterRequestForwardingServer@third_party/openbao/internal/vault/forwarding/request_forwarding_service_grpc.pb.go:211
+  - interface:2128d72b4abc9f78512a85f62f357df1 UnsafeRequestForwardingServer@third_party/openbao/internal/vault/forwarding/request_forwarding_service_grpc.pb.go:207
+  - interface:4e11799c5ea2b292ced25f57a07d324b RequestForwardingServer@third_party/openbao/internal/vault/forwarding/request_forwarding_service_grpc.pb.go:156
+  - interface:b38b7cf9fd528e74ae80012ff2edcdd3 RequestForwardingClient@third_party/openbao/internal/vault/forwarding/request_forwarding_service_grpc.pb.go:44
+  - method:1803b44005543fb410369fc6775894fa RequestForwardingClient.AdvertiseNamespaceKeys@third_party/openbao/internal/vault/forwarding/request_forwarding_service_grpc.pb.go:51
+  - method:1b067542b829f0468655cbb5452cc6f2 Client.CheckReplicationIndex@third_party/openbao/internal/vault/forwarding/request_forwarding_rpc.go:411
+  - method:1c4479bf1a1523c08050547f1ef627b1 core.NamespacesMissingKeys@third_party/openbao/internal/vault/forwarding/request_forwarding.go:45
+  - method:247989895b4739874b94fa41cbeed1e4 forwardedRequestRPCServer.SendNamespaceKeys@third_party/openbao/internal/vault/forwarding/request_forwarding_rpc.go:164
   id: sc.third-party-openbao-internal-vault-forwarding
+  intent: 'The context exists so the request-forwarding wire protocol, the HA gating
+    rules, the certificate lookups, and the client heartbeat/namespace-key/invalidation
+    loops can be reasoned about and changed as one unit. It is the seam between a
+    standby node and the active node: a standby must forward HTTP requests, ship and
+    fetch namespace seal keys, and stay current on invalidations, while the active
+    node must answer those RPCs and push invalidations. The proto service is named
+    `RequestForwarding` for legacy reasons but carries health, forwarding, key sharing
+    and invalidation RPCs, so the specification must record all of them together.'
+  interfaces:
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_service.pb.go
+    kind: struct
+    name: AdvertiseNamespaceKeysReply
+    signature: type AdvertiseNamespaceKeysReply struct { Namespaces []string; Retry
+      bool }
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_service.pb.go
+    kind: struct
+    name: AdvertiseNamespaceKeysRequest
+    signature: type AdvertiseNamespaceKeysRequest struct { Namespaces []string }
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_service.pb.go
+    kind: struct
+    name: CheckInvalidationRequest
+    signature: type CheckInvalidationRequest struct{}
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_service.pb.go
+    kind: struct
+    name: CheckInvalidationResponse
+    signature: type CheckInvalidationResponse struct { Index string; Keys []string;
+      Restart bool; Uuid string }
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_rpc.go
+    kind: struct
+    name: Client
+    signature: type Client struct { RequestForwardingClient; core core; conn *grpc.ClientConn;
+      taskContext context.Context; echoTicker *time.Ticker; nsSyncTicker *time.Ticker;
+      invalidationsContext context.Context; invalidationsContextCancel context.CancelFunc;
+      peerUUID atomic.Pointer[string] }
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_rpc.go
+    kind: method
+    name: Client.CheckReplicationIndex
+    signature: func (c *Client) CheckReplicationIndex(ctx context.Context) (string,
+      error)
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_rpc.go
+    kind: method
+    name: Client.Start
+    signature: func (c *Client) Start()
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_rpc.go
+    kind: method
+    name: Client.Stop
+    signature: func (c *Client) Stop() error
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_rpc.go
+    kind: method
+    name: Client.StopInvalidations
+    signature: func (c *Client) StopInvalidations()
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_rpc.go
+    kind: method
+    name: Client.StreamInvalidations
+    signature: func (c *Client) StreamInvalidations(ctx context.Context) error
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_rpc.go
+    kind: method
+    name: Client.SynchronizeKeys
+    signature: func (c *Client) SynchronizeKeys(ctx context.Context)
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_service.pb.go
+    kind: struct
+    name: ClientKey
+    signature: type ClientKey struct { Type string; X []byte; Y []byte; D []byte }
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_service.pb.go
+    kind: struct
+    name: EchoReply
+    signature: type EchoReply struct { Message string; ClusterAddrs []string; ReplicationState
+      uint32; RaftAppliedIndex uint64; RaftNodeID string; NodeInfo *NodeInformation
+      }
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_service.pb.go
+    kind: struct
+    name: EchoRequest
+    signature: type EchoRequest struct { Message string; ClusterAddr string; ClusterAddrs
+      []string; RaftAppliedIndex uint64; RaftNodeID string; NodeInfo *NodeInformation;
+      RaftTerm uint64; RaftDesiredSuffrage string; RaftUpgradeVersion string; SdkVersion
+      string }
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_service.pb.go
+    kind: struct
+    name: GetNamespaceKeysReply
+    signature: type GetNamespaceKeysReply struct { Keys []*NamespaceKey }
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_service.pb.go
+    kind: struct
+    name: GetNamespaceKeysRequest
+    signature: type GetNamespaceKeysRequest struct { Namespaces []string }
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_rpc.go
+    kind: function
+    name: LegacyPackageFallback
+    signature: func LegacyPackageFallback(ctx context.Context, method string, req,
+      reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption)
+      error
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_service.pb.go
+    kind: struct
+    name: NamespaceKey
+    signature: type NamespaceKey struct { Uuid string; Key []byte }
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_rpc.go
+    kind: function
+    name: NewClient
+    signature: func NewClient(core core, rpcConn *grpc.ClientConn, taskContext context.Context,
+      echoTicker *time.Ticker, nsSyncTicker *time.Ticker) *Client
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_service_grpc.pb.go
+    kind: function
+    name: NewRequestForwardingClient
+    signature: func NewRequestForwardingClient(cc grpc.ClientConnInterface) RequestForwardingClient
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding.go
+    kind: function
+    name: NewRequestForwardingClusterClient
+    signature: func NewRequestForwardingClusterClient(core core) *RequestForwardingClusterClient
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding.go
+    kind: function
+    name: NewRequestForwardingHandler
+    signature: func NewRequestForwardingHandler(c core, cfg ForwardingConfig, fws
+      *http2.Server) (*requestForwardingHandler, error)
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_rpc.go
+    kind: struct
+    name: NodeHAConnectionInfo
+    signature: type NodeHAConnectionInfo struct { NodeInfo *NodeInformation; LastHeartbeat
+      time.Time; Version string; UpgradeVersion string }
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_service.pb.go
+    kind: struct
+    name: NodeInformation
+    signature: type NodeInformation struct { ClusterAddr string; ApiAddr string; Mode
+      string; NodeId string; ReplicationState uint32; Hostname string }
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_service_grpc.pb.go
+    kind: function
+    name: RegisterRequestForwardingServer
+    signature: func RegisterRequestForwardingServer(s grpc.ServiceRegistrar, srv RequestForwardingServer)
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_service_grpc.pb.go
+    kind: interface
+    name: RequestForwardingClient
+    signature: type RequestForwardingClient interface { Echo(ctx context.Context,
+      in *EchoRequest, opts ...grpc.CallOption) (*EchoReply, error); ForwardRequest(ctx
+      context.Context, in *forwarding.Request, opts ...grpc.CallOption) (*forwarding.Response,
+      error); AdvertiseNamespaceKeys(ctx context.Context, in *AdvertiseNamespaceKeysRequest,
+      opts ...grpc.CallOption) (*AdvertiseNamespaceKeysReply, error); SendNamespaceKeys(ctx
+      context.Context, in *SendNamespaceKeysRequest, opts ...grpc.CallOption) (*SendNamespaceKeysReply,
+      error); GetNamespaceKeys(ctx context.Context, in *GetNamespaceKeysRequest, opts
+      ...grpc.CallOption) (*GetNamespaceKeysReply, error); StartInvalidations(ctx
+      context.Context, in *StartInvalidationRequest, opts ...grpc.CallOption) (*StartInvalidationResponse,
+      error); CheckInvalidations(ctx context.Context, in *CheckInvalidationRequest,
+      opts ...grpc.CallOption) (grpc.ServerStreamingClient[CheckInvalidationResponse],
+      error) }
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_service_grpc.pb.go
+    kind: method
+    name: RequestForwardingClient.AdvertiseNamespaceKeys
+    signature: AdvertiseNamespaceKeys(ctx context.Context, in *AdvertiseNamespaceKeysRequest,
+      opts ...grpc.CallOption) (*AdvertiseNamespaceKeysReply, error)
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_service_grpc.pb.go
+    kind: method
+    name: RequestForwardingClient.CheckInvalidations
+    signature: CheckInvalidations(ctx context.Context, in *CheckInvalidationRequest,
+      opts ...grpc.CallOption) (grpc.ServerStreamingClient[CheckInvalidationResponse],
+      error)
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding.go
+    kind: struct
+    name: RequestForwardingClusterClient
+    signature: type RequestForwardingClusterClient struct { core core }
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding.go
+    kind: method
+    name: RequestForwardingClusterClient.CACert
+    signature: func (c *RequestForwardingClusterClient) CACert(ctx context.Context)
+      *x509.Certificate
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding.go
+    kind: method
+    name: RequestForwardingClusterClient.ClientLookup
+    signature: func (c *RequestForwardingClusterClient) ClientLookup(ctx context.Context,
+      requestInfo *tls.CertificateRequestInfo) (*tls.Certificate, error)
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding.go
+    kind: method
+    name: RequestForwardingClusterClient.ServerName
+    signature: func (c *RequestForwardingClusterClient) ServerName() string
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_service_grpc.pb.go
+    kind: interface
+    name: RequestForwardingServer
+    signature: type RequestForwardingServer interface { Echo(context.Context, *EchoRequest)
+      (*EchoReply, error); ForwardRequest(context.Context, *forwarding.Request) (*forwarding.Response,
+      error); AdvertiseNamespaceKeys(context.Context, *AdvertiseNamespaceKeysRequest)
+      (*AdvertiseNamespaceKeysReply, error); SendNamespaceKeys(context.Context, *SendNamespaceKeysRequest)
+      (*SendNamespaceKeysReply, error); GetNamespaceKeys(context.Context, *GetNamespaceKeysRequest)
+      (*GetNamespaceKeysReply, error); StartInvalidations(context.Context, *StartInvalidationRequest)
+      (*StartInvalidationResponse, error); CheckInvalidations(*CheckInvalidationRequest,
+      grpc.ServerStreamingServer[CheckInvalidationResponse]) error; mustEmbedUnimplementedRequestForwardingServer()
+      }
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_service.pb.go
+    kind: struct
+    name: SendNamespaceKeysReply
+    signature: type SendNamespaceKeysReply struct { Retry bool }
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_service.pb.go
+    kind: struct
+    name: SendNamespaceKeysRequest
+    signature: type SendNamespaceKeysRequest struct { Keys []*NamespaceKey }
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_service.pb.go
+    kind: struct
+    name: StartInvalidationRequest
+    signature: type StartInvalidationRequest struct { Uuid string }
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_service.pb.go
+    kind: struct
+    name: StartInvalidationResponse
+    signature: type StartInvalidationResponse struct { Index string; Err string }
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_service_grpc.pb.go
+    kind: struct
+    name: UnimplementedRequestForwardingServer
+    signature: type UnimplementedRequestForwardingServer struct{}
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_service_grpc.pb.go
+    kind: interface
+    name: UnsafeRequestForwardingServer
+    signature: type UnsafeRequestForwardingServer interface { mustEmbedUnimplementedRequestForwardingServer()
+      }
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding.go
+    kind: method
+    name: clusterInfoGetter.ClusterAddr
+    signature: ClusterAddr() string
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding.go
+    kind: method
+    name: clusterInfoGetter.EffectiveSDKVersion
+    signature: EffectiveSDKVersion() string
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding.go
+    kind: method
+    name: clusterInfoGetter.LocalClusterCert
+    signature: LocalClusterCert() *[]byte
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding.go
+    kind: method
+    name: clusterInfoGetter.ReplicationState
+    signature: ReplicationState() consts.ReplicationState
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding.go
+    kind: method
+    name: clusterInfoGetter.SetActiveNodeReplicationState
+    signature: SetActiveNodeReplicationState(consts.ReplicationState)
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding.go
+    kind: method
+    name: clusterPeerClusterAddrsCache.Set
+    signature: Set(string, NodeHAConnectionInfo)
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_rpc.go
+    kind: method
+    name: forwardedRequestRPCServer.AdvertiseNamespaceKeys
+    signature: func (s *forwardedRequestRPCServer) AdvertiseNamespaceKeys(ctx context.Context,
+      in *AdvertiseNamespaceKeysRequest) (*AdvertiseNamespaceKeysReply, error)
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_rpc.go
+    kind: method
+    name: forwardedRequestRPCServer.CheckInvalidations
+    signature: func (s *forwardedRequestRPCServer) CheckInvalidations(req *CheckInvalidationRequest,
+      stream grpc.ServerStreamingServer[CheckInvalidationResponse]) error
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_rpc.go
+    kind: method
+    name: forwardedRequestRPCServer.Echo
+    signature: func (s *forwardedRequestRPCServer) Echo(ctx context.Context, in *EchoRequest)
+      (*EchoReply, error)
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_rpc.go
+    kind: method
+    name: forwardedRequestRPCServer.ForwardRequest
+    signature: func (s *forwardedRequestRPCServer) ForwardRequest(ctx context.Context,
+      freq *forwarding.Request) (*forwarding.Response, error)
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_rpc.go
+    kind: method
+    name: forwardedRequestRPCServer.GetNamespaceKeys
+    signature: func (s *forwardedRequestRPCServer) GetNamespaceKeys(ctx context.Context,
+      in *GetNamespaceKeysRequest) (*GetNamespaceKeysReply, error)
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_rpc.go
+    kind: method
+    name: forwardedRequestRPCServer.SendNamespaceKeys
+    signature: func (s *forwardedRequestRPCServer) SendNamespaceKeys(ctx context.Context,
+      in *SendNamespaceKeysRequest) (*SendNamespaceKeysReply, error)
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding_rpc.go
+    kind: method
+    name: forwardedRequestRPCServer.StartInvalidations
+    signature: func (s *forwardedRequestRPCServer) StartInvalidations(ctx context.Context,
+      req *StartInvalidationRequest) (*StartInvalidationResponse, error)
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding.go
+    kind: method
+    name: requestForwardingHandler.CALookup
+    signature: func (rf *requestForwardingHandler) CALookup(ctx context.Context) ([]*x509.Certificate,
+      error)
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding.go
+    kind: method
+    name: requestForwardingHandler.Handoff
+    signature: func (rf *requestForwardingHandler) Handoff(ctx context.Context, shutdownWg
+      *sync.WaitGroup, closeCh chan struct{}, tlsConn *tls.Conn) error
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding.go
+    kind: method
+    name: requestForwardingHandler.ServerLookup
+    signature: func (rf *requestForwardingHandler) ServerLookup(ctx context.Context,
+      clientHello *tls.ClientHelloInfo) (*tls.Certificate, error)
+  - file: third_party/openbao/internal/vault/forwarding/request_forwarding.go
+    kind: method
+    name: requestForwardingHandler.Stop
+    signature: func (rf *requestForwardingHandler) Stop() error
   name: third-party-openbao-internal-vault-forwarding
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/forwarding/request_forwarding_rpc.go
+    - method:1803b44005543fb410369fc6775894fa
+    id: r.advertise-key-intersection
+    level: MUST
+    text: forwardedRequestRPCServer.AdvertiseNamespaceKeys returns the intersection
+      of the core's namespaces missing keys and the namespaces named in the request,
+      preserving the order of the missing-keys list.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/forwarding/request_forwarding_rpc.go
+    id: r.check-invalidations-blocks
+    level: MUST
+    text: forwardedRequestRPCServer.CheckInvalidations registers the stream as an
+      invalidation peer, returns the error `not registered; check active server's
+      logs for information` when registration fails, and otherwise blocks on the peer
+      stop channel until the stream is finished so the stream stays open while invalidations
+      are delivered.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/forwarding/request_forwarding_rpc.go
+    - method:1b067542b829f0468655cbb5452cc6f2
+    id: r.check-replication-index-uuid
+    level: MUST
+    text: Client.CheckReplicationIndex returns the error `active node has not returned
+      a uuid` when the stored peer uuid is nil or empty, otherwise calls StartInvalidations
+      with that uuid and propagates transport failures, a nil response as `no replication
+      index returned by active node`, and a non-empty response error field; on success
+      it returns the response index.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/forwarding/request_forwarding.go
+    id: r.client-cert-lookup
+    level: MUST
+    text: RequestForwardingClusterClient.ClientLookup returns nil certificate and
+      nil error when the parsed cluster certificate is nil or the stored cluster certificate
+      is empty, copies the stored certificate bytes, and returns a TLS certificate
+      carrying that certificate, the local cluster private key and the parsed cert
+      leaf only when one of the acceptable CA subjects equals the parsed certificate
+      raw issuer; otherwise it returns nil, nil.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/forwarding/request_forwarding_rpc.go
+    - function:0cb099a795e1619529e0e06329fa7eeb
+    id: r.client-heartbeat-loop
+    level: MUST
+    text: Client.Start runs an immediate echo tick and immediate key sync in a goroutine,
+      then loops on the task context, the echo ticker and the namespace sync ticker;
+      on task context cancellation it stops the echo ticker and sets the active node
+      replication state to unknown.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/forwarding/request_forwarding_rpc.go
+    id: r.client-stop-nil-safe
+    level: MUST
+    text: Client.Stop returns nil on a nil receiver, otherwise stops invalidations
+      and closes the gRPC connection; Client.StopInvalidations returns without action
+      when no invalidations cancel function was set.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/forwarding/request_forwarding_rpc.go
+    id: r.client-timeouts-and-guard
+    level: MUST
+    text: Each echo tick is bounded by a two second context timeout and stores the
+      active node replication state from the reply after verifying a non-nil `pong`
+      reply; each namespace key synchronization is bounded by a two minute context
+      timeout and is guarded by an atomic boolean so overlapping syncs log a warning
+      and return instead of running concurrently.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/forwarding/request_forwarding.go
+    - method:1c4479bf1a1523c08050547f1ef627b1
+    id: r.cluster-info-contract
+    level: MUST
+    text: 'The package must obtain all cluster identity from its `core` interface:
+      the cluster address, replication state getter and setter, redirect address,
+      local cluster private key, parsed certificate, raw certificate pointer and effective
+      SDK version, plus raft backend access, logging, namespace key listing and mutation,
+      restart, invalidation peer registration and invalidation awaiting; the handler
+      stores only the narrower `clusterInfoGetter` view of the core.'
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/forwarding/request_forwarding_rpc.go
+    id: r.echo-heartbeat
+    level: MUST
+    text: forwardedRequestRPCServer.Echo caches an incoming node connection info entry
+      keyed by cluster address when the request cluster address is non-empty, updates
+      raft follower states only when the raft applied index is positive, the raft
+      node id is non-empty and follower states are configured, and replies with message
+      `pong` plus the core replication state and, when a raft backend exists, its
+      applied index and node id.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/forwarding/request_forwarding_rpc.go
+    id: r.forward-request-serves-http
+    level: MUST
+    text: forwardedRequestRPCServer.ForwardRequest parses an HTTP request out of the
+      forwarded request, serves it through the configured HTTP handler using the RPC
+      response writer, recovers and logs panics with path, error and stack trace instead
+      of failing the RPC, and copies status code, body and header entries into the
+      response.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/forwarding/request_forwarding_rpc.go
+    id: r.get-keys-fetch
+    level: MUST
+    text: getKeys returns nil when the core reports no namespaces missing keys, requests
+      those namespaces from the active node, returns nil when the reply carries no
+      keys, and otherwise writes the returned batch back through core.SetNamespaceKeys,
+      wrapping failures as `failed loading namespace keys`.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/forwarding/request_forwarding_rpc.go
+    id: r.get-namespace-keys-partial
+    level: MUST
+    text: forwardedRequestRPCServer.GetNamespaceKeys returns an empty reply after
+      logging an error when the core call fails and returned no keys, logs a warning
+      but continues when it fails and returned some keys, and otherwise returns every
+      returned key as a uuid/key pair.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/forwarding/request_forwarding.go
+    - function:026de1a79700fc1f78d3fd8fe04f7fcd
+    id: r.grpc-tuning
+    level: MUST
+    text: The constructor builds the gRPC server with server keepalive time equal
+      to twice `cfg.ClusterHeartbeatInterval` and with max receive and max send message
+      size both set to `math.MaxInt32`.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/forwarding/request_forwarding.go
+    - function:026de1a79700fc1f78d3fd8fe04f7fcd
+    id: r.ha-gates-server-registration
+    level: MUST
+    text: NewRequestForwardingHandler resolves `ha := cfg.HA != nil` once to avoid
+      races, and registers the forwarded request RPC server on the gRPC server only
+      when `ha` is true and `cfg.ClusterHandler` is non-nil; the returned handler
+      records the `ha` flag, the named logger `request-forward`, the HTTP/2 server,
+      and a fresh stop channel.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/forwarding/request_forwarding.go
+    id: r.handoff-non-ha-closes
+    level: MUST
+    text: Handoff returns nil after warning and closing the TLS connection when the
+      handler is not in HA mode; in HA mode it registers two wait-group units, closes
+      the connection when any of quit channel, caller close channel, or the handler
+      stop channel fires, and serves the connection through the HTTP/2 server with
+      the gRPC server as handler.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/forwarding/request_forwarding_rpc.go
+    - function:684d05cae83340677266163547b53c6d
+    id: r.legacy-package-fallback
+    level: SHOULD
+    text: LegacyPackageFallback must behave as a gRPC unary client interceptor that
+      retries only when the first call returned the Unimplemented status code, rewriting
+      the method from `/forwarding.RequestForwarding/Echo` and `/forwarding.RequestForwarding/ForwardRequest`
+      to the `/vault.RequestForwarding/...` names and returning the original error
+      for any other method or status, so OpenBao 2.6 and later interoperate with nodes
+      up to 2.5.
+  - codeRefs:
+    - interface:4e11799c5ea2b292ced25f57a07d324b
+    - interface:b38b7cf9fd528e74ae80012ff2edcdd3
+    id: r.namespace-key-exchange-two-step
+    level: MUST
+    text: Namespace key sharing must stay a two-step advertise-then-send exchange
+      for the standby-to-active direction, as stated by the service comments, so keys
+      the active node already holds are never sent over the wire; the active-to-standby
+      direction is a single GetNamespaceKeys call used for refresh.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/forwarding/request_forwarding_rpc.go
+    - method:247989895b4739874b94fa41cbeed1e4
+    id: r.send-namespace-keys-retry-not-error
+    level: MUST
+    text: 'forwardedRequestRPCServer.SendNamespaceKeys flattens the repeated uuid/key
+      pairs into a map, calls core.SetNamespaceKeys, logs and replies with `Retry:
+      true` when that call fails, and otherwise replies with an empty reply; the RPC
+      never turns this failure into a gRPC transport error.'
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/forwarding/request_forwarding.go
+    id: r.server-lookup-errors
+    level: MUST
+    text: ServerLookup copies the local cluster certificate and returns a TLS certificate
+      with the local private key and parsed leaf, and returns the error `got forwarding
+      connection but no local cert` when the stored certificate is empty; CALookup
+      returns a single-element slice of the parsed certificate and errors with `forwarding
+      connection client but no local cert` when that certificate is nil.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/forwarding/request_forwarding.go
+    id: r.server-name-and-ca
+    level: MUST
+    text: RequestForwardingClusterClient.ServerName returns the parsed cluster certificate
+      subject common name, or the empty string when the parsed certificate is nil;
+      CACert returns the parsed local cluster certificate.
+  - codeRefs:
+    - function:5746c17f5551e7b23f705b7db65f052f
+    - function:fc4a929af8ea5f97ae855ee4d8ffcb5c
+    - interface:2128d72b4abc9f78512a85f62f357df1
+    - interface:4e11799c5ea2b292ced25f57a07d324b
+    - interface:b38b7cf9fd528e74ae80012ff2edcdd3
+    id: r.service-rpcs
+    level: MUST
+    text: 'The RequestForwarding service exposes exactly seven RPCs: the unary Echo,
+      ForwardRequest, AdvertiseNamespaceKeys, SendNamespaceKeys, GetNamespaceKeys
+      and StartInvalidations, plus the server-streaming CheckInvalidations; the generated
+      client interface, server interface and unimplemented server must all carry these
+      seven methods, and RegisterRequestForwardingServer must register a handler for
+      each.'
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/forwarding/request_forwarding_rpc.go
+    id: r.ship-keys-two-step
+    level: MUST
+    text: shipKeys returns nil when the core reports no namespaces with keys, advertises
+      the core's namespaces with keys, returns nil when the active node requests none
+      of them, fetches keys for exactly the requested namespaces, returns the fetch
+      errors when no keys came back, and otherwise sends the keys and returns a multi-error
+      combining any fetch errors with a send failure.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/forwarding/request_forwarding_rpc.go
+    id: r.start-invalidations-error-in-body
+    level: MUST
+    text: forwardedRequestRPCServer.StartInvalidations calls core.MarkPeerStarted
+      with the request uuid and always returns a response, carrying the error text
+      `failed to start invalidations; check active logs for more info` in the response
+      Err field rather than returning a gRPC error.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/forwarding/request_forwarding.go
+    id: r.stop-drains
+    level: MUST
+    text: Stop of the request forwarding handler sleeps for `cluster.ListenerAcceptDeadline`
+      to let existing RPCs drain, then closes the stop channel and stops the gRPC
+      server, returning nil.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/forwarding/request_forwarding_rpc.go
+    id: r.stream-invalidations-restart
+    level: MUST
+    text: Client.StreamInvalidations clears the stored peer uuid, opens the check-invalidations
+      stream, stores the uuid from the first received invalidation, and then hands
+      the rest of the loop to a goroutine that awaits each invalidation through the
+      core and stops on a restart indication or receive error; its cleanup cancels
+      the peer loop and calls core.Restart so read state is rebuilt from scratch instead
+      of resuming a stale stream.
+  - codeRefs:
+    - file:third_party/openbao/internal/vault/forwarding/request_forwarding_rpc.go
+    id: r.synchronize-keys-both-directions
+    level: MUST
+    text: Client.SynchronizeKeys runs shipKeys and getKeys concurrently in a wait
+      group and waits for both, logging an error for each direction that fails without
+      aborting the other direction.
   upstream: self
 - code:
   - third_party/openbao/internal/vault/identity/lookup.go

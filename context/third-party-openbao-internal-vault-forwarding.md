@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so the request-forwarding wire protocol, the HA gating rules, the certificate lookups, and the client heartbeat/namespace-key/invalidation loops can be reasoned about and changed as one unit. It is the seam between a standby node and the active node: a standby must forward HTTP requests, ship and fetch namespace seal keys, and stay current on invalidations, while the active node must answer those RPCs and push invalidations. The proto service is named `RequestForwarding` for legacy reasons but carries health, forwarding, key sharing and invalidation RPCs, so the specification must record all of them together.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
