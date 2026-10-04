@@ -4103,6 +4103,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.policy-type-selection-recreates-record` (MUST): "PolicyTemplate.setPolicyType must unload the existing tracked `policy` record when one is present, then create a new `policy/<type>` store record named from the `nameInput` argument and store it in `policy`."
 - added `r.shared-modal-argument-contract` (MUST): "Both components must read the new record's name from the `nameInput` argument and report results through the `onSave` (and, for the rendered modal, `onCancel`) callback arguments rather than writing to any global state."
 
+### third-party-openbao-ui-app-components-mount-backend
+
+- intent: "" -> "This context exists to fix the contract of the mount-backend type selector: it is the component that decides, from a caller-supplied `mountType` argument, whether the user is offered auth-method types or secret-engine types, and it exposes that decision as a single `mountTypes` list plus a `selection` field for the form's chosen value. It exists inside the vendored OpenBao UI app, so its behaviour must match that of upstream Vault rather than any local redesign."
+- added `r.component-extends-glimmer` (MUST): "MountBackendTypeForm must extend the Glimmer Component base class and inject the version service, so the template can read app version data through the component's own context."
+- added `r.mount-types-branch-on-arg` (MUST): "The mountTypes getter must return the secretEngines list when args.mountType equals the string 'secret', and must otherwise return the auth methods list from the mountable-auth-methods helper, so an absent or non-'secret' mountType falls back to auth methods as the documented default."
+- added `r.secret-engines-getter` (MUST): "The secretEngines getter must return the result of calling the mountableEngines() helper from the mountable-secret-engines module, so secret-engine options come from the shared helper rather than a list held on the component."
+- added `r.selection-tracked` (MUST): "The selection field must be a Glimmer tracked property, so a change to the selected mount type re-renders the type form."
+- added `r.set-mount-type-callback` (MUST): "The component must accept a setMountType callback argument and invoke it with the chosen mount type string, so the caller can write that value onto its model."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4421,4 +4430,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-components-modal-form-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-components-mount-backend-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-components-oidc-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-components-secret-list-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to fix the contract of the mount-backend type selector: it is the component that decides, from a caller-supplied `mountType` argument, whether the user is offered auth-method types or secret-engine types, and it exposes that decision as a single `mountTypes` list plus a `selection` field for the form's chosen value. It exists inside the vendored OpenBao UI app, so its behaviour must match that of upstream Vault rather than any local redesign.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

@@ -1,10 +1,63 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
+- class:ba74c0022e26efc577417b374cc60e75 MountBackendTypeForm@third_party/openbao/ui/app/components/mount-backend/type-form.js:26
 - file:third_party/openbao/ui/app/components/mount-backend/type-form.js type-form.js@third_party/openbao/ui/app/components/mount-backend/type-form.js
 kind: SystemContext
 metadata:
   name: third-party-openbao-ui-app-components-mount-backend
   namespace: default
 spec:
+  intent: 'This context exists to fix the contract of the mount-backend type selector:
+    it is the component that decides, from a caller-supplied `mountType` argument,
+    whether the user is offered auth-method types or secret-engine types, and it exposes
+    that decision as a single `mountTypes` list plus a `selection` field for the form''s
+    chosen value. It exists inside the vendored OpenBao UI app, so its behaviour must
+    match that of upstream Vault rather than any local redesign.'
+  interfaces:
+  - file: third_party/openbao/ui/app/components/mount-backend/type-form.js
+    kind: class
+    name: MountBackendTypeForm
+    signature: MountBackendTypeForm ()
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - class:ba74c0022e26efc577417b374cc60e75
+    - file:third_party/openbao/ui/app/components/mount-backend/type-form.js
+    id: r.component-extends-glimmer
+    level: MUST
+    text: MountBackendTypeForm must extend the Glimmer Component base class and inject
+      the version service, so the template can read app version data through the component's
+      own context.
+  - codeRefs:
+    - class:ba74c0022e26efc577417b374cc60e75
+    - file:third_party/openbao/ui/app/components/mount-backend/type-form.js
+    id: r.mount-types-branch-on-arg
+    level: MUST
+    text: The mountTypes getter must return the secretEngines list when args.mountType
+      equals the string 'secret', and must otherwise return the auth methods list
+      from the mountable-auth-methods helper, so an absent or non-'secret' mountType
+      falls back to auth methods as the documented default.
+  - codeRefs:
+    - class:ba74c0022e26efc577417b374cc60e75
+    - file:third_party/openbao/ui/app/components/mount-backend/type-form.js
+    id: r.secret-engines-getter
+    level: MUST
+    text: The secretEngines getter must return the result of calling the mountableEngines()
+      helper from the mountable-secret-engines module, so secret-engine options come
+      from the shared helper rather than a list held on the component.
+  - codeRefs:
+    - class:ba74c0022e26efc577417b374cc60e75
+    - file:third_party/openbao/ui/app/components/mount-backend/type-form.js
+    id: r.selection-tracked
+    level: MUST
+    text: The selection field must be a Glimmer tracked property, so a change to the
+      selected mount type re-renders the type form.
+  - codeRefs:
+    - class:ba74c0022e26efc577417b374cc60e75
+    - file:third_party/openbao/ui/app/components/mount-backend/type-form.js
+    id: r.set-mount-type-callback
+    level: MUST
+    text: The component must accept a setMountType callback argument and invoke it
+      with the chosen mount type string, so the caller can write that value onto its
+      model.
   upstream: self
