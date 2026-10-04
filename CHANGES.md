@@ -4765,6 +4765,18 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.urls-form-fields` (MUST): "PkiConfigUrlsModel declares issuingCertificates, crlDistributionPoints and ocspServers, each an array attribute using the stringArray edit type with help text suppressed, holding the alternative URL values emitted into issued certificates for the Issuing Certificate, CRL Distribution Points and OCSP Servers fields."
 - added `r.urls-help-url-and-capabilities` (MUST): "PkiConfigUrlsModel returns `/v1/${backendPath}/config/urls?help=1` from getHelpUrl, sets useOpenAPI true, and gates canSet on urlsPath, a lazyCapabilities binding to `${'id'}/config/urls` that is false only when canUpdate is exactly false."
 
+### third-party-openbao-ui-app-models-policy
+
+- intent: "" -> "This context exists to pin down the shape of the OpenBao UI policy models. The policy screens need to know which attributes each policy type carries, which values an enforcement level may take, which default applies when the user sets nothing, and which attributes get rendered as form fields. The three files keep that knowledge in one place: a base policy model extended per policy type, with ACL adding no fields, RGP adding the enforcement level, and EGP adding the path list on top of RGP. Recording this as a spec lets a reader or a refactorer see the inheritance chain and the exact field metadata without reading the Ember app."
+- added `r.acl-model-extends-base-policy` (MUST): "The ACL policy model is produced by extending the shared base policy model from ../policy and contributes no additional attributes or computed properties of its own."
+- added `r.egp-additional-attrs` (MUST): "The EGP model overrides additionalAttrs to expand attribute metadata from itself for both enforcementLevel and paths, replacing the inherited single-field expansion."
+- added `r.egp-model-extends-rgp` (MUST): "The EGP policy model extends the RGP model from ./rgp, so it inherits the enforcementLevel attribute and its default rather than redeclaring them."
+- added `r.egp-paths-attribute` (MUST): "The EGP model adds a paths attribute whose edit type is stringArray, so paths are edited as a list of strings."
+- added `r.rgp-additional-attrs` (MUST): "The RGP model computes additionalAttrs by expanding attribute metadata from itself for the single field enforcementLevel, using the field-to-attrs utility."
+- added `r.rgp-enforcement-level-default` (MUST): "When no enforcement level is supplied for an RGP policy, the model defaults enforcementLevel to hard-mandatory."
+- added `r.rgp-enforcement-level-values` (MUST): "The RGP model exposes an enforcementLevel string attribute whose permitted values are exactly advisory, soft-mandatory and hard-mandatory."
+- added `r.rgp-model-extends-base-policy` (MUST): "The RGP policy model extends the shared base policy model from ../policy."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5155,4 +5167,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-models-pki-certificate-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-models-pki-config-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-models-policy-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-models-policy-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-routes-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |

@@ -8,5 +8,63 @@ metadata:
   name: third-party-openbao-ui-app-models-policy
   namespace: default
 spec:
+  intent: 'This context exists to pin down the shape of the OpenBao UI policy models.
+    The policy screens need to know which attributes each policy type carries, which
+    values an enforcement level may take, which default applies when the user sets
+    nothing, and which attributes get rendered as form fields. The three files keep
+    that knowledge in one place: a base policy model extended per policy type, with
+    ACL adding no fields, RGP adding the enforcement level, and EGP adding the path
+    list on top of RGP. Recording this as a spec lets a reader or a refactorer see
+    the inheritance chain and the exact field metadata without reading the Ember app.'
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/app/models/policy/acl.js
+    id: r.acl-model-extends-base-policy
+    level: MUST
+    text: The ACL policy model is produced by extending the shared base policy model
+      from ../policy and contributes no additional attributes or computed properties
+      of its own.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/models/policy/egp.js
+    id: r.egp-additional-attrs
+    level: MUST
+    text: The EGP model overrides additionalAttrs to expand attribute metadata from
+      itself for both enforcementLevel and paths, replacing the inherited single-field
+      expansion.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/models/policy/egp.js
+    id: r.egp-model-extends-rgp
+    level: MUST
+    text: The EGP policy model extends the RGP model from ./rgp, so it inherits the
+      enforcementLevel attribute and its default rather than redeclaring them.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/models/policy/egp.js
+    id: r.egp-paths-attribute
+    level: MUST
+    text: The EGP model adds a paths attribute whose edit type is stringArray, so
+      paths are edited as a list of strings.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/models/policy/rgp.js
+    id: r.rgp-additional-attrs
+    level: MUST
+    text: The RGP model computes additionalAttrs by expanding attribute metadata from
+      itself for the single field enforcementLevel, using the field-to-attrs utility.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/models/policy/rgp.js
+    id: r.rgp-enforcement-level-default
+    level: MUST
+    text: When no enforcement level is supplied for an RGP policy, the model defaults
+      enforcementLevel to hard-mandatory.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/models/policy/rgp.js
+    id: r.rgp-enforcement-level-values
+    level: MUST
+    text: The RGP model exposes an enforcementLevel string attribute whose permitted
+      values are exactly advisory, soft-mandatory and hard-mandatory.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/models/policy/rgp.js
+    id: r.rgp-model-extends-base-policy
+    level: MUST
+    text: The RGP policy model extends the shared base policy model from ../policy.
   upstream: self
