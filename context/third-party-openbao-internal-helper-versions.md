@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so that the builtin-version helpers used across OpenBao can be described and depended on without reading the source: one function that names the version every builtin plugin reports, and one predicate that recognises that version from a semver metadata marker. It pins the exact semantics of the marker test (dot-split metadata, exact identifier match, never a substring match, non-semver input is not builtin) so callers that classify plugin versions keep consistent behavior.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

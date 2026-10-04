@@ -1995,6 +1995,14 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.proxied-user-agent-embedding` (MUST): "AgentProxyStringWithProxiedUserAgent and ProxyStringWithProxiedUserAgent take the proxied user agent as an argument and embed it in the returned string, so a proxy can report both its own role and the client it is forwarding for."
 - added `r.role-specific-prefixes` (MUST): "Each remaining variant function returns a string carrying its own role prefix, so the roles stay distinguishable in a User-Agent header: AgentProxyString for the agent proxy, ProxyString for the plain proxy, ProxyAPIProxyString for the API proxy, and ProxyAutoAuthString for the proxy auto-auth path."
 
+### third-party-openbao-internal-helper-versions
+
+- intent: "" -> "The context exists so that the builtin-version helpers used across OpenBao can be described and depended on without reading the source: one function that names the version every builtin plugin reports, and one predicate that recognises that version from a semver metadata marker. It pins the exact semantics of the marker test (dot-split metadata, exact identifier match, never a substring match, non-semver input is not builtin) so callers that classify plugin versions keep consistent behavior."
+- added `r.get-builtin-version-returns-default` (MUST): "GetBuiltinVersion must return the constant DefaultBuiltinVersion for every input; the pluginType and pluginName arguments are accepted but ignored, so all builtin plugins report one shared version string."
+- added `r.is-builtin-version-matches-metadata-identifier` (MUST): "For a valid semantic version, IsBuiltinVersion must split the version's metadata section on '.' and return true only when the identifier BuiltinMetadata is one of the resulting parts, so metadata such as "builtin.bao", "other.builtin" or "builtin.anythingelse" counts as builtin while "builtinbutnot" and a version with no metadata do not."
+- added `r.is-builtin-version-parses-semver` (MUST): "IsBuiltinVersion must return false when the input string is not a valid semantic version, and must not panic or error on such input."
+- added `r.is-builtin-version-table-test` (SHOULD): "TestIsBuiltinVersion should keep the table of version/builtin pairs covering both accepted metadata placements, the substring-but-not-identifier negative case, a version with no metadata, and a non-semver string, asserting each expected result."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -2117,5 +2125,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-helper-tlsdebug-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Failed |  | 0 | - |
 | third-party-openbao-internal-helper-tlsdebug-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-helper-useragent-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-helper-versions-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-helper-versions-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-http-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
