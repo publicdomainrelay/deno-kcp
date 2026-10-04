@@ -179,8 +179,41 @@ spec:
   systemContext: deploy-examples-atproto-market
   toSpecHash: e1844e1beecbf99f67a065aa04a7739e89d5cbe7e8149c1b98ecd051cbc89b27
 status:
-  message: the agent is realizing deploy-examples-atproto-market
-  phase: Running
+  agentLog: "...orkspace added (four total)\n- `apply.sh` — WORKSPACES `global relay
+    alice bob`; preflight requires `atproto-market/hono-bidder`; `resolve_key` generates
+    three distinct keys overridable by `PDS_PRIVATE_KEY_HEX`/`BOB_PDS_PRIVATE_KEY_HEX`/`BIDDER_PRIVATE_KEY_HEX`;
+    sed substitutes both new placeholders (verified no substring collision); 15-openbao-bob
+    in loop, 60-bob-pds before 70-bidder; summary covers `bob pds` and `bob bidder`\n-
+    `README.md` — four workspaces, bob rows in both tables, bidder dispatcher ceiling
+    note\n- `.tools/open-architecture/arch.yaml` — `ov.market-workspaces` data and
+    `ov.market-rbac` workspaces list `root:bob`; tenant boundary includes `root:bob`\n\nVerify:
+    `go test ./...` exits 0 (all packages ok). `bash -n apply.sh` clean; new YAML
+    and arch.yaml parse; validator reports no market/bob errors (154 pre-existing
+    errors all name out-of-repo paths).\n\n⚠ claude.ai connectors are disabled because
+    ANTHROPIC_API_KEY or another auth source is set and takes precedence over your
+    claude.ai login · Unset it to load your organization's connectors\n[claude-code:unrecognized_model]
+    {\"model\":\"deepseek-v4-flash\",\"query_source\":\"sdk\"}\nok  \tgithub.com/johnandersen777/deno-kcp/api/v1alpha1\t(cached)\n?
+    \  \tgithub.com/johnandersen777/deno-kcp/cmd/deno-kcp-provider\t[no test files]\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/internal/denojob\t(cached)\nok  \tgithub.com/johnandersen777/deno-kcp/internal/denopod\t(cached)\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/internal/denorun\t(cached)\n?   \tgithub.com/johnandersen777/deno-kcp/internal/livegate\t[no
+    test files]\nok  \tgithub.com/johnandersen777/deno-kcp/internal/policyengine\t(cached)\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/internal/policyworkflowpod\t(cached)\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/internal/policyworkflowrun\t(cached)\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/internal/provider\t0.027s\nok  \tgithub.com/johnandersen777/deno-kcp/internal/trigger\t(cached)\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/test/integration\t(cached)"
+  branch: spec/deploy-examples-atproto-market/e1844e1b
+  commit: 17ac78b796fca713bdc9f5ffc134c4347fc40973
+  filesTouched:
+  - .tools/open-architecture/arch.yaml
+  - deploy/examples/atproto/market/00-workspaces.yaml
+  - deploy/examples/atproto/market/15-openbao-bob.yaml
+  - deploy/examples/atproto/market/60-bob-pds.yaml
+  - deploy/examples/atproto/market/70-bidder.yaml
+  - deploy/examples/atproto/market/README.md
+  - deploy/examples/atproto/market/apply.sh
+  message: 'realized deploy-examples-atproto-market on spec/deploy-examples-atproto-market/e1844e1b:
+    7 file(s) touched, verify exit 0'
+  phase: Succeeded
   progress:
   - at: "2026-10-04T07:50:37Z"
     files:
