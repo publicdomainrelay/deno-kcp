@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the OpenBao UI's serializer behaviour is described independently of the vendored UI source, which lives in third_party and is not authored here. It records what each serializer must do to the API payloads so the contract between the OpenBao HTTP API and the Ember Data store stays visible: id normalization for namespaces, version-object-to-array conversion and rotation timestamps for keymgmt keys, and payload rewriting for MFA login enforcements. Anyone touching the vendored UI, or porting this behaviour to another client, needs this description because the third-party tree is otherwise undifferentiated.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
