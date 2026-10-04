@@ -24704,8 +24704,197 @@ system_contexts:
   - file:third_party/openbao/internal/helper/pgpkeys/keybase.go keybase.go@third_party/openbao/internal/helper/pgpkeys/keybase.go
   - file:third_party/openbao/internal/helper/pgpkeys/keybase_test.go keybase_test.go@third_party/openbao/internal/helper/pgpkeys/keybase_test.go
   - file:third_party/openbao/internal/helper/pgpkeys/test_keys.go test_keys.go@third_party/openbao/internal/helper/pgpkeys/test_keys.go
+  - function:34595ac455643604c743c3764ec6cfb1 GetFingerprints@third_party/openbao/internal/helper/pgpkeys/encrypt_decrypt.go:56
+  - function:3e73c82528ff0863f8a29c086e3a406a FetchKeybasePubkeys@third_party/openbao/internal/helper/pgpkeys/keybase.go:27
+  - function:68d46cf0c2a816b60fba703bf62dcda6 ReadPGPFile@third_party/openbao/internal/helper/pgpkeys/flag.go:101
+  - function:9251717ca0a274b53792e10bc0bd6e6e GetEntities@third_party/openbao/internal/helper/pgpkeys/encrypt_decrypt.go:73
+  - function:990284d610e59ba7e3bfdeb30ad7d517 EncryptShares@third_party/openbao/internal/helper/pgpkeys/encrypt_decrypt.go:22
+  - function:d27b0da6cdf542960c4594e9b50a5483 ParsePGPKeys@third_party/openbao/internal/helper/pgpkeys/flag.go:70
+  - function:f48c70c4217ae84284553499d7f34907 DecryptBytes@third_party/openbao/internal/helper/pgpkeys/encrypt_decrypt.go:94
+  - method:08c76c120c58c7eb787e03ef57f37379 PubKeyFileFlag.Example@third_party/openbao/internal/helper/pgpkeys/flag.go:41
+  - method:4d3884509d108f2cdfb1504141580b2b PubKeyFilesFlag.Example@third_party/openbao/internal/helper/pgpkeys/flag.go:65
+  - method:aedcb111f667a567bf807a55bc910570 PubKeyFileFlag.String@third_party/openbao/internal/helper/pgpkeys/flag.go:21
+  - method:cf79122451d638b029a5158bbdaaf08e PubKeyFileFlag.Set@third_party/openbao/internal/helper/pgpkeys/flag.go:23
+  - method:cfd8a0839893dfddccdc9c3924c904f8 PubKeyFilesFlag.Set@third_party/openbao/internal/helper/pgpkeys/flag.go:51
+  - method:e1793840397cb98083d78687d508b0ed PubKeyFilesFlag.String@third_party/openbao/internal/helper/pgpkeys/flag.go:47
+  - type_alias:03a52d3c14409c44de009c7e4d33ff30 PubKeyFilesFlag@third_party/openbao/internal/helper/pgpkeys/flag.go:45
+  - type_alias:30b6166a5fb8ea106748955a45630621 PubKeyFileFlag@third_party/openbao/internal/helper/pgpkeys/flag.go:19
   id: sc.third-party-openbao-internal-helper-pgpkeys
+  intent: 'This context exists so command entrypoints across OpenBao can accept PGP
+    recipients uniformly: operators name key files or keybase users on the command
+    line, the package resolves them to entities, encrypts each share to its recipient,
+    and reports fingerprints that operators verify out of band. It is a third-party
+    vendored dependency under third_party/openbao, described so the surrounding repository
+    can reason about its contract without re-reading the upstream source.'
+  interfaces:
+  - file: third_party/openbao/internal/helper/pgpkeys/encrypt_decrypt.go
+    kind: function
+    name: DecryptBytes
+    signature: func DecryptBytes(encodedCrypt, privKey string) (*bytes.Buffer, error)
+  - file: third_party/openbao/internal/helper/pgpkeys/encrypt_decrypt.go
+    kind: function
+    name: EncryptShares
+    signature: func EncryptShares(input [][]byte, pgpKeys []string) ([]string, [][]byte,
+      error)
+  - file: third_party/openbao/internal/helper/pgpkeys/keybase.go
+    kind: function
+    name: FetchKeybasePubkeys
+    signature: func FetchKeybasePubkeys(input []string) (map[string]string, error)
+  - file: third_party/openbao/internal/helper/pgpkeys/encrypt_decrypt.go
+    kind: function
+    name: GetEntities
+    signature: func GetEntities(pgpKeys []string) ([]*openpgp.Entity, error)
+  - file: third_party/openbao/internal/helper/pgpkeys/encrypt_decrypt.go
+    kind: function
+    name: GetFingerprints
+    signature: func GetFingerprints(pgpKeys []string, entities []*openpgp.Entity)
+      ([]string, error)
+  - file: third_party/openbao/internal/helper/pgpkeys/flag.go
+    kind: function
+    name: ParsePGPKeys
+    signature: func ParsePGPKeys(keyfiles []string) ([]string, error)
+  - file: third_party/openbao/internal/helper/pgpkeys/flag.go
+    kind: type_alias
+    name: PubKeyFileFlag
+    signature: type PubKeyFileFlag string
+  - file: third_party/openbao/internal/helper/pgpkeys/flag.go
+    kind: method
+    name: PubKeyFileFlag.Example
+    signature: func (p *PubKeyFileFlag) Example() string
+  - file: third_party/openbao/internal/helper/pgpkeys/flag.go
+    kind: method
+    name: PubKeyFileFlag.Set
+    signature: func (p *PubKeyFileFlag) Set(val string) error
+  - file: third_party/openbao/internal/helper/pgpkeys/flag.go
+    kind: method
+    name: PubKeyFileFlag.String
+    signature: func (p *PubKeyFileFlag) String() string
+  - file: third_party/openbao/internal/helper/pgpkeys/flag.go
+    kind: type_alias
+    name: PubKeyFilesFlag
+    signature: type PubKeyFilesFlag []string
+  - file: third_party/openbao/internal/helper/pgpkeys/flag.go
+    kind: method
+    name: PubKeyFilesFlag.Example
+    signature: func (p *PubKeyFilesFlag) Example() string
+  - file: third_party/openbao/internal/helper/pgpkeys/flag.go
+    kind: method
+    name: PubKeyFilesFlag.Set
+    signature: func (p *PubKeyFilesFlag) Set(val string) error
+  - file: third_party/openbao/internal/helper/pgpkeys/flag.go
+    kind: method
+    name: PubKeyFilesFlag.String
+    signature: func (p *PubKeyFilesFlag) String() string
+  - file: third_party/openbao/internal/helper/pgpkeys/flag.go
+    kind: function
+    name: ReadPGPFile
+    signature: func ReadPGPFile(path string) (string, error)
   name: third-party-openbao-internal-helper-pgpkeys
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/pgpkeys/encrypt_decrypt.go
+    - function:f48c70c4217ae84284553499d7f34907
+    id: r.decrypt-bytes
+    level: MUST
+    text: DecryptBytes takes an encoded encrypted payload together with a private
+      key string and returns the decrypted bytes in a buffer, so callers can recover
+      a share that was encrypted by EncryptShares.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/pgpkeys/encrypt_decrypt.go
+    - function:990284d610e59ba7e3bfdeb30ad7d517
+    id: r.encrypt-shares
+    level: MUST
+    text: 'EncryptShares requires exactly one PGP key per input share: when len(input)
+      != len(pgpKeys) it fails with "mismatch between number items to encrypt and
+      number of PGP keys". Otherwise it parses the keys into entities, encrypts each
+      input share to the entity at the same index with openpgp.Encrypt, and returns
+      the primary-key fingerprints and the ciphertexts in that same order, wrapping
+      setup and write failures.'
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/pgpkeys/encrypt_decrypt.go
+    - function:9251717ca0a274b53792e10bc0bd6e6e
+    id: r.entities
+    level: MUST
+    text: GetEntities treats every element of pgpKeys as a standard-base64 string,
+      decodes it, and parses the bytes with openpgp.ReadEntity, returning the entities
+      in input order. A decode failure becomes "error decoding given PGP key" and
+      a parse failure becomes "error parsing given PGP key", both wrapping the cause.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/pgpkeys/keybase.go
+    - function:3e73c82528ff0863f8a29c086e3a406a
+    id: r.fetch-keybase-pubkeys
+    level: MUST
+    text: 'FetchKeybasePubkeys resolves "keybase:<username>" entries against the Keybase
+      public key API: it returns a nil map when the input is empty or contains no
+      prefixed entry, issues one GET to keybase.io user lookup with the joined usernames
+      and fields=public_keys, requires a status of "OK", parses each returned armored
+      primary bundle into a single entity, and maps "keybase:<username>" to that entity''s
+      serialized bytes in base64. A user with no bundle is reported as "unable to
+      fetch keys for user(s) %q from keybase".'
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/pgpkeys/encrypt_decrypt.go
+    - function:34595ac455643604c743c3764ec6cfb1
+    id: r.fingerprints
+    level: MUST
+    text: GetFingerprints returns one lowercase hex fingerprint per entity, taken
+      from entity.PrimaryKey.Fingerprint, in the order given. When the entities argument
+      is nil it first parses entities from the pgpKeys string slice, so callers may
+      pass either form.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/pgpkeys/flag.go
+    - function:d27b0da6cdf542960c4594e9b50a5483
+    id: r.parse-pgp-keys
+    level: MUST
+    text: ParsePGPKeys expands a list of key references into base64 keys, preserving
+      input order and length. It trims each entry; an entry prefixed with "keybase:"
+      must resolve from the Keybase lookup map or the call fails with "keybase user
+      %q not found"; every other entry is read from disk through ReadPGPFile.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/pgpkeys/flag.go
+    - method:08c76c120c58c7eb787e03ef57f37379
+    - method:aedcb111f667a567bf807a55bc910570
+    - method:cf79122451d638b029a5158bbdaaf08e
+    - type_alias:30b6166a5fb8ea106748955a45630621
+    id: r.pub-key-file-flag
+    level: MUST
+    text: 'PubKeyFileFlag is a string-backed flag.Value and command.Example that carries
+      exactly one key: String renders the stored key, Set parses a comma-separated
+      value and fails with "can only be specified once" on a second call and "can
+      only specify one pgp key" when the value expands to more than one key, and Example
+      returns "keybase:user".'
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/pgpkeys/flag.go
+    - method:4d3884509d108f2cdfb1504141580b2b
+    - method:cfd8a0839893dfddccdc9c3924c904f8
+    - method:e1793840397cb98083d78687d508b0ed
+    - type_alias:03a52d3c14409c44de009c7e4d33ff30
+    id: r.pub-key-files-flag
+    level: MUST
+    text: 'PubKeyFilesFlag is a []string-backed flag.Value and command.Example that
+      carries a list of keys: String prints the slice, Set parses a comma-separated
+      value into the expanded key list and fails with "can only be specified once"
+      on a second call, and Example returns "keybase:user1, keybase:user2, ...".'
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/pgpkeys/flag.go
+    - function:68d46cf0c2a816b60fba703bf62dcda6
+    id: r.read-pgp-file
+    level: MUST
+    text: 'ReadPGPFile reads a key from disk and normalizes it to base64: an empty
+      path fails with "empty path", a leading ''@'' is stripped, and the file is first
+      parsed as an armored keyring, in which case exactly one non-nil entity is required
+      (else "more than one key found in file %q" or "primary key was nil for file
+      %q") and its serialized bytes are returned base64-encoded. When armored parsing
+      fails the content is returned unchanged if it is already valid base64, otherwise
+      the raw bytes are base64-encoded.'
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/pgpkeys/flag_test.go
+    - file:third_party/openbao/internal/helper/pgpkeys/keybase_test.go
+    - file:third_party/openbao/internal/helper/pgpkeys/test_keys.go
+    id: r.test-fixtures
+    level: MAY
+    text: The package ships static base64 PGP key fixtures in test_keys.go so that
+      flag_test.go and keybase_test.go can exercise parsing, flag and fingerprint
+      behavior without network access.
   upstream: self
 - code:
   - third_party/openbao/internal/helper/pluginutil/oci/downloader.go

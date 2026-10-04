@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so command entrypoints across OpenBao can accept PGP recipients uniformly: operators name key files or keybase users on the command line, the package resolves them to entities, encrypts each share to its recipient, and reports fingerprints that operators verify out of band. It is a third-party vendored dependency under third_party/openbao, described so the surrounding repository can reason about its contract without re-reading the upstream source.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
