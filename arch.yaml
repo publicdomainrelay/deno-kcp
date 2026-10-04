@@ -35497,8 +35497,8 @@ system_contexts:
     - file:third_party/openbao/internal/vault/external_tests/misc/misc_binary/recovery_test.go
     id: r.recovery-mode-probe
     level: MUST
-    text: The recovery-mode restart must stop the node and start it with Args ["-recovery"],
-      and its StartProbe must call GenerateRecoveryOperationTokenStatusWithContext,
+    text: The recovery-mode restart must stop the node, copy the original options,
+      set Args to ["-recovery"], and start the node with a StartProbe that calls GenerateRecoveryOperationTokenStatusWithContext,
       because in recovery mode the only paths reachable without a recovery token are
       those used to generate one.
   - codeRefs:
@@ -35506,8 +35506,9 @@ system_contexts:
     id: r.recovery-token-single-use
     level: MUST
     text: In recovery mode the test must generate a recovery token with testcluster.GenerateRoot(cluster,
-      testcluster.GenerateRecovery), and must fail if a second GenerateRecovery call
-      succeeds; the returned token is then set on the client.
+      testcluster.GenerateRecovery), must fail the test if a second GenerateRecovery
+      call returns no error, and must then set the returned token on the client with
+      SetToken.
   - codeRefs:
     - file:third_party/openbao/internal/vault/external_tests/misc/misc_binary/recovery_test.go
     id: r.restart-preserves-secret
@@ -35534,9 +35535,10 @@ system_contexts:
     - file:third_party/openbao/internal/vault/external_tests/misc/misc_binary/recovery_test.go
     id: r.skip-without-binary
     level: MUST
-    text: TestRecovery_Docker must read the BAO_BINARY variable and skip the test
-      with the message "only running docker test when $BAO_BINARY present" when it
-      is empty, so the Docker test never runs without an explicit binary.
+    text: TestRecovery_Docker must read the BAO_BINARY variable with api.ReadBaoVariable
+      and skip the test with the message "only running docker test when $BAO_BINARY
+      present" when it is empty, so the Docker test never runs without an explicit
+      binary.
   upstream: self
 - code:
   - third_party/openbao/internal/vault/external_tests/namespaces/namespace_test.go
