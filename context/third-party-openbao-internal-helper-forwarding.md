@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so a request that arrives at one OpenBao node can be serialized, shipped to another node, and replayed there with no observable difference. The forwarding package is that wire contract: the protobuf types define what travels, GenerateForwardedRequest and ParseForwardedRequest define the two directions of the translation, and RPCResponseWriter defines the symmetric path back, letting a remote handler write an HTTP response that is later reconstructed on the origin node. It is vendored third-party code inside deno-kcp, so the spec records the behavior deno-kcp depends on rather than behavior deno-kcp owns.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
