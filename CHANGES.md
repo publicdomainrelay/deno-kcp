@@ -868,6 +868,14 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.legacy-tls-provider` (MUST): "`main` must build the plugin TLS provider from the parsed flag values via `apiClientMeta.GetTLSConfig()` passed to `api.VaultPluginTLSProvider`, and must set the result as `ServeOpts.TLSProviderFunc`, so the plugin maintains backwards compatibility with host versions that do not support plugin AutoMTLS."
 - added `r.serve-ssh-backend-as-plugin` (MUST): "`main` must serve the SSH logical backend by calling `plugin.ServeMultiplex` with `BackendFactoryFunc` set to `ssh.Factory`, so the backend is constructed by the SSH package's factory when the host requests it."
 
+### third-party-openbao-internal-builtin-logical-totp
+
+- intent: "" -> "The context exists so that the TOTP logical backend can be described and reasoned about independently of the rest of OpenBao. It pins down the plugin boundary (Factory and Backend), the storage contract for key entries (backend.Key), and the path surface split between key management and code generation. It is a spec slice of vendored third-party code, so it records the code as written rather than proposing changes."
+- added `r.backend-behaviour-covered-by-tests` (SHOULD): "backend_test.go should exercise the Factory and Backend entry points so that the mounted path set and the key storage contract stay covered by the package's own tests."
+- added `r.backend-registers-key-and-code-paths` (MUST): "Backend must return a *backend whose embedded framework.Backend registers the TOTP path handlers, so that key administration paths from path_keys.go and code generation and validation paths from path_code.go are reachable through the mounted secrets engine."
+- added `r.factory-builds-and-initialises-backend` (MUST): "Factory must construct a TOTP logical backend from the supplied logical.BackendConfig, call Setup on it with the same context and config, return the configured logical.Backend on success, and return the setup error with a nil backend on failure."
+- added `r.key-lookup-uses-key-prefix-and-nil-on-absent` (MUST): "backend.Key must read the named entry from logical storage at the path "key/" concatenated with the caller-supplied name n, return nil with a nil error when no entry exists at that path, propagate a storage read error, and decode the stored JSON into a keyEntry before returning it, so callers can distinguish a missing key from a malformed one."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -891,5 +899,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-builtin-logical-ssh-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-ssh-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-ssh-cmd-ssh-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-internal-builtin-logical-totp-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-internal-builtin-logical-totp-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-internal-builtin-logical-totp-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-totp-cmd-totp-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |

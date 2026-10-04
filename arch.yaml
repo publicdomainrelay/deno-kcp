@@ -12836,8 +12836,68 @@ system_contexts:
   - file:third_party/openbao/internal/builtin/logical/totp/backend_test.go backend_test.go@third_party/openbao/internal/builtin/logical/totp/backend_test.go
   - file:third_party/openbao/internal/builtin/logical/totp/path_code.go path_code.go@third_party/openbao/internal/builtin/logical/totp/path_code.go
   - file:third_party/openbao/internal/builtin/logical/totp/path_keys.go path_keys.go@third_party/openbao/internal/builtin/logical/totp/path_keys.go
+  - function:2659f24939f08b8a6a28ecd0c1a9ad16 Factory@third_party/openbao/internal/builtin/logical/totp/backend.go:18
+  - function:93c53f32f8e8d0b9cf6d2596526daf2b Backend@third_party/openbao/internal/builtin/logical/totp/backend.go:26
+  - method:6dc117858b8c671f708f40ddf3aad3b4 backend.Key@third_party/openbao/internal/builtin/logical/totp/path_keys.go:164
   id: sc.third-party-openbao-internal-builtin-logical-totp
+  intent: The context exists so that the TOTP logical backend can be described and
+    reasoned about independently of the rest of OpenBao. It pins down the plugin boundary
+    (Factory and Backend), the storage contract for key entries (backend.Key), and
+    the path surface split between key management and code generation. It is a spec
+    slice of vendored third-party code, so it records the code as written rather than
+    proposing changes.
+  interfaces:
+  - file: third_party/openbao/internal/builtin/logical/totp/backend.go
+    kind: function
+    name: Backend
+    signature: func Backend() *backend
+  - file: third_party/openbao/internal/builtin/logical/totp/backend.go
+    kind: function
+    name: Factory
+    signature: func Factory(ctx context.Context, conf *logical.BackendConfig) (logical.Backend,
+      error)
+  - file: third_party/openbao/internal/builtin/logical/totp/path_keys.go
+    kind: method
+    name: backend.Key
+    signature: func (b *backend) Key(ctx context.Context, s logical.Storage, n string)
+      (*keyEntry, error)
   name: third-party-openbao-internal-builtin-logical-totp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/totp/backend_test.go
+    id: r.backend-behaviour-covered-by-tests
+    level: SHOULD
+    text: backend_test.go should exercise the Factory and Backend entry points so
+      that the mounted path set and the key storage contract stay covered by the package's
+      own tests.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/totp/path_code.go
+    - file:third_party/openbao/internal/builtin/logical/totp/path_keys.go
+    - function:93c53f32f8e8d0b9cf6d2596526daf2b
+    id: r.backend-registers-key-and-code-paths
+    level: MUST
+    text: Backend must return a *backend whose embedded framework.Backend registers
+      the TOTP path handlers, so that key administration paths from path_keys.go and
+      code generation and validation paths from path_code.go are reachable through
+      the mounted secrets engine.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/totp/backend.go
+    - function:2659f24939f08b8a6a28ecd0c1a9ad16
+    id: r.factory-builds-and-initialises-backend
+    level: MUST
+    text: Factory must construct a TOTP logical backend from the supplied logical.BackendConfig,
+      call Setup on it with the same context and config, return the configured logical.Backend
+      on success, and return the setup error with a nil backend on failure.
+  - codeRefs:
+    - file:third_party/openbao/internal/builtin/logical/totp/path_keys.go
+    - method:6dc117858b8c671f708f40ddf3aad3b4
+    id: r.key-lookup-uses-key-prefix-and-nil-on-absent
+    level: MUST
+    text: backend.Key must read the named entry from logical storage at the path "key/"
+      concatenated with the caller-supplied name n, return nil with a nil error when
+      no entry exists at that path, propagate a storage read error, and decode the
+      stored JSON into a keyEntry before returning it, so callers can distinguish
+      a missing key from a malformed one.
   upstream: self
 - code:
   - third_party/openbao/internal/builtin/logical/totp/cmd/totp/main.go
