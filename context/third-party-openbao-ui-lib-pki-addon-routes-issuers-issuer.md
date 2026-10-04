@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to document the routing layer for a single issuer inside the PKI secrets engine UI: how each issuer sub-screen loads its model, which store records or raw endpoints it touches, and what breadcrumb trail it renders. It gives a reader the contract each route must satisfy — model shape, controller setup, mount-path awareness and confirm-leave behavior — without restating the templates or components that consume it.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
