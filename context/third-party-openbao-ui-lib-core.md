@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the OpenBao UI can resolve icon names in one place. The addon descriptor lets the Ember build discover the package and treat it as an in-development addon that reloads during development. The two mapping tables let components translate legacy OpenBao public-folder icon names and Structure icon names into the Flight icon names they render, and let a lookup miss be expressed explicitly as null instead of a missing key.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

@@ -5340,6 +5340,14 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.flash-message-defaults` (MUST): "The returned ENV must set flashMessageDefaults to timeout 7000 and sticky false as the baseline notification behavior, which the test branch then overrides to a 50 ms timeout."
 - added `r.welcome-message-env` (MUST): "The returned ENV must set welcomeMessage from process.env.UI_AUTH_WELCOME so the login welcome text comes from the deployment environment and not from the build."
 
+### third-party-openbao-ui-lib-core
+
+- intent: "" -> "This context exists so the OpenBao UI can resolve icon names in one place. The addon descriptor lets the Ember build discover the package and treat it as an in-development addon that reloads during development. The two mapping tables let components translate legacy OpenBao public-folder icon names and Structure icon names into the Flight icon names they render, and let a lookup miss be expressed explicitly as null instead of a missing key."
+- added `r.addon-descriptor` (MUST): "index.js must export a module object that carries the addon name taken from require('./package').name and an isDevelopingAddon() method that returns true, so Ember loads the package as an in-development addon."
+- added `r.local-icon-map` (MUST): "icon-mappings.js must export localIconMap as a string-keyed table of icons that exist in the public folder but are not part of the Structure set; each value is the matching Flight icon name, and null marks an icon with no Flight match."
+- added `r.null-means-no-match` (SHOULD): "A null value in either mapping table must be read as an explicit absence of a Flight counterpart, not as a missing entry, so callers that look up an icon can tell a known unmatched icon apart from an unknown name."
+- added `r.structure-icon-map` (MUST): "icon-mappings.js must export structureIconMap covering the complete Structure icon set, keyed by Structure icon name with the Flight counterpart as value, and null where no direct correlation to a Flight icon exists."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -5798,4 +5806,5 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-config-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-config-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-core-addon-components-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
-| third-party-openbao-ui-lib-core-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-core-addon-components-confirm-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-core-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
