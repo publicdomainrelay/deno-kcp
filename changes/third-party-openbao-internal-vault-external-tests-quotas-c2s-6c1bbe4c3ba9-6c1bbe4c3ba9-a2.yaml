@@ -1,0 +1,47 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: third-party-openbao-internal-vault-external-tests-quotas-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2
+  namespace: default
+spec:
+  delta: {}
+  direction: CodeToSpec
+  fromCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+  systemContext: third-party-openbao-internal-vault-external-tests-quotas
+  toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
+status:
+  agentLog: This context covers the OpenBao rate-limit quota external test suite at
+    third_party/openbao/internal/vault/external_tests/quotas/quotas_test.go, a test-only
+    package that exports no production API. Each test builds its own in-memory Vault
+    cluster through teststorage.ClusterSetup with a coreConfig that registers the
+    pki logical backend, the userpass credential backend and the file audit backend,
+    starts it, waits for active, and defers cleanup. Helpers setupMounts and teardownMounts
+    install and remove a userpass auth mount (user foo, password bar), a pki mount
+    with a generated internal root certificate (common_name testvault.com, ttl 200h,
+    ip_sans 127.0.0.1) and a pki role test (allow_subdomains, max_ttl 2h, generate_lease);
+    testRPS and testRPSWithNS hammer a caller-supplied request function in a tight
+    loop for a fixed duration, counting successes and failures in atomic counters
+    and returning both counts plus elapsed wall-clock time. Against that fixture the
+    tests drive sys/quotas/rate-limit and sys/quotas/config through the HTTP API to
+    assert quota naming and deduplication, duplicate-path rejection, path and mount
+    scoping, mount-over-root precedence, namespace inheritance and the inheritable
+    flag toggle, exempt paths, default exempt paths such as sys/health, and audit
+    records emitted on rate-limit violations, comparing observed successes against
+    the token-bucket ideal of ceil(rate) + rate*seconds.
+  message: wrote 14 requirement(s) and 0 interface(s) for third-party-openbao-internal-vault-external-tests-quotas
+  phase: Succeeded
+superseded:
+- message: wrote 14 requirement(s) and 0 interface(s) for third-party-openbao-internal-vault-external-tests-quotas;
+    interface TestQuotas_RateLimit_DupName is not in the observed facts; dropped;
+    interface TestQuotas_RateLimit_DupPath is not in the observed facts; dropped;
+    interface TestQuotas_RateLimitQuota_ExemptPaths is not in the observed facts;
+    dropped; interface TestQuotas_RateLimitQuota_DefaultExemptPaths is not in the
+    observed facts; dropped; interface TestQuotas_RateLimitQuota_AuditLogging is not
+    in the observed facts; dropped; interface TestQuotas_RateLimitQuota_Mount is not
+    in the observed facts; dropped; interface TestQuotas_RateLimitQuota_MountPrecedence
+    is not in the observed facts; dropped; interface TestQuotas_RateLimitQuota is
+    not in the observed facts; dropped; interface TestQuotas_RateLimitQuotaNS is not
+    in the observed facts; dropped; interface TestQuotas_RateLimitQuotaInheritableNS
+    is not in the observed facts; dropped
+  name: third-party-openbao-internal-vault-external-tests-quotas-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9
+  phase: Succeeded
