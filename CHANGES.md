@@ -4210,6 +4210,15 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.vault-query-params` (MUST): "The vault controller must declare the query parameters `wrappedToken` and `redirectTo`, bound to the URL names `wrapped_token` and `redirect_to` respectively, so a login redirect can carry a wrapping token and a return destination through the URL."
 - added `r.vault-services` (MUST): "The vault controller must inject the `auth` and `store` services and must not inject `currentCluster`, unlike the application controller it extends."
 
+### third-party-openbao-ui-app-controllers-vault
+
+- intent: "" -> "The context documents the behaviour contract of the vendored OpenBao UI vault cluster controller: keeping the URL namespace query parameter and the namespace service in sync, and giving the cluster route a console open/closed state and a reference to the active cluster. The spec exists so that the vendored file's surface (query params, observers, aliases, action) is described independently of the surrounding Ember application, and so any change to vendoring or upgrading OpenBao can be checked against these requirements."
+- added `r.console-alias` (MUST): "consoleOpen is an alias of console.isOpen and activeCluster is an alias of auth.activeCluster, so reads of these controller properties reflect the injected console and auth services."
+- added `r.namespace-query-param` (MUST): "The controller declares a query parameter namespaceQueryParam scoped to the controller and exposed in the URL as namespace, defaulting to the empty string."
+- added `r.namespace-sync` (MUST): "An observer on namespaceQueryParam pushes every change of the parameter into the namespace service by calling setNamespace, so the URL and the service state stay in step."
+- added `r.service-injections` (SHOULD): "The controller injects the services auth, store, media, router, permissions, namespace (as namespaceService), flash-messages, version (as vaultVersion), and console, which its aliases, observer, and action depend on."
+- added `r.toggle-console-action` (MUST): "The actions hash provides a toggleConsole action that toggles the consoleOpen property."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4541,6 +4550,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-components-wizard-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-config-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-controllers-vault-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-access-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Pending |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
