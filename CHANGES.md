@@ -5914,6 +5914,23 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.mount-path-service` (MUST): "PkiConfigurationCreateRoute and PkiConfigurationEditRoute must obtain the secret mount path through the secretMountPath service and use its currentPath as the label and model for the mount breadcrumb entries."
 - added `r.parent-model-source` (SHOULD): "All three routes should take acme, cluster, urls, crl and engine from modelFor('configuration') rather than re-fetching them, so the child routes stay consistent with the parent configuration model."
 
+### third-party-openbao-ui-lib-pki-addon-routes-issuers
+
+- intent: "" -> "It exists so the PKI addon can resolve and hydrate the issuer screens the user navigates to: which records the store loads, which parent route params feed the query, and what breadcrumb and empty-state chrome the controllers receive. Reading it tells you the data contract for the issuer list, the issuer detail, and the three issuer-producing forms, including the 404 tolerance of the list route and the confirm-leave guard on the forms."
+- added `r.generate-intermediate-action-record` (MUST): "The generate-intermediate route must build its model by createRecord('pki/action', { actionType: 'generate-csr' }) and must be decorated with withConfirmLeave so navigating away from the unfilled form prompts for confirmation."
+- added `r.generate-intermediate-breadcrumbs` (MUST): "The generate-intermediate route's setupController must call super and set controller.breadcrumbs to secrets (linkExternal), the current mount path routed to overview, issuers routed to issuers.index, then a terminal 'generate CSR' label with no route."
+- added `r.generate-root-action-record` (MUST): "The generate-root route must build its model by createRecord('pki/action', { actionType: 'generate-root' }) and must be decorated with withConfirmLeave so navigating away from the unfilled form prompts for confirmation."
+- added `r.generate-root-breadcrumbs` (MUST): "The generate-root route's setupController must call super and set controller.breadcrumbs to secrets (linkExternal), the current mount path routed to overview, then a terminal 'generate root' label with no route."
+- added `r.import-action-record` (MUST): "The import route must build its model by createRecord('pki/action') with no actionType and must be decorated with withConfirmLeave so navigating away from the unfilled form prompts for confirmation."
+- added `r.import-breadcrumbs` (MUST): "The import route's setupController must call super and set controller.breadcrumbs to secrets (linkExternal), the current mount path routed to overview, issuers routed to issuers.index, then a terminal 'import' label with no route."
+- added `r.issuer-detail-breadcrumbs` (MUST): "The issuer detail route's setupController must call super and set controller.breadcrumbs to secrets (linkExternal), the current mount path routed to overview, then issuers routed to issuers.index."
+- added `r.issuer-detail-query` (MUST): "The issuer detail route must read issuer_ref from paramsFor('issuers/issuer') and issue a queryRecord for a single pki/issuer with backend secretMountPath.currentPath and id issuer_ref."
+- added `r.list-404-tolerance` (MUST): "When the issuer list query rejects with err.httpStatus equal to 404, the route must resolve to a model containing only parentModel from modelFor('issuers'); any other rejection reason must be rethrown."
+- added `r.list-breadcrumbs-empty-state` (MUST): "The list route's setupController must call super, set controller.breadcrumbs to secrets (linkExternal), the current mount path routed to overview, then issuers routed to issuers.index, and set controller.notConfiguredMessage to PKI_DEFAULT_EMPTY_STATE_MSG imported from pki/routes/overview."
+- added `r.list-query-issuers` (MUST): "The issuers list route must query the store for the pki/issuer model with backend set to secretMountPath.currentPath and isListView true, and must return an object pairing the resulting issuersModel with parentModel taken from modelFor('issuers')."
+- added `r.mount-path-service` (MUST): "Every route in this group must inject the secretMountPath service and read secretMountPath.currentPath to scope its store calls and to label the mount breadcrumb."
+- added `r.store-service` (MUST): "Every route in this group must inject the Ember data store service and use it for all model loading and record creation."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -6445,5 +6462,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-lib-pki-addon-routes-certificates-certificate-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-routes-configuration-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-addon-routes-issuers-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-ui-lib-pki-addon-routes-issuers-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-ui-lib-pki-addon-routes-issuers-issuer-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-lib-pki-c2s-6c1bbe4c3ba9-e33a5585dc1a-a2 | CodeToSpec | Succeeded |  | 0 | - |

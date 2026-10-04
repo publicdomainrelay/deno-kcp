@@ -1,5 +1,10 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
+- class:1808fb659a0de3ff6b130a157ff5d87d PkiIssuersListRoute@third_party/openbao/ui/lib/pki/addon/routes/issuers/index.js:10
+- class:36a7118699aba6c17a731d33443338d8 PkiIssuersGenerateRootRoute@third_party/openbao/ui/lib/pki/addon/routes/issuers/generate-root.js:11
+- class:98bf6bfe2a489bf1fdc86c452b842169 PkiIssuerIndexRoute@third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer.js:9
+- class:dcc438682ebd5c0c139adfcf32dd30ba PkiIssuersImportRoute@third_party/openbao/ui/lib/pki/addon/routes/issuers/import.js:11
+- class:f0a42c9ee2f38fec3ffce39a665615d6 PkiIssuersGenerateIntermediateRoute@third_party/openbao/ui/lib/pki/addon/routes/issuers/generate-intermediate.js:11
 - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/generate-intermediate.js
   generate-intermediate.js@third_party/openbao/ui/lib/pki/addon/routes/issuers/generate-intermediate.js
 - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/generate-root.js generate-root.js@third_party/openbao/ui/lib/pki/addon/routes/issuers/generate-root.js
@@ -11,5 +16,138 @@ metadata:
   name: third-party-openbao-ui-lib-pki-addon-routes-issuers
   namespace: default
 spec:
+  intent: 'It exists so the PKI addon can resolve and hydrate the issuer screens the
+    user navigates to: which records the store loads, which parent route params feed
+    the query, and what breadcrumb and empty-state chrome the controllers receive.
+    Reading it tells you the data contract for the issuer list, the issuer detail,
+    and the three issuer-producing forms, including the 404 tolerance of the list
+    route and the confirm-leave guard on the forms.'
+  interfaces:
+  - file: third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer.js
+    kind: class
+    name: PkiIssuerIndexRoute
+    signature: class PkiIssuerIndexRoute extends Route
+  - file: third_party/openbao/ui/lib/pki/addon/routes/issuers/generate-intermediate.js
+    kind: class
+    name: PkiIssuersGenerateIntermediateRoute
+    signature: class PkiIssuersGenerateIntermediateRoute extends Route
+  - file: third_party/openbao/ui/lib/pki/addon/routes/issuers/generate-root.js
+    kind: class
+    name: PkiIssuersGenerateRootRoute
+    signature: class PkiIssuersGenerateRootRoute extends Route
+  - file: third_party/openbao/ui/lib/pki/addon/routes/issuers/import.js
+    kind: class
+    name: PkiIssuersImportRoute
+    signature: class PkiIssuersImportRoute extends Route
+  - file: third_party/openbao/ui/lib/pki/addon/routes/issuers/index.js
+    kind: class
+    name: PkiIssuersListRoute
+    signature: class PkiIssuersListRoute extends Route
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - class:f0a42c9ee2f38fec3ffce39a665615d6
+    - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/generate-intermediate.js
+    id: r.generate-intermediate-action-record
+    level: MUST
+    text: 'The generate-intermediate route must build its model by createRecord(''pki/action'',
+      { actionType: ''generate-csr'' }) and must be decorated with withConfirmLeave
+      so navigating away from the unfilled form prompts for confirmation.'
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/generate-intermediate.js
+    id: r.generate-intermediate-breadcrumbs
+    level: MUST
+    text: The generate-intermediate route's setupController must call super and set
+      controller.breadcrumbs to secrets (linkExternal), the current mount path routed
+      to overview, issuers routed to issuers.index, then a terminal 'generate CSR'
+      label with no route.
+  - codeRefs:
+    - class:36a7118699aba6c17a731d33443338d8
+    - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/generate-root.js
+    id: r.generate-root-action-record
+    level: MUST
+    text: 'The generate-root route must build its model by createRecord(''pki/action'',
+      { actionType: ''generate-root'' }) and must be decorated with withConfirmLeave
+      so navigating away from the unfilled form prompts for confirmation.'
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/generate-root.js
+    id: r.generate-root-breadcrumbs
+    level: MUST
+    text: The generate-root route's setupController must call super and set controller.breadcrumbs
+      to secrets (linkExternal), the current mount path routed to overview, then a
+      terminal 'generate root' label with no route.
+  - codeRefs:
+    - class:dcc438682ebd5c0c139adfcf32dd30ba
+    - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/import.js
+    id: r.import-action-record
+    level: MUST
+    text: The import route must build its model by createRecord('pki/action') with
+      no actionType and must be decorated with withConfirmLeave so navigating away
+      from the unfilled form prompts for confirmation.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/import.js
+    id: r.import-breadcrumbs
+    level: MUST
+    text: The import route's setupController must call super and set controller.breadcrumbs
+      to secrets (linkExternal), the current mount path routed to overview, issuers
+      routed to issuers.index, then a terminal 'import' label with no route.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer.js
+    id: r.issuer-detail-breadcrumbs
+    level: MUST
+    text: The issuer detail route's setupController must call super and set controller.breadcrumbs
+      to secrets (linkExternal), the current mount path routed to overview, then issuers
+      routed to issuers.index.
+  - codeRefs:
+    - class:98bf6bfe2a489bf1fdc86c452b842169
+    - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer.js
+    id: r.issuer-detail-query
+    level: MUST
+    text: The issuer detail route must read issuer_ref from paramsFor('issuers/issuer')
+      and issue a queryRecord for a single pki/issuer with backend secretMountPath.currentPath
+      and id issuer_ref.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/index.js
+    id: r.list-404-tolerance
+    level: MUST
+    text: When the issuer list query rejects with err.httpStatus equal to 404, the
+      route must resolve to a model containing only parentModel from modelFor('issuers');
+      any other rejection reason must be rethrown.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/index.js
+    id: r.list-breadcrumbs-empty-state
+    level: MUST
+    text: The list route's setupController must call super, set controller.breadcrumbs
+      to secrets (linkExternal), the current mount path routed to overview, then issuers
+      routed to issuers.index, and set controller.notConfiguredMessage to PKI_DEFAULT_EMPTY_STATE_MSG
+      imported from pki/routes/overview.
+  - codeRefs:
+    - class:1808fb659a0de3ff6b130a157ff5d87d
+    - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/index.js
+    id: r.list-query-issuers
+    level: MUST
+    text: The issuers list route must query the store for the pki/issuer model with
+      backend set to secretMountPath.currentPath and isListView true, and must return
+      an object pairing the resulting issuersModel with parentModel taken from modelFor('issuers').
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/generate-intermediate.js
+    - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/generate-root.js
+    - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/import.js
+    - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/index.js
+    - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer.js
+    id: r.mount-path-service
+    level: MUST
+    text: Every route in this group must inject the secretMountPath service and read
+      secretMountPath.currentPath to scope its store calls and to label the mount
+      breadcrumb.
+  - codeRefs:
+    - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/generate-intermediate.js
+    - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/generate-root.js
+    - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/import.js
+    - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/index.js
+    - file:third_party/openbao/ui/lib/pki/addon/routes/issuers/issuer.js
+    id: r.store-service
+    level: MUST
+    text: Every route in this group must inject the Ember data store service and use
+      it for all model loading and record creation.
   upstream: self

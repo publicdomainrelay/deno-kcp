@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+It exists so the PKI addon can resolve and hydrate the issuer screens the user navigates to: which records the store loads, which parent route params feed the query, and what breadcrumb and empty-state chrome the controllers receive. Reading it tells you the data contract for the issuer list, the issuer detail, and the three issuer-producing forms, including the 404 tolerance of the list route and the confirm-leave guard on the forms.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
