@@ -5497,6 +5497,18 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.license-header` (MUST): "Both modules must keep the HashiCorp copyright notice and the SPDX-License-Identifier: MPL-2.0 tag at the top of the file, before the export statement."
 - added `r.shim-only` (SHOULD): "Each module should stay a pure re-export shim, adding no local classes, helpers, or side effects, so the single source of truth for the components remains the addon implementation."
 
+### third-party-openbao-ui-lib-core-app-decorators
+
+- intent: "" -> "This context exists so the app-side decorator entry point for confirm-leave navigation guarding is specifiable independently of the addon that implements it. The app file is a pure re-export shim: it owns no logic, but it fixes the import path `core/decorators/confirm-leave` that application and test code use, so changing or removing the re-export would silently break every consumer that imports withConfirmLeave from the app decorators directory rather than from the addon. It is described here so the route-decorator contract it exposes, and the unsaved-change behavior behind it, are recorded as the observable facts show them."
+- added `r.confirm-unsaved-changes` (MUST): "When the model resolved at modelPath has dirty attributes and is not currently saving, willTransition either rolls the model back, if Ember.testing is true or the window.confirm prompt 'You have unsaved changes. Navigating away will discard these changes. Are you sure you want to discard your changes?' is accepted, or otherwise calls transition.abort() and returns false to keep the route from being left."
+- added `r.model-path-default` (MUST): "withConfirmLeave takes modelPath as its first parameter defaulting to 'model', and every controller lookup in the decorator uses that path, so callers change which model is guarded by passing a different path."
+- added `r.reexport-with-confirm-leave` (MUST): "The app-side module third_party/openbao/ui/lib/core/app/decorators/confirm-leave.js re-exports withConfirmLeave from the specifier 'core/decorators/confirm-leave', which resolves to the addon decorator module; the module defines no logic of its own and exports no other binding."
+- added `r.rollback-dirty-model` (MUST): "Rollback goes through _rollbackModel(modelPath), which fetches the model from this.controller and only acts when the model has dirty attributes and is not saving, invoking unloadRecord on a new record and rollbackAttributes otherwise."
+- added `r.route-only-decorator` (MUST): "withConfirmLeave returns a decorator that checks the SuperClass against Ember Route with Object.prototype.isPrototypeOf.call; when the class is not a Route subclass it writes the 'withConfirmLeave decorator must be used on instance of ember Route class. Decorator not applied to returned class' error to console.error and returns SuperClass unchanged instead of wrapping it."
+- added `r.silent-cleanup-paths` (MAY): "withConfirmLeave accepts an optional second parameter, silentCleanupPaths, for callers that want the decorator to skip the confirmation prompt on specific paths."
+- added `r.store-service-injection` (MAY): "The ConfirmLeave class injects the Ember data store service with @service store so model state can be inspected and rolled back from the decorator."
+- added `r.will-transition-guard` (MUST): "The returned ConfirmLeave class calls super.willTransition(...arguments) inside a try/catch so that a SuperClass without its own willTransition does not throw, and then reads the model at modelPath from this.controller before deciding whether to block the transition."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
