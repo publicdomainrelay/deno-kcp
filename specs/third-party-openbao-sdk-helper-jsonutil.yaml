@@ -2,10 +2,135 @@ apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
 - file:third_party/openbao/sdk/helper/jsonutil/json.go json.go@third_party/openbao/sdk/helper/jsonutil/json.go
 - file:third_party/openbao/sdk/helper/jsonutil/json_test.go json_test.go@third_party/openbao/sdk/helper/jsonutil/json_test.go
+- function:182e13ed382d22eedd3d9a5a1a2a4585 EncodeJSON@third_party/openbao/sdk/helper/jsonutil/json.go:18
+- function:186d1ab83658f923b0f4e72c1353748e DecodeJSON@third_party/openbao/sdk/helper/jsonutil/json.go:60
+- function:508dfa21a4c58aba9d9ec2ee8d9f996a DecodeJSONFromReader@third_party/openbao/sdk/helper/jsonutil/json.go:88
+- function:f8402c5f985190e386f7283f906c2157 EncodeJSONAndCompress@third_party/openbao/sdk/helper/jsonutil/json.go:34
 kind: SystemContext
 metadata:
   name: third-party-openbao-sdk-helper-jsonutil
   namespace: default
 spec:
+  intent: 'This context exists so the rest of the OpenBao code tree has one shared,
+    consistent way to serialize and deserialize JSON, including the compressed-storage
+    form used by the logical storage layer (StorageEntry.DecodeJSON calls jsonutil.DecodeJSON).
+    It is upstream vendored SDK code, not logic owned by this repository, and it is
+    documented here because the repository depends on its exact behavior: nil-input
+    rejection, the compression canary convention, the gzip BestCompression default,
+    and json.Number decoding semantics. Nothing in this context is a command entrypoint;
+    it is a library surface consumed by many builtin credential and storage paths.'
+  interfaces:
+  - file: third_party/openbao/sdk/helper/jsonutil/json.go
+    kind: function
+    name: DecodeJSON
+    signature: func DecodeJSON(data []byte, out any) error
+  - file: third_party/openbao/sdk/helper/jsonutil/json.go
+    kind: function
+    name: DecodeJSONFromReader
+    signature: func DecodeJSONFromReader(r io.Reader, out any) error
+  - file: third_party/openbao/sdk/helper/jsonutil/json.go
+    kind: function
+    name: EncodeJSON
+    signature: func EncodeJSON(in any) ([]byte, error)
+  - file: third_party/openbao/sdk/helper/jsonutil/json.go
+    kind: function
+    name: EncodeJSONAndCompress
+    signature: func EncodeJSONAndCompress(in any, config *compressutil.CompressionConfig)
+      ([]byte, error)
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/jsonutil/json.go
+    - function:186d1ab83658f923b0f4e72c1353748e
+    id: r.decode-decompress-canary
+    level: MUST
+    text: 'DecodeJSON must pass the input through compressutil.Decompress, wrap any
+      decompression failure as "failed to decompress JSON: %w", and then only replace
+      the working data with the decompressed bytes when the returned uncompressed
+      flag is false.'
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/jsonutil/json.go
+    - function:186d1ab83658f923b0f4e72c1353748e
+    - function:508dfa21a4c58aba9d9ec2ee8d9f996a
+    id: r.decode-delegates-to-reader
+    level: MUST
+    text: DecodeJSON must perform the actual decoding by calling DecodeJSONFromReader
+      with a bytes.Reader over the resolved data, so both byte-slice and reader entry
+      points share one decode implementation.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/jsonutil/json.go
+    - function:186d1ab83658f923b0f4e72c1353748e
+    id: r.decode-empty-decompressed-invalid
+    level: MUST
+    text: DecodeJSON must return the error "decompressed data being decoded is invalid"
+      when the input was compressed (uncompressed flag false) yet the decompressed
+      result has zero length.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/jsonutil/json.go
+    - function:186d1ab83658f923b0f4e72c1353748e
+    id: r.decode-input-validation
+    level: MUST
+    text: DecodeJSON must return the error "'data' being decoded is nil" for a zero-length
+      data slice and the error "output parameter 'out' is nil" for a nil out, checking
+      data before out.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/jsonutil/json.go
+    - function:508dfa21a4c58aba9d9ec2ee8d9f996a
+    id: r.decode-reader-nil-checks
+    level: MUST
+    text: DecodeJSONFromReader must reject a nil io.Reader with the error "'io.Reader'
+      being decoded is nil" and a nil out with the error "output parameter 'out' is
+      nil".
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/jsonutil/json.go
+    - function:508dfa21a4c58aba9d9ec2ee8d9f996a
+    id: r.decode-reader-use-number
+    level: MUST
+    text: DecodeJSONFromReader must enable UseNumber on the json.Decoder so JSON integer
+      values decode as json.Number instead of float64, and must pass out to Decode
+      directly without taking its address.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/jsonutil/json.go
+    - function:182e13ed382d22eedd3d9a5a1a2a4585
+    id: r.encode-buffer-semantics
+    level: MUST
+    text: EncodeJSON must encode the value with a json.Encoder writing into a bytes.Buffer,
+      return the buffer bytes on success, and return nil plus the encoder error when
+      encoding fails.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/jsonutil/json.go
+    - function:f8402c5f985190e386f7283f906c2157
+    id: r.encode-compress-default-config
+    level: MUST
+    text: EncodeJSONAndCompress must substitute a default CompressionConfig with Type
+      CompressionTypeGzip and GzipCompressionLevel gzip.BestCompression when the caller
+      supplies a nil config, so that a nil config produces gzip output at best compression
+      rather than uncompressed output.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/jsonutil/json.go
+    - function:182e13ed382d22eedd3d9a5a1a2a4585
+    - function:f8402c5f985190e386f7283f906c2157
+    id: r.encode-compress-order
+    level: MUST
+    text: EncodeJSONAndCompress must reject a nil input with the error "input for
+      encoding is nil", JSON-encode the input first via EncodeJSON, and then pass
+      the encoded bytes to compressutil.Compress; an encode failure must propagate
+      without compression being attempted.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/jsonutil/json.go
+    - function:182e13ed382d22eedd3d9a5a1a2a4585
+    id: r.encode-rejects-nil
+    level: MUST
+    text: EncodeJSON must return a nil byte slice and the error "input for encoding
+      is nil" when the input value is nil, and must not attempt encoding in that case.
+  - codeRefs:
+    - file:third_party/openbao/sdk/helper/jsonutil/json_test.go
+    - function:186d1ab83658f923b0f4e72c1353748e
+    - function:f8402c5f985190e386f7283f906c2157
+    id: r.round-trip-tested
+    level: SHOULD
+    text: The package tests must cover the compress/decompress round trip through
+      EncodeJSONAndCompress and DecodeJSON, the encode path through EncodeJSON, and
+      the decode path through DecodeJSON, so the canary and nil-check behavior stay
+      verified.
   upstream: self

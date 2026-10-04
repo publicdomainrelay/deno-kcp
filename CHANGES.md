@@ -3188,6 +3188,21 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.unbalanced-characters` (MUST): "PopulateString must return ErrUnbalancedTemplatingCharacter when a closing "}}" appears before any opening "{{", and also when a segment after an opening delimiter does not contain exactly one closing "]}" pair, so malformed templates never produce partial output."
 - added `r.validity-check-only` (MUST): "When ValidityCheckOnly is set on the input, PopulateString must validate structure and report substitution without invoking performTemplating or writing any text into the builder, so the returned string is empty while syntax errors still surface."
 
+### third-party-openbao-sdk-helper-jsonutil
+
+- intent: "" -> "This context exists so the rest of the OpenBao code tree has one shared, consistent way to serialize and deserialize JSON, including the compressed-storage form used by the logical storage layer (StorageEntry.DecodeJSON calls jsonutil.DecodeJSON). It is upstream vendored SDK code, not logic owned by this repository, and it is documented here because the repository depends on its exact behavior: nil-input rejection, the compression canary convention, the gzip BestCompression default, and json.Number decoding semantics. Nothing in this context is a command entrypoint; it is a library surface consumed by many builtin credential and storage paths."
+- added `r.decode-decompress-canary` (MUST): "DecodeJSON must pass the input through compressutil.Decompress, wrap any decompression failure as "failed to decompress JSON: %w", and then only replace the working data with the decompressed bytes when the returned uncompressed flag is false."
+- added `r.decode-delegates-to-reader` (MUST): "DecodeJSON must perform the actual decoding by calling DecodeJSONFromReader with a bytes.Reader over the resolved data, so both byte-slice and reader entry points share one decode implementation."
+- added `r.decode-empty-decompressed-invalid` (MUST): "DecodeJSON must return the error "decompressed data being decoded is invalid" when the input was compressed (uncompressed flag false) yet the decompressed result has zero length."
+- added `r.decode-input-validation` (MUST): "DecodeJSON must return the error "'data' being decoded is nil" for a zero-length data slice and the error "output parameter 'out' is nil" for a nil out, checking data before out."
+- added `r.decode-reader-nil-checks` (MUST): "DecodeJSONFromReader must reject a nil io.Reader with the error "'io.Reader' being decoded is nil" and a nil out with the error "output parameter 'out' is nil"."
+- added `r.decode-reader-use-number` (MUST): "DecodeJSONFromReader must enable UseNumber on the json.Decoder so JSON integer values decode as json.Number instead of float64, and must pass out to Decode directly without taking its address."
+- added `r.encode-buffer-semantics` (MUST): "EncodeJSON must encode the value with a json.Encoder writing into a bytes.Buffer, return the buffer bytes on success, and return nil plus the encoder error when encoding fails."
+- added `r.encode-compress-default-config` (MUST): "EncodeJSONAndCompress must substitute a default CompressionConfig with Type CompressionTypeGzip and GzipCompressionLevel gzip.BestCompression when the caller supplies a nil config, so that a nil config produces gzip output at best compression rather than uncompressed output."
+- added `r.encode-compress-order` (MUST): "EncodeJSONAndCompress must reject a nil input with the error "input for encoding is nil", JSON-encode the input first via EncodeJSON, and then pass the encoded bytes to compressutil.Compress; an encode failure must propagate without compression being attempted."
+- added `r.encode-rejects-nil` (MUST): "EncodeJSON must return a nil byte slice and the error "input for encoding is nil" when the input value is nil, and must not attempt encoding in that case."
+- added `r.round-trip-tested` (SHOULD): "The package tests must cover the compress/decompress round trip through EncodeJSONAndCompress and DecodeJSON, the encode path through EncodeJSON, and the decode path through DecodeJSON, so the canary and nil-check behavior stay verified."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |

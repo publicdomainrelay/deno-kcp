@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the rest of the OpenBao code tree has one shared, consistent way to serialize and deserialize JSON, including the compressed-storage form used by the logical storage layer (StorageEntry.DecodeJSON calls jsonutil.DecodeJSON). It is upstream vendored SDK code, not logic owned by this repository, and it is documented here because the repository depends on its exact behavior: nil-input rejection, the compression canary convention, the gzip BestCompression default, and json.Number decoding semantics. Nothing in this context is a command entrypoint; it is a library surface consumed by many builtin credential and storage paths.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
