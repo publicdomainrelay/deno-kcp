@@ -1,0 +1,46 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: internal-provider-s2c-5c4b091d79b5
+  namespace: default
+spec:
+  delta:
+    requirements:
+    - id: r.watch-cache-keys-every-workspace
+      op: added
+      to:
+        codeRefs:
+        - file:internal/provider/watch.go
+        - file:internal/provider/watch_cache.go
+        id: r.watch-cache-keys-every-workspace
+        level: MUST
+        text: The provider watches every workspace through one wildcard informer,
+          and the same namespace and name can exist in more than one workspace --
+          a DenoPod named pds in namespace default exists in root:alice and in root:bob.
+          The watch cache must key every object by its logical cluster as well as
+          its namespace and name, so that two such objects are two independent cache
+          entries. Both survive an informer re-list, both are returned by allPods
+          and so appear in the virtual DNS table of every pod, and each is read back
+          by a Ref that names its own workspace. A workload must never be evicted
+          from the cache, dropped from the DNS table or skipped by the reconcile loop
+          because another workspace holds an object with the same namespace and name;
+          a DenoPod that is not ready must keep being reconciled and re-probed on
+          its own key until it is ready or reaches a terminal phase.
+    - id: r.watch-cache-keys-every-workspace-test
+      op: added
+      to:
+        codeRefs:
+        - file:internal/provider/watch_test.go
+        id: r.watch-cache-keys-every-workspace-test
+        level: MUST
+        text: An offline unit test inserts two DenoPods that share a namespace and
+          a name but carry different kcp.io/cluster annotations into the watch cache
+          and asserts that allPods returns both and that ReadPod resolves each one
+          from its own workspace. The test must fail when the cache keys objects by
+          namespace and name alone.
+  direction: SpecToCode
+  fromSpecHash: d585aa61493e88ee63a2972d73d25ab44a8456ae3c4e4e6590bb5c8f09f8de4c
+  systemContext: internal-provider
+  toSpecHash: 5c4b091d79b5f25241dbed814199a53274a9f2b7d0337b1340744dbe8de32ed8
+status:
+  phase: Pending

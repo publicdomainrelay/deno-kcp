@@ -19,6 +19,11 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.readme-lists-bob-and-bidder` (MUST): "README.md's service table adds root:bob DenoPod/pds (hono-pds, port 2585, pds.default.bob.svc.kcp.local) and root:bob DenoPod/bidder (hono-bidder, port 2586, bidder.default.bob.svc.kcp.local), its OpenBao table adds root:bob OpenBao/openbao bob.default (15-openbao-bob.yaml), its prose says four workspaces, and its ceilings note that the bidder registers with an XRPC dispatcher, so it needs one reachable."
 - removed `r.three-workspaces-at-root` (MUST)
 
+### internal-provider
+
+- added `r.watch-cache-keys-every-workspace` (MUST): "The provider watches every workspace through one wildcard informer, and the same namespace and name can exist in more than one workspace -- a DenoPod named pds in namespace default exists in root:alice and in root:bob. The watch cache must key every object by its logical cluster as well as its namespace and name, so that two such objects are two independent cache entries. Both survive an informer re-list, both are returned by allPods and so appear in the virtual DNS table of every pod, and each is read back by a Ref that names its own workspace. A workload must never be evicted from the cache, dropped from the DNS table or skipped by the reconcile loop because another workspace holds an object with the same namespace and name; a DenoPod that is not ready must keep being reconciled and re-probed on its own key until it is ready or reaches a terminal phase."
+- added `r.watch-cache-keys-every-workspace-test` (MUST): "An offline unit test inserts two DenoPods that share a namespace and a name but carry different kcp.io/cluster annotations into the watch cache and asserts that allPods returns both and that ReadPod resolves each one from its own workspace. The test must fail when the cache keys objects by namespace and name alone."
+
 ### test-integration
 
 - intent: "This context exists to hold the one test package that proves deno-kcp works against real infrastructure and against the checked-in examples. It separates what can be verified from the repository alone (offline_test.go, examples.go) from what needs a running kcp, kine, deno and policy-engine (live_test.go, fixture_test.go) from what additionally needs the pinned OpenBao (bao_test.go, openbao_live_test.go), so the cheap checks run everywhere and the expensive ones are gated behind explicit opt-in. The fixture layer exists so that every live test describes intent in terms of typed Kubernetes objects and named expectations rather than raw HTTP, and so the OpenBao version certificates are issued by is the one the repository pins, never whatever binary happens to be on PATH." -> "This context exists to hold the one test package that proves deno-kcp works against real infrastructure and against the checked-in examples. It separates what can be verified from the repository alone (offline_test.go, examples.go) from what needs a running kcp, kine, deno and policy-engine (live_test.go, fixture_test.go) from what additionally needs the pinned OpenBao (bao_test.go, openbao_live_test.go), so the cheap checks run everywhere and the expensive ones are gated behind explicit opt-in. The fixture layer exists so that every live test describes intent in terms of typed Kubernetes objects and named expectations rather than raw HTTP, and so the OpenBao version certificates are issued by is the one the repository pins, never whatever binary happens to be on PATH. The example registry covers every kcp-kind manifest the repository ships, including the atproto market manifests under deploy/examples/atproto/market, so the offline tier decodes and schema-fits them with no cluster."
@@ -2876,6 +2881,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 
 | change | direction | phase | commit | verify | acceptance |
 | --- | --- | --- | --- | --- | --- |
+| internal-provider-s2c-5c4b091d79b5 | SpecToCode | Pending |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-database-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-database-dbplugin-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-builtin-logical-kubernetes-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
@@ -3075,3 +3081,4 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-sdk-database-dbplugin-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Failed |  | 0 | - |
 | third-party-openbao-sdk-database-dbplugin-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-sdk-database-dbplugin-v5-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
+| third-party-openbao-sdk-database-dbplugin-v5-proto-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
