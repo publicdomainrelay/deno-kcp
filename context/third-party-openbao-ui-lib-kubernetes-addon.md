@@ -9,5 +9,7 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 <!-- SPECD_MANAGED_BEGIN -->
 ## Resolved code references
 
-_None yet._
+- `class:be97ad9bca27f8aa6c2b71e7e60c37a7` class KubernetesEngine (third_party/openbao/ui/lib/kubernetes/addon/engine.js)
+- `file:third_party/openbao/ui/lib/kubernetes/addon/engine.js` file engine.js (third_party/openbao/ui/lib/kubernetes/addon/engine.js)
+- `file:third_party/openbao/ui/lib/kubernetes/addon/routes.js` file routes.js (third_party/openbao/ui/lib/kubernetes/addon/routes.js)
 <!-- SPECD_MANAGED_END -->
