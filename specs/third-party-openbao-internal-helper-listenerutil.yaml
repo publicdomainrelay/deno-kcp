@@ -7,10 +7,260 @@ codeRefIndex:
 - file:third_party/openbao/internal/helper/listenerutil/tls_acme_test.go tls_acme_test.go@third_party/openbao/internal/helper/listenerutil/tls_acme_test.go
 - file:third_party/openbao/internal/helper/listenerutil/tls_autoreload.go tls_autoreload.go@third_party/openbao/internal/helper/listenerutil/tls_autoreload.go
 - file:third_party/openbao/internal/helper/listenerutil/tls_autoreload_test.go tls_autoreload_test.go@third_party/openbao/internal/helper/listenerutil/tls_autoreload_test.go
+- function:243cbb2c120f333647af6a079f7272ce NewCertificateGetter@third_party/openbao/internal/helper/listenerutil/tls_acme.go:58
+- function:5510d98d2ab4d1fbcff27a3dcc84253f NewTLSReloadListener@third_party/openbao/internal/helper/listenerutil/tls_autoreload.go:17
+- function:8d308b72974ac29a34f96bf99a2c94ea TLSConfig@third_party/openbao/internal/helper/listenerutil/listener.go:92
+- function:a82b61c4d5b2635503aaae5496eb6481 NewBufConnWrapper@third_party/openbao/internal/helper/listenerutil/bufconn.go:23
+- function:ef7cace533196f8046df8aecdabca006 UnixSocketListener@third_party/openbao/internal/helper/listenerutil/listener.go:67
+- interface:4a249a739fb26e7b33bdd06aaccd8520 ReloadableCertGetter@third_party/openbao/internal/helper/listenerutil/tls_acme.go:34
+- method:0b6c089432a914aa0f61ba9279b84029 ReloadableCertGetter.GetCertificate@third_party/openbao/internal/helper/listenerutil/tls_acme.go:36
+- method:0e078a8bd948f6ce462f5f6b4b07b00a zapHclCore.Sync@third_party/openbao/internal/helper/listenerutil/tls_acme.go:367
+- method:506a7d9b4523e0d642bb5c388725de81 ACMECertGetter.Reload@third_party/openbao/internal/helper/listenerutil/tls_acme.go:264
+- method:534bb51f784d89dad3a8f22eba0a4202 ACMECertGetter.HandleHTTPChallenge@third_party/openbao/internal/helper/listenerutil/tls_acme.go:260
+- method:60acd45c90430863dcb73616a5764bd5 ACMECertGetter.ALPNProtos@third_party/openbao/internal/helper/listenerutil/tls_acme.go:256
+- method:6f0874635cf31f04e9abb3bc6b8e4f12 tlsReloadListener.Close@third_party/openbao/internal/helper/listenerutil/tls_autoreload.go:33
+- method:6fcfa9c9313be3dd282730630cc2ae71 rmListener.Close@third_party/openbao/internal/helper/listenerutil/listener.go:44
+- method:7094d903392bc0f180ed44c61e77ca28 ACMECertGetter.Close@third_party/openbao/internal/helper/listenerutil/tls_acme.go:49
+- method:80950f0bf26ac573a83d76b841f108ac BufConnWrapper.Dial@third_party/openbao/internal/helper/listenerutil/bufconn.go:32
+- method:93f7278092bb45ca17a3fde4a6372ab9 ReloadableCertGetter.Reload@third_party/openbao/internal/helper/listenerutil/tls_acme.go:35
+- method:94b94801595d5e9238661e8d6a613726 zapHclCore.Write@third_party/openbao/internal/helper/listenerutil/tls_acme.go:285
+- method:9b045bb7e2f4878dfb93e81312e98c87 ACMECertGetter.GetCertificate@third_party/openbao/internal/helper/listenerutil/tls_acme.go:266
+- method:abedc81857554c1e51b7a810322a28bd BufConnWrapper.DialContext@third_party/openbao/internal/helper/listenerutil/bufconn.go:39
+- method:af6c5d2b3f786880c1182f3d38622cdd zapHclCore.Enabled@third_party/openbao/internal/helper/listenerutil/tls_acme.go:279
+- method:bce781b1ee92d45e198fbc225eb20939 zapHclCore.Check@third_party/openbao/internal/helper/listenerutil/tls_acme.go:281
+- method:e59b1974e9ea9d869607cb0324187cb8 zapHclCore.With@third_party/openbao/internal/helper/listenerutil/tls_acme.go:280
+- struct:01f8eea6c1bc5ccb81a3105665bc2100 UnixSocketsConfig@third_party/openbao/internal/helper/listenerutil/listener.go:30
+- struct:69069c4c5bdb6e0af39fb1a2d70de474 BufConnWrapper@third_party/openbao/internal/helper/listenerutil/bufconn.go:17
+- struct:6ebe737b4dbbb5ee1564c516b701d770 Listener@third_party/openbao/internal/helper/listenerutil/listener.go:25
+- struct:d76bb3411f325b131d6ff332588c116c ACMECertGetter@third_party/openbao/internal/helper/listenerutil/tls_acme.go:39
 kind: SystemContext
 metadata:
   name: third-party-openbao-internal-helper-listenerutil
   namespace: default
 spec:
+  intent: 'The context exists so that OpenBao''s command layer can construct listeners
+    without owning the file-permission, TLS and certificate-reload mechanics. It factors
+    out three concerns that every server command needs: connecting a client to an
+    in-process bufconn, creating a unix-domain socket with correct ownership and mode
+    that cleans up after itself, and producing a tls.Config whose certificates can
+    be rotated either by an ACME client or by watching files on disk. Keeping these
+    helpers in one package lets agent, proxy and server commands share identical listener
+    semantics, and the ReloadableCertGetter interface lets ACME-backed and file-backed
+    rotation be swapped without changing the TLS configuration code.'
+  interfaces:
+  - file: third_party/openbao/internal/helper/listenerutil/tls_acme.go
+    kind: struct
+    name: ACMECertGetter
+    signature: type ACMECertGetter struct
+  - file: third_party/openbao/internal/helper/listenerutil/tls_acme.go
+    kind: method
+    name: ACMECertGetter.ALPNProtos
+    signature: func (c *ACMECertGetter) ALPNProtos() []string
+  - file: third_party/openbao/internal/helper/listenerutil/tls_acme.go
+    kind: method
+    name: ACMECertGetter.Close
+    signature: func (c *ACMECertGetter) Close() error
+  - file: third_party/openbao/internal/helper/listenerutil/tls_acme.go
+    kind: method
+    name: ACMECertGetter.GetCertificate
+    signature: func (c *ACMECertGetter) GetCertificate(hello *tls.ClientHelloInfo)
+      (*tls.Certificate, error)
+  - file: third_party/openbao/internal/helper/listenerutil/tls_acme.go
+    kind: method
+    name: ACMECertGetter.HandleHTTPChallenge
+    signature: func (c *ACMECertGetter) HandleHTTPChallenge(w http.ResponseWriter,
+      r *http.Request) bool
+  - file: third_party/openbao/internal/helper/listenerutil/tls_acme.go
+    kind: method
+    name: ACMECertGetter.Reload
+    signature: func (c *ACMECertGetter) Reload() error
+  - file: third_party/openbao/internal/helper/listenerutil/bufconn.go
+    kind: struct
+    name: BufConnWrapper
+    signature: type BufConnWrapper struct
+  - file: third_party/openbao/internal/helper/listenerutil/bufconn.go
+    kind: method
+    name: BufConnWrapper.Dial
+    signature: func (bcl *BufConnWrapper) Dial(_, _ string) (net.Conn, error)
+  - file: third_party/openbao/internal/helper/listenerutil/bufconn.go
+    kind: method
+    name: BufConnWrapper.DialContext
+    signature: func (bcl *BufConnWrapper) DialContext(ctx context.Context, _, _ string)
+      (net.Conn, error)
+  - file: third_party/openbao/internal/helper/listenerutil/listener.go
+    kind: struct
+    name: Listener
+    signature: type Listener struct
+  - file: third_party/openbao/internal/helper/listenerutil/bufconn.go
+    kind: function
+    name: NewBufConnWrapper
+    signature: func NewBufConnWrapper(bcl *bufconn.Listener) *BufConnWrapper
+  - file: third_party/openbao/internal/helper/listenerutil/tls_acme.go
+    kind: function
+    name: NewCertificateGetter
+    signature: func NewCertificateGetter(l *configutil.Listener, ui cli.Ui, logger
+      hclog.Logger) (ReloadableCertGetter, error)
+  - file: third_party/openbao/internal/helper/listenerutil/tls_autoreload.go
+    kind: function
+    name: NewTLSReloadListener
+    signature: func NewTLSReloadListener(ln net.Listener, paths []string, interval
+      time.Duration, reload func() error, logger hclog.Logger) net.Listener
+  - file: third_party/openbao/internal/helper/listenerutil/tls_acme.go
+    kind: interface
+    name: ReloadableCertGetter
+    signature: type ReloadableCertGetter interface
+  - file: third_party/openbao/internal/helper/listenerutil/tls_acme.go
+    kind: method
+    name: ReloadableCertGetter.GetCertificate
+    signature: GetCertificate(clientHello *tls.ClientHelloInfo) (*tls.Certificate,
+      error)
+  - file: third_party/openbao/internal/helper/listenerutil/tls_acme.go
+    kind: method
+    name: ReloadableCertGetter.Reload
+    signature: Reload() error
+  - file: third_party/openbao/internal/helper/listenerutil/listener.go
+    kind: function
+    name: TLSConfig
+    signature: func TLSConfig(l *configutil.Listener, props map[string]string, ui
+      cli.Ui, logger hclog.Logger) (*tls.Config, ReloadableCertGetter, error)
+  - file: third_party/openbao/internal/helper/listenerutil/listener.go
+    kind: function
+    name: UnixSocketListener
+    signature: func UnixSocketListener(path string, unixSocketsConfig *UnixSocketsConfig)
+      (net.Listener, error)
+  - file: third_party/openbao/internal/helper/listenerutil/listener.go
+    kind: struct
+    name: UnixSocketsConfig
+    signature: type UnixSocketsConfig struct
+  - file: third_party/openbao/internal/helper/listenerutil/listener.go
+    kind: method
+    name: rmListener.Close
+    signature: func (l *rmListener) Close() error
+  - file: third_party/openbao/internal/helper/listenerutil/tls_autoreload.go
+    kind: method
+    name: tlsReloadListener.Close
+    signature: func (l *tlsReloadListener) Close() error
+  - file: third_party/openbao/internal/helper/listenerutil/tls_acme.go
+    kind: method
+    name: zapHclCore.Check
+    signature: func (z zapHclCore) Check(entry zapcore.Entry, checked *zapcore.CheckedEntry)
+      *zapcore.CheckedEntry
+  - file: third_party/openbao/internal/helper/listenerutil/tls_acme.go
+    kind: method
+    name: zapHclCore.Enabled
+    signature: func (z zapHclCore) Enabled(zapcore.Level) bool
+  - file: third_party/openbao/internal/helper/listenerutil/tls_acme.go
+    kind: method
+    name: zapHclCore.Sync
+    signature: func (z zapHclCore) Sync() error
+  - file: third_party/openbao/internal/helper/listenerutil/tls_acme.go
+    kind: method
+    name: zapHclCore.With
+    signature: func (z zapHclCore) With([]zapcore.Field) zapcore.Core
+  - file: third_party/openbao/internal/helper/listenerutil/tls_acme.go
+    kind: method
+    name: zapHclCore.Write
+    signature: func (z zapHclCore) Write(entry zapcore.Entry, fields []zapcore.Field)
+      error
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/listenerutil/tls_acme.go
+    - function:243cbb2c120f333647af6a079f7272ce
+    - method:506a7d9b4523e0d642bb5c388725de81
+    - method:534bb51f784d89dad3a8f22eba0a4202
+    - method:60acd45c90430863dcb73616a5764bd5
+    - method:7094d903392bc0f180ed44c61e77ca28
+    - method:9b045bb7e2f4878dfb93e81312e98c87
+    - struct:d76bb3411f325b131d6ff332588c116c
+    id: r.acme-cert-getter
+    level: MUST
+    text: NewCertificateGetter returns a ReloadableCertGetter backed by an ACMECertGetter
+      built from a configutil.Listener, a cli.Ui and an hclog.Logger. The getter implements
+      Reload, GetCertificate, ALPNProtos, which reports the ALPN protocol list, HandleHTTPChallenge,
+      which serves an HTTP-01 challenge request and reports whether it handled it,
+      and Close, which releases the ACME client's resources.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/listenerutil/bufconn.go
+    - function:a82b61c4d5b2635503aaae5496eb6481
+    id: r.bufconn-constructor
+    level: MUST
+    text: NewBufConnWrapper builds a BufConnWrapper from a supplied bufconn.Listener,
+      holding that listener so Dial and DialContext can delegate to it.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/listenerutil/bufconn.go
+    - method:80950f0bf26ac573a83d76b841f108ac
+    - method:abedc81857554c1e51b7a810322a28bd
+    - struct:69069c4c5bdb6e0af39fb1a2d70de474
+    id: r.bufconn-wrapper
+    level: MUST
+    text: BufConnWrapper wraps an existing *bufconn.Listener and exposes a Dial and
+      DialContext that ignore the address arguments and dial the in-memory listening
+      end, so callers such as consul-template's TransportDialer interface can open
+      client connections to an in-process listener.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/listenerutil/listener_test.go
+    - file:third_party/openbao/internal/helper/listenerutil/tls_acme_test.go
+    - file:third_party/openbao/internal/helper/listenerutil/tls_autoreload_test.go
+    id: r.listener-tests
+    level: MUST
+    text: The package tests verify the unix socket config by creating a temporary
+      socket, applying a UnixSocketsConfig with user, group and mode given both as
+      names and as numeric ids, and asserting the resulting file permissions equal
+      the requested mode.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/listenerutil/tls_acme.go
+    - interface:4a249a739fb26e7b33bdd06aaccd8520
+    - method:0b6c089432a914aa0f61ba9279b84029
+    - method:93f7278092bb45ca17a3fde4a6372ab9
+    id: r.reloadable-cert-getter
+    level: MUST
+    text: 'ReloadableCertGetter is the interface TLS listeners depend on: Reload re-reads
+      or re-acquires the certificate and GetCertificate serves it to a TLS handshake,
+      so ACME-backed and file-backed rotation are interchangeable.'
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/listenerutil/listener.go
+    - function:8d308b72974ac29a34f96bf99a2c94ea
+    - struct:6ebe737b4dbbb5ee1564c516b701d770
+    id: r.tls-config
+    level: MUST
+    text: TLSConfig derives a *tls.Config and a ReloadableCertGetter from a configutil.Listener,
+      a properties map, a cli.Ui and an hclog.Logger, so server commands get both
+      the TLS settings and the certificate source from one call.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/listenerutil/tls_autoreload.go
+    - function:5510d98d2ab4d1fbcff27a3dcc84253f
+    - method:6f0874635cf31f04e9abb3bc6b8e4f12
+    id: r.tls-reload-listener
+    level: MUST
+    text: NewTLSReloadListener decorates any net.Listener with a watcher over the
+      given file paths that invokes the supplied reload function when those files
+      change, polling every interval and logging through the supplied hclog.Logger,
+      so rotated certificate files take effect without restarting the server. Closing
+      the returned listener stops the watcher before closing the underlying listener.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/listenerutil/listener.go
+    - function:ef7cace533196f8046df8aecdabca006
+    - method:6fcfa9c9313be3dd282730630cc2ae71
+    - struct:01f8eea6c1bc5ccb81a3105665bc2100
+    id: r.unix-socket-listener
+    level: MUST
+    text: UnixSocketListener removes any pre-existing file at the given path, ignoring
+      a not-exist result but failing on other removal errors, then listens on that
+      unix path. When a UnixSocketsConfig is supplied it applies its User, Group and
+      Mode to the socket file, accepting either numeric ids or names, and fails with
+      a wrapped error if permissions cannot be set. The returned listener is an rmListener
+      that deletes the socket file on Close.
+  - codeRefs:
+    - file:third_party/openbao/internal/helper/listenerutil/tls_acme.go
+    - method:0e078a8bd948f6ce462f5f6b4b07b00a
+    - method:94b94801595d5e9238661e8d6a613726
+    - method:af6c5d2b3f786880c1182f3d38622cdd
+    - method:bce781b1ee92d45e198fbc225eb20939
+    - method:e59b1974e9ea9d869607cb0324187cb8
+    id: r.zap-hcl-core
+    level: MUST
+    text: zapHclCore adapts an hclog.Logger to the zapcore.Core interface, implementing
+      Enabled, With, Check, Write and Sync so the ACME client library's zap logging
+      can be routed into OpenBao's hclog output.
   upstream: self

@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+The context exists so that OpenBao's command layer can construct listeners without owning the file-permission, TLS and certificate-reload mechanics. It factors out three concerns that every server command needs: connecting a client to an in-process bufconn, creating a unix-domain socket with correct ownership and mode that cleans up after itself, and producing a tls.Config whose certificates can be rotated either by an ACME client or by watching files on disk. Keeping these helpers in one package lets agent, proxy and server commands share identical listener semantics, and the ReloadableCertGetter interface lets ACME-backed and file-backed rotation be swapped without changing the TLS configuration code.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
