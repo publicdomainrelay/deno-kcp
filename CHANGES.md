@@ -2843,6 +2843,17 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.version-info-fields` (MUST): "VersionInfo must carry exactly the build identity of one binary as five string fields: Revision, Version, VersionPrerelease, VersionMetadata, and CommitDate."
 - added `r.version-number-format` (MUST): "VersionInfo.VersionNumber must return "(version unknown)" when the package-level Version and VersionPrerelease are both "unknown"; otherwise it must begin with the receiver's Version and append "-<VersionPrerelease>" when the prerelease is non-empty, then "+<VersionMetadata>" when the metadata is non-empty."
 
+### third-party-openbao-release
+
+- intent: "" -> "The context exists so that OpenBao releases can be produced as native Linux packages without hand-written per-format stubs: nfpm reads this one YAML manifest and emits both deb and rpm artifacts. It pins the packaging contract that release automation depends on — package name and metadata, GOARCH/GOOS/VERSION substitution, the install layout and file modes, the config files that must survive upgrades, the maintainer script hooks, and the signing key source — so a change to any of those is a change to what ships to package repositories."
+- added `r.build-time-substitution` (MUST): "Architecture, platform and version are not hard-coded; they are taken from the GOARCH, GOOS and VERSION environment variables respectively, so the same manifest yields per-target packages when release automation sets those variables."
+- added `r.install-layout-and-modes` (MUST): "Packaged contents map build outputs to install paths with explicit file modes: ./bin/bao goes to /usr/bin/bao with mode 0755, and ./LICENSE goes to /usr/share/doc/openbao/copyright with mode 0644."
+- added `r.maintainer-scripts` (MUST): "The manifest wires the maintainer script hooks preinstall to ./.release/linux/preinst, postinstall to ./.release/linux/postinst, and postremove to ./.release/linux/postrm."
+- added `r.package-identity` (MUST): "The manifest declares the package identity and metadata that both deb and rpm artifacts carry: name openbao, vendor OpenBao, homepage https://openbao.org, maintainer OpenBao <openbao@lists.openssf.org>, license MPL-2.0, section default, and the multi-line description stating that OpenBao manages, stores and distributes sensitive data including secrets, certificates and keys."
+- added `r.package-signing` (MUST): "Both the deb and rpm sections take their signature key file from the GPG_KEY_FILE environment variable, so signed packages require that variable to name a readable key file at build time."
+- added `r.preserved-config-files` (MUST): "Three files are installed as config|noreplace with mode 0644 so a package upgrade does not overwrite operator edits: ./.release/linux/package/etc/openbao/openbao.env to /etc/openbao/openbao.env, ./.release/linux/package/etc/openbao/openbao.hcl to /etc/openbao/openbao.hcl, and ./.release/linux/package/usr/lib/systemd/system/openbao.service to /usr/lib/systemd/system/openbao.service."
+- added `r.relationship-declarations` (MUST): "The package declares it provides openbao, conflicts with the bao and bao-hsm packages, replaces bao, and depends on openssl, so a package manager treats an OpenBao install as mutually exclusive with the legacy bao packages and pulls in the OpenSSL runtime dependency."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -3042,5 +3053,6 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-internal-vault-seal-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9-a2 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-vault-tokens-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-internal-version-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-release-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-release-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-sdk-database-dbplugin-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |
+| third-party-openbao-sdk-database-dbplugin-v5-c2s-6c1bbe4c3ba9-6c1bbe4c3ba9 | CodeToSpec | Running |  | 0 | - |

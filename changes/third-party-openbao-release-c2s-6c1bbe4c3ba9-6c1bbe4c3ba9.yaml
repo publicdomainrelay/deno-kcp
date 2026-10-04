@@ -10,5 +10,19 @@ spec:
   systemContext: third-party-openbao-release
   toCommit: 6c1bbe4c3ba95ce6f9d4c78dead4b6c359358c8d
 status:
-  message: the agent is summarizing third-party-openbao-release
-  phase: Running
+  agentLog: 'This context covers the packaging configuration for the vendored OpenBao
+    tree under third_party/openbao. It is a single nfpm (nFPM) manifest at third_party/openbao/.release/nfpm.yaml
+    that declares how the bao binary and its supporting files are assembled into Linux
+    .deb and .rpm packages. The manifest fixes package identity and metadata (name
+    openbao, vendor OpenBao, MPL-2.0 license, openbao.org homepage, OpenBao maintainers
+    list), substitutes arch, platform and version from the GOARCH, GOOS and VERSION
+    environment variables at build time, and declares dependency relationships: it
+    provides openbao, conflicts with the bao and bao-hsm packages, replaces bao, and
+    depends on openssl. It maps build outputs into install paths with explicit ownership
+    modes, installing ./bin/bao as /usr/bin/bao, the LICENSE as /usr/share/doc/openbao/copyright,
+    and three configuration artifacts (openbao.env, openbao.hcl and the systemd unit)
+    as config|noreplace so package upgrades do not overwrite operator edits. It wires
+    the preinstall, postinstall and postremove maintainer scripts, and points both
+    the deb and rpm signature sections at the key file named by GPG_KEY_FILE.'
+  message: wrote 7 requirement(s) and 0 interface(s) for third-party-openbao-release
+  phase: Succeeded
