@@ -1,5 +1,6 @@
 apiVersion: specs.publicdomainrelay.dev/v1alpha1
 codeRefIndex:
+- class:d5f79defc551993c07ba3c5bed03dd17 VaultClusterSettingsAuthEnableRoute@third_party/openbao/ui/app/routes/vault/cluster/settings/auth/enable.js:9
 - file:third_party/openbao/ui/app/routes/vault/cluster/settings/auth/configure.js
   configure.js@third_party/openbao/ui/app/routes/vault/cluster/settings/auth/configure.js
 - file:third_party/openbao/ui/app/routes/vault/cluster/settings/auth/enable.js enable.js@third_party/openbao/ui/app/routes/vault/cluster/settings/auth/enable.js
@@ -9,5 +10,59 @@ metadata:
   name: third-party-openbao-ui-app-routes-vault-cluster-settings-auth
   namespace: default
 spec:
+  intent: This context exists to record the route-layer contract of the auth settings
+    area of the OpenBao UI so that changes to route resolution, model loading, and
+    store injection in that subtree can be checked against a written specification.
+    It captures the single observed class, VaultClusterSettingsAuthEnableRoute, and
+    the two sibling route modules that complete the auth settings route tree, so downstream
+    work on the vendored UI knows which files own which routing responsibility.
+  interfaces:
+  - file: third_party/openbao/ui/app/routes/vault/cluster/settings/auth/enable.js
+    kind: class
+    name: VaultClusterSettingsAuthEnableRoute
+    signature: class VaultClusterSettingsAuthEnableRoute
   repository: deno-kcp
+  requirements:
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/settings/auth/configure.js
+    id: r.auth-configure-route-module
+    level: SHOULD
+    text: The configure route module must remain at third_party/openbao/ui/app/routes/vault/cluster/settings/auth/configure.js
+      so the configure segment of the auth settings route tree stays resolvable.
+  - codeRefs:
+    - class:d5f79defc551993c07ba3c5bed03dd17
+    - file:third_party/openbao/ui/app/routes/vault/cluster/settings/auth/enable.js
+    id: r.auth-enable-before-model
+    level: MUST
+    text: VaultClusterSettingsAuthEnableRoute must implement a beforeModel hook, so
+      work that has to happen before the route's model resolves runs on entry to the
+      enable route.
+  - codeRefs:
+    - class:d5f79defc551993c07ba3c5bed03dd17
+    - file:third_party/openbao/ui/app/routes/vault/cluster/settings/auth/enable.js
+    id: r.auth-enable-model-hook
+    level: MUST
+    text: VaultClusterSettingsAuthEnableRoute must implement a model hook, supplying
+      the data the enable route's template renders when the route is entered.
+  - codeRefs:
+    - class:d5f79defc551993c07ba3c5bed03dd17
+    - file:third_party/openbao/ui/app/routes/vault/cluster/settings/auth/enable.js
+    id: r.auth-enable-route-class
+    level: MUST
+    text: The auth settings enable route must be defined by the class VaultClusterSettingsAuthEnableRoute
+      in enable.js, so that Ember's route resolver maps the enable segment of the
+      cluster settings auth route tree to that class.
+  - codeRefs:
+    - class:d5f79defc551993c07ba3c5bed03dd17
+    - file:third_party/openbao/ui/app/routes/vault/cluster/settings/auth/enable.js
+    id: r.auth-enable-store-injection
+    level: MUST
+    text: VaultClusterSettingsAuthEnableRoute must declare a store property, giving
+      the route access to the Ember Data store when it loads auth method records.
+  - codeRefs:
+    - file:third_party/openbao/ui/app/routes/vault/cluster/settings/auth/index.js
+    id: r.auth-index-route-module
+    level: SHOULD
+    text: The index route module must remain at third_party/openbao/ui/app/routes/vault/cluster/settings/auth/index.js
+      so the bare auth settings path resolves to a listing route.
   upstream: self

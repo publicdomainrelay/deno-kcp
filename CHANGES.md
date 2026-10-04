@@ -5134,6 +5134,30 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.operation-routes` (MUST): "The backend directory provides a route module per secret operation: list.js, show.js, create.js, edit.js, secret-edit.js, versions.js, credentials.js, sign.js, configuration.js, overview.js, metadata.js, edit-metadata.js, diff.js, and actions.js, so every secrets-backend screen reachable under the backend route has a matching route definition."
 - added `r.root-route-variants` (MUST): "Each operation route has a paired "-root" module (list-root.js, show-root.js, create-root.js, edit-root.js, credentials-root.js, sign-root.js, versions-root.js) that carries the parent route of the pair, so the backend segment can hold a resource route while the child renders the operation itself."
 
+### third-party-openbao-ui-app-routes-vault-cluster-settings
+
+- intent: "" -> "This context exists so the cluster settings area of the OpenBao UI has well-defined route entry points: mounting a new secrets engine, configuring an existing aws or ssh engine, and viewing the seal state. The redirecting index route keeps the bare settings URL from rendering an empty page, the mount route clears stale secret-engine records before an engine is mounted, and the configure route gates access so only backend types the UI can actually configure are reachable."
+- added `r.configure-secret-backend-aws-after-model` (MUST): "The configure-secret-backend afterModel hook issues queryRecord for the secret-engine with backend and type taken from the model when the model type is aws, and otherwise returns the model unchanged."
+- added `r.configure-secret-backend-find-record` (SHOULD): "After the type check passes, the configure-secret-backend model hook calls findRecord for the backend and returns the queried model whether that call resolves or rejects, so a failed refresh does not block configuration of an already listed engine."
+- added `r.configure-secret-backend-refresh-action` (SHOULD): "The configure-secret-backend route exposes a refreshRoute action that calls this.refresh to re-run the route hooks, giving templates a way to reload the backend after a change."
+- added `r.configure-secret-backend-reset-controller` (MUST): "The configure-secret-backend resetController hook calls controller.reset only when the route is exiting, so controller state survives model refreshes."
+- added `r.configure-secret-backend-setup-controller` (MUST): "The configure-secret-backend setupController hook sets configured to true on the controller when the model carries a publicKey, then defers to the superclass implementation."
+- added `r.configure-secret-backend-type-gate` (MUST): "The configure-secret-backend model hook reads the backend path segment from the route params, queries the secret-engine model with that path, and when no record is returned or the record type is outside the CONFIGURABLE_BACKEND_TYPES list of aws and ssh, it throws an AdapterError whose httpStatus is set to 404."
+- added `r.mount-secret-backend-model` (MUST): "VaultClusterSettingsMountSecretBackendRoute.model creates a new secret-engine record, sets its config association to a newly created mount-config record, and returns the secret-engine record as the route model."
+- added `r.mount-secret-backend-unload` (MUST): "VaultClusterSettingsMountSecretBackendRoute.beforeModel unloads every cached secret-engine record from the store, so a newly mounted engine cannot collide with a stale record of the same name."
+- added `r.seal-model` (MUST): "The seal route model hook returns an RSVP hash whose cluster key is the modelFor of vault.cluster and whose seal key is the capabilities record found for the path sys/seal."
+- added `r.settings-index-redirect` (MUST): "The settings index route aborts a transition when the transition target name equals its own route name, and replaces the transition with vault.cluster.settings.mount-secret-backend, so the bare settings URL never renders the index template."
+
+### third-party-openbao-ui-app-routes-vault-cluster-settings-auth
+
+- intent: "" -> "This context exists to record the route-layer contract of the auth settings area of the OpenBao UI so that changes to route resolution, model loading, and store injection in that subtree can be checked against a written specification. It captures the single observed class, VaultClusterSettingsAuthEnableRoute, and the two sibling route modules that complete the auth settings route tree, so downstream work on the vendored UI knows which files own which routing responsibility."
+- added `r.auth-configure-route-module` (SHOULD): "The configure route module must remain at third_party/openbao/ui/app/routes/vault/cluster/settings/auth/configure.js so the configure segment of the auth settings route tree stays resolvable."
+- added `r.auth-enable-before-model` (MUST): "VaultClusterSettingsAuthEnableRoute must implement a beforeModel hook, so work that has to happen before the route's model resolves runs on entry to the enable route."
+- added `r.auth-enable-model-hook` (MUST): "VaultClusterSettingsAuthEnableRoute must implement a model hook, supplying the data the enable route's template renders when the route is entered."
+- added `r.auth-enable-route-class` (MUST): "The auth settings enable route must be defined by the class VaultClusterSettingsAuthEnableRoute in enable.js, so that Ember's route resolver maps the enable segment of the cluster settings auth route tree to that class."
+- added `r.auth-enable-store-injection` (MUST): "VaultClusterSettingsAuthEnableRoute must declare a store property, giving the route access to the Ember Data store when it loads auth method records."
+- added `r.auth-index-route-module` (SHOULD): "The index route module must remain at third_party/openbao/ui/app/routes/vault/cluster/settings/auth/index.js so the bare auth settings path resolves to a listing route."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
