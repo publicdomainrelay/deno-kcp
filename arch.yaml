@@ -61487,10 +61487,57 @@ system_contexts:
 - code:
   - third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client.js
   codeRefIndex:
+  - class:655bb55c9ae5c9a164f5fc0c955e7c08 OidcClientController@third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client.js:10
   - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client.js
     client.js@third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client.js
   id: sc.third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-clients
+  intent: 'This context exists to specify the behavior of the OIDC client detail controller
+    in the vendored OpenBao UI: it must observe route transitions, keep an isEditRoute
+    flag in sync with the active route name, and expose a showHeader getter that suppresses
+    the page header on the edit route. It is part of the vault cluster access OIDC
+    clients area and depends on the Ember Controller base class, the router service,
+    and the @tracked decorator for reactivity.'
+  interfaces:
+  - file: third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client.js
+    kind: class
+    name: OidcClientController
+    signature: class OidcClientController extends Controller
   name: third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-clients
+  requirements:
+  - codeRefs:
+    - class:655bb55c9ae5c9a164f5fc0c955e7c08
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client.js
+    id: r.constructor-route-observer
+    level: MUST
+    text: The constructor must call super with the forwarded arguments and register
+      a handler on the injected router's 'routeDidChange' event; the handler reads
+      the event's targetName and sets isEditRoute to true when targetName includes
+      the substring 'edit', and false otherwise.
+  - codeRefs:
+    - class:655bb55c9ae5c9a164f5fc0c955e7c08
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client.js
+    id: r.default-export-controller
+    level: MUST
+    text: The file third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client.js
+      must export as its default export a class OidcClientController that extends
+      Ember's Controller base class, so the router can instantiate it as the controller
+      for the OIDC client route.
+  - codeRefs:
+    - class:655bb55c9ae5c9a164f5fc0c955e7c08
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client.js
+    id: r.router-service-injection
+    level: MUST
+    text: OidcClientController must inject the Ember router service via the @service
+      decorator into a property named router, and must declare isEditRoute as a @tracked
+      property, so route changes are observable by templates.
+  - codeRefs:
+    - class:655bb55c9ae5c9a164f5fc0c955e7c08
+    - file:third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client.js
+    id: r.show-header-getter
+    level: MUST
+    text: OidcClientController must expose a showHeader getter that returns the boolean
+      negation of isEditRoute, so the header is hidden whenever the current route
+      is the edit route.
   upstream: self
 - code:
   - third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client/details.js

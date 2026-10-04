@@ -4377,6 +4377,14 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 - added `r.delete-action-failure` (MUST): "If destroying the record fails, the delete action catches the error, rolls the model back with rollbackAttributes so no half-deleted state is shown, and pushes a danger flash message. The message body is error.errors joined with '. ' when that array is present, and otherwise error.message."
 - added `r.delete-action-success` (MUST): "The delete action is exposed as an Ember action and is async. On success it destroys the current model record with destroyRecord, pushes a success flash message with the text 'Assignment deleted successfully', then calls transitionToSafe with the router and the route 'vault.cluster.access.oidc.assignments' to leave the detail page."
 
+### third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-clients
+
+- intent: "" -> "This context exists to specify the behavior of the OIDC client detail controller in the vendored OpenBao UI: it must observe route transitions, keep an isEditRoute flag in sync with the active route name, and expose a showHeader getter that suppresses the page header on the edit route. It is part of the vault cluster access OIDC clients area and depends on the Ember Controller base class, the router service, and the @tracked decorator for reactivity."
+- added `r.constructor-route-observer` (MUST): "The constructor must call super with the forwarded arguments and register a handler on the injected router's 'routeDidChange' event; the handler reads the event's targetName and sets isEditRoute to true when targetName includes the substring 'edit', and false otherwise."
+- added `r.default-export-controller` (MUST): "The file third_party/openbao/ui/app/controllers/vault/cluster/access/oidc/clients/client.js must export as its default export a class OidcClientController that extends Ember's Controller base class, so the router can instantiate it as the controller for the OIDC client route."
+- added `r.router-service-injection` (MUST): "OidcClientController must inject the Ember router service via the @service decorator into a property named router, and must declare isEditRoute as a @tracked property, so route changes are observable by templates."
+- added `r.show-header-getter` (MUST): "OidcClientController must expose a showHeader getter that returns the boolean negation of isEditRoute, so the header is hidden whenever the current route is the edit route."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance |
@@ -4725,7 +4733,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | third-party-openbao-ui-app-controllers-vault-cluster-access-namespaces-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-assignments-assignment-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-clients-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
-| third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-clients-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Pending |  | 0 | - |
+| third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-clients-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-access-oidc-clients-client-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Running |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae | CodeToSpec | Succeeded |  | 0 | - |
 | third-party-openbao-ui-app-controllers-vault-cluster-c2s-6c1bbe4c3ba9-89cee50ec5ae-a2 | CodeToSpec | Succeeded |  | 0 | - |

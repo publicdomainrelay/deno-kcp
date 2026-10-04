@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to specify the behavior of the OIDC client detail controller in the vendored OpenBao UI: it must observe route transitions, keep an isEditRoute flag in sync with the active route name, and expose a showHeader getter that suppresses the page header on the edit route. It is part of the vault cluster access OIDC clients area and depends on the Ember Controller base class, the router service, and the @tracked decorator for reactivity.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
