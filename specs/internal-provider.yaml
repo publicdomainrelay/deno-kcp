@@ -172,6 +172,18 @@ spec:
     codeRefs:
     - file:internal/provider/provider.go
     - function:f4e5cfdbb89305e5310f8800b3c5e307
+  - id: r.provider-initial-list-is-bounded-and-retried
+    level: MUST
+    text: Waiting for a kind's cache to sync must be bounded by a deadline; an attempt
+      that does not sync must be abandoned, the informers must be started again, and
+      the attempt must repeat while the context lives; the provider must log at info
+      level each time a cache has synced and each time it retries.
+  - id: r.provider-initial-list-is-bounded-and-retried-test
+    level: MUST
+    text: An offline test must drive the bounded wait with a factory that never reports
+      synced and must assert that it returns within its deadline, reports the retry
+      and starts the next attempt; the test must fail against a provider that waits
+      on its first attempt without a deadline.
   - id: r.reconcile-observation
     level: MUST
     text: Provider.Reconcile must read the policy run, admit it, and pass the decider
