@@ -24,9 +24,9 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | --- | --- | --- | --- | --- | --- | --- |
 | deploy-examples-atproto-market-s2c-8d254e3186d5 | SpecToCode | Failed |  | 1 | - | - |
 | deploy-examples-atproto-market-s2c-8d254e3186d5-a2 | SpecToCode | Failed |  | 0 | - | - |
-| deploy-examples-atproto-market-s2c-8d254e3186d5-a3 | SpecToCode | Pending |  | 0 | - | - |
+| deploy-examples-atproto-market-s2c-8d254e3186d5-a3 | SpecToCode | Running |  | 0 | - | - |
 | test-integration-s2c-9b30c76edc9d | SpecToCode | Failed |  | 0 | - | - |
-| test-integration-s2c-9b30c76edc9d-a2 | SpecToCode | Pending |  | 0 | - | - |
+| test-integration-s2c-9b30c76edc9d-a2 | SpecToCode | Running |  | 0 | - | - |
 
 ## Policy
 
