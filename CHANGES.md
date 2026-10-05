@@ -199,6 +199,21 @@ The requirement-level delta against `open-architecture/deno-kcp--spec-bidder-and
 - added `r.restart-policy-honours-observed-execution` (MUST): "Reconcile must honour the engine's spec.restartPolicy (default Always, one of Always, OnFailure, Never) against the observed execution: a run that has exited is restarted by default, a liveness failure forces a restart, and under Never a non-zero exit drives the engine to the Failed phase instead of a restart."
 - added `r.result-reports-phase-run-and-requeue` (MUST): "Result must report the target PolicyEnginePhase, the RunID the provider should record, the Ops to apply, and the RequeueAfter duration the provider should wait before reconciling the engine again."
 
+### internal-policyworkflowpod
+
+- intent: "" -> "This context exists so the PolicyWorkflowPod decider can be reasoned about and tested on its own, apart from the provider's client, watches and status writes. The decider encodes two rules the rest of the runtime depends on: a pod is Ready only when the policy engine it references has a reachable endpoint, and it is Pending with reason EngineNotReady until then; and the concurrency and TTL knobs on the pod spec are resolved here so the provider, the admission queue and the workflow-run reconciler all agree on one answer. Because Observed carries EngineReady, EngineEndpoint, Active and Now as plain values, the reconcile path is deterministic and needs no fake clients."
+- added `r.capacity-from-concurrency-policy` (MUST): "Capacity must return 1 with unlimited false for any policy other than ConcurrencyAllow, so the default is one run at a time; under ConcurrencyAllow it must report unlimited true with limit 0 when maxConcurrent is nil or not positive, and otherwise the given maxConcurrent with unlimited false."
+- added `r.carry-status-forward` (MUST): "Reconcile must seed its Result from the pod's existing status, copying phase, endpoint, active and a deep copy of the conditions, and must then overwrite Active with the Observed.Active run count, so a pass that decides nothing new does not drop recorded status."
+- added `r.condition-observed-generation` (MUST): "Every Ready condition Reconcile writes must carry ObservedGeneration equal to Observed.Pod.Generation, and must be merged into the condition list by type rather than appended blindly."
+- added `r.decider-is-client-free` (SHOULD): "The decider must stay free of Kubernetes clients and side effects: Observed supplies the pod, engine readiness and endpoint, active count and clock, and Reconcile returns a Result for the provider to apply, so the rules can be tested by table without a fake client."
+- added `r.deletion-returns-carried` (MUST): "When Observed.Pod.DeletionTimestamp is set, Reconcile must return the carried Result unchanged and stop: no phase change, no condition write and no requeue."
+- added `r.new-defaults-clock` (MUST): "New must return a Reconciler that holds the given Options, and must replace a nil Options.Now with time.Now so a caller that supplies no clock still gets a working decider."
+- added `r.pending-until-engine-ready` (MUST): "While Observed.EngineReady is false or Observed.EngineEndpoint is empty, Reconcile must set Phase to Pending, set the Ready condition to False with reason EngineNotReady and message "the referenced policy engine is not reachable yet", and requeue after the package requeue interval of 2 seconds."
+- added `r.reconcile-defaults-now` (SHOULD): "Reconcile must fill a zero Observed.Now from the reconciler clock rather than fail, so a pass with no timestamp still resolves the time-dependent decisions."
+- added `r.reconcile-requires-name` (MUST): "Reconcile must reject an Observed whose Pod.Name is empty with the error "policyworkflowpod: observed pod has no name", and must return the context error when ctx is already cancelled, before producing any Result."
+- added `r.run-ttl-resolution` (MUST): "RunTTL must prefer the pod's spec.runTTLSecondsAfterFinished over the provider default when the pod and the field are both non-nil, fall back to the provider default when the pod is nil or the field is unset, and return nil rather than a negative duration when the resolved value is nil or below zero."
+- added `r.running-when-engine-ready` (MUST): "When Observed.EngineReady is true and Observed.EngineEndpoint is non-empty, Reconcile must set Phase to Running, publish the engine endpoint on Result.Endpoint, set the Ready condition to True with reason Ready and message "the referenced policy engine is reachable and the pod accepts runs", and requeue after 2 seconds."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance | coverage |
@@ -215,5 +230,5 @@ The requirement-level delta against `open-architecture/deno-kcp--spec-bidder-and
 | internal-denorun-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
 | internal-livegate-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
 | internal-policyengine-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
-| internal-policyworkflowpod-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Running |  | 0 | - | - |
+| internal-policyworkflowpod-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
 | internal-policyworkflowrun-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Running |  | 0 | - | - |

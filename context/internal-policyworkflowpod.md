@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the PolicyWorkflowPod decider can be reasoned about and tested on its own, apart from the provider's client, watches and status writes. The decider encodes two rules the rest of the runtime depends on: a pod is Ready only when the policy engine it references has a reachable endpoint, and it is Pending with reason EngineNotReady until then; and the concurrency and TTL knobs on the pod spec are resolved here so the provider, the admission queue and the workflow-run reconciler all agree on one answer. Because Observed carries EngineReady, EngineEndpoint, Active and Now as plain values, the reconcile path is deterministic and needs no fake clients.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

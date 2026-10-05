@@ -9,5 +9,18 @@ spec:
   fromCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
   toCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
 status:
-  phase: Running
-  message: the agent is summarizing internal-policyworkflowpod
+  phase: Succeeded
+  agentLog: 'internal/policyworkflowpod holds the pure decision logic for the PolicyWorkflowPod
+    kind (deno.computer/v1alpha1, short name pwpod). It declares the Observed input
+    (the PolicyWorkflowPod plus whether its referenced policy engine is ready, the
+    engine endpoint, the observed active run count and the clock), the Result the
+    provider writes back (phase, endpoint, active, conditions, requeue), an Options
+    struct carrying only the Now clock, and a Reconciler whose Reconcile maps the
+    observation to a phase and a Ready condition. Two free functions carry the admission
+    and retention policy that the provider''s admission source and run reconciler
+    also need: Capacity derives the concurrency limit from spec.concurrencyPolicy
+    and spec.maxConcurrent, and RunTTL resolves the effective run TTL from the pod
+    spec against the provider default. The package touches no Kubernetes client: it
+    is fed observations and returns a Result, and policyworkflowpod_test.go exercises
+    the phase transitions and the TTL table.'
+  message: wrote 11 requirement(s) and 8 interface(s) for internal-policyworkflowpod

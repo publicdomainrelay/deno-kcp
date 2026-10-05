@@ -10,6 +10,153 @@ spec:
   dependsOn:
   - sc.api-v1alpha1
   - sc.deno-kcp
+  intent: 'This context exists so the PolicyWorkflowPod decider can be reasoned about
+    and tested on its own, apart from the provider''s client, watches and status writes.
+    The decider encodes two rules the rest of the runtime depends on: a pod is Ready
+    only when the policy engine it references has a reachable endpoint, and it is
+    Pending with reason EngineNotReady until then; and the concurrency and TTL knobs
+    on the pod spec are resolved here so the provider, the admission queue and the
+    workflow-run reconciler all agree on one answer. Because Observed carries EngineReady,
+    EngineEndpoint, Active and Now as plain values, the reconcile path is deterministic
+    and needs no fake clients.'
+  requirements:
+  - id: r.capacity-from-concurrency-policy
+    level: MUST
+    text: Capacity must return 1 with unlimited false for any policy other than ConcurrencyAllow,
+      so the default is one run at a time; under ConcurrencyAllow it must report unlimited
+      true with limit 0 when maxConcurrent is nil or not positive, and otherwise the
+      given maxConcurrent with unlimited false.
+    codeRefs:
+    - file:internal/policyworkflowpod/policyworkflowpod.go
+    - function:bbc6e4753713c4d1d1079ae7e84ed8fa
+  - id: r.carry-status-forward
+    level: MUST
+    text: Reconcile must seed its Result from the pod's existing status, copying phase,
+      endpoint, active and a deep copy of the conditions, and must then overwrite
+      Active with the Observed.Active run count, so a pass that decides nothing new
+      does not drop recorded status.
+    codeRefs:
+    - file:internal/policyworkflowpod/policyworkflowpod.go
+    - method:84d4636db1ea631ee61b88e98f741d27
+    - struct:842e356a5ebdd4a78ce7849f4fada513
+    - struct:8ded0e2d592b1dadd943f5bc7a97eb7f
+  - id: r.condition-observed-generation
+    level: MUST
+    text: Every Ready condition Reconcile writes must carry ObservedGeneration equal
+      to Observed.Pod.Generation, and must be merged into the condition list by type
+      rather than appended blindly.
+    codeRefs:
+    - file:internal/policyworkflowpod/policyworkflowpod.go
+    - method:84d4636db1ea631ee61b88e98f741d27
+    - struct:8ded0e2d592b1dadd943f5bc7a97eb7f
+  - id: r.decider-is-client-free
+    level: SHOULD
+    text: 'The decider must stay free of Kubernetes clients and side effects: Observed
+      supplies the pod, engine readiness and endpoint, active count and clock, and
+      Reconcile returns a Result for the provider to apply, so the rules can be tested
+      by table without a fake client.'
+    codeRefs:
+    - file:internal/policyworkflowpod/policyworkflowpod.go
+    - file:internal/policyworkflowpod/policyworkflowpod_test.go
+    - struct:842e356a5ebdd4a78ce7849f4fada513
+    - struct:8ded0e2d592b1dadd943f5bc7a97eb7f
+  - id: r.deletion-returns-carried
+    level: MUST
+    text: 'When Observed.Pod.DeletionTimestamp is set, Reconcile must return the carried
+      Result unchanged and stop: no phase change, no condition write and no requeue.'
+    codeRefs:
+    - method:84d4636db1ea631ee61b88e98f741d27
+    - struct:842e356a5ebdd4a78ce7849f4fada513
+  - id: r.new-defaults-clock
+    level: MUST
+    text: New must return a Reconciler that holds the given Options, and must replace
+      a nil Options.Now with time.Now so a caller that supplies no clock still gets
+      a working decider.
+    codeRefs:
+    - function:02acf20c6ae76f4247f2782b39f9905d
+    - struct:5aa211d3d5b215af5fa46eca88c2f0c0
+    - struct:8099607c30978aaddc31c1f6fe9b615e
+  - id: r.pending-until-engine-ready
+    level: MUST
+    text: While Observed.EngineReady is false or Observed.EngineEndpoint is empty,
+      Reconcile must set Phase to Pending, set the Ready condition to False with reason
+      EngineNotReady and message "the referenced policy engine is not reachable yet",
+      and requeue after the package requeue interval of 2 seconds.
+    codeRefs:
+    - file:internal/policyworkflowpod/policyworkflowpod.go
+    - method:84d4636db1ea631ee61b88e98f741d27
+    - struct:8ded0e2d592b1dadd943f5bc7a97eb7f
+  - id: r.reconcile-defaults-now
+    level: SHOULD
+    text: Reconcile must fill a zero Observed.Now from the reconciler clock rather
+      than fail, so a pass with no timestamp still resolves the time-dependent decisions.
+    codeRefs:
+    - method:84d4636db1ea631ee61b88e98f741d27
+    - struct:842e356a5ebdd4a78ce7849f4fada513
+  - id: r.reconcile-requires-name
+    level: MUST
+    text: 'Reconcile must reject an Observed whose Pod.Name is empty with the error
+      "policyworkflowpod: observed pod has no name", and must return the context error
+      when ctx is already cancelled, before producing any Result.'
+    codeRefs:
+    - method:84d4636db1ea631ee61b88e98f741d27
+    - struct:842e356a5ebdd4a78ce7849f4fada513
+  - id: r.run-ttl-resolution
+    level: MUST
+    text: RunTTL must prefer the pod's spec.runTTLSecondsAfterFinished over the provider
+      default when the pod and the field are both non-nil, fall back to the provider
+      default when the pod is nil or the field is unset, and return nil rather than
+      a negative duration when the resolved value is nil or below zero.
+    codeRefs:
+    - file:internal/policyworkflowpod/policyworkflowpod.go
+    - file:internal/policyworkflowpod/policyworkflowpod_test.go
+    - function:d4ae60590520385e8ca42957d1cb728f
+  - id: r.running-when-engine-ready
+    level: MUST
+    text: When Observed.EngineReady is true and Observed.EngineEndpoint is non-empty,
+      Reconcile must set Phase to Running, publish the engine endpoint on Result.Endpoint,
+      set the Ready condition to True with reason Ready and message "the referenced
+      policy engine is reachable and the pod accepts runs", and requeue after 2 seconds.
+    codeRefs:
+    - file:internal/policyworkflowpod/policyworkflowpod.go
+    - method:84d4636db1ea631ee61b88e98f741d27
+    - struct:8ded0e2d592b1dadd943f5bc7a97eb7f
+  interfaces:
+  - name: Capacity
+    kind: function
+    signature: func Capacity(policy v1alpha1.ConcurrencyPolicy, maxConcurrent *int32)
+      (int32, bool)
+    file: internal/policyworkflowpod/policyworkflowpod.go
+  - name: New
+    kind: function
+    signature: func New(opts Options) *Reconciler
+    file: internal/policyworkflowpod/policyworkflowpod.go
+  - name: Observed
+    kind: struct
+    signature: type Observed struct
+    file: internal/policyworkflowpod/policyworkflowpod.go
+  - name: Options
+    kind: struct
+    signature: type Options struct
+    file: internal/policyworkflowpod/policyworkflowpod.go
+  - name: Reconciler
+    kind: struct
+    signature: type Reconciler struct
+    file: internal/policyworkflowpod/policyworkflowpod.go
+  - name: Reconciler.Reconcile
+    kind: method
+    signature: func (r *Reconciler) Reconcile(ctx context.Context, o Observed) (Result,
+      error)
+    file: internal/policyworkflowpod/policyworkflowpod.go
+  - name: Result
+    kind: struct
+    signature: type Result struct
+    file: internal/policyworkflowpod/policyworkflowpod.go
+  - name: RunTTL
+    kind: function
+    signature: func RunTTL(pod *v1alpha1.PolicyWorkflowPod, providerDefault *int64)
+      *int64
+    file: internal/policyworkflowpod/policyworkflowpod.go
   arch:
     id: sc.kind.policyworkflowpod
     kind: node
@@ -98,3 +245,11 @@ spec:
 codeRefIndex:
 - file:internal/policyworkflowpod/policyworkflowpod.go policyworkflowpod.go@internal/policyworkflowpod/policyworkflowpod.go
 - file:internal/policyworkflowpod/policyworkflowpod_test.go policyworkflowpod_test.go@internal/policyworkflowpod/policyworkflowpod_test.go
+- function:02acf20c6ae76f4247f2782b39f9905d New@internal/policyworkflowpod/policyworkflowpod.go:48
+- function:bbc6e4753713c4d1d1079ae7e84ed8fa Capacity@internal/policyworkflowpod/policyworkflowpod.go:98
+- function:d4ae60590520385e8ca42957d1cb728f RunTTL@internal/policyworkflowpod/policyworkflowpod.go:108
+- method:84d4636db1ea631ee61b88e98f741d27 Reconciler.Reconcile@internal/policyworkflowpod/policyworkflowpod.go:55
+- struct:5aa211d3d5b215af5fa46eca88c2f0c0 Reconciler@internal/policyworkflowpod/policyworkflowpod.go:44
+- struct:8099607c30978aaddc31c1f6fe9b615e Options@internal/policyworkflowpod/policyworkflowpod.go:40
+- struct:842e356a5ebdd4a78ce7849f4fada513 Observed@internal/policyworkflowpod/policyworkflowpod.go:16
+- struct:8ded0e2d592b1dadd943f5bc7a97eb7f Result@internal/policyworkflowpod/policyworkflowpod.go:28
