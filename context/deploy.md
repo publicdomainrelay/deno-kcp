@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to describe the deployment manifests that register the deno.computer kinds with kcp and make them bindable by tenant workspaces. It states the fixed group, scope, version, naming and status shape every schema must carry, the resource membership of each APIExport, and the default API bindings each WorkspaceType applies, so the YAML stays a faithful, machine-checked mirror of the Go types rather than a hand-maintained duplicate.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 
