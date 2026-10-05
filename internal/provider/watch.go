@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	goruntime "runtime"
 	"strings"
 	"sync"
@@ -99,35 +100,7 @@ func (p *Provider) RunWatch(ctx context.Context) error {
 	p.reader = reader
 	p.watch = &watchState{queue: queue}
 
-	stop := ctx.Done()
-	var factories []dynamicinformer.DynamicSharedInformerFactory
-	for _, url := range endpoints[exportDenoRuntime] {
-		factory, err := p.watchFactory(url)
-		if err != nil {
-			return err
-		}
-		for _, res := range denoRuntimeResources {
-			p.registerInformer(factory, res, reader, queue)
-		}
-		factory.Start(stop)
-		factories = append(factories, factory)
-	}
-	for _, url := range endpoints[exportPolicyWorkflowRun] {
-		factory, err := p.watchFactory(url)
-		if err != nil {
-			return err
-		}
-		p.registerInformer(factory, watchResource{kind: workPolicyRun, gvr: gvrPolicyWorkflowRuns}, reader, queue)
-		factory.Start(stop)
-		factories = append(factories, factory)
-	}
 	// ponytail: workers start before caches sync; handlers enqueue only after the object is in the store, so a reconcile never reads an unseen object.
-	go func() {
-		for _, factory := range factories {
-			factory.WaitForCacheSync(stop)
-		}
-	}()
-
 	var wg sync.WaitGroup
 	for i := 0; i < p.opts.WatchWorkers; i++ {
 		wg.Add(1)
@@ -136,10 +109,134 @@ func (p *Provider) RunWatch(ctx context.Context) error {
 			p.runWatchWorker(ctx, queue)
 		}()
 	}
+
+	round, err := waitForCaches(ctx,
+		func() (*informerRound, error) { return p.startInformers(ctx, endpoints, reader, queue) },
+		defaultCacheSyncTimeout, cacheSyncRetryPace, p.opts.Log)
+	if err != nil {
+		queue.ShutDown()
+		wg.Wait()
+		return err
+	}
+	defer round.Close()
+
 	<-ctx.Done()
 	queue.ShutDown()
 	wg.Wait()
 	return nil
+}
+
+// ponytail: the initial list is bounded so a stalled endpoint costs a retry.
+// An unbounded WaitForCacheSync on a factory whose list never returns left the
+// provider started and reconciling nothing, with the only symptom an endpoint
+// that stayed quiet.
+const defaultCacheSyncTimeout = 30 * time.Second
+
+// cacheSyncRetryPace separates two attempts at the initial cache sync.
+const cacheSyncRetryPace = time.Second
+
+// informerFactory is the slice of a dynamic shared informer factory the
+// initial cache sync needs, so an offline test can supply one that never
+// reports synced.
+type informerFactory interface {
+	Start(stopCh <-chan struct{})
+	WaitForCacheSync(stopCh <-chan struct{}) map[schema.GroupVersionResource]bool
+}
+
+// informerRound is one generation of started informer factories and the stop
+// channel that abandons it.
+type informerRound struct {
+	factories []informerFactory
+	stop      chan struct{}
+	once      sync.Once
+}
+
+func (r *informerRound) Close() {
+	if r == nil {
+		return
+	}
+	r.once.Do(func() { close(r.stop) })
+}
+
+// startInformers builds and starts one round of informers over the discovered
+// endpoints. A retry calls it again, so the reader drops the abandoned round's
+// indexers before the new ones register.
+func (p *Provider) startInformers(ctx context.Context, endpoints map[string][]string, reader *cacheReader, queue workqueue.TypedRateLimitingInterface[workKey]) (*informerRound, error) {
+	round := &informerRound{stop: make(chan struct{})}
+	go func() {
+		select {
+		case <-ctx.Done():
+			round.Close()
+		case <-round.stop:
+		}
+	}()
+	reader.reset()
+	for _, url := range endpoints[exportDenoRuntime] {
+		factory, err := p.watchFactory(url)
+		if err != nil {
+			round.Close()
+			return nil, err
+		}
+		for _, res := range denoRuntimeResources {
+			p.registerInformer(factory, res, reader, queue)
+		}
+		factory.Start(round.stop)
+		round.factories = append(round.factories, factory)
+	}
+	for _, url := range endpoints[exportPolicyWorkflowRun] {
+		factory, err := p.watchFactory(url)
+		if err != nil {
+			round.Close()
+			return nil, err
+		}
+		p.registerInformer(factory, watchResource{kind: workPolicyRun, gvr: gvrPolicyWorkflowRuns}, reader, queue)
+		factory.Start(round.stop)
+		round.factories = append(round.factories, factory)
+	}
+	return round, nil
+}
+
+// awaitCacheRound waits, bounded by deadline, for every factory in the round to
+// report synced; a factory whose stop channel closes first reports false and
+// ends the round.
+func awaitCacheRound(ctx context.Context, factories []informerFactory, deadline time.Duration) bool {
+	bounded, cancel := context.WithTimeout(ctx, deadline)
+	defer cancel()
+	for _, factory := range factories {
+		for _, synced := range factory.WaitForCacheSync(bounded.Done()) {
+			if !synced {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+// waitForCaches bounds each attempt at the initial list. An attempt that does
+// not sync inside its deadline is abandoned, its informers are started again
+// and the attempt repeats while the context lives.
+func waitForCaches(ctx context.Context, build func() (*informerRound, error), deadline, pace time.Duration, log *slog.Logger) (*informerRound, error) {
+	for {
+		round, err := build()
+		if err != nil {
+			return nil, err
+		}
+		if awaitCacheRound(ctx, round.factories, deadline) {
+			log.Info("watch: informer caches have synced", "kinds", len(round.factories))
+			return round, nil
+		}
+		round.Close()
+		if ctx.Err() != nil {
+			return nil, nil
+		}
+		log.Info("watch: informer caches did not sync within the deadline, retrying",
+			"timeout", deadline, "kinds", len(round.factories))
+		select {
+		case <-ctx.Done():
+			return nil, nil
+		case <-time.After(pace):
+		}
+	}
 }
 
 var gvrAPIExportEndpointSlices = schema.GroupVersionResource{Group: "apis.kcp.io", Version: "v1alpha1", Resource: "apiexportendpointslices"}

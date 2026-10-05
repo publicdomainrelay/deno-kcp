@@ -1,15 +1,113 @@
 package provider
 
 import (
+	"bytes"
+	"context"
+	"log/slog"
+	"strings"
+	"sync"
 	"testing"
+	"time"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
 
 	"github.com/johnandersen777/deno-kcp/api/v1alpha1"
 	"github.com/publicdomainrelay/kcp-libs/common/kcp"
 )
+
+// neverSyncingFactory models the stalled endpoint the deadline exists for: its
+// wait blocks until the round's stop channel closes and then still reports the
+// cache unsynced.
+type neverSyncingFactory struct{}
+
+func (neverSyncingFactory) Start(stopCh <-chan struct{}) {}
+
+func (neverSyncingFactory) WaitForCacheSync(stopCh <-chan struct{}) map[schema.GroupVersionResource]bool {
+	<-stopCh
+	return map[schema.GroupVersionResource]bool{gvrDenoPods: false}
+}
+
+type instantSyncingFactory struct{ gvr schema.GroupVersionResource }
+
+func (instantSyncingFactory) Start(stopCh <-chan struct{}) {}
+
+func (f instantSyncingFactory) WaitForCacheSync(stopCh <-chan struct{}) map[schema.GroupVersionResource]bool {
+	return map[schema.GroupVersionResource]bool{f.gvr: true}
+}
+
+// ponytail: the bounded wait is the whole point. An implementation that waits
+// on its first attempt without a deadline builds one round and never starts
+// another, so the third attempt never arrives.
+func TestTheInitialCacheSyncIsBoundedAndRetried(t *testing.T) {
+	var logs bytes.Buffer
+	log := slog.New(slog.NewTextHandler(&logs, &slog.HandlerOptions{Level: slog.LevelInfo}))
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	built := make(chan int, 32)
+	var mu sync.Mutex
+	attempts := 0
+	build := func() (*informerRound, error) {
+		mu.Lock()
+		attempts++
+		attempt := attempts
+		mu.Unlock()
+		built <- attempt
+		return &informerRound{factories: []informerFactory{neverSyncingFactory{}}, stop: make(chan struct{})}, nil
+	}
+
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		_, _ = waitForCaches(ctx, build, 20*time.Millisecond, time.Millisecond, log)
+	}()
+
+	start := time.Now()
+	guard := time.After(2 * time.Second)
+	attempt := 0
+	for attempt < 3 {
+		select {
+		case attempt = <-built:
+		case <-guard:
+			t.Fatalf("the bounded wait started %d attempts in %s; it did not abandon the first one within its deadline", attempt, time.Since(start))
+		}
+	}
+	if elapsed := time.Since(start); elapsed > time.Second {
+		t.Fatalf("three bounded attempts took %s; each deadline is 20ms", elapsed)
+	}
+
+	cancel()
+	select {
+	case <-done:
+	case <-time.After(time.Second):
+		t.Fatal("the bounded wait did not return after the context was cancelled")
+	}
+	if !strings.Contains(logs.String(), "retrying") {
+		t.Fatalf("the bounded wait did not log the retry at info level: %q", logs.String())
+	}
+}
+
+func TestASyncedCacheIsLoggedAndKeepsItsRound(t *testing.T) {
+	var logs bytes.Buffer
+	log := slog.New(slog.NewTextHandler(&logs, nil))
+	round, err := waitForCaches(context.Background(), func() (*informerRound, error) {
+		return &informerRound{factories: []informerFactory{instantSyncingFactory{gvr: gvrDenoPods}}, stop: make(chan struct{})}, nil
+	}, time.Second, time.Millisecond, log)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if round == nil {
+		t.Fatal("a synced cache returned no round")
+	}
+	defer round.Close()
+	if !strings.Contains(logs.String(), "have synced") {
+		t.Fatalf("a synced cache was not logged at info level: %q", logs.String())
+	}
+}
 
 func runObject(kind, name, lc, phase string, labels map[string]string) *unstructured.Unstructured {
 	meta := map[string]any{
