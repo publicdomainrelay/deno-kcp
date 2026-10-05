@@ -161,6 +161,20 @@ spec:
     codeRefs:
     - file:test/integration/examples.go
     - file:test/integration/offline_test.go
+  - id: r.market-registry-paths-are-relative-and-recursive
+    level: MUST
+    text: The market files live in a subdirectory, so the registry and the disk walk
+      must meet there. exampleFiles must carry atproto/market/15-openbao-bob.yaml,
+      atproto/market/60-bob-pds.yaml and atproto/market/70-bidder.yaml as File values
+      relative to deploy/examples with forward slashes, and exampleFilesOnDisk must
+      walk deploy/examples recursively so it returns those same relative paths. The
+      two non-example manifests of the market directory, atproto/market/00-workspaces.yaml
+      and atproto/market/10-rbac.yaml, are declared by name in examples.go and subtracted
+      from the walk by that relative path, so the inventory comparison reports neither
+      a new file that is missing from the registry nor a spurious unregistered manifest.
+    codeRefs:
+    - file:test/integration/examples.go
+    - file:test/integration/offline_test.go
   - id: r.namespace-certificate-hierarchy-is-covered
     level: MUST
     text: The OpenBao tier must cover that a Kubernetes namespace gets its own OpenBao
