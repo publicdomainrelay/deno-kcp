@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the DenoPod controller's decisions can be stated and tested without a Kubernetes client: the reconcile logic is separated from the side-effect layer, which receives the Ops, delete and requeue instructions as data. It is the pod analogue of the other decider packages and is depended on by the provider's pod reconcile path, which builds the Observed input and executes the returned Result.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

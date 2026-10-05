@@ -127,6 +127,30 @@ The requirement-level delta against `open-architecture/deno-kcp--spec-bidder-and
 - added `r.result-is-the-whole-job-plan` (MUST): "Result carries the complete plan for one pass: the DenoJobPhase in Phase, the observed run names in RunNames and the single run name in RunName, the runs to start in CreateRuns and the runs to stop in StopRuns, StartTime and CompletionTime, the Active, Ready, Succeeded, Failed and Retries counters, the ExitCode and Outputs of the selected run, the Conditions, the RequeueAfter delay, and the Delete flag for the runs together with the DeleteJob flag for the job."
 - added `r.run-observation-reports-run-outcome` (MUST): "RunObservation reports one run by Name with its v1alpha1.DenoRunPhase in Phase, an optional exit code in ExitCode, a human-readable Message, and the run's outputs map in Outputs, so the decider can decide on a run without holding the v1alpha1.DenoRun itself."
 
+### internal-denopod
+
+- intent: "" -> "This context exists so the DenoPod controller's decisions can be stated and tested without a Kubernetes client: the reconcile logic is separated from the side-effect layer, which receives the Ops, delete and requeue instructions as data. It is the pod analogue of the other decider packages and is depended on by the provider's pod reconcile path, which builds the Observed input and executes the returned Result."
+- added `r.carries-existing-status` (MUST): "Every decision starts from the observed DenoPod status: phase, run ID, restarts, start time, completion time, exit code, message, outputs, readiness and a copy of conditions carry into the Result."
+- added `r.completion-carries-execution-detail` (MUST): "A completion copies the execution run ID, exit code, message and outputs into the Result, sets the completion time to Now, marks ready false, sets phase Succeeded when successful or Failed otherwise, and sets the Ready condition false plus the Complete condition to the success value."
+- added `r.conditions-carry-generation` (MUST): "Every condition Reconcile sets records the observed pod generation as ObservedGeneration."
+- added `r.deadline-fails-the-pod` (MUST): "When ActiveDeadlineSeconds is set and has elapsed since the status start time, Reconcile stops a running execution, sets phase Failed, clears the run ID, marks ready false, sets the completion time to Now, sets Failed and Ready conditions with reason DeadlineExceeded, and requeues after RequeueAfter."
+- added `r.decisions-are-covered-by-tests` (SHOULD): "Each decision branch is covered by a test in denopod_test.go that builds an Observed value and asserts on the returned Result phase, readiness and timestamps."
+- added `r.deletion-tears-down` (MUST): "When the DenoPod has a deletion timestamp, Reconcile emits OpStopRun if the execution is still running, then OpRemoveFinalizer, sets RemoveFinalizer, marks ready false with reason Terminating, and requeues after RequeueAfter."
+- added `r.execution-state-is-a-string-alias` (MUST): "ExecutionState is a string alias, so a running observation is the value ExecutionRunning and an exited one is ExecutionExited, compared by value in the decision branches."
+- added `r.exit-policy-is-applied` (MUST): "When the execution has exited, the restart policy decides the outcome, where an empty policy means Always: Always restarts; OnFailure completes successfully on exit code zero and restarts otherwise; Never and any unrecognised policy complete successfully on exit code zero and fail with reason ProcessFailed otherwise."
+- added `r.liveness-failure-restarts` (MUST): "When LivenessFailed is set while the execution is running, Reconcile stops the running execution, keeps phase Running, clears the run ID, increments Restarts from the observed status, sets ready false, and records reason LivenessProbeFailed."
+- added `r.no-execution-starts-a-run` (MUST): "When no execution is observed, Reconcile sets phase Running, clears the run ID, emits OpStartRun, sets the start time to Now if unset, marks ready false, sets Starting and Running conditions, and requeues after RequeueAfter."
+- added `r.no-io-from-the-decider` (MUST): "Reconcile performs no I/O and touches no Kubernetes client: side effects are described only through the Ops list, RemoveFinalizer, Delete and RequeueAfter fields of the Result."
+- added `r.op-is-a-string-alias` (MUST): "Op is a string alias naming a single side effect, collected by Reconcile into Result.Ops for the side-effect layer to execute in order."
+- added `r.reconcile-honours-context` (MUST): "Reconcile returns the context error and no Result when the context is already cancelled."
+- added `r.reconcile-injected-clock` (MUST): "Reconcile fills a zero Now from the Reconciler clock, and New defaults that clock to time.Now when Options.Now is nil."
+- added `r.reconcile-requires-pod-name` (MUST): "Reconcile returns an error and an empty Result when the observed DenoPod has no name."
+- added `r.reconciler-is-built-from-options` (MUST): "New returns a Reconciler that keeps the given Options and uses its Now function for every decision that needs a clock."
+- added `r.requeue-interval-exposed` (MUST): "The package exposes RequeueAfter as a two-second duration, used as the requeue interval on the paths that expect another observation."
+- added `r.restart-clears-run-and-counts` (MUST): "A restart keeps phase Running, clears the run ID, sets Restarts to the observed count plus one, sets ready false with the restart message, and requeues after RequeueAfter."
+- added `r.running-reports-readiness` (MUST): "While the execution state is running, Reconcile keeps phase Running, copies the execution run ID, sets Ready from ReadinessPassed (true when that observation is nil), sets the Ready condition true with reason Ready or false with reason NotReady, and requeues after RequeueAfter."
+- added `r.terminal-phase-stops-making-decisions` (MUST): "When the carried phase is Succeeded or Failed, Reconcile emits no run ops and only evaluates TTLSecondsAfterFinished: with a TTL and a completion time it sets Delete and OpDelete once expiry has passed, otherwise it requeues for the remaining time."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance | coverage |
@@ -139,5 +163,5 @@ The requirement-level delta against `open-architecture/deno-kcp--spec-bidder-and
 | deploy-examples-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
 | internal-baoembed-cmd-baoembed-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
 | internal-denojob-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
-| internal-denopod-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Running |  | 0 | - | - |
+| internal-denopod-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
 | internal-denorun-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Running |  | 0 | - | - |

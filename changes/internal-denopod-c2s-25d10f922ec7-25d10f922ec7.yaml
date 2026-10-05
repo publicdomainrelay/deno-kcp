@@ -9,5 +9,19 @@ spec:
   fromCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
   toCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
 status:
-  phase: Running
-  message: the agent is summarizing internal-denopod
+  phase: Succeeded
+  agentLog: 'internal/denopod holds the pure decision function of the DenoPod controller.
+    Reconciler.Reconcile takes an Observed snapshot — the DenoPod object, an optional
+    ExecutionObservation of the running deno process, the readiness probe outcome,
+    a liveness-failed flag and a wall-clock Now — and returns a Result carrying the
+    next phase, run ID, restart count, start and completion times, exit code, message,
+    outputs, readiness, conditions, the list of Ops for the side-effect layer, a requeue
+    interval and the delete and remove-finalizer flags. The package owns no client
+    and performs no I/O: New builds a Reconciler from Options with an injected clock
+    that defaults to time.Now. Decisions run in a fixed order: carry the observed
+    status forward, tear down on a deletion timestamp, stop deciding on an already-terminal
+    phase apart from TTLSecondsAfterFinished expiry, fail on an exceeded activeDeadlineSeconds,
+    start a run when no execution is observed, report readiness while the execution
+    runs, and otherwise apply the pod restart policy (Always, OnFailure, or Never,
+    with empty read as Always) to the exited execution.'
+  message: wrote 20 requirement(s) and 9 interface(s) for internal-denopod

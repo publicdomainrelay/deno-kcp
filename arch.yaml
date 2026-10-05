@@ -434,9 +434,59 @@ system_contexts:
     section: types
     form: map
     position: 2
+  requirements:
+  - id: r.carries-existing-status
+    level: MUST
+  - id: r.completion-carries-execution-detail
+    level: MUST
+  - id: r.conditions-carry-generation
+    level: MUST
+  - id: r.deadline-fails-the-pod
+    level: MUST
+  - id: r.decisions-are-covered-by-tests
+    level: SHOULD
+  - id: r.deletion-tears-down
+    level: MUST
+  - id: r.execution-state-is-a-string-alias
+    level: MUST
+  - id: r.exit-policy-is-applied
+    level: MUST
+  - id: r.liveness-failure-restarts
+    level: MUST
+  - id: r.no-execution-starts-a-run
+    level: MUST
+  - id: r.no-io-from-the-decider
+    level: MUST
+  - id: r.op-is-a-string-alias
+    level: MUST
+  - id: r.reconcile-honours-context
+    level: MUST
+  - id: r.reconcile-injected-clock
+    level: MUST
+  - id: r.reconcile-requires-pod-name
+    level: MUST
+  - id: r.reconciler-is-built-from-options
+    level: MUST
+  - id: r.requeue-interval-exposed
+    level: MUST
+  - id: r.restart-clears-run-and-counts
+    level: MUST
+  - id: r.running-reports-readiness
+    level: MUST
+  - id: r.terminal-phase-stops-making-decisions
+    level: MUST
   codeRefIndex:
   - file:internal/denopod/denopod.go denopod.go@internal/denopod/denopod.go
   - file:internal/denopod/denopod_test.go denopod_test.go@internal/denopod/denopod_test.go
+  - function:3f0c5153e0db566485eab480379f957d New@internal/denopod/denopod.go:98
+  - method:73925188636ee222feadc0ef8ca57514 Reconciler.Reconcile@internal/denopod/denopod.go:105
+  - struct:0ffa826db7f6371892be099973c54fbd ExecutionObservation@internal/denopod/denopod.go:24
+  - struct:4c5bf8db95a5eabcdd5969ee40a83886 Observed@internal/denopod/denopod.go:36
+  - struct:5fda3baee56d4ff8e55031565365af74 Reconciler@internal/denopod/denopod.go:94
+  - struct:aff6e789cdee650936e8e9c4badaedd7 Result@internal/denopod/denopod.go:60
+  - struct:e87bab6be297f86edc21719c386c6996 Options@internal/denopod/denopod.go:90
+  - type_alias:26dc5a9867b60f56e7de57f597ef8248 ExecutionState@internal/denopod/denopod.go:16
+  - type_alias:a490e5e249e0847d63dd37e654172f27 Op@internal/denopod/denopod.go:48
 - id: sc.kind.denorun
   name: internal-denorun
   spec: specs/internal-denorun.yaml
