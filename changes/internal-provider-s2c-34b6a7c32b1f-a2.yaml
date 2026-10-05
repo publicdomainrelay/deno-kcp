@@ -1,0 +1,34 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: internal-provider-s2c-34b6a7c32b1f-a2
+  namespace: default
+spec:
+  systemContext: internal-provider
+  direction: SpecToCode
+  fromSpecHash: f7363c9c6b14afd41ef9d5da863ab4b487f06598051d92bd27f0aaa53590939d
+  toSpecHash: 34b6a7c32b1fd7de2f5d7c13900e54acd3459c26cd5d3de5fea9c24102abd1ba
+  delta:
+    counts:
+      added: 2
+    requirements:
+    - +r.provider-initial-list-is-bounded-and-retried
+    - +r.provider-initial-list-is-bounded-and-retried-test
+status:
+  phase: Pending
+superseded:
+- name: internal-provider-s2c-34b6a7c32b1f
+  phase: Failed
+  message: |-
+    ...g="watch: waiting for APIExport virtual workspace endpoints" denoruntime=0 policyworkflowruns=0
+    time=2026-10-05T03:41:53.796-07:00 level=INFO msg="watch: informer caches synced" factories=2
+
+    status of the pods that are not Running and ready:
+    root:bob pds:
+      {"conditions":[{"lastTransitionTime":"2026-10-05T10:41:57Z","message":"the readiness probe has not passed","observedGeneration":1,"reason":"NotReady","status":"False","type":"Ready"},{"lastTransitionTime":"2026-10-05T10:41:57Z","message":"the deno process is long-running","observedGeneration":1,"reason":"Running","status":"False","type":"Complete"}],"message":"","phase":"Running","ready":false,"restarts":0,"runID":"pod-20261005T104157.474922151-4","startTime":"2026-10-05T10:41:57Z"}
+    root:bob bidder:
+      {"conditions":[{"lastTransitionTime":"2026-10-05T10:41:57Z","message":"the readiness probe has not passed","observedGeneration":1,"reason":"NotReady","status":"False","type":"Ready"},{"lastTransitionTime":"2026-10-05T10:41:57Z","message":"the deno process is long-running","observedGeneration":1,"reason":"Running","status":"False","type":"Complete"}],"message":"the deno process exited; the restart policy is Always","phase":"Running","ready":false,"restarts":124,"runID":"pod-20261005T104610.180631953-130","startTime":"2026-10-05T10:41:57Z"}
+    root:alice verifier:
+      {"completionTime":"2026-10-05T10:42:01Z","conditions":[{"lastTransitionTime":"2026-10-05T10:42:01Z","message":"the pod reached a terminal phase","observedGeneration":1,"reason":"Terminal","status":"False","type":"Ready"},{"lastTransitionTime":"2026-10-05T10:41:59Z","message":"the deno process failed and the restart policy is Never","observedGeneration":1,"reason":"ProcessFailed","status":"False","type":"Complete"}],"exitCode":1,"message":"the deno process exited with code 1","outputs":{"error":"fetch failed","verdict":"fail"},"phase":"Failed","ready":false,"restarts":0,"runID":"pod-20261005T104159.663367585-7","startTime":"2026-10-05T10:41:59Z"}
+
+    accept: fail
