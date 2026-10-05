@@ -9,5 +9,18 @@ spec:
   fromCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
   toCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
 status:
-  phase: Running
-  message: the agent is summarizing internal-policyworkflowrun
+  phase: Succeeded
+  agentLog: 'internal/policyworkflowrun holds a pure decision function for the PolicyWorkflowRun
+    controller. Reconciler wraps Options — a Now clock and a DefaultBackoffLimit —
+    and New fills a nil Now with time.Now and a zero DefaultBackoffLimit with the
+    package default. Reconciler.Reconcile takes an Observed value (the PolicyWorkflowRun,
+    an optional RunObservation, an optional Admission, an optional EffectiveTTLSeconds,
+    and Now) and returns a Result describing the desired status: phase, run id, start
+    and completion times, active/succeeded/failed/retries counters, exit status, outputs,
+    conditions, a list of Op verbs, a requeue delay, and the RemoveFinalizer and Delete
+    flags. The function does no I/O: it validates the input, carries the existing
+    status forward into the Result, then dispatches in a fixed order through deletion
+    teardown, terminal finish with TTL deletion, spec.cancel, spec.suspend, deadline
+    exceeded, admission gating, the start of a new run, and the running, succeeded
+    and failed observation cases.'
+  message: wrote 15 requirement(s) and 10 interface(s) for internal-policyworkflowrun

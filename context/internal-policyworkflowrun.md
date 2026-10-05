@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the PolicyWorkflowRun controller's state machine can be tested and reasoned about without a Kubernetes client: every decision is a pure function of an Observed snapshot, and the caller — internal/provider's reconcileWorkflowRun — owns the I/O that applies the returned Result. Keeping the decisions here means the ordering of teardown, cancellation, suspension, deadline, admission, start and observation handling is expressed in one place as data, rather than scattered across the reconciler's side effects.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

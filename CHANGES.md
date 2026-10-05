@@ -214,6 +214,25 @@ The requirement-level delta against `open-architecture/deno-kcp--spec-bidder-and
 - added `r.run-ttl-resolution` (MUST): "RunTTL must prefer the pod's spec.runTTLSecondsAfterFinished over the provider default when the pod and the field are both non-nil, fall back to the provider default when the pod is nil or the field is unset, and return nil rather than a negative duration when the resolved value is nil or below zero."
 - added `r.running-when-engine-ready` (MUST): "When Observed.EngineReady is true and Observed.EngineEndpoint is non-empty, Reconcile must set Phase to Running, publish the engine endpoint on Result.Endpoint, set the Ready condition to True with reason Ready and message "the referenced policy engine is reachable and the pod accepts runs", and requeue after 2 seconds."
 
+### internal-policyworkflowrun
+
+- intent: "" -> "This context exists so the PolicyWorkflowRun controller's state machine can be tested and reasoned about without a Kubernetes client: every decision is a pure function of an Observed snapshot, and the caller — internal/provider's reconcileWorkflowRun — owns the I/O that applies the returned Result. Keeping the decisions here means the ordering of teardown, cancellation, suspension, deadline, admission, start and observation handling is expressed in one place as data, rather than scattered across the reconciler's side effects."
+- added `r.admission-gate` (MUST): "With no Run observation, a present Admission with Allowed false MUST hold the run in PolicyWorkflowPending with Active zero, the Complete condition false using the admission reason or the fallback "Queued", and a requeue; otherwise the run starts."
+- added `r.cancel` (MUST): "Spec.Cancel MUST stop a running run with OpStopRun, zero Active, set phase PolicyWorkflowCancelled with RunID cleared and CompletionTime set, mark the Cancelled and Complete conditions true, remove the finalizer and requeue."
+- added `r.context-respected` (MUST): "Reconcile returns ctx.Err() before deciding anything once the context is done, and fills Observed.Now from the reconciler clock when the caller leaves it zero."
+- added `r.deadline` (MUST): "When Spec.ActiveDeadlineSeconds is set and Now is not before Status.StartTime plus that deadline, the run MUST be stopped, the phase set to PolicyWorkflowFailed with RunID cleared and CompletionTime set, Failed raised to at least 1, the Failed and Complete conditions set with reason DeadlineExceeded, and a requeue scheduled."
+- added `r.defaults-filled` (MUST): "New replaces a nil Options.Now with time.Now and a zero Options.DefaultBackoffLimit with the package constant DefaultBackoffLimit (6)."
+- added `r.deletion-teardown` (MUST): "A non-nil DeletionTimestamp MUST produce a teardown that stops a running run (OpStopRun), zeroes Active, cancels into Cancelled when the phase is not terminal, appends OpRemoveFinalizer, sets RemoveFinalizer and requeues after RequeueAfter."
+- added `r.failed-retry-backoff` (MUST): "A RunFailed observation MUST zero Active, clear RunID, copy the exit status, and increment Failed and Retries; while the incremented Retries does not exceed the limit (Spec.BackoffLimit when set, else the reconciler DefaultBackoffLimit) the phase returns to PolicyWorkflowPending with the Complete condition false and reason Retrying, and once it exceeds the limit the phase is PolicyWorkflowFailed with CompletionTime and Failed and Complete conditions true with reason BackoffLimitExceeded."
+- added `r.name-required` (MUST): "Reconcile returns the error "policyworkflowrun: observed run has no name" and an empty Result when Observed.WorkflowRun has an empty Name."
+- added `r.running-observation` (MUST): "A RunRunning observation MUST set phase PolicyWorkflowRunning, record the observation run id and start time, set Active 1, set the Complete condition false with reason Running, and requeue."
+- added `r.start-run` (MUST): "Starting a run MUST set phase PolicyWorkflowRunning with Active 1 and a StartTime, append OpStartRun to the ops, set the Complete condition false with reason Running, and requeue after RequeueAfter."
+- added `r.state-required` (MUST): "A Run observation whose State matches none of RunRunning, RunSucceeded or RunFailed MUST produce the error "policyworkflowrun: run observation has no state" and an empty Result."
+- added `r.status-carried` (MUST): "Reconcile starts from a Result that carries phase, run id, start time, completion time, active, succeeded, failed, retries, exit status, outputs and a copy of the conditions from the existing WorkflowRun status."
+- added `r.succeeded-observation` (MUST): "A RunSucceeded observation MUST set phase PolicyWorkflowSucceeded with Active zero, Succeeded 1, the run id, exit status and outputs copied from the observation, CompletionTime set, and the Complete condition true with reason Complete."
+- added `r.suspend` (MUST): "Spec.Suspend MUST stop a running run with OpStopRun and clear the run id, set phase PolicyWorkflowPending with Active zero, set the Suspended condition true, and requeue after RequeueAfter."
+- added `r.terminal-finish` (MUST): "A terminal phase (Succeeded, Failed or Cancelled) MUST go to finish: delete the object with OpDelete once CompletionTime plus the effective TTL is reached (spec TTLSecondsAfterFinished, else Observed.EffectiveTTLSeconds), otherwise requeue for the remaining time; with no TTL or no completion time it returns unchanged."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance | coverage |
@@ -231,4 +250,5 @@ The requirement-level delta against `open-architecture/deno-kcp--spec-bidder-and
 | internal-livegate-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
 | internal-policyengine-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
 | internal-policyworkflowpod-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
-| internal-policyworkflowrun-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Running |  | 0 | - | - |
+| internal-policyworkflowrun-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
+| internal-provider-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Running |  | 0 | - | - |
