@@ -8,6 +8,27 @@ spec:
   upstream: self
   dependsOn:
   - sc.deno-kcp
+  arch:
+    id: tb.child-process
+    kind: node
+    section: system_contexts
+    form: list
+    parent: tb.workload
+    slot: children[0]
+    node:
+      basis: example
+      code:
+      - deploy/examples/atproto/market/20-global-plc.yaml:Deno.execPath
+      - deploy/examples/atproto/market/20-global-plc.yaml:childEnv
+      - deploy/examples/atproto/market/30-relay-relay.yaml:Deno.execPath
+      - deploy/examples/atproto/market/30-relay-relay.yaml:childEnv
+      - deploy/examples/atproto/market/40-alice-pds.yaml:Deno.execPath
+      - deploy/examples/atproto/market/40-alice-pds.yaml:childEnv
+      enforced_by: []
+      id: tb.child-process
+      kind: process
+      principals: {}
+      runs_in: tb.host
 codeRefIndex:
 - file:deploy/examples/deno-job.yaml deno-job.yaml@deploy/examples/deno-job.yaml
 - file:deploy/examples/deno-pod.yaml deno-pod.yaml@deploy/examples/deno-pod.yaml

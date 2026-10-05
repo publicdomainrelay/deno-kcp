@@ -5,4 +5,62 @@ metadata:
   namespace: default
 spec:
   repository: deno-kcp
-  upstream: self
+  upstream: up.kcp
+  overlay:
+  - ov.deno-computer-api
+  - ov.living-threat-model
+  - sc.deno-kcp-provider
+  - sc.internal-denojob
+  - sc.internal-denorun
+  - sc.internal-policyworkflowpod
+  - sc.internal-policyworkflowrun
+  - sc.internal-trigger
+  - sc.kcp.apiexport-vw
+  - sc.kcp.workspaces
+  - sc.kind.denopod
+  - sc.kind.openbao
+  - sc.kind.policyengine
+  - sc.openbao-server
+  orchestrator: orch.demo-deno-runtime
+  arch:
+    id: sc.deno-kcp
+    kind: node
+    section: system_contexts
+    form: list
+    upstream: sc.kcp-local
+    overlay:
+    - ov.deno-computer-api
+    - ov.living-threat-model
+    - sc.deno-kcp-provider
+    - sc.kcp.apiexport-vw
+    - sc.kcp.workspaces
+    - sc.kind.denojob
+    - sc.kind.denopod
+    - sc.kind.denorun
+    - sc.kind.openbao
+    - sc.kind.policyengine
+    - sc.kind.policyworkflowpod
+    - sc.kind.policyworkflowrun
+    - sc.kind.runtrigger
+    - sc.openbao-server
+    orchestrator: orch.demo-deno-runtime
+    node:
+      context: tb.host
+      id: sc.deno-kcp
+      orchestrator: orch.demo-deno-runtime
+      overlay:
+      - ov.deno-computer-api
+      - sc.kind.denopod
+      - sc.kind.policyengine
+      - sc.kind.policyworkflowpod
+      - sc.kind.policyworkflowrun
+      - sc.kind.runtrigger
+      - sc.kind.denojob
+      - sc.kind.denorun
+      - sc.kind.openbao
+      - sc.kcp.workspaces
+      - sc.kcp.apiexport-vw
+      - sc.deno-kcp-provider
+      - sc.openbao-server
+      - ov.living-threat-model
+      upstream: sc.kcp-local

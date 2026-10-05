@@ -9,5 +9,74 @@ spec:
   dependsOn:
   - sc.deno-kcp
   - sc.internal-provider
+  arch:
+    id: ov.provider-flags
+    kind: node
+    section: system_contexts
+    form: list
+    parent: sc.deno-kcp-provider
+    slot: overlay[0]
+    code:
+    - file:cmd/deno-kcp-provider/main.go
+    node:
+      data:
+        flags:
+          bundled-actions-dir:
+            binds: up.gha-lite-bundled-actions
+            env: BUNDLED_ACTIONS_DIR
+          deno-bin:
+            default: deno
+            env: DENO_BIN
+          host:
+            env: KCP_HOST
+          kubeconfig:
+            env: KUBECONFIG
+          metrics-listen:
+            env: METRICS_LISTEN
+          openbao-addr:
+            env: OPENBAO_ADDR
+          openbao-ca-cert:
+            env: OPENBAO_CACERT
+          openbao-intermediate-ttl:
+            default: 43800h
+            env: OPENBAO_INTERMEDIATE_TTL
+          openbao-leaf-ttl:
+            default: 720h
+            env: OPENBAO_LEAF_TTL
+          openbao-mount:
+            default: pki
+            env: OPENBAO_MOUNT
+          openbao-role:
+            default: denopod
+            env: OPENBAO_ROLE
+          openbao-token:
+            env: OPENBAO_TOKEN
+            secret: true
+          pod-timeout:
+            default: 5m
+          policy-engine-dir:
+            binds: up.policy-engine
+            default: ../policy-engine/lib/policy-engine-server-gha-lite
+            env: POLICY_ENGINE_DIR
+          run-ttl-seconds:
+            default: 3600
+            env: RUN_TTL_SECONDS
+            negative: disables
+          runs-dir:
+            default: runs
+            env: RUNS_DIR
+          service-domain:
+            default: kcp.local
+            env: KCP_SERVICE_DOMAIN
+          token-ttl:
+            default: 1h
+          write-status:
+            default: true
+        precedence:
+        - flag
+        - env
+        - default
+      id: ov.provider-flags
+      source: cmd/deno-kcp-provider/main.go
 codeRefIndex:
 - file:cmd/deno-kcp-provider/main.go main.go@cmd/deno-kcp-provider/main.go

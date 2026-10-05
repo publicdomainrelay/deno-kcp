@@ -8,6 +8,31 @@ spec:
   upstream: self
   dependsOn:
   - sc.deno-kcp
+  arch:
+    id: ov.apiexport-vw
+    kind: node
+    section: system_contexts
+    form: list
+    parent: sc.kcp.apiexport-vw
+    slot: overlay[1]
+    code:
+    - file:deploy/denoruntime-apiexport.yaml
+    - file:deploy/policyworkflowrun-apiexport.yaml
+    node:
+      data:
+        client_host: <endpoint url>/clusters/*
+        endpoint_slice:
+          reads: status.endpoints[].url
+          resource: apis.kcp.io/v1alpha1/apiexportendpointslices
+          workspace: root:deno-provider
+        identity: cred.admin-kubeconfig
+        namespaces: all
+        permissionClaims: []
+      id: ov.apiexport-vw
+      source:
+      - deploy/denoruntime-apiexport.yaml
+      - deploy/policyworkflowrun-apiexport.yaml
+      - internal/provider/watch.go
 codeRefIndex:
 - file:deploy/denojob-apiresourceschema.yaml denojob-apiresourceschema.yaml@deploy/denojob-apiresourceschema.yaml
 - file:deploy/denopod-apiresourceschema.yaml denopod-apiresourceschema.yaml@deploy/denopod-apiresourceschema.yaml

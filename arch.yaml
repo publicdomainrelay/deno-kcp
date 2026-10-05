@@ -31,25 +31,60 @@ system_contexts:
   - file:api/v1alpha1/types_shared.go types_shared.go@api/v1alpha1/types_shared.go
   - file:api/v1alpha1/types_test.go types_test.go@api/v1alpha1/types_test.go
   - file:api/v1alpha1/zz_generated.deepcopy.go zz_generated.deepcopy.go@api/v1alpha1/zz_generated.deepcopy.go
-- id: sc.cmd-deno-kcp-provider
+- id: ov.provider-flags
   name: cmd-deno-kcp-provider
   spec: specs/cmd-deno-kcp-provider.yaml
   upstream: self
   depends_on:
   - sc.deno-kcp
   - sc.internal-provider
+  arch:
+    id: ov.provider-flags
+    kind: node
+    section: system_contexts
+    form: list
+    parent: sc.deno-kcp-provider
+    slot: overlay[0]
   codeRefIndex:
   - file:cmd/deno-kcp-provider/main.go main.go@cmd/deno-kcp-provider/main.go
 - id: sc.deno-kcp
   name: deno-kcp
   spec: specs/deno-kcp.yaml
-  upstream: self
-- id: sc.deploy
+  upstream: up.kcp
+  overlay:
+  - ov.deno-computer-api
+  - ov.living-threat-model
+  - sc.deno-kcp-provider
+  - sc.internal-denojob
+  - sc.internal-denorun
+  - sc.internal-policyworkflowpod
+  - sc.internal-policyworkflowrun
+  - sc.internal-trigger
+  - sc.kcp.apiexport-vw
+  - sc.kcp.workspaces
+  - sc.kind.denopod
+  - sc.kind.openbao
+  - sc.kind.policyengine
+  - sc.openbao-server
+  orchestrator: orch.demo-deno-runtime
+  arch:
+    id: sc.deno-kcp
+    kind: node
+    section: system_contexts
+    form: list
+- id: ov.apiexport-vw
   name: deploy
   spec: specs/deploy.yaml
   upstream: self
   depends_on:
   - sc.deno-kcp
+  arch:
+    id: ov.apiexport-vw
+    kind: node
+    section: system_contexts
+    form: list
+    parent: sc.kcp.apiexport-vw
+    slot: overlay[1]
   codeRefIndex:
   - file:deploy/denojob-apiresourceschema.yaml denojob-apiresourceschema.yaml@deploy/denojob-apiresourceschema.yaml
   - file:deploy/denopod-apiresourceschema.yaml denopod-apiresourceschema.yaml@deploy/denopod-apiresourceschema.yaml
@@ -63,12 +98,19 @@ system_contexts:
   - file:deploy/runtrigger-apiresourceschema.yaml runtrigger-apiresourceschema.yaml@deploy/runtrigger-apiresourceschema.yaml
   - file:deploy/workspacetype-denoruntime.yaml workspacetype-denoruntime.yaml@deploy/workspacetype-denoruntime.yaml
   - file:deploy/workspacetype-workflow.yaml workspacetype-workflow.yaml@deploy/workspacetype-workflow.yaml
-- id: sc.deploy-examples
+- id: tb.child-process
   name: deploy-examples
   spec: specs/deploy-examples.yaml
   upstream: self
   depends_on:
   - sc.deno-kcp
+  arch:
+    id: tb.child-process
+    kind: node
+    section: system_contexts
+    form: list
+    parent: tb.workload
+    slot: children[0]
   codeRefIndex:
   - file:deploy/examples/deno-job.yaml deno-job.yaml@deploy/examples/deno-job.yaml
   - file:deploy/examples/deno-pod.yaml deno-pod.yaml@deploy/examples/deno-pod.yaml
