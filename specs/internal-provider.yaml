@@ -21,6 +21,530 @@ spec:
   - sc.internal-policyworkflowpod
   - sc.internal-policyworkflowrun
   - sc.internal-trigger
+  intent: 'This context exists because the provider is the only place in the repository
+    that knows both the deno.computer API surface and the kcp-libs machinery that
+    reads and writes it. It exists to keep three concerns in one describable unit:
+    the API facade (Registry plus the Instances, Reader, Runtime and TokenMinter seams
+    that let tests substitute a fake or a watch cache), the controller loop (watch,
+    admit, decide, write status, finalize), and the operational surfaces a deployment
+    depends on (metrics endpoint, DNS shim, service FQDN resolution, OpenBao PKI,
+    trust bundle). It also carries the live cluster harnesses, so the contract this
+    document states is the contract those harnesses exercise against a real KCP.'
+  requirements:
+  - id: r.active-run-accounting
+    level: MUST
+    text: ActiveRuns must count workloads started and not yet seen terminal, MaxActiveRuns
+      must hold the high-water mark taken with a compare-and-swap loop, and RunStarts
+      must count every start; the inactive decrement must clamp at zero.
+    codeRefs:
+    - method:2188f1b23ffddba57fd070190f3dfab1
+    - method:23233a41823fe7b5628f032a2767752f
+    - method:a6a75598b35908e08153f182c3febf00
+  - id: r.admission-capacity-blockers
+    level: MUST
+    text: admissionSource.Capacity must return a Blocker with ReasonPolicyWorkflowPodMissing
+      when the pod does not exist and ReasonEngineNotReady when the pod has no status
+      endpoint, and must default the policy to ConcurrencyForbid when the pod names
+      no concurrency policy, otherwise carrying the pod's MaxConcurrent.
+    codeRefs:
+    - file:internal/provider/admission.go
+    - method:a07bdbb2bda3bec3a983caa0cbe3f545
+  - id: r.admission-lease-and-lifecycle
+    level: MUST
+    text: The admitter must be built with a queue.Leases store, a two-minute leaseTTL,
+      the provider clock and the workflow-run lifecycle that treats denocomputer.RunningPhase
+      as running and TerminalPolicyWorkflow as terminal; the admitted run must carry
+      the pod endpoint, workflow bytes, inputs and the run TTL from policyworkflowpod.RunTTL
+      with DefaultRunTTLSeconds as fallback.
+    codeRefs:
+    - file:internal/provider/admission.go
+    - file:internal/provider/provider.go
+  - id: r.admission-parent-resolution
+    level: MUST
+    text: admissionSource.Parent must read the policy run, take the parent pod name
+      from spec.policyWorkflowPod and fall back to the PolicyWorkflowPodLabel, and
+      report no parent when the object is absent or the name is empty.
+    codeRefs:
+    - file:internal/provider/admission.go
+    - method:dedfd34a67b569d3bd5df1bbfd2d518e
+  - id: r.admission-runs-lists-labelled-only
+    level: MUST
+    text: admissionSource.Runs must list only the runs the pod's label index returns;
+      a run that names the pod through spec.policyWorkflowPod alone is not in that
+      list and must be appended and admitted by the admitter rather than passed through
+      un-gated.
+    codeRefs:
+    - file:internal/provider/admission.go
+    - method:ea874e105ac66c1a2a0d988371fa3509
+  - id: r.cluster-path-from-id
+    level: MUST
+    text: Registry.ClusterPath must resolve a logical cluster ID to its workspace
+      path through the store, because objects carry only the kcp.io/cluster ID and
+      a name built from that ID alone would read wrong.
+    codeRefs:
+    - file:internal/provider/cluster_path.go
+    - method:1711073a6a2c66ef8dbc0850814be58e
+  - id: r.degrade-rather-than-fail-construction
+    level: MUST
+    text: A DNS shim that cannot be materialised from RunsDir, or an OpenBao client
+      or PKI provisioner that cannot be built, must log a warning and leave that feature
+      off; only the metrics bind may fail construction.
+    codeRefs:
+    - file:internal/provider/provider.go
+    - function:f4e5cfdbb89305e5310f8800b3c5e307
+  - id: r.finalizer-removal-known-list
+    level: MUST
+    text: removeRunFinalizer must call RemoveRunFinalizerKnown with the finalizers
+      the caller already holds when the runtime offers it and the list is non-empty,
+      and otherwise fall back to RemoveRunFinalizer so the patch does not need its
+      own GET.
+    codeRefs:
+    - file:internal/provider/reconcile_run.go
+    - method:9c58b2e5cdc887157dd853e80e10a086
+  - id: r.identity-ref-for-admission
+    level: MUST
+    text: admitRun must hand the admitter a Ref with the resource version cleared,
+      because the queue keys runs, leases and preempt lists on the whole Ref while
+      an informer-sourced ref carries a resource version the source never puts on
+      listed runs.
+    codeRefs:
+    - file:internal/provider/admission.go
+  - id: r.label-indexes-and-fallback-lister
+    level: MUST
+    text: The informers must carry the by-cluster, by-cluster-name, by-cluster-pod,
+      by-cluster-job and by-cluster-trigger-pod indexes; the cache reader must answer
+      job-scoped, pod-scoped and trigger-scoped lists from those indexes, and a reader
+      without the jobRunLister or podWorkflowRunLister method must fall back to listing
+      the whole workspace and filtering on namespace plus label, never dropping the
+      namespace argument.
+    codeRefs:
+    - file:internal/provider/provider.go
+    - file:internal/provider/watch_cache.go
+  - id: r.live-cluster-harness
+    level: MUST
+    text: 'The package''s live tests must drive a real KCP cluster through the shared
+      kubectl helper and the one API installation in live_helpers_test.go: the deno
+      runtime lifecycle, max-concurrent admission, native admission with queue drain,
+      denojob allow-drain and pod-run TTL reaping, creating the policy workflow pods,
+      engines, pods, jobs and runs each needs; main_test.go must reap every spawned
+      process group on exit and on SIGINT or SIGTERM.'
+    codeRefs:
+    - file:internal/provider/live_denojob_drain_test.go
+    - file:internal/provider/live_denoruntime_test.go
+    - file:internal/provider/live_helpers_test.go
+    - file:internal/provider/live_maxconcurrent_test.go
+    - file:internal/provider/live_native_admission_test.go
+    - file:internal/provider/live_ttl_test.go
+    - file:internal/provider/main_test.go
+  - id: r.metrics-endpoint-binds-at-construction
+    level: MUST
+    text: 'When MetricsListen is set, New must bind the metrics endpoint immediately
+      and return a "provider: bind metrics endpoint on %s" error, so a caller learns
+      the port is taken at construction and not at first scrape; Close must shut that
+      server down.'
+    codeRefs:
+    - file:internal/provider/metrics.go
+    - method:bedc23e806b40419ad4ae31c624ffdf9
+  - id: r.metrics-surface
+    level: MUST
+    text: initMetrics must register queue_depth, cache_age_seconds, reconciles_total,
+      conflicts_total, errors_total, active_runs and max_active_runs as gauge functions
+      read from the provider's own atomics and a reconcile_seconds summary; cache_age_seconds
+      must report NaN before the first informer event rather than a zero age.
+    codeRefs:
+    - file:internal/provider/metrics.go
+    - method:783d67229120389163d8738cc3d1a3ec
+  - id: r.new-fills-defaults
+    level: MUST
+    text: 'New must install a decider for each of the seven kinds when the caller
+      left it nil, and fill missing options: TokenTTL one hour, Interval defaultRequeueAfter,
+      MinTransitionPoll minTransitionPoll, WatchWorkers from watchWorkers(), RunsDir
+      runs, ServiceDomain kcp.DefaultServiceDomain, ProviderWorkspace root:deno-provider,
+      Now time.Now and Log slog.Default; BundledActionsDir is made absolute when set.'
+    codeRefs:
+    - function:f4e5cfdbb89305e5310f8800b3c5e307
+    - struct:616ab943fe3365809df93a906c1942bc
+  - id: r.new-requires-registry-and-rest-config
+    level: MUST
+    text: 'New must reject a nil Registry with "provider: Registry is required" and
+      a nil RestConfig with "provider: RestConfig is required for the watch driver",
+      returning no Provider in either case.'
+    codeRefs:
+    - file:internal/provider/provider.go
+    - function:f4e5cfdbb89305e5310f8800b3c5e307
+  - id: r.reconcile-observation
+    level: MUST
+    text: Provider.Reconcile must read the policy run, admit it, and pass the decider
+      an Observed carrying the admission, the effective TTL and the clock; when the
+      run has a RunID, is not cancelling and is not being deleted, and the endpoint
+      is set, it must first ask the policy client for the run's state, exit status,
+      outputs and message.
+    codeRefs:
+    - file:internal/provider/provider.go
+    - method:8bfddbaa8080d45fcb240bd22d4cd5eb
+  - id: r.reconcile-run-ops
+    level: MUST
+    text: The run reconciler must stop a running workload on OpStopRun only when a
+      run ID exists, must not start on OpStartRun when alreadyStarted holds, must
+      skip all writes when WriteStatus is off, and must space a mid-transition re-check
+      at MinTransitionPoll.
+    codeRefs:
+    - file:internal/provider/driver.go
+    - file:internal/provider/reconcile_run.go
+  - id: r.refuse-duplicate-run-start
+    level: MUST
+    text: The provider must record a run ref the moment a workload starts, refresh
+      it once per pass, and refuse to start a second workload for a run it has already
+      started; a retry whose status carries Retries or StartTime and a recreated object
+      carrying a new UID must not be mistaken for staleness. runRefTTL bounds the
+      record for a run deleted before its status reads terminal.
+    codeRefs:
+    - file:internal/provider/reconcile_run.go
+    - file:internal/provider/run_refs.go
+  - id: r.registry-crud-semantics
+    level: MUST
+    text: 'Registry must implement the Instances and Reader seams directly on the
+      store: Read and ListWorkflowRuns on policyworkflowruns, WriteStatus through
+      a status patch body, Delete, RemoveFinalizer with FinalizerPolicyWorkflowRun,
+      plus the run, pod, job, trigger, engine, openbao and workflowpod reads and lists,
+      and it must assert `var _ Reader = (*Registry)(nil)`.'
+    codeRefs:
+    - file:internal/provider/registry.go
+    - method:0336e9c05327f7b15cb6ddb11d9ecda3
+  - id: r.registry-requires-host
+    level: MUST
+    text: 'NewRegistry must reject an empty Host with "provider: Host is required",
+      then build one kcpstore store and hold one typed kcpstore.Resource per deno.computer
+      resource: policyworkflowruns, denoruns, denopods, denojobs, runtriggers, policyengines,
+      policyworkflowpods and openbaos.'
+    codeRefs:
+    - file:internal/provider/registry.go
+    - function:d8299700880b325d38c3aa20aa84ac24
+  - id: r.run-drives-the-watch-loop
+    level: MUST
+    text: Provider.Run must delegate to RunWatch, and Reconciles must report the reconcile
+      counter the metrics gauges also read.
+    codeRefs:
+    - method:83f50090d7ebe3148f7aa5e0db332b4d
+    - method:e77a20a79e63ff4ddd7d130f60aff357
+  - id: r.service-dns-and-pod-env
+    level: MUST
+    text: buildServices must construct the servicenames resolver from the provider's
+      pod source, path cache, token minter, ServiceDomain, TokenTTL, DefaultServiceAccountNamespace
+      and the materialised shim; podEnv must merge the CR's own env first and then
+      the service env, and the resolver must be built once under a sync.Once so concurrent
+      callers agree.
+    codeRefs:
+    - file:internal/provider/service_dns.go
+  - id: r.trust-bundle-content
+    level: MUST
+    text: TrustBundle must return kcp's own CA data so a workload can reach the API
+      server, append the cached OpenBao root PEM when a provisioner exists, and read
+      only what has been provisioned so a vault that is down costs certificates and
+      not the workloads that need none.
+    codeRefs:
+    - file:internal/provider/provider.go
+    - method:f57c1668b886e5485cb302198237df3c
+  - id: r.wake-queued-runs-on-capacity-change
+    level: MUST
+    text: wakeQueuedRuns must re-read the pod, list its runs, compute the wake list
+      from queue.WakeList with the pod's capacity limit, enqueue each woken run and
+      then enqueue the pod itself, returning quietly when the pod name is empty or
+      the pod cannot be read.
+    codeRefs:
+    - file:internal/provider/admission.go
+  - id: r.watch-seven-kinds-shared-cache
+    level: MUST
+    text: RunWatch must await the workspace endpoints, then bind dynamic informers
+      for policyengines, policyworkflowpods, runtriggers, denoruns, denojobs, denopods
+      and openbaos from every denoruntime endpoint and for policyworkflowruns from
+      every policyworkflowruns endpoint, feeding one shared cache reader and one rate-limited
+      typed work queue; workers may start before cache sync because handlers enqueue
+      only after the object is in the store.
+    codeRefs:
+    - file:internal/provider/watch.go
+    - method:f34958b11727b06606bdafed3381d854
+  - id: r.work-dispatch-vocabulary
+    level: SHOULD
+    text: Dispatch must stay on the local workKind and workKey vocabulary covering
+      the eight kinds, with the seven deciders keeping their own Result and Op types;
+      the migration to the library's reconcile.Key and reconcile.Result seam is left
+      as separate work and nothing else in the provider depends on which vocabulary
+      the deciders use.
+    codeRefs:
+    - file:internal/provider/driver.go
+  interfaces:
+  - name: Instances
+    kind: interface
+    signature: type Instances interface
+    file: internal/provider/provider.go
+  - name: Instances.Delete
+    kind: method
+    signature: Delete(ctx context.Context, ref Ref) error
+    file: internal/provider/provider.go
+  - name: Instances.Read
+    kind: method
+    signature: Read(ctx context.Context, ref Ref) (*v1alpha1.PolicyWorkflowRun, error)
+    file: internal/provider/provider.go
+  - name: Instances.RemoveFinalizer
+    kind: method
+    signature: RemoveFinalizer(ctx context.Context, ref Ref) error
+    file: internal/provider/provider.go
+  - name: Instances.WriteStatus
+    kind: method
+    signature: WriteStatus(ctx context.Context, ref Ref, st v1alpha1.PolicyWorkflowRunStatus)
+      error
+    file: internal/provider/provider.go
+  - name: New
+    kind: function
+    signature: func New(opts Options) (*Provider, error)
+    file: internal/provider/provider.go
+  - name: NewRegistry
+    kind: function
+    signature: func NewRegistry(opts RegistryOptions) (*Registry, error)
+    file: internal/provider/registry.go
+  - name: Options
+    kind: struct
+    signature: type Options struct{ Registry Instances; Reader Reader; RestConfig
+      *rest.Config; ProviderWorkspace string; PolicyClient policy.Client; Decider
+      *policyworkflowrun.Reconciler; Runtime Runtime; Minter TokenMinter; PodRunner
+      runner.PodRunner; EngineRunner runner.EngineRunner; PodDecider *denopod.Reconciler;
+      RunDecider *denorun.Reconciler; JobDecider *denojob.Reconciler; TriggerDecider
+      *trigger.Reconciler; EngineDecider *policyengine.Reconciler; WorkflowPodDecider
+      *policyworkflowpod.Reconciler; Host string; TokenTTL time.Duration; BundledActionsDir
+      string; MetricsListen string; DefaultRunTTLSeconds *int64; WriteStatus bool;
+      Interval time.Duration; MinTransitionPoll time.Duration; WatchWorkers int; RunsDir
+      string; ServiceDomain string; OpenBaoAddress string; OpenBaoToken string; OpenBaoCACert
+      []byte; OpenBaoMount string; OpenBaoRole string; OpenBaoIntermediateTTL string;
+      OpenBaoLeafTTL string; Now func() time.Time; Log *slog.Logger }
+    file: internal/provider/provider.go
+  - name: Pass
+    kind: struct
+    signature: type Pass struct{ Phase v1alpha1.PolicyWorkflowPhase; RequeueAfter
+      time.Duration }
+    file: internal/provider/provider.go
+  - name: Provider
+    kind: struct
+    signature: type Provider struct{ opts Options; probes *probe.Tracker; reader Reader;
+      watch *watchState; admissions *admission.Admitter; reconciles atomic.Uint64;
+      metrics providerMetrics; metricsSrv *metrics.Server; services *servicenames.Resolver;
+      ... }
+    file: internal/provider/provider.go
+  - name: Provider.ActiveRuns
+    kind: method
+    signature: ActiveRuns() int64
+    file: internal/provider/run_refs.go
+  - name: Provider.Close
+    kind: method
+    signature: Close() error
+    file: internal/provider/provider.go
+  - name: Provider.MaxActiveRuns
+    kind: method
+    signature: MaxActiveRuns() int64
+    file: internal/provider/run_refs.go
+  - name: Provider.Reconcile
+    kind: method
+    signature: Reconcile(ctx context.Context, ref Ref) (Pass, error)
+    file: internal/provider/provider.go
+  - name: Provider.Reconciles
+    kind: method
+    signature: Reconciles() uint64
+    file: internal/provider/provider.go
+  - name: Provider.Run
+    kind: method
+    signature: Run(ctx context.Context) error
+    file: internal/provider/provider.go
+  - name: Provider.RunStarts
+    kind: method
+    signature: RunStarts() int64
+    file: internal/provider/run_refs.go
+  - name: Provider.RunWatch
+    kind: method
+    signature: RunWatch(ctx context.Context) error
+    file: internal/provider/watch.go
+  - name: Provider.TrustBundle
+    kind: method
+    signature: TrustBundle() []byte
+    file: internal/provider/provider.go
+  - name: Reader
+    kind: interface
+    signature: type Reader interface
+    file: internal/provider/provider.go
+  - name: Reader.ListRuns
+    kind: method
+    signature: ListRuns(ctx context.Context, logicalCluster string) ([]v1alpha1.DenoRun,
+      error)
+    file: internal/provider/provider.go
+  - name: Reader.ListWorkflowRuns
+    kind: method
+    signature: ListWorkflowRuns(ctx context.Context, logicalCluster string) ([]v1alpha1.PolicyWorkflowRun,
+      error)
+    file: internal/provider/provider.go
+  - name: Reader.Read
+    kind: method
+    signature: Read(ctx context.Context, ref Ref) (*v1alpha1.PolicyWorkflowRun, error)
+    file: internal/provider/provider.go
+  - name: Reader.ReadEngine
+    kind: method
+    signature: ReadEngine(ctx context.Context, ref Ref) (*v1alpha1.PolicyEngine, error)
+    file: internal/provider/provider.go
+  - name: Reader.ReadJob
+    kind: method
+    signature: ReadJob(ctx context.Context, ref Ref) (*v1alpha1.DenoJob, error)
+    file: internal/provider/provider.go
+  - name: Reader.ReadOpenBao
+    kind: method
+    signature: ReadOpenBao(ctx context.Context, ref Ref) (*v1alpha1.OpenBao, error)
+    file: internal/provider/provider.go
+  - name: Reader.ReadPod
+    kind: method
+    signature: ReadPod(ctx context.Context, ref Ref) (*v1alpha1.DenoPod, error)
+    file: internal/provider/provider.go
+  - name: Reader.ReadRun
+    kind: method
+    signature: ReadRun(ctx context.Context, ref Ref) (*v1alpha1.DenoRun, error)
+    file: internal/provider/provider.go
+  - name: Reader.ReadTrigger
+    kind: method
+    signature: ReadTrigger(ctx context.Context, ref Ref) (*v1alpha1.RunTrigger, error)
+    file: internal/provider/provider.go
+  - name: Reader.ReadWorkflowPod
+    kind: method
+    signature: ReadWorkflowPod(ctx context.Context, ref Ref) (*v1alpha1.PolicyWorkflowPod,
+      error)
+    file: internal/provider/provider.go
+  - name: Registry
+    kind: struct
+    signature: type Registry struct{ store *kcpstore.Store; workflowRuns, runs, pods,
+      jobs, triggers, engines, workflowPods, openBaos *kcpstore.Resource[...] }
+    file: internal/provider/registry.go
+  - name: Registry.ClusterPath
+    kind: method
+    signature: ClusterPath(ctx context.Context, id string) (string, error)
+    file: internal/provider/cluster_path.go
+  - name: RegistryOptions
+    kind: struct
+    signature: type RegistryOptions struct{ Host string; RestConfig *rest.Config;
+      Transport http.RoundTripper }
+    file: internal/provider/registry.go
+  - name: Runtime
+    kind: interface
+    signature: type Runtime interface
+    file: internal/provider/provider_runtime.go
+  - name: Runtime.CreateJob
+    kind: method
+    signature: CreateJob(ctx context.Context, logicalCluster string, job *v1alpha1.DenoJob)
+      error
+    file: internal/provider/provider_runtime.go
+  - name: Runtime.CreatePod
+    kind: method
+    signature: CreatePod(ctx context.Context, logicalCluster string, pod *v1alpha1.DenoPod)
+      error
+    file: internal/provider/provider_runtime.go
+  - name: Runtime.CreateRun
+    kind: method
+    signature: CreateRun(ctx context.Context, logicalCluster string, run *v1alpha1.DenoRun)
+      error
+    file: internal/provider/provider_runtime.go
+  - name: Runtime.CreateWorkflowRun
+    kind: method
+    signature: CreateWorkflowRun(ctx context.Context, logicalCluster string, run *v1alpha1.PolicyWorkflowRun)
+      error
+    file: internal/provider/provider_runtime.go
+  - name: Runtime.DeleteEngine
+    kind: method
+    signature: DeleteEngine(ctx context.Context, ref Ref) error
+    file: internal/provider/provider_runtime.go
+  - name: Runtime.DeleteJob
+    kind: method
+    signature: DeleteJob(ctx context.Context, ref Ref) error
+    file: internal/provider/provider_runtime.go
+  - name: Runtime.DeleteOpenBao
+    kind: method
+    signature: DeleteOpenBao(ctx context.Context, ref Ref) error
+    file: internal/provider/provider_runtime.go
+  - name: Runtime.DeletePod
+    kind: method
+    signature: DeletePod(ctx context.Context, ref Ref) error
+    file: internal/provider/provider_runtime.go
+  - name: Runtime.DeleteRun
+    kind: method
+    signature: DeleteRun(ctx context.Context, ref Ref) error
+    file: internal/provider/provider_runtime.go
+  - name: Runtime.DeleteWorkflowPod
+    kind: method
+    signature: DeleteWorkflowPod(ctx context.Context, ref Ref) error
+    file: internal/provider/provider_runtime.go
+  - name: Runtime.ListOpenBaos
+    kind: method
+    signature: ListOpenBaos(ctx context.Context, logicalCluster, namespace string)
+      ([]v1alpha1.OpenBao, error)
+    file: internal/provider/provider_runtime.go
+  - name: Runtime.RemoveEngineFinalizer
+    kind: method
+    signature: RemoveEngineFinalizer(ctx context.Context, ref Ref) error
+    file: internal/provider/provider_runtime.go
+  - name: Runtime.RemoveOpenBaoFinalizer
+    kind: method
+    signature: RemoveOpenBaoFinalizer(ctx context.Context, ref Ref) error
+    file: internal/provider/provider_runtime.go
+  - name: Runtime.RemovePodFinalizer
+    kind: method
+    signature: RemovePodFinalizer(ctx context.Context, ref Ref) error
+    file: internal/provider/provider_runtime.go
+  - name: Runtime.RemoveRunFinalizer
+    kind: method
+    signature: RemoveRunFinalizer(ctx context.Context, ref Ref) error
+    file: internal/provider/provider_runtime.go
+  - name: Runtime.WriteEngineStatus
+    kind: method
+    signature: WriteEngineStatus(ctx context.Context, ref Ref, st v1alpha1.PolicyEngineStatus)
+      error
+    file: internal/provider/provider_runtime.go
+  - name: Runtime.WriteJobStatus
+    kind: method
+    signature: WriteJobStatus(ctx context.Context, ref Ref, st v1alpha1.DenoJobStatus)
+      error
+    file: internal/provider/provider_runtime.go
+  - name: Runtime.WriteOpenBaoFinalizer
+    kind: method
+    signature: WriteOpenBaoFinalizer(ctx context.Context, ref Ref, finalizers []string)
+      error
+    file: internal/provider/provider_runtime.go
+  - name: Runtime.WriteOpenBaoStatus
+    kind: method
+    signature: WriteOpenBaoStatus(ctx context.Context, ref Ref, st v1alpha1.OpenBaoStatus)
+      error
+    file: internal/provider/provider_runtime.go
+  - name: Runtime.WritePodStatus
+    kind: method
+    signature: WritePodStatus(ctx context.Context, ref Ref, st v1alpha1.DenoPodStatus)
+      error
+    file: internal/provider/provider_runtime.go
+  - name: Runtime.WriteRunStatus
+    kind: method
+    signature: WriteRunStatus(ctx context.Context, ref Ref, st v1alpha1.DenoRunStatus)
+      error
+    file: internal/provider/provider_runtime.go
+  - name: Runtime.WriteTriggerStatus
+    kind: method
+    signature: WriteTriggerStatus(ctx context.Context, ref Ref, st v1alpha1.RunTriggerStatus)
+      error
+    file: internal/provider/provider_runtime.go
+  - name: Runtime.WriteWorkflowPodStatus
+    kind: method
+    signature: WriteWorkflowPodStatus(ctx context.Context, ref Ref, st v1alpha1.PolicyWorkflowPodStatus)
+      error
+    file: internal/provider/provider_runtime.go
+  - name: TokenMinter
+    kind: interface
+    signature: type TokenMinter interface
+    file: internal/provider/provider_runtime.go
+  - name: TokenMinter.MintServiceAccountToken
+    kind: method
+    signature: MintServiceAccountToken(ctx context.Context, logicalCluster, namespace,
+      name string, ttl time.Duration) (string, error)
+    file: internal/provider/provider_runtime.go
   arch:
     id: sc.test.provider-live-cluster
     kind: node
@@ -153,3 +677,22 @@ codeRefIndex:
 - file:internal/provider/watch.go watch.go@internal/provider/watch.go
 - file:internal/provider/watch_cache.go watch_cache.go@internal/provider/watch_cache.go
 - file:internal/provider/watch_test.go watch_test.go@internal/provider/watch_test.go
+- function:d8299700880b325d38c3aa20aa84ac24 NewRegistry@internal/provider/registry.go:48
+- function:f4e5cfdbb89305e5310f8800b3c5e307 New@internal/provider/provider.go:203
+- method:0336e9c05327f7b15cb6ddb11d9ecda3 Registry.Read@internal/provider/registry.go:91
+- method:1711073a6a2c66ef8dbc0850814be58e Registry.ClusterPath@internal/provider/cluster_path.go:16
+- method:2188f1b23ffddba57fd070190f3dfab1 Provider.ActiveRuns@internal/provider/run_refs.go:51
+- method:23233a41823fe7b5628f032a2767752f Provider.MaxActiveRuns@internal/provider/run_refs.go:55
+- method:783d67229120389163d8738cc3d1a3ec summaryObserver.Observe@internal/provider/metrics.go:31
+- method:83f50090d7ebe3148f7aa5e0db332b4d Provider.Reconciles@internal/provider/provider.go:341
+- method:8bfddbaa8080d45fcb240bd22d4cd5eb Provider.Reconcile@internal/provider/provider.go:485
+- method:9c58b2e5cdc887157dd853e80e10a086 runFinalizerRemover.RemoveRunFinalizerKnown@internal/provider/reconcile_run.go:157
+- method:a07bdbb2bda3bec3a983caa0cbe3f545 admissionSource.Capacity@internal/provider/admission.go:101
+- method:a6a75598b35908e08153f182c3febf00 Provider.RunStarts@internal/provider/run_refs.go:59
+- method:bedc23e806b40419ad4ae31c624ffdf9 Provider.Close@internal/provider/provider.go:330
+- method:dedfd34a67b569d3bd5df1bbfd2d518e admissionSource.Parent@internal/provider/admission.go:67
+- method:e77a20a79e63ff4ddd7d130f60aff357 Provider.Run@internal/provider/provider.go:337
+- method:ea874e105ac66c1a2a0d988371fa3509 admissionSource.Runs@internal/provider/admission.go:85
+- method:f34958b11727b06606bdafed3381d854 Provider.RunWatch@internal/provider/watch.go:88
+- method:f57c1668b886e5485cb302198237df3c Provider.TrustBundle@internal/provider/provider.go:322
+- struct:616ab943fe3365809df93a906c1942bc Options@internal/provider/provider.go:76

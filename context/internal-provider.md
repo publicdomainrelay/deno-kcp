@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists because the provider is the only place in the repository that knows both the deno.computer API surface and the kcp-libs machinery that reads and writes it. It exists to keep three concerns in one describable unit: the API facade (Registry plus the Instances, Reader, Runtime and TokenMinter seams that let tests substitute a fake or a watch cache), the controller loop (watch, admit, decide, write status, finalize), and the operational surfaces a deployment depends on (metrics endpoint, DNS shim, service FQDN resolution, OpenBao PKI, trust bundle). It also carries the live cluster harnesses, so the contract this document states is the contract those harnesses exercise against a real KCP.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

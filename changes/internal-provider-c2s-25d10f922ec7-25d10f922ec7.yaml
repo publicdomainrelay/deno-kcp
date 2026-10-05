@@ -9,5 +9,22 @@ spec:
   fromCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
   toCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
 status:
-  phase: Running
-  message: the agent is summarizing internal-provider
+  phase: Succeeded
+  agentLog: 'internal/provider is the KCP controller that turns deno.computer custom
+    resources into running workloads. Registry is the thin API-layer facade over kcpstore:
+    it binds one kcpstore.Resource per group-version-resource (policyworkflowruns,
+    denoruns, denopods, denojobs, runtriggers, policyengines, policyworkflowpods,
+    openbaos) and exposes typed reads, status patches, creates, deletes and finalizer
+    removal through the Instances and Reader interfaces. Provider composes those reads
+    with a watch driver, a policy admission queue, per-kind deciders and a metric
+    surface. RunWatch binds dynamic informers for the seven denoruntime kinds plus
+    policyworkflowruns across every endpoint of the two APIExports into one shared
+    cache and rate-limited work queue, and Reconcile reads the object, admits it through
+    the queue-backed admitter, and hands the decider an Observed value with admission,
+    effective TTL, the clock and any runner observation. Admission keys runs on a
+    resource-version-free Ref, resolves a run''s parent PolicyWorkflowPod from spec
+    or label, and reports a Blocker when the pod is absent or its engine endpoint
+    is not yet set. The package also carries the FQDN and PKI wiring (servicenames
+    resolver, DNS shim, OpenBao-backed provisioner and trust bundle) and a set of
+    live harnesses that drive real KCP clusters.'
+  message: wrote 26 requirement(s) and 59 interface(s) for internal-provider

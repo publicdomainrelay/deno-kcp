@@ -757,6 +757,59 @@ system_contexts:
     section: system_contexts
     form: list
     position: 6
+  requirements:
+  - id: r.active-run-accounting
+    level: MUST
+  - id: r.admission-capacity-blockers
+    level: MUST
+  - id: r.admission-lease-and-lifecycle
+    level: MUST
+  - id: r.admission-parent-resolution
+    level: MUST
+  - id: r.admission-runs-lists-labelled-only
+    level: MUST
+  - id: r.cluster-path-from-id
+    level: MUST
+  - id: r.degrade-rather-than-fail-construction
+    level: MUST
+  - id: r.finalizer-removal-known-list
+    level: MUST
+  - id: r.identity-ref-for-admission
+    level: MUST
+  - id: r.label-indexes-and-fallback-lister
+    level: MUST
+  - id: r.live-cluster-harness
+    level: MUST
+  - id: r.metrics-endpoint-binds-at-construction
+    level: MUST
+  - id: r.metrics-surface
+    level: MUST
+  - id: r.new-fills-defaults
+    level: MUST
+  - id: r.new-requires-registry-and-rest-config
+    level: MUST
+  - id: r.reconcile-observation
+    level: MUST
+  - id: r.reconcile-run-ops
+    level: MUST
+  - id: r.refuse-duplicate-run-start
+    level: MUST
+  - id: r.registry-crud-semantics
+    level: MUST
+  - id: r.registry-requires-host
+    level: MUST
+  - id: r.run-drives-the-watch-loop
+    level: MUST
+  - id: r.service-dns-and-pod-env
+    level: MUST
+  - id: r.trust-bundle-content
+    level: MUST
+  - id: r.wake-queued-runs-on-capacity-change
+    level: MUST
+  - id: r.watch-seven-kinds-shared-cache
+    level: MUST
+  - id: r.work-dispatch-vocabulary
+    level: SHOULD
   codeRefIndex:
   - file:internal/provider/admission.go admission.go@internal/provider/admission.go
   - file:internal/provider/admission_test.go admission_test.go@internal/provider/admission_test.go
@@ -800,6 +853,25 @@ system_contexts:
   - file:internal/provider/watch.go watch.go@internal/provider/watch.go
   - file:internal/provider/watch_cache.go watch_cache.go@internal/provider/watch_cache.go
   - file:internal/provider/watch_test.go watch_test.go@internal/provider/watch_test.go
+  - function:d8299700880b325d38c3aa20aa84ac24 NewRegistry@internal/provider/registry.go:48
+  - function:f4e5cfdbb89305e5310f8800b3c5e307 New@internal/provider/provider.go:203
+  - method:0336e9c05327f7b15cb6ddb11d9ecda3 Registry.Read@internal/provider/registry.go:91
+  - method:1711073a6a2c66ef8dbc0850814be58e Registry.ClusterPath@internal/provider/cluster_path.go:16
+  - method:2188f1b23ffddba57fd070190f3dfab1 Provider.ActiveRuns@internal/provider/run_refs.go:51
+  - method:23233a41823fe7b5628f032a2767752f Provider.MaxActiveRuns@internal/provider/run_refs.go:55
+  - method:783d67229120389163d8738cc3d1a3ec summaryObserver.Observe@internal/provider/metrics.go:31
+  - method:83f50090d7ebe3148f7aa5e0db332b4d Provider.Reconciles@internal/provider/provider.go:341
+  - method:8bfddbaa8080d45fcb240bd22d4cd5eb Provider.Reconcile@internal/provider/provider.go:485
+  - method:9c58b2e5cdc887157dd853e80e10a086 runFinalizerRemover.RemoveRunFinalizerKnown@internal/provider/reconcile_run.go:157
+  - method:a07bdbb2bda3bec3a983caa0cbe3f545 admissionSource.Capacity@internal/provider/admission.go:101
+  - method:a6a75598b35908e08153f182c3febf00 Provider.RunStarts@internal/provider/run_refs.go:59
+  - method:bedc23e806b40419ad4ae31c624ffdf9 Provider.Close@internal/provider/provider.go:330
+  - method:dedfd34a67b569d3bd5df1bbfd2d518e admissionSource.Parent@internal/provider/admission.go:67
+  - method:e77a20a79e63ff4ddd7d130f60aff357 Provider.Run@internal/provider/provider.go:337
+  - method:ea874e105ac66c1a2a0d988371fa3509 admissionSource.Runs@internal/provider/admission.go:85
+  - method:f34958b11727b06606bdafed3381d854 Provider.RunWatch@internal/provider/watch.go:88
+  - method:f57c1668b886e5485cb302198237df3c Provider.TrustBundle@internal/provider/provider.go:322
+  - struct:616ab943fe3365809df93a906c1942bc Options@internal/provider/provider.go:76
 - id: sc.kind.runtrigger
   name: internal-trigger
   spec: specs/internal-trigger.yaml
