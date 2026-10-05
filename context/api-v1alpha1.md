@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists because the CRD types are the contract between the deno-kcp controllers and everything outside them: clients, informers and the denospec library all read these structs, so their field shape, phase vocabulary and deep-copy semantics must stay fixed and reviewable in one place. denospec.go is the bridge that keeps the Kubernetes-facing spelling of permissions and service accounts from drifting away from the library's own types.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

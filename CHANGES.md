@@ -4,6 +4,18 @@ The requirement-level delta against `open-architecture/deno-kcp--spec-bidder-and
 
 ## Requirements
 
+### api-v1alpha1
+
+- intent: "" -> "This context exists because the CRD types are the contract between the deno-kcp controllers and everything outside them: clients, informers and the denospec library all read these structs, so their field shape, phase vocabulary and deep-copy semantics must stay fixed and reviewable in one place. denospec.go is the bridge that keeps the Kubernetes-facing spelling of permissions and service accounts from drifting away from the library's own types."
+- added `r.deepcopy-implements-runtime-object` (MUST): "Every kind and list carries generated DeepCopyInto, DeepCopy and DeepCopyObject methods so it satisfies runtime.Object and can be cached by informers, and the copies must not alias any nested map, slice or pointer from the source object."
+- added `r.group-version-registers-all-kinds` (MUST): "The package registers one group/version and adds every custom kind (DenoJob, DenoPod, DenoRun, OpenBao, PolicyEngine, PolicyWorkflowPod, PolicyWorkflowRun, RunTrigger) to its scheme, so a controller can build a client for any of them."
+- added `r.kinds-pair-spec-status-and-list` (MUST): "Every custom kind pairs a Spec holding the desired state with a Status holding observed state, and ships a List companion, so controllers and clients can reconcile and enumerate each resource."
+- added `r.permissions-convert-to-denospec` (MUST): "DenoPermissions.DenoSpec converts the CRD permission set into a denospec.Permissions value, copying the scalar flags directly and routing each per-resource permission through the DenoPermission converter; a nil receiver yields nil instead of panicking."
+- added `r.service-account-converts-to-denospec` (MUST): "ServiceAccountRef.DenoSpec converts the reference into a denospec.ServiceAccountRef carrying Name and Namespace, and returns nil for a nil receiver so a missing service account stays distinguishable from an empty one."
+- added `r.shared-types-single-source` (MUST): "Permission, service-account, pod-template, exec-probe, restart-policy and concurrency-policy types live once in types_shared.go and are embedded by the workload kinds, so those shapes have a single definition that all kinds inherit."
+- added `r.status-reports-a-phase` (MUST): "Each kind's status reports its lifecycle through a dedicated phase type, giving DenoJob, DenoPod, DenoRun, OpenBao-era workloads, PolicyEngine, PolicyWorkflowPod, PolicyWorkflowRun and RunTrigger a shared vocabulary of states that other code can switch on."
+- added `r.tests-pin-copy-and-absence-semantics` (SHOULD): "Tests assert that a deep copy of a kind shares no backing storage with its original and that an absent service-account reference is distinguishable from a present but zero-valued one, since both properties are silent failures when they regress."
+
 ### cmd-deno-kcp-provider
 
 - intent: "" -> "This context exists to pin down the provider's process boundary: the single main that turns operator input (flags and environment) into the registry, engine runner, pod runner and provider the controller needs, and the failure and shutdown behaviour around them. Everything else in the repository assumes a configured provider already exists; this context is what makes one."
@@ -25,6 +37,7 @@ The requirement-level delta against `open-architecture/deno-kcp--spec-bidder-and
 
 | change | direction | phase | commit | verify | acceptance | coverage |
 | --- | --- | --- | --- | --- | --- | --- |
-| api-v1alpha1-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Running |  | 0 | - | - |
+| api-v1alpha1-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
 | cmd-deno-kcp-provider-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
 | deno-kcp-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Running |  | 0 | - | - |
+| deploy-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Running |  | 0 | - | - |
