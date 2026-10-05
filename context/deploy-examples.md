@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the example manifests and the registry that describes them have a single written contract. The manifests are the only executable proof that each deno-kcp kind can be expressed as a Kubernetes object, and the registry is what lets the integration suite pair a manifest with its Kind, its plural Resource and its generated APIResourceSchema. Writing that pairing down makes drift detectable: a manifest added on disk without a registry entry, or a manifest whose kind stops matching the schema the registry names, is a spec violation rather than a silent gap in coverage.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

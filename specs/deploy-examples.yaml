@@ -8,6 +8,129 @@ spec:
   upstream: self
   dependsOn:
   - sc.deno-kcp
+  intent: 'This context exists so the example manifests and the registry that describes
+    them have a single written contract. The manifests are the only executable proof
+    that each deno-kcp kind can be expressed as a Kubernetes object, and the registry
+    is what lets the integration suite pair a manifest with its Kind, its plural Resource
+    and its generated APIResourceSchema. Writing that pairing down makes drift detectable:
+    a manifest added on disk without a registry entry, or a manifest whose kind stops
+    matching the schema the registry names, is a spec violation rather than a silent
+    gap in coverage.'
+  requirements:
+  - id: r.deno-job-kind
+    level: MUST
+    text: deno-job.yaml instantiates Kind DenoJob, resource denojobs, and the registry
+      checks it against denojob-apiresourceschema.yaml.
+    codeRefs:
+    - file:deploy/examples/deno-job.yaml
+  - id: r.deno-pod-kind
+    level: MUST
+    text: deno-pod.yaml instantiates Kind DenoPod, resource denopods, and the registry
+      checks it against denopod-apiresourceschema.yaml.
+    codeRefs:
+    - file:deploy/examples/deno-pod.yaml
+  - id: r.deno-run-kind
+    level: MUST
+    text: deno-run.yaml instantiates Kind DenoRun, resource denoruns, and the registry
+      checks it against denorun-apiresourceschema.yaml.
+    codeRefs:
+    - file:deploy/examples/deno-run.yaml
+  - id: r.disk-walk-yaml-only-sorted
+    level: MUST
+    text: exampleFilesOnDisk reads the examples root, skips every directory entry
+      and every entry whose extension is not .yaml, and returns the remaining file
+      names sorted.
+  - id: r.every-example-is-a-yaml
+    level: MUST
+    text: Every manifest the registry names sits directly in the examples root with
+      a .yaml extension, so a registry entry that points at a missing, renamed or
+      non-YAML file is a lookup the disk walk never confirms.
+  - id: r.lookup-by-file-name
+    level: MUST
+    text: exampleByName returns the registry entry whose File matches the given name
+      and reports true, and reports false with a zero example when no entry matches,
+      so an unknown example is a lookup miss and not a zero value.
+  - id: r.native-fire-pod-kind
+    level: MUST
+    text: native-fire-pod.yaml also instantiates Kind DenoPod, resource denopods,
+      against denopod-apiresourceschema.yaml, covering the same Kind with a different
+      runtime path.
+    codeRefs:
+    - file:deploy/examples/native-fire-pod.yaml
+  - id: r.one-kind-many-examples
+    level: SHOULD
+    text: DenoPod is exercised by three separate top-level manifests (deno-pod.yaml,
+      native-fire-pod.yaml, openbao-tls-pod.yaml), so one Kind is covered by more
+      than one configuration.
+    codeRefs:
+    - file:deploy/examples/deno-pod.yaml
+    - file:deploy/examples/native-fire-pod.yaml
+    - file:deploy/examples/openbao-tls-pod.yaml
+  - id: r.openbao-kind
+    level: MUST
+    text: openbao.yaml instantiates Kind OpenBao, resource openbaos, and the registry
+      checks it against openbao-apiresourceschema.yaml.
+    codeRefs:
+    - file:deploy/examples/openbao.yaml
+  - id: r.openbao-tls-pod-kind
+    level: MUST
+    text: openbao-tls-pod.yaml also instantiates Kind DenoPod, resource denopods,
+      against denopod-apiresourceschema.yaml, showing the pod wired to OpenBao over
+      TLS.
+    codeRefs:
+    - file:deploy/examples/openbao-tls-pod.yaml
+  - id: r.policy-workflow-run-kind
+    level: MUST
+    text: policy-workflow-run.yaml instantiates Kind PolicyWorkflowRun, resource policyworkflowruns,
+      and the registry checks it against policyworkflowrun-apiresourceschema.yaml.
+    codeRefs:
+    - file:deploy/examples/policy-workflow-run.yaml
+  - id: r.policyengine-kind
+    level: MUST
+    text: policyengine.yaml instantiates Kind PolicyEngine, resource policyengines,
+      and the registry checks it against policyengine-apiresourceschema.yaml.
+    codeRefs:
+    - file:deploy/examples/policyengine.yaml
+  - id: r.policyworkflowpod-kind
+    level: MUST
+    text: policyworkflowpod.yaml instantiates Kind PolicyWorkflowPod, resource policyworkflowpods,
+      and the registry checks it against policyworkflowpod-apiresourceschema.yaml.
+    codeRefs:
+    - file:deploy/examples/policyworkflowpod.yaml
+  - id: r.registry-covers-top-level-manifests
+    level: MUST
+    text: 'The registry carries exactly one entry for each of the ten top-level manifests:
+      deno-job.yaml, deno-pod.yaml, deno-run.yaml, native-fire-pod.yaml, openbao.yaml,
+      openbao-tls-pod.yaml, policy-workflow-run.yaml, policyengine.yaml, policyworkflowpod.yaml
+      and runtrigger.yaml.'
+    codeRefs:
+    - file:deploy/examples/deno-job.yaml
+    - file:deploy/examples/deno-pod.yaml
+    - file:deploy/examples/deno-run.yaml
+    - file:deploy/examples/native-fire-pod.yaml
+    - file:deploy/examples/openbao-tls-pod.yaml
+    - file:deploy/examples/openbao.yaml
+    - file:deploy/examples/policy-workflow-run.yaml
+    - file:deploy/examples/policyengine.yaml
+    - file:deploy/examples/policyworkflowpod.yaml
+    - file:deploy/examples/runtrigger.yaml
+  - id: r.registry-enumerates-examples
+    level: MUST
+    text: exampleFiles returns the registry of example entries in a fixed order, and
+      each entry carries File, Kind, Resource and Schema, so a consumer can pair a
+      manifest name with the Kind it instantiates, the plural resource and the APIResourceSchema
+      that describes it.
+  - id: r.registry-matches-disk
+    level: MUST
+    text: The names returned by exampleFilesOnDisk agree with the File fields of exampleFiles,
+      so adding or removing a manifest on disk without updating the registry fails
+      the integration suite.
+  - id: r.runtrigger-kind
+    level: MUST
+    text: runtrigger.yaml instantiates Kind RunTrigger, resource runtriggers, and
+      the registry checks it against runtrigger-apiresourceschema.yaml.
+    codeRefs:
+    - file:deploy/examples/runtrigger.yaml
   arch:
     id: tb.child-process
     kind: node

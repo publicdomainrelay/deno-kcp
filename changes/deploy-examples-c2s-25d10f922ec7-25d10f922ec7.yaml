@@ -9,5 +9,21 @@ spec:
   fromCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
   toCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
 status:
-  phase: Running
-  message: the agent is summarizing deploy-examples
+  phase: Succeeded
+  agentLog: 'deploy/examples holds the hand-written Kubernetes manifests that act
+    as the operator''s smoke-test corpus: deno-job.yaml, deno-pod.yaml, deno-run.yaml,
+    native-fire-pod.yaml, openbao-tls-pod.yaml, openbao.yaml, policy-workflow-run.yaml,
+    policyengine.yaml, policyworkflowpod.yaml and runtrigger.yaml. These ten manifests
+    instantiate the eight deno-kcp kinds DenoJob, DenoPod, DenoRun, OpenBao, PolicyWorkflowRun,
+    PolicyEngine, PolicyWorkflowPod and RunTrigger, with DenoPod carried by three
+    of them. test/integration/examples.go holds the registry that describes them:
+    exampleFiles returns a fixed-order slice of example values, each pairing a File
+    name with the Kind it instantiates, its plural Resource and the generated APIResourceSchema
+    file that describes it; exampleByName resolves a file name to its entry and reports
+    a miss as false; exampleFilesOnDisk reads the examples root, skips directory entries
+    and anything that is not a .yaml file, and returns the surviving names sorted,
+    so the on-disk listing and the in-code registry stay in step.'
+  message: wrote 17 requirement(s) and 0 interface(s) for deploy-examples; dropped
+    5 unresolved code ref(s); interface exampleFiles is not in the observed facts;
+    dropped; interface exampleByName is not in the observed facts; dropped; interface
+    exampleFilesOnDisk is not in the observed facts; dropped

@@ -45,6 +45,27 @@ The requirement-level delta against `open-architecture/deno-kcp--spec-bidder-and
 - added `r.per-class-permission-fields` (MUST): "DenoPermission.denoSpec maps one permission class onto denospec.Permission, forwarding allow, allowList, deny and denyList so an operator can restrict a class by denylist, allowlist or boolean as the CRD declares."
 - added `r.service-account-ref` (MUST): "ServiceAccountRef.DenoSpec forwards the reference's name and namespace into denospec.ServiceAccountRef, so the identity a run executes under survives the trip from the custom resource to the deno spec."
 
+### deploy-examples
+
+- intent: "" -> "This context exists so the example manifests and the registry that describes them have a single written contract. The manifests are the only executable proof that each deno-kcp kind can be expressed as a Kubernetes object, and the registry is what lets the integration suite pair a manifest with its Kind, its plural Resource and its generated APIResourceSchema. Writing that pairing down makes drift detectable: a manifest added on disk without a registry entry, or a manifest whose kind stops matching the schema the registry names, is a spec violation rather than a silent gap in coverage."
+- added `r.deno-job-kind` (MUST): "deno-job.yaml instantiates Kind DenoJob, resource denojobs, and the registry checks it against denojob-apiresourceschema.yaml."
+- added `r.deno-pod-kind` (MUST): "deno-pod.yaml instantiates Kind DenoPod, resource denopods, and the registry checks it against denopod-apiresourceschema.yaml."
+- added `r.deno-run-kind` (MUST): "deno-run.yaml instantiates Kind DenoRun, resource denoruns, and the registry checks it against denorun-apiresourceschema.yaml."
+- added `r.disk-walk-yaml-only-sorted` (MUST): "exampleFilesOnDisk reads the examples root, skips every directory entry and every entry whose extension is not .yaml, and returns the remaining file names sorted."
+- added `r.every-example-is-a-yaml` (MUST): "Every manifest the registry names sits directly in the examples root with a .yaml extension, so a registry entry that points at a missing, renamed or non-YAML file is a lookup the disk walk never confirms."
+- added `r.lookup-by-file-name` (MUST): "exampleByName returns the registry entry whose File matches the given name and reports true, and reports false with a zero example when no entry matches, so an unknown example is a lookup miss and not a zero value."
+- added `r.native-fire-pod-kind` (MUST): "native-fire-pod.yaml also instantiates Kind DenoPod, resource denopods, against denopod-apiresourceschema.yaml, covering the same Kind with a different runtime path."
+- added `r.one-kind-many-examples` (SHOULD): "DenoPod is exercised by three separate top-level manifests (deno-pod.yaml, native-fire-pod.yaml, openbao-tls-pod.yaml), so one Kind is covered by more than one configuration."
+- added `r.openbao-kind` (MUST): "openbao.yaml instantiates Kind OpenBao, resource openbaos, and the registry checks it against openbao-apiresourceschema.yaml."
+- added `r.openbao-tls-pod-kind` (MUST): "openbao-tls-pod.yaml also instantiates Kind DenoPod, resource denopods, against denopod-apiresourceschema.yaml, showing the pod wired to OpenBao over TLS."
+- added `r.policy-workflow-run-kind` (MUST): "policy-workflow-run.yaml instantiates Kind PolicyWorkflowRun, resource policyworkflowruns, and the registry checks it against policyworkflowrun-apiresourceschema.yaml."
+- added `r.policyengine-kind` (MUST): "policyengine.yaml instantiates Kind PolicyEngine, resource policyengines, and the registry checks it against policyengine-apiresourceschema.yaml."
+- added `r.policyworkflowpod-kind` (MUST): "policyworkflowpod.yaml instantiates Kind PolicyWorkflowPod, resource policyworkflowpods, and the registry checks it against policyworkflowpod-apiresourceschema.yaml."
+- added `r.registry-covers-top-level-manifests` (MUST): "The registry carries exactly one entry for each of the ten top-level manifests: deno-job.yaml, deno-pod.yaml, deno-run.yaml, native-fire-pod.yaml, openbao.yaml, openbao-tls-pod.yaml, policy-workflow-run.yaml, policyengine.yaml, policyworkflowpod.yaml and runtrigger.yaml."
+- added `r.registry-enumerates-examples` (MUST): "exampleFiles returns the registry of example entries in a fixed order, and each entry carries File, Kind, Resource and Schema, so a consumer can pair a manifest name with the Kind it instantiates, the plural resource and the APIResourceSchema that describes it."
+- added `r.registry-matches-disk` (MUST): "The names returned by exampleFilesOnDisk agree with the File fields of exampleFiles, so adding or removing a manifest on disk without updating the registry fails the integration suite."
+- added `r.runtrigger-kind` (MUST): "runtrigger.yaml instantiates Kind RunTrigger, resource runtriggers, and the registry checks it against runtrigger-apiresourceschema.yaml."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance | coverage |
@@ -53,4 +74,4 @@ The requirement-level delta against `open-architecture/deno-kcp--spec-bidder-and
 | cmd-deno-kcp-provider-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
 | deno-kcp-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
 | deploy-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Running |  | 0 | - | - |
-| deploy-examples-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Running |  | 0 | - | - |
+| deploy-examples-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
