@@ -9,5 +9,30 @@ spec:
   fromCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
   toCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
 status:
-  phase: Running
-  message: the agent is summarizing deploy-examples-atproto-market
+  phase: Succeeded
+  agentLog: 'The atproto market example under deploy/examples/atproto/market is a
+    four-workspace reference topology - global, relay, alice and bob - declared in
+    00-workspaces.yaml, each workspace type denoruntime with path root. 10-rbac.yaml
+    gives every workspace a deno-runner ServiceAccount plus the deno-runner-read-pods
+    ClusterRole and its binding, so a pod can get and list deno.computer denopods.
+    15-openbao-global.yaml, 15-openbao-alice.yaml and 15-openbao-relay.yaml each create
+    one OpenBao object named openbao with the finalizer openbao.deno.computer/namespace,
+    naming the OpenBao namespace that serves that workspace. Four DenoPod manifests
+    then carry the services: the PLC directory on port 2587 in global, the relay on
+    2584 in relay, alice''s PDS on 2583 with the verifier beside it, and bob''s PDS
+    on 2585 with a bidder on 2586. Every service pod uses SERVICE_TLS true, --unstable-kv,
+    the deno-runner service account, restartPolicy Always (Never for the verifier),
+    an env allowList carrying the shim keys, and a supervisor script that writes KCP_CA_BUNDLE
+    to ca.pem, sets DENO_CERT, writes the injected leaf to tls.crt and tls.key, appends
+    --tls-cert-file and --tls-key-file to the child argv, prepends KCP_SHIM as --preload,
+    spawns the entry module with stdin null and records the child exitCode in result.json.
+    Each pod''s readiness probe resolves its own cluster-local name and fetches a
+    health path, and each reports that the pod reaches Running with ready true. The
+    verifier in alice imports KCP_SHIM first, creates an account, reads the DID back
+    from the PLC, writes twice while watching the relay subscribeRepos WebSocket,
+    decodes frame payloads as bytes, and exits 0 only when plcStatus is 200, gotAccessJwt
+    is yes and relaySawCommit is yes.'
+  message: wrote 18 requirement(s) and 0 interface(s) for deploy-examples-atproto-market;
+    interface MARKET_WORKSPACES is not in the observed facts; dropped; interface exampleFiles
+    is not in the observed facts; dropped; interface exampleByName is not in the observed
+    facts; dropped

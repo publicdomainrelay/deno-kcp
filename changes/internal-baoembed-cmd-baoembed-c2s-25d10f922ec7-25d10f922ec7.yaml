@@ -9,5 +9,22 @@ spec:
   fromCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
   toCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
 status:
-  phase: Running
-  message: the agent is summarizing internal-baoembed-cmd-baoembed
+  phase: Succeeded
+  agentLog: The `internal/baoembed/cmd/baoembed` command is a single-file Go `main`
+    package that runs an embedded OpenBao development server, so integration tests
+    and developers get a live server without an external install. It parses four flags
+    (`-addr`, `-root-token`, `-tls`, `-tls-dir`), each falling back to an environment
+    variable (`BAOEMBED_ADDR`, `BAOEMBED_ROOT_TOKEN`, `BAOEMBED_TLS`, `BAOEMBED_TLS_DIR`)
+    with defaults `127.0.0.1:8200`, `root`, off, and empty. It exports the root token
+    by setting `BAO_DEV_ROOT_TOKEN_ID`; in TLS mode it picks the given certificate
+    directory or a fresh temporary one, creates it with `os.MkdirAll` at mode `0o700`,
+    and computes the CA path by joining that directory with `devTLSCAFile`. It then
+    starts the server and holds it running, polling the configured address on a fixed
+    interval rather than trusting an address the server reports, and signals readiness
+    by printing a line beginning with the constant `readyPrefix` (`"BAOEMBED "`),
+    which carries `https` and the CA path in TLS mode and `http` with no CA path otherwise.
+    Failures to set the root token or to make the certificate directory are written
+    to stderr and exit with status 1.
+  message: wrote 7 requirement(s) and 0 interface(s) for internal-baoembed-cmd-baoembed;
+    interface main is not in the observed facts; dropped; interface readyPrefix is
+    not in the observed facts; dropped

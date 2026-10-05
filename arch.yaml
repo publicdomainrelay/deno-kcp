@@ -299,6 +299,43 @@ system_contexts:
     form: list
     parent: tb.workload
     slot: children[0]
+  requirements:
+  - id: r.acceptance-survives-a-stalled-provider
+    level: MUST
+  - id: r.acceptance-trap-stops-workloads-first
+    level: MUST
+  - id: r.apply-includes-bob-and-bidder
+    level: MUST
+  - id: r.four-workspaces-at-root
+    level: MUST
+  - id: r.live-acceptance-script
+    level: MUST
+  - id: r.openbao-object-per-workspace
+    level: MUST
+  - id: r.pds-pod
+    level: MUST
+  - id: r.plc-directory-pod
+    level: MUST
+  - id: r.rbac-covers-bob
+    level: MUST
+  - id: r.readme-lists-bob-and-bidder
+    level: MUST
+  - id: r.relay-pod
+    level: MUST
+  - id: r.runner-rbac-reads-denopods
+    level: MUST
+  - id: r.supervisor-env-allowlist
+    level: MUST
+  - id: r.supervisor-injects-tls-and-shim
+    level: MUST
+  - id: r.verifier-bounded-wait
+    level: MUST
+  - id: r.verifier-end-to-end-check
+    level: MUST
+  - id: r.verifier-judges-decode-frames
+    level: SHOULD
+  - id: r.verifier-waits-for-its-peers
+    level: MUST
   codeRefIndex:
   - file:deploy/examples/atproto/market/00-workspaces.yaml 00-workspaces.yaml@deploy/examples/atproto/market/00-workspaces.yaml
   - file:deploy/examples/atproto/market/10-rbac.yaml 10-rbac.yaml@deploy/examples/atproto/market/10-rbac.yaml
@@ -309,6 +346,8 @@ system_contexts:
   - file:deploy/examples/atproto/market/30-relay-relay.yaml 30-relay-relay.yaml@deploy/examples/atproto/market/30-relay-relay.yaml
   - file:deploy/examples/atproto/market/40-alice-pds.yaml 40-alice-pds.yaml@deploy/examples/atproto/market/40-alice-pds.yaml
   - file:deploy/examples/atproto/market/50-verifier.yaml 50-verifier.yaml@deploy/examples/atproto/market/50-verifier.yaml
+  - file:deploy/examples/atproto/market/README.md README.md@deploy/examples/atproto/market/README.md
+  - file:deploy/examples/atproto/market/apply.sh apply.sh@deploy/examples/atproto/market/apply.sh
 - id: sc.openbao-embedded
   name: internal-baoembed-cmd-baoembed
   spec: specs/internal-baoembed-cmd-baoembed.yaml
@@ -325,6 +364,21 @@ system_contexts:
     form: list
     parent: sc.test.integration-cluster
     slot: overlay[3]
+  requirements:
+  - id: r.flag-env-fallbacks
+    level: MUST
+  - id: r.main-entry-point
+    level: MUST
+  - id: r.poll-until-server-answers
+    level: MUST
+  - id: r.readiness-line-prefix
+    level: MUST
+  - id: r.root-token-export
+    level: MUST
+  - id: r.scheme-and-ca-in-ready-line
+    level: MUST
+  - id: r.tls-cert-directory
+    level: MUST
   codeRefIndex:
   - file:internal/baoembed/cmd/baoembed/main.go main.go@internal/baoembed/cmd/baoembed/main.go
 - id: sc.kind.denojob

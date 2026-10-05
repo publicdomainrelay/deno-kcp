@@ -8,6 +8,242 @@ spec:
   upstream: self
   dependsOn:
   - sc.deno-kcp
+  intent: 'This context exists to pin down the deploy/examples/atproto/market example
+    as an executable specification of what the kcp deno runtime must support: peer
+    services that reach each other only by cluster-local name over TLS, with identity
+    and certificates supplied from outside the pod. It is the reference topology that
+    exercises workspace creation, per-workspace API bindings, per-workspace RBAC,
+    per-workspace OpenBao authority selection, the provider''s virtual DNS table and
+    shim, and the TLS leaf injection path, so that a regression in any of those surfaces
+    shows up as a failing verifier pod rather than as an untested assumption in the
+    provider. The example also carries a live acceptance script, so that it is proven
+    by bringing the whole topology up and reaching it, not only by decoding its manifests
+    and fitting them to their schemas. Two properties of the provider virtual DNS
+    shape the manifests: a workload address table is written once at pod start, so
+    a consumer that starts before its producer cannot reach it by cluster-local name,
+    and WebSocket construction cannot fall back to discovery at all. The PDS crawler
+    therefore points at the relay listener address, which needs no table lookup, while
+    the relay reaches the PDS by the cluster-local name its own later start puts in
+    the table.'
+  requirements:
+  - id: r.acceptance-survives-a-stalled-provider
+    level: MUST
+    text: 'The live acceptance must survive a provider that comes up, logs that it
+      is waiting for its APIExport virtual workspace endpoints, and then reconciles
+      nothing: every object apply.sh applies stays without a status and apply.sh fails
+      on its first wait. After the provider is started and apply.sh returns, the acceptance
+      must detect that state within a bounded window - no OpenBao object in any workspace
+      carries status.ready true and no DenoPod exists in any workspace - and, when
+      no workload exists yet, stop the provider, start it again, and run apply.sh
+      again. It must make at least two and at most three attempts, print which attempt
+      it is on, and record each attempt''s apply.sh exit code. It must never restart
+      the provider once a DenoPod exists, because the workloads are children of the
+      provider and stopping it would orphan them.'
+    codeRefs:
+    - file:deploy/examples/atproto/market/apply.sh
+  - id: r.acceptance-trap-stops-workloads-first
+    level: MUST
+    text: The live acceptance's EXIT trap must stop the workloads before it stops
+      the provider that owns them. The DenoPod processes are children of the provider,
+      so killing the provider orphans them and they keep holding the fixed host ports
+      2583 to 2587 of the example, which makes the next run on the same machine unable
+      to bind them. The trap therefore deletes every DenoPod in every workspace through
+      kcp first, waits, bounded, for the objects to disappear (the denopod.deno.computer/run
+      finalizer is what stops each process, and it only runs while the provider is
+      up), and only then stops the provider, OpenBao and kcp and removes ACCEPT_ROOT.
+      It must not stop a process it did not start, and it must do this whether the
+      checks passed or failed.
+    codeRefs:
+    - file:deploy/examples/atproto/market/apply.sh
+  - id: r.apply-includes-bob-and-bidder
+    level: MUST
+    text: apply.sh names the workspaces global relay alice bob, requires atproto-market/hono-bidder
+      as well as hono-plc, hono-atproto-relay and hono-pds in its preflight check,
+      generates a PDS key for bob and a key for the bidder, each distinct from alice's
+      and each overridable by BOB_PDS_PRIVATE_KEY_HEX and BIDDER_PRIVATE_KEY_HEX,
+      substitutes them into the manifests, applies bob's OpenBao authority with the
+      other authorities, applies bob's PDS manifest before the bidder manifest, and
+      reports the phase and readiness of both pds and bidder in its final summary.
+    codeRefs:
+    - file:deploy/examples/atproto/market/apply.sh
+  - id: r.four-workspaces-at-root
+    level: MUST
+    text: The example creates exactly the four workspaces global, relay, alice and
+      bob, each with spec.type.name denoruntime and spec.type.path root.
+    codeRefs:
+    - file:deploy/examples/atproto/market/00-workspaces.yaml
+  - id: r.live-acceptance-script
+    level: MUST
+    text: 'The example''s live acceptance brings the whole market up in a throwaway
+      state directory and exits non-zero unless every workload is up and reachable.
+      It is bash with set -euo pipefail; ACCEPT_ROOT (default a fresh mktemp -d) is
+      the one directory it owns, and an EXIT trap stops everything it started and
+      removes that directory, never stopping or touching a kcp, kine or OpenBao it
+      did not start. It asks the kernel for three free 127.0.0.1 ports, for kcp, kine
+      and OpenBao, instead of pinning any, so it cannot collide with another instance
+      on the machine. It starts kcp with ROOT under ACCEPT_ROOT and KCP_SECURE_PORT
+      and KINE_ENDPOINT set to two of those ports through deploy/start-kcp.sh, installs
+      the provider through deploy/install-provider.sh, builds ./cmd/deno-kcp-provider
+      into ACCEPT_ROOT, starts OpenBao with OPENBAO_DIR under ACCEPT_ROOT and OPENBAO_LISTEN
+      on the third port through deploy/start-openbao.sh, and runs the provider with
+      --kubeconfig, --openbao-addr, --openbao-token root and RUNS_DIR under ACCEPT_ROOT.
+      It then runs the example''s apply.sh with ORG_ROOT the repository parent, KUBECONFIG
+      the kcp admin kubeconfig, the same OPENBAO_LISTEN, START_OPENBAO=0, a bounded
+      WAIT_SECONDS, and the key files under ACCEPT_ROOT. When apply.sh returns, whether
+      it succeeded or not, it reads every DenoPod from kcp with kubectl and prints
+      one line per check with its result and the decisive evidence: apply.sh exited
+      0; DenoPod plc in root:global, relay in root:relay, pds in root:alice, pds in
+      root:bob and bidder in root:bob each reached phase Running and report ready
+      true; DenoPod verifier in root:alice reached the terminal phase Succeeded; bob''s
+      pds answers on its own name, which the provider proves with its readiness probe
+      through the shim and the host proves by fetching the same path from outside
+      with curl against the host port; the bidder answers on its cluster-local name
+      and on its host port. The host check names the scheme the listener actually
+      speaks: the bob PDS serves TLS because its supervisor writes the injected leaf
+      and appends the TLS flags, so its host check is https, and the bidder serves
+      plain HTTP because its supervisor must not append those flags, so its host check
+      is http; the provider''s readiness probe is the one that does not care, because
+      it tries https and then http. The five long-running pods are still Running with
+      ready true when they are read a second time at least ten seconds later, so a
+      pod that dies after startup fails the run. It prints a final table naming every
+      check and its result, prints the tail of the provider log and the status of
+      the failing pod when a check fails, and exits 0 only when every check passed.'
+    codeRefs:
+    - file:deploy/examples/atproto/market/README.md
+    - file:deploy/examples/atproto/market/apply.sh
+  - id: r.openbao-object-per-workspace
+    level: MUST
+    text: 'Each workspace applies one OpenBao object named openbao in namespace default,
+      carrying the finalizer openbao.deno.computer/namespace and naming the OpenBao
+      namespace that serves it: global.default, relay.default, alice.default and bob.default
+      respectively. The workspace''s pods take their certificates from that authority
+      and not from another workspace''s.'
+    codeRefs:
+    - file:deploy/examples/atproto/market/15-openbao-alice.yaml
+    - file:deploy/examples/atproto/market/15-openbao-global.yaml
+    - file:deploy/examples/atproto/market/15-openbao-relay.yaml
+  - id: r.pds-pod
+    level: MUST
+    text: 'The alice workspace runs DenoPod pds under the deno-runner service account
+      with restartPolicy Always, SERVICE_TLS true, --unstable-kv in SERVICE_DENO_FLAGS,
+      port 2583, PDS_PUBLIC_HOSTNAME pds.default.alice.svc.kcp.local, PDS_PLC_DIRECTORY_URL
+      pointed at the global PLC name, PDS_CRAWLERS pointed at https://127.0.0.1:2584,
+      the listener address of the relay, and PDS_PRIVATE_KEY_HEX in SERVICE_ENV. The
+      crawler URL is that address and not the cluster-local name of the relay because
+      this pod is applied before the relay: the virtual DNS table is written once
+      when the pod starts, so relay.default.relay.svc.kcp.local is not in it, the
+      shim fails such a name with the message that it is not in the table and could
+      not be discovered inside a catch that swallows it, and the PDS then never announces
+      itself and the relay never carries this PDS''s commits. A crawler URL that is
+      an address needs no table lookup. The relay still reaches this PDS by the cluster-local
+      name in PDS_PUBLIC_HOSTNAME, which is in the relay table because the relay starts
+      after it.'
+    codeRefs:
+    - file:deploy/examples/atproto/market/40-alice-pds.yaml
+  - id: r.plc-directory-pod
+    level: MUST
+    text: The global workspace runs DenoPod plc with restartPolicy Always, the denopod.deno.computer/run
+      finalizer, SERVICE_TLS true, port 2587, and a readiness probe that resolves
+      plc.default.global.svc.kcp.local and requests /health, so the pod reports ready
+      only when its own cluster-local name answers through the virtual DNS shim.
+    codeRefs:
+    - file:deploy/examples/atproto/market/20-global-plc.yaml
+  - id: r.rbac-covers-bob
+    level: MUST
+    text: apply.sh applies 10-rbac.yaml in root:bob as it does in every workspace,
+      and every DenoPod in bob names the deno-runner service account, so bob's pods
+      read the objects they need under the same role as the other workspaces.
+    codeRefs:
+    - file:deploy/examples/atproto/market/10-rbac.yaml
+    - file:deploy/examples/atproto/market/apply.sh
+  - id: r.readme-lists-bob-and-bidder
+    level: MUST
+    text: README.md's service table adds root:bob DenoPod/pds (hono-pds, port 2585,
+      pds.default.bob.svc.kcp.local) and root:bob DenoPod/bidder (hono-bidder, port
+      2586, bidder.default.bob.svc.kcp.local), its OpenBao table adds root:bob OpenBao/openbao
+      bob.default, its prose says four workspaces, and its ceilings note that the
+      bidder registers with an XRPC dispatcher, so it needs one reachable.
+    codeRefs:
+    - file:deploy/examples/atproto/market/README.md
+  - id: r.relay-pod
+    level: MUST
+    text: The relay workspace runs DenoPod relay with restartPolicy Always, SERVICE_TLS
+      true, HOSTNAME relay.default.relay.svc.kcp.local on port 2584, and a readiness
+      probe that resolves relay.default.relay.svc.kcp.local and requests /xrpc/_health.
+    codeRefs:
+    - file:deploy/examples/atproto/market/30-relay-relay.yaml
+  - id: r.runner-rbac-reads-denopods
+    level: MUST
+    text: The example creates a ServiceAccount named deno-runner in namespace default,
+      a ClusterRole named deno-runner-read-pods granting get and list on deno.computer
+      denopods, and a ClusterRoleBinding of that role to that ServiceAccount, and
+      no other ClusterRole is added because that one already covers what every runner
+      pod needs.
+    codeRefs:
+    - file:deploy/examples/atproto/market/10-rbac.yaml
+  - id: r.supervisor-env-allowlist
+    level: MUST
+    text: Every service pod's env allowList admits the shim's keys (SERVICE_*, KCP_SHIM,
+      KCP_TLS_CERT, KCP_TLS_KEY, KCP_CA_BUNDLE, KCP_SERVICE_NAME, KCP_SERVICE_DOMAIN,
+      KCP_DNS_TABLE, KCP_TOKENS, KCP_SERVER, KCP_NAMESPACE, PATH, HOME) and its write
+      allowList admits only result.json, tls.crt, tls.key and ca.pem, with read and
+      run allowed and noPrompt true, so the supervisor can write the material the
+      shim injects and nothing else.
+    codeRefs:
+    - file:deploy/examples/atproto/market/20-global-plc.yaml
+    - file:deploy/examples/atproto/market/30-relay-relay.yaml
+    - file:deploy/examples/atproto/market/40-alice-pds.yaml
+  - id: r.supervisor-injects-tls-and-shim
+    level: MUST
+    text: The service pods' supervisor script writes the injected KCP_CA_BUNDLE to
+      ca.pem and sets DENO_CERT to it, writes KCP_TLS_CERT and KCP_TLS_KEY to tls.crt
+      and tls.key and appends --tls-cert-file and --tls-key-file to the child argv,
+      prepends KCP_SHIM to the Deno flags as --preload, spawns the entry module as
+      a child process with stdin null and inherited stdio, and writes the child exitCode
+      to result.json, so the child trusts the market CA and serves the injected leaf.
+    codeRefs:
+    - file:deploy/examples/atproto/market/20-global-plc.yaml
+    - file:deploy/examples/atproto/market/30-relay-relay.yaml
+    - file:deploy/examples/atproto/market/40-alice-pds.yaml
+  - id: r.verifier-bounded-wait
+    level: MUST
+    text: The verifier's relay watch settles exactly once, with a 90 second timeout,
+      closing the WebSocket on settle and reporting error or closed instead of hanging,
+      so a relay that never emits the commit fails the pod within the timeout rather
+      than holding it open forever.
+    codeRefs:
+    - file:deploy/examples/atproto/market/50-verifier.yaml
+  - id: r.verifier-end-to-end-check
+    level: MUST
+    text: The alice workspace runs DenoPod verifier with restartPolicy Never, importing
+      KCP_SHIM before anything else, creating an account on VERIFY_PDS, reading the
+      returned DID back from VERIFY_PLC, making a first write so the PDS announces
+      itself, then writing a second record while watching VERIFY_RELAY's subscribeRepos
+      WebSocket, and exiting 0 only when plcStatus is 200, gotAccessJwt is yes and
+      relaySawCommit is yes. A run that does not see its own commit on the relay fails.
+    codeRefs:
+    - file:deploy/examples/atproto/market/50-verifier.yaml
+  - id: r.verifier-judges-decode-frames
+    level: SHOULD
+    text: The verifier treats relay frames as bytes, decoding ArrayBuffer and Blob
+      payloads with TextDecoder before searching for its own DID, because the relay
+      emits DRISL where a CBOR string is its bytes verbatim and a search over the
+      raw frame would not find the DID.
+    codeRefs:
+    - file:deploy/examples/atproto/market/50-verifier.yaml
+  - id: r.verifier-waits-for-its-peers
+    level: MUST
+    text: apply.sh must not create the verifier after a fixed sleep. It must instead
+      wait, with the same bounded WAIT_SECONDS deadline it uses elsewhere, until the
+      peers the verifier reaches are observable - DenoPod pds in root:alice reports
+      phase Running and ready true, which is the provider's own proof that pds.default.alice.svc.kcp.local
+      resolves through the virtual DNS table and answers on /xrpc/_health - and only
+      then apply the verifier manifest. When the deadline passes without that pod
+      becoming ready, apply.sh must say so on stderr and still create the verifier,
+      so the run reports the failure instead of hanging. A fixed sleep before a pod
+      whose restartPolicy is Never is not a wait for anything and must not be written.
+    codeRefs:
+    - file:deploy/examples/atproto/market/apply.sh
   arch:
     id: tb.child-process
     kind: node
@@ -43,3 +279,5 @@ codeRefIndex:
 - file:deploy/examples/atproto/market/30-relay-relay.yaml 30-relay-relay.yaml@deploy/examples/atproto/market/30-relay-relay.yaml
 - file:deploy/examples/atproto/market/40-alice-pds.yaml 40-alice-pds.yaml@deploy/examples/atproto/market/40-alice-pds.yaml
 - file:deploy/examples/atproto/market/50-verifier.yaml 50-verifier.yaml@deploy/examples/atproto/market/50-verifier.yaml
+- file:deploy/examples/atproto/market/README.md README.md@deploy/examples/atproto/market/README.md
+- file:deploy/examples/atproto/market/apply.sh apply.sh@deploy/examples/atproto/market/apply.sh
