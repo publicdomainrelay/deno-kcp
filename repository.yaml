@@ -10,6 +10,16 @@ spec:
   - go
   - test
   - ./...
+  acceptance:
+  - name: market-live-acceptance
+    command:
+    - bash
+    - deploy/examples/atproto/market/accept.sh
+    timeoutSeconds: 1800
+    gate: true
+    env:
+      ORG_ROOT: /tmp/specd-deno-kcp-policy-20261005
+      TMPDIR: /tmp/specd-deno-kcp-policy-20261005/tmp
   populate:
     partition: directory
     summarize: true
