@@ -9,5 +9,16 @@ spec:
   fromCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
   toCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
 status:
-  phase: Running
-  message: the agent is summarizing internal-livegate
+  phase: Succeeded
+  agentLog: internal/livegate is a test-only Go package contained in the single file
+    internal/livegate/livegate.go. It exports three helpers. RequiresLive reads the
+    environment variable DENO_KCP_REQUIRE_LIVE and reports true only when its value
+    is the string "1". Require takes a *testing.T, a format string and variadic args,
+    calls t.Helper(), then calls t.Fatalf when RequiresLive reports true and t.Skipf
+    otherwise, so a live test fails loudly in a live-required run and skips quietly
+    on ordinary runs. Short takes the same arguments, calls t.Helper(), and delegates
+    to Require only when testing.Short() is true, leaving the test untouched when
+    short mode is off. Callers are the provider live tests (internal/provider/live_*_test.go)
+    and the test/integration fixtures, which use the package to gate tests that need
+    a real kcp, kine, kubectl or deno toolchain.
+  message: wrote 5 requirement(s) and 3 interface(s) for internal-livegate

@@ -511,8 +511,22 @@ system_contexts:
   upstream: self
   depends_on:
   - sc.deno-kcp
+  requirements:
+  - id: r.helpers-attribute-caller
+    level: MUST
+  - id: r.live-flag-from-env
+    level: MUST
+  - id: r.require-fails-when-live-required
+    level: MUST
+  - id: r.require-skips-otherwise
+    level: MUST
+  - id: r.short-delegates-to-require
+    level: MUST
   codeRefIndex:
   - file:internal/livegate/livegate.go livegate.go@internal/livegate/livegate.go
+  - function:0e31bdc8610f1db91dd40606eac8d2a2 RequiresLive@internal/livegate/livegate.go:8
+  - function:105aa5910047c1743f2bbed1f73895c8 Short@internal/livegate/livegate.go:20
+  - function:cc9c12855dee252d71eac5766360e2f9 Require@internal/livegate/livegate.go:12
 - id: type.DenoRestartPolicy
   name: internal-policyengine
   spec: specs/internal-policyengine.yaml

@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists to hold the gate that decides whether a test requiring live infrastructure runs, fails or skips, so that ordinary runs stay green without the kcp, kine, kubectl and deno toolchain while a live-required run (DENO_KCP_REQUIRE_LIVE=1) cannot silently skip the live tests. It keeps that decision in one small exported surface, RequiresLive for callers that gate early, Require for callers that want fail-or-skip behavior, and Short for callers that additionally want the test to skip under go test -short.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

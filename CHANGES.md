@@ -151,6 +151,15 @@ The requirement-level delta against `open-architecture/deno-kcp--spec-bidder-and
 - added `r.running-reports-readiness` (MUST): "While the execution state is running, Reconcile keeps phase Running, copies the execution run ID, sets Ready from ReadinessPassed (true when that observation is nil), sets the Ready condition true with reason Ready or false with reason NotReady, and requeues after RequeueAfter."
 - added `r.terminal-phase-stops-making-decisions` (MUST): "When the carried phase is Succeeded or Failed, Reconcile emits no run ops and only evaluates TTLSecondsAfterFinished: with a TTL and a completion time it sets Delete and OpDelete once expiry has passed, otherwise it requeues for the remaining time."
 
+### internal-livegate
+
+- intent: "" -> "This context exists to hold the gate that decides whether a test requiring live infrastructure runs, fails or skips, so that ordinary runs stay green without the kcp, kine, kubectl and deno toolchain while a live-required run (DENO_KCP_REQUIRE_LIVE=1) cannot silently skip the live tests. It keeps that decision in one small exported surface, RequiresLive for callers that gate early, Require for callers that want fail-or-skip behavior, and Short for callers that additionally want the test to skip under go test -short."
+- added `r.helpers-attribute-caller` (MUST): "Require and Short MUST call t.Helper() before deciding anything, so failure and skip reports attribute the caller's line rather than the gate's own line."
+- added `r.live-flag-from-env` (MUST): "RequiresLive MUST report true if and only if the environment variable DENO_KCP_REQUIRE_LIVE equals the exact string "1"; any other value, including an unset variable, MUST report false."
+- added `r.require-fails-when-live-required` (MUST): "Require MUST call t.Fatalf with the caller's format string and args when RequiresLive reports true, so a test gated on live infrastructure fails loudly rather than skipping when the run requires live."
+- added `r.require-skips-otherwise` (MUST): "Require MUST call t.Skipf with the caller's format string and args when RequiresLive reports false, so a live test skips quietly and the message text is the caller's skip reason."
+- added `r.short-delegates-to-require` (MUST): "Short MUST call Require with the same format string and args exactly when testing.Short() is true, and MUST do nothing when short mode is off, so the test keeps running outside short mode."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance | coverage |
@@ -165,4 +174,4 @@ The requirement-level delta against `open-architecture/deno-kcp--spec-bidder-and
 | internal-denojob-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
 | internal-denopod-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
 | internal-denorun-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Running |  | 0 | - | - |
-| internal-livegate-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Running |  | 0 | - | - |
+| internal-livegate-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
