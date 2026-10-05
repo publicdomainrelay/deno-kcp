@@ -6,9 +6,102 @@ metadata:
 spec:
   repository: deno-kcp
   upstream: self
+  orchestrator: sc.deno-kcp-provider
   dependsOn:
   - sc.api-v1alpha1
   - sc.deno-kcp
+  arch:
+    id: sc.kind.runtrigger
+    kind: node
+    section: system_contexts
+    form: list
+    parent: sc.deno-kcp
+    slot: overlay[5]
+    orchestrator: sc.deno-kcp-provider
+    code:
+    - file:internal/trigger/trigger.go
+    - file:internal/trigger/trigger_test.go
+    node:
+      axis: one_shot
+      code:
+        logic: internal/trigger
+        registry: internal/provider/registry_trigger.go
+      context: tb.provider-workspace
+      id: sc.kind.runtrigger
+      orchestrator: sc.deno-kcp-provider
+      overlay: []
+      owns:
+      - sc.kind.denojob
+      upstream:
+        api:
+          export: denoruntime
+          group: deno.computer
+          kind: RunTrigger
+          resource: runtriggers
+          schema: v1alpha1-3.runtriggers.deno.computer
+          scope: Namespaced
+          short: rtrig
+          version: v1alpha1
+        condition_facts:
+          Complete:
+            by: internal/trigger/trigger.go:Reconcile
+            false_reasons:
+            - Pending
+            true_reasons:
+            - Triggered
+          Failed:
+            by: internal/trigger/trigger.go:Reconcile
+            true_reasons:
+            - NoMatch
+            - WorkflowCancelled
+            - WorkflowFailed
+        conditions:
+        - Complete
+        - Failed
+        field_types:
+          conditions: type.conditions
+          jobTemplate: sc.kind.denojob.spec
+          match: map[string]string
+        manifest: deploy/runtrigger-apiresourceschema.yaml
+        phases:
+        - Pending
+        - Triggered
+        - Skipped
+        - Failed
+        refs:
+          policyWorkflowPod: sc.kind.policyworkflowpod
+        spec:
+        - policyWorkflowPod
+        - match
+        - jobTemplate
+        status:
+        - phase
+        - matched
+        - jobName
+        - lastRun
+        - conditions
+        status_facts:
+          conditions:
+            by: internal/trigger/trigger.go:Reconcile
+            decides: Complete
+            when: on_every_pass
+          jobName:
+            by: internal/trigger/trigger.go:Reconcile
+            decides: none
+            when: on_trigger
+          lastRun:
+            by: internal/trigger/trigger.go:Reconcile
+            decides: none
+            when: on_trigger
+          matched:
+            by: internal/trigger/trigger.go:Reconcile
+            decides: none
+            when: on_trigger
+          phase:
+            by: internal/trigger/trigger.go:Reconcile
+            decides: self
+            when: on_trigger
+        types: api/v1alpha1/types_runtrigger.go
 codeRefIndex:
 - file:internal/trigger/trigger.go trigger.go@internal/trigger/trigger.go
 - file:internal/trigger/trigger_test.go trigger_test.go@internal/trigger/trigger_test.go

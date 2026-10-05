@@ -6,9 +6,177 @@ metadata:
 spec:
   repository: deno-kcp
   upstream: self
+  orchestrator: sc.deno-kcp-provider
   dependsOn:
   - sc.api-v1alpha1
   - sc.deno-kcp
+  arch:
+    id: sc.kind.policyworkflowrun
+    kind: node
+    section: system_contexts
+    form: list
+    parent: sc.deno-kcp
+    slot: overlay[4]
+    orchestrator: sc.deno-kcp-provider
+    code:
+    - file:internal/policyworkflowrun/policyworkflowrun.go
+    - file:internal/policyworkflowrun/policyworkflowrun_test.go
+    node:
+      axis: one_shot
+      cancellation:
+        src: adr_0001
+        via:
+        - spec.cancel
+        - deletion
+      code:
+        client: internal/provider/policy_client.go
+        logic: internal/policyworkflowrun
+      context: tb.provider-workspace
+      id: sc.kind.policyworkflowrun
+      orchestrator: sc.deno-kcp-provider
+      output: status.outputs.allow
+      overlay: []
+      upstream:
+        api:
+          export: policyworkflowruns
+          group: deno.computer
+          kind: PolicyWorkflowRun
+          resource: policyworkflowruns
+          schema: v1alpha1-4.policyworkflowruns.deno.computer
+          scope: Namespaced
+          short: pwr
+          version: v1alpha1
+        condition_facts:
+          Cancelled:
+            by: internal/policyworkflowrun/policyworkflowrun.go:Reconcile
+            true_reasons:
+            - Cancelled
+            - Deleted
+          Complete:
+            by: internal/policyworkflowrun/policyworkflowrun.go:Reconcile
+            false_reasons:
+            - Queued
+            - AtCapacity
+            - Superseded
+            - EngineNotReady
+            - PolicyWorkflowPodMissing
+            - Running
+            - Retrying
+            true_reasons:
+            - Complete
+            - DeadlineExceeded
+            - BackoffLimitExceeded
+            - Cancelled
+            - Deleted
+          Failed:
+            by: internal/policyworkflowrun/policyworkflowrun.go:Reconcile
+            true_reasons:
+            - DeadlineExceeded
+            - BackoffLimitExceeded
+          Suspended:
+            by: internal/policyworkflowrun/policyworkflowrun.go:Reconcile
+            cleared_by: internal/policyworkflowrun/policyworkflowrun.go:Reconcile
+            true_reasons:
+            - Suspended
+        conditions:
+        - Cancelled
+        - Complete
+        - Failed
+        - Suspended
+        field_types:
+          args: map[string]string
+          conditions: type.conditions
+          inputs: map[string]string
+          workflow: runtime.RawExtension
+        finalizer:
+          code:
+          - api/v1alpha1/types_policyworkflowrun.go:FinalizerPolicyWorkflowRun
+          - internal/provider/registry.go:RemoveFinalizer
+          name: policyworkflowrun.deno.computer/run
+          set_by:
+          - manifest
+        manifest: deploy/policyworkflowrun-apiresourceschema.yaml
+        phases:
+        - Pending
+        - Running
+        - Succeeded
+        - Failed
+        - Cancelled
+        refs:
+          engineEndpoint: sc.kind.policyengine.status.endpoint
+          policyWorkflowPod: sc.kind.policyworkflowpod
+        spec:
+        - workflow
+        - inputs
+        - args
+        - perspective
+        - selfDid
+        - policyWorkflowPod
+        - engineEndpoint
+        - suspend
+        - cancel
+        - backoffLimit
+        - activeDeadlineSeconds
+        - ttlSecondsAfterFinished
+        status:
+        - phase
+        - runID
+        - startTime
+        - completionTime
+        - active
+        - succeeded
+        - failed
+        - retries
+        - exitStatus
+        - outputs
+        - conditions
+        status_facts:
+          active:
+            by: internal/policyworkflowrun/policyworkflowrun.go:Reconcile
+            decides: none
+            when: on_every_pass
+          completionTime:
+            by: internal/policyworkflowrun/policyworkflowrun.go:Reconcile
+            decides: none
+            when: on_terminal
+          conditions:
+            also: phase
+            by: internal/policyworkflowrun/policyworkflowrun.go:Reconcile
+            decides: Complete
+            when: on_every_pass
+          exitStatus:
+            by: internal/policyworkflowrun/policyworkflowrun.go:Reconcile
+            decides: none
+            when: on_terminal
+          failed:
+            by: internal/policyworkflowrun/policyworkflowrun.go:Reconcile
+            decides: none
+            when: on_restart
+          outputs:
+            by: internal/policyworkflowrun/policyworkflowrun.go:Reconcile
+            decides: self
+            when: on_terminal
+          phase:
+            by: internal/policyworkflowrun/policyworkflowrun.go:Reconcile
+            decides: self
+            when: on_every_pass
+          retries:
+            by: internal/policyworkflowrun/policyworkflowrun.go:Reconcile
+            decides: none
+            when: on_restart
+          runID:
+            by: internal/policyworkflowrun/policyworkflowrun.go:Reconcile
+            decides: none
+            when: on_running
+          startTime:
+            by: internal/policyworkflowrun/policyworkflowrun.go:Reconcile
+            decides: none
+            when: on_start
+          succeeded:
+            by: internal/policyworkflowrun/policyworkflowrun.go:Reconcile
+            decides: none
+            when: on_terminal
+        types: api/v1alpha1/types_policyworkflowrun.go
 codeRefIndex:
 - file:internal/policyworkflowrun/policyworkflowrun.go policyworkflowrun.go@internal/policyworkflowrun/policyworkflowrun.go
 - file:internal/policyworkflowrun/policyworkflowrun_test.go policyworkflowrun_test.go@internal/policyworkflowrun/policyworkflowrun_test.go

@@ -239,30 +239,50 @@ system_contexts:
   codeRefIndex:
   - file:internal/policyengine/policyengine.go policyengine.go@internal/policyengine/policyengine.go
   - file:internal/policyengine/policyengine_test.go policyengine_test.go@internal/policyengine/policyengine_test.go
-- id: sc.internal-policyworkflowpod
+- id: sc.kind.policyworkflowpod
   name: internal-policyworkflowpod
   spec: specs/internal-policyworkflowpod.yaml
   upstream: self
+  orchestrator: sc.deno-kcp-provider
   depends_on:
   - sc.api-v1alpha1
   - sc.deno-kcp
+  arch:
+    id: sc.kind.policyworkflowpod
+    kind: node
+    section: system_contexts
+    form: list
+    parent: sc.deno-kcp
+    slot: overlay[3]
   codeRefIndex:
   - file:internal/policyworkflowpod/policyworkflowpod.go policyworkflowpod.go@internal/policyworkflowpod/policyworkflowpod.go
   - file:internal/policyworkflowpod/policyworkflowpod_test.go policyworkflowpod_test.go@internal/policyworkflowpod/policyworkflowpod_test.go
-- id: sc.internal-policyworkflowrun
+- id: sc.kind.policyworkflowrun
   name: internal-policyworkflowrun
   spec: specs/internal-policyworkflowrun.yaml
   upstream: self
+  orchestrator: sc.deno-kcp-provider
   depends_on:
   - sc.api-v1alpha1
   - sc.deno-kcp
+  arch:
+    id: sc.kind.policyworkflowrun
+    kind: node
+    section: system_contexts
+    form: list
+    parent: sc.deno-kcp
+    slot: overlay[4]
   codeRefIndex:
   - file:internal/policyworkflowrun/policyworkflowrun.go policyworkflowrun.go@internal/policyworkflowrun/policyworkflowrun.go
   - file:internal/policyworkflowrun/policyworkflowrun_test.go policyworkflowrun_test.go@internal/policyworkflowrun/policyworkflowrun_test.go
-- id: sc.internal-provider
+- id: sc.test.provider-live-cluster
   name: internal-provider
   spec: specs/internal-provider.yaml
-  upstream: self
+  upstream: sc.deno-kcp
+  overlay:
+  - ov.test-cluster
+  - ov.test-provider-live-install
+  orchestrator: orch.test-live
   depends_on:
   - sc.api-v1alpha1
   - sc.deno-kcp
@@ -274,6 +294,12 @@ system_contexts:
   - sc.internal-policyworkflowpod
   - sc.internal-policyworkflowrun
   - sc.internal-trigger
+  arch:
+    id: sc.test.provider-live-cluster
+    kind: node
+    section: system_contexts
+    form: list
+    position: 6
   codeRefIndex:
   - file:internal/provider/admission.go admission.go@internal/provider/admission.go
   - file:internal/provider/admission_test.go admission_test.go@internal/provider/admission_test.go
@@ -317,25 +343,55 @@ system_contexts:
   - file:internal/provider/watch.go watch.go@internal/provider/watch.go
   - file:internal/provider/watch_cache.go watch_cache.go@internal/provider/watch_cache.go
   - file:internal/provider/watch_test.go watch_test.go@internal/provider/watch_test.go
-- id: sc.internal-trigger
+- id: sc.kind.runtrigger
   name: internal-trigger
   spec: specs/internal-trigger.yaml
   upstream: self
+  orchestrator: sc.deno-kcp-provider
   depends_on:
   - sc.api-v1alpha1
   - sc.deno-kcp
+  arch:
+    id: sc.kind.runtrigger
+    kind: node
+    section: system_contexts
+    form: list
+    parent: sc.deno-kcp
+    slot: overlay[5]
   codeRefIndex:
   - file:internal/trigger/trigger.go trigger.go@internal/trigger/trigger.go
   - file:internal/trigger/trigger_test.go trigger_test.go@internal/trigger/trigger_test.go
-- id: sc.test-integration
+- id: sc.test.integration-cluster
   name: test-integration
   spec: specs/test-integration.yaml
-  upstream: self
+  upstream: sc.deno-kcp
+  overlay:
+  - ov.runtime-rbac
+  - ov.test-cluster
+  - ov.test-integration-install
+  - sc.demo.native-fire
+  - sc.demo.on-policy-allow
+  - sc.demo.open-policy-pod
+  - sc.demo.policy-engine
+  - sc.example.deno-job
+  - sc.example.deno-pod
+  - sc.example.deno-run
+  - sc.example.openbao
+  - sc.example.openbao-tls-pod
+  - sc.internal-baoembed-cmd-baoembed
+  - sc.test.direct-run
+  orchestrator: orch.test-integration
   depends_on:
   - sc.api-v1alpha1
   - sc.deno-kcp
   - sc.internal-livegate
   - sc.internal-provider
+  arch:
+    id: sc.test.integration-cluster
+    kind: node
+    section: system_contexts
+    form: list
+    position: 5
   codeRefIndex:
   - file:test/integration/bao_test.go bao_test.go@test/integration/bao_test.go
   - file:test/integration/examples.go examples.go@test/integration/examples.go
