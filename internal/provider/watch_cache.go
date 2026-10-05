@@ -30,6 +30,14 @@ func (r *cacheReader) add(kind workKind, indexer cache.Indexer) {
 	r.indexers[kind] = append(r.indexers[kind], indexer)
 }
 
+// reset drops every indexer so a retried round of informers does not leave an
+// abandoned round's stores answering reads.
+func (r *cacheReader) reset() {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.indexers = map[workKind][]cache.Indexer{}
+}
+
 func (r *cacheReader) kindIndexers(kind workKind) []cache.Indexer {
 	r.mu.RLock()
 	defer r.mu.RUnlock()

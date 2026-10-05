@@ -397,8 +397,11 @@ func TestReconcilePodMintsATokenAndReportsOutputs(t *testing.T) {
 	if rt.pods[ref].Status.Outputs["allow"] != "true" {
 		t.Fatalf("outputs = %v", rt.pods[ref].Status.Outputs)
 	}
-	if minter.calls != 1 {
-		t.Fatalf("mint calls = %d, want 1", minter.calls)
+	// Two minters, not one: the pod's own service account token, and the FQDN
+	// layer's per-workspace token for KCP_TOKENS, which mints because this pod
+	// names a service account and so carries a shim.
+	if minter.calls != 2 {
+		t.Fatalf("mint calls = %d, want 2", minter.calls)
 	}
 }
 
