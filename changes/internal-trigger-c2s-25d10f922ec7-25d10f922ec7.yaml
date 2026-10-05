@@ -9,5 +9,17 @@ spec:
   fromCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
   toCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
 status:
-  phase: Running
-  message: the agent is summarizing internal-trigger
+  phase: Succeeded
+  agentLog: internal/trigger holds the decision logic for the RunTrigger custom resource.
+    Reconcile takes an Observed snapshot — the RunTrigger object, an optional RunObservation
+    of the referenced policy workflow's latest run, an AnyRun flag that says whether
+    any run exists at all, and a Now clock time — and returns a Result. The Result
+    carries the desired RunTriggerPhase, whether the run matched the spec's match
+    map, the derived job name, the last consumed run, the status conditions, the Ops
+    the caller must execute, and a RemoveFinalizer flag. Result starts from the object's
+    existing status, so fields the decider leaves alone survive. Conditions are written
+    through meta.SetStatusCondition with the trigger's generation as ObservedGeneration.
+    The package makes no client calls and asks for no requeue; the provider layer
+    executes the returned Ops. New builds a Reconciler from Options and defaults its
+    Now function to time.Now.
+  message: wrote 15 requirement(s) and 8 interface(s) for internal-trigger

@@ -233,6 +233,25 @@ The requirement-level delta against `open-architecture/deno-kcp--spec-bidder-and
 - added `r.suspend` (MUST): "Spec.Suspend MUST stop a running run with OpStopRun and clear the run id, set phase PolicyWorkflowPending with Active zero, set the Suspended condition true, and requeue after RequeueAfter."
 - added `r.terminal-finish` (MUST): "A terminal phase (Succeeded, Failed or Cancelled) MUST go to finish: delete the object with OpDelete once CompletionTime plus the effective TTL is reached (spec TTLSecondsAfterFinished, else Observed.EffectiveTTLSeconds), otherwise requeue for the remaining time; with no TTL or no completion time it returns unchanged."
 
+### internal-trigger
+
+- intent: "" -> "This context exists so the RunTrigger resource has one deterministic, side-effect-free decider that the provider layer can drive. Splitting the decision out of the provider keeps the trigger's phase machine testable from plain Observed snapshots and keeps every client call, finalizer removal, and job creation in the caller's hands. Because the decider reads only what it is given and writes only what it returns, the same code runs under unit tests with a fixed clock and under the provider with the real one."
+- added `r.carry-status` (MUST): "Result starts as a copy of the trigger's existing status — phase, matched, job name, last run, and an appended copy of the conditions slice — so status fields the decider does not touch survive the pass."
+- added `r.clock-default` (MUST): "New replaces a nil Options.Now with time.Now and stores the options on the Reconciler; Reconcile fills a zero Observed.Now from that stored clock, so the decider stays deterministic when a test supplies its own clock."
+- added `r.covered-by-tests` (SHOULD): "Table tests in the package's test file drive Reconcile through Observed snapshots with a fixed clock, covering the no-run, no-match, empty-match, same-run, newer-run, cancelled, failed, and already-triggered paths, and assert the returned phase, matched flag, job name, last run, and ops."
+- added `r.create-job-once` (MUST): "On a matching success, Result sets phase Triggered, Matched true, and JobName as "<trigger name>-<run name>" from the run's name; it sets LastRun and appends OpCreateJob plus a Complete=True condition with reason Triggered only when the run's name differs from the carried LastRun, so the same run never creates a second job."
+- added `r.ctx-cancel` (MUST): "Reconcile returns the context error when the passed context is already cancelled, and it does so after the name and clock checks but before it reads status or run state."
+- added `r.decider-only` (MUST): "Reconcile performs no client calls; it reports the desired phase and status in Result and names the work in its Ops, which the provider layer executes."
+- added `r.deletion-finalizer` (MUST): "When the trigger has a deletion timestamp, Result appends OpRemoveFinalizer, sets RemoveFinalizer, and returns the carried result without evaluating run state."
+- added `r.match-gate` (MUST): "A succeeded run triggers only when every key of Spec.Match equals the run's output value at that key; an empty match map matches any success. A run that does not match yields phase Skipped, Matched false, and a Failed=True condition with reason NoMatch."
+- added `r.name-required` (MUST): "Reconcile returns the error "trigger: observed trigger has no name" and an empty Result when the observed trigger has no name, before any other work."
+- added `r.no-requeue` (SHOULD): "The reconciler asks for no requeue interval; it relies on the driver enqueuing it when a run of the referenced policy workflow pod reaches a terminal phase, plus a backstop for an event that never arrives."
+- added `r.no-run-pending` (MUST): "With no observed run, Result returns the carried result unchanged if the carried phase is already Triggered; otherwise it sets phase Pending and writes a Complete=False condition with reason Pending, whose message names whichever case applies: the referenced policy workflow pod has produced no run, or, when AnyRun is true, that the latest run has not finished."
+- added `r.observed-generation` (MUST): "Every condition the decider writes goes through meta.SetStatusCondition and carries the trigger's generation as ObservedGeneration, so repeated passes merge conditions instead of duplicating them."
+- added `r.op-vocabulary` (MUST): "Result.Ops carries values from the Op vocabulary: OpCreateJob for the job the trigger fires, and OpRemoveFinalizer for the deletion pass."
+- added `r.skipped-runs` (MUST): "A cancelled run and a failed run each yield phase Skipped, Matched false, no job op, and a Failed=True condition whose reason is WorkflowCancelled or WorkflowFailed respectively."
+- added `r.unfinished-pending` (MUST): "A run in any other, non-terminal phase yields phase Pending with a Complete=False condition whose reason is Pending and whose message says the referenced policy workflow run has not finished."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance | coverage |
@@ -252,4 +271,4 @@ The requirement-level delta against `open-architecture/deno-kcp--spec-bidder-and
 | internal-policyworkflowpod-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
 | internal-policyworkflowrun-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
 | internal-provider-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Running |  | 0 | - | - |
-| internal-trigger-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Running |  | 0 | - | - |
+| internal-trigger-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |

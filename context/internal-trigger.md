@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the RunTrigger resource has one deterministic, side-effect-free decider that the provider layer can drive. Splitting the decision out of the provider keeps the trigger's phase machine testable from plain Observed snapshots and keeps every client call, finalizer removal, and job creation in the caller's hands. Because the decider reads only what it is given and writes only what it returns, the same code runs under unit tests with a fixed clock and under the provider with the real one.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

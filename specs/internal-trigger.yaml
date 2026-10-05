@@ -10,6 +10,171 @@ spec:
   dependsOn:
   - sc.api-v1alpha1
   - sc.deno-kcp
+  intent: This context exists so the RunTrigger resource has one deterministic, side-effect-free
+    decider that the provider layer can drive. Splitting the decision out of the provider
+    keeps the trigger's phase machine testable from plain Observed snapshots and keeps
+    every client call, finalizer removal, and job creation in the caller's hands.
+    Because the decider reads only what it is given and writes only what it returns,
+    the same code runs under unit tests with a fixed clock and under the provider
+    with the real one.
+  requirements:
+  - id: r.carry-status
+    level: MUST
+    text: Result starts as a copy of the trigger's existing status — phase, matched,
+      job name, last run, and an appended copy of the conditions slice — so status
+      fields the decider does not touch survive the pass.
+    codeRefs:
+    - method:5926281263a64123a37f6099290debee
+    - struct:a3fbb6626d9d915cb17e70f240a59a55
+  - id: r.clock-default
+    level: MUST
+    text: New replaces a nil Options.Now with time.Now and stores the options on the
+      Reconciler; Reconcile fills a zero Observed.Now from that stored clock, so the
+      decider stays deterministic when a test supplies its own clock.
+    codeRefs:
+    - function:f347057cde00720e2ba57c3dd951470c
+    - struct:9094b81797efe240a545142966b526c0
+    - struct:ce2bb0551ed1ce86badc642077aab120
+  - id: r.covered-by-tests
+    level: SHOULD
+    text: Table tests in the package's test file drive Reconcile through Observed
+      snapshots with a fixed clock, covering the no-run, no-match, empty-match, same-run,
+      newer-run, cancelled, failed, and already-triggered paths, and assert the returned
+      phase, matched flag, job name, last run, and ops.
+    codeRefs:
+    - file:internal/trigger/trigger_test.go
+    - method:5926281263a64123a37f6099290debee
+  - id: r.create-job-once
+    level: MUST
+    text: On a matching success, Result sets phase Triggered, Matched true, and JobName
+      as "<trigger name>-<run name>" from the run's name; it sets LastRun and appends
+      OpCreateJob plus a Complete=True condition with reason Triggered only when the
+      run's name differs from the carried LastRun, so the same run never creates a
+      second job.
+    codeRefs:
+    - method:5926281263a64123a37f6099290debee
+    - type_alias:ea5d49f390b7f0cb47a28a95e8f58b81
+  - id: r.ctx-cancel
+    level: MUST
+    text: Reconcile returns the context error when the passed context is already cancelled,
+      and it does so after the name and clock checks but before it reads status or
+      run state.
+    codeRefs:
+    - method:5926281263a64123a37f6099290debee
+  - id: r.decider-only
+    level: MUST
+    text: Reconcile performs no client calls; it reports the desired phase and status
+      in Result and names the work in its Ops, which the provider layer executes.
+    codeRefs:
+    - method:5926281263a64123a37f6099290debee
+    - struct:9094b81797efe240a545142966b526c0
+  - id: r.deletion-finalizer
+    level: MUST
+    text: When the trigger has a deletion timestamp, Result appends OpRemoveFinalizer,
+      sets RemoveFinalizer, and returns the carried result without evaluating run
+      state.
+    codeRefs:
+    - method:5926281263a64123a37f6099290debee
+    - type_alias:ea5d49f390b7f0cb47a28a95e8f58b81
+  - id: r.match-gate
+    level: MUST
+    text: A succeeded run triggers only when every key of Spec.Match equals the run's
+      output value at that key; an empty match map matches any success. A run that
+      does not match yields phase Skipped, Matched false, and a Failed=True condition
+      with reason NoMatch.
+    codeRefs:
+    - method:5926281263a64123a37f6099290debee
+    - struct:128da6e45c96bafe5081998013f47ffe
+  - id: r.name-required
+    level: MUST
+    text: 'Reconcile returns the error "trigger: observed trigger has no name" and
+      an empty Result when the observed trigger has no name, before any other work.'
+    codeRefs:
+    - method:5926281263a64123a37f6099290debee
+    - struct:dc3e99d1633068172953c5024a851849
+  - id: r.no-requeue
+    level: SHOULD
+    text: The reconciler asks for no requeue interval; it relies on the driver enqueuing
+      it when a run of the referenced policy workflow pod reaches a terminal phase,
+      plus a backstop for an event that never arrives.
+    codeRefs:
+    - method:5926281263a64123a37f6099290debee
+  - id: r.no-run-pending
+    level: MUST
+    text: 'With no observed run, Result returns the carried result unchanged if the
+      carried phase is already Triggered; otherwise it sets phase Pending and writes
+      a Complete=False condition with reason Pending, whose message names whichever
+      case applies: the referenced policy workflow pod has produced no run, or, when
+      AnyRun is true, that the latest run has not finished.'
+    codeRefs:
+    - method:5926281263a64123a37f6099290debee
+    - struct:dc3e99d1633068172953c5024a851849
+  - id: r.observed-generation
+    level: MUST
+    text: Every condition the decider writes goes through meta.SetStatusCondition
+      and carries the trigger's generation as ObservedGeneration, so repeated passes
+      merge conditions instead of duplicating them.
+    codeRefs:
+    - method:5926281263a64123a37f6099290debee
+  - id: r.op-vocabulary
+    level: MUST
+    text: 'Result.Ops carries values from the Op vocabulary: OpCreateJob for the job
+      the trigger fires, and OpRemoveFinalizer for the deletion pass.'
+    codeRefs:
+    - struct:a3fbb6626d9d915cb17e70f240a59a55
+    - type_alias:ea5d49f390b7f0cb47a28a95e8f58b81
+  - id: r.skipped-runs
+    level: MUST
+    text: A cancelled run and a failed run each yield phase Skipped, Matched false,
+      no job op, and a Failed=True condition whose reason is WorkflowCancelled or
+      WorkflowFailed respectively.
+    codeRefs:
+    - method:5926281263a64123a37f6099290debee
+  - id: r.unfinished-pending
+    level: MUST
+    text: A run in any other, non-terminal phase yields phase Pending with a Complete=False
+      condition whose reason is Pending and whose message says the referenced policy
+      workflow run has not finished.
+    codeRefs:
+    - method:5926281263a64123a37f6099290debee
+  interfaces:
+  - name: New
+    kind: function
+    signature: func New(opts Options) *Reconciler
+    file: internal/trigger/trigger.go
+  - name: Observed
+    kind: struct
+    signature: type Observed struct { Trigger v1alpha1.RunTrigger; Run *RunObservation;
+      AnyRun bool; Now time.Time }
+    file: internal/trigger/trigger.go
+  - name: Op
+    kind: type_alias
+    signature: type Op string
+    file: internal/trigger/trigger.go
+  - name: Options
+    kind: struct
+    signature: type Options struct { Now func() time.Time }
+    file: internal/trigger/trigger.go
+  - name: Reconciler
+    kind: struct
+    signature: type Reconciler struct { opts Options }
+    file: internal/trigger/trigger.go
+  - name: Reconciler.Reconcile
+    kind: method
+    signature: func (r *Reconciler) Reconcile(ctx context.Context, o Observed) (Result,
+      error)
+    file: internal/trigger/trigger.go
+  - name: Result
+    kind: struct
+    signature: type Result struct { Phase v1alpha1.RunTriggerPhase; Matched bool;
+      JobName string; LastRun string; Conditions []metav1.Condition; Ops []Op; RemoveFinalizer
+      bool }
+    file: internal/trigger/trigger.go
+  - name: RunObservation
+    kind: struct
+    signature: type RunObservation struct { Name string; Phase v1alpha1.PolicyWorkflowPhase;
+      Outputs map[string]string }
+    file: internal/trigger/trigger.go
   arch:
     id: sc.kind.runtrigger
     kind: node
@@ -105,3 +270,11 @@ spec:
 codeRefIndex:
 - file:internal/trigger/trigger.go trigger.go@internal/trigger/trigger.go
 - file:internal/trigger/trigger_test.go trigger_test.go@internal/trigger/trigger_test.go
+- function:f347057cde00720e2ba57c3dd951470c New@internal/trigger/trigger.go:65
+- method:5926281263a64123a37f6099290debee Reconciler.Reconcile@internal/trigger/trigger.go:73
+- struct:128da6e45c96bafe5081998013f47ffe RunObservation@internal/trigger/trigger.go:15
+- struct:9094b81797efe240a545142966b526c0 Reconciler@internal/trigger/trigger.go:61
+- struct:a3fbb6626d9d915cb17e70f240a59a55 Result@internal/trigger/trigger.go:41
+- struct:ce2bb0551ed1ce86badc642077aab120 Options@internal/trigger/trigger.go:57
+- struct:dc3e99d1633068172953c5024a851849 Observed@internal/trigger/trigger.go:23
+- type_alias:ea5d49f390b7f0cb47a28a95e8f58b81 Op@internal/trigger/trigger.go:33
