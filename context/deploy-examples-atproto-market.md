@@ -12,10 +12,13 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 - `file:deploy/examples/atproto/market/00-workspaces.yaml` file 00-workspaces.yaml (deploy/examples/atproto/market/00-workspaces.yaml)
 - `file:deploy/examples/atproto/market/10-rbac.yaml` file 10-rbac.yaml (deploy/examples/atproto/market/10-rbac.yaml)
 - `file:deploy/examples/atproto/market/15-openbao-alice.yaml` file 15-openbao-alice.yaml (deploy/examples/atproto/market/15-openbao-alice.yaml)
+- `file:deploy/examples/atproto/market/15-openbao-bob.yaml` file 15-openbao-bob.yaml (deploy/examples/atproto/market/15-openbao-bob.yaml)
 - `file:deploy/examples/atproto/market/15-openbao-global.yaml` file 15-openbao-global.yaml (deploy/examples/atproto/market/15-openbao-global.yaml)
 - `file:deploy/examples/atproto/market/15-openbao-relay.yaml` file 15-openbao-relay.yaml (deploy/examples/atproto/market/15-openbao-relay.yaml)
 - `file:deploy/examples/atproto/market/20-global-plc.yaml` file 20-global-plc.yaml (deploy/examples/atproto/market/20-global-plc.yaml)
 - `file:deploy/examples/atproto/market/30-relay-relay.yaml` file 30-relay-relay.yaml (deploy/examples/atproto/market/30-relay-relay.yaml)
 - `file:deploy/examples/atproto/market/40-alice-pds.yaml` file 40-alice-pds.yaml (deploy/examples/atproto/market/40-alice-pds.yaml)
 - `file:deploy/examples/atproto/market/50-verifier.yaml` file 50-verifier.yaml (deploy/examples/atproto/market/50-verifier.yaml)
+- `file:deploy/examples/atproto/market/60-bob-pds.yaml` file 60-bob-pds.yaml (deploy/examples/atproto/market/60-bob-pds.yaml)
+- `file:deploy/examples/atproto/market/70-bidder.yaml` file 70-bidder.yaml (deploy/examples/atproto/market/70-bidder.yaml)
 <!-- SPECD_MANAGED_END -->

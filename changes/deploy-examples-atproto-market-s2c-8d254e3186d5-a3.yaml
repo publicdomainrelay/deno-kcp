@@ -20,9 +20,146 @@ spec:
     - +r.bob-workspace-authority
     - ~r.apply-includes-bob-and-bidder
 status:
-  phase: Running
-  message: the agent is realizing deploy-examples-atproto-market in a batch of 2 led
-    by deploy-examples-atproto-market
+  phase: Succeeded
+  branch: spec/deploy-examples-atproto-market/8d254e31
+  commit: f31ce445412fe2c57400d0a781abd25f65736c82
+  filesTouched:
+  - deploy/examples/atproto/market/00-workspaces.yaml
+  - deploy/examples/atproto/market/15-openbao-bob.yaml
+  - deploy/examples/atproto/market/40-alice-pds.yaml
+  - deploy/examples/atproto/market/60-bob-pds.yaml
+  - deploy/examples/atproto/market/70-bidder.yaml
+  - deploy/examples/atproto/market/README.md
+  - deploy/examples/atproto/market/accept.sh
+  - deploy/examples/atproto/market/apply.sh
+  - internal/provider/provider_runtime_test.go
+  - test/integration/examples.go
+  - test/integration/offline_test.go
+  agentLog: |-
+    ... plain-HTTP variant — writes only `ca.pem`/`DENO_CERT`, never tls.crt/tls.key nor TLS flags, write allowList `result.json`+`ca.pem`, sets `PDS_STATE_PATH` and `REPO_PRIVATE_KEY_HEX_PATH` into the run dir.
+    - `40-alice-pds.yaml`: `PDS_CRAWLERS` → relay listener address `https://127.0.0.1:2584`.
+    - `apply.sh`: workspaces `global relay alice bob`; preflight adds `atproto-market/hono-bidder`; three per-identity keys via `resolve_key` (`PDS_`/`BOB_PDS_`/`BIDDER_PRIVATE_KEY_HEX`, own key files); three distinct sed placeholders; order plc → alice pds → bob pds → relay → bidder; verifier gated on bounded wait for alice pds Running+ready (no `sleep 10`); summary loop covers bob pds + bob bidder.
+    - `accept.sh` (new): whole topology under mktemp `ACCEPT_ROOT` on three kernel-issued ports; retry loop ≤3 attempts that restarts the provider only while no DenoPod exists; EXIT trap deletes DenoPods through kcp and waits before stopping provider/OpenBao/kcp; per-check results table, provider log tail on failure.
+    - `README.md`: four workspaces, bob pds/bidder rows, bob OpenBao row, bidder TLS exception, `accept.sh` section, XRPC-dispatcher ceiling.
+
+    **Gate fix:** all host checks now verify — no `-k` anywhere. `accept.sh` reads the market root CA from OpenBao (`/v1/pki/ca/pem`) and uses `curl --cacert … --resolve <name>:<port>:127.0.0.1`; `apply.sh`'s hint block prints the same verified form.
+
+    **test-integration:** `examples.go` registers the ten market manifests with forward-slash relative paths, declares `nonExamples` (00-workspaces, 10-rbac), and `exampleFilesOnDisk` walks `deploy/examples` recursively; `offline_test.go` subtracts `nonExamples` before comparing.
+
+    **Other:** `provider_runtime_test.go` asserted `mint calls == 1`; the FQDN layer mints one per-workspace token for `KCP_TOKENS` plus the pod's service-account token, so one pod costs two. Assertion now 2 with a comment naming both callers. No production change.
+
+    verify: exit 0, 854ms, 10 ok, 2 without tests
+  message: 'realized deploy-examples-atproto-market in a batch of 2 led by deploy-examples-atproto-market
+    on spec/deploy-examples-atproto-market/8d254e31: 11 file(s) touched, verify exit
+    0'
+  requirementCoverage:
+  - id: r.apply-includes-bob-and-bidder
+    implemented: true
+    evidence: apply.sh:32 `WORKSPACES="global relay alice bob"`; :43 `for bin in atproto-market/hono-plc
+      atproto-market/hono-bidder atproto-relay/hono-atproto-relay hono-pds; do [ -e
+      "$ORG_ROOT/$bin" ] || ... exit 1`; :29-30 BOB_KEY_FILE/BIDDER_KEY_FILE; :94-115
+      `resolve_key` reads `${!env}` (PDS_PRIVATE_KEY_HEX/BOB_PDS_PRIVATE_KEY_HEX/BIDDER_PRIVATE_KEY_HEX)
+      or its own file else generates `openssl rand -hex 32`, and `bob_key=$(resolve_key
+      BOB_PDS_PRIVATE_KEY_HEX ...)`, `bidder_key=$(resolve_key BIDDER_PRIVATE_KEY_HEX
+      ...)`; :121-124 sed substitutes `__PDS_PRIVATE_KEY_HEX__`->$key, `__BOB_PDS_PRIVATE_KEY_HEX__`->$bob_key,
+      `__BIDDER_PRIVATE_KEY_HEX__`->$bidder_key, distinct placeholder per file; :139-141
+      openbao loop `apply_pod "$ws" "15-openbao-$ws.yaml"` now covers bob; :158 `apply_pod
+      bob 60-bob-pds.yaml` before :163 `apply_pod bob 70-bidder.yaml`; :187 summary
+      loop `for entry in "global plc" "relay relay" "alice pds" "bob pds" "bob bidder"`
+      prints phase= and ready=
+  - id: r.apply-order-for-bob-and-bidder
+    implemented: true
+    evidence: apply.sh:156-159 order `apply_pod global 20-global-plc.yaml`, `apply_pod
+      alice 40-alice-pds.yaml`, `apply_pod bob 60-bob-pds.yaml`, then `apply_pod relay
+      30-relay-relay.yaml`; :160-163 `apply_pod bob 70-bidder.yaml` after the relay
+      with comment on the once-written address table; :187 final wait loop `for entry
+      in "global plc" "relay relay" "alice pds" "bob pds" "bob bidder"` covers bob
+      pds and bob bidder plus the three others
+  - id: r.bidder-pod
+    implemented: true
+    evidence: '70-bidder.yaml: DenoPod `name: bidder`, `namespace: default`, finalizers
+      `denopod.deno.computer/run`, `restartPolicy: Always`, serviceAccount `deno-runner`;
+      `SERVICE_ENTRY: ".../atproto-market/hono-bidder/mod.ts"`; `SERVICE_CWD: ".../atproto-market"`;
+      `SERVICE_ARGS: ''["--serve-port","2586","--relay-url","https://relay.default.relay.svc.kcp.local","--compute-provider-deno-worker","--skip-qr"]''`;
+      `SERVICE_DENO_FLAGS: ''["--unstable-kv"]''`; `SERVICE_TLS: "true"`; `SERVICE_ENV:
+      ''{"PORT":"2586","SERVE_PORT":"2586","REPO_PRIVATE_KEY_HEX":"__BIDDER_PRIVATE_KEY_HEX__"}''`;
+      readinessProbe command `[kcpdns, bidder.default.bob.svc.kcp.local, /oauth-client-metadata.json]`
+      with periodSeconds 5, failureThreshold 6, timeoutSeconds 10; port 2586 used
+      only here'
+  - id: r.bidder-supervisor-serves-plain-http
+    implemented: true
+    evidence: '70-bidder.yaml script: `const caBundle = Deno.env.get("KCP_CA_BUNDLE")
+      ?? ""; if (caBundle) { const caPath = `${runDir}/ca.pem`; await Deno.writeTextFile(caPath,
+      caBundle); childEnv.DENO_CERT = caPath; }`; no read of KCP_TLS_CERT/KCP_TLS_KEY
+      and no tls.crt/tls.key write and no `args.push("--tls-cert-file"...)`; `if (shim)
+      denoFlags.unshift("--preload", shim)`; `new Deno.Command(Deno.execPath(), {args:["run","-A",...denoFlags,entry,...args],
+      cwd, env: childEnv, stdin:"null", stdout:"inherit", stderr:"inherit"})` then
+      `writeTextFile("result.json", JSON.stringify({exitCode: String(status.code)}))`;
+      :`write: allowList: [result.json, ca.pem]` (no tls.crt/tls.key); env allowList
+      identical to 60-bob-pds.yaml; before spawn `childEnv.PDS_STATE_PATH = `${runDir}/pds-state`;
+      childEnv.REPO_PRIVATE_KEY_HEX_PATH = `${runDir}/repo-private-key.hex``'
+  - id: r.bob-pds-pod
+    implemented: true
+    evidence: '60-bob-pds.yaml: DenoPod `name: pds`, `namespace: default`, finalizers
+      `denopod.deno.computer/run`, `restartPolicy: Always`, serviceAccount `deno-runner`;
+      `SERVICE_ENTRY: ".../hono-pds/main.ts"`, `SERVICE_CWD: ".../hono-pds"`, `SERVICE_ARGS:
+      ''["--port","2585","--hostname","127.0.0.1"]''`, `SERVICE_DENO_FLAGS: ''["--unstable-kv"]''`,
+      `SERVICE_TLS: "true"`, `SERVICE_ENV: ''{"PORT":"2585","HOSTNAME":"127.0.0.1","PDS_PUBLIC_HOSTNAME":"pds.default.bob.svc.kcp.local","PDS_PLC_DIRECTORY_URL":"https://plc.default.global.svc.kcp.local","PDS_CRAWLERS":"https://127.0.0.1:2584","PDS_SUBSCRIBE_REPOS_FORMAT":"json","PDS_PRIVATE_KEY_HEX":"__BOB_PDS_PRIVATE_KEY_HEX__"}''`;
+      script writes ca.pem/tls.crt/tls.key and pushes `--tls-cert-file`,`--tls-key-file`,
+      `stdin:"null"`, inherited stdio, result.json; write allowList `[result.json,
+      tls.crt, tls.key, ca.pem]`; env allowList `[SERVICE_ENTRY, SERVICE_CWD, SERVICE_ARGS,
+      SERVICE_DENO_FLAGS, SERVICE_ENV, SERVICE_TLS, KCP_SHIM, KCP_TLS_CERT, KCP_TLS_KEY,
+      KCP_CA_BUNDLE, KCP_SERVICE_NAME, KCP_SERVICE_DOMAIN, KCP_DNS_TABLE, KCP_TOKENS,
+      KCP_SERVER, KCP_NAMESPACE, PATH, HOME]`; readinessProbe `[kcpdns, pds.default.bob.svc.kcp.local,
+      /xrpc/_health]`, periodSeconds 5, failureThreshold 6, timeoutSeconds 10; applied
+      at apply.sh:158 before the relay at :159, crawler URL `https://127.0.0.1:2584`'
+  - id: r.bob-workspace-authority
+    implemented: true
+    evidence: '00-workspaces.yaml adds `--- apiVersion: tenancy.kcp.io/v1alpha1 kind:
+      Workspace metadata: name: bob spec: type: {name: denoruntime, path: root}`;
+      new 15-openbao-bob.yaml: `kind: OpenBao metadata: {name: openbao, namespace:
+      default, finalizers: [openbao.deno.computer/namespace]} spec: {namespace: bob.default}`;
+      apply.sh:32 WORKSPACES includes bob, :139-141 `for ws in $WORKSPACES; do apply_pod
+      "$ws" "15-openbao-$ws.yaml" >/dev/null; done`, :142-154 loop waits until `get
+      openbao openbao -o jsonpath=''{.status.ready}''` = `true` for each workspace
+      before :156+ applies any workload'
+  policy:
+    warned:
+    - policy: requirement-text-has-machine-path
+      constraint: requirement-text-has-machine-path
+      enforcementAction: warn
+      severity: error
+      msg: requirement r.bidder-pod names ["/home/johnandersen777", "/home/johnandersen777"],
+        a path that exists on the machine that wrote it and nowhere else
+      object: SpecChange default/deploy-examples-atproto-market-s2c-8d254e3186d5-a3
+    - policy: requirement-text-has-machine-path
+      constraint: requirement-text-has-machine-path
+      enforcementAction: warn
+      severity: error
+      msg: requirement r.bob-pds-pod names ["/home/johnandersen777", "/home/johnandersen777"],
+        a path that exists on the machine that wrote it and nowhere else
+      object: SpecChange default/deploy-examples-atproto-market-s2c-8d254e3186d5-a3
+    message: 2 warn violation(s)
+  progress:
+    turns: 1
+    tools:
+    - tool: realize
+      count: 1
+    files:
+    - deploy/examples/atproto/market/00-workspaces.yaml
+    - deploy/examples/atproto/market/15-openbao-bob.yaml
+    - deploy/examples/atproto/market/40-alice-pds.yaml
+    - deploy/examples/atproto/market/60-bob-pds.yaml
+    - deploy/examples/atproto/market/70-bidder.yaml
+    - deploy/examples/atproto/market/README.md
+    - deploy/examples/atproto/market/accept.sh
+    - deploy/examples/atproto/market/apply.sh
+    - internal/provider/provider_runtime_test.go
+    - test/integration/examples.go
+    - test/integration/offline_test.go
+    notes: 1
+    first: "2026-10-05T10:27:49Z"
+    last: "2026-10-05T10:27:49Z"
 superseded:
 - name: deploy-examples-atproto-market-s2c-8d254e3186d5-a2
   phase: Failed

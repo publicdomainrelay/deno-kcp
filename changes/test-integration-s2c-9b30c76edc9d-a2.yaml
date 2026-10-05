@@ -14,8 +14,89 @@ spec:
     requirements:
     - +r.market-registry-paths-are-relative-and-recursive
 status:
-  phase: Running
-  message: the agent is realizing test-integration in a batch of 2 led by deploy-examples-atproto-market
+  phase: Succeeded
+  branch: spec/deploy-examples-atproto-market/8d254e31
+  commit: f31ce445412fe2c57400d0a781abd25f65736c82
+  filesTouched:
+  - deploy/examples/atproto/market/00-workspaces.yaml
+  - deploy/examples/atproto/market/15-openbao-bob.yaml
+  - deploy/examples/atproto/market/40-alice-pds.yaml
+  - deploy/examples/atproto/market/60-bob-pds.yaml
+  - deploy/examples/atproto/market/70-bidder.yaml
+  - deploy/examples/atproto/market/README.md
+  - deploy/examples/atproto/market/accept.sh
+  - deploy/examples/atproto/market/apply.sh
+  - internal/provider/provider_runtime_test.go
+  - test/integration/examples.go
+  - test/integration/offline_test.go
+  agentLog: |-
+    ... plain-HTTP variant — writes only `ca.pem`/`DENO_CERT`, never tls.crt/tls.key nor TLS flags, write allowList `result.json`+`ca.pem`, sets `PDS_STATE_PATH` and `REPO_PRIVATE_KEY_HEX_PATH` into the run dir.
+    - `40-alice-pds.yaml`: `PDS_CRAWLERS` → relay listener address `https://127.0.0.1:2584`.
+    - `apply.sh`: workspaces `global relay alice bob`; preflight adds `atproto-market/hono-bidder`; three per-identity keys via `resolve_key` (`PDS_`/`BOB_PDS_`/`BIDDER_PRIVATE_KEY_HEX`, own key files); three distinct sed placeholders; order plc → alice pds → bob pds → relay → bidder; verifier gated on bounded wait for alice pds Running+ready (no `sleep 10`); summary loop covers bob pds + bob bidder.
+    - `accept.sh` (new): whole topology under mktemp `ACCEPT_ROOT` on three kernel-issued ports; retry loop ≤3 attempts that restarts the provider only while no DenoPod exists; EXIT trap deletes DenoPods through kcp and waits before stopping provider/OpenBao/kcp; per-check results table, provider log tail on failure.
+    - `README.md`: four workspaces, bob pds/bidder rows, bob OpenBao row, bidder TLS exception, `accept.sh` section, XRPC-dispatcher ceiling.
+
+    **Gate fix:** all host checks now verify — no `-k` anywhere. `accept.sh` reads the market root CA from OpenBao (`/v1/pki/ca/pem`) and uses `curl --cacert … --resolve <name>:<port>:127.0.0.1`; `apply.sh`'s hint block prints the same verified form.
+
+    **test-integration:** `examples.go` registers the ten market manifests with forward-slash relative paths, declares `nonExamples` (00-workspaces, 10-rbac), and `exampleFilesOnDisk` walks `deploy/examples` recursively; `offline_test.go` subtracts `nonExamples` before comparing.
+
+    **Other:** `provider_runtime_test.go` asserted `mint calls == 1`; the FQDN layer mints one per-workspace token for `KCP_TOKENS` plus the pod's service-account token, so one pod costs two. Assertion now 2 with a comment naming both callers. No production change.
+
+    verify: exit 0, 854ms, 10 ok, 2 without tests
+  message: 'realized test-integration in a batch of 2 led by deploy-examples-atproto-market
+    on spec/deploy-examples-atproto-market/8d254e31: 11 file(s) touched, verify exit
+    0'
+  requirementCoverage:
+  - id: r.market-registry-paths-are-relative-and-recursive
+    implemented: true
+    evidence: 'test/integration/examples.go: exampleFiles() gains `{File: "atproto/market/15-openbao-bob.yaml",
+      Kind: "OpenBao", ...}`, `{File: "atproto/market/60-bob-pds.yaml", Kind: "DenoPod",
+      ...}`, `{File: "atproto/market/70-bidder.yaml", Kind: "DenoPod", ...}` (slash-separated,
+      relative to deploy/examples). exampleFilesOnDisk() replaced os.ReadDir with
+      `filepath.WalkDir(root, func(path string, entry os.DirEntry, err error) error
+      {...})` appending `filepath.ToSlash(rel)` from `filepath.Rel(root, path)`, so
+      it recurses and returns the same relative paths. `var nonExamples = []string{"atproto/market/00-workspaces.yaml",
+      "atproto/market/10-rbac.yaml"}` is declared, and TestExampleInventoryMatchesDisk
+      builds `skip` from nonExamples and filters the walk output (`if skip[file] {
+      continue }`) before comparing to exampleFiles(), so both the missing-from-registry
+      and spurious-unregistered cases are handled.'
+  policy:
+    warned:
+    - policy: requirement-text-has-machine-path
+      constraint: requirement-text-has-machine-path
+      enforcementAction: warn
+      severity: error
+      msg: requirement r.bidder-pod names ["/home/johnandersen777", "/home/johnandersen777"],
+        a path that exists on the machine that wrote it and nowhere else
+      object: SpecChange default/deploy-examples-atproto-market-s2c-8d254e3186d5-a3
+    - policy: requirement-text-has-machine-path
+      constraint: requirement-text-has-machine-path
+      enforcementAction: warn
+      severity: error
+      msg: requirement r.bob-pds-pod names ["/home/johnandersen777", "/home/johnandersen777"],
+        a path that exists on the machine that wrote it and nowhere else
+      object: SpecChange default/deploy-examples-atproto-market-s2c-8d254e3186d5-a3
+    message: 2 warn violation(s)
+  progress:
+    turns: 1
+    tools:
+    - tool: realize
+      count: 1
+    files:
+    - deploy/examples/atproto/market/00-workspaces.yaml
+    - deploy/examples/atproto/market/15-openbao-bob.yaml
+    - deploy/examples/atproto/market/40-alice-pds.yaml
+    - deploy/examples/atproto/market/60-bob-pds.yaml
+    - deploy/examples/atproto/market/70-bidder.yaml
+    - deploy/examples/atproto/market/README.md
+    - deploy/examples/atproto/market/accept.sh
+    - deploy/examples/atproto/market/apply.sh
+    - internal/provider/provider_runtime_test.go
+    - test/integration/examples.go
+    - test/integration/offline_test.go
+    notes: 1
+    first: "2026-10-05T10:27:49Z"
+    last: "2026-10-05T10:27:49Z"
 superseded:
 - name: test-integration-s2c-9b30c76edc9d
   phase: Failed
