@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so that DenoJob reconciliation has one place that decides and no place that acts: internal/provider observes the cluster and writes the Result back, while internal/denojob only turns observed state into a plan. Splitting the decision out keeps the job's phase, counters, conditions, requeue delay and delete flags testable without a client, and lets the provider layer stay a thin observer and writer.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

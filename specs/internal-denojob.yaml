@@ -10,6 +10,108 @@ spec:
   dependsOn:
   - sc.api-v1alpha1
   - sc.deno-kcp
+  intent: 'This context exists so that DenoJob reconciliation has one place that decides
+    and no place that acts: internal/provider observes the cluster and writes the
+    Result back, while internal/denojob only turns observed state into a plan. Splitting
+    the decision out keeps the job''s phase, counters, conditions, requeue delay and
+    delete flags testable without a client, and lets the provider layer stay a thin
+    observer and writer.'
+  requirements:
+  - id: r.decider-tested-against-constructed-observed
+    level: MUST
+    text: denojob_test.go drives the decider by constructing Observed values and asserting
+      directly on the returned Result, covering at least that a job with no runs yet
+      creates exactly one run named demo-1 and reports DenoJobPending with Active
+      one, and that the job reaches DenoJobSucceeded carrying its run's outputs with
+      Succeeded one once that run reports DenoRunSucceeded.
+    codeRefs:
+    - file:internal/denojob/denojob_test.go
+    - struct:0ba4feb0fbc5bf2cadab0956427bd073
+    - struct:a76d5210541b3f0c4f0346477f21b1c1
+  - id: r.observed-carries-job-runs-and-now
+    level: MUST
+    text: 'Observed supplies the decoded observed state for one pass: the v1alpha1.DenoJob
+      in Job, the slice of RunObservation for the runs the job owns in Runs, and the
+      time the decision is made against in Now.'
+    codeRefs:
+    - struct:0ba4feb0fbc5bf2cadab0956427bd073
+    - struct:d14a57a215b6cff18c212b07ddfe93f7
+  - id: r.options-default-now-and-backoff-limit
+    level: MUST
+    text: 'New fills in the Options fields the caller left unset: the Now clock falls
+      back to time.Now and a zero DefaultBackoffLimit falls back to the package DefaultBackoffLimit,
+      so a Reconciler built from a zero Options still decides against a real clock
+      and a real retry limit.'
+    codeRefs:
+    - function:0d2947cb5cecdc22a1eed7036e77229b
+    - struct:f9b27eae82ab32e2cb4cf25ca02b0e65
+  - id: r.reconcile-is-a-pure-decision
+    level: MUST
+    text: Reconciler.Reconcile takes a context.Context and an Observed snapshot and
+      returns a Result plus an error; it performs no Kubernetes client work, so every
+      effect the job needs is expressed in the returned Result for the caller to apply.
+    codeRefs:
+    - method:609e5eaa8563a6ad1508b812aa5604b4
+    - struct:0ba4feb0fbc5bf2cadab0956427bd073
+    - struct:a76d5210541b3f0c4f0346477f21b1c1
+  - id: r.reconciler-built-from-options
+    level: MUST
+    text: The decider is a Reconciler value, and the only way to build one is New,
+      which takes an Options value and returns a *Reconciler.
+    codeRefs:
+    - function:0d2947cb5cecdc22a1eed7036e77229b
+    - struct:8a80dd72dde5aa7fad20d4a2a56c0c77
+    - struct:f9b27eae82ab32e2cb4cf25ca02b0e65
+  - id: r.result-is-the-whole-job-plan
+    level: MUST
+    text: 'Result carries the complete plan for one pass: the DenoJobPhase in Phase,
+      the observed run names in RunNames and the single run name in RunName, the runs
+      to start in CreateRuns and the runs to stop in StopRuns, StartTime and CompletionTime,
+      the Active, Ready, Succeeded, Failed and Retries counters, the ExitCode and
+      Outputs of the selected run, the Conditions, the RequeueAfter delay, and the
+      Delete flag for the runs together with the DeleteJob flag for the job.'
+    codeRefs:
+    - file:internal/denojob/denojob.go
+    - struct:a76d5210541b3f0c4f0346477f21b1c1
+  - id: r.run-observation-reports-run-outcome
+    level: MUST
+    text: RunObservation reports one run by Name with its v1alpha1.DenoRunPhase in
+      Phase, an optional exit code in ExitCode, a human-readable Message, and the
+      run's outputs map in Outputs, so the decider can decide on a run without holding
+      the v1alpha1.DenoRun itself.
+    codeRefs:
+    - file:internal/denojob/denojob.go
+    - struct:d14a57a215b6cff18c212b07ddfe93f7
+  interfaces:
+  - name: New
+    kind: function
+    signature: func New(opts Options) *Reconciler
+    file: internal/denojob/denojob.go
+  - name: Observed
+    kind: struct
+    signature: type Observed struct
+    file: internal/denojob/denojob.go
+  - name: Options
+    kind: struct
+    signature: type Options struct
+    file: internal/denojob/denojob.go
+  - name: Reconciler
+    kind: struct
+    signature: type Reconciler struct
+    file: internal/denojob/denojob.go
+  - name: Reconciler.Reconcile
+    kind: method
+    signature: func (r *Reconciler) Reconcile(ctx context.Context, o Observed) (Result,
+      error)
+    file: internal/denojob/denojob.go
+  - name: Result
+    kind: struct
+    signature: type Result struct
+    file: internal/denojob/denojob.go
+  - name: RunObservation
+    kind: struct
+    signature: type RunObservation struct
+    file: internal/denojob/denojob.go
   arch:
     id: sc.kind.denojob
     kind: node
@@ -161,3 +263,10 @@ spec:
 codeRefIndex:
 - file:internal/denojob/denojob.go denojob.go@internal/denojob/denojob.go
 - file:internal/denojob/denojob_test.go denojob_test.go@internal/denojob/denojob_test.go
+- function:0d2947cb5cecdc22a1eed7036e77229b New@internal/denojob/denojob.go:89
+- method:609e5eaa8563a6ad1508b812aa5604b4 Reconciler.Reconcile@internal/denojob/denojob.go:99
+- struct:0ba4feb0fbc5bf2cadab0956427bd073 Observed@internal/denojob/denojob.go:33
+- struct:8a80dd72dde5aa7fad20d4a2a56c0c77 Reconciler@internal/denojob/denojob.go:85
+- struct:a76d5210541b3f0c4f0346477f21b1c1 Result@internal/denojob/denojob.go:41
+- struct:d14a57a215b6cff18c212b07ddfe93f7 RunObservation@internal/denojob/denojob.go:21
+- struct:f9b27eae82ab32e2cb4cf25ca02b0e65 Options@internal/denojob/denojob.go:79

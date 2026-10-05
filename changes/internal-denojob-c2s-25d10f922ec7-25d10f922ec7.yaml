@@ -9,5 +9,19 @@ spec:
   fromCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
   toCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
 status:
-  phase: Running
-  message: the agent is summarizing internal-denojob
+  phase: Succeeded
+  agentLog: 'internal/denojob is the pure decision layer for the DenoJob custom resource
+    in deno-kcp. New builds a *Reconciler from an Options value carrying a Now clock
+    function and a DefaultBackoffLimit, filling in time.Now and DefaultBackoffLimit
+    when the caller leaves them zero. Reconciler.Reconcile takes a context.Context
+    plus an Observed snapshot — the v1alpha1.DenoJob in Job, a slice of RunObservation
+    for its runs in Runs, and the current time in Now — and returns a Result together
+    with an error. Result is the whole plan for the job: the DenoJobPhase, the observed
+    run names, the single run name, the runs to create and to stop, start and completion
+    times, the active, ready, succeeded, failed and retry counters, the exit code,
+    the outputs map, the conditions, the requeue delay, and the delete flags for the
+    runs and the job. RunObservation reports one run by name with its v1alpha1.DenoRunPhase,
+    an optional exit code, a message, and the run''s outputs map. Because the decider
+    does no Kubernetes client work, denojob_test.go reconciles constructed Observed
+    values and asserts directly on the returned Result.'
+  message: wrote 7 requirement(s) and 7 interface(s) for internal-denojob

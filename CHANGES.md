@@ -116,6 +116,17 @@ The requirement-level delta against `open-architecture/deno-kcp--spec-bidder-and
 - added `r.scheme-and-ca-in-ready-line` (MUST): "In TLS mode the command serves `https` and the readiness line carries the generated CA certificate path, formed by joining the TLS directory with `devTLSCAFile`; without TLS the scheme is `http` and the CA path is empty."
 - added `r.tls-cert-directory` (MUST): "In TLS mode the command uses the given TLS directory, or creates a fresh temporary directory when none is given, then calls `os.MkdirAll` on it with mode `0o700` because OpenBao refuses a certificate directory that does not exist; a failure to create the temporary directory writes `baoembed: making a certificate directory: %v` to stderr and exits with status 1, and a failure of `os.MkdirAll` writes `baoembed: making the certificate directory %s: %v` to stderr and exits with status 1."
 
+### internal-denojob
+
+- intent: "" -> "This context exists so that DenoJob reconciliation has one place that decides and no place that acts: internal/provider observes the cluster and writes the Result back, while internal/denojob only turns observed state into a plan. Splitting the decision out keeps the job's phase, counters, conditions, requeue delay and delete flags testable without a client, and lets the provider layer stay a thin observer and writer."
+- added `r.decider-tested-against-constructed-observed` (MUST): "denojob_test.go drives the decider by constructing Observed values and asserting directly on the returned Result, covering at least that a job with no runs yet creates exactly one run named demo-1 and reports DenoJobPending with Active one, and that the job reaches DenoJobSucceeded carrying its run's outputs with Succeeded one once that run reports DenoRunSucceeded."
+- added `r.observed-carries-job-runs-and-now` (MUST): "Observed supplies the decoded observed state for one pass: the v1alpha1.DenoJob in Job, the slice of RunObservation for the runs the job owns in Runs, and the time the decision is made against in Now."
+- added `r.options-default-now-and-backoff-limit` (MUST): "New fills in the Options fields the caller left unset: the Now clock falls back to time.Now and a zero DefaultBackoffLimit falls back to the package DefaultBackoffLimit, so a Reconciler built from a zero Options still decides against a real clock and a real retry limit."
+- added `r.reconcile-is-a-pure-decision` (MUST): "Reconciler.Reconcile takes a context.Context and an Observed snapshot and returns a Result plus an error; it performs no Kubernetes client work, so every effect the job needs is expressed in the returned Result for the caller to apply."
+- added `r.reconciler-built-from-options` (MUST): "The decider is a Reconciler value, and the only way to build one is New, which takes an Options value and returns a *Reconciler."
+- added `r.result-is-the-whole-job-plan` (MUST): "Result carries the complete plan for one pass: the DenoJobPhase in Phase, the observed run names in RunNames and the single run name in RunName, the runs to start in CreateRuns and the runs to stop in StopRuns, StartTime and CompletionTime, the Active, Ready, Succeeded, Failed and Retries counters, the ExitCode and Outputs of the selected run, the Conditions, the RequeueAfter delay, and the Delete flag for the runs together with the DeleteJob flag for the job."
+- added `r.run-observation-reports-run-outcome` (MUST): "RunObservation reports one run by Name with its v1alpha1.DenoRunPhase in Phase, an optional exit code in ExitCode, a human-readable Message, and the run's outputs map in Outputs, so the decider can decide on a run without holding the v1alpha1.DenoRun itself."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance | coverage |
@@ -127,5 +138,5 @@ The requirement-level delta against `open-architecture/deno-kcp--spec-bidder-and
 | deploy-examples-atproto-market-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
 | deploy-examples-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
 | internal-baoembed-cmd-baoembed-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
-| internal-denojob-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Running |  | 0 | - | - |
+| internal-denojob-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
 | internal-denopod-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Running |  | 0 | - | - |
