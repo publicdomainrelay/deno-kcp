@@ -8,6 +8,28 @@ spec:
   upstream: self
   dependsOn:
   - sc.deno-kcp
+  arch:
+    id: type.ServiceAccountRef
+    kind: node
+    section: types
+    form: map
+    position: 4
+    code:
+    - file:api/v1alpha1/deno_types_test.go
+    - file:api/v1alpha1/types_shared.go
+    node:
+      code:
+        absent: api/v1alpha1/deno_types_test.go:TestServiceAccountAbsentDistinguishesFromZero
+        default: internal/provider/registry_runtime.go:DefaultServiceAccountNamespace
+        type: api/v1alpha1/types_shared.go
+      default: no_token
+      defaults:
+        namespace: default
+      fields:
+      - name
+      - namespace
+      held_by:
+      - sc.kind.policyengine.spec.serviceAccount
 codeRefIndex:
 - file:api/v1alpha1/deno_types_test.go deno_types_test.go@api/v1alpha1/deno_types_test.go
 - file:api/v1alpha1/denospec.go denospec.go@api/v1alpha1/denospec.go

@@ -1,0 +1,62 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SystemContext
+metadata:
+  name: internal-provider
+  namespace: default
+spec:
+  repository: deno-kcp
+  upstream: self
+  dependsOn:
+  - sc.api-v1alpha1
+  - sc.deno-kcp
+  - sc.internal-denojob
+  - sc.internal-denopod
+  - sc.internal-denorun
+  - sc.internal-livegate
+  - sc.internal-policyengine
+  - sc.internal-policyworkflowpod
+  - sc.internal-policyworkflowrun
+  - sc.internal-trigger
+codeRefIndex:
+- file:internal/provider/admission.go admission.go@internal/provider/admission.go
+- file:internal/provider/admission_test.go admission_test.go@internal/provider/admission_test.go
+- file:internal/provider/cluster_path.go cluster_path.go@internal/provider/cluster_path.go
+- file:internal/provider/driver.go driver.go@internal/provider/driver.go
+- file:internal/provider/live_denojob_drain_test.go live_denojob_drain_test.go@internal/provider/live_denojob_drain_test.go
+- file:internal/provider/live_denoruntime_test.go live_denoruntime_test.go@internal/provider/live_denoruntime_test.go
+- file:internal/provider/live_helpers_test.go live_helpers_test.go@internal/provider/live_helpers_test.go
+- file:internal/provider/live_maxconcurrent_test.go live_maxconcurrent_test.go@internal/provider/live_maxconcurrent_test.go
+- file:internal/provider/live_native_admission_test.go live_native_admission_test.go@internal/provider/live_native_admission_test.go
+- file:internal/provider/live_ttl_test.go live_ttl_test.go@internal/provider/live_ttl_test.go
+- file:internal/provider/main_test.go main_test.go@internal/provider/main_test.go
+- file:internal/provider/metrics.go metrics.go@internal/provider/metrics.go
+- file:internal/provider/metrics_test.go metrics_test.go@internal/provider/metrics_test.go
+- file:internal/provider/provider.go provider.go@internal/provider/provider.go
+- file:internal/provider/provider_runtime.go provider_runtime.go@internal/provider/provider_runtime.go
+- file:internal/provider/provider_runtime_test.go provider_runtime_test.go@internal/provider/provider_runtime_test.go
+- file:internal/provider/provider_test.go provider_test.go@internal/provider/provider_test.go
+- file:internal/provider/reconcile_engine.go reconcile_engine.go@internal/provider/reconcile_engine.go
+- file:internal/provider/reconcile_job.go reconcile_job.go@internal/provider/reconcile_job.go
+- file:internal/provider/reconcile_openbao.go reconcile_openbao.go@internal/provider/reconcile_openbao.go
+- file:internal/provider/reconcile_openbao_test.go reconcile_openbao_test.go@internal/provider/reconcile_openbao_test.go
+- file:internal/provider/reconcile_pod.go reconcile_pod.go@internal/provider/reconcile_pod.go
+- file:internal/provider/reconcile_run.go reconcile_run.go@internal/provider/reconcile_run.go
+- file:internal/provider/reconcile_trigger.go reconcile_trigger.go@internal/provider/reconcile_trigger.go
+- file:internal/provider/reconcile_workflowpod.go reconcile_workflowpod.go@internal/provider/reconcile_workflowpod.go
+- file:internal/provider/registry.go registry.go@internal/provider/registry.go
+- file:internal/provider/registry_engine.go registry_engine.go@internal/provider/registry_engine.go
+- file:internal/provider/registry_job.go registry_job.go@internal/provider/registry_job.go
+- file:internal/provider/registry_openbao.go registry_openbao.go@internal/provider/registry_openbao.go
+- file:internal/provider/registry_pod.go registry_pod.go@internal/provider/registry_pod.go
+- file:internal/provider/registry_run.go registry_run.go@internal/provider/registry_run.go
+- file:internal/provider/registry_runtime.go registry_runtime.go@internal/provider/registry_runtime.go
+- file:internal/provider/registry_test.go registry_test.go@internal/provider/registry_test.go
+- file:internal/provider/registry_trigger.go registry_trigger.go@internal/provider/registry_trigger.go
+- file:internal/provider/registry_workflowpod.go registry_workflowpod.go@internal/provider/registry_workflowpod.go
+- file:internal/provider/run_refs.go run_refs.go@internal/provider/run_refs.go
+- file:internal/provider/run_refs_test.go run_refs_test.go@internal/provider/run_refs_test.go
+- file:internal/provider/service_dns.go service_dns.go@internal/provider/service_dns.go
+- file:internal/provider/service_dns_inject_test.go service_dns_inject_test.go@internal/provider/service_dns_inject_test.go
+- file:internal/provider/watch.go watch.go@internal/provider/watch.go
+- file:internal/provider/watch_cache.go watch_cache.go@internal/provider/watch_cache.go
+- file:internal/provider/watch_test.go watch_test.go@internal/provider/watch_test.go

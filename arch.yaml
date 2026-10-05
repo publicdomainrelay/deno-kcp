@@ -4,12 +4,18 @@ metadata:
   name: deno-kcp
   branch: open-architecture/deno-kcp--spec-bidder-and-bob-pds-policy-20261005
 system_contexts:
-- id: sc.api-v1alpha1
+- id: type.ServiceAccountRef
   name: api-v1alpha1
   spec: specs/api-v1alpha1.yaml
   upstream: self
   depends_on:
   - sc.deno-kcp
+  arch:
+    id: type.ServiceAccountRef
+    kind: node
+    section: types
+    form: map
+    position: 4
   codeRefIndex:
   - file:api/v1alpha1/deno_types_test.go deno_types_test.go@api/v1alpha1/deno_types_test.go
   - file:api/v1alpha1/denospec.go denospec.go@api/v1alpha1/denospec.go
@@ -156,6 +162,100 @@ system_contexts:
   codeRefIndex:
   - file:internal/policyworkflowpod/policyworkflowpod.go policyworkflowpod.go@internal/policyworkflowpod/policyworkflowpod.go
   - file:internal/policyworkflowpod/policyworkflowpod_test.go policyworkflowpod_test.go@internal/policyworkflowpod/policyworkflowpod_test.go
+- id: sc.internal-policyworkflowrun
+  name: internal-policyworkflowrun
+  spec: specs/internal-policyworkflowrun.yaml
+  upstream: self
+  depends_on:
+  - sc.api-v1alpha1
+  - sc.deno-kcp
+  codeRefIndex:
+  - file:internal/policyworkflowrun/policyworkflowrun.go policyworkflowrun.go@internal/policyworkflowrun/policyworkflowrun.go
+  - file:internal/policyworkflowrun/policyworkflowrun_test.go policyworkflowrun_test.go@internal/policyworkflowrun/policyworkflowrun_test.go
+- id: sc.internal-provider
+  name: internal-provider
+  spec: specs/internal-provider.yaml
+  upstream: self
+  depends_on:
+  - sc.api-v1alpha1
+  - sc.deno-kcp
+  - sc.internal-denojob
+  - sc.internal-denopod
+  - sc.internal-denorun
+  - sc.internal-livegate
+  - sc.internal-policyengine
+  - sc.internal-policyworkflowpod
+  - sc.internal-policyworkflowrun
+  - sc.internal-trigger
+  codeRefIndex:
+  - file:internal/provider/admission.go admission.go@internal/provider/admission.go
+  - file:internal/provider/admission_test.go admission_test.go@internal/provider/admission_test.go
+  - file:internal/provider/cluster_path.go cluster_path.go@internal/provider/cluster_path.go
+  - file:internal/provider/driver.go driver.go@internal/provider/driver.go
+  - file:internal/provider/live_denojob_drain_test.go live_denojob_drain_test.go@internal/provider/live_denojob_drain_test.go
+  - file:internal/provider/live_denoruntime_test.go live_denoruntime_test.go@internal/provider/live_denoruntime_test.go
+  - file:internal/provider/live_helpers_test.go live_helpers_test.go@internal/provider/live_helpers_test.go
+  - file:internal/provider/live_maxconcurrent_test.go live_maxconcurrent_test.go@internal/provider/live_maxconcurrent_test.go
+  - file:internal/provider/live_native_admission_test.go live_native_admission_test.go@internal/provider/live_native_admission_test.go
+  - file:internal/provider/live_ttl_test.go live_ttl_test.go@internal/provider/live_ttl_test.go
+  - file:internal/provider/main_test.go main_test.go@internal/provider/main_test.go
+  - file:internal/provider/metrics.go metrics.go@internal/provider/metrics.go
+  - file:internal/provider/metrics_test.go metrics_test.go@internal/provider/metrics_test.go
+  - file:internal/provider/provider.go provider.go@internal/provider/provider.go
+  - file:internal/provider/provider_runtime.go provider_runtime.go@internal/provider/provider_runtime.go
+  - file:internal/provider/provider_runtime_test.go provider_runtime_test.go@internal/provider/provider_runtime_test.go
+  - file:internal/provider/provider_test.go provider_test.go@internal/provider/provider_test.go
+  - file:internal/provider/reconcile_engine.go reconcile_engine.go@internal/provider/reconcile_engine.go
+  - file:internal/provider/reconcile_job.go reconcile_job.go@internal/provider/reconcile_job.go
+  - file:internal/provider/reconcile_openbao.go reconcile_openbao.go@internal/provider/reconcile_openbao.go
+  - file:internal/provider/reconcile_openbao_test.go reconcile_openbao_test.go@internal/provider/reconcile_openbao_test.go
+  - file:internal/provider/reconcile_pod.go reconcile_pod.go@internal/provider/reconcile_pod.go
+  - file:internal/provider/reconcile_run.go reconcile_run.go@internal/provider/reconcile_run.go
+  - file:internal/provider/reconcile_trigger.go reconcile_trigger.go@internal/provider/reconcile_trigger.go
+  - file:internal/provider/reconcile_workflowpod.go reconcile_workflowpod.go@internal/provider/reconcile_workflowpod.go
+  - file:internal/provider/registry.go registry.go@internal/provider/registry.go
+  - file:internal/provider/registry_engine.go registry_engine.go@internal/provider/registry_engine.go
+  - file:internal/provider/registry_job.go registry_job.go@internal/provider/registry_job.go
+  - file:internal/provider/registry_openbao.go registry_openbao.go@internal/provider/registry_openbao.go
+  - file:internal/provider/registry_pod.go registry_pod.go@internal/provider/registry_pod.go
+  - file:internal/provider/registry_run.go registry_run.go@internal/provider/registry_run.go
+  - file:internal/provider/registry_runtime.go registry_runtime.go@internal/provider/registry_runtime.go
+  - file:internal/provider/registry_test.go registry_test.go@internal/provider/registry_test.go
+  - file:internal/provider/registry_trigger.go registry_trigger.go@internal/provider/registry_trigger.go
+  - file:internal/provider/registry_workflowpod.go registry_workflowpod.go@internal/provider/registry_workflowpod.go
+  - file:internal/provider/run_refs.go run_refs.go@internal/provider/run_refs.go
+  - file:internal/provider/run_refs_test.go run_refs_test.go@internal/provider/run_refs_test.go
+  - file:internal/provider/service_dns.go service_dns.go@internal/provider/service_dns.go
+  - file:internal/provider/service_dns_inject_test.go service_dns_inject_test.go@internal/provider/service_dns_inject_test.go
+  - file:internal/provider/watch.go watch.go@internal/provider/watch.go
+  - file:internal/provider/watch_cache.go watch_cache.go@internal/provider/watch_cache.go
+  - file:internal/provider/watch_test.go watch_test.go@internal/provider/watch_test.go
+- id: sc.internal-trigger
+  name: internal-trigger
+  spec: specs/internal-trigger.yaml
+  upstream: self
+  depends_on:
+  - sc.api-v1alpha1
+  - sc.deno-kcp
+  codeRefIndex:
+  - file:internal/trigger/trigger.go trigger.go@internal/trigger/trigger.go
+  - file:internal/trigger/trigger_test.go trigger_test.go@internal/trigger/trigger_test.go
+- id: sc.test-integration
+  name: test-integration
+  spec: specs/test-integration.yaml
+  upstream: self
+  depends_on:
+  - sc.api-v1alpha1
+  - sc.deno-kcp
+  - sc.internal-livegate
+  - sc.internal-provider
+  codeRefIndex:
+  - file:test/integration/bao_test.go bao_test.go@test/integration/bao_test.go
+  - file:test/integration/examples.go examples.go@test/integration/examples.go
+  - file:test/integration/fixture_test.go fixture_test.go@test/integration/fixture_test.go
+  - file:test/integration/live_test.go live_test.go@test/integration/live_test.go
+  - file:test/integration/offline_test.go offline_test.go@test/integration/offline_test.go
+  - file:test/integration/openbao_live_test.go openbao_live_test.go@test/integration/openbao_live_test.go
 - id: sc.tools-open-architecture
   name: tools-open-architecture
   spec: specs/tools-open-architecture.yaml
