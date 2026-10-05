@@ -272,3 +272,4 @@ The requirement-level delta against `open-architecture/deno-kcp--spec-bidder-and
 | internal-policyworkflowrun-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
 | internal-provider-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Running |  | 0 | - | - |
 | internal-trigger-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
+| test-integration-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Running |  | 0 | - | - |
