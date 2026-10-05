@@ -27,6 +27,175 @@ spec:
   - sc.deno-kcp
   - sc.internal-livegate
   - sc.internal-provider
+  intent: 'This context exists to hold the end-to-end contract of deno-kcp: that the
+    shipped example manifests are loadable, complete, mutually wired and schema-valid
+    without any cluster, and that the same manifests actually reconcile on a real
+    kcp against a real deno runtime and a real OpenBao. It is where the repository
+    proves its published examples are not merely plausible files but working inputs,
+    where the live fixture encodes the cluster topology (kine, kcp, provider workspaces,
+    typed reads with bounded polling) that makes a live run reproducible, and where
+    the certificate hierarchy a deno pod depends on is demonstrated rather than assumed.
+    Everything here is a test, so its outputs are pass/fail facts about the product
+    surface: no production code depends on it, but a change to the examples, the schemas,
+    the CRD types or the OpenBao integration is meant to break here first.'
+  requirements:
+  - id: r.deno-binaries-are-located-by-name-or-env
+    level: SHOULD
+    text: Required binaries are located by name on PATH and may be overridden through
+      the environment (requireBinary reading the variable, envOr falling back when
+      it is unset); the policy-engine and bundled-actions directories are resolved
+      by policyEngineDir and bundledActionsDir honouring POLICY_ENGINE_DIR and BUNDLED_ACTIONS_DIR.
+    codeRefs:
+    - file:test/integration/fixture_test.go
+  - id: r.embedded-bao-runs-in-development-mode
+    level: MUST
+    text: startBao must start the pinned server in development mode on a free port,
+      returning a baoServer that carries the address, root token and CA, so the hierarchy
+      under test is namespace and PKI behaviour rather than storage or seal behaviour;
+      startEmbeddedBao and startEmbeddedBaoTLS are the plain and secure entries, and
+      baoServer.caCert must return the generated CA so a client can verify the server
+      with it.
+    codeRefs:
+    - file:test/integration/bao_test.go
+  - id: r.every-example-decodes
+    level: MUST
+    text: Every file the example registry names must load with loadExampleFile and
+      decode through decodeExample into the exampleObject of its declared Kind without
+      error, so a malformed manifest fails the suite before a cluster is ever started.
+    codeRefs:
+    - file:test/integration/examples.go
+    - file:test/integration/offline_test.go
+  - id: r.example-inventory-matches-disk
+    level: MUST
+    text: 'exampleFiles must agree with exampleFilesOnDisk: the disk walk returns
+      every kcp-kind manifest path relative to deploy/examples, the non-example manifests
+      00-workspaces.yaml and 10-rbac.yaml are declared by name in examples.go and
+      subtracted from the walk, and any file present on disk but absent from the registry
+      (or the reverse) must fail the test.'
+    codeRefs:
+    - file:test/integration/examples.go
+    - file:test/integration/offline_test.go
+  - id: r.examples-fit-installed-schemas
+    level: MUST
+    text: Each example must validate against the APIResourceSchema installed for its
+      declared Kind, and each APIExport the repository ships must name the schemas
+      it declares, so an example that drifts from its CRD schema or an export that
+      references an undeclared schema fails the offline tier.
+    codeRefs:
+    - file:test/integration/offline_test.go
+  - id: r.examples-reference-each-other-consistently
+    level: MUST
+    text: Examples that name another example -- the workspace, policy engine, workflow
+      pod and run trigger an example points at -- must resolve to an example the registry
+      actually carries, so a dangling reference between manifests fails without a
+      cluster.
+    codeRefs:
+    - file:test/integration/examples.go
+    - file:test/integration/offline_test.go
+  - id: r.fixture-offers-process-and-port-helpers
+    level: SHOULD
+    text: 'The fixture must offer the helper primitives its tests build on: freePort
+      and tcpOpen to find and probe a port, httpOK to probe a URL, tail to quote the
+      last lines of a log when an expectation fails, decodeDocs and caData to turn
+      a manifest body and a certificate file into documents and bytes, and baseHost
+      to normalise a logical cluster host.'
+    codeRefs:
+    - file:test/integration/fixture_test.go
+  - id: r.live-cluster-fixture-bootstraps-workspaces
+    level: MUST
+    text: startCluster must start kine and kcp on free ports and bootstrap the tenancy
+      and provider workspaces before any live test applies an example; liveCluster.bootstrap
+      and liveCluster.workspacePhase must let a test observe that the workspace reached
+      its expected phase, and withOpenBao must install the OpenBao server options
+      into the cluster before the fixture starts.
+    codeRefs:
+    - file:test/integration/fixture_test.go
+  - id: r.live-cluster-offers-typed-and-untyped-reads
+    level: MUST
+    text: liveCluster must expose typed reads for the deno-kcp kinds -- pod, job,
+      run, trigger, engine, workflowPod, workflowRuns and openBao returning the v1alpha1
+      objects, ref returning the provider reference -- plus get, client, conditionTrue
+      and workspacePhase over the dynamic client; apply, applyDeployFile, create,
+      createDoc, createDocs, createExampleDoc and load must turn files and decoded
+      documents into objects on the named logical cluster, and startProvider must
+      run the in-process provider against the engine and actions directories.
+    codeRefs:
+    - file:test/integration/fixture_test.go
+  - id: r.live-expectations-are-polled-with-timeouts
+    level: MUST
+    text: Live tests must wait on cluster state through liveCluster.expect with an
+      explicit timeout rather than sleeping a fixed duration, so a slow reconcile
+      is waited out and a wrong state fails with the polled condition named instead
+      of hanging.
+    codeRefs:
+    - file:test/integration/fixture_test.go
+  - id: r.live-suite-requires-explicit-opt-in
+    level: MUST
+    text: Every live test must call requireLive first and skip unless the environment
+      opts in, reporting 'set DENO_KCP_REQUIRE_LIVE=1 and provide kcp, kine, deno
+      and a sibling policy-engine checkout'; requireBinary and requireDir must apply
+      the same opt-in discipline to each external binary and directory the fixture
+      needs.
+    codeRefs:
+    - file:test/integration/fixture_test.go
+    - file:test/integration/live_test.go
+    - file:test/integration/openbao_live_test.go
+  - id: r.live-tests-drive-the-example-chain
+    level: SHOULD
+    text: TestExampleChainOnRealKCP must drive the published example chain -- policy
+      engine, policy workflow pod, run trigger, native fire pod, policy workflow run,
+      deno run, deno job and deno pod -- end to end on a real kcp, and TestDirectRunAndReadersOnRealKCP
+      must separately apply a direct run with its readers and observe the cluster
+      state that results.
+    codeRefs:
+    - file:test/integration/live_test.go
+  - id: r.market-examples-are-registered
+    level: MUST
+    text: exampleFiles must carry an entry for every kcp-kind manifest under deploy/examples/atproto/market
+      -- 15-openbao-global.yaml, 15-openbao-relay.yaml, 15-openbao-alice.yaml, 15-openbao-bob.yaml,
+      20-global-plc.yaml, 30-relay-relay.yaml, 40-alice-pds.yaml, 50-verifier.yaml,
+      60-bob-pds.yaml and 70-bidder.yaml -- with File holding the path relative to
+      deploy/examples and Resource and Schema naming the kind the manifest declares,
+      so exampleByName resolves them and the offline decode, inventory and schema-fit
+      checks cover them.
+    codeRefs:
+    - file:test/integration/examples.go
+    - file:test/integration/offline_test.go
+  - id: r.namespace-certificate-hierarchy-is-covered
+    level: MUST
+    text: The OpenBao tier must cover that a Kubernetes namespace gets its own OpenBao
+      namespace whose intermediate is signed by the root, that a workload's certificate
+      verifies against the root alone over plain HTTP (TestOpenBaoAuthorityIssuesTheCertificateADenoPodServesWith)
+      and over TLS (TestOpenBaoOverTLSIssuesTheCertificateADenoPodServesWith), and
+      that a namespace with no OpenBao object gets no certificate (TestANamespaceWithoutAnOpenBaoObjectGetsNoCertificate).
+    codeRefs:
+    - file:test/integration/bao_test.go
+    - file:test/integration/openbao_live_test.go
+  - id: r.offline-suite-needs-no-cluster
+    level: MUST
+    text: TestEveryExampleDecodesFromDisk, TestExampleInventoryMatchesDisk, TestExamplesAreWiredToEachOther,
+      TestExamplesFitTheInstalledSchemas and TestAPIExportsNameDeclaredSchemas must
+      run with no kcp, kine, deno or policy-engine present, reading only the checkout
+      through repoRoot and localExamples.
+    codeRefs:
+    - file:test/integration/examples.go
+    - file:test/integration/offline_test.go
+  - id: r.openbao-under-test-is-the-pinned-checkout
+    level: MUST
+    text: The OpenBao server under test must be built from the third_party/openbao
+      checkout the repository pins, not taken from PATH; baoembedBinary resolves and
+      builds that checkout once per test binary, and embeddedReadyLine reads the server
+      log until the ready line appears or the test fails.
+    codeRefs:
+    - file:test/integration/bao_test.go
+  - id: r.spawned-processes-are-reaped
+    level: MUST
+    text: TestMain must run the suite and reap every child process the fixture spawned,
+      so a failing live run leaves no kcp, kine or bao behind; startProcess records
+      each child, killSpawned and process.kill terminate the recorded set, and killSpawned
+      returns how many it killed.
+    codeRefs:
+    - file:test/integration/fixture_test.go
   arch:
     id: sc.test.integration-cluster
     kind: node

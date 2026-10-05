@@ -9,5 +9,80 @@ spec:
   fromCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
   toCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
 status:
-  phase: Running
-  message: the agent is summarizing test-integration
+  phase: Succeeded
+  agentLog: 'The test-integration package proves what the repository alone cannot:
+    three tiers of checks over the deno-kcp examples and runtime. The offline tier
+    (examples.go, offline_test.go) needs no cluster: it decodes every registered kcp-kind
+    manifest through decodeExample, reconciles the declared inventory with exampleFilesOnDisk,
+    checks that examples reference each other, and schema-fits each one against the
+    APIResourceSchema of its declared kind and the APIExports that name it. The live
+    tier (fixture_test.go, live_test.go) stands up kine, kcp and the in-process provider,
+    bootstraps the tenancy and provider workspaces, then drives the published example
+    chain and a direct run with its readers against typed v1alpha1 objects, polling
+    cluster state through liveCluster.expect with explicit timeouts. The OpenBao tier
+    (bao_test.go, openbao_live_test.go) builds the pinned third_party/openbao checkout
+    once per test binary, runs it in development mode, and proves that a Kubernetes
+    namespace gets its own OpenBao namespace whose intermediate is signed by the root,
+    that a workload certificate verifies against the root alone over plain HTTP and
+    over TLS, and that a namespace with no OpenBao object gets no certificate. TestMain
+    reaps every child process the fixture spawned, and the example registry carries
+    the atproto market manifests so the cheap tier exercises them with no cluster
+    present.'
+  message: wrote 17 requirement(s) and 0 interface(s) for test-integration; interface
+    TestANamespaceWithoutAnOpenBaoObjectGetsNoCertificate is not in the observed facts;
+    dropped; interface TestAPIExportsNameDeclaredSchemas is not in the observed facts;
+    dropped; interface TestDirectRunAndReadersOnRealKCP is not in the observed facts;
+    dropped; interface TestEveryExampleDecodesFromDisk is not in the observed facts;
+    dropped; interface TestExampleChainOnRealKCP is not in the observed facts; dropped;
+    interface TestExampleInventoryMatchesDisk is not in the observed facts; dropped;
+    interface TestExamplesAreWiredToEachOther is not in the observed facts; dropped;
+    interface TestExamplesFitTheInstalledSchemas is not in the observed facts; dropped;
+    interface TestMain is not in the observed facts; dropped; interface TestOpenBaoAuthorityIssuesTheCertificateADenoPodServesWith
+    is not in the observed facts; dropped; interface TestOpenBaoOverTLSIssuesTheCertificateADenoPodServesWith
+    is not in the observed facts; dropped; interface baoAnnouncement is not in the
+    observed facts; dropped; interface baoServer is not in the observed facts; dropped;
+    interface baoServer.caCert is not in the observed facts; dropped; interface baoembedBinary
+    is not in the observed facts; dropped; interface baseHost is not in the observed
+    facts; dropped; interface bundledActionsDir is not in the observed facts; dropped;
+    interface caData is not in the observed facts; dropped; interface decodeDocs is
+    not in the observed facts; dropped; interface decodeExample is not in the observed
+    facts; dropped; interface embeddedReadyLine is not in the observed facts; dropped;
+    interface envOr is not in the observed facts; dropped; interface example is not
+    in the observed facts; dropped; interface exampleByName is not in the observed
+    facts; dropped; interface exampleFiles is not in the observed facts; dropped;
+    interface exampleFilesOnDisk is not in the observed facts; dropped; interface
+    exampleObject is not in the observed facts; dropped; interface freePort is not
+    in the observed facts; dropped; interface httpOK is not in the observed facts;
+    dropped; interface killSpawned is not in the observed facts; dropped; interface
+    liveCluster.apply is not in the observed facts; dropped; interface liveCluster.applyDeployFile
+    is not in the observed facts; dropped; interface liveCluster.bootstrap is not
+    in the observed facts; dropped; interface liveCluster.client is not in the observed
+    facts; dropped; interface liveCluster.conditionTrue is not in the observed facts;
+    dropped; interface liveCluster.create is not in the observed facts; dropped; interface
+    liveCluster.createDoc is not in the observed facts; dropped; interface liveCluster.createDocs
+    is not in the observed facts; dropped; interface liveCluster.createExampleDoc
+    is not in the observed facts; dropped; interface liveCluster.engine is not in
+    the observed facts; dropped; interface liveCluster.expect is not in the observed
+    facts; dropped; interface liveCluster.get is not in the observed facts; dropped;
+    interface liveCluster.job is not in the observed facts; dropped; interface liveCluster.load
+    is not in the observed facts; dropped; interface liveCluster.openBao is not in
+    the observed facts; dropped; interface liveCluster.pod is not in the observed
+    facts; dropped; interface liveCluster.ref is not in the observed facts; dropped;
+    interface liveCluster.run is not in the observed facts; dropped; interface liveCluster.startProvider
+    is not in the observed facts; dropped; interface liveCluster.trigger is not in
+    the observed facts; dropped; interface liveCluster.workflowPod is not in the observed
+    facts; dropped; interface liveCluster.workflowRuns is not in the observed facts;
+    dropped; interface liveCluster.workspacePhase is not in the observed facts; dropped;
+    interface loadExample is not in the observed facts; dropped; interface loadExampleFile
+    is not in the observed facts; dropped; interface localExamples is not in the observed
+    facts; dropped; interface policyEngineDir is not in the observed facts; dropped;
+    interface process.kill is not in the observed facts; dropped; interface repoRoot
+    is not in the observed facts; dropped; interface requireBinary is not in the observed
+    facts; dropped; interface requireDir is not in the observed facts; dropped; interface
+    requireLive is not in the observed facts; dropped; interface startBao is not in
+    the observed facts; dropped; interface startCluster is not in the observed facts;
+    dropped; interface startEmbeddedBao is not in the observed facts; dropped; interface
+    startEmbeddedBaoTLS is not in the observed facts; dropped; interface startProcess
+    is not in the observed facts; dropped; interface tail is not in the observed facts;
+    dropped; interface tcpOpen is not in the observed facts; dropped; interface withOpenBao
+    is not in the observed facts; dropped
