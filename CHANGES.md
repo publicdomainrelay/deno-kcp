@@ -18,6 +18,8 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 
 - added `r.provider-initial-list-is-bounded-and-retried` (MUST): "Waiting for a kind's cache to sync must be bounded by a deadline; an attempt that does not sync must be abandoned, the informers must be started again, and the attempt must repeat while the context lives; the provider must log at info level each time a cache has synced and each time it retries."
 - added `r.provider-initial-list-is-bounded-and-retried-test` (MUST): "An offline test must drive the bounded wait with a factory that never reports synced and must assert that it returns within its deadline, reports the retry and starts the next attempt; the test must fail against a provider that waits on its first attempt without a deadline."
+- added `r.watch-cache-keys-every-workspace` (MUST): "The provider's watch cache must key every object by its workspace, namespace and name, so that two DenoPods named default/pds in two different workspaces both stay in the store and both are reconciled; a store keyed by namespace and name alone evicts the first, and the evicted workload never reports ready."
+- added `r.watch-cache-keys-every-workspace-test` (MUST): "An offline test must drive the cache with two objects that share a namespace and name in two workspaces, assert that both are present and that an event for one does not evict the other, and must fail against a cache keyed by namespace and name alone."
 - changed `r.watch-seven-kinds-shared-cache` (codeRefs): "RunWatch must await the workspace endpoints, then bind dynamic informers for policyengines, policyworkflowpods, runtriggers, denoruns, denojobs, denopods and openbaos from every denoruntime endpoint and for policyworkflowruns from every policyworkflowruns endpoint, feeding one shared cache reader and one rate-limited typed work queue; workers may start before cache sync because handlers enqueue only after the object is in the store."
 
 ### test-integration
@@ -34,6 +36,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | internal-provider-s2c-34b6a7c32b1f | SpecToCode | Failed |  | 0 | market-live-acceptance failed | - |
 | internal-provider-s2c-34b6a7c32b1f-a2 | SpecToCode | Failed |  | 0 | market-live-acceptance failed | - |
 | internal-provider-s2c-34b6a7c32b1f-a3 | SpecToCode | Succeeded | 2a0798f5 | 0 | market-live-acceptance failed | 2 implemented |
+| internal-provider-s2c-993d65b47662 | SpecToCode | Pending |  | 0 | - | - |
 | test-integration-s2c-9b30c76edc9d | SpecToCode | Failed |  | 0 | - | - |
 | test-integration-s2c-9b30c76edc9d-a2 | SpecToCode | Succeeded | f31ce445 | 0 | - | 1 implemented |
 

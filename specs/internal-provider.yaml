@@ -265,6 +265,18 @@ spec:
       the pod cannot be read.
     codeRefs:
     - file:internal/provider/admission.go
+  - id: r.watch-cache-keys-every-workspace
+    level: MUST
+    text: The provider's watch cache must key every object by its workspace, namespace
+      and name, so that two DenoPods named default/pds in two different workspaces
+      both stay in the store and both are reconciled; a store keyed by namespace and
+      name alone evicts the first, and the evicted workload never reports ready.
+  - id: r.watch-cache-keys-every-workspace-test
+    level: MUST
+    text: An offline test must drive the cache with two objects that share a namespace
+      and name in two workspaces, assert that both are present and that an event for
+      one does not evict the other, and must fail against a cache keyed by namespace
+      and name alone.
   - id: r.watch-seven-kinds-shared-cache
     level: MUST
     text: RunWatch must await the workspace endpoints, then bind dynamic informers
