@@ -1,14 +1,16 @@
-# Three AT Protocol services on kcp, over TLS, by name
+# AT Protocol services and a market bidder on kcp, over TLS, by name
 
-Three KCP workspaces, one DenoPod each, plus a verifier that drives them. Each
-workspace also carries an `OpenBao` object naming the OpenBao namespace that
-serves it, which is where its DenoPod's serving certificate is issued from:
+Four KCP workspaces, plus a verifier that drives them. Each workspace also
+carries an `OpenBao` object naming the OpenBao namespace that serves it, which is
+where its DenoPods' serving certificates are issued from:
 
 ```
 root:global   DenoPod/plc       hono-plc            :2587  plc.default.global.svc.kcp.local
 root:relay    DenoPod/relay     hono-atproto-relay  :2584  relay.default.relay.svc.kcp.local
 root:alice    DenoPod/pds       hono-pds            :2583  pds.default.alice.svc.kcp.local
 root:alice    DenoPod/verifier  the end-to-end check
+root:bob      DenoPod/pds       hono-pds            :2585  pds.default.bob.svc.kcp.local
+root:bob      DenoPod/bidder    hono-bidder         :2586  bidder.default.bob.svc.kcp.local
 
 OpenBao objects, one per workspace, each naming the OpenBao namespace that holds
 its intermediate CA:
@@ -16,6 +18,7 @@ its intermediate CA:
   root:global   OpenBao/openbao  global.default    (15-openbao-global.yaml)
   root:relay    OpenBao/openbao  relay.default     (15-openbao-relay.yaml)
   root:alice    OpenBao/openbao  alice.default     (15-openbao-alice.yaml)
+  root:bob      OpenBao/openbao  bob.default       (15-openbao-bob.yaml)
 ```
 
 Each service serves **TLS**, is reached by a **cluster-local name**, and trusts
@@ -75,6 +78,10 @@ OpenBao in development mode is in-memory, like the PLC directory and the PDS, so
 a restart empties the hierarchy and every workload's certificate has to be
 reissued: restart OpenBao, restart the provider, and re-apply.
 
+The bidder is the exception: it declares no `--tls-cert-file` / `--tls-key-file`
+option and its parser rejects unknown flags, so `70-bidder.yaml` writes only
+`ca.pem` and gives the child the trust bundle, never a leaf.
+
 Each service gained `--tls-cert-file` / `--tls-key-file`; `createServe` has taken
 `tcp.cert` and `tcp.key` since it was written, but nothing ever passed them, so
 every service in the org had only ever served plain HTTP. TLS is what lets the
@@ -95,6 +102,16 @@ bash deploy/examples/atproto/market/apply.sh
 
 `apply.sh` starts OpenBao itself unless `START_OPENBAO=0`, and waits for each
 workspace's `OpenBao` object to report ready before it applies the workloads.
+
+`accept.sh` is that whole sequence as one live acceptance: it brings up its own
+kcp, kine, OpenBao and provider under a throwaway `$ACCEPT_ROOT` on ports the
+kernel hands out, runs `apply.sh`, then reads every DenoPod back and reaches each
+service on its own name and from the host, and exits non-zero unless every check
+passed:
+
+```bash
+bash deploy/examples/atproto/market/accept.sh
+```
 
 Requires the sibling repositories `atproto-market`, `atproto-relay`, `hono-pds`
 and `typescript-helpers`.
@@ -158,3 +175,5 @@ way to make the name resolve; every leaf carries `127.0.0.1` for that reason.
   accounts in memory too.
 - **Anything bypassing the four patched entry points** — a native library, or a
   subprocess the workload spawns — does not see virtual DNS.
+- **The bidder registers with an XRPC dispatcher**, so it needs one reachable at
+  the URL it is given; without a dispatcher it comes up but can list nothing.

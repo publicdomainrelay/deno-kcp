@@ -41,7 +41,26 @@ func exampleFiles() []example {
 		{File: "policyengine.yaml", Kind: "PolicyEngine", Resource: "policyengines", Schema: "policyengine-apiresourceschema.yaml"},
 		{File: "policyworkflowpod.yaml", Kind: "PolicyWorkflowPod", Resource: "policyworkflowpods", Schema: "policyworkflowpod-apiresourceschema.yaml"},
 		{File: "runtrigger.yaml", Kind: "RunTrigger", Resource: "runtriggers", Schema: "runtrigger-apiresourceschema.yaml"},
+		{File: "atproto/market/15-openbao-global.yaml", Kind: "OpenBao", Resource: "openbaos", Schema: "openbao-apiresourceschema.yaml"},
+		{File: "atproto/market/15-openbao-relay.yaml", Kind: "OpenBao", Resource: "openbaos", Schema: "openbao-apiresourceschema.yaml"},
+		{File: "atproto/market/15-openbao-alice.yaml", Kind: "OpenBao", Resource: "openbaos", Schema: "openbao-apiresourceschema.yaml"},
+		{File: "atproto/market/15-openbao-bob.yaml", Kind: "OpenBao", Resource: "openbaos", Schema: "openbao-apiresourceschema.yaml"},
+		{File: "atproto/market/20-global-plc.yaml", Kind: "DenoPod", Resource: "denopods", Schema: "denopod-apiresourceschema.yaml"},
+		{File: "atproto/market/30-relay-relay.yaml", Kind: "DenoPod", Resource: "denopods", Schema: "denopod-apiresourceschema.yaml"},
+		{File: "atproto/market/40-alice-pds.yaml", Kind: "DenoPod", Resource: "denopods", Schema: "denopod-apiresourceschema.yaml"},
+		{File: "atproto/market/50-verifier.yaml", Kind: "DenoPod", Resource: "denopods", Schema: "denopod-apiresourceschema.yaml"},
+		{File: "atproto/market/60-bob-pds.yaml", Kind: "DenoPod", Resource: "denopods", Schema: "denopod-apiresourceschema.yaml"},
+		{File: "atproto/market/70-bidder.yaml", Kind: "DenoPod", Resource: "denopods", Schema: "denopod-apiresourceschema.yaml"},
 	}
+}
+
+// nonExamples are the manifests under deploy/examples that carry no deno-kcp
+// kind: the tenancy and RBAC bootstrap for the market walkthrough. They stay
+// out of the example registry, and TestExampleInventoryMatchesDisk subtracts
+// them from the disk walk so the inventory still agrees with what ships.
+var nonExamples = []string{
+	"atproto/market/00-workspaces.yaml",
+	"atproto/market/10-rbac.yaml",
 }
 
 func exampleByName(file string) (example, bool) {
@@ -150,16 +169,24 @@ func loadExample(file string) (exampleObject, error) {
 }
 
 func exampleFilesOnDisk() ([]string, error) {
-	entries, err := os.ReadDir(localExamples())
+	root := localExamples()
+	var out []string
+	err := filepath.WalkDir(root, func(path string, entry os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if entry.IsDir() || filepath.Ext(entry.Name()) != ".yaml" {
+			return nil
+		}
+		rel, err := filepath.Rel(root, path)
+		if err != nil {
+			return err
+		}
+		out = append(out, filepath.ToSlash(rel))
+		return nil
+	})
 	if err != nil {
 		return nil, err
-	}
-	var out []string
-	for _, entry := range entries {
-		if entry.IsDir() || filepath.Ext(entry.Name()) != ".yaml" {
-			continue
-		}
-		out = append(out, entry.Name())
 	}
 	sort.Strings(out)
 	return out, nil

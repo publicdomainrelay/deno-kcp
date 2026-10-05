@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Deploys the three-service AT Protocol topology: a PLC directory in root:global,
-# a relay in root:relay, and a PDS in root:alice. Each DenoPod runs its service
-# as a supervised child process of its own deno entrypoint, because these are CLI
-# entrypoints that own their argv, not libraries.
+# Deploys the AT Protocol market topology: a PLC directory in root:global, a relay
+# in root:relay, a PDS in root:alice, and in root:bob a second PDS plus a market
+# bidder. Each DenoPod runs its service as a supervised child process of its own
+# deno entrypoint, because these are CLI entrypoints that own their argv, not
+# libraries.
 #
 # Requires the provider to be installed first (deploy/install-provider.sh) and
 # the sibling repositories checked out: atproto-market, atproto-relay, hono-pds,
 # typescript-helpers. See README.md in this directory for what does and does not
-# work between the three services.
+# work between the services.
 
 REPO=$(cd "$(dirname "$0")/../../../.." && pwd)
 MARKET_DIR=$(cd "$(dirname "$0")" && pwd)
@@ -25,8 +26,10 @@ KC() { "$KUBECTL" --cache-dir="$KCACHE" "$@"; }
 export KUBECONFIG=${KUBECONFIG:-$REPO/.kcp-demo/admin.kubeconfig}
 WAIT_SECONDS=${WAIT_SECONDS:-120}
 KEY_FILE=${KEY_FILE:-$REPO/.kcp-demo/atproto-market-pds-key.hex}
+BOB_KEY_FILE=${BOB_KEY_FILE:-$REPO/.kcp-demo/atproto-market-bob-pds-key.hex}
+BIDDER_KEY_FILE=${BIDDER_KEY_FILE:-$REPO/.kcp-demo/atproto-market-bidder-key.hex}
 
-WORKSPACES="global relay alice"
+WORKSPACES="global relay alice bob"
 
 S=$(KC config view --minify -o jsonpath='{.clusters[0].cluster.server}')
 S=${S%%/clusters/*}
@@ -37,10 +40,8 @@ K() { KC --server="$1" "${@:2}"; }
 echo "org root:   $ORG_ROOT"
 echo "root server: $ROOT_SERVER"
 
-for ws in $WORKSPACES; do
-  for bin in atproto-market/hono-plc atproto-relay/hono-atproto-relay hono-pds; do
-    [ -e "$ORG_ROOT/$bin" ] || { echo "missing $ORG_ROOT/$bin" >&2; exit 1; }
-  done
+for bin in atproto-market/hono-plc atproto-market/hono-bidder atproto-relay/hono-atproto-relay hono-pds; do
+  [ -e "$ORG_ROOT/$bin" ] || { echo "missing $ORG_ROOT/$bin" >&2; exit 1; }
 done
 
 KC --server="$ROOT_SERVER" apply --validate=false -f "$MARKET_DIR/00-workspaces.yaml"
@@ -86,22 +87,41 @@ if [ "${START_OPENBAO:-1}" = "1" ]; then
   OPENBAO_LISTEN="$OPENBAO_LISTEN" bash "$REPO/deploy/start-openbao.sh"
 fi
 
-if [ -n "${PDS_PRIVATE_KEY_HEX:-}" ]; then
-  key="$PDS_PRIVATE_KEY_HEX"
-elif [ -s "$KEY_FILE" ]; then
-  key=$(cat "$KEY_FILE")
-else
-  mkdir -p "$(dirname "$KEY_FILE")"
-  key=$(openssl rand -hex 32)
-  printf '%s' "$key" > "$KEY_FILE"
-  chmod 600 "$KEY_FILE"
-  echo "generated a PDS signing key at $KEY_FILE"
-fi
+# Three signing keys, one per identity: alice's PDS, bob's PDS and the bidder.
+# Each is overridable, each persists in its own file, and a key that showed up
+# twice would make two identities collide, so a distinct one is generated for
+# each that is not already spoken for.
+resolve_key() {
+  local env=$1 file=$2 label=$3
+  if [ -n "${!env:-}" ]; then
+    printf '%s' "${!env}"
+    return
+  fi
+  if [ -s "$file" ]; then
+    cat "$file"
+    return
+  fi
+  mkdir -p "$(dirname "$file")"
+  local generated
+  generated=$(openssl rand -hex 32)
+  printf '%s' "$generated" > "$file"
+  chmod 600 "$file"
+  echo "generated a $label signing key at $file" >&2
+  printf '%s' "$generated"
+}
 
+key=$(resolve_key PDS_PRIVATE_KEY_HEX "$KEY_FILE" "PDS")
+bob_key=$(resolve_key BOB_PDS_PRIVATE_KEY_HEX "$BOB_KEY_FILE" "bob PDS")
+bidder_key=$(resolve_key BIDDER_PRIVATE_KEY_HEX "$BIDDER_KEY_FILE" "bidder")
+
+# Each pod's manifest carries its own placeholder, so one substitution pass can
+# never hand two pods the same key.
 apply_pod() {
   local ws=$1 file=$2
   sed -e "s|/home/johnandersen777/src/publicdomainrelay-kcp|$ORG_ROOT|g" \
       -e "s|__PDS_PRIVATE_KEY_HEX__|$key|g" \
+      -e "s|__BOB_PDS_PRIVATE_KEY_HEX__|$bob_key|g" \
+      -e "s|__BIDDER_PRIVATE_KEY_HEX__|$bidder_key|g" \
       "$MARKET_DIR/$file" \
     | KC --server="$S/clusters/root:$ws" apply --validate=false -f -
 }
@@ -135,14 +155,36 @@ done
 
 apply_pod global 20-global-plc.yaml
 apply_pod alice  40-alice-pds.yaml
+apply_pod bob    60-bob-pds.yaml
 apply_pod relay  30-relay-relay.yaml
-# The verifier needs every peer in its table, and a pod created in the same
-# second as its peers can start with an empty one.
-sleep 10
+# The bidder reaches both the PLC directory and the relay, so it starts after
+# both, and after bob's own PDS so the two share a workspace from the first
+# reconcile.
+apply_pod bob    70-bidder.yaml
+# The verifier reaches alice's PDS, the PLC directory and the relay, so a fixed
+# sleep in front of a pod whose restartPolicy is Never waits for nothing. What is
+# waited for instead is the provider's own verdict on alice's PDS: phase Running
+# with ready true is the readiness probe resolving pds.default.alice.svc.kcp.local
+# through the shim's table and answering on /xrpc/_health, which is the same name
+# and the same path the verifier uses. The wait shares the bounded WAIT_SECONDS
+# deadline used everywhere else, and when it expires the verifier is created
+# anyway, so the run reports a verifier that could not reach its peers instead of
+# stopping here.
+verifier_deadline=$(( $(date +%s) + WAIT_SECONDS ))
+while :; do
+  phase=$(KC --server="$S/clusters/root:alice" get denopod pds -o jsonpath='{.status.phase}' 2>/dev/null || true)
+  ready=$(KC --server="$S/clusters/root:alice" get denopod pds -o jsonpath='{.status.ready}' 2>/dev/null || true)
+  [ "$phase" = "Running" ] && [ "$ready" = "true" ] && break
+  if [ "$(date +%s)" -ge "$verifier_deadline" ]; then
+    echo "alice pds in root:alice never reported Running and ready within ${WAIT_SECONDS}s; creating the verifier anyway so the run reports it" >&2
+    break
+  fi
+  sleep 2
+done
 apply_pod alice  50-verifier.yaml
 
 deadline=$(( $(date +%s) + WAIT_SECONDS ))
-for entry in "global plc" "relay relay" "alice pds"; do
+for entry in "global plc" "relay relay" "alice pds" "bob pds" "bob bidder"; do
   set -- $entry
   ws=$1; name=$2
   while :; do
@@ -176,12 +218,22 @@ for ws in $WORKSPACES; do
   echo "  root:$ws $(KC --server="$S/clusters/root:$ws" get openbao openbao -o jsonpath='{.status.namespace} serial={.status.serial}')"
 done
 echo
-echo "health:"
-echo "  plc    curl http://127.0.0.1:2587/health"
-echo "  relay  curl http://127.0.0.1:2584/xrpc/_health"
-echo "  pds    curl http://127.0.0.1:2583/xrpc/_health"
+echo "health: every service pod sets SERVICE_TLS true except the bidder, so the"
+echo "listeners below are https except the bidder's. The service names do not"
+echo "resolve on the host, so each check resolves the name to the loopback address"
+echo "its listener holds, and verifies the leaf against the market CA instead of"
+echo "disabling verification. Read that CA out of OpenBao's root namespace first:"
+echo
+echo "  curl -sS -H 'X-Vault-Token: root' http://$OPENBAO_LISTEN/v1/pki/ca/pem > ca.pem"
+echo
+echo "  plc      curl --cacert ca.pem --resolve plc.default.global.svc.kcp.local:2587:127.0.0.1 https://plc.default.global.svc.kcp.local:2587/health"
+echo "  relay    curl --cacert ca.pem --resolve relay.default.relay.svc.kcp.local:2584:127.0.0.1 https://relay.default.relay.svc.kcp.local:2584/xrpc/_health"
+echo "  alice    curl --cacert ca.pem --resolve pds.default.alice.svc.kcp.local:2583:127.0.0.1 https://pds.default.alice.svc.kcp.local:2583/xrpc/_health"
+echo "  bob pds  curl --cacert ca.pem --resolve pds.default.bob.svc.kcp.local:2585:127.0.0.1 https://pds.default.bob.svc.kcp.local:2585/xrpc/_health"
+echo "  bidder   curl http://127.0.0.1:2586/oauth-client-metadata.json  (plain HTTP by design)"
 echo
 echo "create alice:"
-echo "  curl -sS -X POST http://127.0.0.1:2583/xrpc/com.atproto.server.createAccount \\"
+echo "  curl --cacert ca.pem --resolve pds.default.alice.svc.kcp.local:2583:127.0.0.1 \\"
+echo "    -sS -X POST https://pds.default.alice.svc.kcp.local:2583/xrpc/com.atproto.server.createAccount \\"
 echo "    -H 'content-type: application/json' \\"
 echo "    -d '{\"handle\":\"alice\",\"password\":\"hunter2\"}'"
