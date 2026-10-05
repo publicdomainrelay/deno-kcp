@@ -6,9 +6,132 @@ metadata:
 spec:
   repository: deno-kcp
   upstream: self
+  orchestrator: sc.deno-kcp-provider
   dependsOn:
   - sc.api-v1alpha1
   - sc.deno-kcp
+  arch:
+    id: sc.kind.denorun
+    kind: node
+    section: system_contexts
+    form: list
+    parent: sc.deno-kcp
+    slot: overlay[7]
+    orchestrator: sc.deno-kcp-provider
+    code:
+    - file:internal/denorun/denorun.go
+    - file:internal/denorun/denorun_test.go
+    node:
+      axis: one_shot
+      code:
+        logic: internal/denorun
+        registry: internal/provider/registry_run.go
+      context: tb.provider-workspace
+      id: sc.kind.denorun
+      orchestrator: sc.deno-kcp-provider
+      overlay: []
+      owned_by:
+      - sc.kind.denojob
+      upstream:
+        api:
+          export: denoruntime
+          group: deno.computer
+          kind: DenoRun
+          resource: denoruns
+          schema: v1alpha1-2.denoruns.deno.computer
+          scope: Namespaced
+          short: drun
+          version: v1alpha1
+        condition_facts:
+          Complete:
+            by: internal/denorun/denorun.go:Reconcile
+            false_reasons:
+            - Running
+            - Retrying
+            true_reasons:
+            - Complete
+            - DeadlineExceeded
+            - BackoffExceeded
+          Failed:
+            by: internal/denorun/denorun.go:Reconcile
+            true_reasons:
+            - DeadlineExceeded
+            - BackoffExceeded
+        conditions:
+        - Complete
+        - Failed
+        embeds: type.DenoPodTemplate
+        field_types:
+          conditions: type.conditions
+        finalizer:
+          code:
+          - api/v1alpha1/types_denorun.go:FinalizerDenoRun
+          - internal/provider/reconcile_run.go:newRunForJob
+          - internal/provider/registry_run.go:RemoveRunFinalizer
+          - internal/provider/registry_run.go:RemoveRunFinalizerKnown
+          name: denorun.deno.computer/run
+          set_by:
+          - manifest
+          - provider
+        manifest: deploy/denorun-apiresourceschema.yaml
+        phases:
+        - Pending
+        - Running
+        - Succeeded
+        - Failed
+        spec:
+        - backoff
+        - activeDeadlineSeconds
+        - ttlSecondsAfterFinished
+        status:
+        - phase
+        - runID
+        - startTime
+        - completionTime
+        - exitCode
+        - message
+        - outputs
+        - retries
+        - conditions
+        status_facts:
+          completionTime:
+            by: internal/denorun/denorun.go:Reconcile
+            decides: none
+            when: on_exit
+          conditions:
+            also: phase
+            by: internal/denorun/denorun.go:Reconcile
+            decides: Complete
+            when: on_every_pass
+          exitCode:
+            by: internal/denorun/denorun.go:Reconcile
+            decides: none
+            when: on_exit
+          message:
+            by: internal/denorun/denorun.go:Reconcile
+            decides: none
+            when: on_exit
+          outputs:
+            by: internal/denorun/denorun.go:Reconcile
+            decides: none
+            when: on_exit
+          phase:
+            by: internal/denorun/denorun.go:Reconcile
+            decides: self
+            when: on_start
+          retries:
+            by: internal/denorun/denorun.go:Reconcile
+            decides: none
+            when: on_restart
+          runID:
+            by: internal/denorun/denorun.go:Reconcile
+            decides: none
+            when: on_running
+          startTime:
+            by: internal/denorun/denorun.go:Reconcile
+            decides: none
+            when: on_start
+        types: api/v1alpha1/types_denorun.go
 codeRefIndex:
 - file:internal/denorun/denorun.go denorun.go@internal/denorun/denorun.go
 - file:internal/denorun/denorun_test.go denorun_test.go@internal/denorun/denorun_test.go

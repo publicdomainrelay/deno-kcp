@@ -6,9 +6,158 @@ metadata:
 spec:
   repository: deno-kcp
   upstream: self
+  orchestrator: sc.deno-kcp-provider
   dependsOn:
   - sc.api-v1alpha1
   - sc.deno-kcp
+  arch:
+    id: sc.kind.denojob
+    kind: node
+    section: system_contexts
+    form: list
+    parent: sc.deno-kcp
+    slot: overlay[6]
+    orchestrator: sc.deno-kcp-provider
+    code:
+    - file:internal/denojob/denojob.go
+    - file:internal/denojob/denojob_test.go
+    node:
+      axis: one_shot
+      code:
+        logic: internal/denojob
+        registry: internal/provider/registry_job.go
+      context: tb.provider-workspace
+      id: sc.kind.denojob
+      orchestrator: sc.deno-kcp-provider
+      overlay: []
+      owned_by:
+      - sc.kind.runtrigger
+      owns:
+      - sc.kind.denorun
+      upstream:
+        api:
+          export: denoruntime
+          group: deno.computer
+          kind: DenoJob
+          resource: denojobs
+          schema: v1alpha1-4.denojobs.deno.computer
+          scope: Namespaced
+          short: djob
+          version: v1alpha1
+        condition_facts:
+          Complete:
+            by: internal/denojob/denojob.go:Reconcile
+            false_reasons:
+            - Pending
+            - Running
+            true_reasons:
+            - Complete
+            - DeadlineExceeded
+            - BackoffLimitExceeded
+          Failed:
+            by: internal/denojob/denojob.go:Reconcile
+            true_reasons:
+            - DeadlineExceeded
+            - BackoffLimitExceeded
+          Suspended:
+            by: internal/denojob/denojob.go:Reconcile
+            cleared_by: internal/denojob/denojob.go:Reconcile
+            true_reasons:
+            - Suspended
+        conditions:
+        - Complete
+        - Failed
+        - Suspended
+        field_types:
+          conditions: type.conditions
+          template: sc.kind.denorun.spec
+        manifest: deploy/denojob-apiresourceschema.yaml
+        phases:
+        - Pending
+        - Running
+        - Succeeded
+        - Failed
+        spec:
+        - template
+        - completions
+        - parallelism
+        - backoffLimit
+        - suspend
+        - activeDeadlineSeconds
+        - ttlSecondsAfterFinished
+        status:
+        - phase
+        - runName
+        - runs
+        - startTime
+        - completionTime
+        - active
+        - ready
+        - succeeded
+        - failed
+        - retries
+        - exitCode
+        - outputs
+        - conditions
+        status_facts:
+          active:
+            also: ready
+            by: internal/denojob/denojob.go:Reconcile
+            decides: none
+            when: on_every_pass
+          completionTime:
+            by: internal/denojob/denojob.go:Reconcile
+            decides: none
+            when: on_terminal
+          conditions:
+            also: phase
+            by: internal/denojob/denojob.go:Reconcile
+            decides: Complete
+            when: on_every_pass
+          exitCode:
+            by: internal/denojob/denojob.go:Reconcile
+            decides: none
+            when: on_terminal
+          failed:
+            by: internal/denojob/denojob.go:Reconcile
+            decides: none
+            when: on_every_pass
+          outputs:
+            by: internal/denojob/denojob.go:Reconcile
+            decides: none
+            when: on_terminal
+          phase:
+            by: internal/denojob/denojob.go:Reconcile
+            decides: self
+            when: on_every_pass
+          ready:
+            also: phase
+            by: internal/denojob/denojob.go:Reconcile
+            decides: none
+            when: on_running
+          retries:
+            by: internal/denojob/denojob.go:Reconcile
+            decides: none
+            when: on_every_pass
+          runName:
+            also: runs
+            by: internal/denojob/denojob.go:Reconcile
+            decides: none
+            when: on_create
+          runs:
+            also: runName
+            by: internal/denojob/denojob.go:Reconcile
+            decides: none
+            when: on_create
+          startTime:
+            by: internal/denojob/denojob.go:Reconcile
+            decides: none
+            when: on_create
+          succeeded:
+            by: internal/denojob/denojob.go:Reconcile
+            decides: none
+            when: on_every_pass
+        types: api/v1alpha1/types_denojob.go
 codeRefIndex:
 - file:internal/denojob/denojob.go denojob.go@internal/denojob/denojob.go
 - file:internal/denojob/denojob_test.go denojob_test.go@internal/denojob/denojob_test.go

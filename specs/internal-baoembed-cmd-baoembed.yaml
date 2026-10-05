@@ -5,8 +5,40 @@ metadata:
   namespace: default
 spec:
   repository: deno-kcp
-  upstream: self
+  upstream: up.openbao
+  overlay:
+  - ov.baopki
+  orchestrator: orch.baoembed
   dependsOn:
   - sc.deno-kcp
+  arch:
+    id: sc.openbao-embedded
+    kind: node
+    section: system_contexts
+    form: list
+    parent: sc.test.integration-cluster
+    slot: overlay[3]
+    upstream: up.openbao
+    overlay:
+    - ov.baopki
+    orchestrator: orch.baoembed
+    code:
+    - file:internal/baoembed/cmd/baoembed/main.go
+    node:
+      code:
+        driver: internal/baoembed/cmd/baoembed/main.go:readyPrefix
+        tests:
+        - test/integration/bao_test.go
+        - test/integration/openbao_live_test.go
+      context: tb.openbao
+      id: sc.openbao-embedded
+      optional: true
+      orchestrator: orch.baoembed
+      overlay:
+      - ov.baopki
+      signs:
+      - sc.example.openbao
+      upstream: up.openbao
+      use: live_tests
 codeRefIndex:
 - file:internal/baoembed/cmd/baoembed/main.go main.go@internal/baoembed/cmd/baoembed/main.go

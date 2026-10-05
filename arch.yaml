@@ -122,12 +122,19 @@ system_contexts:
   - file:deploy/examples/policyengine.yaml policyengine.yaml@deploy/examples/policyengine.yaml
   - file:deploy/examples/policyworkflowpod.yaml policyworkflowpod.yaml@deploy/examples/policyworkflowpod.yaml
   - file:deploy/examples/runtrigger.yaml runtrigger.yaml@deploy/examples/runtrigger.yaml
-- id: sc.deploy-examples-atproto-market
+- id: tb.child-process
   name: deploy-examples-atproto-market
   spec: specs/deploy-examples-atproto-market.yaml
   upstream: self
   depends_on:
   - sc.deno-kcp
+  arch:
+    id: tb.child-process
+    kind: node
+    section: system_contexts
+    form: list
+    parent: tb.workload
+    slot: children[0]
   codeRefIndex:
   - file:deploy/examples/atproto/market/00-workspaces.yaml 00-workspaces.yaml@deploy/examples/atproto/market/00-workspaces.yaml
   - file:deploy/examples/atproto/market/10-rbac.yaml 10-rbac.yaml@deploy/examples/atproto/market/10-rbac.yaml
@@ -138,41 +145,73 @@ system_contexts:
   - file:deploy/examples/atproto/market/30-relay-relay.yaml 30-relay-relay.yaml@deploy/examples/atproto/market/30-relay-relay.yaml
   - file:deploy/examples/atproto/market/40-alice-pds.yaml 40-alice-pds.yaml@deploy/examples/atproto/market/40-alice-pds.yaml
   - file:deploy/examples/atproto/market/50-verifier.yaml 50-verifier.yaml@deploy/examples/atproto/market/50-verifier.yaml
-- id: sc.internal-baoembed-cmd-baoembed
+- id: sc.openbao-embedded
   name: internal-baoembed-cmd-baoembed
   spec: specs/internal-baoembed-cmd-baoembed.yaml
-  upstream: self
+  upstream: up.openbao
+  overlay:
+  - ov.baopki
+  orchestrator: orch.baoembed
   depends_on:
   - sc.deno-kcp
+  arch:
+    id: sc.openbao-embedded
+    kind: node
+    section: system_contexts
+    form: list
+    parent: sc.test.integration-cluster
+    slot: overlay[3]
   codeRefIndex:
   - file:internal/baoembed/cmd/baoembed/main.go main.go@internal/baoembed/cmd/baoembed/main.go
-- id: sc.internal-denojob
+- id: sc.kind.denojob
   name: internal-denojob
   spec: specs/internal-denojob.yaml
   upstream: self
+  orchestrator: sc.deno-kcp-provider
   depends_on:
   - sc.api-v1alpha1
   - sc.deno-kcp
+  arch:
+    id: sc.kind.denojob
+    kind: node
+    section: system_contexts
+    form: list
+    parent: sc.deno-kcp
+    slot: overlay[6]
   codeRefIndex:
   - file:internal/denojob/denojob.go denojob.go@internal/denojob/denojob.go
   - file:internal/denojob/denojob_test.go denojob_test.go@internal/denojob/denojob_test.go
-- id: sc.internal-denopod
+- id: type.DenoRestartPolicy
   name: internal-denopod
   spec: specs/internal-denopod.yaml
   upstream: self
   depends_on:
   - sc.api-v1alpha1
   - sc.deno-kcp
+  arch:
+    id: type.DenoRestartPolicy
+    kind: node
+    section: types
+    form: map
+    position: 2
   codeRefIndex:
   - file:internal/denopod/denopod.go denopod.go@internal/denopod/denopod.go
   - file:internal/denopod/denopod_test.go denopod_test.go@internal/denopod/denopod_test.go
-- id: sc.internal-denorun
+- id: sc.kind.denorun
   name: internal-denorun
   spec: specs/internal-denorun.yaml
   upstream: self
+  orchestrator: sc.deno-kcp-provider
   depends_on:
   - sc.api-v1alpha1
   - sc.deno-kcp
+  arch:
+    id: sc.kind.denorun
+    kind: node
+    section: system_contexts
+    form: list
+    parent: sc.deno-kcp
+    slot: overlay[7]
   codeRefIndex:
   - file:internal/denorun/denorun.go denorun.go@internal/denorun/denorun.go
   - file:internal/denorun/denorun_test.go denorun_test.go@internal/denorun/denorun_test.go
@@ -184,13 +223,19 @@ system_contexts:
   - sc.deno-kcp
   codeRefIndex:
   - file:internal/livegate/livegate.go livegate.go@internal/livegate/livegate.go
-- id: sc.internal-policyengine
+- id: type.DenoRestartPolicy
   name: internal-policyengine
   spec: specs/internal-policyengine.yaml
   upstream: self
   depends_on:
   - sc.api-v1alpha1
   - sc.deno-kcp
+  arch:
+    id: type.DenoRestartPolicy
+    kind: node
+    section: types
+    form: map
+    position: 2
   codeRefIndex:
   - file:internal/policyengine/policyengine.go policyengine.go@internal/policyengine/policyengine.go
   - file:internal/policyengine/policyengine_test.go policyengine_test.go@internal/policyengine/policyengine_test.go
