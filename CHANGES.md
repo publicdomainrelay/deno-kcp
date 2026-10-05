@@ -303,6 +303,25 @@ The requirement-level delta against `open-architecture/deno-kcp--spec-bidder-and
 - added `r.openbao-under-test-is-the-pinned-checkout` (MUST): "The OpenBao server under test must be built from the third_party/openbao checkout the repository pins, not taken from PATH; baoembedBinary resolves and builds that checkout once per test binary, and embeddedReadyLine reads the server log until the ready line appears or the test fails."
 - added `r.spawned-processes-are-reaped` (MUST): "TestMain must run the suite and reap every child process the fixture spawned, so a failing live run leaves no kcp, kine or bao behind; startProcess records each child, killSpawned and process.kill terminate the recorded set, and killSpawned returns how many it killed."
 
+### tools-open-architecture
+
+- intent: "" -> "The context exists so that deno-kcp's architecture is a checked artifact rather than prose: arch.yaml states the repo's upstreams, kinds, boundaries, crossings, risks and reconcile passes, and validate.py is the gate that refuses a document whose ids, paths, symbols, boundary tree, crossing accounting or reconcile wiring do not hold together. It keeps the declared architecture in step with the Go source by checking kind names, resources, phases, conditions and status facts against the APIResourceSchema manifests and Go type files, and it keeps the document itself honest by rejecting duplicate YAML keys and schema nodes that lack descriptions."
+- added `r.arch-document-is-open-architecture` (MUST): "arch.yaml must declare $schema pointing at arch.schema.json, apiVersion open-architecture.dffml.github.io/v0alpha1, kind OpenArchitecture, and metadata naming the repo, the root id and the axes prefixes."
+- added `r.boundary-tree-one-root` (MUST): "The execution-context boundary tree must have exactly one root, every context must carry enforced_by, and an instance carrying an object must sit in a namespace context whose workspace is listed by an ancestor."
+- added `r.crossings-and-risks-accounted` (MUST): "A crossing's from and to must both be execution contexts in the boundary tree, and a crossing whose auth is none or whose gate is empty must be named by at least one risk."
+- added `r.declared-refs-resolve` (MUST): "Every reference in the document must resolve to an id the index holds; a ref naming an id that nothing defines is an error, and knowing one id's kind from the prefix lets validate.py require the referenced id to be of a compatible kind."
+- added `r.duplicate-yaml-keys-error` (MUST): "Loading arch.yaml must report a duplicate mapping key at its line number rather than silently taking the last value."
+- added `r.ids-are-prefixed-refs` (MUST): "Every id must match the prefixed ref form, one of up, orch, type, cred, ov, sc, tb, x, r, rec or flow, followed by a dotted name; an id defined twice is an error and must be a ref to the existing definition instead."
+- added `r.orphans-warned` (SHOULD): "An id that nothing references and that metadata.roots does not list should be reported as an orphan warning, while a root that is referenced elsewhere or that is not an unreferenced entry point is an error."
+- added `r.outline-mode` (MAY): "validate.py may print the document's shape, its ids, kinds and refs without values, optionally limited to one subtree by a prefix argument, instead of running the checks."
+- added `r.paths-and-symbols-exist` (MUST): "Every path-valued key must name a file that exists under the repo, and a path:Symbol value must name a symbol found in that file; orchestrator path keys and upstream executes entries are checked the same way."
+- added `r.reconcile-wiring-closed` (MUST): "Each kind must have exactly one reconcile pass that writes its status; every read must name the spec or status of a kind and a field that kind declares; every wake named by a read must exist, and every declared wake must be used by some read."
+- added `r.schema-check-first` (MUST): "validate.py must check the schema document itself before validating arch.yaml against it with jsonschema Draft202012Validator, and must report a schema node that carries a type without a description."
+- added `r.spec-fields-read-or-unread` (MUST): "Every spec field of a kind must either be read by a reconciler or listed as unread, and a field listed unread must not also be read or fall outside the kind's spec fields."
+- added `r.system-context-tree-checks` (MUST): "Each system context must carry upstream, overlay and orchestrator, must not name itself as its own upstream or overlay, and the upstream, overlay, depends_on and introduces graph must be free of cycles."
+- added `r.validate-exits-nonzero-on-error` (MUST): "validate.py must exit 1 when any error is reported and exit 0 otherwise; warnings must never change the exit code."
+- added `r.values-match-go-source` (MUST): "A kind's short name, plural resource, phases and conditions must agree with its APIResourceSchema manifest and Go type file, its status_facts keys must equal its status list, and each decides value must be a phase, a condition, self or none."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance | coverage |
@@ -324,4 +343,4 @@ The requirement-level delta against `open-architecture/deno-kcp--spec-bidder-and
 | internal-provider-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
 | internal-trigger-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
 | test-integration-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
-| tools-open-architecture-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Running |  | 0 | - | - |
+| tools-open-architecture-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
