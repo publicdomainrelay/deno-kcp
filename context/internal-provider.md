@@ -62,8 +62,8 @@ _The resolved code references are regenerated on every run. Cite the ids above r
 - `method:04c9c12ef6ee491671f3ef14f8486cee` method Runtime.WriteRunStatus (internal/provider/provider_runtime.go)
 - `method:08cbdd1a97d2aeb9d9187918def0a3ff` method TokenMinter.MintServiceAccountToken (internal/provider/provider_runtime.go)
 - `method:0a1baf118dfd1184e6e20c9bc6c2149d` method Runtime.WriteEngineStatus (internal/provider/provider_runtime.go)
-- `method:0c338b727be3207f28cbf878427e832a` method cacheReader.Read (internal/provider/watch_cache.go)
+- `method:0c1e82b8107e26085d48c24ae4fb8603` method cacheReader.ReadTrigger (internal/provider/watch_cache.go)
 - `method:0cb5c9e3b143e0c4ed9b5147fe59f6b3` method Registry.WriteJobStatus (internal/provider/registry_job.go)
 
-_103 more reference(s) indexed but not listed here to stay inside the 1500-token budget._
+_106 more reference(s) indexed but not listed here to stay inside the 1500-token budget._
 <!-- SPECD_MANAGED_END -->

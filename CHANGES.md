@@ -18,6 +18,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 
 - added `r.provider-initial-list-is-bounded-and-retried` (MUST): "Waiting for a kind's cache to sync must be bounded by a deadline; an attempt that does not sync must be abandoned, the informers must be started again, and the attempt must repeat while the context lives; the provider must log at info level each time a cache has synced and each time it retries."
 - added `r.provider-initial-list-is-bounded-and-retried-test` (MUST): "An offline test must drive the bounded wait with a factory that never reports synced and must assert that it returns within its deadline, reports the retry and starts the next attempt; the test must fail against a provider that waits on its first attempt without a deadline."
+- changed `r.watch-seven-kinds-shared-cache` (codeRefs): "RunWatch must await the workspace endpoints, then bind dynamic informers for policyengines, policyworkflowpods, runtriggers, denoruns, denojobs, denopods and openbaos from every denoruntime endpoint and for policyworkflowruns from every policyworkflowruns endpoint, feeding one shared cache reader and one rate-limited typed work queue; workers may start before cache sync because handlers enqueue only after the object is in the store."
 
 ### test-integration
 
@@ -32,7 +33,7 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | deploy-examples-atproto-market-s2c-8d254e3186d5-a3 | SpecToCode | Succeeded | f31ce445 | 0 | - | 6 implemented |
 | internal-provider-s2c-34b6a7c32b1f | SpecToCode | Failed |  | 0 | market-live-acceptance failed | - |
 | internal-provider-s2c-34b6a7c32b1f-a2 | SpecToCode | Failed |  | 0 | market-live-acceptance failed | - |
-| internal-provider-s2c-34b6a7c32b1f-a3 | SpecToCode | Running |  | 0 | - | - |
+| internal-provider-s2c-34b6a7c32b1f-a3 | SpecToCode | Succeeded | 2a0798f5 | 0 | market-live-acceptance failed | 2 implemented |
 | test-integration-s2c-9b30c76edc9d | SpecToCode | Failed |  | 0 | - | - |
 | test-integration-s2c-9b30c76edc9d-a2 | SpecToCode | Succeeded | f31ce445 | 0 | - | 1 implemented |
 

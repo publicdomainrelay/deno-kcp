@@ -1,5 +1,7 @@
-syncedFingerprint: d8fab230a0bcac1073be293ec25ef7e4f1455af65b7937ba71707b357dd52f32
-realizedSpecHash: f7363c9c6b14afd41ef9d5da863ab4b487f06598051d92bd27f0aaa53590939d
+observedCommit: 2a0798f5bcdd3d20d03e22160e319dc25ae385d1
+syncedCommit: 2a0798f5bcdd3d20d03e22160e319dc25ae385d1
+syncedFingerprint: 5b1e9383a80bb085956e0cc0f5d23a545161b2afcaf5a53e52dae8decd912ccd
+realizedSpecHash: 9bc86161d5382c9a2625b793b5bf7b3b7ed45887cba37d67c7c79171c5944a0d
 conditions:
 - type: CodeSynced
   status: "False"
@@ -18,9 +20,9 @@ conditions:
     admissionSource.Runs, cacheReader.ListRuns, cacheReader.ListRunsForJob, cacheReader.ListWorkflowRuns,
     cacheReader.ListWorkflowRunsForPod, cacheReader.Read, cacheReader.ReadEngine,
     cacheReader.ReadJob, cacheReader.ReadOpenBao, cacheReader.ReadPod, cacheReader.ReadRun,
-    cacheReader.ReadTrigger, cacheReader.ReadWorkflowPod, jobRunLister.ListRunsForJob,
-    podWorkflowRunLister.ListWorkflowRunsForPod, runFinalizerRemover.RemoveRunFinalizerKnown,
-    summaryObserver.Observe'
+    cacheReader.ReadTrigger, cacheReader.ReadWorkflowPod, informerFactory.Start, informerFactory.WaitForCacheSync,
+    informerRound.Close, jobRunLister.ListRunsForJob, podWorkflowRunLister.ListWorkflowRunsForPod,
+    runFinalizerRemover.RemoveRunFinalizerKnown, summaryObserver.Observe'
 - type: Drifted
   status: "False"
   reason: FingerprintEqual
@@ -712,81 +714,99 @@ observed:
     kind: method
     signature: (ctx context.Context) error
     file: internal/provider/watch.go
-    line: 88
-    codegraphId: method:f34958b11727b06606bdafed3381d854
+    line: 89
+    codegraphId: method:8e551c9ad36f9dc79cabaaddcf8a4242
+  - name: informerFactory.Start
+    kind: method
+    signature: (stopCh <-chan struct{})
+    file: internal/provider/watch.go
+    line: 142
+    codegraphId: method:df5b4430bc3c7582ff15a2574f438cd0
+  - name: informerFactory.WaitForCacheSync
+    kind: method
+    signature: (stopCh <-chan struct{}) map[schema.GroupVersionResource]bool
+    file: internal/provider/watch.go
+    line: 143
+    codegraphId: method:4e8dbc74588a192e5b723394459c6753
+  - name: informerRound.Close
+    kind: method
+    signature: ()
+    file: internal/provider/watch.go
+    line: 154
+    codegraphId: method:1ee97ddf8c92dc724c39e5e89b31f832
   - name: cacheReader.Read
     kind: method
     signature: (_ context.Context, ref Ref) (*v1alpha1.PolicyWorkflowRun, error)
     file: internal/provider/watch_cache.go
-    line: 115
-    codegraphId: method:0c338b727be3207f28cbf878427e832a
+    line: 123
+    codegraphId: method:ac011dc964feeb6f75b3f8fd9c86c571
   - name: cacheReader.ReadRun
     kind: method
     signature: (_ context.Context, ref Ref) (*v1alpha1.DenoRun, error)
     file: internal/provider/watch_cache.go
-    line: 119
-    codegraphId: method:39357fde02deb917a6d729cd64103e58
+    line: 127
+    codegraphId: method:3da5cbe9c5bd094e6f34a00d8a5e34d0
   - name: cacheReader.ListRuns
     kind: method
     signature: (_ context.Context, logicalCluster string) ([]v1alpha1.DenoRun, error)
     file: internal/provider/watch_cache.go
-    line: 123
-    codegraphId: method:d3b126aa7c393857fc52b276be2775e8
+    line: 131
+    codegraphId: method:1f4e596e1d4d64259bc84a2bcae3426b
   - name: cacheReader.ListRunsForJob
     kind: method
     signature: (_ context.Context, logicalCluster, namespace, jobName string) ([]v1alpha1.DenoRun,
       error)
     file: internal/provider/watch_cache.go
-    line: 127
-    codegraphId: method:233229f09be3f2275ac69f207bb6268b
+    line: 135
+    codegraphId: method:f8e766327ad6b85b266544870ff58f06
   - name: cacheReader.ReadPod
     kind: method
     signature: (_ context.Context, ref Ref) (*v1alpha1.DenoPod, error)
     file: internal/provider/watch_cache.go
-    line: 144
-    codegraphId: method:4234fcb2deb93cd1d3ffff30a08e9bac
+    line: 152
+    codegraphId: method:9c495de855f01ae2cd020c2eaa07045b
   - name: cacheReader.ReadJob
     kind: method
     signature: (_ context.Context, ref Ref) (*v1alpha1.DenoJob, error)
     file: internal/provider/watch_cache.go
-    line: 148
-    codegraphId: method:bc5ee52232736b9e76295ebe1658d03a
+    line: 156
+    codegraphId: method:cb47a6cc918fc35b1e44fdb79478d42b
   - name: cacheReader.ReadTrigger
     kind: method
     signature: (_ context.Context, ref Ref) (*v1alpha1.RunTrigger, error)
     file: internal/provider/watch_cache.go
-    line: 152
-    codegraphId: method:b9504aa99cdd8e93e139e86c24b33700
+    line: 160
+    codegraphId: method:0c1e82b8107e26085d48c24ae4fb8603
   - name: cacheReader.ReadOpenBao
     kind: method
     signature: (_ context.Context, ref Ref) (*v1alpha1.OpenBao, error)
     file: internal/provider/watch_cache.go
-    line: 156
-    codegraphId: method:156f2b8e2e488a6f619076e2b3281489
+    line: 164
+    codegraphId: method:a0f83c651c5da9f519d930e47e79c2c6
   - name: cacheReader.ReadEngine
     kind: method
     signature: (_ context.Context, ref Ref) (*v1alpha1.PolicyEngine, error)
     file: internal/provider/watch_cache.go
-    line: 160
-    codegraphId: method:63085a4016a0611c83abdda86074ad51
+    line: 168
+    codegraphId: method:597e264ffff945ffb93841c95e6f7756
   - name: cacheReader.ReadWorkflowPod
     kind: method
     signature: (_ context.Context, ref Ref) (*v1alpha1.PolicyWorkflowPod, error)
     file: internal/provider/watch_cache.go
-    line: 164
-    codegraphId: method:1bd007e7df0c379bccb2c4e5927b024d
+    line: 172
+    codegraphId: method:e3a3c78b1d1203c86d88176b71299956
   - name: cacheReader.ListWorkflowRuns
     kind: method
     signature: (_ context.Context, logicalCluster string) ([]v1alpha1.PolicyWorkflowRun,
       error)
     file: internal/provider/watch_cache.go
-    line: 168
-    codegraphId: method:fec4d29b214cd73931b1d89410112759
+    line: 176
+    codegraphId: method:1785959f0d54c7cdc2130034fe8704d4
   - name: cacheReader.ListWorkflowRunsForPod
     kind: method
     signature: (_ context.Context, logicalCluster, namespace, podName string) ([]v1alpha1.PolicyWorkflowRun,
       error)
     file: internal/provider/watch_cache.go
-    line: 191
-    codegraphId: method:3fdfde3c1a480d83c360edc8c048bc7b
-  fingerprint: d8fab230a0bcac1073be293ec25ef7e4f1455af65b7937ba71707b357dd52f32
+    line: 199
+    codegraphId: method:7b3d2820c1ed4aa9bf1ac3c416476833
+  fingerprint: 5b1e9383a80bb085956e0cc0f5d23a545161b2afcaf5a53e52dae8decd912ccd
