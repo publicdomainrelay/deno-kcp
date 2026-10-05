@@ -22,6 +22,77 @@ spec:
   - sc.kind.policyengine
   - sc.openbao-server
   orchestrator: orch.demo-deno-runtime
+  intent: The context exists to pin down the contract between the deno-kcp custom
+    resources and the deno permission model they compile to, so that a DenoPod or
+    policy-driven run gets exactly the permissions its spec asked for and nothing
+    else. It also anchors the repo-level artifacts — module wiring, build entrypoint,
+    and the ADRs and how-tos — that explain and reproduce how those resources are
+    admitted, reconciled, and cancelled.
+  requirements:
+  - id: r.build-entrypoint
+    level: MAY
+    text: The Makefile remains the single build entrypoint for the repository's targets,
+      so generated artifacts and controller builds are produced the same way by every
+      contributor.
+    codeRefs:
+    - file:Makefile
+  - id: r.conversion-nil-safe
+    level: MUST
+    text: 'Every conversion method is nil-safe: a nil DenoPermissions, DenoPermission
+      or ServiceAccountRef receiver returns a nil pointer instead of dereferencing
+      it, so an unset field in the custom resource becomes an unset field in the deno
+      spec and an omitted class never blocks the whole conversion.'
+  - id: r.decisions-recorded-as-adrs
+    level: SHOULD
+    text: 'The decisions that shape the run path stay recorded as accepted ADRs: cancelling
+      policy workflow runs in docs/adrs/0001-cancel-policy-workflow-runs.md, native
+      run admission in docs/adrs/0002-native-run-admission.md, and the event-driven
+      reconcile loop in docs/adrs/0003-event-driven-reconcile-loop.md, so a change
+      to reconcile, admission or cancellation is argued against the recorded decision
+      rather than re-litigated.'
+    codeRefs:
+    - file:docs/adrs/0001-cancel-policy-workflow-runs.md
+    - file:docs/adrs/0002-native-run-admission.md
+    - file:docs/adrs/0003-event-driven-reconcile-loop.md
+  - id: r.deno-permissions-to-spec
+    level: MUST
+    text: DenoPermissions.DenoSpec converts the custom-resource permission block into
+      a denospec.Permissions value, carrying the all, noPrompt, hrTime and allowScripts
+      scalars through unchanged and filling each per-class slot (read, write, net,
+      env, run, ffi, sys, import, ignoreEnv) from that class's own DenoPermission.
+  - id: r.external-sources-declared
+    level: MAY
+    text: External source trees the build depends on are declared in .gitmodules and
+      the Go module graph in go.mod with go.sum, so a checkout pins the exact upstream
+      revisions this repository was built against.
+    codeRefs:
+    - file:.gitmodules
+    - file:go.mod
+    - file:go.sum
+  - id: r.operator-how-tos
+    level: SHOULD
+    text: 'The repository keeps the operator-facing how-tos that back the KCP integration:
+      local KCP development in docs/KCP_DEV_HOW_TO.md, the policy engine''s KCP wiring
+      in docs/POLICY_ENGINE_KCP.md with its how-to in docs/POLICY_ENGINE_HOW_TO.md,
+      the OpenBao PKI path in docs/OPENBAO_PKI.md, and the runtime and embedding research
+      notes in docs/DENO_RUNTIME_KCP.md and docs/DENO_EMBEDDING_RESEARCH.md.'
+    codeRefs:
+    - file:docs/DENO_EMBEDDING_RESEARCH.md
+    - file:docs/DENO_RUNTIME_KCP.md
+    - file:docs/KCP_DEV_HOW_TO.md
+    - file:docs/OPENBAO_PKI.md
+    - file:docs/POLICY_ENGINE_HOW_TO.md
+    - file:docs/POLICY_ENGINE_KCP.md
+  - id: r.per-class-permission-fields
+    level: MUST
+    text: DenoPermission.denoSpec maps one permission class onto denospec.Permission,
+      forwarding allow, allowList, deny and denyList so an operator can restrict a
+      class by denylist, allowlist or boolean as the CRD declares.
+  - id: r.service-account-ref
+    level: MUST
+    text: ServiceAccountRef.DenoSpec forwards the reference's name and namespace into
+      denospec.ServiceAccountRef, so the identity a run executes under survives the
+      trip from the custom resource to the deno spec.
   arch:
     id: sc.deno-kcp
     kind: node
@@ -64,3 +135,17 @@ spec:
       - sc.openbao-server
       - ov.living-threat-model
       upstream: sc.kcp-local
+codeRefIndex:
+- file:.gitmodules .gitmodules@.gitmodules
+- file:Makefile Makefile@Makefile
+- file:docs/DENO_EMBEDDING_RESEARCH.md DENO_EMBEDDING_RESEARCH.md@docs/DENO_EMBEDDING_RESEARCH.md
+- file:docs/DENO_RUNTIME_KCP.md DENO_RUNTIME_KCP.md@docs/DENO_RUNTIME_KCP.md
+- file:docs/KCP_DEV_HOW_TO.md KCP_DEV_HOW_TO.md@docs/KCP_DEV_HOW_TO.md
+- file:docs/OPENBAO_PKI.md OPENBAO_PKI.md@docs/OPENBAO_PKI.md
+- file:docs/POLICY_ENGINE_HOW_TO.md POLICY_ENGINE_HOW_TO.md@docs/POLICY_ENGINE_HOW_TO.md
+- file:docs/POLICY_ENGINE_KCP.md POLICY_ENGINE_KCP.md@docs/POLICY_ENGINE_KCP.md
+- file:docs/adrs/0001-cancel-policy-workflow-runs.md 0001-cancel-policy-workflow-runs.md@docs/adrs/0001-cancel-policy-workflow-runs.md
+- file:docs/adrs/0002-native-run-admission.md 0002-native-run-admission.md@docs/adrs/0002-native-run-admission.md
+- file:docs/adrs/0003-event-driven-reconcile-loop.md 0003-event-driven-reconcile-loop.md@docs/adrs/0003-event-driven-reconcile-loop.md
+- file:go.mod go.mod@go.mod
+- file:go.sum go.sum@go.sum

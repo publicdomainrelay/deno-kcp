@@ -33,11 +33,23 @@ The requirement-level delta against `open-architecture/deno-kcp--spec-bidder-and
 - added `r.run-until-signal` (MUST): "main runs providerImpl.Run under a context cancelled by SIGINT or SIGTERM and exits with status 1 after logging "provider stopped" if Run returns an error."
 - added `r.single-binary-entrypoint` (MUST): "The package provides one main function that acts as the provider process entrypoint, declares a config struct for its settings, and holds no reconcile logic; the remaining behaviour lives in the helpers envOr, envOrInt64, defaultRunTTL, caData and readIfSet."
 
+### deno-kcp
+
+- intent: "" -> "The context exists to pin down the contract between the deno-kcp custom resources and the deno permission model they compile to, so that a DenoPod or policy-driven run gets exactly the permissions its spec asked for and nothing else. It also anchors the repo-level artifacts — module wiring, build entrypoint, and the ADRs and how-tos — that explain and reproduce how those resources are admitted, reconciled, and cancelled."
+- added `r.build-entrypoint` (MAY): "The Makefile remains the single build entrypoint for the repository's targets, so generated artifacts and controller builds are produced the same way by every contributor."
+- added `r.conversion-nil-safe` (MUST): "Every conversion method is nil-safe: a nil DenoPermissions, DenoPermission or ServiceAccountRef receiver returns a nil pointer instead of dereferencing it, so an unset field in the custom resource becomes an unset field in the deno spec and an omitted class never blocks the whole conversion."
+- added `r.decisions-recorded-as-adrs` (SHOULD): "The decisions that shape the run path stay recorded as accepted ADRs: cancelling policy workflow runs in docs/adrs/0001-cancel-policy-workflow-runs.md, native run admission in docs/adrs/0002-native-run-admission.md, and the event-driven reconcile loop in docs/adrs/0003-event-driven-reconcile-loop.md, so a change to reconcile, admission or cancellation is argued against the recorded decision rather than re-litigated."
+- added `r.deno-permissions-to-spec` (MUST): "DenoPermissions.DenoSpec converts the custom-resource permission block into a denospec.Permissions value, carrying the all, noPrompt, hrTime and allowScripts scalars through unchanged and filling each per-class slot (read, write, net, env, run, ffi, sys, import, ignoreEnv) from that class's own DenoPermission."
+- added `r.external-sources-declared` (MAY): "External source trees the build depends on are declared in .gitmodules and the Go module graph in go.mod with go.sum, so a checkout pins the exact upstream revisions this repository was built against."
+- added `r.operator-how-tos` (SHOULD): "The repository keeps the operator-facing how-tos that back the KCP integration: local KCP development in docs/KCP_DEV_HOW_TO.md, the policy engine's KCP wiring in docs/POLICY_ENGINE_KCP.md with its how-to in docs/POLICY_ENGINE_HOW_TO.md, the OpenBao PKI path in docs/OPENBAO_PKI.md, and the runtime and embedding research notes in docs/DENO_RUNTIME_KCP.md and docs/DENO_EMBEDDING_RESEARCH.md."
+- added `r.per-class-permission-fields` (MUST): "DenoPermission.denoSpec maps one permission class onto denospec.Permission, forwarding allow, allowList, deny and denyList so an operator can restrict a class by denylist, allowlist or boolean as the CRD declares."
+- added `r.service-account-ref` (MUST): "ServiceAccountRef.DenoSpec forwards the reference's name and namespace into denospec.ServiceAccountRef, so the identity a run executes under survives the trip from the custom resource to the deno spec."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance | coverage |
 | --- | --- | --- | --- | --- | --- | --- |
 | api-v1alpha1-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
 | cmd-deno-kcp-provider-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
-| deno-kcp-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Running |  | 0 | - | - |
+| deno-kcp-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
 | deploy-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Running |  | 0 | - | - |
