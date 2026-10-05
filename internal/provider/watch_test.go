@@ -11,7 +11,6 @@ import (
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
 
 	"github.com/johnandersen777/deno-kcp/api/v1alpha1"
@@ -155,7 +154,7 @@ func triggerObjectNS(name, lc, ns, pod string) *unstructured.Unstructured {
 
 func triggerReader(t *testing.T, objects ...*unstructured.Unstructured) *cacheReader {
 	t.Helper()
-	indexer := cache.NewIndexer(cache.MetaNamespaceKeyFunc, watchIndexers)
+	indexer := newCacheStore()
 	reader := newCacheReader()
 	reader.add(workTrigger, indexer)
 	for _, obj := range objects {
@@ -299,5 +298,57 @@ func TestATriggerWithoutAPodIsNotWoken(t *testing.T) {
 		if key.kind == workTrigger {
 			t.Fatalf("a trigger with no pod reference was woken: %v", key)
 		}
+	}
+}
+
+func podObject(name, lc, ns, phase string) *unstructured.Unstructured {
+	return &unstructured.Unstructured{Object: map[string]any{
+		"apiVersion": "deno.computer/v1alpha1",
+		"kind":       "DenoPod",
+		"metadata": map[string]any{
+			"name":        name,
+			"namespace":   ns,
+			"annotations": map[string]any{kcp.ClusterAnnotation: lc},
+		},
+		"status": map[string]any{"phase": phase},
+	}}
+}
+
+// ponytail: the guard for the failure mode a second workspace introduces. Every
+// object used to sit in the informer's own store, which keys by namespace and
+// name, so two DenoPods named default/pds in two workspaces were one entry: the
+// second Add evicted the first, its reads returned NotFound, and the evicted
+// workload never reported ready.
+func TestTwoWorkspacesKeepTheirSameNamedPods(t *testing.T) {
+	store := newCacheStore()
+	reader := newCacheReader()
+	reader.add(workPod, store)
+
+	alice := podObject("pds", "root:alice", "default", "Running")
+	bob := podObject("pds", "root:bob", "default", "Running")
+	for _, obj := range []*unstructured.Unstructured{alice, bob} {
+		if err := store.Add(obj); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if got := len(reader.allPods()); got != 2 {
+		t.Fatalf("the cache holds %d pods, want both workspaces' default/pds", got)
+	}
+	for _, lc := range []string{"root:alice", "root:bob"} {
+		pod, err := reader.ReadPod(context.Background(), Ref{LogicalCluster: lc, Namespace: "default", Name: "pds"})
+		if err != nil {
+			t.Fatalf("ReadPod(%s default/pds): %v", lc, err)
+		}
+		if got := pod.Annotations[kcp.ClusterAnnotation]; got != lc {
+			t.Fatalf("ReadPod(%s default/pds) returned the pod of %s", lc, got)
+		}
+	}
+
+	if err := store.Update(bob); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := reader.ReadPod(context.Background(), Ref{LogicalCluster: "root:alice", Namespace: "default", Name: "pds"}); err != nil {
+		t.Fatalf("an event for root:bob evicted root:alice's pod: %v", err)
 	}
 }

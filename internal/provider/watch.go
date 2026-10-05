@@ -443,19 +443,60 @@ var watchIndexers = cache.Indexers{
 	},
 }
 
+// workCacheKey keys a cached object by workspace, namespace and name.
+//
+// ponytail: the informer's own store keys by namespace and name, so two DenoPods
+// named default/pds in two workspaces are one store entry and the later event
+// evicts the earlier object, which leaves the evicted workload with no status
+// ever written. The reader therefore keeps its own store, keyed by the ref the
+// object's kcp.io/cluster annotation plus its namespace and name build, and the
+// handlers below fill it.
+func workCacheKey(obj any) (string, error) {
+	u, ok := obj.(*unstructured.Unstructured)
+	if !ok {
+		return "", fmt.Errorf("provider: cache object %T is not unstructured", obj)
+	}
+	return Ref{
+		LogicalCluster: u.GetAnnotations()[kcp.ClusterAnnotation],
+		Namespace:      u.GetNamespace(),
+		Name:           u.GetName(),
+	}.Key(), nil
+}
+
+// newCacheStore is the store one informer's objects land in; production and the
+// offline cache tests build it the same way, so a test observes the keying the
+// provider actually reconciles from.
+func newCacheStore() cache.Indexer {
+	return cache.NewIndexer(workCacheKey, watchIndexers)
+}
+
+func untombstone(obj any) any {
+	if tombstone, ok := obj.(cache.DeletedFinalStateUnknown); ok {
+		return tombstone.Obj
+	}
+	return obj
+}
+
 func (p *Provider) registerInformer(factory dynamicinformer.DynamicSharedInformerFactory, res watchResource, reader *cacheReader, queue workqueue.TypedRateLimitingInterface[workKey]) {
 	informer := factory.ForResource(res.gvr).Informer()
-	indexer := informer.GetIndexer()
-	_ = indexer.AddIndexers(watchIndexers)
-	reader.add(res.kind, indexer)
+	store := newCacheStore()
+	reader.add(res.kind, store)
 	_, _ = informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj any) {
 			p.recordEvent()
+			_ = store.Add(obj)
 			enqueueWatchObject(res.kind, obj, reader, queue)
 		},
 		UpdateFunc: func(oldObj, obj any) {
 			p.recordEvent()
+			_ = store.Update(obj)
 			enqueueWatchUpdate(res.kind, oldObj, obj, reader, queue)
+		},
+		DeleteFunc: func(obj any) {
+			// ponytail: the reader's store is its own, so a delete the informer's
+			// store applies for free has to be replayed here; without it a deleted
+			// run reads as present forever and its finalizer never runs.
+			_ = store.Delete(untombstone(obj))
 		},
 	})
 }
