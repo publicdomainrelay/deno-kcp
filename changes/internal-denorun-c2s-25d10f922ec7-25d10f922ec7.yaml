@@ -9,5 +9,19 @@ spec:
   fromCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
   toCommit: 25d10f922ec7360cc7247da945a6fe49e88cf7ab
 status:
-  phase: Running
-  message: the agent is summarizing internal-denorun
+  phase: Succeeded
+  agentLog: internal/denorun holds the stateless decision engine for one DenoRun.
+    It declares the observation the provider hands in, Observed, carrying a v1alpha1.DenoRun,
+    an optional *RunObservation of the running workload, and a Now reading; and the
+    Result the decider hands back, which is the whole next status (Phase, RunID, RunIDCleared,
+    StartTime, CompletionTime, ExitCode, Message, Outputs, Retries, Conditions) plus
+    the Ops the provider must carry out, a RequeueAfter delay, RemoveFinalizer and
+    Delete. Reconciler wraps Options and offers the single entry point Reconcile,
+    which rejects a nameless run, fills a zero Now from its clock, returns the context
+    error when the context is cancelled, carries the existing status forward, and
+    then dispatches on deletion timestamp, terminal phase, active deadline, missing
+    execution observation, and finally the observed RunState. RunState enumerates
+    running, succeeded and failed; Op enumerates start-run, stop-run, delete and remove-finalizer.
+    The package holds no client and does no I/O, so the provider owns every write
+    and the decider stays a pure function of what it is handed.
+  message: wrote 22 requirement(s) and 9 interface(s) for internal-denorun

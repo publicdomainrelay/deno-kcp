@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so that the decision logic of a DenoRun lives in one place that can be tested without a cluster. The provider observes the cluster, builds the Observed value and applies the Result; the decider only decides, which keeps retries, deadlines, TTL cleanup and finalizer removal reviewable as pure rules. The context boundary is deliberate: no Kubernetes client, no side effects, no hidden state beyond Options, so a pass is reproducible from the observed facts alone.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

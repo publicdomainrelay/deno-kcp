@@ -10,6 +10,235 @@ spec:
   dependsOn:
   - sc.api-v1alpha1
   - sc.deno-kcp
+  intent: 'This context exists so that the decision logic of a DenoRun lives in one
+    place that can be tested without a cluster. The provider observes the cluster,
+    builds the Observed value and applies the Result; the decider only decides, which
+    keeps retries, deadlines, TTL cleanup and finalizer removal reviewable as pure
+    rules. The context boundary is deliberate: no Kubernetes client, no side effects,
+    no hidden state beyond Options, so a pass is reproducible from the observed facts
+    alone.'
+  requirements:
+  - id: r.conditions-stamp-generation
+    level: MUST
+    text: Every condition the decider sets carries the observed run's generation as
+      ObservedGeneration and replaces any condition of the same type already carried
+      forward.
+    codeRefs:
+    - file:internal/denorun/denorun.go
+    - method:f155b5d02f0b9e87bf309fef18faa708
+  - id: r.deadline-exceeded-fails
+    level: MUST
+    text: When ActiveDeadlineSeconds and a start time are both set and Now is not
+      before start plus the deadline, the decider stops a running execution, sets
+      the phase to failed, clears RunID with RunIDCleared set, stamps the completion
+      time from Now, sets the Failed and Complete conditions to true with reason DeadlineExceeded,
+      and requeues 2 seconds.
+    codeRefs:
+    - file:internal/denorun/denorun.go
+    - method:f155b5d02f0b9e87bf309fef18faa708
+  - id: r.decider-pure
+    level: MUST
+    text: The package performs no I/O, holds no client, and exposes no other state
+      on Reconciler than Options; every side effect leaves Reconcile as an Op in the
+      Result for the provider to apply.
+    codeRefs:
+    - file:internal/denorun/denorun.go
+    - file:internal/denorun/denorun_test.go
+    - struct:8cfd6dfc94f9f9f64a46b94dc7cac4c6
+  - id: r.deletion-teardown
+    level: MUST
+    text: When the run carries a deletion timestamp the decider stops a still-running
+      execution by appending OpStopRun, appends OpRemoveFinalizer, sets RemoveFinalizer,
+      requeues 2 seconds and returns; this branch is checked first, before terminal
+      phase, deadline and execution state.
+    codeRefs:
+    - file:internal/denorun/denorun.go
+    - method:f155b5d02f0b9e87bf309fef18faa708
+  - id: r.failed-retries-or-fails
+    level: MUST
+    text: 'A failed observation clears RunID with RunIDCleared set, sets retries to
+      the carried retries plus one, records the exit code and message, and compares
+      retries against spec.Backoff, falling back to Options.DefaultBackoff: past the
+      limit the phase becomes failed with the completion time stamped and the Failed
+      plus Complete conditions true with reason BackoffExceeded, otherwise the phase
+      returns to pending with the Complete condition false and reason Retrying; either
+      way it requeues 2 seconds.'
+    codeRefs:
+    - file:internal/denorun/denorun.go
+    - method:f155b5d02f0b9e87bf309fef18faa708
+    - struct:ee4d89fa2c7dd0cff8185caf5882f1e5
+  - id: r.new-defaults-clock
+    level: MUST
+    text: New returns a Reconciler built from Options, substituting time.Now when
+      Options.Now is nil.
+    codeRefs:
+    - file:internal/denorun/denorun.go
+    - function:ebb0b90e032475ce8ac596f8c699f18d
+  - id: r.no-execution-starts-run
+    level: MUST
+    text: 'With no execution observation the decider starts the run: it sets the start
+      time from Now if unset, sets the phase to running, appends the start-run Op,
+      sets the Complete condition to false with reason Running, and requeues 2 seconds.'
+    codeRefs:
+    - file:internal/denorun/denorun.go
+    - method:f155b5d02f0b9e87bf309fef18faa708
+  - id: r.observed-shape
+    level: MUST
+    text: Observed carries the DenoRun under reconciliation, an optional pointer to
+      a RunObservation, and the Now clock reading the decision is made against; a
+      nil Execution means the provider saw no workload for this run.
+    codeRefs:
+    - file:internal/denorun/denorun.go
+    - struct:46375556082738a3e31036edf9eb66d4
+  - id: r.op-values
+    level: MUST
+    text: Op is a string type whose values are "start-run", "stop-run", "delete" and
+      "remove-finalizer", naming the side effects the provider must perform.
+    codeRefs:
+    - file:internal/denorun/denorun.go
+    - type_alias:30190d31491ebfeaec53888338d8ddf7
+  - id: r.options-shape
+    level: MUST
+    text: Options supplies the Now clock function and a DefaultBackoff retry limit
+      whose default is 0, and the package also pins the standard requeue delay at
+      2 seconds.
+    codeRefs:
+    - file:internal/denorun/denorun.go
+    - struct:ee4d89fa2c7dd0cff8185caf5882f1e5
+  - id: r.reconcile-carries-status
+    level: MUST
+    text: Reconcile seeds the Result from the run's existing status, copying phase,
+      run id, start and completion times, exit code, message, outputs, retries, and
+      a fresh copy of the conditions.
+    codeRefs:
+    - file:internal/denorun/denorun.go
+    - method:f155b5d02f0b9e87bf309fef18faa708
+  - id: r.reconcile-defaults-now
+    level: MUST
+    text: Reconcile fills in a zero Now from the Reconciler's clock and, after the
+      name check, returns the context error if the context is already cancelled.
+    codeRefs:
+    - file:internal/denorun/denorun.go
+    - method:f155b5d02f0b9e87bf309fef18faa708
+  - id: r.reconcile-requires-run-name
+    level: MUST
+    text: Reconcile returns an error and an empty Result when the observed DenoRun
+      has no name.
+    codeRefs:
+    - file:internal/denorun/denorun.go
+    - method:f155b5d02f0b9e87bf309fef18faa708
+  - id: r.reconciler-holds-options
+    level: MUST
+    text: Reconciler is a struct holding the configured Options and exposes no other
+      state.
+    codeRefs:
+    - file:internal/denorun/denorun.go
+    - struct:8cfd6dfc94f9f9f64a46b94dc7cac4c6
+  - id: r.result-carries-next-status
+    level: MUST
+    text: 'Result carries the full next status the provider should write: Phase, RunID,
+      RunIDCleared, StartTime, CompletionTime, ExitCode, Message, Outputs, Retries,
+      Conditions, Ops, RequeueAfter, RemoveFinalizer and Delete.'
+    codeRefs:
+    - file:internal/denorun/denorun.go
+    - struct:729b6f20e41c65ca009aeef5ce0be147
+  - id: r.run-id-cleared-flag
+    level: MUST
+    text: Result.RunIDCleared distinguishes an id the decider never saw from one it
+      cleared on purpose, so the provider does not write back the id of the workload
+      it just observed and re-observe a corpse on the next pass.
+    codeRefs:
+    - file:internal/denorun/denorun.go
+    - struct:729b6f20e41c65ca009aeef5ce0be147
+  - id: r.run-observation-shape
+    level: MUST
+    text: RunObservation carries RunID, State, an optional ExitCode, Message and an
+      Outputs map, and describes what the provider observed for one workload execution.
+    codeRefs:
+    - file:internal/denorun/denorun.go
+    - struct:871d7b88332e893f59d62b5249a55bca
+  - id: r.run-state-values
+    level: MUST
+    text: RunState is a string type whose only values are "running", "succeeded" and
+      "failed".
+    codeRefs:
+    - file:internal/denorun/denorun.go
+    - type_alias:bd23d69ec74e9fe3e50fcdbd3c0331ba
+  - id: r.running-reports-id
+    level: MUST
+    text: A running observation sets the start time if unset, keeps the phase running,
+      adopts the observed RunID, sets the Complete condition to false with reason
+      Running, and requeues 2 seconds.
+    codeRefs:
+    - file:internal/denorun/denorun.go
+    - method:f155b5d02f0b9e87bf309fef18faa708
+  - id: r.succeeded-completes
+    level: MUST
+    text: A succeeded observation sets the phase to succeeded, adopts the observed
+      RunID, exit code and outputs, stamps the completion time from Now, sets the
+      Complete condition to true with reason Complete, and requeues 2 seconds.
+    codeRefs:
+    - file:internal/denorun/denorun.go
+    - method:f155b5d02f0b9e87bf309fef18faa708
+  - id: r.terminal-ttl-delete
+    level: MUST
+    text: 'A run whose carried phase is succeeded or failed is left finished: with
+      TTLSecondsAfterFinished set and a completion time, it sets Delete and appends
+      the delete Op once the TTL has elapsed, otherwise it requeues for the remaining
+      time until expiry, and with no TTL or no completion time it returns unchanged.'
+    codeRefs:
+    - file:internal/denorun/denorun.go
+    - method:f155b5d02f0b9e87bf309fef18faa708
+  - id: r.unknown-state-errors
+    level: MUST
+    text: An execution observation whose state is none of running, succeeded or failed
+      returns an error and an empty Result.
+    codeRefs:
+    - file:internal/denorun/denorun.go
+    - method:f155b5d02f0b9e87bf309fef18faa708
+  interfaces:
+  - name: New
+    kind: function
+    signature: func New(opts Options) *Reconciler
+    file: internal/denorun/denorun.go
+  - name: Observed
+    kind: struct
+    signature: type Observed struct { Run v1alpha1.DenoRun; Execution *RunObservation;
+      Now time.Time }
+    file: internal/denorun/denorun.go
+  - name: Op
+    kind: type_alias
+    signature: type Op string
+    file: internal/denorun/denorun.go
+  - name: Options
+    kind: struct
+    signature: type Options struct { Now func() time.Time; DefaultBackoff int32 }
+    file: internal/denorun/denorun.go
+  - name: Reconciler
+    kind: struct
+    signature: type Reconciler struct { opts Options }
+    file: internal/denorun/denorun.go
+  - name: Reconciler.Reconcile
+    kind: method
+    signature: func (r *Reconciler) Reconcile(ctx context.Context, o Observed) (Result,
+      error)
+    file: internal/denorun/denorun.go
+  - name: Result
+    kind: struct
+    signature: type Result struct { Phase v1alpha1.DenoRunPhase; RunID string; RunIDCleared
+      bool; StartTime *metav1.Time; CompletionTime *metav1.Time; ExitCode *int32;
+      Message string; Outputs map[string]string; Retries int32; Conditions []metav1.Condition;
+      Ops []Op; RequeueAfter time.Duration; RemoveFinalizer bool; Delete bool }
+    file: internal/denorun/denorun.go
+  - name: RunObservation
+    kind: struct
+    signature: type RunObservation struct { RunID string; State RunState; ExitCode
+      *int32; Message string; Outputs map[string]string }
+    file: internal/denorun/denorun.go
+  - name: RunState
+    kind: type_alias
+    signature: type RunState string
+    file: internal/denorun/denorun.go
   arch:
     id: sc.kind.denorun
     kind: node
@@ -135,3 +364,12 @@ spec:
 codeRefIndex:
 - file:internal/denorun/denorun.go denorun.go@internal/denorun/denorun.go
 - file:internal/denorun/denorun_test.go denorun_test.go@internal/denorun/denorun_test.go
+- function:ebb0b90e032475ce8ac596f8c699f18d New@internal/denorun/denorun.go:101
+- method:f155b5d02f0b9e87bf309fef18faa708 Reconciler.Reconcile@internal/denorun/denorun.go:108
+- struct:46375556082738a3e31036edf9eb66d4 Observed@internal/denorun/denorun.go:40
+- struct:729b6f20e41c65ca009aeef5ce0be147 Result@internal/denorun/denorun.go:60
+- struct:871d7b88332e893f59d62b5249a55bca RunObservation@internal/denorun/denorun.go:28
+- struct:8cfd6dfc94f9f9f64a46b94dc7cac4c6 Reconciler@internal/denorun/denorun.go:97
+- struct:ee4d89fa2c7dd0cff8185caf5882f1e5 Options@internal/denorun/denorun.go:91
+- type_alias:30190d31491ebfeaec53888338d8ddf7 Op@internal/denorun/denorun.go:48
+- type_alias:bd23d69ec74e9fe3e50fcdbd3c0331ba RunState@internal/denorun/denorun.go:18

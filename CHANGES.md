@@ -151,6 +151,32 @@ The requirement-level delta against `open-architecture/deno-kcp--spec-bidder-and
 - added `r.running-reports-readiness` (MUST): "While the execution state is running, Reconcile keeps phase Running, copies the execution run ID, sets Ready from ReadinessPassed (true when that observation is nil), sets the Ready condition true with reason Ready or false with reason NotReady, and requeues after RequeueAfter."
 - added `r.terminal-phase-stops-making-decisions` (MUST): "When the carried phase is Succeeded or Failed, Reconcile emits no run ops and only evaluates TTLSecondsAfterFinished: with a TTL and a completion time it sets Delete and OpDelete once expiry has passed, otherwise it requeues for the remaining time."
 
+### internal-denorun
+
+- intent: "" -> "This context exists so that the decision logic of a DenoRun lives in one place that can be tested without a cluster. The provider observes the cluster, builds the Observed value and applies the Result; the decider only decides, which keeps retries, deadlines, TTL cleanup and finalizer removal reviewable as pure rules. The context boundary is deliberate: no Kubernetes client, no side effects, no hidden state beyond Options, so a pass is reproducible from the observed facts alone."
+- added `r.conditions-stamp-generation` (MUST): "Every condition the decider sets carries the observed run's generation as ObservedGeneration and replaces any condition of the same type already carried forward."
+- added `r.deadline-exceeded-fails` (MUST): "When ActiveDeadlineSeconds and a start time are both set and Now is not before start plus the deadline, the decider stops a running execution, sets the phase to failed, clears RunID with RunIDCleared set, stamps the completion time from Now, sets the Failed and Complete conditions to true with reason DeadlineExceeded, and requeues 2 seconds."
+- added `r.decider-pure` (MUST): "The package performs no I/O, holds no client, and exposes no other state on Reconciler than Options; every side effect leaves Reconcile as an Op in the Result for the provider to apply."
+- added `r.deletion-teardown` (MUST): "When the run carries a deletion timestamp the decider stops a still-running execution by appending OpStopRun, appends OpRemoveFinalizer, sets RemoveFinalizer, requeues 2 seconds and returns; this branch is checked first, before terminal phase, deadline and execution state."
+- added `r.failed-retries-or-fails` (MUST): "A failed observation clears RunID with RunIDCleared set, sets retries to the carried retries plus one, records the exit code and message, and compares retries against spec.Backoff, falling back to Options.DefaultBackoff: past the limit the phase becomes failed with the completion time stamped and the Failed plus Complete conditions true with reason BackoffExceeded, otherwise the phase returns to pending with the Complete condition false and reason Retrying; either way it requeues 2 seconds."
+- added `r.new-defaults-clock` (MUST): "New returns a Reconciler built from Options, substituting time.Now when Options.Now is nil."
+- added `r.no-execution-starts-run` (MUST): "With no execution observation the decider starts the run: it sets the start time from Now if unset, sets the phase to running, appends the start-run Op, sets the Complete condition to false with reason Running, and requeues 2 seconds."
+- added `r.observed-shape` (MUST): "Observed carries the DenoRun under reconciliation, an optional pointer to a RunObservation, and the Now clock reading the decision is made against; a nil Execution means the provider saw no workload for this run."
+- added `r.op-values` (MUST): "Op is a string type whose values are "start-run", "stop-run", "delete" and "remove-finalizer", naming the side effects the provider must perform."
+- added `r.options-shape` (MUST): "Options supplies the Now clock function and a DefaultBackoff retry limit whose default is 0, and the package also pins the standard requeue delay at 2 seconds."
+- added `r.reconcile-carries-status` (MUST): "Reconcile seeds the Result from the run's existing status, copying phase, run id, start and completion times, exit code, message, outputs, retries, and a fresh copy of the conditions."
+- added `r.reconcile-defaults-now` (MUST): "Reconcile fills in a zero Now from the Reconciler's clock and, after the name check, returns the context error if the context is already cancelled."
+- added `r.reconcile-requires-run-name` (MUST): "Reconcile returns an error and an empty Result when the observed DenoRun has no name."
+- added `r.reconciler-holds-options` (MUST): "Reconciler is a struct holding the configured Options and exposes no other state."
+- added `r.result-carries-next-status` (MUST): "Result carries the full next status the provider should write: Phase, RunID, RunIDCleared, StartTime, CompletionTime, ExitCode, Message, Outputs, Retries, Conditions, Ops, RequeueAfter, RemoveFinalizer and Delete."
+- added `r.run-id-cleared-flag` (MUST): "Result.RunIDCleared distinguishes an id the decider never saw from one it cleared on purpose, so the provider does not write back the id of the workload it just observed and re-observe a corpse on the next pass."
+- added `r.run-observation-shape` (MUST): "RunObservation carries RunID, State, an optional ExitCode, Message and an Outputs map, and describes what the provider observed for one workload execution."
+- added `r.run-state-values` (MUST): "RunState is a string type whose only values are "running", "succeeded" and "failed"."
+- added `r.running-reports-id` (MUST): "A running observation sets the start time if unset, keeps the phase running, adopts the observed RunID, sets the Complete condition to false with reason Running, and requeues 2 seconds."
+- added `r.succeeded-completes` (MUST): "A succeeded observation sets the phase to succeeded, adopts the observed RunID, exit code and outputs, stamps the completion time from Now, sets the Complete condition to true with reason Complete, and requeues 2 seconds."
+- added `r.terminal-ttl-delete` (MUST): "A run whose carried phase is succeeded or failed is left finished: with TTLSecondsAfterFinished set and a completion time, it sets Delete and appends the delete Op once the TTL has elapsed, otherwise it requeues for the remaining time until expiry, and with no TTL or no completion time it returns unchanged."
+- added `r.unknown-state-errors` (MUST): "An execution observation whose state is none of running, succeeded or failed returns an error and an empty Result."
+
 ### internal-livegate
 
 - intent: "" -> "This context exists to hold the gate that decides whether a test requiring live infrastructure runs, fails or skips, so that ordinary runs stay green without the kcp, kine, kubectl and deno toolchain while a live-required run (DENO_KCP_REQUIRE_LIVE=1) cannot silently skip the live tests. It keeps that decision in one small exported surface, RequiresLive for callers that gate early, Require for callers that want fail-or-skip behavior, and Short for callers that additionally want the test to skip under go test -short."
@@ -173,6 +199,6 @@ The requirement-level delta against `open-architecture/deno-kcp--spec-bidder-and
 | internal-baoembed-cmd-baoembed-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
 | internal-denojob-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
 | internal-denopod-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
-| internal-denorun-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Running |  | 0 | - | - |
+| internal-denorun-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
 | internal-livegate-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
 | internal-policyengine-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Running |  | 0 | - | - |
