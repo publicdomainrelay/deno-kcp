@@ -140,3 +140,4 @@ The requirement-level delta against `open-architecture/deno-kcp--spec-bidder-and
 | internal-baoembed-cmd-baoembed-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
 | internal-denojob-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
 | internal-denopod-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Running |  | 0 | - | - |
+| internal-denorun-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Running |  | 0 | - | - |
