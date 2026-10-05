@@ -9,6 +9,131 @@ spec:
   dependsOn:
   - sc.api-v1alpha1
   - sc.deno-kcp
+  intent: This context exists so the PolicyEngine restart, readiness and liveness
+    decisions live in one pure, separately testable place instead of being spread
+    through the provider's reconcile loop. The provider observes the world (engine
+    status, run state, probes, endpoint) and hands that snapshot to the decider; the
+    decider returns the phase, run ID, ops and requeue delay it wants, and the provider
+    is the only side that touches the cluster, the engine runner or the probe endpoints.
+    That split keeps engine policy unit-testable through Observed values and keeps
+    runner specifics out of the decision code.
+  requirements:
+  - id: r.engine-behaviour-is-unit-tested
+    level: SHOULD
+    text: Engine policy outcomes such as readiness reporting, restart on exit by default,
+      liveness-failure restart, and the Never restart policy failing on a non-zero
+      exit should stay covered by tests that drive the decider through Observed values.
+    codeRefs:
+    - file:internal/policyengine/policyengine_test.go
+  - id: r.execution-observation-identifies-run-and-state
+    level: MUST
+    text: ExecutionObservation must identify the run by RunID, report its ExecutionState,
+      and carry a human-readable Message; it appears on Observed only when the engine
+      has a run to observe.
+    codeRefs:
+    - file:internal/policyengine/policyengine.go
+    - struct:51a6de2d483d5be40201c7de454f6cd7
+  - id: r.execution-state-names-run-state
+    level: MUST
+    text: ExecutionState must be a string alias so the decider can name whether the
+      engine run is running or exited without importing the runner's own state type.
+    codeRefs:
+    - file:internal/policyengine/policyengine.go
+    - type_alias:c2475e9a59e50fceb012111299966c7a
+  - id: r.new-builds-reconciler-from-options
+    level: MUST
+    text: New must construct a Reconciler from an Options value, so the decider's
+      dependencies and tunables are supplied at build time rather than read from package
+      globals.
+    codeRefs:
+    - file:internal/policyengine/policyengine.go
+    - function:26e6969406488bfc97e9ed77febe4974
+    - struct:c5868ebca402d6036b8a7d908bf1a8ba
+  - id: r.observed-carries-engine-and-execution
+    level: MUST
+    text: Observed must carry the v1alpha1.PolicyEngine under reconciliation, an optional
+      ExecutionObservation of the current run, the ReadinessPassed probe result, the
+      LivenessFailed flag, the engine Endpoint, and the observation time Now, so the
+      decider needs no other input.
+    codeRefs:
+    - file:internal/policyengine/policyengine.go
+    - struct:7b1226e6c85673295723299601dd8674
+  - id: r.ops-name-the-actions-the-provider-applies
+    level: MUST
+    text: Op must be the alias for the actions a decision can ask for, so a Result
+      can list them and the provider can switch on each one to drive the engine runner
+      without the decider naming any runner method directly.
+    codeRefs:
+    - file:internal/policyengine/policyengine.go
+    - type_alias:43971b7fe73a576e55a3463fe8f33daf
+  - id: r.reconcile-is-a-pure-decision
+    level: MUST
+    text: Reconciler.Reconcile must decide engine behaviour only from the Observed
+      snapshot it is given and return the Result it wants applied; it must not perform
+      cluster, runner or probe I/O itself, leaving the returned Ops for the provider
+      to execute.
+    codeRefs:
+    - method:cf15bd5457ef89fffc8abf3947dbb830
+    - struct:2c2a9e18bb5ac0b6ffbbc8977980dbed
+  - id: r.restart-policy-honours-observed-execution
+    level: MUST
+    text: 'Reconcile must honour the engine''s spec.restartPolicy (default Always,
+      one of Always, OnFailure, Never) against the observed execution: a run that
+      has exited is restarted by default, a liveness failure forces a restart, and
+      under Never a non-zero exit drives the engine to the Failed phase instead of
+      a restart.'
+    codeRefs:
+    - file:internal/policyengine/policyengine.go
+    - method:cf15bd5457ef89fffc8abf3947dbb830
+  - id: r.result-reports-phase-run-and-requeue
+    level: MUST
+    text: Result must report the target PolicyEnginePhase, the RunID the provider
+      should record, the Ops to apply, and the RequeueAfter duration the provider
+      should wait before reconciling the engine again.
+    codeRefs:
+    - file:internal/policyengine/policyengine.go
+    - struct:bea3d6cd026242f0ba9701845a99d9ef
+  interfaces:
+  - name: ExecutionObservation
+    kind: struct
+    signature: type ExecutionObservation struct { RunID string; State ExecutionState;
+      Message string }
+    file: internal/policyengine/policyengine.go
+  - name: ExecutionState
+    kind: type_alias
+    signature: type ExecutionState string
+    file: internal/policyengine/policyengine.go
+  - name: New
+    kind: function
+    signature: func New(opts Options) *Reconciler
+    file: internal/policyengine/policyengine.go
+  - name: Observed
+    kind: struct
+    signature: type Observed struct { Engine v1alpha1.PolicyEngine; Execution *ExecutionObservation;
+      ReadinessPassed *bool; LivenessFailed bool; Endpoint string; Now time.Time }
+    file: internal/policyengine/policyengine.go
+  - name: Op
+    kind: type_alias
+    signature: type Op
+    file: internal/policyengine/policyengine.go
+  - name: Options
+    kind: struct
+    signature: type Options struct
+    file: internal/policyengine/policyengine.go
+  - name: Reconciler
+    kind: struct
+    signature: type Reconciler struct
+    file: internal/policyengine/policyengine.go
+  - name: Reconciler.Reconcile
+    kind: method
+    signature: func (r *Reconciler) Reconcile(ctx context.Context, o Observed) (Result,
+      error)
+    file: internal/policyengine/policyengine.go
+  - name: Result
+    kind: struct
+    signature: type Result struct { Phase v1alpha1.PolicyEnginePhase; RunID string;
+      Ops []Op; RequeueAfter time.Duration }
+    file: internal/policyengine/policyengine.go
   arch:
     id: type.DenoRestartPolicy
     kind: node
@@ -34,3 +159,12 @@ spec:
 codeRefIndex:
 - file:internal/policyengine/policyengine.go policyengine.go@internal/policyengine/policyengine.go
 - file:internal/policyengine/policyengine_test.go policyengine_test.go@internal/policyengine/policyengine_test.go
+- function:26e6969406488bfc97e9ed77febe4974 New@internal/policyengine/policyengine.go:94
+- method:cf15bd5457ef89fffc8abf3947dbb830 Reconciler.Reconcile@internal/policyengine/policyengine.go:101
+- struct:2c2a9e18bb5ac0b6ffbbc8977980dbed Reconciler@internal/policyengine/policyengine.go:90
+- struct:51a6de2d483d5be40201c7de454f6cd7 ExecutionObservation@internal/policyengine/policyengine.go:24
+- struct:7b1226e6c85673295723299601dd8674 Observed@internal/policyengine/policyengine.go:32
+- struct:bea3d6cd026242f0ba9701845a99d9ef Result@internal/policyengine/policyengine.go:58
+- struct:c5868ebca402d6036b8a7d908bf1a8ba Options@internal/policyengine/policyengine.go:86
+- type_alias:43971b7fe73a576e55a3463fe8f33daf Op@internal/policyengine/policyengine.go:46
+- type_alias:c2475e9a59e50fceb012111299966c7a ExecutionState@internal/policyengine/policyengine.go:16

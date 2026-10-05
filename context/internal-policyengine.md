@@ -2,7 +2,7 @@
 
 Repository: `deno-kcp`
 
-_(empty: write what this context is for)_
+This context exists so the PolicyEngine restart, readiness and liveness decisions live in one pure, separately testable place instead of being spread through the provider's reconcile loop. The provider observes the world (engine status, run state, probes, endpoint) and hands that snapshot to the decider; the decider returns the phase, run ID, ops and requeue delay it wants, and the provider is the only side that touches the cluster, the engine runner or the probe endpoints. That split keeps engine policy unit-testable through Observed values and keeps runner specifics out of the decision code.
 
 _The resolved code references are regenerated on every run. Cite the ids above rather than writing them here._
 

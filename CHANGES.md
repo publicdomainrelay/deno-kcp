@@ -186,6 +186,19 @@ The requirement-level delta against `open-architecture/deno-kcp--spec-bidder-and
 - added `r.require-skips-otherwise` (MUST): "Require MUST call t.Skipf with the caller's format string and args when RequiresLive reports false, so a live test skips quietly and the message text is the caller's skip reason."
 - added `r.short-delegates-to-require` (MUST): "Short MUST call Require with the same format string and args exactly when testing.Short() is true, and MUST do nothing when short mode is off, so the test keeps running outside short mode."
 
+### internal-policyengine
+
+- intent: "" -> "This context exists so the PolicyEngine restart, readiness and liveness decisions live in one pure, separately testable place instead of being spread through the provider's reconcile loop. The provider observes the world (engine status, run state, probes, endpoint) and hands that snapshot to the decider; the decider returns the phase, run ID, ops and requeue delay it wants, and the provider is the only side that touches the cluster, the engine runner or the probe endpoints. That split keeps engine policy unit-testable through Observed values and keeps runner specifics out of the decision code."
+- added `r.engine-behaviour-is-unit-tested` (SHOULD): "Engine policy outcomes such as readiness reporting, restart on exit by default, liveness-failure restart, and the Never restart policy failing on a non-zero exit should stay covered by tests that drive the decider through Observed values."
+- added `r.execution-observation-identifies-run-and-state` (MUST): "ExecutionObservation must identify the run by RunID, report its ExecutionState, and carry a human-readable Message; it appears on Observed only when the engine has a run to observe."
+- added `r.execution-state-names-run-state` (MUST): "ExecutionState must be a string alias so the decider can name whether the engine run is running or exited without importing the runner's own state type."
+- added `r.new-builds-reconciler-from-options` (MUST): "New must construct a Reconciler from an Options value, so the decider's dependencies and tunables are supplied at build time rather than read from package globals."
+- added `r.observed-carries-engine-and-execution` (MUST): "Observed must carry the v1alpha1.PolicyEngine under reconciliation, an optional ExecutionObservation of the current run, the ReadinessPassed probe result, the LivenessFailed flag, the engine Endpoint, and the observation time Now, so the decider needs no other input."
+- added `r.ops-name-the-actions-the-provider-applies` (MUST): "Op must be the alias for the actions a decision can ask for, so a Result can list them and the provider can switch on each one to drive the engine runner without the decider naming any runner method directly."
+- added `r.reconcile-is-a-pure-decision` (MUST): "Reconciler.Reconcile must decide engine behaviour only from the Observed snapshot it is given and return the Result it wants applied; it must not perform cluster, runner or probe I/O itself, leaving the returned Ops for the provider to execute."
+- added `r.restart-policy-honours-observed-execution` (MUST): "Reconcile must honour the engine's spec.restartPolicy (default Always, one of Always, OnFailure, Never) against the observed execution: a run that has exited is restarted by default, a liveness failure forces a restart, and under Never a non-zero exit drives the engine to the Failed phase instead of a restart."
+- added `r.result-reports-phase-run-and-requeue` (MUST): "Result must report the target PolicyEnginePhase, the RunID the provider should record, the Ops to apply, and the RequeueAfter duration the provider should wait before reconciling the engine again."
+
 ## Realization
 
 | change | direction | phase | commit | verify | acceptance | coverage |
@@ -201,5 +214,6 @@ The requirement-level delta against `open-architecture/deno-kcp--spec-bidder-and
 | internal-denopod-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
 | internal-denorun-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
 | internal-livegate-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
-| internal-policyengine-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Running |  | 0 | - | - |
+| internal-policyengine-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
 | internal-policyworkflowpod-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Running |  | 0 | - | - |
+| internal-policyworkflowrun-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Running |  | 0 | - | - |
