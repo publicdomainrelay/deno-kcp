@@ -1,0 +1,41 @@
+apiVersion: specs.publicdomainrelay.dev/v1alpha1
+kind: SpecChange
+metadata:
+  name: deploy-examples-atproto-market-s2c-8d254e3186d5-a3
+  namespace: default
+spec:
+  systemContext: deploy-examples-atproto-market
+  direction: SpecToCode
+  fromSpecHash: 3c7f2f549409826ec9b06c803386a3393e8de0af67490a6f09c2aa91ddc4d810
+  toSpecHash: 8d254e3186d5d8f5f005fbb130c0488de89f9fe73d572c279727c52532683609
+  delta:
+    counts:
+      added: 5
+      changed: 2
+    requirements:
+    - +r.apply-order-for-bob-and-bidder
+    - +r.bidder-pod
+    - +r.bidder-supervisor-serves-plain-http
+    - +r.bob-pds-pod
+    - +r.bob-workspace-authority
+    - ~r.apply-includes-bob-and-bidder
+status:
+  phase: Pending
+superseded:
+- name: deploy-examples-atproto-market-s2c-8d254e3186d5-a2
+  phase: Failed
+  message: 'PolicyDenied: security-disabled-verification: added line deploy/examples/atproto/market/apply.sh:222
+    is "echo \"  bob pds curl -k https://127.0.0.1:2585/xrpc/_health\"", which turns
+    certificate verification off; a check that trusts any certificate checks nothing'
+- name: deploy-examples-atproto-market-s2c-8d254e3186d5
+  phase: Failed
+  message: "verify exited 1: ok  \tgithub.com/johnandersen777/deno-kcp/api/v1alpha1\t(cached)\n?
+    \  \tgithub.com/johnandersen777/deno-kcp/cmd/deno-kcp-provider\t[no test files]\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/internal/denojob\t(cached)\nok  \tgithub.com/johnandersen777/deno-kcp/internal/denopod\t(cached)\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/internal/denorun\t(cached)\n?   \tgithub.com/johnandersen777/deno-kcp/internal/livegate\t[no
+    test files]\nok  \tgithub.com/johnandersen777/deno-kcp/internal/policyengine\t(cached)\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/internal/policyworkflowpod\t(cached)\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/internal/policyworkflowrun\t(cached)\n---
+    FAIL: TestReconcilePodMintsATokenAndReportsOutputs (0.00s)\n    provider_runtime_test.go:401:
+    mint calls = 2, want 1\nFAIL\nFAIL\tgithub.com/johnandersen777/deno-kcp/internal/provider\t0.031s\nok
+    \ \tgithub.com/johnandersen777/deno-kcp/internal/trigger\t(cached)\nok  \tgithub.com/johnandersen777/deno-kcp/test/integration\t(cached)\nFAIL"

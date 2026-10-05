@@ -23,5 +23,16 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 | change | direction | phase | commit | verify | acceptance | coverage |
 | --- | --- | --- | --- | --- | --- | --- |
 | deploy-examples-atproto-market-s2c-8d254e3186d5 | SpecToCode | Failed |  | 1 | - | - |
-| deploy-examples-atproto-market-s2c-8d254e3186d5-a2 | SpecToCode | Running |  | 0 | - | - |
-| test-integration-s2c-9b30c76edc9d | SpecToCode | Running |  | 0 | - | - |
+| deploy-examples-atproto-market-s2c-8d254e3186d5-a2 | SpecToCode | Failed |  | 0 | - | - |
+| deploy-examples-atproto-market-s2c-8d254e3186d5-a3 | SpecToCode | Pending |  | 0 | - | - |
+| test-integration-s2c-9b30c76edc9d | SpecToCode | Failed |  | 0 | - | - |
+| test-integration-s2c-9b30c76edc9d-a2 | SpecToCode | Pending |  | 0 | - | - |
+
+## Policy
+
+Violations a policy recorded without blocking the change.
+
+- `requirement-text-has-machine-path` (deploy-examples-atproto-market-s2c-8d254e3186d5-a2): requirement r.bidder-pod names ["/home/johnandersen777", "/home/johnandersen777"], a path that exists on the machine that wrote it and nowhere else
+- `requirement-text-has-machine-path` (deploy-examples-atproto-market-s2c-8d254e3186d5-a2): requirement r.bob-pds-pod names ["/home/johnandersen777", "/home/johnandersen777"], a path that exists on the machine that wrote it and nowhere else
+- `requirement-text-has-machine-path` (test-integration-s2c-9b30c76edc9d): requirement r.bidder-pod names ["/home/johnandersen777", "/home/johnandersen777"], a path that exists on the machine that wrote it and nowhere else
+- `requirement-text-has-machine-path` (test-integration-s2c-9b30c76edc9d): requirement r.bob-pds-pod names ["/home/johnandersen777", "/home/johnandersen777"], a path that exists on the machine that wrote it and nowhere else
