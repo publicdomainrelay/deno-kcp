@@ -18,4 +18,4 @@ The requirement-level delta against `open-architecture/deno-kcp`, and what this 
 
 | change | direction | phase | commit | verify | acceptance | coverage |
 | --- | --- | --- | --- | --- | --- | --- |
-| deploy-examples-atproto-market-s2c-8d254e3186d5 | SpecToCode | Pending |  | 0 | - | - |
+| deploy-examples-atproto-market-s2c-8d254e3186d5 | SpecToCode | Running |  | 0 | - | - |
