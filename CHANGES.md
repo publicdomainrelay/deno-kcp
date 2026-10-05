@@ -93,3 +93,4 @@ The requirement-level delta against `open-architecture/deno-kcp--spec-bidder-and
 | deploy-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
 | deploy-examples-atproto-market-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Running |  | 0 | - | - |
 | deploy-examples-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Succeeded |  | 0 | - | - |
+| internal-baoembed-cmd-baoembed-c2s-25d10f922ec7-25d10f922ec7 | CodeToSpec | Running |  | 0 | - | - |
