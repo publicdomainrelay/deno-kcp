@@ -64,6 +64,8 @@ type DenoPodStatus struct {
 
 	Ready bool `json:"ready,omitempty"`
 
+	Address string `json:"address,omitempty"`
+
 	Conditions []metav1.Condition `json:"conditions,omitempty"`
 }
 

@@ -8,6 +8,7 @@ import (
 
 	"github.com/publicdomainrelay/kcp-libs/common/denospec"
 	"github.com/publicdomainrelay/kcp-libs/common/ref"
+	"github.com/publicdomainrelay/kcp-libs/factory/servicenames"
 
 	"github.com/johnandersen777/deno-kcp/api/v1alpha1"
 	"github.com/johnandersen777/deno-kcp/internal/denopod"
@@ -17,6 +18,7 @@ import (
 func (p *Provider) reconcilePod(ctx context.Context, ref Ref, pod *v1alpha1.DenoPod) (time.Duration, bool, error) {
 	ref.ResourceVersion = pod.ResourceVersion
 	o := denopod.Observed{Pod: *pod, Now: p.opts.Now()}
+	address := ""
 	if pod.Status.RunID != "" {
 		st, err := p.opts.PodRunner.Observe(ctx, pod.Status.RunID)
 		if err != nil {
@@ -25,6 +27,10 @@ func (p *Provider) reconcilePod(ctx context.Context, ref Ref, pod *v1alpha1.Deno
 		state := denopod.ExecutionExited
 		if st.State == runner.StateRunning {
 			state = denopod.ExecutionRunning
+			address = servicenames.BoundAddress(pod.Spec.Env["SERVICE_ARGS"], pod.Spec.Env["SERVICE_ENV"], st.BoundPort)
+		}
+		if address != pod.Status.Address {
+			p.publishAddress(ctx, ref, address)
 		}
 		o.Execution = &denopod.ExecutionObservation{
 			RunID:    pod.Status.RunID,
@@ -44,6 +50,12 @@ func (p *Provider) reconcilePod(ctx context.Context, ref Ref, pod *v1alpha1.Deno
 		return res.RequeueAfter, terminal, nil
 	}
 	runID := res.RunID
+	if runID != pod.Status.RunID || terminal {
+		if address != "" || pod.Status.Address != "" {
+			p.publishAddress(ctx, ref, "")
+		}
+		address = ""
+	}
 	for _, op := range res.Ops {
 		switch op {
 		case denopod.OpStopRun:
@@ -73,6 +85,7 @@ func (p *Provider) reconcilePod(ctx context.Context, ref Ref, pod *v1alpha1.Deno
 		Message:        res.Message,
 		Outputs:        res.Outputs,
 		Ready:          res.Ready,
+		Address:        address,
 		Conditions:     res.Conditions,
 	}
 	status.Phase = res.Phase
@@ -80,6 +93,9 @@ func (p *Provider) reconcilePod(ctx context.Context, ref Ref, pod *v1alpha1.Deno
 		if err := p.opts.Runtime.WritePodStatus(ctx, ref, status); err != nil {
 			return 0, false, err
 		}
+	}
+	if _, err := p.serviceResolver().WriteTableFile(ctx); err != nil {
+		p.opts.Log.Warn("kcpdns: the table file was not rewritten, peers keep the addresses they had", "err", err)
 	}
 	for _, op := range res.Ops {
 		switch op {

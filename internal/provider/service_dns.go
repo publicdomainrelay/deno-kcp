@@ -29,6 +29,7 @@ func (p *Provider) buildServices() *servicenames.Resolver {
 		TokenTTL:                p.opts.TokenTTL,
 		ServiceAccountNamespace: DefaultServiceAccountNamespace,
 		Shim:                    p.dnsShim,
+		TableFile:               p.dnsTable,
 	})
 }
 
@@ -105,7 +106,11 @@ func (p *Provider) probeCommand(command []string) []string {
 	if p.dnsShim == "" || p.dnsProbe == "" {
 		return nil
 	}
-	return denospec.ProbeCommand("", p.dnsShim, p.dnsProbe, command[1], probePath(command), assets.DNSProbeEnv)
+	var reads []string
+	if p.dnsTable != "" {
+		reads = []string{p.dnsTable}
+	}
+	return denospec.ProbeCommandReading("", p.dnsShim, p.dnsProbe, command[1], probePath(command), assets.DNSProbeEnv, reads)
 }
 
 func probePath(command []string) string {
@@ -113,6 +118,17 @@ func probePath(command []string) string {
 		return command[2]
 	}
 	return "/"
+}
+
+// publishAddress records the address a workload's process reported binding and
+// rewrites the table file every shim re-reads, so a peer started before this pod
+// bound, or this pod restarted on a new port, is found on the next lookup.
+func (p *Provider) publishAddress(ctx context.Context, ref Ref, address string) {
+	services := p.serviceResolver()
+	services.Observe(ctx, ref, address)
+	if _, err := services.WriteTableFile(ctx); err != nil {
+		p.opts.Log.Warn("kcpdns: the table file was not rewritten, peers keep the addresses they had", "err", err)
+	}
 }
 
 // allPods reads every DenoPod in every workspace out of the informer cache. The

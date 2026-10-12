@@ -187,6 +187,8 @@ type Provider struct {
 
 	dnsProbe string
 
+	dnsTable string
+
 	pki *pkiprovisioner.Provisioner
 
 	clusterCA []byte
@@ -271,6 +273,7 @@ func New(opts Options) (*Provider, error) {
 	} else {
 		p.dnsShim = paths[assets.ShimName]
 		p.dnsProbe = paths[assets.ProbeName]
+		p.dnsTable = assets.DNSTablePath(opts.RunsDir)
 	}
 	p.services = p.buildServices()
 	if opts.RestConfig != nil {
