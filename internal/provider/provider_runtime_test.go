@@ -22,7 +22,7 @@ func TestPodStatusPatchForcesManagedFieldsPresent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	assertStatusFields(t, body, "phase", "runID", "restarts", "message", "exitCode", "ready",
+	assertStatusFields(t, body, "phase", "runID", "restarts", "message", "exitCode", "ready", "address",
 		"startTime", "completionTime", "outputs", "conditions")
 }
 

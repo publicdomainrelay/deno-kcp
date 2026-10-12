@@ -39,6 +39,7 @@ func podStatusPatch(st v1alpha1.DenoPodStatus) ([]byte, error) {
 		"message":  st.Message,
 		"exitCode": st.ExitCode,
 		"ready":    st.Ready,
+		"address":  st.Address,
 	}
 	if st.StartTime != nil {
 		status["startTime"] = st.StartTime
